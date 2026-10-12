@@ -405,7 +405,7 @@ export function EvidenceQuestionnaire({
                                 )}
                                 {row.dualLink ? " · same file on Team Members + Client" : ""}
                               </span>
-                              <span className="mt-2 block text-sm leading-snug text-slate-700">
+                              <span className="mt-2 block text-sm leading-snug text-haze-700">
                                 {row.why}
                               </span>
                               <EvidenceDueFields
@@ -427,7 +427,7 @@ export function EvidenceQuestionnaire({
                                       href={link.href}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="text-xs font-semibold text-[var(--hive-accent,#2f6fed)] underline-offset-2 hover:underline"
+                                      className="text-xs font-semibold text-[var(--hive-accent)] underline-offset-2 hover:underline"
                                     >
                                       {link.label}
                                     </a>

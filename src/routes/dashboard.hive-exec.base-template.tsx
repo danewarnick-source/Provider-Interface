@@ -64,7 +64,7 @@ function BaseTemplatePage() {
                   </span>
                   <span className="font-medium text-sm">{v.title}</span>
                   {v.is_current ? (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-900">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-success-200 bg-success-50 px-2 py-0.5 text-[11px] font-semibold text-success-900">
                       <CheckCircle2 className="h-3 w-3" /> Current
                     </span>
                   ) : null}
@@ -80,9 +80,9 @@ function BaseTemplatePage() {
                     {v.changelog.slice(0, 8).map((c, i) => (
                       <li key={i}>
                         <span className={
-                          c.type === "added" ? "font-semibold text-emerald-700"
-                            : c.type === "removed" ? "font-semibold text-rose-700"
-                              : "font-semibold text-amber-700"
+                          c.type === "added" ? "font-semibold text-success-700"
+                            : c.type === "removed" ? "font-semibold text-danger-700"
+                              : "font-semibold text-warning-700"
                         }>
                           {c.type}
                         </span>{" "}
@@ -194,7 +194,7 @@ function PublishNewVersion({ current }: { current: BaseTemplateVersion | null })
                 />
                 <button
                   onClick={() => removeSection(i)}
-                  className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-md text-rose-700 hover:bg-rose-50"
+                  className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-md text-danger-700 hover:bg-danger-50"
                   aria-label="Remove section"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -232,7 +232,7 @@ function PublishNewVersion({ current }: { current: BaseTemplateVersion | null })
         <button
           onClick={() => publish.mutate()}
           disabled={publish.isPending || !title.trim() || sections.length === 0}
-          className="inline-flex min-h-[36px] items-center gap-2 rounded-md bg-[var(--hive-gold)] px-3 text-xs font-semibold text-white hover:bg-[#b8651a] disabled:opacity-50"
+          className="inline-flex min-h-[36px] items-center gap-2 rounded-md bg-[var(--hive-accent)] px-3 text-xs font-semibold text-white hover:bg-[#b8651a] disabled:opacity-50"
         >
           <Save className="h-3.5 w-3.5" /> {publish.isPending ? "Publishing…" : `Publish v${(current?.version ?? 0) + 1}`}
         </button>

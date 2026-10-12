@@ -70,15 +70,15 @@ export function LoanFeatureGate({
   }
 
   return (
-    <Card className="border-amber-300/60 bg-amber-50/30 dark:bg-amber-950/10">
+    <Card className="border-warning-300/60 bg-warning-50/30 dark:bg-warning-950/10">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Lock className="h-5 w-5 text-amber-600" /> Restricted Feature — Client Loan Ledger
+          <Lock className="h-5 w-5 text-warning-600" /> Restricted Feature — Client Loan Ledger
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="rounded-md border border-amber-300/60 bg-background/60 p-3 text-xs">
-          <div className="mb-1 flex items-center gap-1 font-medium text-amber-700">
+        <div className="rounded-md border border-warning-300/60 bg-background/60 p-3 text-xs">
+          <div className="mb-1 flex items-center gap-1 font-medium text-warning-700">
             <Sparkles className="h-3.5 w-3.5" /> NECTAR — informational only
           </div>
           <p className="text-muted-foreground">
@@ -92,7 +92,7 @@ export function LoanFeatureGate({
 
         <div className="rounded-md border border-border bg-background/80 p-3">
           <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
-            <ShieldAlert className="h-4 w-4 text-amber-600" /> Recordkeeping attestation
+            <ShieldAlert className="h-4 w-4 text-warning-600" /> Recordkeeping attestation
           </div>
           <pre className="max-h-72 overflow-auto whitespace-pre-wrap rounded bg-muted/40 p-3 text-xs leading-relaxed">
 {LOAN_ATTESTATION_TEXT}

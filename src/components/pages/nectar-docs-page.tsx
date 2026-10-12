@@ -336,14 +336,14 @@ export function NectarDocsPage() {
 function ParseStatusBadge({ status }: { status: string }) {
   if (status === "parsed") {
     return (
-      <Badge className="bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/15 dark:text-emerald-300">
+      <Badge className="bg-success-500/15 text-success-700 hover:bg-success-500/15 dark:text-success-300">
         <Sparkles className="mr-1 h-3 w-3" /> Parsed
       </Badge>
     );
   }
   if (status === "parsing" || status === "pending") {
     return (
-      <Badge className="bg-amber-500/15 text-amber-700 hover:bg-amber-500/15 dark:text-amber-300">
+      <Badge className="bg-warning-500/15 text-warning-700 hover:bg-warning-500/15 dark:text-warning-300">
         <Loader2 className="mr-1 h-3 w-3 animate-spin" /> {status}
       </Badge>
     );
@@ -412,7 +412,7 @@ function UploadButton({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button className="gap-2 bg-amber-500 text-amber-950 hover:bg-amber-400">
+        <Button className="gap-2 bg-warning-500 text-warning-950 hover:bg-warning-400">
           <Upload className="h-4 w-4" /> Upload document
         </Button>
       </DialogTrigger>
@@ -493,7 +493,7 @@ function UploadButton({
           <Button
             disabled={!file || mut.isPending}
             onClick={() => mut.mutate()}
-            className="bg-amber-500 text-amber-950 hover:bg-amber-400"
+            className="bg-warning-500 text-warning-950 hover:bg-warning-400"
           >
             {mut.isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -674,7 +674,7 @@ function DocumentDetailDialog({
                           <div className="flex gap-1">
                             <Button
                               size="sm"
-                              className="h-7 bg-amber-500 text-amber-950 hover:bg-amber-400"
+                              className="h-7 bg-warning-500 text-warning-950 hover:bg-warning-400"
                               onClick={() => review.mutate({ fieldId: f.id, action: "confirm" })}
                             >
                               <ShieldCheck className="mr-1 h-3 w-3" /> Confirm
@@ -718,7 +718,7 @@ function DocumentDetailDialog({
                       v{v.version}{" "}
                       {v.is_current && (
                         <Badge
-                          className="ml-1 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                          className="ml-1 bg-success-500/15 text-success-700 dark:text-success-300"
                           variant="outline"
                         >
                           current
@@ -743,13 +743,13 @@ function DocumentDetailDialog({
 function FieldStatusBadge({ status }: { status: string }) {
   if (status === "confirmed")
     return (
-      <Badge className="bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/15 dark:text-emerald-300">
+      <Badge className="bg-success-500/15 text-success-700 hover:bg-success-500/15 dark:text-success-300">
         confirmed
       </Badge>
     );
   if (status === "overridden")
     return (
-      <Badge className="bg-amber-500/15 text-amber-700 hover:bg-amber-500/15 dark:text-amber-300">
+      <Badge className="bg-warning-500/15 text-warning-700 hover:bg-warning-500/15 dark:text-warning-300">
         overridden
       </Badge>
     );

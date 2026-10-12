@@ -191,7 +191,7 @@ export function HiveSubscriptionPanel() {
 
       {d.testMode && (
         <div
-          className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-950"
+          className="flex items-start gap-2 rounded-lg border border-warning-300 bg-warning-50 px-3 py-2 text-sm text-warning-950"
           data-testid="stripe-test-mode-hint"
         >
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
@@ -204,7 +204,7 @@ export function HiveSubscriptionPanel() {
 
       {complimentary && (
         <div
-          className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-950"
+          className="rounded-lg border border-success-200 bg-success-50 px-3 py-2 text-sm text-success-950"
           data-testid="comped-note"
         >
           {d.orgName ?? "This company"} is billing-exempt. Provider Interface never charges this company.
@@ -214,7 +214,7 @@ export function HiveSubscriptionPanel() {
       )}
 
       {!d.paymentsConfigured && !complimentary && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900">
+        <div className="rounded-lg border border-danger-200 bg-danger-50 px-3 py-2 text-sm text-danger-900">
           {d.paymentsMessage ?? "Payments are not set up yet. Ask an Exec to add the Stripe test keys."}
         </div>
       )}

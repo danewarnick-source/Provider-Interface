@@ -812,7 +812,7 @@ function ReviewPanel({
             className="mt-4 h-[480px] w-full rounded-xl border"
           />
         ) : (
-          <div className="mt-6 flex h-64 items-center justify-center rounded-xl bg-slate-50 text-sm text-muted-foreground">
+          <div className="mt-6 flex h-64 items-center justify-center rounded-xl bg-haze-50 text-sm text-muted-foreground">
             <FileText className="mr-2 h-4 w-4" />
             {file ? "Open preview to view the stored file." : "Nothing uploaded yet."}
           </div>

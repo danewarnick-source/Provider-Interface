@@ -94,7 +94,7 @@ describe("public pages share homepage marketing chrome", () => {
     assert.match(homeCss, /background: var\(--hive-primary\)/);
     assert.doesNotMatch(
       homeCss.slice(homeCss.indexOf(".pi-home-paper .pi-home-btn.gold")),
-      /background: var\(--hive-gold\)/,
+      /background: var\(--hive-accent\)/,
     );
   });
 });

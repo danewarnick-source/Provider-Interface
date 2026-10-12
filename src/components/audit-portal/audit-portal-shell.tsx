@@ -142,7 +142,7 @@ function AuditorLoginPanel({ onSignedIn }: { onSignedIn: () => void }) {
           </div>
         </div>
 
-        <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+        <div className="mb-4 rounded-md border border-warning-200 bg-warning-50 p-3 text-xs text-warning-900">
           <div className="flex items-start gap-2">
             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
             <div>
@@ -162,7 +162,7 @@ function AuditorLoginPanel({ onSignedIn }: { onSignedIn: () => void }) {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="username"
-              className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-[var(--hive-text)] focus:outline-none"
+              className="mt-1 min-h-[44px] w-full rounded-md border border-haze-300 bg-white px-3 py-2 text-sm focus:border-[var(--hive-text)] focus:outline-none"
             />
           </label>
           <label className="block">
@@ -174,7 +174,7 @@ function AuditorLoginPanel({ onSignedIn }: { onSignedIn: () => void }) {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
-                className="min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-3 py-2 pr-10 text-sm focus:border-[var(--hive-text)] focus:outline-none"
+                className="min-h-[44px] w-full rounded-md border border-haze-300 bg-white px-3 py-2 pr-10 text-sm focus:border-[var(--hive-text)] focus:outline-none"
               />
               <button
                 type="button"
@@ -188,7 +188,7 @@ function AuditorLoginPanel({ onSignedIn }: { onSignedIn: () => void }) {
             </div>
           </label>
           {error && (
-            <div className="rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-800">
+            <div className="rounded-md border border-danger-200 bg-danger-50 p-2 text-xs text-danger-800">
               {error}
             </div>
           )}

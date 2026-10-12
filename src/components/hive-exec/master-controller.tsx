@@ -161,7 +161,7 @@ function Toggle({
       disabled={disabled}
       onClick={() => onChange(!on)}
       className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-        on ? "bg-emerald-600" : "bg-muted-foreground/30"
+        on ? "bg-success-600" : "bg-muted-foreground/30"
       } disabled:cursor-not-allowed disabled:opacity-50`}
     >
       <span

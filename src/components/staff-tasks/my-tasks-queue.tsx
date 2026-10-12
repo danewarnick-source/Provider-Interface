@@ -59,7 +59,7 @@ export function MyTasksQueue({
                     {reviewLabel ? (
                       <p
                         data-testid="my-task-review"
-                        className="text-sm font-medium text-amber-800 dark:text-amber-200"
+                        className="text-sm font-medium text-warning-800 dark:text-warning-200"
                       >
                         {reviewLabel}
                       </p>
@@ -67,7 +67,7 @@ export function MyTasksQueue({
                     {task.overridden ? (
                       <p
                         data-testid="override-state"
-                        className="text-sm font-medium text-amber-800 dark:text-amber-200"
+                        className="text-sm font-medium text-warning-800 dark:text-warning-200"
                       >
                         {OVERRIDE_STATE_LABEL}
                         {task.overrideUntil ? ` until ${task.overrideUntil}` : ""}.{" "}
@@ -79,7 +79,7 @@ export function MyTasksQueue({
                         <p className="text-sm font-medium">{task.progressLabel}</p>
                         <div className="h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden>
                           <div
-                            className="h-full rounded-full bg-emerald-600"
+                            className="h-full rounded-full bg-success-600"
                             style={{
                               width: progressWidth(task.progressLabel),
                             }}

@@ -36,7 +36,7 @@ export function AuditorPackagePreview({ packageId, mode }: { packageId: string; 
   if (viewQ.isLoading) return <div className="p-4 text-sm text-muted-foreground">Loading package…</div>;
   if (viewQ.error || !viewQ.data) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+      <div className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-sm text-danger-800">
         {(viewQ.error as Error | undefined)?.message ?? "Package not available."}
       </div>
     );
@@ -46,13 +46,13 @@ export function AuditorPackagePreview({ packageId, mode }: { packageId: string; 
   return (
     <div className="space-y-4">
       {mode === "org" && (
-        <div className="rounded-md border border-sky-200 bg-sky-50 p-2 text-xs text-sky-900">
+        <div className="rounded-md border border-denim-200 bg-denim-50 p-2 text-xs text-denim-900">
           <strong>Auditor preview.</strong> This is exactly what a granted auditor sees on login.
           Folders and files below sync live to their view.
         </div>
       )}
 
-      <header className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <header className="rounded-xl border border-haze-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="text-xs uppercase tracking-wider text-muted-foreground">{pkg.state_agency}</div>
@@ -64,14 +64,14 @@ export function AuditorPackagePreview({ packageId, mode }: { packageId: string; 
                 <Calendar className="h-3 w-3" /> {pkg.date_range_start} → {pkg.date_range_end}
               </span>
               <span>Provider: {pkg.organization_name}</span>
-              <span className="rounded bg-emerald-100 px-2 py-0.5 font-medium uppercase text-emerald-700">
+              <span className="rounded bg-success-100 px-2 py-0.5 font-medium uppercase text-success-700">
                 {pkg.status}
               </span>
             </div>
           </div>
         </div>
         {payload.is_seed && (
-          <div className="mt-3 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-xs text-amber-900">
+          <div className="mt-3 flex items-start gap-2 rounded-md border border-warning-200 bg-warning-50 p-2 text-xs text-warning-900">
             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
             <div>
               <strong>Synthetic seed data.</strong> Real client and staff records will render
@@ -82,15 +82,15 @@ export function AuditorPackagePreview({ packageId, mode }: { packageId: string; 
       </header>
 
       {/* NECTAR + subject records */}
-      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="rounded-xl border border-haze-200 bg-white p-5 shadow-sm">
         <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--hive-text)]">
-          <Sparkles className="h-4 w-4 text-[var(--hive-gold)]" /> NECTAR summary
+          <Sparkles className="h-4 w-4 text-[var(--hive-accent-text)]" /> NECTAR summary
         </div>
-        <p className="text-sm text-slate-700">{payload.nectar_summary.overall}</p>
+        <p className="text-sm text-haze-700">{payload.nectar_summary.overall}</p>
         {payload.nectar_summary.flags.length > 0 && (
           <ul className="mt-3 space-y-1">
             {payload.nectar_summary.flags.map((f, i) => (
-              <li key={i} className="flex items-start gap-2 rounded border border-amber-200 bg-amber-50 p-2 text-xs text-amber-900">
+              <li key={i} className="flex items-start gap-2 rounded border border-warning-200 bg-warning-50 p-2 text-xs text-warning-900">
                 <AlertTriangle className="mt-0.5 h-3 w-3" />
                 <span>{f.message}</span>
               </li>
@@ -114,9 +114,9 @@ export function AuditorPackagePreview({ packageId, mode }: { packageId: string; 
 function SubjectCard({ subject, nectarNote }: { subject: AuditPackageSubjectSummary; nectarNote?: string }) {
   const Icon = subject.subject_type === "staff" ? User : Contact2;
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="rounded-xl border border-haze-200 bg-white p-5 shadow-sm">
       <header className="mb-3 flex items-center gap-2">
-        <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+        <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-haze-100 text-haze-700">
           <Icon className="h-4 w-4" />
         </span>
         <div>
@@ -135,11 +135,11 @@ function SubjectCard({ subject, nectarNote }: { subject: AuditPackageSubjectSumm
         <RecordBlock title="Timesheets" empty={subject.timesheets.length === 0}>
           <ul className="space-y-1 text-xs">
             {subject.timesheets.map((t, i) => (
-              <li key={i} className="flex justify-between gap-2 border-b border-slate-100 pb-1 last:border-0">
+              <li key={i} className="flex justify-between gap-2 border-b border-haze-100 pb-1 last:border-0">
                 <span className="tabular-nums text-muted-foreground">{t.date}</span>
                 <span>{t.service_code}</span>
                 <span className="tabular-nums">{t.hours}h / {t.units}u</span>
-                {t.evv_verified && <span className="text-emerald-600">EVV ✓</span>}
+                {t.evv_verified && <span className="text-success-600">EVV ✓</span>}
               </li>
             ))}
           </ul>
@@ -151,7 +151,7 @@ function SubjectCard({ subject, nectarNote }: { subject: AuditPackageSubjectSumm
               <li key={i}>
                 <div className="font-medium">{g.goal}</div>
                 <div className="text-muted-foreground">{g.progress_pct}% · last note {g.last_note_date}</div>
-                <div className="italic text-slate-600">&ldquo;{g.last_note}&rdquo;</div>
+                <div className="italic text-haze-600">&ldquo;{g.last_note}&rdquo;</div>
               </li>
             ))}
           </ul>
@@ -160,10 +160,10 @@ function SubjectCard({ subject, nectarNote }: { subject: AuditPackageSubjectSumm
         <RecordBlock title="PBA ledger" empty={subject.pba_ledger.length === 0}>
           <ul className="space-y-1 text-xs">
             {subject.pba_ledger.map((l, i) => (
-              <li key={i} className="flex justify-between border-b border-slate-100 pb-1 last:border-0">
+              <li key={i} className="flex justify-between border-b border-haze-100 pb-1 last:border-0">
                 <span className="text-muted-foreground">{l.date}</span>
                 <span>{l.memo}</span>
-                <span className={`tabular-nums ${l.kind === "deposit" ? "text-emerald-700" : "text-red-700"}`}>
+                <span className={`tabular-nums ${l.kind === "deposit" ? "text-success-700" : "text-danger-700"}`}>
                   {l.kind === "deposit" ? "+" : "−"}${(l.amount_cents / 100).toFixed(2)}
                 </span>
               </li>
@@ -174,12 +174,12 @@ function SubjectCard({ subject, nectarNote }: { subject: AuditPackageSubjectSumm
         <RecordBlock title="Billing support documents">
           <ul className="space-y-1 text-xs">
             {subject.billing_support_docs.map((d, i) => (
-              <li key={i} className="flex items-center justify-between gap-2 border-b border-slate-100 pb-1 last:border-0">
+              <li key={i} className="flex items-center justify-between gap-2 border-b border-haze-100 pb-1 last:border-0">
                 <span className="inline-flex items-center gap-1">
-                  <FileText className="h-3 w-3 text-slate-400" /> {d.title}
+                  <FileText className="h-3 w-3 text-haze-400" /> {d.title}
                 </span>
                 <span className="text-muted-foreground tabular-nums">{d.date}</span>
-                <span className={d.status === "on_file" ? "text-emerald-700" : "text-amber-700"}>
+                <span className={d.status === "on_file" ? "text-success-700" : "text-warning-700"}>
                   {d.status.replace("_", " ")}
                 </span>
               </li>
@@ -193,9 +193,9 @@ function SubjectCard({ subject, nectarNote }: { subject: AuditPackageSubjectSumm
 
 function RecordBlock({ title, empty, children }: { title: string; empty?: boolean; children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-3">
+    <div className="rounded-lg border border-haze-100 bg-haze-50/50 p-3">
       <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</div>
-      {empty ? <div className="text-xs italic text-slate-400">None recorded.</div> : children}
+      {empty ? <div className="text-xs italic text-haze-400">None recorded.</div> : children}
     </div>
   );
 }
@@ -305,7 +305,7 @@ function PackageFilesSection({ packageId, mode }: { packageId: string; mode: "or
   }
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="rounded-xl border border-haze-200 bg-white p-5 shadow-sm">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="text-sm font-semibold text-[var(--hive-text)]">Provider-uploaded files</div>
         {canEdit && (
@@ -314,7 +314,7 @@ function PackageFilesSection({ packageId, mode }: { packageId: string; mode: "or
               value={newFolder}
               onChange={(e) => setNewFolder(e.target.value)}
               placeholder="New folder name"
-              className="min-h-[36px] rounded-md border border-slate-300 px-2 text-xs"
+              className="min-h-[36px] rounded-md border border-haze-300 px-2 text-xs"
             />
             <button
               onClick={() => { if (newFolder.trim()) { createFolderMut.mutate(newFolder.trim()); setNewFolder(""); } }}
@@ -328,7 +328,7 @@ function PackageFilesSection({ packageId, mode }: { packageId: string; mode: "or
       </div>
 
       {mode === "org" && (
-        <div className="mb-3 rounded border border-dashed border-amber-300 bg-amber-50 p-2 text-[11px] text-amber-900">
+        <div className="mb-3 rounded border border-dashed border-warning-300 bg-warning-50 p-2 text-[11px] text-warning-900">
           {/* PHI SEAM — repoint bucket 'audit-files' to compliant-host bucket before live client files */}
           <strong>Seed / sample files only</strong> — the storage bucket flips to the compliant host before real client documents.
         </div>
@@ -400,13 +400,13 @@ function FolderBlock({
       } : undefined}
       onClick={onActivate}
       className={`mt-2 rounded-lg border p-3 transition-colors ${
-        dragOver ? "border-emerald-400 bg-emerald-50" :
-        active ? "border-[var(--hive-text)]/40 bg-slate-50" : "border-slate-200 bg-white"
+        dragOver ? "border-success-400 bg-success-50" :
+        active ? "border-[var(--hive-text)]/40 bg-haze-50" : "border-haze-200 bg-white"
       }`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm font-medium text-[var(--hive-text)]">
-          <Folder className="h-4 w-4 text-amber-500" /> {label}
+          <Folder className="h-4 w-4 text-warning-500" /> {label}
           <span className="text-xs text-muted-foreground">({files.length})</span>
         </div>
         {canEdit && (
@@ -421,14 +421,14 @@ function FolderBlock({
             <button
               onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
               disabled={uploading}
-              className="inline-flex min-h-[32px] items-center gap-1 rounded border border-slate-300 bg-white px-2 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              className="inline-flex min-h-[32px] items-center gap-1 rounded border border-haze-300 bg-white px-2 text-xs font-medium text-haze-700 hover:bg-haze-50 disabled:opacity-50"
             >
               {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />} Upload
             </button>
             {onDeleteFolder && (
               <button
                 onClick={(e) => { e.stopPropagation(); if (confirm(`Delete folder "${label}"? Files inside will move to Package root.`)) onDeleteFolder(); }}
-                className="text-red-600 hover:text-red-800"
+                className="text-danger-600 hover:text-danger-800"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
@@ -444,9 +444,9 @@ function FolderBlock({
       ) : (
         <ul className="mt-2 space-y-1">
           {files.map((f) => (
-            <li key={f.id} className="flex items-center justify-between rounded border border-slate-100 bg-slate-50/60 px-2 py-1 text-xs">
+            <li key={f.id} className="flex items-center justify-between rounded border border-haze-100 bg-haze-50/60 px-2 py-1 text-xs">
               <span className="flex items-center gap-2 truncate">
-                <FileText className="h-3 w-3 text-slate-400" />
+                <FileText className="h-3 w-3 text-haze-400" />
                 <span className="truncate">{f.file_name}</span>
                 {f.size_bytes != null && (
                   <span className="text-muted-foreground">({formatBytes(f.size_bytes)})</span>
@@ -462,7 +462,7 @@ function FolderBlock({
                 {canEdit && (
                   <button
                     onClick={(e) => { e.stopPropagation(); if (confirm(`Delete "${f.file_name}"?`)) onDeleteFile(f.id); }}
-                    className="text-red-600 hover:text-red-800"
+                    className="text-danger-600 hover:text-danger-800"
                   >
                     <Trash2 className="h-3 w-3" />
                   </button>

@@ -27,7 +27,7 @@ const DOT: Record<ReturnType<typeof healthEventTone>, string> = {
   info: "bg-[var(--hive-info)]",
   ok: "bg-[var(--hive-ok)]",
   danger: "bg-[var(--hive-danger)]",
-  profile: "bg-hive-gold",
+  profile: "bg-hive-accent",
   neutral: "bg-hive-border",
 };
 

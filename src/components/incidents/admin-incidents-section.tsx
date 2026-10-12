@@ -102,26 +102,26 @@ function CountdownPill({
   const hrsLeft = msLeft / 3_600_000;
   if (done) {
     return (
-      <Badge className="gap-1 bg-emerald-600 text-white hover:bg-emerald-600">
+      <Badge className="gap-1 bg-success-600 text-white hover:bg-success-600">
         <CheckCircle2 className="h-3 w-3" /> {label} ✓
       </Badge>
     );
   }
   const overdue = hrsLeft < 0;
-  let tone = "bg-emerald-600 text-white";
+  let tone = "bg-success-600 text-white";
   if (totalHours <= 24) {
-    if (hrsLeft < 6) tone = "bg-rose-600 text-white animate-pulse";
-    else if (hrsLeft < 12) tone = "bg-amber-500 text-white";
+    if (hrsLeft < 6) tone = "bg-danger-600 text-white animate-pulse";
+    else if (hrsLeft < 12) tone = "bg-warning-500 text-white";
   } else {
-    if (hrsLeft < 8) tone = "bg-rose-600 text-white animate-pulse";
-    else if (hrsLeft < 24) tone = "bg-amber-500 text-white";
+    if (hrsLeft < 8) tone = "bg-danger-600 text-white animate-pulse";
+    else if (hrsLeft < 24) tone = "bg-warning-500 text-white";
   }
   const text = overdue
     ? `${label} · OVERDUE ${Math.abs(Math.floor(hrsLeft))}h`
     : hrsLeft >= 24
       ? `${label} · ${Math.floor(hrsLeft / 24)}d ${Math.floor(hrsLeft % 24)}h left`
       : `${label} · ${Math.max(0, Math.floor(hrsLeft))}h ${Math.max(0, Math.floor((msLeft % 3_600_000) / 60_000))}m left`;
-  return <Badge className={`gap-1 ${overdue ? "bg-rose-700 text-white" : tone}`}><Clock className="h-3 w-3" />{text}</Badge>;
+  return <Badge className={`gap-1 ${overdue ? "bg-danger-700 text-white" : tone}`}><Clock className="h-3 w-3" />{text}</Badge>;
 }
 
 function ActorNames({ ids, actors }: { ids: Array<string | null | undefined>; actors: Map<string, string> }) {
@@ -331,9 +331,9 @@ function IncidentCard({
   const closed = ir.status === "State_Confirmed";
 
   return (
-    <Card className={`overflow-hidden ${ir.is_fatality ? "border-rose-500 border-2" : ""}`}>
+    <Card className={`overflow-hidden ${ir.is_fatality ? "border-danger-500 border-2" : ""}`}>
       {ir.is_fatality && (
-        <div className="flex items-center gap-2 bg-rose-600 px-3 py-2 text-xs font-semibold text-white">
+        <div className="flex items-center gap-2 bg-danger-600 px-3 py-2 text-xs font-semibold text-white">
           <Skull className="h-3.5 w-3.5" />
           Fatality — immediate DHHS / §1.26 notifications required
         </div>
@@ -373,10 +373,10 @@ function IncidentCard({
         <CardContent className="pt-0 pb-3">
           <div className="flex flex-wrap items-center gap-2">
             {ir.is_abuse_neglect && (
-              <Badge className="bg-rose-600 text-white">Abuse/Neglect</Badge>
+              <Badge className="bg-danger-600 text-white">Abuse/Neglect</Badge>
             )}
             {!ir.upi_submitted_at && <Badge variant="outline">UPI not submitted</Badge>}
-            {closed && <Badge className="bg-emerald-600 text-white">Completed</Badge>}
+            {closed && <Badge className="bg-success-600 text-white">Completed</Badge>}
           </div>
         </CardContent>
       )}
@@ -390,21 +390,21 @@ function IncidentCard({
           <p className="whitespace-pre-wrap rounded-md bg-muted/40 px-3 py-2 text-xs">{detail.description}</p>
         )}
         {ir.is_abuse_neglect && detail.prevention_strategies && (
-          <div className="rounded-md border border-amber-300 bg-amber-50 p-2 text-xs dark:bg-amber-950/30">
-            <p className="font-semibold text-amber-800 dark:text-amber-100">Prevention strategies (§1.27(3))</p>
-            <p className="whitespace-pre-wrap text-amber-900 dark:text-amber-100">{detail.prevention_strategies}</p>
+          <div className="rounded-md border border-warning-300 bg-warning-50 p-2 text-xs dark:bg-warning-950/30">
+            <p className="font-semibold text-warning-800 dark:text-warning-100">Prevention strategies (§1.27(3))</p>
+            <p className="whitespace-pre-wrap text-warning-900 dark:text-warning-100">{detail.prevention_strategies}</p>
           </div>
         )}
 
         <div className="flex flex-wrap items-center gap-2">
           <CountdownPill deadline={upiDeadline} done={!!ir.upi_submitted_at} totalHours={24} label="UPI submission + guardian notice · 24h" />
           {ir.is_abuse_neglect && !detail.aps_notified_at && (
-            <Badge className="bg-rose-600 text-white">APS-PENDING</Badge>
+            <Badge className="bg-danger-600 text-white">APS-PENDING</Badge>
           )}
           {detail.restraint_used && (
-            <Badge className="bg-amber-600 text-white">RESTRAINT</Badge>
+            <Badge className="bg-warning-600 text-white">RESTRAINT</Badge>
           )}
-          {closed && <Badge className="bg-emerald-600 text-white">Completed</Badge>}
+          {closed && <Badge className="bg-success-600 text-white">Completed</Badge>}
         </div>
 
         {(ir.upi_submitted_at || ir.guardian_notified_at) && (
@@ -553,7 +553,7 @@ export function AdminIncidentsSection({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 text-amber-600" />
+          <AlertTriangle className="h-4 w-4 text-warning-600" />
           Incidents
         </h3>
         <nav className="ml-auto inline-flex rounded-lg border border-border bg-card p-1">

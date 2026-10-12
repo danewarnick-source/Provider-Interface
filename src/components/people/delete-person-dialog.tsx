@@ -121,7 +121,7 @@ export function DeletePersonDialog({
                     className={cn(
                       "min-h-11 rounded-full border px-4 text-sm",
                       choice === c
-                        ? "border-hive-ink bg-hive-gold-soft font-medium text-hive-ink"
+                        ? "border-hive-ink bg-hive-accent-soft font-medium text-hive-ink"
                         : "border-hive-border bg-hive-surface text-muted-foreground",
                     )}
                   >

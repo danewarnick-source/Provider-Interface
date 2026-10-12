@@ -180,9 +180,9 @@ export function IncidentTrendsStrip({
                       <span
                         className={`text-[10px] ${
                           delta > 0
-                            ? "text-rose-600"
+                            ? "text-danger-600"
                             : delta < 0
-                              ? "text-emerald-600"
+                              ? "text-success-600"
                               : "text-muted-foreground"
                         }`}
                       >

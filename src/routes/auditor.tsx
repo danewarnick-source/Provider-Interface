@@ -135,7 +135,7 @@ function AuditorSignIn() {
       <Card className="bg-card/80 backdrop-blur border-[color:var(--border-light)]">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <ShieldCheck className="h-5 w-5 text-[color:var(--amber-600)]" /> Auditor sign-in
+            <ShieldCheck className="h-5 w-5 text-[color:var(--color-warning-600)]" /> Auditor sign-in
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -144,7 +144,7 @@ function AuditorSignIn() {
             — you verify yourself, no account creation needed.
           </p>
           {sent ? (
-            <div className="rounded-md border border-[color:var(--amber-300)] bg-[color:var(--amber-50)] px-3 py-3 text-sm">
+            <div className="rounded-md border border-[color:var(--color-warning-300)] bg-[color:var(--color-warning-50)] px-3 py-3 text-sm">
               <div className="flex items-center gap-2 font-medium">
                 <Mail className="h-4 w-4" /> Check your inbox
               </div>
@@ -207,7 +207,7 @@ function AuditorShareList({ onOpen }: { onOpen: (id: string) => void }) {
         {(data?.shares ?? []).map((s: any) => {
           const cls =
             s.live_status === "active"
-              ? "border-[color:var(--amber-300)]"
+              ? "border-[color:var(--color-warning-300)]"
               : "border-[color:var(--border-light)] opacity-80";
           return (
             <button
@@ -220,7 +220,7 @@ function AuditorShareList({ onOpen }: { onOpen: (id: string) => void }) {
                 <Badge
                   className={
                     s.live_status === "active"
-                      ? "bg-[color:var(--amber-100)] text-[color:var(--navy-900)] border-0"
+                      ? "bg-[color:var(--color-warning-100)] text-[color:var(--navy-900)] border-0"
                       : "bg-[color:var(--surface-2)] text-foreground border-0"
                   }
                 >
@@ -362,7 +362,7 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
                     <Badge
                       className={
                         provided
-                          ? "bg-[color:var(--amber-100)] text-[color:var(--navy-900)] border-0"
+                          ? "bg-[color:var(--color-warning-100)] text-[color:var(--navy-900)] border-0"
                           : missing
                             ? "bg-destructive/10 text-destructive border border-destructive/30"
                             : "bg-[color:var(--surface-2)] text-foreground border-0"
@@ -408,10 +408,10 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
         </Card>
       )}
 
-      <Card className="bg-card/70 backdrop-blur border-[color:var(--amber-300)]">
+      <Card className="bg-card/70 backdrop-blur border-[color:var(--color-warning-300)]">
         <CardHeader>
           <CardTitle className="text-sm flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[color:var(--amber-600)]" />
+            <Sparkles className="h-4 w-4 text-[color:var(--color-warning-600)]" />
             NECTAR — Training standard vs evidence
           </CardTitle>
         </CardHeader>
@@ -446,7 +446,7 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
               <div className="space-y-1">
                 {(data.nectar.evidence ?? []).slice(0, 8).map((c: any) => (
                   <div key={c.id} className="text-xs flex items-center gap-2">
-                    <CheckCircle2 className="h-3 w-3 text-[color:var(--amber-600)]" />
+                    <CheckCircle2 className="h-3 w-3 text-[color:var(--color-warning-600)]" />
                     {c.title}
                   </div>
                 ))}
@@ -465,7 +465,7 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
 function Stat({ label, value, tone }: { label: string; value: number; tone?: "amber" | "red" }) {
   const cls =
     tone === "amber"
-      ? "text-[color:var(--amber-600)]"
+      ? "text-[color:var(--color-warning-600)]"
       : tone === "red"
         ? "text-destructive"
         : "text-foreground";

@@ -4,20 +4,18 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium leading-none tracking-tight transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center gap-1 rounded-full border border-transparent px-2.5 py-1 text-xs font-semibold leading-none transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {
     variants: {
       variant: {
-        default: "border-transparent bg-[var(--hive-gold-soft)] text-[var(--hive-on-gold)]",
-        secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        destructive:
-          "border-transparent bg-[var(--hive-danger-soft)] text-[var(--hive-danger-fg)]",
-        outline: "border-border text-foreground bg-card",
-        success: "border-transparent bg-[var(--hive-ok-soft)] text-[var(--hive-ok-fg)]",
-        warning: "border-transparent bg-[var(--hive-gold-soft)] text-[var(--hive-on-gold)]",
-        accent: "border-transparent bg-[var(--hive-gold-soft)] text-[var(--hive-on-gold)]",
-        life: "border-transparent bg-[var(--hive-gold-soft)] text-[var(--hive-on-gold)]",
+        default: "bg-pt text-pri",
+        secondary: "bg-pt text-pri hover:bg-pt2",
+        destructive: "bg-danger-50 text-danger-700",
+        outline: "bg-paper text-pri shadow-[inset_0_0_0_1px_var(--denim-pt2)]",
+        success: "bg-acct text-accd shadow-[inset_0_0_0_1px_var(--denim-acctb)]",
+        warning: "bg-warning-50 text-warning-700",
+        accent: "bg-acct text-accd shadow-[inset_0_0_0_1px_var(--denim-acctb)]",
+        life: "bg-acct text-accd shadow-[inset_0_0_0_1px_var(--denim-acctb)]",
       },
     },
     defaultVariants: {

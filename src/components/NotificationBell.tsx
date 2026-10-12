@@ -40,21 +40,21 @@ function timeAgo(iso: string): string {
 }
 
 function urgencyRing(urgency: Urgency) {
-  if (urgency === "critical") return "border-l-4 border-l-rose-500 bg-rose-50 dark:bg-rose-950/40";
-  if (urgency === "urgent") return "border-l-4 border-l-amber-500 bg-amber-50 dark:bg-amber-950/40";
-  return "border-l-4 border-l-blue-400 bg-blue-50 dark:bg-blue-950/30";
+  if (urgency === "critical") return "border-l-4 border-l-danger-500 bg-danger-50 dark:bg-danger-950/40";
+  if (urgency === "urgent") return "border-l-4 border-l-warning-500 bg-warning-50 dark:bg-warning-950/40";
+  return "border-l-4 border-l-denim-400 bg-denim-50 dark:bg-denim-950/30";
 }
 
 function urgencyIcon(urgency: Urgency) {
-  if (urgency === "critical") return <AlertTriangle className="h-4 w-4 shrink-0 text-rose-500" />;
-  if (urgency === "urgent") return <Clock className="h-4 w-4 shrink-0 text-amber-500" />;
-  return <CheckCircle2 className="h-4 w-4 shrink-0 text-blue-400" />;
+  if (urgency === "critical") return <AlertTriangle className="h-4 w-4 shrink-0 text-danger-500" />;
+  if (urgency === "urgent") return <Clock className="h-4 w-4 shrink-0 text-warning-500" />;
+  return <CheckCircle2 className="h-4 w-4 shrink-0 text-denim-400" />;
 }
 
 function badgeColor(urgency: Urgency) {
-  if (urgency === "critical") return "bg-rose-500 text-white";
-  if (urgency === "urgent") return "bg-amber-500 text-white";
-  return "bg-blue-500 text-white";
+  if (urgency === "critical") return "bg-danger-500 text-white";
+  if (urgency === "urgent") return "bg-warning-500 text-white";
+  return "bg-denim-500 text-white";
 }
 
 export function NotificationBell({
@@ -257,7 +257,7 @@ export function NotificationBell({
         >
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
-            <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--hive-gold)] px-1 text-[10px] font-bold leading-none text-[var(--hive-sidebar)] ring-2 ring-[var(--hive-sidebar)]">
+            <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--hive-accent)] px-1 text-[10px] font-bold leading-none text-[var(--hive-sidebar)] ring-2 ring-[var(--hive-sidebar)]">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
@@ -302,7 +302,7 @@ export function NotificationBell({
                       <button type="button" onClick={() => handleClick(n)}
                         className="w-full px-4 py-3 text-left transition hover:bg-[var(--hive-hover)]">
                         <div className="flex items-start gap-2.5">
-                          {synthetic ? <GraduationCap className="h-4 w-4 shrink-0 text-amber-500" /> : urgencyIcon(n.urgency)}
+                          {synthetic ? <GraduationCap className="h-4 w-4 shrink-0 text-warning-500" /> : urgencyIcon(n.urgency)}
                           <div className="min-w-0 flex-1">
                             <p className={`text-xs font-semibold leading-snug ${!n.read_at ? "text-foreground" : "text-muted-foreground"}`}>
                               {n.title}

@@ -19,19 +19,19 @@ const TONE: Record<EvidenceLabelKind, { bar: string; text: string; pill: string 
     pill: "border-destructive/30 bg-destructive/10 text-destructive",
   },
   review: {
-    bar: "bg-sky-500",
-    text: "text-sky-700 dark:text-sky-300",
-    pill: "border-sky-500/30 bg-sky-500/10 text-sky-700 dark:text-sky-300",
+    bar: "bg-denim-500",
+    text: "text-denim-700 dark:text-denim-300",
+    pill: "border-denim-500/30 bg-denim-500/10 text-denim-700 dark:text-denim-300",
   },
   due_soon: {
-    bar: "bg-amber-500",
-    text: "text-amber-700 dark:text-amber-300",
-    pill: "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+    bar: "bg-warning-500",
+    text: "text-warning-700 dark:text-warning-300",
+    pill: "border-warning-500/30 bg-warning-500/10 text-warning-700 dark:text-warning-300",
   },
   current: {
-    bar: "bg-emerald-500",
-    text: "text-emerald-700 dark:text-emerald-300",
-    pill: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+    bar: "bg-success-500",
+    text: "text-success-700 dark:text-success-300",
+    pill: "border-success-500/30 bg-success-500/10 text-success-700 dark:text-success-300",
   },
 };
 

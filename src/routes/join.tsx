@@ -367,7 +367,7 @@ function JoinPage() {
         <Button
           type="submit"
           disabled={!canJoin}
-          className="h-11 bg-[linear-gradient(135deg,var(--hive-gold)_0%,var(--hive-gold)_100%)] text-[#141a3d] hover:opacity-95 disabled:opacity-50"
+          className="h-11 bg-[linear-gradient(135deg,var(--hive-accent)_0%,var(--hive-accent)_100%)] text-[#141a3d] hover:opacity-95 disabled:opacity-50"
         >
           {busy ? "Joining…" : `Join ${preview.org_name}`}
         </Button>

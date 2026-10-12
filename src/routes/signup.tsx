@@ -97,7 +97,7 @@ export const Route = createFileRoute("/signup")({
 
 const JAKARTA = "var(--font-sans)";
 const AMBER = "var(--hive-text)";
-const STEP_FILL = "var(--hive-gold)";
+const STEP_FILL = "var(--hive-accent)";
 
 const inputStyle: React.CSSProperties = {
   background: "var(--hive-surface)",
@@ -638,7 +638,7 @@ function Step1Account({
             emailErr ? (
               <>
                 {emailErr}{" "}
-                <Link to="/login" className="font-medium text-[var(--hive-gold)] hover:underline">
+                <Link to="/login" className="font-medium text-[var(--hive-accent-text)] hover:underline">
                   Sign in →
                 </Link>
               </>
@@ -653,7 +653,7 @@ function Step1Account({
               setEmailErr(null);
               update("email", e.target.value);
             }}
-            className="flex h-12 w-full rounded-lg px-3 py-2 text-base outline-none focus:border-[var(--hive-gold)]/60 focus:ring-2 focus:ring-[var(--hive-gold)]/40"
+            className="flex h-12 w-full rounded-lg px-3 py-2 text-base outline-none focus:border-[var(--hive-accent)]/60 focus:ring-2 focus:ring-[var(--hive-accent)]/40"
             style={inputStyle}
             placeholder="you+agency@gmail.com"
             data-testid="signup-email"
@@ -673,7 +673,7 @@ function Step1Account({
               aria-invalid={passwordWeakErr ? true : undefined}
               aria-describedby={passwordWeakErr ? "signup-password-weak" : undefined}
               data-testid="signup-password"
-              className="flex h-12 w-full rounded-lg px-3 py-2 pr-10 text-base outline-none focus:border-[var(--hive-gold)]/60 focus:ring-2 focus:ring-[var(--hive-gold)]/40"
+              className="flex h-12 w-full rounded-lg px-3 py-2 pr-10 text-base outline-none focus:border-[var(--hive-accent)]/60 focus:ring-2 focus:ring-[var(--hive-accent)]/40"
               style={inputStyle}
             />
             <button
@@ -713,7 +713,7 @@ function Step1Account({
               value={form.confirm}
               onChange={(e) => update("confirm", e.target.value)}
               data-testid="signup-confirm"
-              className="flex h-12 w-full rounded-lg px-3 py-2 pr-10 text-base outline-none focus:border-[var(--hive-gold)]/60 focus:ring-2 focus:ring-[var(--hive-gold)]/40"
+              className="flex h-12 w-full rounded-lg px-3 py-2 pr-10 text-base outline-none focus:border-[var(--hive-accent)]/60 focus:ring-2 focus:ring-[var(--hive-accent)]/40"
               style={inputStyle}
             />
             <button
@@ -1085,7 +1085,7 @@ function TextInput({
       onBlur={onBlur}
       placeholder={placeholder}
       data-testid={testId}
-      className="flex h-12 w-full rounded-lg px-3 py-2 text-base outline-none focus:border-[var(--hive-gold)]/60 focus:ring-2 focus:ring-[var(--hive-gold)]/40 disabled:opacity-60"
+      className="flex h-12 w-full rounded-lg px-3 py-2 text-base outline-none focus:border-[var(--hive-accent)]/60 focus:ring-2 focus:ring-[var(--hive-accent)]/40 disabled:opacity-60"
       style={inputStyle}
     />
   );
@@ -1269,7 +1269,7 @@ function Step5Training({
                 onChange={(e) => updatePerson(person.id, { name: e.target.value })}
                 placeholder="Name"
                 data-testid={`signup-training-name-${index}`}
-                className="flex h-11 w-full rounded-lg px-3 py-2 text-base outline-none focus:border-[var(--hive-gold)]/60 focus:ring-2 focus:ring-[var(--hive-gold)]/40"
+                className="flex h-11 w-full rounded-lg px-3 py-2 text-base outline-none focus:border-[var(--hive-accent)]/60 focus:ring-2 focus:ring-[var(--hive-accent)]/40"
                 style={inputStyle}
               />
               <Button

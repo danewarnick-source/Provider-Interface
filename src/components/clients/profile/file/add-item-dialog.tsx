@@ -124,7 +124,7 @@ export function AddItemDialog({
                 onClick={() => setChoice(r.key)}
                 className={cn(
                   "w-full rounded-xl border p-3 text-left",
-                  choice === r.key ? "border-hive-ink bg-hive-gold-soft" : "border-hive-border",
+                  choice === r.key ? "border-hive-ink bg-hive-accent-soft" : "border-hive-border",
                 )}
               >
                 <span className="block text-sm font-medium text-hive-ink">{r.title}</span>

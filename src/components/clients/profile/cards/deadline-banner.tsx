@@ -11,7 +11,7 @@ export function deadlineToneClass(satisfied: boolean, overdue: boolean): string 
     ? "border-[var(--hive-ok)]/30 bg-[var(--hive-ok-soft)] text-[var(--hive-ok-fg)]"
     : overdue
       ? "border-[var(--hive-danger)]/30 bg-[var(--hive-danger-soft)] text-[var(--hive-danger-fg)]"
-      : "border-hive-gold/50 bg-hive-gold-soft text-hive-ink";
+      : "border-hive-accent/50 bg-hive-accent-soft text-hive-ink";
 }
 
 /** Due / overdue / satisfied line for a document with a deadline. */

@@ -48,8 +48,8 @@ export function NectarRail({
     >
       <div className="flex items-center justify-between border-b border-[var(--hive-border)] px-4 py-3">
         <div className="flex items-center gap-2">
-          <PiMark variant="gold" className="h-4 w-4" />
-          <h2 className="font-display text-sm font-semibold tracking-tight text-[var(--hive-gold)]">
+          <PiMark variant="brand" className="h-4 w-4" />
+          <h2 className="font-display text-sm font-semibold tracking-tight text-[var(--hive-accent-text)]">
             Nectar
           </h2>
         </div>
@@ -75,9 +75,9 @@ export function NectarRail({
               key={text}
               type="button"
               onClick={() => goAsk(text)}
-              className="flex items-start gap-2.5 rounded-lg border border-[var(--hive-border)] bg-[var(--hive-surface)] px-3 py-2.5 text-left text-sm text-[var(--hive-text)] transition hover:border-[var(--hive-gold)]"
+              className="flex items-start gap-2.5 rounded-lg border border-[var(--hive-border)] bg-[var(--hive-surface)] px-3 py-2.5 text-left text-sm text-[var(--hive-text)] transition hover:border-[var(--hive-accent)]"
             >
-              <Icon className="mt-0.5 h-4 w-4 shrink-0 text-[var(--hive-gold)]" />
+              <Icon className="mt-0.5 h-4 w-4 shrink-0 text-[var(--hive-accent-text)]" />
               <span>{text}</span>
             </button>
           ))}
@@ -94,7 +94,7 @@ export function NectarRail({
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             placeholder="Ask a question..."
-            className="h-10 min-w-0 flex-1 rounded-md border border-[var(--hive-border)] bg-[var(--hive-canvas)] px-3 text-sm text-[var(--hive-text)] placeholder:text-[var(--hive-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--hive-gold)]/40"
+            className="h-10 min-w-0 flex-1 rounded-md border border-[var(--hive-border)] bg-[var(--hive-canvas)] px-3 text-sm text-[var(--hive-text)] placeholder:text-[var(--hive-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--hive-accent)]/40"
           />
           <button
             type="submit"

@@ -211,7 +211,7 @@ export function PublishConfirmDialog({
           </div>
 
           {zeroWarn && !loading && (
-            <div className="rounded-xl border border-hive-gold/50 bg-hive-gold-soft px-3 py-2 text-xs text-hive-ink">
+            <div className="rounded-xl border border-hive-accent/50 bg-hive-accent-soft px-3 py-2 text-xs text-hive-ink">
               No staff are assigned to this client yet. You can publish now — staff will receive
               this {kindLabel} automatically once you assign them. Publish anyway?
             </div>

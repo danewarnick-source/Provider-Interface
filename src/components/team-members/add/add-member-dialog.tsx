@@ -252,7 +252,7 @@ export function AddTeamMemberDialog({
             </DialogHeader>
             {result.rehireEligible === false && (
               <p
-                className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-200"
+                className="flex items-start gap-2 rounded-md border border-warning-300 bg-warning-50 p-3 text-sm text-warning-900 dark:border-warning-900/50 dark:bg-warning-900/20 dark:text-warning-200"
                 role="alert"
               >
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -529,7 +529,7 @@ function CreatedStep({
         </DialogDescription>
       </DialogHeader>
       {inviteError && !invited && (
-        <p className="text-sm text-amber-700 dark:text-amber-300" role="alert">
+        <p className="text-sm text-warning-700 dark:text-warning-300" role="alert">
           The invite didn&apos;t send: {inviteError}
         </p>
       )}

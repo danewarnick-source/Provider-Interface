@@ -98,7 +98,7 @@ export function RestrictionDialog({
           </span>
           <Badge
             variant={completion.isComplete ? "default" : "outline"}
-            className={completion.isComplete ? "bg-emerald-600 hover:bg-emerald-600" : "border-amber-400 text-amber-800"}
+            className={completion.isComplete ? "bg-success-600 hover:bg-success-600" : "border-warning-400 text-warning-800"}
           >
             {completion.completedCount}/{completion.total}
           </Badge>
@@ -110,9 +110,9 @@ export function RestrictionDialog({
               <div key={def.key} className="space-y-2 rounded-md border border-border p-3">
                 <div className="flex items-start gap-2">
                   {isComplete ? (
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success-600" />
                   ) : (
-                    <Circle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                    <Circle className="mt-0.5 h-4 w-4 shrink-0 text-warning-500" />
                   )}
                   <div>
                     <div className="text-sm font-medium">

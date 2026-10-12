@@ -4,7 +4,7 @@ import type { ShiftRow } from "@/hooks/use-schedule-preview";
 // ── Design tokens ported from PI-Schedule-Demo-v6.html ──────────────
 export const SCHED = {
   navy: "var(--hive-sidebar)",
-  gold: "var(--hive-gold)",
+  gold: "var(--hive-accent)",
   teal: "var(--hive-ok)",
   ink: "var(--hive-ink)",
   paper: "var(--hive-canvas)",
@@ -15,8 +15,8 @@ export const SCHED = {
   gapBg: "var(--hive-danger-soft)",
   ok: "var(--hive-ok)",
   okBg: "var(--hive-ok-soft)",
-  warn: "var(--hive-gold)",
-  warnBg: "var(--hive-gold-soft)",
+  warn: "var(--hive-accent)",
+  warnBg: "var(--hive-accent-soft)",
   tealBg: "var(--hive-ok-soft)",
   purple: "var(--hive-sidebar)",
   purpleBg: "#eef1f4",

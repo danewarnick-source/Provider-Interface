@@ -106,7 +106,7 @@ export function AdminHomeWelcome({ welcomeFlag = false }: { welcomeFlag?: boolea
         className="pointer-events-none absolute inset-y-0 right-0 w-1/2"
         style={{
           background:
-            "radial-gradient(closest-side at 80% 20%, color-mix(in srgb, var(--hive-gold) 14%, transparent), transparent 75%)",
+            "radial-gradient(closest-side at 80% 20%, color-mix(in srgb, var(--hive-accent) 14%, transparent), transparent 75%)",
         }}
       />
       <div className="relative z-10 flex h-full flex-col justify-between gap-3 px-5 py-4 sm:px-6">

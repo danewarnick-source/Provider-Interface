@@ -85,17 +85,17 @@ function NeedsRow({ to, icon, label, count, emphasis }: { to: string; icon: Reac
       to={to}
       className={`flex items-center justify-between rounded-lg border p-3 transition-colors ${
         showEmphasis
-          ? "border-[var(--hive-gold)] bg-gradient-to-r from-[#fff7ed] to-[#ffedd5] hover:border-[#c2610e]"
+          ? "border-[var(--hive-accent)] bg-gradient-to-r from-[#fff7ed] to-[#ffedd5] hover:border-[#c2610e]"
           : "border-border bg-background hover:bg-muted"
       }`}
     >
       <div className="flex items-center gap-2 text-sm">
-        <span className={showEmphasis ? "text-[var(--hive-gold)]" : "text-muted-foreground"}>{icon}</span>
+        <span className={showEmphasis ? "text-[var(--hive-accent-text)]" : "text-muted-foreground"}>{icon}</span>
         <span className={showEmphasis ? "font-semibold text-[#7c2d12]" : "text-foreground"}>{label}</span>
       </div>
       <span
         className={`inline-flex min-w-[28px] items-center justify-center rounded-full px-2 py-0.5 text-xs font-bold ${
-          count === 0 ? "bg-muted text-muted-foreground" : showEmphasis ? "bg-[var(--hive-gold)] text-white" : "bg-[var(--hive-text)] text-white"
+          count === 0 ? "bg-muted text-muted-foreground" : showEmphasis ? "bg-[var(--hive-accent)] text-white" : "bg-[var(--hive-text)] text-white"
         }`}
       >
         {count}

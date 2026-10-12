@@ -86,7 +86,7 @@ export function KnowledgePage() {
   const content = (
     <div className="space-y-6">
       <header className="space-y-2">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--hive-gold)]">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--hive-accent-text)]">
           <BookOpen className="h-3.5 w-3.5" />
           Knowledge
         </div>
@@ -199,7 +199,7 @@ function KnowledgeRow({ source, orgId }: { source: SourceRow; orgId: string }) {
     <li className="flex flex-col gap-2 py-3 sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <FileText className="h-4 w-4 shrink-0 text-[var(--hive-gold)]" />
+          <FileText className="h-4 w-4 shrink-0 text-[var(--hive-accent-text)]" />
           <span className="min-w-0 break-words text-sm font-medium text-[var(--hive-text)]">
             {source.title}
           </span>
@@ -218,7 +218,7 @@ function KnowledgeRow({ source, orgId }: { source: SourceRow; orgId: string }) {
           <span>{new Date(source.created_at).toLocaleDateString()}</span>
         </div>
         {source.parse_status === "failed" && (
-          <p className="mt-1 text-[11px] text-red-700 dark:text-red-300">
+          <p className="mt-1 text-[11px] text-danger-700 dark:text-danger-300">
             {(source.metadata as { parse_error?: string } | null)?.parse_error ??
               "Parse failed. Re-upload the document to try again."}
           </p>
@@ -266,7 +266,7 @@ function ParseBadge({
 }) {
   if (status === "parsed") {
     return (
-      <Badge className="bg-emerald-500/15 text-[10px] text-emerald-700 hover:bg-emerald-500/15 dark:text-emerald-300">
+      <Badge className="bg-success-500/15 text-[10px] text-success-700 hover:bg-success-500/15 dark:text-success-300">
         In knowledge base
       </Badge>
     );
@@ -274,7 +274,7 @@ function ParseBadge({
   if (status === "parsing" || status === "pending") {
     return (
       <>
-        <Badge className="bg-[var(--hive-gold)]/15 text-[10px] text-[var(--hive-gold)] hover:bg-[var(--hive-gold)]/15">
+        <Badge className="bg-[var(--hive-accent)]/15 text-[10px] text-[var(--hive-accent-text)] hover:bg-[var(--hive-accent)]/15">
           Ingesting…
         </Badge>
         <button
@@ -289,7 +289,7 @@ function ParseBadge({
   }
   if (status === "failed") {
     return (
-      <Badge className="bg-red-500/15 text-[10px] text-red-700 hover:bg-red-500/15 dark:text-red-300">
+      <Badge className="bg-danger-500/15 text-[10px] text-danger-700 hover:bg-danger-500/15 dark:text-danger-300">
         Ingest failed
       </Badge>
     );
@@ -399,7 +399,7 @@ function UploadCard({
   return (
     <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
       <h2 className="mb-1 flex items-center gap-2 font-display text-sm font-semibold text-[var(--hive-text)]">
-        <Upload className="h-4 w-4 text-[var(--hive-gold)]" /> Upload a document
+        <Upload className="h-4 w-4 text-[var(--hive-accent-text)]" /> Upload a document
       </h2>
       <p className="mb-3 text-xs text-muted-foreground">
         Scope of Work, policies, or any agency document. Nectar parses the file
@@ -412,7 +412,7 @@ function UploadCard({
           onClick={() => setMode("file")}
           className={`rounded-md px-3 py-1.5 transition ${
             mode === "file"
-              ? "bg-[var(--hive-gold)] text-[var(--hive-on-gold)]"
+              ? "bg-[var(--hive-accent)] text-[var(--hive-on-accent)]"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -423,7 +423,7 @@ function UploadCard({
           onClick={() => setMode("url")}
           className={`rounded-md px-3 py-1.5 transition ${
             mode === "url"
-              ? "bg-[var(--hive-gold)] text-[var(--hive-on-gold)]"
+              ? "bg-[var(--hive-accent)] text-[var(--hive-on-accent)]"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -476,7 +476,7 @@ function UploadCard({
               />
             </div>
             <Button
-              className="w-full bg-[var(--hive-gold)] text-[var(--hive-on-gold)] hover:bg-[#b8651a]"
+              className="w-full bg-[var(--hive-accent)] text-[var(--hive-on-accent)] hover:bg-[#b8651a]"
               onClick={() => captureUrl.mutate()}
               disabled={submitting || !url.trim() || !title.trim()}
             >
@@ -503,7 +503,7 @@ function UploadCard({
               />
             </div>
             <Button
-              className="w-full bg-[var(--hive-gold)] text-[var(--hive-on-gold)] hover:bg-[#b8651a]"
+              className="w-full bg-[var(--hive-accent)] text-[var(--hive-on-accent)] hover:bg-[#b8651a]"
               onClick={() => upload.mutate()}
               disabled={submitting || !file}
             >

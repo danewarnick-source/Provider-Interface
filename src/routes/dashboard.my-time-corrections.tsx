@@ -45,20 +45,20 @@ function statusBadge(s: string | null) {
   const v = (s ?? "").toLowerCase();
   if (v === "approved") {
     return (
-      <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-200">
+      <Badge className="bg-success-100 text-success-800 dark:bg-success-500/15 dark:text-success-200">
         <CheckCircle2 className="mr-1 h-3 w-3" /> Approved — corrected times now bill
       </Badge>
     );
   }
   if (v === "rejected") {
     return (
-      <Badge className="bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-200">
+      <Badge className="bg-danger-100 text-danger-800 dark:bg-danger-500/15 dark:text-danger-200">
         <XCircle className="mr-1 h-3 w-3" /> Denied — original times stand
       </Badge>
     );
   }
   return (
-    <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-200">
+    <Badge className="bg-warning-100 text-warning-800 dark:bg-warning-500/15 dark:text-warning-200">
       <Timer className="mr-1 h-3 w-3" /> Pending supervisor review
     </Badge>
   );
@@ -93,7 +93,7 @@ function MyTimeCorrectionsPage() {
       <header className="space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-amber-700" />
+            <Clock className="h-5 w-5 text-warning-700" />
             <h1 className="text-xl font-semibold">My time corrections</h1>
           </div>
           {org?.organization_id && user?.id && (
@@ -158,8 +158,8 @@ function MyTimeCorrectionsPage() {
                 <p className="mt-1 font-mono text-xs">In: {fmt(r.clock_in_timestamp)}</p>
                 <p className="font-mono text-xs">Out: {fmt(r.clock_out_timestamp)}</p>
               </div>
-              <div className="rounded-lg border border-amber-400/50 bg-amber-50/40 p-2.5 dark:bg-amber-500/5">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+              <div className="rounded-lg border border-warning-400/50 bg-warning-50/40 p-2.5 dark:bg-warning-500/5">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-warning-700 dark:text-warning-300">
                   You requested
                 </p>
                 <p className="mt-1 font-mono text-xs">In: {fmt(r.corrected_clock_in ?? r.clock_in_timestamp)}</p>
@@ -175,8 +175,8 @@ function MyTimeCorrectionsPage() {
             )}
 
             {(r.review_status ?? "").toLowerCase() === "rejected" && r.review_note && (
-              <div className="rounded-lg border border-rose-400/50 bg-rose-50/40 p-2.5 dark:bg-rose-500/5">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-rose-700 dark:text-rose-300">
+              <div className="rounded-lg border border-danger-400/50 bg-danger-50/40 p-2.5 dark:bg-danger-500/5">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-danger-700 dark:text-danger-300">
                   Reviewer's note
                 </p>
                 <p className="mt-1 text-xs leading-relaxed">{r.review_note}</p>

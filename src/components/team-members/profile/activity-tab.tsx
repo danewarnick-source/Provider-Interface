@@ -26,8 +26,8 @@ const KIND_LABEL: Record<ActivityKind, string> = {
 const KIND_TONE: Record<ActivityKind, string> = {
   shift: "bg-[var(--hive-ink)]/10 text-[var(--hive-ink)]",
   form: "bg-muted text-foreground/80",
-  incident: "bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300",
-  account: "bg-sky-100 text-sky-800 dark:bg-sky-500/10 dark:text-sky-300",
+  incident: "bg-danger-100 text-danger-700 dark:bg-danger-500/10 dark:text-danger-300",
+  account: "bg-denim-100 text-denim-800 dark:bg-denim-500/10 dark:text-denim-300",
 };
 
 /** Read-only, newest first. A failed load says so instead of "No activity". */

@@ -139,7 +139,7 @@ export function ClientQuickInfoSheet({ client, trigger }: Props) {
                       {goals.slice(1).map((g, i) => (
                         <li
                           key={i}
-                          className="rounded-md border border-emerald-200 bg-white px-2.5 py-1.5 text-sm"
+                          className="rounded-md border border-success-200 bg-white px-2.5 py-1.5 text-sm"
                         >
                           {g}
                         </li>
@@ -200,19 +200,19 @@ function Section({
 }) {
   const palette = {
     caution: {
-      wrap: "border-rose-300 bg-rose-50",
-      head: "text-rose-800",
-      icon: "bg-rose-500 text-white",
+      wrap: "border-danger-300 bg-danger-50",
+      head: "text-danger-800",
+      icon: "bg-danger-500 text-white",
     },
     success: {
-      wrap: "border-emerald-300 bg-emerald-50",
-      head: "text-emerald-800",
+      wrap: "border-success-300 bg-success-50",
+      head: "text-success-800",
       icon: "bg-[#117a52] text-white",
     },
     info: {
-      wrap: "border-sky-300 bg-sky-50",
-      head: "text-sky-800",
-      icon: "bg-sky-600 text-white",
+      wrap: "border-denim-300 bg-denim-50",
+      head: "text-denim-800",
+      icon: "bg-denim-600 text-white",
     },
     neutral: {
       wrap: "border-border bg-card",
@@ -266,7 +266,7 @@ function ContactRow({
       {phone ? (
         <a
           href={`tel:${phone}`}
-          className="inline-flex min-h-[40px] shrink-0 items-center gap-1 rounded-md bg-sky-600 px-3 text-xs font-semibold text-white hover:bg-sky-700"
+          className="inline-flex min-h-[40px] shrink-0 items-center gap-1 rounded-md bg-denim-600 px-3 text-xs font-semibold text-white hover:bg-denim-700"
         >
           <Phone className="h-3.5 w-3.5" /> Call
         </a>

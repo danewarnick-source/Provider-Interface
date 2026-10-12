@@ -49,9 +49,9 @@ export function OnboardingPipelineCard({ counts }: { counts: PipelineCounts }) {
                 <Link
                   to="/dashboard/team-members"
                   search={s.view ? { view: s.view } : {}}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-background px-3 py-3 transition hover:border-[var(--hive-gold)]/40"
+                  className="flex items-center gap-3 rounded-xl border border-border bg-background px-3 py-3 transition hover:border-[var(--hive-accent)]/40"
                 >
-                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--hive-text)] text-[var(--hive-gold)]">
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--hive-text)] text-[var(--hive-accent-text)]">
                     <Icon className="h-4 w-4" strokeWidth={2} />
                   </span>
                   <div className="min-w-0">

@@ -45,12 +45,12 @@ function flattenGroups(groups: Group[]): FormField[] {
 }
 
 const GROUP_TONES = [
-  "bg-slate-50/60 border-slate-200",
-  "bg-amber-50/40 border-amber-200",
-  "bg-sky-50/40 border-sky-200",
-  "bg-emerald-50/40 border-emerald-200",
-  "bg-violet-50/40 border-violet-200",
-  "bg-rose-50/40 border-rose-200",
+  "bg-haze-50/60 border-haze-200",
+  "bg-warning-50/40 border-warning-200",
+  "bg-denim-50/40 border-denim-200",
+  "bg-success-50/40 border-success-200",
+  "bg-denim-50/40 border-denim-200",
+  "bg-danger-50/40 border-danger-200",
 ];
 
 export function SortableFields({

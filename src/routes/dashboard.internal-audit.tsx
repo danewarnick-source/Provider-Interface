@@ -108,17 +108,17 @@ const AREA_LABEL: Record<FindingArea, string> = {
 const SEVERITY_BADGE: Record<Severity, { label: string; cls: string; Icon: typeof AlertTriangle }> = {
   critical: {
     label: "Critical gap",
-    cls: "bg-red-50 text-red-700 border-red-200",
+    cls: "bg-danger-50 text-danger-700 border-danger-200",
     Icon: ShieldAlert,
   },
   attention: {
     label: "Needs attention",
-    cls: "bg-amber-50 text-amber-800 border-amber-200",
+    cls: "bg-warning-50 text-warning-800 border-warning-200",
     Icon: AlertTriangle,
   },
   minor: {
     label: "Minor",
-    cls: "bg-slate-50 text-slate-700 border-slate-200",
+    cls: "bg-haze-50 text-haze-700 border-haze-200",
     Icon: Info,
   },
 };
@@ -285,16 +285,16 @@ export function InternalAuditPage() {
   const body = (
     <div className="space-y-6">
       {/* Header / posture */}
-      <div className="rounded-2xl border border-[var(--hive-gold)]/30 bg-gradient-to-br from-[#fff7ed] via-white to-white p-5 shadow-[var(--shadow-card)]">
+      <div className="rounded-2xl border border-[var(--hive-accent)]/30 bg-gradient-to-br from-[#fff7ed] via-white to-white p-5 shadow-[var(--shadow-card)]">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--hive-gold)]/15 ring-1 ring-[var(--hive-gold)]/30">
-              <PiMark variant="gold" className="h-5 w-5" />
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--hive-accent)]/15 ring-1 ring-[var(--hive-accent)]/30">
+              <PiMark variant="brand" className="h-5 w-5" />
             </span>
             <div>
               <h2 className="font-display text-xl font-bold tracking-tight text-[var(--hive-text)]">
                 Internal Audit
-                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-[var(--hive-gold)]/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#9a3412]">
+                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-[var(--hive-accent)]/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#9a3412]">
                   <Sparkles className="h-3 w-3" /> NECTAR
                 </span>
               </h2>
@@ -408,7 +408,7 @@ export function InternalAuditPage() {
         <div className="mb-2 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-[var(--hive-text)]">Other scope filters</h3>
           {usingSample && (
-            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800">
+            <span className="rounded-full bg-warning-50 px-2 py-0.5 text-[11px] font-medium text-warning-800">
               Sample active — single-client filter ignored
             </span>
           )}
@@ -538,7 +538,7 @@ export function InternalAuditPage() {
           </div>
         ) : findings.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-2 py-12 text-sm text-muted-foreground">
-            <CheckCircle2 className="h-6 w-6 text-emerald-600" />
+            <CheckCircle2 className="h-6 w-6 text-success-600" />
             <span>No findings in this scope. Nice work.</span>
           </div>
         ) : (
@@ -572,10 +572,10 @@ function ReadinessCard({ score, loading }: { score?: number; loading: boolean })
   const s = score ?? 0;
   const tone =
     s >= 90
-      ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+      ? "text-success-700 bg-success-50 border-success-200"
       : s >= 70
-      ? "text-amber-700 bg-amber-50 border-amber-200"
-      : "text-red-700 bg-red-50 border-red-200";
+      ? "text-warning-700 bg-warning-50 border-warning-200"
+      : "text-danger-700 bg-danger-50 border-danger-200";
   return (
     <div className={`rounded-2xl border p-4 shadow-[var(--shadow-card)] ${tone}`}>
       <div className="text-xs font-medium uppercase tracking-wider opacity-80">

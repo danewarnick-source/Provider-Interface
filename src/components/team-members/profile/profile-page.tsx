@@ -144,8 +144,8 @@ export function ProfilePage() {
   }
   if (!profileQ.data) {
     return (
-      <Card className="border-rose-200 bg-rose-50/30" data-testid="profile-not-found">
-        <CardContent className="space-y-3 p-6 text-sm text-rose-700">
+      <Card className="border-danger-200 bg-danger-50/30" data-testid="profile-not-found">
+        <CardContent className="space-y-3 p-6 text-sm text-danger-700">
           <p>
             <ShieldAlert className="mr-2 inline h-4 w-4" />
             This person isn't a team member in this agency.

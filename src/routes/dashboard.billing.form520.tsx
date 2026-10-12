@@ -780,14 +780,14 @@ function Billing520Page() {
               Provider approver: {providerEmail} · <Link to="/dashboard/nectar-company-profile" className="underline underline-offset-2">Edit</Link>
             </p>
           ) : (
-            <p className="text-sm text-red-600 dark:text-red-400">
+            <p className="text-sm text-danger-600 dark:text-danger-400">
               No provider approver email set — add it on the <Link to="/dashboard/nectar-company-profile" className="underline underline-offset-2">company profile</Link>
             </p>
           )}
         </div>
         <div className="flex flex-wrap gap-2">
           {locked && (
-            <Badge className="gap-1 bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/15 dark:text-emerald-300">
+            <Badge className="gap-1 bg-success-500/15 text-success-700 hover:bg-success-500/15 dark:text-success-300">
               <Lock className="h-3 w-3" /> Submitted & locked
             </Badge>
           )}
@@ -886,12 +886,12 @@ function Billing520Page() {
       </p>
 
       {/* ── Review & Submit ────────────────────────────────────────────── */}
-      <Card className="border-amber-500/20 bg-card/60 backdrop-blur">
+      <Card className="border-warning-500/20 bg-card/60 backdrop-blur">
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <CardTitle className="flex items-center gap-2 text-base">
-                <ShieldCheck className="h-4 w-4 text-amber-600" />
+                <ShieldCheck className="h-4 w-4 text-warning-600" />
                 Review & Attest — Provider Confirmation Required
               </CardTitle>
               <p className="mt-1 text-xs text-muted-foreground">
@@ -908,7 +908,7 @@ function Billing520Page() {
 
         <CardContent className="space-y-4">
           {!ATTESTATION_COPY_APPROVED && (
-            <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-200">
+            <div className="rounded-md border border-warning-500/30 bg-warning-500/10 p-3 text-sm text-warning-800 dark:text-warning-200">
               Submission to the State is currently disabled — the provider attestation language is pending
               legal review and must be finalized before any 520 can be signed and submitted. Review and
               export (CSV / Excel / PDF) remain available.
@@ -938,8 +938,8 @@ function Billing520Page() {
                   </h3>
                 </div>
                 {warnings.length === 0 ? (
-                  <Alert className="border-emerald-500/30 bg-emerald-500/5">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                  <Alert className="border-success-500/30 bg-success-500/5">
+                    <CheckCircle2 className="h-4 w-4 text-success-600" />
                     <AlertTitle>Clean</AlertTitle>
                     <AlertDescription>PI did not surface any audit warnings for this submission.</AlertDescription>
                   </Alert>
@@ -950,10 +950,10 @@ function Billing520Page() {
                       className={
                         w.severity === "blocker"
                           ? "border-destructive/40 bg-destructive/5"
-                          : "border-amber-500/40 bg-amber-500/5"
+                          : "border-warning-500/40 bg-warning-500/5"
                       }
                     >
-                      <AlertTriangle className={w.severity === "blocker" ? "h-4 w-4 text-destructive" : "h-4 w-4 text-amber-600"} />
+                      <AlertTriangle className={w.severity === "blocker" ? "h-4 w-4 text-destructive" : "h-4 w-4 text-warning-600"} />
                       <AlertTitle className="font-mono text-xs uppercase">{w.warning_type.replaceAll("_", " ")}</AlertTitle>
                       <AlertDescription className="space-y-2">
                         <p>{w.message}</p>
@@ -983,7 +983,7 @@ function Billing520Page() {
                               variant="outline"
                               className={
                                 w.status === "attested"
-                                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                                  ? "border-success-500/40 bg-success-500/10 text-success-700 dark:text-success-300"
                                   : "border-muted-foreground/30 bg-muted/40"
                               }
                             >
@@ -999,8 +999,8 @@ function Billing520Page() {
               </div>
 
               {/* Attestation */}
-              <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 space-y-3">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+              <div className="rounded-xl border border-warning-500/30 bg-warning-500/5 p-4 space-y-3">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-warning-700 dark:text-warning-300">
                   Provider Attestation
                 </h3>
                 <p className="text-[11px] italic text-muted-foreground">
@@ -1009,8 +1009,8 @@ function Billing520Page() {
                 <p className="text-sm leading-relaxed">{ATTESTATION_TEXT}</p>
 
                 {locked ? (
-                  <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm">
-                    <p className="font-medium text-emerald-800 dark:text-emerald-300">
+                  <div className="rounded-md border border-success-500/30 bg-success-500/10 p-3 text-sm">
+                    <p className="font-medium text-success-800 dark:text-success-300">
                       <Lock className="mr-1 inline h-3.5 w-3.5" />
                       Submitted by {submission.attestation_signature_name}{" "}
                       on {submission.submitted_at ? new Date(submission.submitted_at).toLocaleString() : "—"}.
@@ -1042,7 +1042,7 @@ function Billing520Page() {
                       />
                     </div>
                     {!ATTESTATION_COPY_APPROVED && (
-                      <div className="rounded-md border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">
+                      <div className="rounded-md border border-danger-500/30 bg-danger-500/10 p-3 text-sm text-danger-700 dark:text-danger-300">
                         Form 520 submission is temporarily disabled. The provider attestation
                         language is pending legal review and must be finalized before forms can
                         be signed and submitted.

@@ -3,28 +3,28 @@ import type { EvidenceMatrixChip, EvidenceMatrixChipKind } from "@/lib/evidence/
 
 const CHIP: Record<EvidenceMatrixChipKind, string> = {
   complete: "bg-[var(--hive-ok-soft)] text-[var(--hive-ok-fg)]",
-  due: "bg-[var(--hive-gold-soft)] text-[#6b5420]",
+  due: "bg-[var(--hive-accent-soft)] text-[#6b5420]",
   missing: "bg-[var(--hive-danger-soft)] text-[var(--hive-danger-fg)]",
   review: "bg-[var(--hive-info-soft)] text-[var(--hive-info-fg)]",
   add: "border border-dashed border-[var(--hive-border)] bg-[var(--hive-muted-surface)] text-[var(--hive-steel)]",
   open: "bg-[var(--hive-muted-surface)] text-[var(--hive-text)]",
   na: "border border-dashed border-[var(--hive-border)] bg-[var(--hive-muted-surface)] text-[var(--hive-steel)]",
   awaiting_review: "bg-[var(--hive-info-soft)] text-[var(--hive-info-fg)]",
-  sent_back: "bg-[var(--hive-gold-soft)] text-[#6b5420]",
+  sent_back: "bg-[var(--hive-accent-soft)] text-[#6b5420]",
   skipped:
     "border border-dashed border-[var(--hive-border)] bg-[var(--hive-muted-surface)] text-[var(--hive-steel)]",
 };
 
 const ICO: Record<EvidenceMatrixChipKind, { mark: string; fill: string }> = {
   complete: { mark: "✓", fill: "bg-[var(--hive-ok)]" },
-  due: { mark: "·", fill: "bg-[var(--hive-gold)]" },
+  due: { mark: "·", fill: "bg-[var(--hive-accent)]" },
   missing: { mark: "·", fill: "bg-[var(--hive-danger)]" },
   review: { mark: "o", fill: "bg-[var(--hive-info)]" },
   add: { mark: "+", fill: "bg-[var(--hive-steel)]" },
   open: { mark: "·", fill: "bg-[var(--hive-steel)]" },
   na: { mark: "–", fill: "bg-[var(--hive-steel)]" },
   awaiting_review: { mark: "o", fill: "bg-[var(--hive-info)]" },
-  sent_back: { mark: "!", fill: "bg-[var(--hive-gold)]" },
+  sent_back: { mark: "!", fill: "bg-[var(--hive-accent)]" },
   skipped: { mark: "–", fill: "bg-[var(--hive-steel)]" },
 };
 

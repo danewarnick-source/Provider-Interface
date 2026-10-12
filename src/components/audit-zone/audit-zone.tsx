@@ -345,7 +345,7 @@ function DocumentPull({ orgId }: { orgId?: string }) {
     <Card className="bg-card/60 backdrop-blur border-[color:var(--border-light)]">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <Search className="h-4 w-4 text-[color:var(--amber-600)]" />
+          <Search className="h-4 w-4 text-[color:var(--color-warning-600)]" />
           Pull a document or report
         </CardTitle>
         <p className="text-xs text-muted-foreground">
@@ -360,19 +360,19 @@ function DocumentPull({ orgId }: { orgId?: string }) {
           featureName="Pull records in plain language"
           benefit="Ask NECTAR to assemble any pull from your data — e.g. “all of Blake's DSI timesheets for FY26” — instead of building filters by hand. Works across every record type and every plan year on file."
         >
-          <div className="rounded-lg border border-[color:var(--amber-300)] bg-gradient-to-br from-[color:var(--amber-50)]/70 to-white p-3">
+          <div className="rounded-lg border border-[color:var(--color-warning-300)] bg-gradient-to-br from-[color:var(--color-warning-50)]/70 to-white p-3">
             <div className="mb-2 flex items-center gap-2">
               <span
-                className="inline-flex h-6 w-6 items-center justify-center text-[color:var(--amber-600)]"
+                className="inline-flex h-6 w-6 items-center justify-center text-[color:var(--color-warning-600)]"
                 style={{
                   clipPath:
                     "polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)",
-                  background: "linear-gradient(135deg, var(--amber-100), var(--amber-200))",
+                  background: "linear-gradient(135deg, var(--color-warning-100), var(--color-warning-200))",
                 }}
               >
                 <Sparkles className="h-3.5 w-3.5" />
               </span>
-              <Label className="text-xs font-semibold uppercase tracking-wide text-[color:var(--amber-700)]">
+              <Label className="text-xs font-semibold uppercase tracking-wide text-[color:var(--color-warning-700)]">
                 NECTAR Infusion
               </Label>
               <span className="text-xs text-muted-foreground">
@@ -404,12 +404,12 @@ function DocumentPull({ orgId }: { orgId?: string }) {
               </Button>
             </div>
             {nectarReply && (
-              <div className="mt-3 rounded-md border border-[color:var(--amber-200)] bg-white/80 p-3 text-sm">
+              <div className="mt-3 rounded-md border border-[color:var(--color-warning-200)] bg-white/80 p-3 text-sm">
                 <NectarAnswer text={nectarReply.answer} />
                 {nectarReply.deepLink && (
                   <a
                     href={nectarReply.deepLink.path}
-                    className="mt-2 inline-block text-xs font-medium text-[color:var(--amber-700)] hover:underline"
+                    className="mt-2 inline-block text-xs font-medium text-[color:var(--color-warning-700)] hover:underline"
                   >
                     {nectarReply.deepLink.label} →
                   </a>
@@ -571,7 +571,7 @@ type AuditDoc = {
 
 const statusMeta: Record<AuditFile["status"], { label: string; cls: string }> = {
   building: { label: "Building", cls: "bg-[color:var(--surface-2)] text-foreground" },
-  review_complete: { label: "Review Complete", cls: "bg-[color:var(--amber-100)] text-[color:var(--navy-900)]" },
+  review_complete: { label: "Review Complete", cls: "bg-[color:var(--color-warning-100)] text-[color:var(--navy-900)]" },
   sent_to_audit: { label: "Sent to Audit", cls: "bg-[color:var(--navy-900)] text-white" },
 };
 
@@ -624,7 +624,7 @@ function MonthlyAuditFolders({ orgId }: { orgId?: string }) {
     <Card className="bg-card/60 backdrop-blur border-[color:var(--border-light)]">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <FolderArchive className="h-4 w-4 text-[color:var(--amber-600)]" />
+          <FolderArchive className="h-4 w-4 text-[color:var(--color-warning-600)]" />
           Monthly Billing Support Documents
         </CardTitle>
         <p className="text-xs text-muted-foreground">
@@ -884,7 +884,7 @@ function AuditFileDialog({
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FolderArchive className="h-5 w-5 text-[color:var(--amber-600)]" />
+            <FolderArchive className="h-5 w-5 text-[color:var(--color-warning-600)]" />
             {file ? `Audit folder — ${format(new Date(file.period_month), "MMMM yyyy")}` : "Audit folder"}
           </DialogTitle>
         </DialogHeader>
@@ -1002,7 +1002,7 @@ export function AuditZone() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <FolderArchive className="h-6 w-6 text-[color:var(--amber-600)]" />
+        <FolderArchive className="h-6 w-6 text-[color:var(--color-warning-600)]" />
         <div>
           <h1 className="text-2xl font-semibold">Audit Zone</h1>
           <p className="text-sm text-muted-foreground">

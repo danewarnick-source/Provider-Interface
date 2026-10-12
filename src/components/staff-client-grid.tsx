@@ -143,10 +143,10 @@ function ClientDetail({
                 className={[
                   "min-h-[44px] rounded-lg border px-3 py-1.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   active
-                    ? "border-[color:var(--amber-600,var(--hive-gold))] bg-[image:var(--gradient-amber)] text-[color:var(--navy-900,var(--hive-text))] shadow-sm"
+                    ? "border-[color:var(--color-warning-600,var(--hive-accent))] bg-[image:var(--gradient-amber)] text-[color:var(--navy-900,var(--hive-text))] shadow-sm"
                     : locked
                       ? "border-border bg-muted/40 text-muted-foreground opacity-60"
-                      : "border-border bg-background text-foreground hover:border-[color:var(--amber-600,var(--hive-gold))]/60",
+                      : "border-border bg-background text-foreground hover:border-[color:var(--color-warning-600,var(--hive-accent))]/60",
                 ].join(" ")}
               >
                 <span className="block font-mono text-sm font-semibold leading-tight">{code}</span>
@@ -164,10 +164,10 @@ function ClientDetail({
                   className={[
                     "mt-1 inline-block rounded-full px-1.5 py-[1px] text-[9px] font-semibold uppercase tracking-wide",
                     isEvvLockedCode(code)
-                      ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                      ? "bg-success-500/15 text-success-700 dark:text-success-300"
                       : isDailyServiceCode(code)
-                        ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
-                        : "bg-slate-500/15 text-slate-600 dark:text-slate-300",
+                        ? "bg-warning-500/15 text-warning-700 dark:text-warning-300"
+                        : "bg-haze-500/15 text-haze-600 dark:text-haze-300",
                   ].join(" ")}
                   title={
                     isEvvLockedCode(code)
@@ -200,7 +200,7 @@ function ClientDetail({
             .filter((t) => t.setupStatus === "published")
             .map((t) =>
               t.completionStatus === "completed" ? (
-                <div key={t.type} className="flex items-center gap-2 text-xs text-emerald-700">
+                <div key={t.type} className="flex items-center gap-2 text-xs text-success-700">
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   <span className="font-medium">{t.label}</span>
                   <span className="text-muted-foreground">· Completed</span>
@@ -209,7 +209,7 @@ function ClientDetail({
                 <Link
                   key={t.type}
                   to="/dashboard/my-obligations"
-                  className="flex items-center gap-2 rounded-md border border-amber-300/60 bg-amber-500/5 px-2 py-1.5 text-xs font-semibold text-amber-800 transition hover:border-amber-400"
+                  className="flex items-center gap-2 rounded-md border border-warning-300/60 bg-warning-500/5 px-2 py-1.5 text-xs font-semibold text-warning-800 transition hover:border-warning-400"
                 >
                   <GraduationCap className="h-3.5 w-3.5" />
                   <span>Review required · {t.label}</span>
@@ -329,7 +329,7 @@ function ClientRow({
         isOnTheClock
           ? "border-[#15a06a] ring-1 ring-[#15a06a]/40"
           : todayShift
-            ? "border-[color:var(--amber-600,var(--hive-gold))]/70 ring-1 ring-[color:var(--amber-600,var(--hive-gold))]/30"
+            ? "border-[color:var(--color-warning-600,var(--hive-accent))]/70 ring-1 ring-[color:var(--color-warning-600,var(--hive-accent))]/30"
             : "border-border",
       ].join(" ")}
     >
@@ -363,7 +363,7 @@ function ClientRow({
                 On clock · {elapsed}
               </span>
             ) : todayShift ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-[color:var(--amber-600,var(--hive-gold))]/15 px-2 py-0.5 text-[10px] font-semibold text-[color:var(--amber-700,var(--hive-gold))]">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[color:var(--color-warning-600,var(--hive-accent))]/15 px-2 py-0.5 text-[10px] font-semibold text-[color:var(--color-warning-700,var(--hive-accent))]">
                 <CalendarCheck2 className="h-3 w-3" />
                 Scheduled · {fmtTime(todayShift.starts_at)}–{fmtTime(todayShift.ends_at)}
                 {todayShift.job_code ? ` · ${todayShift.job_code}` : ""}
@@ -374,7 +374,7 @@ function ClientRow({
               </span>
             )}
             {hasTrainingDue && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+              <span className="inline-flex items-center gap-1 rounded-full bg-warning-500/15 px-2 py-0.5 text-[10px] font-semibold text-warning-800">
                 <GraduationCap className="h-3 w-3" />
                 Training due
               </span>
@@ -394,7 +394,7 @@ function ClientRow({
               role="button"
               aria-label={`Quick info for ${fullName}`}
               onClick={(e) => e.stopPropagation()}
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:border-[color:var(--amber-600,var(--hive-gold))]/60 hover:text-[color:var(--amber-700,var(--hive-gold))]"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:border-[color:var(--color-warning-600,var(--hive-accent))]/60 hover:text-[color:var(--color-warning-700,var(--hive-accent))]"
             >
               <Info className="h-4 w-4" />
             </span>

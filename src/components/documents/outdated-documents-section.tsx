@@ -94,7 +94,7 @@ export function OutdatedDocumentsSection({
                         {d.document_type.replace(/_/g, " ")}
                       </Badge>
                     )}
-                    <Badge variant="outline" className="text-[10px] uppercase text-amber-700 dark:text-amber-300">
+                    <Badge variant="outline" className="text-[10px] uppercase text-warning-700 dark:text-warning-300">
                       outdated
                     </Badge>
                   </div>

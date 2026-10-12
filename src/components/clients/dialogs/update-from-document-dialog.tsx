@@ -172,8 +172,8 @@ export function UpdateFromDocumentDialog({
 
         {reason ? (
           <div className="space-y-3">
-            <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+            <div className="flex items-start gap-2 rounded-md border border-warning-200 bg-warning-50 p-3 text-sm">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning-600" />
               <div>{reason}</div>
             </div>
             <DialogFooter className="gap-2">

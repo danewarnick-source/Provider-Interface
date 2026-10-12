@@ -36,11 +36,11 @@ export const Route = createFileRoute("/dashboard/summaries")({
 
 function statusBadge(s: ProgressSummaryRow["status"]) {
   const map: Record<ProgressSummaryRow["status"], { label: string; cls: string }> = {
-    pending: { label: "Pending", cls: "bg-slate-200 text-slate-800" },
-    draft: { label: "Drafted by Nectar", cls: "bg-blue-100 text-blue-800" },
-    in_review: { label: "In review", cls: "bg-amber-100 text-amber-800" },
-    finalized: { label: "Finalized", cls: "bg-green-100 text-green-800" },
-    no_source: { label: "No documentation", cls: "bg-red-100 text-red-800" },
+    pending: { label: "Pending", cls: "bg-haze-200 text-haze-800" },
+    draft: { label: "Drafted by Nectar", cls: "bg-denim-100 text-denim-800" },
+    in_review: { label: "In review", cls: "bg-warning-100 text-warning-800" },
+    finalized: { label: "Finalized", cls: "bg-success-100 text-success-800" },
+    no_source: { label: "No documentation", cls: "bg-danger-100 text-danger-800" },
   };
   const { label, cls } = map[s];
   return <Badge className={cls}>{label}</Badge>;
@@ -295,11 +295,11 @@ function ClientList({
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {c.overdueCount > 0 ? (
-              <Badge className="bg-red-100 text-red-800">{c.overdueCount} overdue</Badge>
+              <Badge className="bg-danger-100 text-danger-800">{c.overdueCount} overdue</Badge>
             ) : c.openCount > 0 ? (
-              <Badge className="bg-amber-100 text-amber-900">{c.openCount} open</Badge>
+              <Badge className="bg-warning-100 text-warning-900">{c.openCount} open</Badge>
             ) : c.nextDue ? (
-              <Badge className="bg-green-100 text-green-800">On track</Badge>
+              <Badge className="bg-success-100 text-success-800">On track</Badge>
             ) : (
               <Badge variant="outline" className="text-muted-foreground">No active codes</Badge>
             )}
@@ -419,12 +419,12 @@ function PeriodSection({
                       Not yet due — draft anytime
                     </Badge>
                   )}
-                  {tone === "overdue" && <Badge className="bg-red-100 text-red-800">Overdue</Badge>}
+                  {tone === "overdue" && <Badge className="bg-danger-100 text-danger-800">Overdue</Badge>}
                   {r.status === "finalized" && filing === "upi" && !r.upi_entered_at && (
-                    <Badge className="bg-amber-100 text-amber-900">Awaiting UPI</Badge>
+                    <Badge className="bg-warning-100 text-warning-900">Awaiting UPI</Badge>
                   )}
                   {r.status === "finalized" && filing === "support_coordinator" && !r.sc_sent_at && (
-                    <Badge className="bg-amber-100 text-amber-900">Awaiting SC send</Badge>
+                    <Badge className="bg-warning-100 text-warning-900">Awaiting SC send</Badge>
                   )}
                 </div>
                 <div className="text-xs text-muted-foreground mt-0.5">

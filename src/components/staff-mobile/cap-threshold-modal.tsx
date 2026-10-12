@@ -138,7 +138,7 @@ export function CapThresholdModal() {
       aria-labelledby="cap-modal-title"
       className="absolute inset-0 z-50 flex items-end justify-center bg-black/60 px-3 pb-3 pt-6 backdrop-blur-sm"
     >
-      <div className="w-full max-w-sm rounded-2xl border border-[var(--hive-gold)]/40 bg-white shadow-xl">
+      <div className="w-full max-w-sm rounded-2xl border border-[var(--hive-accent)]/40 bg-white shadow-xl">
         <div className="flex items-start gap-3 border-b border-border px-4 py-3">
           <span
             className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${

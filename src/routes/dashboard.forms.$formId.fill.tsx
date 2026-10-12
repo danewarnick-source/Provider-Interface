@@ -89,7 +89,7 @@ function ObligationBanner({ instanceId }: { instanceId: string }) {
   });
   if (!data?.obligation || !data.instance) return null;
   return (
-    <div className="flex items-start gap-2 rounded-lg border border-amber-300/60 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-200">
+    <div className="flex items-start gap-2 rounded-lg border border-warning-300/60 bg-warning-500/10 p-3 text-sm text-warning-900 dark:text-warning-200">
       <ClipboardList className="mt-0.5 h-4 w-4 shrink-0" />
       <span>
         Completing this form satisfies your obligation: <strong>{data.obligation.title}</strong> — {data.instance.period_key}.

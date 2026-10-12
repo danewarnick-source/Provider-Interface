@@ -112,7 +112,7 @@ export function PbaAuditRow({
       ) : sample.status === "verified" ? (
         <Badge
           variant="outline"
-          className="border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
+          className="border-success-500/40 text-success-700 dark:text-success-300"
         >
           Verified {sample.verified_at ? new Date(sample.verified_at).toLocaleDateString() : ""}
         </Badge>
@@ -120,7 +120,7 @@ export function PbaAuditRow({
         <>
           <Badge
             variant="outline"
-            className="border-amber-500/40 text-amber-700 dark:text-amber-300"
+            className="border-warning-500/40 text-warning-700 dark:text-warning-300"
           >
             Picked — needs independent verification
           </Badge>

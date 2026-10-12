@@ -245,11 +245,11 @@ function ReportCard({ report }: { report: NectarFinReport }) {
             <span className="inline-flex items-center gap-1">
               {report.any_declined ? (
                 <>
-                  <ShieldAlert className="h-3 w-3 text-amber-600" /> partial access
+                  <ShieldAlert className="h-3 w-3 text-warning-600" /> partial access
                 </>
               ) : (
                 <>
-                  <ShieldCheck className="h-3 w-3 text-emerald-600" /> full access (requested sources)
+                  <ShieldCheck className="h-3 w-3 text-success-600" /> full access (requested sources)
                 </>
               )}
             </span>
@@ -269,18 +269,18 @@ function ReportCard({ report }: { report: NectarFinReport }) {
       <section className="pre text-sm whitespace-pre-wrap leading-relaxed">{report.answer}</section>
 
       {declined.length > 0 && (
-        <section className="rounded-md border border-amber-300/40 bg-amber-50 dark:bg-amber-950/30 p-3 text-xs space-y-1">
-          <div className="flex items-center gap-2 font-semibold text-amber-700 dark:text-amber-300">
+        <section className="rounded-md border border-warning-300/40 bg-warning-50 dark:bg-warning-950/30 p-3 text-xs space-y-1">
+          <div className="flex items-center gap-2 font-semibold text-warning-700 dark:text-warning-300">
             <AlertTriangle className="h-3.5 w-3.5" /> Declined sources (you do not have access)
           </div>
           <div className="flex flex-wrap gap-1.5">
             {declined.map((s) => (
-              <Badge key={s.source} variant="outline" className="border-amber-400 text-amber-700 dark:text-amber-300">
+              <Badge key={s.source} variant="outline" className="border-warning-400 text-warning-700 dark:text-warning-300">
                 {labelFor(s.source)}
               </Badge>
             ))}
           </div>
-          <p className="italic text-amber-700/80 dark:text-amber-300/80">
+          <p className="italic text-warning-700/80 dark:text-warning-300/80">
             NECTAR did not include any figures from these sources in its answer.
           </p>
         </section>

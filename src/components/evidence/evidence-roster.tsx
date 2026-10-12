@@ -144,7 +144,7 @@ function PersonAccordion({
           <span
             className={`grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full border bg-[var(--hive-muted-surface)] text-[11px] font-bold text-[var(--hive-text)] ${
               expanded
-                ? "border-[var(--hive-gold)] shadow-[0_0_0_1px_var(--hive-gold)]"
+                ? "border-[var(--hive-accent)] shadow-[0_0_0_1px_var(--hive-accent)]"
                 : "border-[var(--hive-border)]"
             }`}
           >

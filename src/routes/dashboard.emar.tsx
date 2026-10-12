@@ -272,15 +272,15 @@ function EmarPage() {
             const h = headers[clientId];
             return (
               <section key={clientId} className="space-y-2">
-                <Card className="border-l-4 border-l-rose-500 p-3">
+                <Card className="border-l-4 border-l-danger-500 p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="text-sm font-semibold">{h?.name ?? "Person"}</div>
                     <div className="flex flex-wrap items-center gap-1.5">
                       {(h?.allergies ?? []).length === 0 ? (
-                        <Badge className="bg-emerald-100 text-emerald-800 text-[10px] hover:bg-emerald-100">No known allergies</Badge>
+                        <Badge className="bg-success-100 text-success-800 text-[10px] hover:bg-success-100">No known allergies</Badge>
                       ) : (
                         (h?.allergies ?? []).map((a) => (
-                          <span key={a} className="inline-flex items-center gap-1 rounded-md border border-rose-300 bg-rose-50 px-2 py-0.5 text-[11px] font-medium text-rose-900">
+                          <span key={a} className="inline-flex items-center gap-1 rounded-md border border-danger-300 bg-danger-50 px-2 py-0.5 text-[11px] font-medium text-danger-900">
                             <AlertCircle className="h-3 w-3" /> {a}
                           </span>
                         ))
@@ -288,7 +288,7 @@ function EmarPage() {
                     </div>
                   </div>
                   {(h?.dysphagia || (h?.swallowing_alerts ?? []).length > 0) && (
-                    <div className="mt-2 flex items-start gap-1.5 rounded-md border border-amber-300 bg-amber-50 p-1.5 text-[11px] text-amber-900">
+                    <div className="mt-2 flex items-start gap-1.5 rounded-md border border-warning-300 bg-warning-50 p-1.5 text-[11px] text-warning-900">
                       <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                       <div>
                         {h?.dysphagia && <div>Dysphagia on file — confirm upright posture; verify crushed-med policy.</div>}
@@ -308,7 +308,7 @@ function EmarPage() {
                           <div>
                             <div className="text-sm font-medium flex items-center gap-1.5">
                               {r.medication_name}
-                              {r.is_rescue && <Badge className="bg-rose-500 text-white text-[9px]">Rescue</Badge>}
+                              {r.is_rescue && <Badge className="bg-danger-500 text-white text-[9px]">Rescue</Badge>}
                               {r.controlled_schedule && <Badge variant="outline" className="text-[9px]">CII–CV</Badge>}
                             </div>
                             <div className="text-xs text-muted-foreground">
@@ -317,7 +317,7 @@ function EmarPage() {
                           </div>
                         </div>
                         {done ? (
-                          <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">
+                          <Badge className="bg-success-100 text-success-800 hover:bg-success-100">
                             <CheckCircle2 className="mr-1 h-3 w-3" /> Logged
                           </Badge>
                         ) : (
@@ -449,7 +449,7 @@ function PassDialog({
                 onChange={(e) => setActualTime(e.target.value)}
               />
               {lateEntry && (
-                <p className="text-[11px] text-amber-700 dark:text-amber-400">
+                <p className="text-[11px] text-warning-700 dark:text-warning-400">
                   ⚠️ Late entry — {gapMinutes} min gap will be flagged on the audit trail.
                 </p>
               )}
@@ -461,7 +461,7 @@ function PassDialog({
               <div className="grid gap-2">
                 <Label>Reason *</Label>
                 <Select value={reason} onValueChange={setReason}>
-                  <SelectTrigger className={reasonRequired ? "border-rose-400" : ""}>
+                  <SelectTrigger className={reasonRequired ? "border-danger-400" : ""}>
                     <SelectValue placeholder="Select a reason" />
                   </SelectTrigger>
                   <SelectContent>
@@ -474,9 +474,9 @@ function PassDialog({
                 <Textarea
                   rows={4} value={notes} onChange={(e) => setNotes(e.target.value)}
                   placeholder="Describe what happened, the Person's affect, attempts made, and any follow-up."
-                  className={notesRequired ? "border-rose-400" : ""}
+                  className={notesRequired ? "border-danger-400" : ""}
                 />
-                {notesRequired && <p className="text-xs text-rose-600">Required — min 10 characters.</p>}
+                {notesRequired && <p className="text-xs text-danger-600">Required — min 10 characters.</p>}
               </div>
             </>
           )}

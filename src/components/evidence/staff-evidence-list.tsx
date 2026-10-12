@@ -113,8 +113,8 @@ export function StaffEvidenceList() {
                   <EvidenceStatusGlyph status={status} />
                 </div>
                 {status === "sent_back" && file?.review_note ? (
-                  <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
-                    <p className="text-xs font-semibold text-amber-900">Sent back — please fix</p>
+                  <div className="mt-3 rounded-xl border border-warning-200 bg-warning-50 px-3 py-2">
+                    <p className="text-xs font-semibold text-warning-900">Sent back — please fix</p>
                     <p className="mt-1 whitespace-pre-wrap text-sm">{file.review_note}</p>
                   </div>
                 ) : status === "awaiting_review" ? (

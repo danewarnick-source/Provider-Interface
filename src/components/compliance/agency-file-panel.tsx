@@ -40,7 +40,7 @@ export function AgencyFilePanel({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-[var(--hive-gold)]/30 bg-gradient-to-br from-[#fff7ed] via-white to-white p-5 shadow-[var(--shadow-card)]">
+      <div className="rounded-2xl border border-[var(--hive-accent)]/30 bg-gradient-to-br from-[#fff7ed] via-white to-white p-5 shadow-[var(--shadow-card)]">
         <h1 className="font-display text-xl font-bold tracking-tight text-[var(--hive-text)]">
           Agency file
         </h1>

@@ -86,7 +86,7 @@ export function NectarDocumentActionsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--amber-700,#b45309)]">
+          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--color-warning-700,#b45309)]">
             <Sparkles className="h-3.5 w-3.5" /> NECTAR
           </div>
           <DialogTitle className="text-base">
@@ -100,14 +100,14 @@ export function NectarDocumentActionsDialog({
               <Loader2 className="h-4 w-4 animate-spin" /> Detecting document type…
             </div>
           ) : offer.error ? (
-            <p className="text-sm text-rose-700">
+            <p className="text-sm text-danger-700">
               Couldn't read this document right now. You can still find it in your
               documents list.
             </p>
           ) : offer.data ? (
             <>
               <div className="flex items-start gap-2 rounded-xl border border-border/60 bg-muted/30 p-3 text-xs text-muted-foreground">
-                <PiMark variant="gold" className="mt-0.5 h-4 w-4 shrink-0" />
+                <PiMark variant="brand" className="mt-0.5 h-4 w-4 shrink-0" />
                 <div className="space-y-1">
                   <div className="text-foreground">{offer.data.prompt}</div>
                   <div className="flex items-center gap-2">
@@ -136,13 +136,13 @@ export function NectarDocumentActionsDialog({
                         type="button"
                         disabled={run.isPending}
                         onClick={() => run.mutate(a.handler)}
-                        className="flex w-full flex-col items-start gap-1 rounded-xl border border-border/60 bg-card p-3 text-left text-sm transition hover:border-[color:var(--amber-400,var(--hive-gold))] hover:bg-[color:var(--amber-50,#fffbeb)] disabled:cursor-not-allowed disabled:opacity-60"
+                        className="flex w-full flex-col items-start gap-1 rounded-xl border border-border/60 bg-card p-3 text-left text-sm transition hover:border-[color:var(--color-warning-400,var(--hive-accent))] hover:bg-[color:var(--color-warning-50,#fffbeb)] disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         <span className="flex items-center gap-2 font-medium">
                           {busyKey === a.handler && run.isPending ? (
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
                           ) : (
-                            <Sparkles className="h-3.5 w-3.5 text-[color:var(--amber-600,#d97706)]" />
+                            <Sparkles className="h-3.5 w-3.5 text-[color:var(--color-warning-600,#d97706)]" />
                           )}
                           {a.label}
                         </span>

@@ -93,31 +93,31 @@ const CATEGORY_LABEL: Record<Category, string> = {
 };
 
 const SEVERITY_STYLE: Record<Severity, string> = {
-  low: "bg-slate-100 text-slate-700 border-slate-200",
-  medium: "bg-amber-50 text-amber-800 border-amber-200",
-  high: "bg-orange-100 text-orange-800 border-orange-300",
-  critical: "bg-red-100 text-red-800 border-red-300",
+  low: "bg-haze-100 text-haze-700 border-haze-200",
+  medium: "bg-warning-50 text-warning-800 border-warning-200",
+  high: "bg-warning-100 text-warning-800 border-warning-300",
+  critical: "bg-danger-100 text-danger-800 border-danger-300",
 };
 
 const STATUS_STYLE: Record<Status, string> = {
   new: "bg-[#fff7ed] text-[#9a3412] border-[#fed7aa]",
-  in_progress: "bg-blue-50 text-blue-800 border-blue-200",
-  resolved: "bg-emerald-50 text-emerald-800 border-emerald-200",
+  in_progress: "bg-denim-50 text-denim-800 border-denim-200",
+  resolved: "bg-success-50 text-success-800 border-success-200",
 };
 
 const RISK_STYLE: Record<Risk, string> = {
-  low: "bg-emerald-50 text-emerald-800 border-emerald-200",
-  medium: "bg-amber-50 text-amber-800 border-amber-200",
-  high: "bg-red-100 text-red-800 border-red-300",
+  low: "bg-success-50 text-success-800 border-success-200",
+  medium: "bg-warning-50 text-warning-800 border-warning-200",
+  high: "bg-danger-100 text-danger-800 border-danger-300",
 };
 
 const RES_STATE_STYLE: Record<ResolutionState, string> = {
   drafted: "bg-[#fff7ed] text-[#9a3412] border-[#fed7aa]",
-  approved: "bg-blue-50 text-blue-800 border-blue-200",
-  rejected: "bg-slate-100 text-slate-700 border-slate-200",
-  applied: "bg-emerald-50 text-emerald-800 border-emerald-200",
-  queued_for_impl: "bg-indigo-50 text-indigo-800 border-indigo-200",
-  verified: "bg-emerald-100 text-emerald-900 border-emerald-300",
+  approved: "bg-denim-50 text-denim-800 border-denim-200",
+  rejected: "bg-haze-100 text-haze-700 border-haze-200",
+  applied: "bg-success-50 text-success-800 border-success-200",
+  queued_for_impl: "bg-denim-50 text-denim-800 border-denim-200",
+  verified: "bg-success-100 text-success-900 border-success-300",
 };
 
 const RES_STATE_LABEL: Record<ResolutionState, string> = {
@@ -314,7 +314,7 @@ function HiveNectarPage() {
       <section className="rounded-xl border border-[#fed7aa] bg-gradient-to-r from-[#fff7ed] to-[#ffedd5] p-4 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hive-gold)] text-white">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hive-accent)] text-white">
               <PiMark className="h-5 w-5" />
             </span>
             <div>
@@ -352,17 +352,17 @@ function HiveNectarPage() {
             </div>
             <div className="text-[#9a3412]/80">New</div>
           </div>
-          <div className="rounded-lg border border-blue-200 bg-white/70 p-2">
-            <div className="font-display text-lg font-bold text-blue-800">
+          <div className="rounded-lg border border-denim-200 bg-white/70 p-2">
+            <div className="font-display text-lg font-bold text-denim-800">
               {counts.in_progress}
             </div>
-            <div className="text-blue-800/80">In progress</div>
+            <div className="text-denim-800/80">In progress</div>
           </div>
-          <div className="rounded-lg border border-emerald-200 bg-white/70 p-2">
-            <div className="font-display text-lg font-bold text-emerald-800">
+          <div className="rounded-lg border border-success-200 bg-white/70 p-2">
+            <div className="font-display text-lg font-bold text-success-800">
               {counts.resolved}
             </div>
-            <div className="text-emerald-800/80">Resolved</div>
+            <div className="text-success-800/80">Resolved</div>
           </div>
         </div>
       </section>
@@ -615,7 +615,7 @@ function TicketCard({
   const state: ResolutionState = (o.resolution.state ?? "drafted") as ResolutionState;
 
   const cardClass = isArch
-    ? "rounded-xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50/40 to-white p-4 shadow-sm transition-colors hover:border-indigo-300"
+    ? "rounded-xl border-2 border-denim-200 bg-gradient-to-br from-denim-50/40 to-white p-4 shadow-sm transition-colors hover:border-denim-300"
     : "rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-[#fed7aa]";
 
   return (
@@ -674,7 +674,7 @@ function TicketCard({
         <div
           className={`mt-3 rounded-lg border p-3 ${
             isArch
-              ? "border-indigo-200 bg-indigo-50/60"
+              ? "border-denim-200 bg-denim-50/60"
               : "border-[#fed7aa] bg-[#fff7ed]/70"
           }`}
         >
@@ -685,8 +685,8 @@ function TicketCard({
             <span
               className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${
                 isArch
-                  ? "border-indigo-300 bg-white text-indigo-800"
-                  : "border-emerald-300 bg-white text-emerald-800"
+                  ? "border-denim-300 bg-white text-denim-800"
+                  : "border-success-300 bg-white text-success-800"
               }`}
             >
               {isArch ? <Layers className="h-3 w-3" /> : <Wrench className="h-3 w-3" />}
@@ -755,7 +755,7 @@ function TicketCard({
           </dl>
 
           {isArch && state === "drafted" && (
-            <div className="mt-2 flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-900">
+            <div className="mt-2 flex items-start gap-2 rounded-md border border-danger-200 bg-danger-50 p-2 text-xs text-danger-900">
               <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               <span>
                 <strong>Affects requirements engine — all companies.</strong>{" "}
@@ -766,7 +766,7 @@ function TicketCard({
           )}
 
           {o.resolution.verification && (
-            <div className="mt-2 flex items-start gap-2 rounded-md border border-emerald-200 bg-emerald-50 p-2 text-xs text-emerald-900">
+            <div className="mt-2 flex items-start gap-2 rounded-md border border-success-200 bg-success-50 p-2 text-xs text-success-900">
               <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               <span>
                 <strong>NECTAR verification:</strong> {o.resolution.verification}
@@ -780,7 +780,7 @@ function TicketCard({
                 <>
                   <button
                     onClick={onApprove}
-                    className="inline-flex min-h-[40px] items-center gap-1 rounded-md bg-emerald-700 px-3 text-xs font-semibold text-white hover:bg-emerald-800"
+                    className="inline-flex min-h-[40px] items-center gap-1 rounded-md bg-success-700 px-3 text-xs font-semibold text-white hover:bg-success-800"
                   >
                     <Check className="h-3.5 w-3.5" /> Approve
                   </button>
@@ -792,7 +792,7 @@ function TicketCard({
                   </button>
                   <button
                     onClick={onReject}
-                    className="inline-flex min-h-[40px] items-center gap-1 rounded-md border border-border bg-background px-3 text-xs font-medium text-red-700 hover:bg-red-50"
+                    className="inline-flex min-h-[40px] items-center gap-1 rounded-md border border-border bg-background px-3 text-xs font-medium text-danger-700 hover:bg-danger-50"
                   >
                     <X className="h-3.5 w-3.5" /> Reject
                   </button>
@@ -809,13 +809,13 @@ function TicketCard({
               {state === "applied" && (
                 <button
                   onClick={onVerify}
-                  className="inline-flex min-h-[40px] items-center gap-1 rounded-md bg-emerald-700 px-3 text-xs font-semibold text-white hover:bg-emerald-800"
+                  className="inline-flex min-h-[40px] items-center gap-1 rounded-md bg-success-700 px-3 text-xs font-semibold text-white hover:bg-success-800"
                 >
                   <CheckCircle2 className="h-3.5 w-3.5" /> Run NECTAR verification
                 </button>
               )}
               {state === "queued_for_impl" && (
-                <span className="inline-flex items-center gap-1 rounded-md border border-indigo-200 bg-white px-3 py-2 text-xs font-medium text-indigo-800">
+                <span className="inline-flex items-center gap-1 rounded-md border border-denim-200 bg-white px-3 py-2 text-xs font-medium text-denim-800">
                   <ClipboardList className="h-3.5 w-3.5" />
                   Routed to deliberate implementation track — draft plan attached
                 </span>

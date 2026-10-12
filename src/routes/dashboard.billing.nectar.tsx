@@ -58,7 +58,7 @@ function NectarPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-xl border border-[var(--hive-gold)]/30 bg-card p-4 shadow-sm">
+      <section className="rounded-xl border border-[var(--hive-accent)]/30 bg-card p-4 shadow-sm">
         <div className="mb-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <NectarBadge size="sm" />
@@ -293,7 +293,7 @@ function ReportBuilder() {
   }
 
   return (
-    <section className="rounded-xl border border-[var(--hive-gold)]/30 bg-card p-4 shadow-sm">
+    <section className="rounded-xl border border-[var(--hive-accent)]/30 bg-card p-4 shadow-sm">
       <div className="mb-3 flex items-center gap-3">
         <NectarMark size="sm" />
         <div className="flex flex-1 items-center gap-2">
@@ -481,7 +481,7 @@ function SavedReportsSection({ onRunPrompt }: { onRunPrompt: (p: string) => void
   return (
     <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
       <div className="mb-3 flex items-center gap-2">
-        <Pin className="h-4 w-4 text-[var(--hive-gold)]" />
+        <Pin className="h-4 w-4 text-[var(--hive-accent-text)]" />
         <h2 className="font-display text-lg font-semibold">Saved reports</h2>
         <span className="text-xs text-muted-foreground">
           Pin one-tap re-runs and schedule recurring delivery
@@ -501,7 +501,7 @@ function SavedReportsSection({ onRunPrompt }: { onRunPrompt: (p: string) => void
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <div className="flex items-center gap-1 text-sm font-semibold text-[var(--hive-text)]">
-                    {r.pinned && <Pin className="h-3 w-3 text-[var(--hive-gold)]" />}
+                    {r.pinned && <Pin className="h-3 w-3 text-[var(--hive-accent-text)]" />}
                     <span className="truncate">{r.name}</span>
                   </div>
                   <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{r.prompt}</p>

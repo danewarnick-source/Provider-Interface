@@ -76,7 +76,7 @@ function CompaniesPage() {
         <Link
           key={cls.id}
           to="/dashboard/hive-exec/classes"
-          className="flex items-start justify-between gap-3 rounded-xl border-2 border-[var(--hive-gold)] bg-gradient-to-r from-[#fff7ed] to-[#ffedd5] p-4 shadow-sm"
+          className="flex items-start justify-between gap-3 rounded-xl border-2 border-[var(--hive-accent)] bg-gradient-to-r from-[#fff7ed] to-[#ffedd5] p-4 shadow-sm"
         >
           <div>
             <div className="font-display text-base font-bold text-[var(--hive-text)]">
@@ -95,10 +95,10 @@ function CompaniesPage() {
       {pendingCount > 0 && (
         <Link
           to="/dashboard/hive-exec/upgrade-requests"
-          className="group flex items-center justify-between gap-3 rounded-xl border-2 border-[var(--hive-gold)] bg-gradient-to-r from-[#fff7ed] to-[#ffedd5] p-4 shadow-sm transition-all hover:shadow-md"
+          className="group flex items-center justify-between gap-3 rounded-xl border-2 border-[var(--hive-accent)] bg-gradient-to-r from-[#fff7ed] to-[#ffedd5] p-4 shadow-sm transition-all hover:shadow-md"
         >
           <div className="flex items-center gap-3">
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--hive-gold)] text-white shadow-sm">
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--hive-accent)] text-white shadow-sm">
               <Sparkles className="h-5 w-5" />
             </span>
             <div>
@@ -267,12 +267,12 @@ function PlanBadge({ plan }: { plan: string }) {
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    active: "bg-emerald-100 text-emerald-700",
-    past_due: "bg-amber-100 text-amber-700",
-    locked: "bg-red-100 text-red-700",
-    cancelled: "bg-gray-100 text-gray-600",
-    canceled: "bg-gray-100 text-gray-600",
-    inactive: "bg-slate-100 text-slate-600",
+    active: "bg-success-100 text-success-700",
+    past_due: "bg-warning-100 text-warning-700",
+    locked: "bg-danger-100 text-danger-700",
+    cancelled: "bg-haze-100 text-haze-600",
+    canceled: "bg-haze-100 text-haze-600",
+    inactive: "bg-haze-100 text-haze-600",
   };
   return (
     <span className={`rounded px-2 py-0.5 text-xs ${map[status] ?? "bg-muted"}`}>
@@ -283,9 +283,9 @@ function StatusBadge({ status }: { status: string }) {
 
 function HealthDot({ health }: { health: "good" | "warn" | "risk" }) {
   const map = {
-    good: { dot: "bg-emerald-500", label: "Good" },
-    warn: { dot: "bg-amber-500", label: "Watch" },
-    risk: { dot: "bg-red-500", label: "Risk" },
+    good: { dot: "bg-success-500", label: "Good" },
+    warn: { dot: "bg-warning-500", label: "Watch" },
+    risk: { dot: "bg-danger-500", label: "Risk" },
   }[health];
   return (
     <span className="inline-flex items-center gap-1.5 text-xs">

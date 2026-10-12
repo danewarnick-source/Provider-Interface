@@ -55,7 +55,7 @@ function HiveExecsSection() {
   return (
     <section className="rounded-xl border border-[#fed7aa] bg-card p-4 shadow-sm">
       <div className="mb-3 flex items-center gap-2">
-        <ShieldCheck className="h-4 w-4 text-[var(--hive-gold)]" />
+        <ShieldCheck className="h-4 w-4 text-[var(--hive-accent-text)]" />
         <h2 className="font-display text-lg font-semibold">PI Executive Role</h2>
       </div>
       <p className="mb-3 text-xs text-muted-foreground">
@@ -94,7 +94,7 @@ function HiveExecsSection() {
         <button
           type="submit"
           disabled={grant.isPending || !email.trim()}
-          className="inline-flex min-h-[44px] items-center justify-center gap-1 rounded-md bg-[var(--hive-gold)] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#b8631a] disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center justify-center gap-1 rounded-md bg-[var(--hive-accent)] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#b8631a] disabled:opacity-50"
         >
           <Plus className="h-4 w-4" /> Grant
         </button>
@@ -124,9 +124,9 @@ function HiveExecsSection() {
                 </td>
                 <td className="px-3 py-2">
                   {r.active ? (
-                    <span className="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">Active</span>
+                    <span className="rounded bg-success-100 px-2 py-0.5 text-xs font-medium text-success-700">Active</span>
                   ) : (
-                    <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">Revoked</span>
+                    <span className="rounded bg-haze-100 px-2 py-0.5 text-xs font-medium text-haze-600">Revoked</span>
                   )}
                 </td>
                 <td className="px-3 py-2 text-xs text-muted-foreground">
@@ -280,8 +280,8 @@ function MembersSection() {
                     onClick={() => upd.mutate({ membershipId: m.membership_id, patch: { active: !m.active } })}
                     className={`rounded px-2 py-0.5 text-xs font-medium ${
                       m.active
-                        ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                        : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+                        ? "bg-success-100 text-success-700 hover:bg-success-200"
+                        : "bg-haze-200 text-haze-700 hover:bg-haze-300"
                     }`}
                   >
                     {m.active ? "Active" : "Inactive"}

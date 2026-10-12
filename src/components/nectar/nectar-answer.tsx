@@ -15,7 +15,7 @@ export function NectarAnswer({ text }: { text: string }) {
         components={{
           p: ({ children }) => <p className="mb-1.5 last:mb-0">{children}</p>,
           ul: ({ children }) => (
-            <ul className="my-1.5 list-disc space-y-1 pl-5 marker:text-[var(--hive-gold)]">{children}</ul>
+            <ul className="my-1.5 list-disc space-y-1 pl-5 marker:text-[var(--hive-accent-text)]">{children}</ul>
           ),
           ol: ({ children }) => (
             <ol className="my-1.5 list-decimal space-y-1 pl-5">{children}</ol>
@@ -28,7 +28,7 @@ export function NectarAnswer({ text }: { text: string }) {
             <em className="not-italic text-xs text-muted-foreground">{children}</em>
           ),
           a: ({ children, href }) => (
-            <a href={href} className="text-[var(--hive-gold)] underline underline-offset-2 hover:text-[#b8651a]">
+            <a href={href} className="text-[var(--hive-accent-text)] underline underline-offset-2 hover:text-[#b8651a]">
               {children}
             </a>
           ),

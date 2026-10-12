@@ -244,7 +244,7 @@ export function ReferralsPage() {
                               stage={(r.stage ?? "new") as ReferralStage}
                             />
                             {r.source === "email" && (
-                              <Badge className="bg-amber-100 text-[10px] text-amber-900 hover:bg-amber-100">
+                              <Badge className="bg-warning-100 text-[10px] text-warning-900 hover:bg-warning-100">
                                 Auto-ingested — review
                               </Badge>
                             )}
@@ -1023,8 +1023,8 @@ function NewReferralDialog({ organizationId }: { organizationId: string }) {
 
           {duplicates && duplicates.length > 0 && (
             <div className="md:col-span-2">
-              <Alert variant="default" className="border-amber-400 bg-amber-50">
-                <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <Alert variant="default" className="border-warning-400 bg-warning-50">
+                <AlertTriangle className="h-4 w-4 text-warning-600" />
                 <AlertTitle>Possible duplicate</AlertTitle>
                 <AlertDescription>
                   {duplicates.length} similar referral

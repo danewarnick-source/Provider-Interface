@@ -185,7 +185,7 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
           <Button onClick={() => pcspReady ? draftMut.mutate(false) : setShowPcspPrompt(true)} disabled={draftMut.isPending}>
             {draftMut.isPending
               ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-              : <Sparkles className="mr-1.5 h-3.5 w-3.5 text-amber-500" />}
+              : <Sparkles className="mr-1.5 h-3.5 w-3.5 text-warning-500" />}
             Build from PCSP goals with Nectar
           </Button>
           <Button variant="outline" onClick={() => pcspReady ? blankMut.mutate() : setShowPcspPrompt(true)} disabled={blankMut.isPending}>
@@ -261,12 +261,12 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
       </div>
 
       {!pcspReady && (
-        <div className="rounded-md border border-amber-300/60 bg-amber-50/60 px-3 py-2 text-xs text-amber-900">
+        <div className="rounded-md border border-warning-300/60 bg-warning-50/60 px-3 py-2 text-xs text-warning-900">
           Upload a PCSP to get started — this training is built from the PCSP. Publishing and editing are disabled until a PCSP is on file (add it from the client's Client file).
         </div>
       )}
 
-      <div className="rounded-md border border-amber-300/60 bg-amber-50/60 px-3 py-2 text-xs text-amber-900 flex gap-2">
+      <div className="rounded-md border border-warning-300/60 bg-warning-50/60 px-3 py-2 text-xs text-warning-900 flex gap-2">
         <Shield className="h-4 w-4 shrink-0 mt-0.5" />
         <span>
           NECTAR <strong>presents this client's own documented data verbatim</strong>. It does not write care techniques, interventions, or how-to.

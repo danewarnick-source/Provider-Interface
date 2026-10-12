@@ -15,14 +15,14 @@ export function NectarCompletenessErrors({
   return (
     <div
       role="alert"
-      className="space-y-2 rounded-md border border-rose-500/40 bg-rose-500/10 px-3 py-2.5"
+      className="space-y-2 rounded-md border border-danger-500/40 bg-danger-500/10 px-3 py-2.5"
     >
-      <p className="text-xs font-semibold text-rose-800 dark:text-rose-200">
+      <p className="text-xs font-semibold text-danger-800 dark:text-danger-200">
         NECTAR completeness check — fix these, then tap Submit again
       </p>
       <ul className="space-y-1.5">
         {failed.map((item) => (
-          <li key={item.key} className="text-xs leading-relaxed text-rose-800 dark:text-rose-200">
+          <li key={item.key} className="text-xs leading-relaxed text-danger-800 dark:text-danger-200">
             <span className="font-semibold">{COMPLETENESS_LABELS[item.key]}.</span>{" "}
             {item.message}
           </li>

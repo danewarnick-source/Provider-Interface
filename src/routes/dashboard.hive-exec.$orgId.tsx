@@ -189,7 +189,7 @@ function CompanyDetailPage() {
             {d?.billing_sms_phone ? (
               <span className="font-mono text-foreground">{d.billing_sms_phone}</span>
             ) : (
-              <span className="text-amber-600">none on file</span>
+              <span className="text-warning-600">none on file</span>
             )}
           </span>
         </div>
@@ -318,7 +318,7 @@ function CompanyDetailPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
           <div className="w-full max-w-lg rounded-xl border border-border bg-card p-5 shadow-xl">
             <div className="mb-3 flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-600" />
+              <AlertTriangle className="h-5 w-5 text-warning-600" />
               <h3 className="font-display text-lg font-semibold">Confirm identifying-info change</h3>
             </div>
             <p className="mb-3 text-sm text-muted-foreground">
@@ -454,12 +454,12 @@ function CompanyDetailPage() {
                 <span className="text-foreground">{fmtMoney(d.subscription.mrr_cents)}</span> MRR (live)
               </div>
               {d.subscription.past_due_since ? (
-                <div className="mt-1 text-amber-700">
+                <div className="mt-1 text-warning-700">
                   Past due since {new Date(d.subscription.past_due_since).toLocaleDateString()}
                 </div>
               ) : null}
               {d.subscription.locked_at ? (
-                <div className="mt-1 text-red-700">
+                <div className="mt-1 text-danger-700">
                   Locked at {new Date(d.subscription.locked_at).toLocaleString()}
                 </div>
               ) : null}
@@ -468,7 +468,7 @@ function CompanyDetailPage() {
             <div className="mt-3 text-xs text-muted-foreground">No subscription on file yet.</div>
           )}
 
-          <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3">
+          <div className="mt-4 rounded-md border border-warning-200 bg-warning-50 p-3">
             <label className="flex items-start gap-2 text-sm">
               <input
                 type="checkbox"
@@ -611,10 +611,10 @@ function ReadOnly({ label, value, mono }: { label: string; value: string | numbe
 
 function StatusPill({ status }: { status: string }) {
   const map: Record<string, string> = {
-    active: "bg-emerald-100 text-emerald-700",
-    past_due: "bg-amber-100 text-amber-700",
-    locked: "bg-red-100 text-red-700",
-    cancelled: "bg-gray-100 text-gray-600",
+    active: "bg-success-100 text-success-700",
+    past_due: "bg-warning-100 text-warning-700",
+    locked: "bg-danger-100 text-danger-700",
+    cancelled: "bg-haze-100 text-haze-600",
   };
   return (
     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${map[status] ?? "bg-muted"}`}>

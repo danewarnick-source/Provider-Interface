@@ -290,7 +290,7 @@ function LoginPage() {
   };
 
   const fieldClass =
-    "flex h-12 w-full rounded-md border border-[var(--hive-border)] bg-[var(--hive-surface)] px-3 py-2 text-base text-[var(--hive-text)] outline-none placeholder:text-[var(--hive-text-muted)] focus:border-[var(--hive-gold)] focus:ring-2 focus:ring-[var(--hive-gold)]/30";
+    "flex h-12 w-full rounded-md border border-[var(--hive-border)] bg-[var(--hive-surface)] px-3 py-2 text-base text-[var(--hive-text)] outline-none placeholder:text-[var(--hive-text-muted)] focus:border-[var(--hive-accent)] focus:ring-2 focus:ring-[var(--hive-accent)]/30";
 
   return (
     <AuthFrame>

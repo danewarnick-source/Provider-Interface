@@ -252,7 +252,7 @@ function BillingLockedPage() {
           <div
             role="alert"
             data-testid="checkout-confirm-error"
-            className="mt-6 w-full rounded-lg border border-red-400/30 bg-red-500/10 px-4 py-3 text-left text-sm text-red-200"
+            className="mt-6 w-full rounded-lg border border-danger-400/30 bg-danger-500/10 px-4 py-3 text-left text-sm text-danger-200"
           >
             {state.confirmError}
           </div>
@@ -275,7 +275,7 @@ function BillingLockedPage() {
         ) : state.isAdmin ? (
           <div className="mt-8 w-full space-y-3 text-left">
             {!state.paymentsConfigured && (
-              <div className="rounded-lg border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+              <div className="rounded-lg border border-danger-400/30 bg-danger-500/10 px-4 py-3 text-sm text-danger-200">
                 {state.paymentsMessage ??
                   "Payments are not set up yet. An Exec needs to add the Stripe test keys."}
               </div>

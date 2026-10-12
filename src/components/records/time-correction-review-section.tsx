@@ -137,11 +137,11 @@ export function TimeCorrectionReviewSection({ organizationId }: { organizationId
   if (rows.length === 0) return null;
 
   return (
-    <section className="rounded-xl border-l-4 border-l-amber-500 border border-border bg-card p-4 shadow-sm">
+    <section className="rounded-xl border-l-4 border-l-warning-500 border border-border bg-card p-4 shadow-sm">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div>
           <h3 className="flex items-center gap-2 text-sm font-semibold text-[var(--hive-text)]">
-            <Clock className="h-4 w-4 text-amber-600" /> Time-correction requests
+            <Clock className="h-4 w-4 text-warning-600" /> Time-correction requests
           </h3>
           <p className="mt-0.5 text-[11px] text-muted-foreground">
             Staff-submitted corrections awaiting your decision. Approving makes the corrected times the official billable times; denying returns the shift with your note so the caregiver can resubmit.
@@ -191,11 +191,11 @@ function TimeCorrectionCard({
           </p>
         </div>
         <div className="flex flex-wrap gap-1.5">
-          <Badge className="bg-amber-100 text-[10px] text-amber-800 dark:bg-amber-500/15 dark:text-amber-200">
+          <Badge className="bg-warning-100 text-[10px] text-warning-800 dark:bg-warning-500/15 dark:text-warning-200">
             Time correction requested
           </Badge>
           {row.incident_flag && (
-            <Badge className="bg-rose-100 text-[10px] text-rose-800 dark:bg-rose-500/15 dark:text-rose-200">
+            <Badge className="bg-danger-100 text-[10px] text-danger-800 dark:bg-danger-500/15 dark:text-danger-200">
               <Flag className="mr-1 h-3 w-3" /> Incident flagged
             </Badge>
           )}
@@ -208,12 +208,12 @@ function TimeCorrectionCard({
           <p className="mt-1 font-mono text-xs">In: {fmtTs(row.clock_in_timestamp)}</p>
           <p className="font-mono text-xs">Out: {fmtTs(row.clock_out_timestamp)}</p>
         </div>
-        <div className="rounded-lg border border-amber-400/50 bg-amber-50/40 p-2.5 dark:bg-amber-500/5">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">Caregiver requested</p>
+        <div className="rounded-lg border border-warning-400/50 bg-warning-50/40 p-2.5 dark:bg-warning-500/5">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-warning-700 dark:text-warning-300">Caregiver requested</p>
           <p className="mt-1 font-mono text-xs">In: {fmtTs(row.corrected_clock_in)}</p>
           <p className="font-mono text-xs">Out: {fmtTs(row.corrected_clock_out)}</p>
           {variance !== null && (
-            <p className="mt-1 text-[11px] font-medium text-amber-700 dark:text-amber-300">
+            <p className="mt-1 text-[11px] font-medium text-warning-700 dark:text-warning-300">
               Variance: {variance >= 0 ? "+" : ""}{variance} min
             </p>
           )}

@@ -260,7 +260,7 @@ export function StaffObligationsFilesTab({
   return (
     <div className="space-y-4" data-testid="team-member-file">
       {awaiting > 0 ? (
-        <p className="text-sm text-sky-800">
+        <p className="text-sm text-denim-800">
           {awaiting} upload{awaiting === 1 ? "" : "s"} awaiting review.
         </p>
       ) : null}
@@ -315,7 +315,7 @@ export function StaffObligationsFilesTab({
                         </p>
                       ) : null}
                       {status === "sent_back" && file ? (
-                        <p className="mt-1 max-w-xs text-xs text-amber-900">
+                        <p className="mt-1 max-w-xs text-xs text-warning-900">
                           Sent back by {nameOf(file.reviewed_by)}
                           {file.reviewed_at ? ` on ${formatStamp(file.reviewed_at)}` : ""}
                           {file.review_note ? `: ${file.review_note}` : ""}

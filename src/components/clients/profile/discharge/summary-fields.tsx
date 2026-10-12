@@ -42,7 +42,7 @@ export function SummaryFields({
         ) : null}
       </div>
       {value.draftedByNectar ? (
-        <p className="rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-xs text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+        <p className="rounded-md border border-warning-300 bg-warning-50 px-2 py-1 text-xs text-warning-900 dark:border-warning-500/40 dark:bg-warning-500/10 dark:text-warning-200">
           Nectar's draft, from what is on file. Read it, fix anything wrong, then confirm.
         </p>
       ) : null}

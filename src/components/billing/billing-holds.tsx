@@ -29,8 +29,8 @@ const BILLING_LABEL: Record<BillingEligibilityStatus, string> = {
 
 function chipClass(ok: boolean): string {
   return ok
-    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200"
-    : "border-rose-400/50 bg-rose-500/10 text-rose-800 dark:text-rose-200";
+    ? "border-success-500/40 bg-success-500/10 text-success-800 dark:text-success-200"
+    : "border-danger-400/50 bg-danger-500/10 text-danger-800 dark:text-danger-200";
 }
 
 export function EntryReadinessChips({ result }: { result: EntryReadiness }) {
@@ -58,7 +58,7 @@ export function BillingHoldsList({
 }) {
   if (holds.length === 0) {
     return (
-      <p className="flex items-center gap-1.5 text-sm text-emerald-700 dark:text-emerald-300">
+      <p className="flex items-center gap-1.5 text-sm text-success-700 dark:text-success-300">
         <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
         {emptyLabel}
       </p>
@@ -69,12 +69,12 @@ export function BillingHoldsList({
       {holds.map((h, i) => (
         <li
           key={`${h.kind}-${h.gap}-${i}`}
-          className="rounded-md border border-rose-300/40 bg-rose-500/[0.04] px-3 py-2"
+          className="rounded-md border border-danger-300/40 bg-danger-500/[0.04] px-3 py-2"
         >
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="flex items-start gap-1.5 text-sm font-medium text-foreground">
-                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-rose-700" />
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-danger-700" />
                 {h.reason}
               </p>
               <p className="mt-0.5 pl-5 text-xs text-muted-foreground">

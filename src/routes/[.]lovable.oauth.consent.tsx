@@ -77,7 +77,7 @@ function Consent() {
         anytime from your account settings.
       </p>
       {error && (
-        <p role="alert" className="mt-4 rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+        <p role="alert" className="mt-4 rounded-md border border-danger-300 bg-danger-50 p-3 text-sm text-danger-800">
           {error}
         </p>
       )}

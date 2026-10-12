@@ -459,14 +459,14 @@ export function EvvArchivePage() {
                   <td className="px-3 py-2">
                     {fmtTs(inTs)} → {fmtTs(outTs)}
                     {r.is_edited_by_admin && (
-                      <span className="ml-1 text-[10px] font-medium uppercase tracking-wider text-amber-700">edited</span>
+                      <span className="ml-1 text-[10px] font-medium uppercase tracking-wider text-warning-700">edited</span>
                     )}
                   </td>
                   <td className="px-3 py-2 tabular-nums">{fmtDur(r.duration_min)}</td>
                   <td className="px-3 py-2">
                     <div className="flex flex-wrap items-center gap-1">
                       {r.is_out_of_bounds ? (
-                        <span className="inline-flex items-center gap-1 text-xs text-amber-700">
+                        <span className="inline-flex items-center gap-1 text-xs text-warning-700">
                           <AlertTriangle className="h-3 w-3" /> out
                         </span>
                       ) : (
@@ -544,13 +544,13 @@ function FilterLabel({ label, children }: { label: string; children: React.React
 function BillingBadge({ value }: { value: "billed" | "unbilled" | "held" }) {
   if (value === "billed")
     return (
-      <Badge className="gap-1 bg-emerald-100 text-emerald-800 hover:bg-emerald-100">
+      <Badge className="gap-1 bg-success-100 text-success-800 hover:bg-success-100">
         <CheckCircle2 className="h-3 w-3" /> Billed
       </Badge>
     );
   if (value === "held")
     return (
-      <Badge variant="outline" className="gap-1 border-amber-300 text-amber-800">
+      <Badge variant="outline" className="gap-1 border-warning-300 text-warning-800">
         <AlertTriangle className="h-3 w-3" /> Held
       </Badge>
     );

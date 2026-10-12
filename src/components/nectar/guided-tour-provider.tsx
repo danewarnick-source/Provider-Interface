@@ -183,7 +183,7 @@ function TourOverlay({
       {/* Amber spotlight ring */}
       {rect && (
         <div
-          className="pointer-events-none absolute rounded-[10px] ring-2 ring-[var(--hive-gold)] shadow-[0_0_0_4px_rgba(217,122,28,0.25)] transition-all duration-200"
+          className="pointer-events-none absolute rounded-[10px] ring-2 ring-[var(--hive-accent)] shadow-[0_0_0_4px_rgba(217,122,28,0.25)] transition-all duration-200"
           style={{ top: rect.top - 8, left: rect.left - 8, width: rect.width + 16, height: rect.height + 16 }}
         />
       )}
@@ -240,7 +240,7 @@ function TourOverlay({
           </div>
           <button
             onClick={onAdvance}
-            className="inline-flex min-h-[36px] items-center gap-1 rounded-md bg-[var(--hive-gold)] px-3 py-1 text-xs font-semibold text-white shadow hover:bg-[#b8651a]"
+            className="inline-flex min-h-[36px] items-center gap-1 rounded-md bg-[var(--hive-accent)] px-3 py-1 text-xs font-semibold text-white shadow hover:bg-[#b8651a]"
           >
             {tour.stepIndex + 1 === total ? "Finish" : "Next"} <ChevronRight className="h-3 w-3" />
           </button>

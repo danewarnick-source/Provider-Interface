@@ -719,7 +719,7 @@ function DashboardLayout() {
           {isCognitoAuth() && (orgError || awsDbFailed) && (
             <div
               data-testid="cognito-bootstrap-error"
-              className="shrink-0 border-b border-amber-300/60 bg-amber-50 px-4 py-2 text-center text-xs text-amber-950 md:px-6"
+              className="shrink-0 border-b border-warning-300/60 bg-warning-50 px-4 py-2 text-center text-xs text-warning-950 md:px-6"
             >
               {awsDbErrorMessage ||
                 (orgQueryError instanceof Error ? orgQueryError.message : null) ||
@@ -851,7 +851,7 @@ function DashboardLayout() {
                     className="hive-chrome-btn h-10 px-3 text-xs font-semibold"
                     title="Open Nectar"
                   >
-                    <PiMark variant="gold" className="h-3.5 w-3.5" />
+                    <PiMark variant="brand" className="h-3.5 w-3.5" />
                     <span className="hidden md:inline">Nectar</span>
                   </button>
                   {isAdminCapable && effectiveView === "admin" && <DraftJobsHeaderPill />}
@@ -888,7 +888,7 @@ function DashboardLayout() {
               {!isHiveExecView && !isStatePreview && <DemoOrgBanner />}
 
               {isStatePreview && (
-                <div className="flex items-center justify-between gap-3 border-b border-[var(--hive-gold)]/30 bg-[var(--hive-gold)]/[0.08] px-4 py-2 text-xs md:px-6">
+                <div className="flex items-center justify-between gap-3 border-b border-[var(--hive-accent)]/30 bg-[var(--hive-accent)]/[0.08] px-4 py-2 text-xs md:px-6">
                   <div className="flex items-center gap-2 text-[#9a3412]">
                     <MapPin className="h-3.5 w-3.5" />
                     <span className="font-semibold uppercase tracking-wider">
@@ -904,7 +904,7 @@ function DashboardLayout() {
                     <Link
                       to="/dashboard/hive-exec/states/$stateCode"
                       params={{ stateCode: currentPreviewState.code }}
-                      className="hidden md:inline-flex items-center gap-1 rounded-md border border-[var(--hive-gold)]/40 bg-white/60 px-2 py-0.5 text-[11px] font-medium text-[#9a3412] hover:bg-white"
+                      className="hidden md:inline-flex items-center gap-1 rounded-md border border-[var(--hive-accent)]/40 bg-white/60 px-2 py-0.5 text-[11px] font-medium text-[#9a3412] hover:bg-white"
                     >
                       Edit template
                     </Link>
@@ -928,8 +928,8 @@ function DashboardLayout() {
                     Select a state from the sidebar to load the platform configured as that state.
                   </div>
                 ) : isComingSoonPreview ? (
-                  <div className="mx-auto max-w-xl rounded-lg border border-dashed border-[var(--hive-gold)]/40 bg-[var(--hive-gold)]/[0.06] p-10 text-center">
-                    <MapPin className="mx-auto h-8 w-8 text-[var(--hive-gold)]" />
+                  <div className="mx-auto max-w-xl rounded-lg border border-dashed border-[var(--hive-accent)]/40 bg-[var(--hive-accent)]/[0.06] p-10 text-center">
+                    <MapPin className="mx-auto h-8 w-8 text-[var(--hive-accent-text)]" />
                     <h2 className="mt-3 text-lg font-semibold tracking-tight">
                       Coming soon for {currentPreviewState?.name}
                     </h2>
@@ -941,7 +941,7 @@ function DashboardLayout() {
                       <Link
                         to="/dashboard/hive-exec/states/$stateCode"
                         params={{ stateCode: currentPreviewState.code }}
-                        className="mt-4 inline-flex items-center gap-1 rounded-md border border-[var(--hive-gold)]/40 bg-white px-3 py-1.5 text-xs font-medium text-[#9a3412] hover:bg-[var(--hive-gold)]/10"
+                        className="mt-4 inline-flex items-center gap-1 rounded-md border border-[var(--hive-accent)]/40 bg-white px-3 py-1.5 text-xs font-medium text-[#9a3412] hover:bg-[var(--hive-accent)]/10"
                       >
                         Build {currentPreviewState.name} template
                       </Link>
@@ -983,7 +983,7 @@ function CompanyClientsBridge({
   return (
     <button
       type="button"
-      className="mt-3 flex w-full items-center justify-center gap-2 rounded-md border border-[var(--hive-gold)]/40 bg-[var(--hive-gold)]/10 px-3 py-2 text-xs font-semibold text-[var(--hive-gold)] hover:bg-[var(--hive-gold)]/20"
+      className="mt-3 flex w-full items-center justify-center gap-2 rounded-md border border-[var(--hive-accent)]/40 bg-[var(--hive-accent)]/10 px-3 py-2 text-xs font-semibold text-[var(--hive-accent-text)] hover:bg-[var(--hive-accent)]/20"
       onClick={() => {
         // Switch to company Admin portal and open Clients — hive-exec
         // nav intentionally excludes PHI; this is the explicit bridge.
@@ -1132,7 +1132,7 @@ function SidebarBody({
           )}
 
           {isStatePreview && (
-            <div className="mt-3 space-y-2 rounded-md border border-[var(--hive-gold)]/30 bg-[var(--hive-gold)]/[0.06] p-2">
+            <div className="mt-3 space-y-2 rounded-md border border-[var(--hive-accent)]/30 bg-[var(--hive-accent)]/[0.06] p-2">
               <label className="block text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/70">
                 State
               </label>
@@ -1172,7 +1172,7 @@ function SidebarBody({
                   onClick={() => setSubView("admin")}
                   className={`flex-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
                     subView === "admin"
-                      ? "bg-[var(--hive-gold)] text-white"
+                      ? "bg-[var(--hive-accent)] text-white"
                       : "bg-sidebar text-sidebar-foreground/70 hover:bg-sidebar-accent"
                   }`}
                 >
@@ -1183,7 +1183,7 @@ function SidebarBody({
                   onClick={() => setSubView("staff")}
                   className={`flex-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
                     subView === "staff"
-                      ? "bg-[var(--hive-gold)] text-white"
+                      ? "bg-[var(--hive-accent)] text-white"
                       : "bg-sidebar text-sidebar-foreground/70 hover:bg-sidebar-accent"
                   }`}
                 >
@@ -1194,7 +1194,7 @@ function SidebarBody({
                 <Link
                   to="/dashboard/hive-exec/states/$stateCode"
                   params={{ stateCode: currentPreviewState.code }}
-                  className="block rounded-md border border-[var(--hive-gold)]/30 bg-sidebar px-2 py-1 text-center text-[11px] font-medium text-[var(--hive-gold)] hover:bg-[var(--hive-gold)]/10"
+                  className="block rounded-md border border-[var(--hive-accent)]/30 bg-sidebar px-2 py-1 text-center text-[11px] font-medium text-[var(--hive-accent-text)] hover:bg-[var(--hive-accent)]/10"
                 >
                   Edit {currentPreviewState.name} template
                 </Link>
@@ -1256,7 +1256,7 @@ function SidebarBody({
                             </span>
                             {badgeCount > 0 && (
                               <span
-                                className={`inline-flex min-w-[20px] items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold ${active ? "bg-white text-[var(--hive-text)]" : "bg-[var(--hive-gold)] text-white"}`}
+                                className={`inline-flex min-w-[20px] items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold ${active ? "bg-white text-[var(--hive-text)]" : "bg-[var(--hive-accent)] text-white"}`}
                               >
                                 {badgeCount}
                               </span>

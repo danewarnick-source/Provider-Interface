@@ -148,7 +148,7 @@ function ComplianceSetupPage() {
       {search.reason === "setup_incomplete" ? (
         <div
           data-testid="setup-redirect-reason"
-          className="rounded-xl border border-amber-300/50 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+          className="rounded-xl border border-warning-300/50 bg-warning-50 px-4 py-3 text-sm text-warning-950"
         >
           Staff and client screens stay closed until required operating questions are answered.
           Skip is disabled at {status.progressLabel}.

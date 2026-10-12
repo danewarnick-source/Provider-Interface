@@ -29,5 +29,5 @@
 }
 
 .home-tab[aria-selected="true"] {
-  border-bottom-color: var(--hive-gold);
+  border-bottom-color: var(--hive-accent);
 }

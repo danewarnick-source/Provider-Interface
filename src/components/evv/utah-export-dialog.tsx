@@ -495,13 +495,13 @@ export function UtahExportDialog({ open, onClose, organizationId, staffNameMap }
               <li className="text-muted-foreground">{outOfBounds.length} excluded · out-of-bounds without an accepted reason</li>
               <li className="text-muted-foreground">{noClockOut.length} excluded · no clock-out yet</li>
               {notReviewed.length > 0 && (
-                <li className="text-amber-600">{notReviewed.length} excluded · not yet confirmed/reviewed</li>
+                <li className="text-warning-600">{notReviewed.length} excluded · not yet confirmed/reviewed</li>
               )}
               {addressBlankCount > 0 && (
-                <li className="text-amber-600">{addressBlankCount} row{addressBlankCount === 1 ? "" : "s"} with blank address — city/state/zip will be empty (state may flag)</li>
+                <li className="text-warning-600">{addressBlankCount} row{addressBlankCount === 1 ? "" : "s"} with blank address — city/state/zip will be empty (state may flag)</li>
               )}
               {gpsAbsentCount > 0 && (
-                <li className="text-amber-600">{gpsAbsentCount} row{gpsAbsentCount === 1 ? "" : "s"} with no GPS — lat/lng will be blank (state may flag)</li>
+                <li className="text-warning-600">{gpsAbsentCount} row{gpsAbsentCount === 1 ? "" : "s"} with no GPS — lat/lng will be blank (state may flag)</li>
               )}
               {gpsBypassedCount > 0 && (
                 <li className="text-[var(--hive-ink)]">{gpsBypassedCount} row{gpsBypassedCount === 1 ? "" : "s"} · GPS bypassed by staff — exporting with the client's on-file address instead of GPS</li>

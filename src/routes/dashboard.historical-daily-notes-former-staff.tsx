@@ -85,7 +85,7 @@ function FormerStaffAttestPage() {
         </p>
       </header>
 
-      <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-xs text-muted-foreground">
+      <div className="rounded-md border border-warning-500/40 bg-warning-500/5 p-3 text-xs text-muted-foreground">
         <Info className="mr-1 inline h-3 w-3" />
         Nothing here creates or edits note content on behalf of a staff member. You are signing off on the
         record as it was imported. If the narrative is empty or wrong and no one remembers what happened,
@@ -93,8 +93,8 @@ function FormerStaffAttestPage() {
       </div>
 
       {rows.length === 0 && (
-        <div className="rounded-2xl border border-emerald-500/40 bg-emerald-500/5 p-6 text-center text-sm">
-          <CheckCircle2 className="mx-auto h-6 w-6 text-emerald-600" />
+        <div className="rounded-2xl border border-success-500/40 bg-success-500/5 p-6 text-center text-sm">
+          <CheckCircle2 className="mx-auto h-6 w-6 text-success-600" />
           <div className="mt-2 font-medium">No former-staff notes waiting for admin attestation.</div>
         </div>
       )}
@@ -112,7 +112,7 @@ function FormerStaffAttestPage() {
                     Former staff id {r.user_id.slice(0, 8)}… (no active platform access)
                   </div>
                 </div>
-                <Badge variant="outline" className="border-amber-500/40 text-amber-700">
+                <Badge variant="outline" className="border-warning-500/40 text-warning-700">
                   <Archive className="mr-1 h-3 w-3" />
                   Historical import
                 </Badge>

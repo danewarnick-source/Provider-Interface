@@ -15,7 +15,7 @@ const OPEN_KEY = "client-overview-attention-open";
 
 const ITEM_TONE: Record<AttentionItem["tone"], string> = {
   bad: "border-[var(--hive-danger)]/30 bg-[var(--hive-danger-soft)]",
-  warn: "border-hive-gold/50 bg-hive-gold-soft",
+  warn: "border-hive-accent/50 bg-hive-accent-soft",
 };
 const ICON: Record<AttentionItem["tone"], string> = {
   bad: "text-[var(--hive-danger-fg)]",

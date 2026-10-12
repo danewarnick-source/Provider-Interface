@@ -153,9 +153,9 @@ export function TotalTile({
 }) {
   const toneClass =
     tone === "positive"
-      ? "text-emerald-700"
+      ? "text-success-700"
       : tone === "danger"
-        ? "text-rose-700"
+        ? "text-danger-700"
         : "text-foreground";
   return (
     <div

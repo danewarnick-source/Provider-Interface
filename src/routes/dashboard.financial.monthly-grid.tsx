@@ -461,7 +461,7 @@ function MonthlyGridPage() {
           <header className="mb-3 flex items-center gap-2">
             <Briefcase className="h-4 w-4 text-muted-foreground" />
             <h3 className="font-display text-base font-semibold">Admin / Training hours</h3>
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-800">
+            <span className="rounded-full bg-warning-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-warning-800">
               Non-billable
             </span>
           </header>

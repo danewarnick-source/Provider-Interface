@@ -152,7 +152,7 @@ function RevenuePage() {
                 Entered by you
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-success-700 dark:text-success-400">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 PI-Verified
               </div>
@@ -379,7 +379,7 @@ function SubtotalBand({
 }) {
   const styles =
     tone === "verified"
-      ? "border-emerald-500/30 bg-emerald-500/[0.06]"
+      ? "border-success-500/30 bg-success-500/[0.06]"
       : tone === "manual"
         ? "border-primary/30 bg-primary/[0.05]"
         : tone === "inputs"
@@ -409,21 +409,21 @@ function SubtotalBand({
 
 function NectarBilledUpsell() {
   return (
-    <div className="relative overflow-hidden rounded-xl border border-[color:var(--amber-400)] bg-gradient-to-br from-[color:var(--amber-50)] to-white p-4">
+    <div className="relative overflow-hidden rounded-xl border border-[color:var(--color-warning-400)] bg-gradient-to-br from-[color:var(--color-warning-50)] to-white p-4">
       <div className="flex items-start gap-3">
         <span
-          className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center text-[color:var(--amber-600)]"
+          className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center text-[color:var(--color-warning-600)]"
           style={{
             clipPath:
               "polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)",
             background:
-              "linear-gradient(135deg, var(--amber-100), var(--amber-200))",
+              "linear-gradient(135deg, var(--color-warning-100), var(--color-warning-200))",
           }}
         >
           <Sparkles className="h-4 w-4" />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--amber-700)]">
+          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--color-warning-700)]">
             <Lock className="h-3 w-3" /> NECTAR Infusion
           </div>
           <p className="mt-1 text-sm font-semibold text-[color:var(--navy-900)]">
@@ -535,7 +535,7 @@ function ManualBilledEditor({
                       {label} {year}
                     </span>
                     {entry?.is_estimate && (
-                      <span className="rounded-full border border-amber-400/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300">
+                      <span className="rounded-full border border-warning-400/40 bg-warning-500/10 px-1.5 py-0.5 text-[10px] font-medium text-warning-700 dark:text-warning-300">
                         Estimate
                       </span>
                     )}
@@ -760,7 +760,7 @@ function RevenueRow({
           {receivedAvailable ? (
             <span className="tabular-nums text-muted-foreground">—</span>
           ) : (
-            <span className="inline-flex items-center rounded-full border border-amber-400/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:text-amber-300">
+            <span className="inline-flex items-center rounded-full border border-warning-400/40 bg-warning-500/10 px-2 py-0.5 text-[11px] font-medium text-warning-700 dark:text-warning-300">
               Pending — not yet imported
             </span>
           )}

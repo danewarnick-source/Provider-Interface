@@ -40,7 +40,7 @@ type Props = {
 };
 
 const STATUS_CLS: Record<string, string> = {
-  active: "bg-[color:var(--amber-100)] text-[color:var(--navy-900)] border-0",
+  active: "bg-[color:var(--color-warning-100)] text-[color:var(--navy-900)] border-0",
   scheduled: "bg-[color:var(--surface-2)] text-foreground border border-[color:var(--border-light)]",
   expired: "bg-muted text-muted-foreground border-0",
   revoked: "bg-destructive/10 text-destructive border border-destructive/30",
@@ -123,7 +123,7 @@ export function AuditorShareManager({ packetId, packetName, organizationId }: Pr
       <div className="flex items-start justify-between gap-2 flex-wrap">
         <div>
           <h3 className="text-sm font-semibold flex items-center gap-2">
-            <Share2 className="h-4 w-4 text-[color:var(--amber-600)]" /> Auditor access
+            <Share2 className="h-4 w-4 text-[color:var(--color-warning-600)]" /> Auditor access
           </h3>
           <p className="text-xs text-muted-foreground">
             Share this audit folder with a state auditor by email and access window. Replaces the old Google Drive folder share — you control exactly what is visible and when.
@@ -205,7 +205,7 @@ export function AuditorShareManager({ packetId, packetName, organizationId }: Pr
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <ShieldAlert className="h-5 w-5 text-[color:var(--amber-600)]" /> Confirm auditor access
+                <ShieldAlert className="h-5 w-5 text-[color:var(--color-warning-600)]" /> Confirm auditor access
               </DialogTitle>
               <DialogDescription>
                 Review carefully before access goes live. Auditors verify their own email login — PI never creates accounts on their behalf.
@@ -219,7 +219,7 @@ export function AuditorShareManager({ packetId, packetName, organizationId }: Pr
                 value={`${format(new Date(confirming.starts_at), "MMM d, yyyy h:mma")} → ${format(new Date(confirming.ends_at), "MMM d, yyyy h:mma")}`}
               />
               <Row label="Files shared" value="All items and attached records-desk files in this folder" />
-              <div className="rounded-md border border-[color:var(--amber-300)] bg-[color:var(--amber-50)] text-xs px-3 py-2 text-foreground">
+              <div className="rounded-md border border-[color:var(--color-warning-300)] bg-[color:var(--color-warning-50)] text-xs px-3 py-2 text-foreground">
                 Privacy reminder: sharing exposes protected client and staff records. Treat this with the same care as your current Drive-based audit workflow.
               </div>
             </div>

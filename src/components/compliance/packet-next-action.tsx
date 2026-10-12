@@ -2,9 +2,9 @@ import { ArrowRight, CircleAlert } from "lucide-react";
 import type { PacketNextAction } from "@/lib/obligations/packet";
 
 function urgencyClass(urgency: PacketNextAction["urgency"]): string {
-  if (urgency === "critical") return "border-rose-300 bg-rose-50 text-rose-950";
-  if (urgency === "high") return "border-amber-300 bg-amber-50 text-amber-950";
-  return "border-[var(--hive-gold)]/40 bg-[#fff7ed] text-[var(--hive-text)]";
+  if (urgency === "critical") return "border-danger-300 bg-danger-50 text-danger-950";
+  if (urgency === "high") return "border-warning-300 bg-warning-50 text-warning-950";
+  return "border-[var(--hive-accent)]/40 bg-[#fff7ed] text-[var(--hive-text)]";
 }
 
 export function PacketNextActionCard({

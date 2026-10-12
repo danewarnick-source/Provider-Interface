@@ -99,7 +99,7 @@ export function CodesCell({ row, viewer, max = 4 }: CellProps & { max?: number }
         <SectionLink
           clientId={row.id}
           section={cell.section}
-          className="rounded-full border border-hive-gold bg-hive-gold-soft px-2 text-hive-ink"
+          className="rounded-full border border-hive-accent bg-hive-accent-soft px-2 text-hive-ink"
         >
           {cell.status} · Renew
         </SectionLink>

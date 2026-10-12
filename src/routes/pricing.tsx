@@ -10,9 +10,6 @@ import {
   PI_SIGN_IN,
 } from "@/lib/pi-landing";
 
-const NEWSREADER =
-  "https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap";
-
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
@@ -21,7 +18,6 @@ export const Route = createFileRoute("/pricing")({
       { property: "og:title", content: PI_PRICING_PAGE_TITLE },
       { property: "og:description", content: PI_PRICING_PAGE_DESCRIPTION },
     ],
-    links: [{ rel: "stylesheet", href: NEWSREADER }],
   }),
   component: PricingPage,
 });

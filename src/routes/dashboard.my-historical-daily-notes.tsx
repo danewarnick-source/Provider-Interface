@@ -57,8 +57,8 @@ export function MyHistoricalDailyNotesPage() {
   if (rows.length === 0) {
     return (
       <div className="mx-auto max-w-2xl p-6">
-        <div className="rounded-2xl border border-emerald-500/40 bg-emerald-500/5 p-6 text-center">
-          <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-600" />
+        <div className="rounded-2xl border border-success-500/40 bg-success-500/5 p-6 text-center">
+          <CheckCircle2 className="mx-auto h-8 w-8 text-success-600" />
           <div className="mt-2 font-semibold">You're all caught up</div>
           <p className="mt-1 text-sm text-muted-foreground">
             You have no historical daily notes waiting for your attestation. When an admin submits historical
@@ -80,7 +80,7 @@ export function MyHistoricalDailyNotesPage() {
             does not sign the rest.
           </p>
         </div>
-        <Badge variant="outline" className="border-amber-500/40 text-amber-700">
+        <Badge variant="outline" className="border-warning-500/40 text-warning-700">
           <Archive className="mr-1 h-3 w-3" />
           Historical import
         </Badge>

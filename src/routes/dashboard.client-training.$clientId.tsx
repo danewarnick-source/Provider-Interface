@@ -218,7 +218,7 @@ function ClientTrainingViewer() {
           <h1 className="mt-0.5 text-base font-semibold leading-snug tracking-tight">{trainingType === "person_centered" ? typeLabel : training.title}</h1>
         </div>
         {alreadyCurrent && (
-          <div className="mt-2 flex items-center gap-1.5 text-xs text-emerald-700">
+          <div className="mt-2 flex items-center gap-1.5 text-xs text-success-700">
             <CheckCircle2 className="h-3.5 w-3.5" />
             <span>Completed {completion?.completed_at ? new Date(completion.completed_at).toLocaleDateString() : ""}</span>
           </div>
@@ -228,8 +228,8 @@ function ClientTrainingViewer() {
       {alreadyCurrent ? (
         <div className="flex-1 min-h-0 overflow-y-auto bg-card px-4 py-10">
           <div className="mx-auto flex max-w-md flex-col items-center text-center space-y-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-              <CheckCircle2 className="h-10 w-10 text-emerald-600" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-success-100">
+              <CheckCircle2 className="h-10 w-10 text-success-600" />
             </div>
             <h2 className="text-xl font-semibold tracking-tight">Training completed</h2>
             <p className="text-sm text-muted-foreground">
@@ -267,7 +267,7 @@ function ClientTrainingViewer() {
             className="flex-1 min-h-0 overflow-y-auto bg-card px-4 py-4 space-y-6"
           >
             {trainingType === "person_centered" && (
-              <div className="rounded-md border-2 border-amber-400 bg-amber-50 px-3 py-3 text-sm text-amber-900 flex gap-2 shadow-sm">
+              <div className="rounded-md border-2 border-warning-400 bg-warning-50 px-3 py-3 text-sm text-warning-900 flex gap-2 shadow-sm">
                 <Users className="h-5 w-5 shrink-0 mt-0.5" />
                 <span>
                   <strong>Complete this profile WITH the person.</strong> These questions should be answered from the individual's own perspective and in their own words wherever possible — like an interview where you ask and they respond. If the person communicates differently or with support, include the perspectives of those who know them best. This is about understanding who they are and how they want to be supported.
@@ -275,7 +275,7 @@ function ClientTrainingViewer() {
               </div>
             )}
 
-            <div className="rounded-md border border-amber-300/60 bg-amber-50/60 px-3 py-2 text-xs text-amber-900 flex gap-2">
+            <div className="rounded-md border border-warning-300/60 bg-warning-50/60 px-3 py-2 text-xs text-warning-900 flex gap-2">
               <Shield className="h-4 w-4 shrink-0 mt-0.5" />
               <span>
                 This content is your agency's published snapshot of this client's documented needs. Review every section carefully -- your typed-name attestation is recorded.
@@ -319,7 +319,7 @@ function ClientTrainingViewer() {
                         onChange={(e) => patchAnswer(idx, { answer: e.target.value, relevant: null, hint: "" })}
                         className={ans?.relevant === false ? "border-destructive" : ""}
                       />
-                      <p className={`text-[11px] ${wordCount(ans?.answer ?? "") >= MIN_WORDS ? "text-emerald-700" : "text-muted-foreground"}`}>
+                      <p className={`text-[11px] ${wordCount(ans?.answer ?? "") >= MIN_WORDS ? "text-success-700" : "text-muted-foreground"}`}>
                         {wordCount(ans?.answer ?? "")}/{MIN_WORDS} words minimum
                       </p>
                       {ans?.checking && (
@@ -329,7 +329,7 @@ function ClientTrainingViewer() {
                         <p className="text-xs text-destructive flex items-center gap-1"><AlertTriangle className="h-3 w-3" />{ans.hint}</p>
                       )}
                       {ans?.relevant === true && ans.answer.trim() && (
-                        <p className="text-xs text-emerald-700 flex items-center gap-1"><CheckCircle2 className="h-3 w-3" />Looks good.</p>
+                        <p className="text-xs text-success-700 flex items-center gap-1"><CheckCircle2 className="h-3 w-3" />Looks good.</p>
                       )}
                     </div>
                   );
@@ -340,17 +340,17 @@ function ClientTrainingViewer() {
 
           <footer className="border-t border-border bg-card px-4 py-3 space-y-2">
             {completion && !pinned && (
-              <p className="text-[11px] text-amber-800">
+              <p className="text-[11px] text-warning-800">
                 You previously completed an earlier version. The training has been updated -- please re-attest.
               </p>
             )}
             {questions.length > 0 && !allAnswered && (
-              <p className="text-[11px] text-amber-800">
+              <p className="text-[11px] text-warning-800">
                 Please answer all review questions (at least 25 words each) before signing.
               </p>
             )}
             {!contentRead && (
-              <p className="text-[11px] text-amber-800">
+              <p className="text-[11px] text-warning-800">
                 Scroll through the full training above before signing.
               </p>
             )}

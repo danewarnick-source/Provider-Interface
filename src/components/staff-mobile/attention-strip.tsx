@@ -114,9 +114,9 @@ export function AttentionStrip() {
         const Icon = c.icon;
         const toneCls =
           c.tone === "danger"
-            ? "border-rose-300/60 bg-rose-500/5 text-rose-700 hover:border-rose-400"
+            ? "border-danger-300/60 bg-danger-500/5 text-danger-700 hover:border-danger-400"
             : c.tone === "warn"
-              ? "border-amber-300/60 bg-amber-500/5 text-amber-800 hover:border-amber-400"
+              ? "border-warning-300/60 bg-warning-500/5 text-warning-800 hover:border-warning-400"
               : "border-primary/30 bg-primary/5 text-primary hover:border-primary/50";
         return (
           <li key={c.key}>

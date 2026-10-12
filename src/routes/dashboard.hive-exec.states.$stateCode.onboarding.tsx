@@ -170,7 +170,7 @@ function OnboardingPage() {
 
       <header className="rounded-xl border border-[#fed7aa] bg-gradient-to-r from-[var(--hive-text)] to-[#1a2a5a] p-4 text-white shadow-sm">
         <div className="flex items-center gap-3">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hive-gold)]">
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hive-accent)]">
             <ClipboardList className="h-5 w-5" />
           </span>
           <div>
@@ -203,7 +203,7 @@ function OnboardingPage() {
               }`}
             >
               <span className="font-mono">{i + 1}</span> {s.title}
-              {flaggedHere ? <Flag className="h-3 w-3 text-[var(--hive-gold)]" /> : null}
+              {flaggedHere ? <Flag className="h-3 w-3 text-[var(--hive-accent-text)]" /> : null}
             </button>
           );
         })}
@@ -273,7 +273,7 @@ function OnboardingPage() {
       {/* Build-needs summary */}
       <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
         <h3 className="flex items-center gap-2 font-display text-base font-semibold">
-          <Wrench className="h-4 w-4 text-[var(--hive-gold)]" />
+          <Wrench className="h-4 w-4 text-[var(--hive-accent-text)]" />
           Flagged build needs ({flags.length})
         </h3>
         <p className="mt-1 text-xs text-muted-foreground">
@@ -355,7 +355,7 @@ function FieldRow({
           onClick={onToggleFlag}
           className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium ${
             flagged
-              ? "border-[var(--hive-gold)] bg-[#fff7ed] text-[#7c2d12]"
+              ? "border-[var(--hive-accent)] bg-[#fff7ed] text-[#7c2d12]"
               : "border-border bg-background text-muted-foreground hover:bg-muted"
           }`}
         >

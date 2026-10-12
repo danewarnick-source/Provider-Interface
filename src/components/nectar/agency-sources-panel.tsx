@@ -136,7 +136,7 @@ export function AgencySourcesPanel({ orgId }: { orgId: string | null | undefined
       </div>
 
       {query.data && !query.data.softReady ? (
-        <div className="rounded-lg border border-amber-300/40 bg-amber-500/5 px-3 py-2 text-[11px] text-amber-900 dark:text-amber-200">
+        <div className="rounded-lg border border-warning-300/40 bg-warning-500/5 px-3 py-2 text-[11px] text-warning-900 dark:text-warning-200">
           Soft columns are not live yet. Relations are computed in the app and
           will persist after Core applies the Step 7 migration (after Step 5).
         </div>

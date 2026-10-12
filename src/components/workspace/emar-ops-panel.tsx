@@ -119,9 +119,9 @@ function RefillsCard({ meds, clientId }: { meds: Med[]; clientId: string }) {
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  {isLow && <Badge className="bg-amber-100 text-amber-900 text-[10px] hover:bg-amber-100"><AlertTriangle className="mr-1 h-3 w-3" />Low</Badge>}
-                  {status === "pending" && <Badge className="bg-blue-100 text-blue-900 text-[10px] hover:bg-blue-100">Refill pending</Badge>}
-                  {status === "ordered" && <Badge className="bg-indigo-100 text-indigo-900 text-[10px] hover:bg-indigo-100">Ordered</Badge>}
+                  {isLow && <Badge className="bg-warning-100 text-warning-900 text-[10px] hover:bg-warning-100"><AlertTriangle className="mr-1 h-3 w-3" />Low</Badge>}
+                  {status === "pending" && <Badge className="bg-denim-100 text-denim-900 text-[10px] hover:bg-denim-100">Refill pending</Badge>}
+                  {status === "ordered" && <Badge className="bg-denim-100 text-denim-900 text-[10px] hover:bg-denim-100">Ordered</Badge>}
                   {status === "ok" && <Badge variant="outline" className="text-[10px]">OK</Badge>}
                   {status === "ok" && (
                     <Button size="sm" variant="outline" className="h-8" disabled={mut.isPending}
@@ -181,7 +181,7 @@ function ShiftCountCard({ meds, clientId }: { meds: Med[]; clientId: string }) {
   return (
     <Card className="p-4">
       <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
-        <ClipboardCheck className="h-4 w-4 text-purple-600" /> Shift-change controlled counts
+        <ClipboardCheck className="h-4 w-4 text-denim-600" /> Shift-change controlled counts
       </div>
       {controlled.length === 0 ? (
         <p className="text-sm text-muted-foreground">No controlled medications on file.</p>
@@ -284,7 +284,7 @@ function TransfersCard({ meds, clientId }: { meds: Med[]; clientId: string }) {
   return (
     <Card className="p-4">
       <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
-        <ArrowRightLeft className="h-4 w-4 text-blue-600" /> Medication transfers
+        <ArrowRightLeft className="h-4 w-4 text-denim-600" /> Medication transfers
         <Button size="sm" className="ml-auto h-8" onClick={() => setOpen(true)} disabled={meds.length === 0}>
           Log transfer
         </Button>

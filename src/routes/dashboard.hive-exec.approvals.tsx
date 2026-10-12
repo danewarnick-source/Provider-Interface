@@ -78,7 +78,7 @@ function ApprovalsPage() {
       {/* Liability banner — critical to keep visible */}
       <section className="rounded-xl border border-[#fed7aa] bg-gradient-to-r from-[#fff7ed] to-[#ffedd5] p-4 shadow-sm">
         <div className="flex items-start gap-3">
-          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--hive-gold)] text-white">
+          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--hive-accent)] text-white">
             <ShieldCheck className="h-5 w-5" />
           </span>
           <div>
@@ -108,7 +108,7 @@ function ApprovalsPage() {
 
       {!isLoading && items.length === 0 && (
         <div className="rounded-xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          <CheckCircle2 className="mx-auto mb-2 h-5 w-5 text-emerald-600" />
+          <CheckCircle2 className="mx-auto mb-2 h-5 w-5 text-success-600" />
           Inbox zero — no NECTAR drafts awaiting your verification.
         </div>
       )}
@@ -190,7 +190,7 @@ function ApprovalCard({
             size="sm"
             onClick={() => setMode("approve")}
             disabled={busy}
-            className="bg-emerald-600 text-white hover:bg-emerald-700"
+            className="bg-success-600 text-white hover:bg-success-700"
           >
             <CheckCircle2 className="mr-1 h-4 w-4" /> Approve extraction
           </Button>
@@ -206,8 +206,8 @@ function ApprovalCard({
       )}
 
       {mode === "approve" && (
-        <div className="mt-3 space-y-2 rounded-lg border border-emerald-200 bg-emerald-50/60 p-3">
-          <p className="text-xs text-emerald-900">
+        <div className="mt-3 space-y-2 rounded-lg border border-success-200 bg-success-50/60 p-3">
+          <p className="text-xs text-success-900">
             Confirming faithful extraction. Optional note (visible in audit log):
           </p>
           <Textarea
@@ -221,7 +221,7 @@ function ApprovalCard({
               size="sm"
               onClick={() => onApprove(note.trim() || undefined)}
               disabled={busy}
-              className="bg-emerald-600 text-white hover:bg-emerald-700"
+              className="bg-success-600 text-white hover:bg-success-700"
             >
               Confirm approval
             </Button>
@@ -233,8 +233,8 @@ function ApprovalCard({
       )}
 
       {mode === "reject" && (
-        <div className="mt-3 space-y-2 rounded-lg border border-amber-300 bg-amber-50/60 p-3">
-          <p className="flex items-center gap-1 text-xs text-amber-900">
+        <div className="mt-3 space-y-2 rounded-lg border border-warning-300 bg-warning-50/60 p-3">
+          <p className="flex items-center gap-1 text-xs text-warning-900">
             <AlertTriangle className="h-3.5 w-3.5" />
             Required: explain what NECTAR got wrong so the next draft can fix it.
           </p>

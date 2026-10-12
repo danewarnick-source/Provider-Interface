@@ -158,7 +158,7 @@ function BankMappingPage() {
       </div>
 
       {/* Mapping grid */}
-      <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-muted-foreground">
+      <div className="rounded-lg border border-warning-500/30 bg-warning-500/5 p-3 text-xs text-muted-foreground">
         Bank connection and deposit sync are coming soon. This area is not yet
         connected to a live bank feed — no transactions will be imported.
       </div>
@@ -213,12 +213,12 @@ function BankMappingPage() {
                       </SelectContent>
                     </Select>
                     {committed && committed === current && (
-                      <Badge variant="outline" className="gap-1 border-emerald-500/40 text-emerald-600">
+                      <Badge variant="outline" className="gap-1 border-success-500/40 text-success-600">
                         <CheckCircle2 className="h-3 w-3" /> Committed
                       </Badge>
                     )}
                     {draft && draft !== committed && (
-                      <Badge variant="outline" className="border-amber-500/40 text-amber-600">Pending</Badge>
+                      <Badge variant="outline" className="border-warning-500/40 text-warning-600">Pending</Badge>
                     )}
                     {client && !draft && !committed && null}
                   </div>
@@ -249,9 +249,9 @@ function Pipeline() {
   return (
     <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
       <div className="mb-3 flex items-center gap-2">
-        <Zap className="h-4 w-4 text-amber-500" />
+        <Zap className="h-4 w-4 text-warning-500" />
         <h3 className="text-base font-semibold">Auto-Ledger Pipeline (Coming Soon)</h3>
-        <Badge variant="outline" className="border-amber-500/40 text-amber-600">Pending</Badge>
+        <Badge variant="outline" className="border-warning-500/40 text-warning-600">Pending</Badge>
       </div>
       <ol className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-3">
         <li className="rounded-lg border border-border/70 bg-muted/20 p-3">
@@ -260,7 +260,7 @@ function Pipeline() {
         </li>
         <li className="rounded-lg border border-border/70 bg-muted/20 p-3">
           <div className="mb-1 text-xs font-medium uppercase tracking-wider text-foreground">2 · Reconcile</div>
-          Matched deposits write a verified <Badge variant="outline" className="px-1.5 py-0 text-[10px]">deposit</Badge> row into the client&apos;s PBA trust ledger with a <span className="font-medium text-amber-600">⚡ Auto-Reconciled via Bank Feed Sync</span> badge.
+          Matched deposits write a verified <Badge variant="outline" className="px-1.5 py-0 text-[10px]">deposit</Badge> row into the client&apos;s PBA trust ledger with a <span className="font-medium text-warning-600">⚡ Auto-Reconciled via Bank Feed Sync</span> badge.
         </li>
         <li className="rounded-lg border border-border/70 bg-muted/20 p-3">
           <div className="mb-1 flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-foreground"><BookOpen className="h-3 w-3" /> 3 · QBO Bridge</div>

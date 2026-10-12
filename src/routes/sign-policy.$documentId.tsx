@@ -262,17 +262,17 @@ function SignPolicyGate() {
       <footer className="border-t border-border bg-card px-4 py-4">
         <div className="mx-auto max-w-3xl space-y-3">
           {!readToBottom && (
-            <p className="text-[11px] text-amber-700 dark:text-amber-300">
+            <p className="text-[11px] text-warning-700 dark:text-warning-300">
               Scroll to the end of the policy above to enable signing.
             </p>
           )}
           <p className="text-[11px] leading-relaxed text-muted-foreground">
             <span className="font-semibold text-foreground">Attestation:</span> {attestationStatement}
           </p>
-          <label className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-2 text-[11px] leading-relaxed dark:bg-amber-950/30 dark:border-amber-800">
+          <label className="flex items-start gap-2 rounded-lg border border-warning-300 bg-warning-50 p-2 text-[11px] leading-relaxed dark:bg-warning-950/30 dark:border-warning-800">
             <Checkbox checked={esignConsent} onCheckedChange={(v) => setEsignConsent(v === true)} className="mt-0.5" />
             <span>
-              <span className="block font-semibold text-amber-900 dark:text-amber-100">
+              <span className="block font-semibold text-warning-900 dark:text-warning-100">
                 Electronic signature consent (ESIGN / Utah UETA)
               </span>
               {ESIGN_CONSENT_STATEMENT}

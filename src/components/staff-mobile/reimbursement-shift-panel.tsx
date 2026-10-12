@@ -27,9 +27,9 @@ interface Props {
 }
 
 const STATUS_META: Record<string, { label: string; tone: string; Icon: typeof ClockIcon }> = {
-  pending:  { label: "Pending admin approval", tone: "bg-amber-100 text-amber-900 border-amber-300", Icon: ClockIcon },
-  approved: { label: "Approved",                tone: "bg-emerald-100 text-emerald-900 border-emerald-300", Icon: CheckCircle2 },
-  denied:   { label: "Denied",                  tone: "bg-rose-100 text-rose-900 border-rose-300", Icon: XCircle },
+  pending:  { label: "Pending admin approval", tone: "bg-warning-100 text-warning-900 border-warning-300", Icon: ClockIcon },
+  approved: { label: "Approved",                tone: "bg-success-100 text-success-900 border-success-300", Icon: CheckCircle2 },
+  denied:   { label: "Denied",                  tone: "bg-danger-100 text-danger-900 border-danger-300", Icon: XCircle },
 };
 
 export function ReimbursementShiftPanel({ shiftId, clientId }: Props) {
@@ -60,7 +60,7 @@ export function ReimbursementShiftPanel({ shiftId, clientId }: Props) {
     >
       <header className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-warning-100 text-warning-800">
             <Receipt className="h-4 w-4" />
           </span>
           <div className="leading-tight">
@@ -73,7 +73,7 @@ export function ReimbursementShiftPanel({ shiftId, clientId }: Props) {
         <Button
           size="sm"
           onClick={() => setOpenNew(true)}
-          className="h-9 gap-1 bg-amber-500 text-white hover:bg-amber-600"
+          className="h-9 gap-1 bg-warning-500 text-white hover:bg-warning-600"
         >
           <Plus className="h-4 w-4" /> Request
         </Button>
@@ -133,7 +133,7 @@ function RequestCard({ req, onChange }: { req: ReimbursementRow; onChange: () =>
       )}
       {needsPaperwork && <PaperworkSection req={req} onSaved={onChange} />}
       {req.status === "approved" && req.summary_submitted_at && (
-        <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700">
+        <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-success-700">
           <CheckCircle2 className="h-3 w-3" /> Paperwork complete · attached to shift record
         </p>
       )}
@@ -221,8 +221,8 @@ function PaperworkSection({ req, onSaved }: { req: ReimbursementRow; onSaved: ()
   }
 
   return (
-    <div className="mt-3 space-y-3 rounded-md border border-amber-300 bg-amber-50/70 p-3">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-900">
+    <div className="mt-3 space-y-3 rounded-md border border-warning-300 bg-warning-50/70 p-3">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-warning-900">
         End-of-shift paperwork required
       </p>
 
@@ -238,7 +238,7 @@ function PaperworkSection({ req, onSaved }: { req: ReimbursementRow; onSaved: ()
               <button
                 type="button"
                 onClick={() => removeReceipt(p)}
-                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded text-rose-600 hover:bg-rose-50"
+                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded text-danger-600 hover:bg-danger-50"
                 aria-label="Remove receipt"
               >
                 <Trash2 className="h-3.5 w-3.5" />
@@ -287,7 +287,7 @@ function PaperworkSection({ req, onSaved }: { req: ReimbursementRow; onSaved: ()
       <Button
         onClick={submitPaperwork}
         disabled={busy}
-        className="h-10 w-full bg-amber-500 text-white hover:bg-amber-600"
+        className="h-10 w-full bg-warning-500 text-white hover:bg-warning-600"
       >
         {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         Attach to shift record
@@ -352,7 +352,7 @@ function NewRequestDialog({
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Receipt className="h-4 w-4 text-amber-600" />
+            <Receipt className="h-4 w-4 text-warning-600" />
             Activity Reimbursement Request
           </DialogTitle>
           <DialogDescription>
@@ -404,7 +404,7 @@ function NewRequestDialog({
           <Button
             onClick={() => submit.mutate()}
             disabled={submit.isPending}
-            className="bg-amber-500 text-white hover:bg-amber-600"
+            className="bg-warning-500 text-white hover:bg-warning-600"
           >
             {submit.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Send for approval

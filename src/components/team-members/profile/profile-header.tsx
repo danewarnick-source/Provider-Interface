@@ -45,8 +45,8 @@ import { isReadyAlone, readyAloneLabel } from "@/lib/team-members/readiness";
 const profileRoute = getRouteApi("/dashboard/team-members/$staffId");
 
 const TONE: Record<BadgeTone, string> = {
-  ok: "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-300",
-  warn: "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300",
+  ok: "border-success-300 bg-success-50 text-success-800 dark:border-success-500/40 dark:bg-success-500/10 dark:text-success-300",
+  warn: "border-warning-300 bg-warning-50 text-warning-800 dark:border-warning-500/40 dark:bg-warning-500/10 dark:text-warning-300",
   bad: "border-destructive/30 bg-destructive/10 text-destructive",
   muted: "border-border bg-muted text-muted-foreground",
 };

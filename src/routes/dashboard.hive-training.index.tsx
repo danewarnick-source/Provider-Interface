@@ -157,8 +157,8 @@ function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {
     not_started: { label: "Not started", cls: "bg-muted text-muted-foreground" },
     in_progress: { label: "In progress", cls: "bg-[#C8881E]/15 text-[#C8881E]" },
-    completed: { label: "Completed", cls: "bg-green-100 text-green-700" },
-    expired: { label: "Expired", cls: "bg-red-100 text-red-700" },
+    completed: { label: "Completed", cls: "bg-success-100 text-success-700" },
+    expired: { label: "Expired", cls: "bg-danger-100 text-danger-700" },
   };
   const cfg = map[status] ?? { label: status, cls: "bg-muted text-muted-foreground" };
   return <Badge className={cfg.cls}>{cfg.label}</Badge>;

@@ -57,11 +57,11 @@ export function AddonLock({
         <PopoverTrigger asChild>
           <button
             type="button"
-            className="absolute inset-0 z-10 flex items-center justify-end gap-2 rounded-md pr-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--amber-500)]"
+            className="absolute inset-0 z-10 flex items-center justify-end gap-2 rounded-md pr-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-warning-500)]"
             aria-label={`${featureName} — upgrade to use`}
           >
-            <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--amber-400)] bg-[color:var(--amber-50)]/95 px-2.5 py-1 text-[11px] font-semibold text-[color:var(--navy-900)] shadow-sm backdrop-blur">
-              <Lock className="h-3 w-3 text-[color:var(--amber-600)]" />
+            <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--color-warning-400)] bg-[color:var(--color-warning-50)]/95 px-2.5 py-1 text-[11px] font-semibold text-[color:var(--navy-900)] shadow-sm backdrop-blur">
+              <Lock className="h-3 w-3 text-[color:var(--color-warning-600)]" />
               Upgrade to use
             </span>
           </button>
@@ -70,21 +70,21 @@ export function AddonLock({
           align="end"
           className="w-80 border-[color:var(--border-light)] bg-white/85 p-0 shadow-xl backdrop-blur-md"
         >
-          <div className="rounded-t-md bg-gradient-to-br from-[color:var(--amber-50)] to-white p-4">
+          <div className="rounded-t-md bg-gradient-to-br from-[color:var(--color-warning-50)] to-white p-4">
             <div className="flex items-center gap-2">
               <span
-                className="inline-flex h-7 w-7 items-center justify-center text-[color:var(--amber-600)]"
+                className="inline-flex h-7 w-7 items-center justify-center text-[color:var(--color-warning-600)]"
                 style={{
                   clipPath:
                     "polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)",
                   background:
-                    "linear-gradient(135deg, var(--amber-100), var(--amber-200))",
+                    "linear-gradient(135deg, var(--color-warning-100), var(--color-warning-200))",
                 }}
               >
                 <Sparkles className="h-3.5 w-3.5" />
               </span>
               <div>
-                <div className="text-xs font-semibold uppercase tracking-wide text-[color:var(--amber-700)]">
+                <div className="text-xs font-semibold uppercase tracking-wide text-[color:var(--color-warning-700)]">
                   {tag}
                 </div>
                 <div className="text-sm font-semibold text-[color:var(--navy-900)]">

@@ -132,7 +132,7 @@ export function ProfileShell<K extends string>({
                       className={cn(
                         "flex min-h-11 w-full items-center gap-2.5 whitespace-nowrap rounded-full border px-2 py-1.5 pr-3.5 text-left text-sm text-hive-ink transition-colors md:rounded-xl md:border-transparent md:pr-2",
                         active
-                          ? "border-hive-gold/50 bg-hive-gold-soft font-semibold"
+                          ? "border-hive-accent/50 bg-hive-accent-soft font-semibold"
                           : "border-hive-border bg-hive-surface hover:bg-[var(--hive-muted-surface)] md:bg-transparent",
                       )}
                     >

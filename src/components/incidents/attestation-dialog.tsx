@@ -58,10 +58,10 @@ export function AttestationDialog({
         <div className="space-y-3 text-sm">
           {intro}
           {children}
-          <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-xs dark:bg-amber-950/30 dark:border-amber-800">
-            <p className="font-semibold text-amber-900 dark:text-amber-100">Attestation</p>
-            <p className="mt-1 whitespace-pre-wrap text-amber-950 dark:text-amber-50">{attestationText}</p>
-            <label className="mt-2 flex items-start gap-2 text-amber-950 dark:text-amber-50">
+          <div className="rounded-md border border-warning-300 bg-warning-50 p-3 text-xs dark:bg-warning-950/30 dark:border-warning-800">
+            <p className="font-semibold text-warning-900 dark:text-warning-100">Attestation</p>
+            <p className="mt-1 whitespace-pre-wrap text-warning-950 dark:text-warning-50">{attestationText}</p>
+            <label className="mt-2 flex items-start gap-2 text-warning-950 dark:text-warning-50">
               <Checkbox checked={checked} onCheckedChange={(v) => setChecked(!!v)} />
               <span>I confirm the above attestation is true and accurate.</span>
             </label>

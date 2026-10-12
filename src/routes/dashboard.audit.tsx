@@ -82,7 +82,7 @@ type Item = {
 const statusMeta: Record<Item["status"], { label: string; cls: string; icon: typeof CheckCircle2 }> = {
   auto_filled: {
     label: "Auto-filled",
-    cls: "bg-[color:var(--amber-100)] text-[color:var(--navy-900)]",
+    cls: "bg-[color:var(--color-warning-100)] text-[color:var(--navy-900)]",
     icon: Sparkles,
   },
   confirmed: {
@@ -135,7 +135,7 @@ export function AuditPage() {
     <div className="space-y-6" data-tour="audit.body">
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <FolderArchive className="h-6 w-6 text-[color:var(--amber-600)]" />
+          <FolderArchive className="h-6 w-6 text-[color:var(--color-warning-600)]" />
           <div>
             <h1 className="text-2xl font-semibold">Audit</h1>
             <p className="text-sm text-muted-foreground">
@@ -484,13 +484,13 @@ function PacketDetail({
       </div>
 
       {disclosureItem && (
-        <div className="flex items-start gap-3 rounded-lg border-2 border-amber-400 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-950/40">
-          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
+        <div className="flex items-start gap-3 rounded-lg border-2 border-warning-400 bg-warning-50 p-4 dark:border-warning-700 dark:bg-warning-950/40">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-warning-600 dark:text-warning-400" />
           <div className="min-w-0">
-            <div className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+            <div className="text-sm font-semibold text-warning-900 dark:text-warning-200">
               {disclosureItem.title}
             </div>
-            <p className="mt-1 text-sm text-amber-900/90 dark:text-amber-200/90">
+            <p className="mt-1 text-sm text-warning-900/90 dark:text-warning-200/90">
               {disclosureItem.description}
             </p>
           </div>
@@ -639,7 +639,7 @@ function Stat({
 }) {
   const accentCls =
     accent === "amber"
-      ? "text-[color:var(--amber-600)]"
+      ? "text-[color:var(--color-warning-600)]"
       : accent === "navy"
       ? "text-[color:var(--navy-900)]"
       : accent === "red"

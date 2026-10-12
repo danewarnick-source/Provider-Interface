@@ -72,8 +72,8 @@ export function SamplePicker({
             <span
               className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] ${
                 selected.length === targetCount
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "bg-amber-50 text-amber-700"
+                  ? "bg-success-50 text-success-700"
+                  : "bg-warning-50 text-warning-700"
               }`}
             >
               / {targetCount} requested

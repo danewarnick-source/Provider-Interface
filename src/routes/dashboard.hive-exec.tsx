@@ -35,7 +35,7 @@ function ExecCommandCenterLayout() {
       <header className="rounded-xl border border-[#fed7aa] bg-gradient-to-r from-[var(--hive-text)] to-[#1a2a5a] p-4 text-white shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hive-gold)] text-white">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hive-accent)] text-white">
               <Shield className="h-5 w-5" />
             </span>
             <div>
@@ -50,7 +50,7 @@ function ExecCommandCenterLayout() {
               <Button
                 size="sm"
                 variant="secondary"
-                className="bg-[var(--hive-gold)] text-white hover:bg-[#b8641a]"
+                className="bg-[var(--hive-accent)] text-white hover:bg-[#b8641a]"
                 onClick={() => setGuideOpen(true)}
               >
                 <HelpCircle className="mr-1 h-3.5 w-3.5" /> Guide me

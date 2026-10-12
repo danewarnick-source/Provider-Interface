@@ -5,7 +5,7 @@ export type ProfileTone = "profile" | "info" | "ok" | "danger" | "neutral";
 
 /** Icon tile fill + icon color. */
 export const TONE_TILE: Record<ProfileTone, string> = {
-  profile: "bg-hive-gold-soft text-hive-ink",
+  profile: "bg-hive-accent-soft text-hive-ink",
   info: "bg-[var(--hive-info-soft)] text-[var(--hive-info-fg)]",
   ok: "bg-[var(--hive-ok-soft)] text-[var(--hive-ok-fg)]",
   danger: "bg-[var(--hive-danger-soft)] text-[var(--hive-danger-fg)]",
@@ -14,7 +14,7 @@ export const TONE_TILE: Record<ProfileTone, string> = {
 
 /** Pill fill, text and border. */
 export const TONE_TAG: Record<ProfileTone, string> = {
-  profile: "border-hive-gold/40 bg-hive-gold-soft text-hive-ink",
+  profile: "border-hive-accent/40 bg-hive-accent-soft text-hive-ink",
   info: "border-[var(--hive-info)]/30 bg-[var(--hive-info-soft)] text-[var(--hive-info-fg)]",
   ok: "border-[var(--hive-ok)]/30 bg-[var(--hive-ok-soft)] text-[var(--hive-ok-fg)]",
   danger:

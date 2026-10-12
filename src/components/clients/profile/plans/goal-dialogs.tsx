@@ -120,7 +120,7 @@ export function SupportDialog({
           <div className="space-y-1">
             <Label>Codes paid to us for this support</Label>
             {choices.length === 0 ? (
-              <p className="text-xs text-amber-700">No active codes for this client. Add authorizations under Billing first.</p>
+              <p className="text-xs text-warning-700">No active codes for this client. Add authorizations under Billing first.</p>
             ) : (
               <div className="flex flex-wrap gap-1.5">
                 {choices.map((c) => (

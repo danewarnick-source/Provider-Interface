@@ -53,19 +53,19 @@ export function OnboardingGuidanceBanner({ step }: { step: number }) {
   if (!copy) return null;
 
   return (
-    <div className="relative mb-4 overflow-hidden rounded-2xl border border-[color:var(--amber-400,var(--hive-gold))]/50 bg-gradient-to-br from-[#0b1733] via-[#0d1a3a] to-[#0b1733] p-4 text-amber-50 shadow-lg sm:p-5">
+    <div className="relative mb-4 overflow-hidden rounded-2xl border border-[color:var(--color-warning-400,var(--hive-accent))]/50 bg-gradient-to-br from-[#0b1733] via-[#0d1a3a] to-[#0b1733] p-4 text-warning-50 shadow-lg sm:p-5">
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[color:var(--amber-500,var(--hive-gold))] text-[#0b1733]">
+        <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[color:var(--color-warning-500,var(--hive-accent))] text-[#0b1733]">
           <Sparkles className="h-5 w-5" />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="text-[11px] font-semibold uppercase tracking-wide text-[color:var(--amber-400,var(--hive-gold))]">
+          <div className="text-[11px] font-semibold uppercase tracking-wide text-[color:var(--color-warning-400,var(--hive-accent))]">
             NECTAR · Optional checklist — does not unlock create
           </div>
-          <h3 className="mt-0.5 font-display text-base font-semibold text-amber-50">
+          <h3 className="mt-0.5 font-display text-base font-semibold text-warning-50">
             {copy.title}
           </h3>
-          <p className="mt-1 text-sm leading-relaxed text-amber-100/90">{copy.body}</p>
+          <p className="mt-1 text-sm leading-relaxed text-warning-100/90">{copy.body}</p>
         </div>
         <Button
           variant="ghost"
@@ -76,7 +76,7 @@ export function OnboardingGuidanceBanner({ step }: { step: number }) {
             }
             setDismissed(true);
           }}
-          className="shrink-0 text-amber-100 hover:bg-white/10 hover:text-amber-50"
+          className="shrink-0 text-warning-100 hover:bg-white/10 hover:text-warning-50"
           aria-label="Dismiss NECTAR guidance"
         >
           <X className="h-4 w-4" />

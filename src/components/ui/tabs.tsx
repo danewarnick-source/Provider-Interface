@@ -12,7 +12,7 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "inline-flex h-11 items-center justify-start gap-1 border-b border-border bg-transparent p-0 text-muted-foreground",
+      "inline-flex h-11 max-w-full items-center justify-start gap-1 overflow-x-auto rounded-full bg-pt0 p-1 text-muted-foreground shadow-[inset_0_0_0_1px_var(--denim-line)]",
       className,
     )}
     {...props}
@@ -27,7 +27,7 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "relative inline-flex items-center justify-center whitespace-nowrap px-4 h-11 text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:text-foreground data-[state=active]:text-[var(--hive-gold)] data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:left-2 data-[state=active]:after:right-2 data-[state=active]:after:-bottom-px data-[state=active]:after:h-[2px] data-[state=active]:after:rounded-full data-[state=active]:after:bg-[var(--hive-gold)]",
+      "relative inline-flex h-9 items-center justify-center whitespace-nowrap rounded-full px-4 text-sm font-semibold cursor-pointer transition-[background-color,color,box-shadow] duration-200 ease-denim focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:text-pri data-[state=active]:bg-paper data-[state=active]:text-pri data-[state=active]:shadow-[var(--denim-shadow-sm)]",
       className,
     )}
     {...props}

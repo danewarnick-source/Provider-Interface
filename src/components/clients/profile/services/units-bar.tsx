@@ -6,7 +6,7 @@ import { OVER_PACE_POINTS, UNITS_LOW_PCT, type CodePace } from "@/lib/clients/re
 
 function barTone(p: CodePace): string {
   if (p.leftPct <= UNITS_LOW_PCT) return "bg-[var(--hive-danger)]";
-  if (p.usedPct - p.elapsedPct >= OVER_PACE_POINTS) return "bg-hive-gold";
+  if (p.usedPct - p.elapsedPct >= OVER_PACE_POINTS) return "bg-hive-accent";
   return "bg-[var(--hive-ok)]";
 }
 

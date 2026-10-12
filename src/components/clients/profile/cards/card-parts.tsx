@@ -28,7 +28,7 @@ export function InfoTile({
     <div
       className={cn(
         "min-w-0 rounded-xl border p-4",
-        warn ? "border-hive-gold bg-hive-gold-soft" : "border-hive-border bg-hive-surface",
+        warn ? "border-hive-accent bg-hive-accent-soft" : "border-hive-border bg-hive-surface",
       )}
       data-testid={testId}
     >

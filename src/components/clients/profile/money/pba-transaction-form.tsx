@@ -157,7 +157,7 @@ export function PbaTransactionForm({ orgId, account }: { orgId: string; account:
             : "Attach a receipt (PNG, JPG or PDF)"}
       </label>
       {needsReceipt && !receipt ? (
-        <p className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400">
+        <p className="flex items-center gap-1.5 text-xs text-warning-700 dark:text-warning-400">
           <Receipt className="h-3.5 w-3.5" /> A receipt is required over $50.
         </p>
       ) : null}

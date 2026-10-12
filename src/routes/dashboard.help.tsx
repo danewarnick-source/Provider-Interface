@@ -186,7 +186,7 @@ function HelpPage() {
             <button
               type="button"
               onClick={() => { setPendingGoal(undefined); setTaskCenterOpen(true); }}
-              className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-[var(--hive-gold)] px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-[#b8651a]"
+              className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-[var(--hive-accent)] px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-[#b8651a]"
             >
               <ListChecks className="h-3.5 w-3.5" /> Guide me
             </button>
@@ -275,7 +275,7 @@ function HelpPage() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask NECTAR anything about PI…"
-          className="min-h-[44px] flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--hive-gold)]/40"
+          className="min-h-[44px] flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--hive-accent)]/40"
           disabled={m.isPending}
         />
         <NectarButton
@@ -381,7 +381,7 @@ function NectarBubble({
 }) {
   return (
     <div className="flex items-start gap-2">
-      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--hive-text)] text-[var(--hive-gold)] shadow-sm">
+      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--hive-text)] text-[var(--hive-accent-text)] shadow-sm">
         <PiMark className="h-4 w-4" />
       </div>
       <div className="max-w-[85%] space-y-2">
@@ -402,7 +402,7 @@ function NectarBubble({
           <button
             type="button"
             onClick={() => onNavigate(reply.deepLink!.path)}
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md bg-[var(--hive-gold)] px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-[#b8651a]"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md bg-[var(--hive-accent)] px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-[#b8651a]"
           >
             {reply.deepLink.label}
             <ArrowRight className="h-3.5 w-3.5" />
@@ -417,7 +417,7 @@ function NectarBubble({
                 onClick={() => onFollowUp(f)}
                 className="min-h-[44px] rounded-full border border-border bg-white px-2.5 py-1 text-[11px] text-muted-foreground hover:bg-muted"
               >
-                <Sparkles className="mr-1 inline h-3 w-3 text-[var(--hive-gold)]" />
+                <Sparkles className="mr-1 inline h-3 w-3 text-[var(--hive-accent-text)]" />
                 {f}
               </button>
             ))}
@@ -431,14 +431,14 @@ function NectarBubble({
 function NectarTypingBubble() {
   return (
     <div className="flex items-start gap-2">
-      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--hive-text)] text-[var(--hive-gold)] shadow-sm">
+      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--hive-text)] text-[var(--hive-accent-text)] shadow-sm">
         <PiMark className="h-4 w-4" />
       </div>
       <div className="rounded-2xl rounded-tl-sm border border-[#fed7aa] bg-white px-3.5 py-2 text-sm text-muted-foreground shadow-sm">
         <span className="inline-flex gap-1">
-          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--hive-gold)] [animation-delay:-0.3s]" />
-          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--hive-gold)] [animation-delay:-0.15s]" />
-          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--hive-gold)]" />
+          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--hive-accent)] [animation-delay:-0.3s]" />
+          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--hive-accent)] [animation-delay:-0.15s]" />
+          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--hive-accent)]" />
         </span>
       </div>
     </div>

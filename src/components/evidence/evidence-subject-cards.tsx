@@ -94,7 +94,7 @@ export function EvidenceSubjectCards({
             className={cn(
               "rounded-[14px] border bg-[var(--hive-surface)] px-4 py-3.5 text-left shadow-[0_1px_2px_rgba(36,48,64,0.04)]",
               active
-                ? "border-[var(--hive-gold)] shadow-[0_0_0_1px_var(--hive-gold)]"
+                ? "border-[var(--hive-accent)] shadow-[0_0_0_1px_var(--hive-accent)]"
                 : "border-[var(--hive-border)]",
             )}
           >

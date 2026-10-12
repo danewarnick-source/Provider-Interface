@@ -58,12 +58,6 @@ export const Route = createFileRoute("/dashboard/scheduler")({
       { title: "Scheduler — Provider Interface" },
       { name: "description", content: "Schedule, Day Program, and Staff view" },
     ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap",
-      },
-    ],
   }),
   validateSearch: (s: Record<string, unknown>): { focus?: string } =>
     typeof s.focus === "string" ? { focus: s.focus } : {},
@@ -96,7 +90,7 @@ function sectionLabelFor(code: string): string {
 }
 
 const NAVY = "var(--hive-ink)";
-const GOLD = "var(--hive-gold)";
+const GOLD = "var(--hive-accent)";
 const TEAL = "var(--hive-ok)";
 const LINE = "var(--hive-border)";
 
@@ -186,7 +180,7 @@ function SchedulerPage() {
           <button
             onClick={() => publishMut.mutate()}
             disabled={publishMut.isPending || !orgId}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-[var(--hive-gold)] bg-transparent px-3.5 py-2 text-[13px] font-semibold text-[var(--hive-text)] hover:bg-[var(--hive-gold-soft)]"
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-[var(--hive-accent)] bg-transparent px-3.5 py-2 text-[13px] font-semibold text-[var(--hive-text)] hover:bg-[var(--hive-accent-soft)]"
           >
             <Send className="h-4 w-4" /> {publishMut.isPending ? "Publishing…" : "Publish"}
           </button>
@@ -231,7 +225,7 @@ function TabBtn({ label, active, onClick }: { label: string; active: boolean; on
       onClick={onClick}
       className={`cursor-pointer border-b-2 px-3 py-1.5 text-[13px] font-semibold ${
         active
-          ? "border-[var(--hive-gold)] text-[var(--hive-text)]"
+          ? "border-[var(--hive-accent)] text-[var(--hive-text)]"
           : "border-transparent text-[var(--hive-text-muted)] hover:text-[var(--hive-text)]"
       }`}
     >
@@ -245,7 +239,7 @@ function ViewBtn({ label, icon, active, onClick }: { label: string; icon?: React
       onClick={onClick}
       className={`inline-flex items-center gap-1 border-b-2 px-3 py-1.5 text-sm font-medium ${
         active
-          ? "border-[var(--hive-gold)] text-[var(--hive-gold)]"
+          ? "border-[var(--hive-accent)] text-[var(--hive-accent-text)]"
           : "border-transparent text-[var(--hive-text-muted)] hover:text-[var(--hive-text)]"
       }`}
     >
@@ -554,14 +548,14 @@ function HomePill({ label, active, onClick }: { label: string; active: boolean; 
   );
 }
 
-const FALLBACK_PALETTE = ["#3b6aa8", "#7d4cdb", "var(--hive-ink)", "#d6438a", "var(--hive-gold)", "#3a8acc", "#dc3a3a", "#7eb45b", "#4a5b8c", "#a36cd6", "#2e8b75", "#c0593f"];
+const FALLBACK_PALETTE = ["#3b6aa8", "#7d4cdb", "var(--hive-ink)", "#d6438a", "var(--hive-accent)", "#3a8acc", "#dc3a3a", "#7eb45b", "#4a5b8c", "#a36cd6", "#2e8b75", "#c0593f"];
 function codeColor(code: string): string {
   switch (code) {
     case "SLH": return "#3b6aa8";
     case "COM": return "#7d4cdb";
     case "PAC": return "var(--hive-ink)";
     case "RP2": return "#d6438a";
-    case "HHS": return "var(--hive-gold)";
+    case "HHS": return "var(--hive-accent)";
     case "RHS": return "#3a8acc";
     case "PM1": return "#dc3a3a";
     case "DSI": return "#7eb45b";
@@ -594,7 +588,7 @@ function ClientCell({
       metaLine = (
         <button
           onClick={() => onSetAdminHours(client)}
-          className="text-[11px] underline text-[color:var(--amber-700,var(--hive-gold))]"
+          className="text-[11px] underline text-[color:var(--color-warning-700,var(--hive-accent))]"
         >
           Set administrative hours
         </button>
@@ -610,7 +604,7 @@ function ClientCell({
           to="/dashboard/clients/$clientId"
           params={{ clientId: client.id }}
           search={{ section: "services" }}
-          className="text-[11px] underline text-[color:var(--amber-700,var(--hive-gold))]"
+          className="text-[11px] underline text-[color:var(--color-warning-700,var(--hive-accent))]"
         >
           Set units
         </Link>
@@ -702,7 +696,7 @@ function DayView({
                         const d = new Date(anchor); d.setHours(h, 0, 0, 0);
                         onAdd({ clientId: c.id, code, day: d });
                       }}
-                      className="border-l border-dashed text-[10px] text-muted-foreground/50 hover:bg-amber-50/40"
+                      className="border-l border-dashed text-[10px] text-muted-foreground/50 hover:bg-warning-50/40"
                       style={{ borderColor: "#eee" }}
                       title="Add shift"
                     />
@@ -817,7 +811,7 @@ function WeekView({
                       if (dayShifts[0]) onOpenShift(dayShifts[0].id);
                       else onAdd({ clientId: c.id, code, day: d });
                     }}
-                    className="flex items-center justify-center hover:bg-amber-50/40"
+                    className="flex items-center justify-center hover:bg-warning-50/40"
                     style={{ minHeight: 50, background: sameDay(d, today) ? "#fff7e6" : undefined }}
                   >
                     {dayShifts.length === 0 ? (
@@ -1138,13 +1132,13 @@ function AddShiftDialog({
                       <span className="flex items-center gap-1">
                         {needsAbi && (
                           <AlertTriangle
-                            className="inline h-3 w-3 shrink-0 text-amber-600"
+                            className="inline h-3 w-3 shrink-0 text-warning-600"
                             aria-label="Missing ABI training (reminder only)"
                           />
                         )}
                         {needs30Day && (
                           <AlertTriangle
-                            className="inline h-3 w-3 shrink-0 text-amber-600"
+                            className="inline h-3 w-3 shrink-0 text-warning-600"
                             aria-label="30-day training incomplete (reminder only)"
                           />
                         )}
@@ -1157,7 +1151,7 @@ function AddShiftDialog({
             </Select>
             {clientId && <p className="text-[11px] text-muted-foreground mt-1">Only staff on {clientName}'s team are listed.</p>}
             {trainingReminder && (
-              <p className="text-[11px] text-amber-800 mt-1.5 rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5">
+              <p className="text-[11px] text-warning-800 mt-1.5 rounded-md border border-warning-200 bg-warning-50 px-2 py-1.5">
                 {trainingReminder}
               </p>
             )}
@@ -1517,7 +1511,7 @@ function ShiftDetailPanel({
                 <span className="flex items-center gap-1">
                   {shift.staff_id && missingThirtyDay.has(shift.staff_id) && (
                     <AlertTriangle
-                      className="inline h-3 w-3 shrink-0 text-red-600"
+                      className="inline h-3 w-3 shrink-0 text-danger-600"
                      
                       aria-label="30-day training incomplete"
                     />
@@ -1535,7 +1529,7 @@ function ShiftDetailPanel({
                     <span className="flex items-center gap-1">
                       {needs30Day && (
                         <AlertTriangle
-                          className="inline h-3 w-3 shrink-0 text-red-600"
+                          className="inline h-3 w-3 shrink-0 text-danger-600"
                          
                           aria-label="30-day training incomplete"
                         />
@@ -1565,7 +1559,7 @@ function ShiftDetailPanel({
                       <div className="flex-1 truncate flex items-center gap-1">
                         {needs30Day && (
                           <AlertTriangle
-                            className="inline h-3 w-3 shrink-0 text-red-600"
+                            className="inline h-3 w-3 shrink-0 text-danger-600"
                            
                           />
                         )}
@@ -1805,8 +1799,8 @@ function SessionCard({
                   {(c.first_name?.[0] ?? "") + (c.last_name?.[0] ?? "")}
                 </span>
                 <span className="text-sm flex-1 truncate">{c.first_name} {c.last_name}</span>
-                <button onClick={() => onMark(cid, true)} className={`text-[11px] px-2 py-0.5 rounded ${state === "present" ? "bg-emerald-100 text-emerald-700 font-semibold" : "text-muted-foreground hover:bg-muted"}`}>Present</button>
-                <button onClick={() => onMark(cid, false)} className={`text-[11px] px-2 py-0.5 rounded ${state === "absent" ? "bg-red-100 text-red-700 font-semibold" : "text-muted-foreground hover:bg-muted"}`}>Absent</button>
+                <button onClick={() => onMark(cid, true)} className={`text-[11px] px-2 py-0.5 rounded ${state === "present" ? "bg-success-100 text-success-700 font-semibold" : "text-muted-foreground hover:bg-muted"}`}>Present</button>
+                <button onClick={() => onMark(cid, false)} className={`text-[11px] px-2 py-0.5 rounded ${state === "absent" ? "bg-danger-100 text-danger-700 font-semibold" : "text-muted-foreground hover:bg-muted"}`}>Absent</button>
               </div>
             );
           })}
@@ -1965,7 +1959,7 @@ function StaffViewPreview({
               </div>
               <div className="flex-1 text-sm">
                 {isOff ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-emerald-50 text-emerald-700 text-xs font-semibold">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-success-50 text-success-700 text-xs font-semibold">
                     Time off
                   </span>
                 ) : dayShifts.length === 0 ? (

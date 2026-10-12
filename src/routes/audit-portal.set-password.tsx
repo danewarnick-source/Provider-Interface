@@ -120,14 +120,14 @@ function SetPasswordPage() {
         </div>
 
         {status === "verifying" && (
-          <div className="rounded-md border border-slate-200 bg-slate-50 p-4 text-sm text-muted-foreground">
+          <div className="rounded-md border border-haze-200 bg-haze-50 p-4 text-sm text-muted-foreground">
             Verifying your invite link…
           </div>
         )}
 
         {status === "error" && (
           <div className="space-y-3">
-            <div className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+            <div className="flex items-start gap-2 rounded-md border border-danger-200 bg-danger-50 p-3 text-sm text-danger-800">
               <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
               <div>{errorMsg || "This invite link is invalid or has expired."}</div>
             </div>
@@ -139,7 +139,7 @@ function SetPasswordPage() {
 
         {status === "ready" && (
           <form onSubmit={onSubmit} className="space-y-3">
-            <p className="text-sm text-slate-700">
+            <p className="text-sm text-haze-700">
               Set a password for your auditor account. You'll be taken directly to your
               granted audit package.
             </p>
@@ -149,7 +149,7 @@ function SetPasswordPage() {
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password" required minLength={12} autoComplete="new-password"
-                  className="min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-3 py-2 pr-10 text-sm focus:border-[var(--hive-text)] focus:outline-none"
+                  className="min-h-[44px] w-full rounded-md border border-haze-300 bg-white px-3 py-2 pr-10 text-sm focus:border-[var(--hive-text)] focus:outline-none"
                 />
                 <button
                   type="button"
@@ -168,7 +168,7 @@ function SetPasswordPage() {
                 <input
                   type={showConfirm ? "text" : "password"}
                   name="confirm" required minLength={12} autoComplete="new-password"
-                  className="min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-3 py-2 pr-10 text-sm focus:border-[var(--hive-text)] focus:outline-none"
+                  className="min-h-[44px] w-full rounded-md border border-haze-300 bg-white px-3 py-2 pr-10 text-sm focus:border-[var(--hive-text)] focus:outline-none"
                 />
                 <button
                   type="button"

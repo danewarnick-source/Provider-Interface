@@ -92,9 +92,9 @@ function ComplianceInbox() {
   if (totalItems === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-amber-300/40 bg-amber-500/5 p-4 shadow-[var(--shadow-card)]">
+    <div className="rounded-2xl border border-warning-300/40 bg-warning-500/5 p-4 shadow-[var(--shadow-card)]">
       <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
-        <AlertTriangle className="h-4 w-4 text-amber-600" />
+        <AlertTriangle className="h-4 w-4 text-warning-600" />
         Needs Your Attention ({totalItems})
       </h2>
       <ul className="space-y-2">
@@ -188,15 +188,15 @@ function PoliciesToAcknowledgeCard() {
   if (pending.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-amber-400/50 bg-amber-500/5 p-4 shadow-[var(--shadow-card)]">
-      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-amber-900 dark:text-amber-200">
+    <div className="rounded-2xl border border-warning-400/50 bg-warning-500/5 p-4 shadow-[var(--shadow-card)]">
+      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-warning-900 dark:text-warning-200">
         <FileSignature className="h-4 w-4" /> Policies to read &amp; acknowledge
       </h2>
       <ul className="space-y-2">
         {pending.map((p) => (
           <li
             key={p.id}
-            className="flex items-center justify-between gap-3 rounded-lg border border-amber-300/60 bg-background/60 px-3 py-2.5"
+            className="flex items-center justify-between gap-3 rounded-lg border border-warning-300/60 bg-background/60 px-3 py-2.5"
           >
             <div className="min-w-0">
               <p className="truncate text-sm font-medium">{p.title}</p>
@@ -207,7 +207,7 @@ function PoliciesToAcknowledgeCard() {
             <Link
               to="/dashboard/courses/policy/$documentId"
               params={{ documentId: p.id }}
-              className="flex shrink-0 items-center gap-1 text-xs font-medium text-amber-700 hover:underline dark:text-amber-300"
+              className="flex shrink-0 items-center gap-1 text-xs font-medium text-warning-700 hover:underline dark:text-warning-300"
             >
               Read and sign <ArrowRight className="h-3.5 w-3.5" />
             </Link>

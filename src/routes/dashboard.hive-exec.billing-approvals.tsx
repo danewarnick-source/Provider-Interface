@@ -48,7 +48,7 @@ function BillingApprovalsPage() {
     <div className="space-y-4">
       <header className="rounded-2xl border border-border bg-card p-4 shadow-sm">
         <div className="flex flex-wrap items-center gap-3">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-success-100 text-success-700">
             <ShieldCheck className="h-4 w-4" />
           </span>
           <div>
@@ -59,7 +59,7 @@ function BillingApprovalsPage() {
             </p>
           </div>
           {tab === "pending" && pendingTotal > 0 && (
-            <Badge variant="outline" className="ml-auto border-amber-500/60 text-amber-700">
+            <Badge variant="outline" className="ml-auto border-warning-500/60 text-warning-700">
               {pendingTotal} open ticket{pendingTotal === 1 ? "" : "s"}
             </Badge>
           )}
@@ -140,8 +140,8 @@ function ApprovalRow({ r, onOpen }: { r: ApprovalRequestRow; onOpen: () => void 
         )}
       </div>
       <div className="flex flex-col items-end gap-1">
-        {status === "pending" && <Badge variant="outline" className="border-amber-500/60 text-amber-700">Open ticket</Badge>}
-        {status === "approved" && <Badge variant="outline" className="border-emerald-500/60 text-emerald-700">Resolved · Approved</Badge>}
+        {status === "pending" && <Badge variant="outline" className="border-warning-500/60 text-warning-700">Open ticket</Badge>}
+        {status === "approved" && <Badge variant="outline" className="border-success-500/60 text-success-700">Resolved · Approved</Badge>}
         {status === "denied" && <Badge variant="outline" className="border-destructive/60 text-destructive">Resolved · Denied</Badge>}
         {status === "withdrawn" && <Badge variant="outline" className="text-muted-foreground">Withdrawn</Badge>}
         <Button size="sm" variant="outline" onClick={onOpen}>

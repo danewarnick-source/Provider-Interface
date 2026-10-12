@@ -328,15 +328,15 @@ export function AuthoritativeSourceDrop({
       {/* Drag overlay */}
       {dragging && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-[color:var(--navy-900,#0b1733)]/40 backdrop-blur-sm">
-          <div className="m-4 flex max-w-lg flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-[color:var(--amber-400,var(--hive-gold))] bg-white/85 p-8 text-center shadow-xl">
+          <div className="m-4 flex max-w-lg flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-[color:var(--color-warning-400,var(--hive-accent))] bg-white/85 p-8 text-center shadow-xl">
             <span
               className="inline-flex h-14 w-14 items-center justify-center rounded-full"
               style={{
                 background:
-                  "linear-gradient(135deg, var(--amber-100, #fef3c7), var(--amber-200, #fde68a))",
+                  "linear-gradient(135deg, var(--color-warning-100, #fef3c7), var(--color-warning-200, #fde68a))",
               }}
             >
-              <PiMark variant="gold" className="h-7 w-7" />
+              <PiMark variant="brand" className="h-7 w-7" />
             </span>
             <div className="text-lg font-semibold text-[color:var(--navy-900,#0b1733)]">
               Drop to add to Authoritative Sources
@@ -361,8 +361,8 @@ export function AuthoritativeSourceDrop({
         }}
       >
         <DialogContent className="flex max-h-[90vh] w-[calc(100vw-1.5rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-xl">
-          <DialogHeader className="border-b border-border/60 bg-gradient-to-br from-[color:var(--amber-50,#fffbeb)] to-white px-5 py-4">
-            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--amber-700,#b45309)]">
+          <DialogHeader className="border-b border-border/60 bg-gradient-to-br from-[color:var(--color-warning-50,#fffbeb)] to-white px-5 py-4">
+            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--color-warning-700,#b45309)]">
               <Sparkles className="h-3.5 w-3.5" /> NECTAR · Label authoritative source
             </div>
             <DialogTitle className="text-base">
@@ -386,14 +386,14 @@ export function AuthoritativeSourceDrop({
             {current && (
               <>
                 {current.routeBlock ? (
-                  <div className="flex items-start gap-2 rounded-xl border border-rose-300 bg-rose-50/80 p-3 text-xs text-rose-900">
+                  <div className="flex items-start gap-2 rounded-xl border border-danger-300 bg-danger-50/80 p-3 text-xs text-danger-900">
                     <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                     <div className="space-y-1.5">
                       <div className="font-semibold">
                         {current.routeBlock.label} files always route to Company Docs.
                       </div>
                       <p className="leading-relaxed">{current.routeBlock.reason}</p>
-                      <p className="leading-relaxed text-rose-800/80">
+                      <p className="leading-relaxed text-danger-800/80">
                         Authoritative Sources is state/contract documents that
                         apply across clients (SOW, contracts, DSPD/DHS
                         requirements). Anything tied to a specific client or
@@ -404,7 +404,7 @@ export function AuthoritativeSourceDrop({
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-7 border-rose-300 text-xs text-rose-900 hover:bg-rose-100"
+                          className="h-7 border-danger-300 text-xs text-danger-900 hover:bg-danger-100"
                           onClick={removeCurrent}
                         >
                           Remove — I'll upload to Company Docs
@@ -413,7 +413,7 @@ export function AuthoritativeSourceDrop({
                     </div>
                   </div>
                 ) : current.routeWarning ? (
-                  <div className="flex items-start gap-2 rounded-xl border border-amber-400/60 bg-amber-50/80 p-3 text-xs text-amber-900">
+                  <div className="flex items-start gap-2 rounded-xl border border-warning-400/60 bg-warning-50/80 p-3 text-xs text-warning-900">
                     <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                     <div className="space-y-1">
                       <div className="font-semibold">
@@ -466,7 +466,7 @@ export function AuthoritativeSourceDrop({
                     </SelectContent>
                   </Select>
                   <p className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                    <Sparkles className="h-3 w-3 text-[color:var(--amber-600,#d97706)]" />
+                    <Sparkles className="h-3 w-3 text-[color:var(--color-warning-600,#d97706)]" />
                     NECTAR proposed from filename — confirm or change.
                   </p>
                 </div>
@@ -553,7 +553,7 @@ export function AuthoritativeSourceDrop({
               type="button"
               onClick={handleSaveAndNext}
               disabled={saveOne.isPending || !current?.title.trim() || !!current?.routeBlock}
-              className="gap-1 bg-[color:var(--amber-500,var(--hive-gold))] text-amber-950 hover:bg-[color:var(--amber-400,#f6b94d)]"
+              className="gap-1 bg-[color:var(--color-warning-500,var(--hive-accent))] text-warning-950 hover:bg-[color:var(--color-warning-400,#f6b94d)]"
             >
               {saveOne.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

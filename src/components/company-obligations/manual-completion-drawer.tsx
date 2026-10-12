@@ -224,7 +224,7 @@ export function ManualCompletionDrawer({
 
         {attestationBlocked ? (
           <>
-            <div className="mt-4 rounded-md border border-amber-300/60 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-200">
+            <div className="mt-4 rounded-md border border-warning-300/60 bg-warning-500/10 p-3 text-sm text-warning-900 dark:text-warning-200">
               This obligation requires the staff member to attest personally. Use the "Notify staff
               to attest" button on the obligation card to send them a reminder.
             </div>
@@ -353,7 +353,7 @@ export function ManualCompletionDrawer({
                 </div>
               )}
 
-              <div className="flex items-start gap-2 rounded-md border border-amber-300/60 bg-amber-500/10 p-2.5 text-xs text-amber-900 dark:text-amber-200">
+              <div className="flex items-start gap-2 rounded-md border border-warning-300/60 bg-warning-500/10 p-2.5 text-xs text-warning-900 dark:text-warning-200">
                 <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>
                   You are recording this on behalf of{" "}

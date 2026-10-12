@@ -523,10 +523,10 @@ export function ResidentialDailyTab({
                         <button
                           type="button"
                           onClick={() => onOpenIncidents?.(row.id)}
-                          className="rounded-md focus:outline-none focus:ring-2 focus:ring-rose-400"
+                          className="rounded-md focus:outline-none focus:ring-2 focus:ring-danger-400"
                           aria-label="Open fatality incident in the Incidents log"
                         >
-                          <Badge className="bg-rose-600 text-[10px] text-white hover:bg-rose-700">
+                          <Badge className="bg-danger-600 text-[10px] text-white hover:bg-danger-700">
                             §1.26 Fatality
                           </Badge>
                         </button>
@@ -535,7 +535,7 @@ export function ResidentialDailyTab({
                         <button
                           type="button"
                           onClick={() => onOpenIncidents?.(row.id)}
-                          className="rounded-md focus:outline-none focus:ring-2 focus:ring-amber-400"
+                          className="rounded-md focus:outline-none focus:ring-2 focus:ring-warning-400"
                           aria-label="Open this client's incidents in the log"
                           title="Open in Incidents log"
                         >
@@ -565,12 +565,12 @@ export function ResidentialDailyTab({
                 </CardHeader>
                 <CardContent className="space-y-3 pt-1">
                   {row.missingDays > 0 && (
-                    <div className="text-xs text-amber-700 dark:text-amber-300">
+                    <div className="text-xs text-warning-700 dark:text-warning-300">
                       {row.missingDays} day{row.missingDays === 1 ? "" : "s"} in range did not bill — open the client hub to see what's missing.
                     </div>
                   )}
                   {row.historicalDocumented > 0 && (
-                    <div className="text-xs text-sky-700 dark:text-sky-300">
+                    <div className="text-xs text-denim-700 dark:text-denim-300">
                       {row.historicalDocumented} historical day{row.historicalDocumented === 1 ? "" : "s"} on file from before go-live (attested — not flagged as missing; see Historical daily notes below).
                     </div>
                   )}
@@ -589,12 +589,12 @@ export function ResidentialDailyTab({
                           <div
                             className={`h-full transition-all ${
                               supportTone === "red"
-                                ? "bg-rose-500"
+                                ? "bg-danger-500"
                                 : supportTone === "amber"
-                                  ? "bg-amber-500"
+                                  ? "bg-warning-500"
                                   : supportTone === "emerald"
-                                    ? "bg-emerald-500"
-                                    : "bg-slate-400"
+                                    ? "bg-success-500"
+                                    : "bg-haze-400"
                             }`}
                             style={{ width: `${Math.min(100, pct ?? 0)}%` }}
                           />
@@ -612,11 +612,11 @@ export function ResidentialDailyTab({
                       <div className="flex items-center gap-2 text-xs">
                         <UsersIcon className="h-3.5 w-3.5 text-muted-foreground" />
                         {row.supervisionContacts > 0 ? (
-                          <span className="text-emerald-700 dark:text-emerald-300">
+                          <span className="text-success-700 dark:text-success-300">
                             Supervised ✓ · {row.supervisionContacts} contact{row.supervisionContacts === 1 ? "" : "s"}
                           </span>
                         ) : (
-                          <span className="text-amber-700 dark:text-amber-300">No supervision contact logged in range</span>
+                          <span className="text-warning-700 dark:text-warning-300">No supervision contact logged in range</span>
                         )}
                       </div>
                       <Button

@@ -57,7 +57,7 @@ export function MyHistoricalTimesheetsPage() {
     <div className="mx-auto max-w-4xl space-y-4 p-4 md:p-6">
       <header className="space-y-2">
         <div className="flex items-center gap-2">
-          <Archive className="h-5 w-5 text-amber-700" />
+          <Archive className="h-5 w-5 text-warning-700" />
           <h1 className="text-xl font-semibold">Historical timesheets to confirm</h1>
         </div>
         <p className="text-sm text-muted-foreground">
@@ -88,7 +88,7 @@ export function MyHistoricalTimesheetsPage() {
 
       {!q.isLoading && !q.isError && rows.length === 0 && (
         <div className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
-          <CheckCircle2 className="mx-auto mb-2 h-6 w-6 text-emerald-600" />
+          <CheckCircle2 className="mx-auto mb-2 h-6 w-6 text-success-600" />
           You're all caught up — nothing waiting on your confirmation.
         </div>
       )}
@@ -246,11 +246,11 @@ function EntryCard({ row, onChanged }: { row: Row; onChanged: () => void }) {
           featureName="Draft with NECTAR"
           benefit="Turn quick shorthand (or a voice memo) into a compliant progress-note draft in seconds. You always review and confirm before it's saved."
         >
-          <div className="rounded-lg border-2 border-dashed border-amber-400 bg-amber-50/60 px-3 py-3">
+          <div className="rounded-lg border-2 border-dashed border-warning-400 bg-warning-50/60 px-3 py-3">
             <div className="mb-2 flex items-center gap-2">
-              <PiMark variant="gold" className="h-4 w-4" />
+              <PiMark variant="brand" className="h-4 w-4" />
               <div className="flex-1">
-                <div className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">NECTAR Infusion</div>
+                <div className="text-[11px] font-semibold uppercase tracking-wide text-warning-700">NECTAR Infusion</div>
                 <div className="text-sm font-semibold">Draft with NECTAR</div>
               </div>
             </div>
@@ -271,7 +271,7 @@ function EntryCard({ row, onChanged }: { row: Row; onChanged: () => void }) {
                 size="sm"
                 onClick={runDraftWithNectar}
                 disabled={draftBusy || shorthand.trim().length < 3}
-                className="min-h-[44px] bg-amber-600 text-white hover:bg-amber-700"
+                className="min-h-[44px] bg-warning-600 text-white hover:bg-warning-700"
               >
                 {draftBusy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                 Draft with NECTAR
@@ -290,10 +290,10 @@ function EntryCard({ row, onChanged }: { row: Row; onChanged: () => void }) {
               )}
             </div>
             {nectarDraft && (
-              <div className="mt-3 rounded-md border-2 border-amber-500 bg-white px-3 py-2.5 shadow-sm">
+              <div className="mt-3 rounded-md border-2 border-warning-500 bg-white px-3 py-2.5 shadow-sm">
                 <div className="mb-1.5 flex items-center gap-2">
-                  <PiMark variant="gold" className="h-3.5 w-3.5" />
-                  <span className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">
+                  <PiMark variant="brand" className="h-3.5 w-3.5" />
+                  <span className="text-[11px] font-semibold uppercase tracking-wide text-warning-700">
                     NECTAR draft — review before confirming
                   </span>
                 </div>
@@ -322,7 +322,7 @@ function EntryCard({ row, onChanged }: { row: Row; onChanged: () => void }) {
         <label className="mb-1 block text-xs font-medium text-muted-foreground">
           Shift note
           {nectarUsed && (
-            <span className="ml-2 inline-flex items-center gap-1 rounded-full border border-amber-400 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+            <span className="ml-2 inline-flex items-center gap-1 rounded-full border border-warning-400 bg-warning-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-warning-700">
               <PiMark className="h-2.5 w-2.5" /> AI-drafted — your review required
             </span>
           )}

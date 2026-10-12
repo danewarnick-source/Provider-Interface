@@ -142,16 +142,16 @@ function FinancesHub() {
                   value={String(snap?.blockers ?? 0)}
                   icon={
                     (snap?.blockers ?? 0) > 0 ? (
-                      <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
+                      <AlertTriangle className="h-3.5 w-3.5 text-warning-600" />
                     ) : (
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                      <CheckCircle2 className="h-3.5 w-3.5 text-success-600" />
                     )
                   }
                   variant={(snap?.blockers ?? 0) > 0 ? "warning" : "success"}
                 />
                 {(snap?.expiringSoon ?? 0) > 0 && (
                   <div className="col-span-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-300/40 bg-amber-500/10 px-2 py-1 text-[11px] font-medium text-amber-700">
+                    <span className="inline-flex items-center gap-1.5 rounded-md border border-warning-300/40 bg-warning-500/10 px-2 py-1 text-[11px] font-medium text-warning-700">
                       <CalendarClock className="h-3 w-3" />
                       {snap!.expiringSoon} authorization{snap!.expiringSoon === 1 ? "" : "s"} expiring within 30 days
                     </span>
@@ -252,9 +252,9 @@ function Stat({
 }) {
   const borderClass =
     variant === "warning"
-      ? "border-amber-300/40 bg-amber-500/[0.04]"
+      ? "border-warning-300/40 bg-warning-500/[0.04]"
       : variant === "success"
-        ? "border-emerald-300/40 bg-emerald-500/[0.04]"
+        ? "border-success-300/40 bg-success-500/[0.04]"
         : "border-border/60 bg-background/40";
 
   return (
@@ -278,7 +278,7 @@ function TrendBadge({ pct }: { pct: number }) {
   return (
     <span
       className={`inline-flex items-center gap-0.5 text-[11px] font-medium ${
-        up ? "text-emerald-600" : "text-rose-600"
+        up ? "text-success-600" : "text-danger-600"
       }`}
       title="vs last month"
     >

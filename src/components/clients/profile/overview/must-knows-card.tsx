@@ -50,7 +50,7 @@ export function MustKnowsCard({
       tone={text ? "profile" : "neutral"}
       title="Must-knows"
       description="Health, behaviors, trauma and supports every team member needs to know first."
-      className={text ? "border-hive-gold" : undefined}
+      className={text ? "border-hive-accent" : undefined}
       testId="client-must-knows"
       actions={
         idle && text ? (

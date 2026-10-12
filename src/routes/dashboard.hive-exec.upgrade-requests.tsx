@@ -148,7 +148,7 @@ function RequestRow({
           <button
             onClick={onGrant}
             disabled={busy}
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md bg-success-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-success-700 disabled:opacity-50"
           >
             <Check className="h-4 w-4" /> Grant access
           </button>
@@ -160,9 +160,9 @@ function RequestRow({
 
 function StatusPill({ status }: { status: "pending" | "approved" | "denied" }) {
   const map = {
-    pending: "bg-amber-100 text-amber-800",
-    approved: "bg-emerald-100 text-emerald-700",
-    denied: "bg-gray-100 text-gray-600",
+    pending: "bg-warning-100 text-warning-800",
+    approved: "bg-success-100 text-success-700",
+    denied: "bg-haze-100 text-haze-600",
   }[status];
   return <span className={`rounded px-2 py-0.5 text-xs font-medium capitalize ${map}`}>{status}</span>;
 }

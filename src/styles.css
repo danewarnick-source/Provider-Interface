@@ -14,14 +14,16 @@
   --radius-xl: calc(var(--radius) + 2px);
   --radius-2xl: calc(var(--radius) + 6px);
 
-  --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  /* Display = same professional sans as body, at bold/semibold. Never a decorative face. */
-  --font-display: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
-  /* One typeface platform-wide: `font-mono` keeps tabular alignment for IDs, hours and money
-     but renders in the same sans instead of a second (monospace) face. */
-  --font-mono: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* Denim typography: Figtree for UI/body, Manrope for headings and big numbers. */
+  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Manrope", ui-sans-serif, sans-serif;
+  --font-heading: "Manrope", ui-sans-serif, sans-serif;
+  /* `font-mono` keeps tabular alignment for IDs, hours and money in the same face. */
+  --font-mono: "Figtree", ui-sans-serif, system-ui, sans-serif;
   --font-mono--font-variant-numeric: tabular-nums;
-  --font-serif: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Manrope", ui-sans-serif, sans-serif;
+
+  --ease-denim: cubic-bezier(0.22, 1, 0.36, 1);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -59,6 +61,11 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
 
   --gradient-hero: var(--gradient-hero);
   --gradient-brand: var(--gradient-brand);
@@ -69,53 +76,94 @@
   --shadow-card: var(--shadow-card);
   --shadow-soft: var(--shadow-soft);
   --shadow-glow: var(--shadow-glow);
+  --shadow-denim: var(--denim-shadow);
 
-  /* ===== HIVE brand ramps (Tailwind v4 utilities: bg-hive-navy-500, etc.) ===== */
-  --color-hive-navy-50:  var(--hive-navy-50);
-  --color-hive-navy-100: var(--hive-navy-100);
-  --color-hive-navy-200: var(--hive-navy-200);
-  --color-hive-navy-300: var(--hive-navy-300);
-  --color-hive-navy-400: var(--hive-navy-400);
-  --color-hive-navy-500: var(--hive-navy-500);
-  --color-hive-navy-600: var(--hive-navy-600);
-  --color-hive-navy-700: var(--hive-navy-700);
-  --color-hive-navy-800: var(--hive-navy-800);
-  --color-hive-navy-900: var(--hive-navy-900);
+  /* ===== Denim tokens as utilities (bg-pri, text-deep, bg-acct, border-line, ...) ===== */
+  --color-deep: var(--denim-deep);
+  --color-pri: var(--denim-pri);
+  --color-steel: var(--denim-steel);
+  --color-hi: var(--denim-hi);
+  --color-acc: var(--denim-acc);
+  --color-accd: var(--denim-accd);
+  --color-accl: var(--denim-accl);
+  --color-acclh: var(--denim-acclh);
+  --color-acct: var(--denim-acct);
+  --color-acctb: var(--denim-acctb);
+  --color-pt0: var(--denim-pt0);
+  --color-pt: var(--denim-pt);
+  --color-pt2: var(--denim-pt2);
+  --color-paper: var(--denim-paper);
+  --color-ink: var(--denim-ink);
+  --color-line: var(--denim-line);
+  --color-ondark: var(--denim-ondark);
+  --color-ondarkp: var(--denim-ondarkp);
+  --color-body: var(--denim-text);
 
-  --color-nectar-gold-50:  var(--nectar-gold-50);
-  --color-nectar-gold-100: var(--nectar-gold-100);
-  --color-nectar-gold-200: var(--nectar-gold-200);
-  --color-nectar-gold-300: var(--nectar-gold-300);
-  --color-nectar-gold-400: var(--nectar-gold-400);
-  --color-nectar-gold-500: var(--nectar-gold-500);
-  --color-nectar-gold-600: var(--nectar-gold-600);
-  --color-nectar-gold-700: var(--nectar-gold-700);
-  --color-nectar-gold-800: var(--nectar-gold-800);
-  --color-nectar-gold-900: var(--nectar-gold-900);
+  /* ===== Denim ramps. These replace Tailwind's default palette in this app:
+     slate/gray → haze, blue/sky/indigo/violet → denim, green/emerald → success,
+     amber/yellow/orange → warning, red/rose → danger. ===== */
+  /* denim ramp */
+  --color-denim-50: #F4F7FA;
+  --color-denim-100: #EAF0F6;
+  --color-denim-200: #D3DFEB;
+  --color-denim-300: #A9C3DB;
+  --color-denim-400: #6096BA;
+  --color-denim-500: #4F80AC;
+  --color-denim-600: #3A6592;
+  --color-denim-700: #274C77;
+  --color-denim-800: #1B3350;
+  --color-denim-900: #142840;
+  --color-denim-950: #0E1D30;
+  /* haze ramp */
+  --color-haze-50: #F6F8FA;
+  --color-haze-100: #EEF2F6;
+  --color-haze-200: #E1E7EE;
+  --color-haze-300: #C6D0DB;
+  --color-haze-400: #8E9AA7;
+  --color-haze-500: #5F6B78;
+  --color-haze-600: #4A5767;
+  --color-haze-700: #3E4B5A;
+  --color-haze-800: #2A394B;
+  --color-haze-900: #17283D;
+  --color-haze-950: #0F1C2B;
+  /* success ramp */
+  --color-success-50: #EEF7E9;
+  --color-success-100: #DDF2D3;
+  --color-success-200: #CDEBC0;
+  --color-success-300: #A8D893;
+  --color-success-400: #74BC5D;
+  --color-success-500: #4D9F3A;
+  --color-success-600: #3B7D2C;
+  --color-success-700: #326A26;
+  --color-success-800: #29561F;
+  --color-success-900: #1F4218;
+  --color-success-950: #142B10;
+  /* warning ramp */
+  --color-warning-50: #FFF4E5;
+  --color-warning-100: #FFE9CC;
+  --color-warning-200: #FED6A6;
+  --color-warning-300: #FBB774;
+  --color-warning-400: #F59546;
+  --color-warning-500: #E9791F;
+  --color-warning-600: #CF5F10;
+  --color-warning-700: #B54708;
+  --color-warning-800: #93370D;
+  --color-warning-900: #7A2E0E;
+  --color-warning-950: #4E1C07;
+  /* danger ramp */
+  --color-danger-50: #FDECEC;
+  --color-danger-100: #FEE4E2;
+  --color-danger-200: #FECDCA;
+  --color-danger-300: #FDA29B;
+  --color-danger-400: #F97066;
+  --color-danger-500: #F04438;
+  --color-danger-600: #D92D20;
+  --color-danger-700: #B42318;
+  --color-danger-800: #912018;
+  --color-danger-900: #7A271A;
+  --color-danger-950: #55160C;
 
-  --color-nectar-violet-50:  var(--nectar-violet-50);
-  --color-nectar-violet-100: var(--nectar-violet-100);
-  --color-nectar-violet-200: var(--nectar-violet-200);
-  --color-nectar-violet-300: var(--nectar-violet-300);
-  --color-nectar-violet-400: var(--nectar-violet-400);
-  --color-nectar-violet-500: var(--nectar-violet-500);
-  --color-nectar-violet-600: var(--nectar-violet-600);
-  --color-nectar-violet-700: var(--nectar-violet-700);
-  --color-nectar-violet-800: var(--nectar-violet-800);
-  --color-nectar-violet-900: var(--nectar-violet-900);
-
-  --color-hive-teal-50:  var(--hive-teal-50);
-  --color-hive-teal-100: var(--hive-teal-100);
-  --color-hive-teal-200: var(--hive-teal-200);
-  --color-hive-teal-300: var(--hive-teal-300);
-  --color-hive-teal-400: var(--hive-teal-400);
-  --color-hive-teal-500: var(--hive-teal-500);
-  --color-hive-teal-600: var(--hive-teal-600);
-  --color-hive-teal-700: var(--hive-teal-700);
-  --color-hive-teal-800: var(--hive-teal-800);
-  --color-hive-teal-900: var(--hive-teal-900);
-
-  /* Locked Hive theme — single source in src/styles/hive-theme.css */
+  /* App roles (src/styles/hive-theme.css) */
   --color-hive-bg: var(--hive-bg);
   --color-hive-sidebar: var(--hive-sidebar);
   --color-hive-chrome-text: var(--hive-chrome-text);
@@ -123,10 +171,10 @@
   --color-hive-surface: var(--hive-surface);
   --color-hive-border: var(--hive-border);
   --color-hive-steel: var(--hive-steel);
-  --color-hive-gold: var(--hive-gold);
-  --color-hive-gold-hover: var(--hive-gold-hover);
-  --color-hive-gold-soft: var(--hive-gold-soft);
-  --color-hive-on-gold: var(--hive-on-gold);
+  --color-hive-accent: var(--hive-accent);
+  --color-hive-accent-hover: var(--hive-accent-hover);
+  --color-hive-accent-soft: var(--hive-accent-soft);
+  --color-hive-on-accent: var(--hive-on-accent);
   --color-hive-hover: var(--hive-hover);
   --color-hive-primary: var(--hive-primary);
   --color-hive-text: var(--hive-text);
@@ -138,195 +186,8 @@
 }
 
 :root {
-  --radius: 0.5rem;
-
-  /* === HIVE brand ramps — remapped to the locked steel room === */
-  --hive-navy-50:  #F4F6F8;
-  --hive-navy-100: #E4E8ED;
-  --hive-navy-200: #C5CDD5;
-  --hive-navy-300: #9AA6B2;
-  --hive-navy-400: #6B7A89;
-  --hive-navy-500: #3E5368;
-  --hive-navy-600: #35475A;
-  --hive-navy-700: #2C3C4D;
-  --hive-navy-800: #243040;
-  --hive-navy-900: #243040;
-
-  --nectar-gold-50:  #F8F3E4;
-  --nectar-gold-100: #F3EBD4;
-  --nectar-gold-200: #E8D7A8;
-  --nectar-gold-300: #DCC46F;
-  --nectar-gold-400: #D4AF37;
-  --nectar-gold-500: #C9A227;
-  --nectar-gold-600: #B08E1F;
-  --nectar-gold-700: #8E7219;
-  --nectar-gold-800: #6B5613;
-  --nectar-gold-900: #4A3B0D;
-
-  --nectar-violet-50:  #F3EEF9;
-  --nectar-violet-100: #E2D5F0;
-  --nectar-violet-200: #C7AEE2;
-  --nectar-violet-300: #AA84D3;
-  --nectar-violet-400: #8955C2;
-  --nectar-violet-500: #6C2BB3;
-  --nectar-violet-600: #5F269E;
-  --nectar-violet-700: #4E1F81;
-  --nectar-violet-800: #3C1864;
-  --nectar-violet-900: #2B1148;
-
-  --hive-teal-50:  #E4EDE5;
-  --hive-teal-100: #D4E2D6;
-  --hive-teal-200: #B5CDB9;
-  --hive-teal-300: #96B89C;
-  --hive-teal-400: #7AA382;
-  --hive-teal-500: #6B8F71;
-  --hive-teal-600: #58785D;
-  --hive-teal-700: #2F4A35;
-  --hive-teal-800: #243040;
-  --hive-teal-900: #243040;
-
-  --ink: var(--hive-text);
-
-  /* === HIVE rebrand surfaces (raw hex) === */
-  --surface:        var(--hive-surface);
-  --surface-2:      var(--hive-canvas);
-  --surface-3:      var(--hive-muted-surface);
-  --border-light:   var(--hive-border);
-  --border-dark:    var(--hive-border);
-
-  --navy-900:       var(--hive-ink);
-  --navy-800:       var(--hive-sidebar);
-  --navy-700:       #35475a;
-
-  --amber-500:      var(--hive-gold);
-  --amber-600:      var(--hive-gold-hover);
-
-  --text-strong:    var(--hive-text);
-  --text-soft:      var(--hive-text-muted);
-
-  --gradient-amber:  var(--hive-gold);
-  --gradient-navy:   var(--hive-sidebar);
-
-  /* HIVE Training storefront — same room as the rest of the product. */
-  --training-navy:      var(--hive-sidebar);
-  --training-gold:      var(--hive-gold);
-  --training-gold-soft: var(--hive-gold-soft);
-  --training-bg:        var(--hive-canvas);
-  --training-glow:      0 0 0 1px color-mix(in srgb, var(--hive-gold) 28%, transparent),
-    0 20px 60px -20px color-mix(in srgb, var(--hive-gold) 22%, transparent);
-
-  --btn-primary:        var(--hive-primary);  --btn-primary-hover: var(--hive-primary-hover);  --btn-primary-active: var(--hive-primary);
-  --btn-gold:           var(--hive-gold);  --btn-gold-hover:    var(--hive-gold-hover);  --btn-gold-active:    var(--hive-gold);
-  --btn-violet:         var(--hive-sidebar);  --btn-violet-hover:  #35475a;  --btn-violet-active:  #2c3c4d;
-  --btn-teal:           var(--hive-ink);  --btn-teal-hover:    #35475a;  --btn-teal-active:    #2c3c4d;
-
-  /* Legacy raw aliases */
-  --hive-navy: var(--hive-navy-500);
-  --nectar-gold: var(--nectar-gold-500);
-  --nectar-violet: var(--nectar-violet-500);
-  --hive-teal: var(--hive-teal-500);
-
-  /* Semantic tokens — remapped in hive-theme.css; values here keep
-     Tailwind @theme in sync if that file is not yet applied. */
-  --background: var(--hive-canvas);
-  --foreground: var(--hive-text);
-  --surface-warm: var(--hive-canvas);
-
-  --card: var(--hive-surface);
-  --card-foreground: var(--hive-text);
-  --popover: var(--hive-surface);
-  --popover-foreground: var(--hive-text);
-
-  --primary: var(--hive-ink);
-  --primary-foreground: #ffffff;
-
-  --accent: var(--hive-gold);
-  --accent-foreground: var(--hive-on-gold);
-
-  --accent-2: var(--hive-gold);
-  --accent-3: var(--hive-ok);
-
-  --secondary: var(--hive-muted-surface);
-  --secondary-foreground: var(--hive-text);
-
-  --muted: var(--hive-muted-surface);
-  --muted-foreground: var(--hive-text-muted);
-
-  --destructive: var(--hive-danger);
-  --destructive-foreground: #ffffff;
-
-  --success: var(--hive-ok);
-  --success-foreground: #ffffff;
-  --warning: var(--hive-gold);
-  --warning-foreground: var(--hive-on-gold);
-  --info: var(--hive-info);
-  --info-foreground: #ffffff;
-
-  --border: var(--hive-border);
-  --input: var(--hive-border);
-  --ring: var(--hive-gold);
-
-  --gradient-hero: var(--hive-canvas);
-  --gradient-brand: var(--hive-gold);
-  --gradient-life: var(--hive-gold);
-  --gradient-soft: color-mix(in srgb, var(--hive-gold) 6%, var(--hive-canvas));
-
-  --shadow-elegant: 0 18px 40px -24px rgba(36, 48, 64, 0.18);
-  --shadow-card: 0 1px 0 color-mix(in srgb, var(--hive-border) 80%, transparent);
-  --shadow-soft: 0 1px 2px rgba(36, 48, 64, 0.06);
-  --shadow-glow: 0 0 0 1px color-mix(in srgb, var(--hive-gold) 22%, transparent),
-    0 12px 32px -16px color-mix(in srgb, var(--hive-gold) 28%, transparent);
-
-  --sidebar: var(--hive-sidebar);
-  --sidebar-foreground: var(--hive-chrome-text);
-  --sidebar-primary: var(--hive-gold);
-  --sidebar-primary-foreground: var(--hive-on-gold);
-  --sidebar-accent: color-mix(in srgb, white 10%, var(--hive-sidebar));
-  --sidebar-accent-foreground: var(--hive-chrome-text);
-  --sidebar-border: color-mix(in srgb, white 14%, var(--hive-sidebar));
-  --sidebar-ring: var(--hive-gold);
-
-  /* ===== Scheduler service-code families (Phase 1) ===== */
-  --sched-residential:       oklch(0.62 0.13 195);   /* teal */
-  --sched-supported-living:  oklch(0.62 0.16 245);   /* sky */
-  --sched-day-supports:      oklch(0.68 0.16 155);   /* emerald */
-  --sched-employment:        oklch(0.58 0.20 295);   /* violet */
-  --sched-respite:           oklch(0.70 0.18 350);   /* pink */
-  --sched-other:             oklch(0.60 0.02 250);   /* slate */
+  --radius: 0.75rem;
 }
-
-.dark {
-  --background: var(--hive-canvas);
-  --foreground: var(--hive-text);
-  --surface-warm: var(--hive-canvas);
-  --card: var(--hive-surface);
-  --card-foreground: var(--hive-text);
-  --popover: var(--hive-surface);
-  --popover-foreground: var(--hive-text);
-  --primary: var(--hive-ink);
-  --primary-foreground: #ffffff;
-  --secondary: var(--hive-muted-surface);
-  --secondary-foreground: var(--hive-text);
-  --muted: var(--hive-muted-surface);
-  --muted-foreground: var(--hive-text-muted);
-  --accent: var(--hive-gold);
-  --accent-foreground: var(--hive-on-gold);
-  --accent-2: var(--hive-gold);
-  --accent-3: var(--hive-ok);
-  --border: var(--hive-border);
-  --input: var(--hive-border);
-  --ring: var(--hive-gold);
-
-  /* Scheduler service-code families (dark) */
-  --sched-residential:       oklch(0.70 0.13 195);
-  --sched-supported-living:  oklch(0.72 0.16 245);
-  --sched-day-supports:      oklch(0.74 0.16 155);
-  --sched-employment:        oklch(0.70 0.20 295);
-  --sched-respite:           oklch(0.78 0.18 350);
-  --sched-other:             oklch(0.74 0.02 250);
-}
-
-
 
 @layer base {
   * { border-color: var(--color-border); }
@@ -337,18 +198,25 @@
     font-family: var(--font-sans);
     font-size: 16px;
     line-height: 1.55;
-    font-feature-settings: "cv11", "ss01", "ss03";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
   }
+  main { overflow-x: clip; }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     line-height: 1.15;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
   }
-  h1 { font-size: var(--text-3xl); font-weight: 700; letter-spacing: -0.02em; }
-  h2 { font-size: var(--text-2xl); }
-  h3 { font-size: var(--text-xl); }
+  h1 { font-size: var(--text-3xl); line-height: 1.1; letter-spacing: -0.025em; color: var(--denim-deep); }
+  h2 { font-size: var(--text-2xl); letter-spacing: -0.02em; }
+  h3 { font-size: var(--text-xl); font-weight: 600; }
+  h4, h5, h6 { font-weight: 600; }
+  ::selection { background: var(--denim-accl); color: var(--denim-ink); }
+  :focus-visible { outline-color: var(--denim-pri); }
+  input::placeholder, textarea::placeholder { color: var(--denim-muted); }
 
   @media (min-width: 768px) {
     :root {
@@ -356,7 +224,16 @@
       --page-padding-y: 2rem;
     }
   }
-  .text-display { font-family: var(--font-display); font-size: 2.5rem; font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; }
+  .text-display { font-family: var(--font-display); font-size: 2.5rem; font-weight: 700; line-height: 1.1; letter-spacing: -0.025em; color: var(--denim-deep); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @layer utilities {

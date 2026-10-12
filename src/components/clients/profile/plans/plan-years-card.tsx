@@ -79,7 +79,7 @@ export function PlanYearsCard({
       <div className="space-y-3" data-testid="client-plan-years">
         {words && rows.length ? (
           <div
-            className={`${NOTE} border-hive-gold/50 bg-hive-gold-soft`}
+            className={`${NOTE} border-hive-accent/50 bg-hive-accent-soft`}
             data-testid="plan-reminder"
           >
             <CalendarClock className="h-4 w-4 shrink-0" aria-hidden />

@@ -213,7 +213,7 @@ export function SummaryEditor({
                 }}
               />
             ) : draftMut.isPending || nectarMut.isPending ? (
-              <div className="rounded border bg-blue-50 px-3 py-2 text-sm text-blue-800 flex items-center gap-2">
+              <div className="rounded border bg-denim-50 px-3 py-2 text-sm text-denim-800 flex items-center gap-2">
                 <Loader2 className="size-4 animate-spin" />{" "}
                 {draftMut.isPending ? "Nectar is drafting…" : "Nectar is reviewing…"}
               </div>

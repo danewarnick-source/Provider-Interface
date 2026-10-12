@@ -77,7 +77,7 @@ export function ContactCard({
             {c.name}
             {c.is_primary ? (
               <Star
-                className="ml-1 inline h-3 w-3 fill-hive-gold align-baseline text-hive-gold"
+                className="ml-1 inline h-3 w-3 fill-hive-accent align-baseline text-hive-accent"
                 aria-label="Main contact"
               />
             ) : null}

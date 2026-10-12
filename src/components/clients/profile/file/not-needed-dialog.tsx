@@ -62,7 +62,7 @@ export function NotNeededDialog({
               className={cn(
                 "min-h-11 rounded-full border px-3 text-sm",
                 choice === r
-                  ? "border-hive-ink bg-hive-gold-soft font-medium text-hive-ink"
+                  ? "border-hive-ink bg-hive-accent-soft font-medium text-hive-ink"
                   : "border-hive-border bg-hive-surface text-muted-foreground",
               )}
             >

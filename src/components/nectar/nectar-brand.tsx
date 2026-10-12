@@ -8,8 +8,8 @@ import { PiMark } from "@/components/pi-landing/pi-mark";
  * Brand tokens:
  *   navy surface  #141a3d  (--navy-800)
  *   navy deep     var(--hive-text)  (--navy-900)
- *   amber accent  var(--hive-gold) / #F2A23C  (--amber-500)
- *   amber-on-navy text  var(--hive-gold)
+ *   amber accent  var(--hive-accent) / #F2A23C  (--color-warning-500)
+ *   amber-on-navy text  var(--hive-accent)
  *   amber-pill text     #412402 (dark cocoa for AA on amber)
  *
  * Use these components anywhere NECTAR generates, summarizes,
@@ -40,14 +40,14 @@ export function NectarMark({
       aria-hidden
       className={cn(
         "relative inline-flex shrink-0 items-center justify-center rounded-full",
-        "bg-[var(--hive-sidebar)] text-[var(--hive-gold)] ring-1 ring-[var(--hive-gold)]/30",
+        "bg-[var(--hive-sidebar)] text-[var(--hive-accent-text)] ring-1 ring-[var(--hive-accent)]/30",
         dims,
         className,
       )}
     >
       <PiMark className={cn(hex)} />
       {ornament ? (
-        <span className="absolute -right-0.5 -top-0.5 inline-flex items-center justify-center rounded-full bg-[var(--hive-gold)] p-[2px] text-[var(--hive-on-gold)] shadow-sm">
+        <span className="absolute -right-0.5 -top-0.5 inline-flex items-center justify-center rounded-full bg-[var(--hive-accent)] p-[2px] text-[var(--hive-on-accent)] shadow-sm">
           <Sparkles className={spark} strokeWidth={2.5} />
         </span>
       ) : null}
@@ -80,8 +80,8 @@ export function NectarBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full bg-[var(--hive-gold)]",
-        "font-bold uppercase tracking-wider text-[var(--hive-on-gold)]",
+        "inline-flex items-center gap-1.5 rounded-full bg-[var(--hive-accent)]",
+        "font-bold uppercase tracking-wider text-[var(--hive-on-accent)]",
         "shadow-[0_1px_0_rgba(255,255,255,0.35)_inset]",
         pad,
         className,
@@ -116,8 +116,8 @@ export function NectarChip({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border border-[var(--hive-gold)]/40 bg-[color-mix(in_srgb,var(--hive-gold)_10%,transparent)]",
-        "px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--hive-gold)]",
+        "inline-flex items-center gap-1 rounded-full border border-[var(--hive-accent)]/40 bg-[color-mix(in_srgb,var(--hive-accent)_10%,transparent)]",
+        "px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--hive-accent-text)]",
         className,
       )}
     >
@@ -149,7 +149,7 @@ export const NectarSurface = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEl
           className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full"
           style={{
             background:
-              "radial-gradient(closest-side, color-mix(in srgb, var(--hive-gold) 18%, transparent), transparent 70%)",
+              "radial-gradient(closest-side, color-mix(in srgb, var(--hive-accent) 18%, transparent), transparent 70%)",
           }}
         />
         {children}
@@ -171,8 +171,8 @@ export function NectarCard({
     <div
       {...rest}
       className={cn(
-        "relative overflow-hidden rounded-xl border border-[var(--hive-gold)]/30 bg-card shadow-sm",
-        "before:absolute before:inset-y-0 before:left-0 before:w-1 before:bg-[var(--hive-gold)]",
+        "relative overflow-hidden rounded-xl border border-[var(--hive-accent)]/30 bg-card shadow-sm",
+        "before:absolute before:inset-y-0 before:left-0 before:w-1 before:bg-[var(--hive-accent)]",
         className,
       )}
     >
@@ -213,7 +213,7 @@ export function NectarHeader({
               <div className="flex items-center gap-2">
                 <NectarBadge size="xs" />
                 {eyebrow && (
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--hive-gold)]">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--hive-accent-text)]">
                     {eyebrow}
                   </span>
                 )}
@@ -273,12 +273,12 @@ export const NectarButton = forwardRef<HTMLButtonElement, NectarButtonProps>(
     ref,
   ) {
     const base =
-      "inline-flex min-h-[40px] items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hive-gold)]/50 focus-visible:ring-offset-2";
+      "inline-flex min-h-[40px] items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hive-accent)]/50 focus-visible:ring-offset-2";
     const styles =
       variant === "amber"
         ? "bg-[var(--hive-primary)] text-[var(--hive-primary-fg)] hover:bg-[var(--hive-primary-hover)]"
         : variant === "ghost"
-        ? "border border-[var(--hive-gold)]/40 bg-[color-mix(in_srgb,var(--hive-gold)_10%,transparent)] text-[var(--hive-gold)] hover:bg-[color-mix(in_srgb,var(--hive-gold)_20%,transparent)]"
+        ? "border border-[var(--hive-accent)]/40 bg-[color-mix(in_srgb,var(--hive-accent)_10%,transparent)] text-[var(--hive-accent-text)] hover:bg-[color-mix(in_srgb,var(--hive-accent)_20%,transparent)]"
         : "bg-[var(--hive-primary)] text-[var(--hive-primary-fg)] hover:bg-[var(--hive-primary-hover)]";
     const leading = loading ? (
       <Loader2 className="h-4 w-4 animate-spin" />

@@ -13,7 +13,7 @@ export function GapsReason({
   onReason: (v: string) => void;
 }) {
   return (
-    <div className="space-y-2 rounded-xl border border-hive-gold/50 bg-hive-gold-soft p-3 text-sm text-hive-ink">
+    <div className="space-y-2 rounded-xl border border-hive-accent/50 bg-hive-accent-soft p-3 text-sm text-hive-ink">
       <p className="font-medium">
         {gaps.length} support{gaps.length === 1 ? " has" : "s have"} no strategy yet:
       </p>

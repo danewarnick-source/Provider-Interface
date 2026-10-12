@@ -54,7 +54,7 @@ export function ClientSpendingShiftPanel({ shiftId, clientId }: Props) {
     >
       <header className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-warning-100 text-warning-800">
             <Wallet className="h-4 w-4" />
           </span>
           <div className="leading-tight">
@@ -67,7 +67,7 @@ export function ClientSpendingShiftPanel({ shiftId, clientId }: Props) {
         <Button
           size="sm"
           onClick={() => setOpenNew(true)}
-          className="h-9 gap-1 bg-amber-500 text-white hover:bg-amber-600"
+          className="h-9 gap-1 bg-warning-500 text-white hover:bg-warning-600"
         >
           <Plus className="h-4 w-4" /> Entry
         </Button>
@@ -170,7 +170,7 @@ function EntryCard({
             <p className="mt-1 text-[11px] text-muted-foreground italic">{entry.notes}</p>
           )}
         </div>
-        <span className="shrink-0 rounded-md bg-amber-100 px-2 py-1 text-xs font-semibold tabular-nums text-amber-900">
+        <span className="shrink-0 rounded-md bg-warning-100 px-2 py-1 text-xs font-semibold tabular-nums text-warning-900">
           ${Number(entry.amount).toFixed(2)}
         </span>
       </div>
@@ -209,7 +209,7 @@ function EntryCard({
           <button
             type="button"
             onClick={removeEntry}
-            className="ml-auto inline-flex h-7 items-center gap-1 rounded px-2 text-[11px] text-rose-600 hover:bg-rose-50"
+            className="ml-auto inline-flex h-7 items-center gap-1 rounded px-2 text-[11px] text-danger-600 hover:bg-danger-50"
             aria-label="Remove entry"
           >
             <Trash2 className="h-3 w-3" /> Remove
@@ -290,7 +290,7 @@ function NewEntryDialog({
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Wallet className="h-4 w-4 text-amber-600" />
+            <Wallet className="h-4 w-4 text-warning-600" />
             Log Client Spending
           </DialogTitle>
           <DialogDescription>
@@ -362,7 +362,7 @@ function NewEntryDialog({
           <Button
             onClick={() => submit.mutate()}
             disabled={submit.isPending}
-            className="bg-amber-500 text-white hover:bg-amber-600"
+            className="bg-warning-500 text-white hover:bg-warning-600"
           >
             {submit.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save entry

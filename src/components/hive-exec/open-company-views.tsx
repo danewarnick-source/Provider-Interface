@@ -51,7 +51,7 @@ export function OpenCompanyViews({
         <button
           type="button"
           aria-label={adminName}
-          className={`${btn} border-[var(--hive-gold)]/50 bg-[var(--hive-gold)] text-[#1a1208] hover:brightness-105`}
+          className={`${btn} border-[var(--hive-accent)]/50 bg-[var(--hive-accent)] text-[#1a1208] hover:brightness-105`}
           onClick={() => go("admin")}
         >
           <Building2 className="h-3.5 w-3.5" />

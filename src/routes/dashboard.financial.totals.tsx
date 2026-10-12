@@ -384,7 +384,7 @@ function TotalsPage() {
                 <td className="px-3 py-2 text-right tabular-nums">{fmtUSD(yearTotals.stateTax)}</td>
                 <td className="px-3 py-2"></td>
                 <td className="px-3 py-2 text-right tabular-nums">{fmtUSD(yearTotals.received)}</td>
-                <td className={`px-3 py-2 text-right tabular-nums ${yearTotals.netReceived >= 0 ? "text-emerald-600" : "text-destructive"}`}>{fmtUSD(yearTotals.netReceived)}</td>
+                <td className={`px-3 py-2 text-right tabular-nums ${yearTotals.netReceived >= 0 ? "text-success-600" : "text-destructive"}`}>{fmtUSD(yearTotals.netReceived)}</td>
               </tr>
             </tfoot>
           </table>
@@ -506,7 +506,7 @@ function MonthRow({
           </div>
         </div>
       </td>
-      <td className={`px-3 py-2 text-right tabular-nums font-semibold ${m.netReceived >= 0 ? "text-emerald-600" : "text-destructive"}`}>
+      <td className={`px-3 py-2 text-right tabular-nums font-semibold ${m.netReceived >= 0 ? "text-success-600" : "text-destructive"}`}>
         {fmtUSD(m.netReceived)}
       </td>
     </tr>

@@ -78,7 +78,7 @@ export function OlderRecords({
           {q.isLoading ? (
             <p className="text-sm text-muted-foreground">Loading older records…</p>
           ) : q.error ? (
-            <p className="text-sm text-rose-700">
+            <p className="text-sm text-danger-700">
               {q.error instanceof Error ? q.error.message : "Could not load older records."}
             </p>
           ) : rows.length === 0 ? (

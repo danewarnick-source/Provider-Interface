@@ -10,10 +10,10 @@
 export const colors = {
   brand: {
     navy: "var(--hive-sidebar)",
-    gold: "var(--hive-gold)",
-    goldHover: "var(--hive-gold-hover)",
-    goldSoft: "var(--hive-gold-soft)",
-    onGold: "var(--hive-on-gold)",
+    gold: "var(--hive-accent)",
+    goldHover: "var(--hive-accent-hover)",
+    goldSoft: "var(--hive-accent-soft)",
+    onGold: "var(--hive-on-accent)",
     cream: "var(--hive-chrome-text)",
   },
   surface: {
@@ -34,15 +34,15 @@ export const colors = {
   border: {
     default: "var(--hive-border)",
     divider: "var(--hive-border)",
-    focus: "var(--hive-gold)",
+    focus: "var(--hive-accent)",
   },
   state: {
     success: "var(--hive-ok)",
     successFg: "var(--hive-ok-fg)",
     successSoft: "var(--hive-ok-soft)",
-    warning: "var(--hive-gold)",
-    warningFg: "var(--hive-on-gold)",
-    warningSoft: "var(--hive-gold-soft)",
+    warning: "var(--hive-accent)",
+    warningFg: "var(--hive-on-accent)",
+    warningSoft: "var(--hive-accent-soft)",
     error: "var(--hive-danger)",
     errorFg: "var(--hive-danger-fg)",
     errorSoft: "var(--hive-danger-soft)",

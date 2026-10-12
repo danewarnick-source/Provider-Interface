@@ -75,7 +75,7 @@ export function SummaryDocument({ doc, edit }: { doc: SummaryDoc; edit?: DocEdit
         <p className="text-xs font-medium text-muted-foreground">{doc.provider}</p>
         <p className="text-lg font-semibold text-hive-ink">{doc.title}</p>
         {doc.draftMark ? (
-          <p className="mt-1 inline-flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900">
+          <p className="mt-1 inline-flex items-center gap-1 rounded bg-warning-100 px-2 py-0.5 text-xs font-medium text-warning-900">
             <Sparkles className="size-3" /> {doc.draftMark}
           </p>
         ) : null}

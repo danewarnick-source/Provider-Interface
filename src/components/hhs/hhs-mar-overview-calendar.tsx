@@ -19,11 +19,11 @@ type LogRow = {
 };
 
 const DOT: Record<EmarStatus, string> = {
-  self_administered: "bg-emerald-500",
-  refused: "bg-rose-500",
-  missed: "bg-amber-500",
-  loa: "bg-sky-500",
-  omitted: "bg-amber-600",
+  self_administered: "bg-success-500",
+  refused: "bg-danger-500",
+  missed: "bg-warning-500",
+  loa: "bg-denim-500",
+  omitted: "bg-warning-600",
 };
 
 function summarize(statuses: EmarStatus[]): string {
@@ -101,19 +101,19 @@ export function HhsMarOverviewCalendar({
           legend={
             <div className="flex flex-wrap gap-3 text-[11px] text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" aria-hidden />
+                <span className="h-2.5 w-2.5 rounded-full bg-success-500" aria-hidden />
                 Self administered
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-amber-500" aria-hidden />
+                <span className="h-2.5 w-2.5 rounded-full bg-warning-500" aria-hidden />
                 Missed
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-rose-500" aria-hidden />
+                <span className="h-2.5 w-2.5 rounded-full bg-danger-500" aria-hidden />
                 Refused
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-sky-500" aria-hidden />
+                <span className="h-2.5 w-2.5 rounded-full bg-denim-500" aria-hidden />
                 LOA
               </span>
             </div>

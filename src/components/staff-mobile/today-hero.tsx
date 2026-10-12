@@ -105,7 +105,7 @@ export function TodayHero() {
         aria-label="Active shift"
         className={`rounded-2xl border p-5 shadow-[var(--shadow-card)] ${
           needsClockOut
-            ? "border-amber-400/60 bg-amber-500/10"
+            ? "border-warning-400/60 bg-warning-500/10"
             : "border-[#15a06a]/50 bg-[#15a06a]/5"
         }`}
       >
@@ -114,7 +114,7 @@ export function TodayHero() {
             <span
               className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl ${
                 needsClockOut
-                  ? "bg-amber-500/20 text-amber-800"
+                  ? "bg-warning-500/20 text-warning-800"
                   : "bg-[#15a06a]/15 text-[#0d5c3d]"
               }`}
             >
@@ -123,7 +123,7 @@ export function TodayHero() {
             <div className="min-w-0">
               <p
                 className={`text-xs font-semibold uppercase tracking-wide ${
-                  needsClockOut ? "text-amber-800" : "text-[#0d5c3d]"
+                  needsClockOut ? "text-warning-800" : "text-[#0d5c3d]"
                 }`}
               >
                 {needsClockOut ? "Shift in progress · Needs your attention" : "Shift in progress"}
@@ -257,11 +257,11 @@ export function TodayHero() {
 
   const tone =
     primaryDaily || !primary
-      ? "border-amber-400/50 bg-amber-500/5"
+      ? "border-warning-400/50 bg-warning-500/5"
       : state === "now"
         ? "border-[#15a06a]/50 bg-[#15a06a]/5"
         : state === "soon"
-          ? "border-amber-400/50 bg-amber-500/5"
+          ? "border-warning-400/50 bg-warning-500/5"
           : "border-border bg-card";
 
   const eyebrow = primaryDaily || !primary

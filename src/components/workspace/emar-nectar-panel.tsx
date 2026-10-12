@@ -35,7 +35,7 @@ export function EmarNectarPanel({ clientId }: { clientId: string }) {
   return (
     <Card className="p-4">
       <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
-        <Sparkles className="h-4 w-4 text-amber-500" /> Nectar — eMAR helper
+        <Sparkles className="h-4 w-4 text-warning-500" /> Nectar — eMAR helper
         <Badge variant="outline" className="ml-auto text-[10px]">Advisory draft</Badge>
       </div>
       <p className="mb-3 text-[11px] text-muted-foreground">
@@ -57,8 +57,8 @@ export function EmarNectarPanel({ clientId }: { clientId: string }) {
         </p>
       )}
       {!!result && (
-        <div className="rounded-md border border-amber-200 bg-amber-50/50 p-3 text-sm dark:border-amber-800 dark:bg-amber-950/20">
-          <div className="mb-1 flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+        <div className="rounded-md border border-warning-200 bg-warning-50/50 p-3 text-sm dark:border-warning-800 dark:bg-warning-950/20">
+          <div className="mb-1 flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-warning-700 dark:text-warning-300">
             <AlertTriangle className="h-3 w-3" /> Draft — review before acting
           </div>
           <p className="whitespace-pre-wrap leading-relaxed">{result}</p>

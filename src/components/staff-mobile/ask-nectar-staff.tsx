@@ -177,7 +177,7 @@ export function AskNectarStaff({ clientId, initialQuestion }: AskNectarStaffProp
       >
         {isEmpty && (
           <div className="space-y-3">
-            <div className="flex items-start gap-2 rounded-lg border border-[var(--hive-gold)]/30 bg-[#fff7ed] px-3 py-2 text-[11px] leading-snug text-[#7a4a0a]">
+            <div className="flex items-start gap-2 rounded-lg border border-[var(--hive-accent)]/30 bg-[#fff7ed] px-3 py-2 text-[11px] leading-snug text-[#7a4a0a]">
               <Shield className="mt-0.5 h-3 w-3 shrink-0" />
               <span>
                 I only know your assignments, your shifts, and your policies.
@@ -198,7 +198,7 @@ export function AskNectarStaff({ clientId, initialQuestion }: AskNectarStaffProp
                   key={s}
                   type="button"
                   onClick={() => send(s)}
-                  className="block min-h-[40px] w-full rounded-lg border border-border bg-card px-3 py-2 text-left text-[13px] leading-snug text-foreground transition hover:border-[var(--hive-gold)]/50 hover:bg-[#fff7ed] active:scale-[0.99]"
+                  className="block min-h-[40px] w-full rounded-lg border border-border bg-card px-3 py-2 text-left text-[13px] leading-snug text-foreground transition hover:border-[var(--hive-accent)]/50 hover:bg-[#fff7ed] active:scale-[0.99]"
                 >
                   {s}
                 </button>
@@ -228,7 +228,7 @@ export function AskNectarStaff({ clientId, initialQuestion }: AskNectarStaffProp
                 {m.reply?.deepLink?.path === STAFF_PAY_PERIOD_PATH && (
                   <Link
                     to="/dashboard"
-                    className="mt-2 inline-flex min-h-[44px] items-center gap-1.5 rounded-md bg-[var(--hive-gold)] px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-[#b8651a]"
+                    className="mt-2 inline-flex min-h-[44px] items-center gap-1.5 rounded-md bg-[var(--hive-accent)] px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-[#b8651a]"
                   >
                     {m.reply.deepLink.label || STAFF_PAY_PERIOD_LINK_LABEL}
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -293,7 +293,7 @@ export function AskNectarStaff({ clientId, initialQuestion }: AskNectarStaffProp
             }}
             placeholder="Ask about your schedule, caseload, or training…"
             rows={1}
-            className="min-h-[48px] max-h-32 flex-1 resize-none rounded-full border border-input bg-background px-4 py-3 text-sm leading-snug focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hive-gold)]/40"
+            className="min-h-[48px] max-h-32 flex-1 resize-none rounded-full border border-input bg-background px-4 py-3 text-sm leading-snug focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hive-accent)]/40"
             disabled={mutation.isPending}
           />
           <NectarButton

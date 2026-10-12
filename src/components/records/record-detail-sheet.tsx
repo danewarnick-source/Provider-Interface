@@ -258,7 +258,7 @@ export function RecordDetailSheet({
         </SheetHeader>
 
         {(row.is_edited_by_admin || row.edited_by_admin_name) && (
-          <div className="mt-3 rounded-md border border-amber-300 bg-amber-50/60 px-3 py-2 text-xs text-amber-900 dark:bg-amber-500/10 dark:text-amber-200">
+          <div className="mt-3 rounded-md border border-warning-300 bg-warning-50/60 px-3 py-2 text-xs text-warning-900 dark:bg-warning-500/10 dark:text-warning-200">
             Last edited by <span className="font-semibold">{row.edited_by_admin_name ?? "Administrator"}</span>
             {row.edited_at && <> on {new Date(row.edited_at).toLocaleString()}</>}.
           </div>
@@ -277,8 +277,8 @@ export function RecordDetailSheet({
             </Select>
           </div>
           {isEvvLockedCode(svc) && (
-            <div className="sm:col-span-2 flex items-start gap-2 rounded-md border border-orange-300 bg-orange-50 px-3 py-2 text-xs text-orange-900 dark:border-orange-600 dark:bg-orange-950/40 dark:text-orange-200">
-              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-500" />
+            <div className="sm:col-span-2 flex items-start gap-2 rounded-md border border-warning-300 bg-warning-50 px-3 py-2 text-xs text-warning-900 dark:border-warning-600 dark:bg-warning-950/40 dark:text-warning-200">
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning-500" />
               <span>
                 <span className="font-semibold">EVV record ({svc}).</span> Editing clock in/out times here updates PI's records but does <span className="font-semibold">not</span> amend data already transmitted to UEVV. The state's EVV record will continue to reflect the original GPS-captured times. Contact DHHS if the transmitted record needs correction.
               </span>
@@ -371,13 +371,13 @@ export function RecordDetailSheet({
         </div>
 
         {history.length > 0 && (
-          <div className="mt-4 rounded-lg border border-amber-500/40 bg-amber-50/40 p-3 text-xs dark:bg-amber-500/5">
-            <div className="mb-1 flex items-center gap-1 font-semibold text-amber-900 dark:text-amber-200">
+          <div className="mt-4 rounded-lg border border-warning-500/40 bg-warning-50/40 p-3 text-xs dark:bg-warning-500/5">
+            <div className="mb-1 flex items-center gap-1 font-semibold text-warning-900 dark:text-warning-200">
               <History className="h-3 w-3" /> Edit history ({history.length})
             </div>
             <ul className="max-h-32 space-y-1 overflow-auto">
               {history.slice().reverse().map((h, i) => (
-                <li key={i} className="font-mono text-[11px] text-amber-950 dark:text-amber-100">
+                <li key={i} className="font-mono text-[11px] text-warning-950 dark:text-warning-100">
                   {new Date(h.timestamp).toLocaleString()} · {h.admin} · {h.field_changed}: {h.old_value} → {h.new_value}
                 </li>
               ))}

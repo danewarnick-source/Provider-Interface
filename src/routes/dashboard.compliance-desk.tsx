@@ -483,7 +483,7 @@ function InlineNotesRow({ row, colSpan }: { row: Row; colSpan: number }) {
                 Attested at {new Date(row.attested_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
               </p>
             ) : (
-              <p className="mt-1 flex items-center gap-1.5 text-sm text-amber-700 dark:text-amber-300">
+              <p className="mt-1 flex items-center gap-1.5 text-sm text-warning-700 dark:text-warning-300">
                 <AlertTriangle className="h-3.5 w-3.5" />
                 Not recorded
               </p>
@@ -854,7 +854,7 @@ export function ComplianceDeskPage() {
               type="button"
               onClick={submitAiSearch}
               disabled={vectorQ.isFetching || aiInput.trim().length === 0}
-              className="h-8 shrink-0 bg-gradient-to-r from-primary to-fuchsia-600 text-primary-foreground hover:opacity-90"
+              className="h-8 shrink-0 bg-gradient-to-r from-primary to-denim-600 text-primary-foreground hover:opacity-90"
             >
               {vectorQ.isFetching ? (
                 <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
@@ -1312,7 +1312,7 @@ function PendingTable({
                   <EditedByAdminBadge row={r} />
                   <FlagDot row={r} />
                   {r.edit_reason && (
-                    <div className="mt-0.5 max-w-[260px] truncate text-[11px] font-normal italic text-amber-700 dark:text-amber-300" title={r.edit_reason}>
+                    <div className="mt-0.5 max-w-[260px] truncate text-[11px] font-normal italic text-warning-700 dark:text-warning-300" title={r.edit_reason}>
                       ✎ {r.edit_reason}
                     </div>
                   )}
@@ -1565,7 +1565,7 @@ function NeedsReviewRow({
   const [showReject, setShowReject] = useState(false);
   const variance = varianceMinutes(row);
   return (
-    <div className="space-y-3 rounded-lg border border-l-4 border-l-amber-500 bg-card p-4 shadow-sm">
+    <div className="space-y-3 rounded-lg border border-l-4 border-l-warning-500 bg-card p-4 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-semibold text-sm">
@@ -1582,12 +1582,12 @@ function NeedsReviewRow({
         </div>
         <div className="flex flex-wrap gap-1.5">
           {row.incident_flag && (
-            <Badge className="bg-rose-100 text-rose-800 text-[10px] dark:bg-rose-500/15 dark:text-rose-200">
+            <Badge className="bg-danger-100 text-danger-800 text-[10px] dark:bg-danger-500/15 dark:text-danger-200">
               <Flag className="mr-1 h-3 w-3" /> Incident flagged
             </Badge>
           )}
           {row.corrected_clock_in && (
-            <Badge className="bg-amber-100 text-amber-800 text-[10px] dark:bg-amber-500/15 dark:text-amber-200">
+            <Badge className="bg-warning-100 text-warning-800 text-[10px] dark:bg-warning-500/15 dark:text-warning-200">
               Correction submitted
             </Badge>
           )}
@@ -1600,12 +1600,12 @@ function NeedsReviewRow({
           <p className="mt-1 font-mono text-xs">In: {fmtTs(row.clock_in_timestamp)}</p>
           <p className="font-mono text-xs">Out: {fmtTs(row.clock_out_timestamp)}</p>
         </div>
-        <div className="rounded-lg border border-amber-400/50 bg-amber-50/40 p-2.5 dark:bg-amber-500/5">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">Corrected</p>
+        <div className="rounded-lg border border-warning-400/50 bg-warning-50/40 p-2.5 dark:bg-warning-500/5">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-warning-700 dark:text-warning-300">Corrected</p>
           <p className="mt-1 font-mono text-xs">In: {fmtTs(row.corrected_clock_in)}</p>
           <p className="font-mono text-xs">Out: {fmtTs(row.corrected_clock_out)}</p>
           {variance !== null && (
-            <p className="mt-1 text-[11px] font-medium text-amber-700 dark:text-amber-300">
+            <p className="mt-1 text-[11px] font-medium text-warning-700 dark:text-warning-300">
               Variance: {variance >= 0 ? "+" : ""}{variance} min
             </p>
           )}
@@ -2072,7 +2072,7 @@ function GpsMatchDialog({ row, onClose }: { row: Row | null; onClose: () => void
         {row && (
           <div className="space-y-3 text-sm">
             <div className="rounded-lg border border-border p-3">
-              <div className="font-semibold text-emerald-600">Clock-In</div>
+              <div className="font-semibold text-success-600">Clock-In</div>
               {row.gps_in_coordinates?.latitude != null && row.gps_in_coordinates?.longitude != null ? (
                 <>
                   <div className="font-mono text-xs">
@@ -2091,7 +2091,7 @@ function GpsMatchDialog({ row, onClose }: { row: Row | null; onClose: () => void
               )}
             </div>
             <div className="rounded-lg border border-border p-3">
-              <div className="font-semibold text-rose-600">Clock-Out</div>
+              <div className="font-semibold text-danger-600">Clock-Out</div>
               {row.gps_out_coordinates?.latitude != null && row.gps_out_coordinates?.longitude != null ? (
                 <>
                   <div className="font-mono text-xs">
@@ -2281,13 +2281,13 @@ function EditShiftDialog({ row, onClose }: { row: Row | null; onClose: () => voi
         </div>
 
         {history.length > 0 && (
-          <div className="rounded-lg border border-amber-500/40 bg-amber-50/40 p-3 text-xs">
-            <div className="mb-1 flex items-center gap-1 font-semibold text-amber-900">
+          <div className="rounded-lg border border-warning-500/40 bg-warning-50/40 p-3 text-xs">
+            <div className="mb-1 flex items-center gap-1 font-semibold text-warning-900">
               <AlertTriangle className="h-3 w-3" /> Prior Audit Trail ({history.length})
             </div>
             <ul className="max-h-32 space-y-1 overflow-auto">
               {history.slice().reverse().map((h, i) => (
-                <li key={i} className="font-mono text-[11px] text-amber-950">
+                <li key={i} className="font-mono text-[11px] text-warning-950">
                   {new Date(h.timestamp).toLocaleString()} · {h.admin} · {h.field_changed}: {h.old_value} → {h.new_value}
                 </li>
               ))}
@@ -2703,10 +2703,10 @@ function ReviewReconciliationDialog({ row, onClose }: { row: Row | null; onClose
                 </div>
 
                 {decision === "accepted" && (
-                  <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-xs dark:border-amber-800 dark:bg-amber-950/30">
-                    <p className="font-semibold text-amber-900 dark:text-amber-100">Attestation (required)</p>
-                    <p className="mt-1 whitespace-pre-wrap text-amber-950 dark:text-amber-50">{ACCEPT_ATTESTATION_TEXT}</p>
-                    <label className="mt-2 flex items-start gap-2 text-amber-950 dark:text-amber-50">
+                  <div className="rounded-md border border-warning-300 bg-warning-50 p-3 text-xs dark:border-warning-800 dark:bg-warning-950/30">
+                    <p className="font-semibold text-warning-900 dark:text-warning-100">Attestation (required)</p>
+                    <p className="mt-1 whitespace-pre-wrap text-warning-950 dark:text-warning-50">{ACCEPT_ATTESTATION_TEXT}</p>
+                    <label className="mt-2 flex items-start gap-2 text-warning-950 dark:text-warning-50">
                       <input
                         type="checkbox"
                         checked={attestChecked}

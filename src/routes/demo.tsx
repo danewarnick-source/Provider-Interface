@@ -27,8 +27,8 @@ export const Route = createFileRoute("/demo")({
 const NAVY_BG =
   "radial-gradient(1000px 600px at 80% 110%, rgba(244,169,58,0.18), transparent 60%), linear-gradient(140deg, #141a3d 0%, var(--hive-text) 100%)";
 const JAKARTA = '"Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif';
-const AMBER = "var(--hive-gold)";
-const AMBER_GRAD = "linear-gradient(135deg, var(--hive-gold) 0%, var(--hive-gold) 100%)";
+const AMBER = "var(--hive-accent)";
+const AMBER_GRAD = "linear-gradient(135deg, var(--hive-accent) 0%, var(--hive-accent) 100%)";
 
 function DemoPage() {
   const [submitted, setSubmitted] = useState(false);

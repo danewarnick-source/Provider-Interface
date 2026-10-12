@@ -179,7 +179,7 @@ export function NectarBar({
       style={{ borderColor: "#e6e7ee" }}
     >
       <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">
-        <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+        <Sparkles className="h-3.5 w-3.5 text-warning-500" />
         Ask Nectar
       </div>
       <Input
@@ -328,11 +328,11 @@ export function NectarBar({
                         </td>
                         <td className="px-2 py-2">
                           {d.flags.length === 0 ? (
-                            <span className="inline-flex items-center gap-1 text-emerald-700 text-xs">
+                            <span className="inline-flex items-center gap-1 text-success-700 text-xs">
                               <Check className="h-3 w-3" /> ready
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-amber-700 text-xs">
+                            <span className="inline-flex items-center gap-1 text-warning-700 text-xs">
                               <AlertTriangle className="h-3 w-3" />
                               {d.flags.join(", ")}
                             </span>
@@ -359,7 +359,7 @@ export function NectarBar({
                             staff selected
                           </span>
                         ) : (
-                          <span className="text-amber-700 italic">
+                          <span className="text-warning-700 italic">
                             no eligible staff
                           </span>
                         )}

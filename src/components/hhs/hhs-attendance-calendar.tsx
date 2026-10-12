@@ -89,11 +89,11 @@ export function HhsAttendanceCalendar({
           legend={
             <div className="flex flex-wrap gap-3 text-[11px] text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" aria-hidden />
+                <span className="h-2.5 w-2.5 rounded-full bg-success-500" aria-hidden />
                 Present / services provided
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-rose-500" aria-hidden />
+                <span className="h-2.5 w-2.5 rounded-full bg-danger-500" aria-hidden />
                 Not present
               </span>
               <span className="inline-flex items-center gap-1.5">
@@ -120,10 +120,10 @@ export function HhsAttendanceCalendar({
               >
                 <span>{day}</span>
                 {!future && mark === "green" ? (
-                  <span className="mt-auto mb-1 h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                  <span className="mt-auto mb-1 h-2.5 w-2.5 rounded-full bg-success-500" />
                 ) : null}
                 {!future && mark === "red" ? (
-                  <span className="mt-auto mb-1 h-2.5 w-2.5 rounded-full bg-rose-500" />
+                  <span className="mt-auto mb-1 h-2.5 w-2.5 rounded-full bg-danger-500" />
                 ) : null}
               </div>
             );

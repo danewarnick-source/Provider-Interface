@@ -66,7 +66,7 @@ export function OpenShiftsPanel({
   return (
     <div className="rounded-xl border bg-card p-3">
       <div className="mb-2 flex items-center gap-2">
-        <Sparkles className="h-4 w-4 text-amber-500" />
+        <Sparkles className="h-4 w-4 text-warning-500" />
         <h3 className="text-sm font-semibold">
           {mode === "staff" ? "Open shifts you're qualified for" : "Open shifts"} ({rows.length})
         </h3>
@@ -80,7 +80,7 @@ export function OpenShiftsPanel({
               key={s.id}
               className={cn(
                 "flex flex-col gap-2 rounded-lg border p-2 text-sm md:flex-row md:items-center md:justify-between",
-                pending && "border-amber-300 bg-amber-50/60",
+                pending && "border-warning-300 bg-warning-50/60",
               )}
             >
               <button
@@ -130,7 +130,7 @@ export function OpenShiftsPanel({
                   </Button>
                 )}
                 {mode === "staff" && mine && (
-                  <span className="text-[11px] font-medium text-amber-700">
+                  <span className="text-[11px] font-medium text-warning-700">
                     Requested, waiting for approval
                   </span>
                 )}

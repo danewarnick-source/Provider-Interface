@@ -105,7 +105,7 @@ export function SteveDockPanel({ routeContext = null, featureKeyContext = null, 
                       {s.related_route && (
                         <a
                           href={s.related_route}
-                          className="inline-flex items-center text-[var(--hive-gold)] hover:underline"
+                          className="inline-flex items-center text-[var(--hive-accent-text)] hover:underline"
                           title={`Open ${s.related_route}`}
                         >
                           <ExternalLink className="ml-0.5 h-2.5 w-2.5" />

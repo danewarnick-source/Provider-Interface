@@ -13,14 +13,14 @@ import { cn } from "@/lib/utils";
 import type { SidebarProfile, SidebarProfileBadgeTone } from "./sidebar-takeover";
 
 const FOCUS =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hive-gold)] focus-visible:ring-offset-0";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hive-accent)] focus-visible:ring-offset-0";
 const ITEM_IDLE =
   "text-[var(--hive-chrome-text)]/75 hover:bg-[color-mix(in_srgb,white_10%,transparent)] hover:text-[var(--hive-chrome-text)]";
 
 const BADGE_TONE: Record<SidebarProfileBadgeTone, string> = {
   bad: "bg-destructive text-destructive-foreground",
-  warn: "bg-[var(--hive-gold)] text-white",
-  ok: "bg-emerald-600 text-white",
+  warn: "bg-[var(--hive-accent)] text-white",
+  ok: "bg-success-600 text-white",
   muted: "bg-[color-mix(in_srgb,white_16%,transparent)] text-[var(--hive-chrome-text)]",
 };
 

@@ -49,7 +49,7 @@ export function MissingInfoChip({ row }: { row: RosterRow }) {
           data-testid="missing-info-chip"
           aria-label={`Missing info: ${text}`}
           onClick={(e) => e.stopPropagation()}
-          className="shrink-0 cursor-help rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-700 dark:text-amber-300"
+          className="shrink-0 cursor-help rounded-full border border-warning-500/30 bg-warning-500/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-warning-700 dark:text-warning-300"
         >
           Missing info
         </span>

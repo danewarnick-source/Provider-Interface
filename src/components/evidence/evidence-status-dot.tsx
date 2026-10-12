@@ -3,10 +3,10 @@ import { cn } from "@/lib/utils";
 import { statusLabel, type EvidenceCellStatus } from "@/lib/evidence/status.ts";
 
 const RING: Record<EvidenceCellStatus, string> = {
-  done: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  missing: "bg-rose-50 text-rose-700 ring-rose-200",
-  awaiting_review: "bg-sky-50 text-sky-700 ring-sky-200",
-  sent_back: "bg-amber-50 text-amber-800 ring-amber-200",
+  done: "bg-success-50 text-success-700 ring-success-200",
+  missing: "bg-danger-50 text-danger-700 ring-danger-200",
+  awaiting_review: "bg-denim-50 text-denim-700 ring-denim-200",
+  sent_back: "bg-warning-50 text-warning-800 ring-warning-200",
   skipped: "bg-muted text-muted-foreground ring-border",
 };
 

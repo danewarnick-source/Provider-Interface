@@ -192,10 +192,10 @@ function EditForm() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <DirtyBadge isDirty={isDirty} />
-          <Button variant="outline" onClick={() => setShowNectar(true)}><Sparkles className="mr-1.5 h-4 w-4 text-amber-500" /> Build with Nectar</Button>
+          <Button variant="outline" onClick={() => setShowNectar(true)}><Sparkles className="mr-1.5 h-4 w-4 text-warning-500" /> Build with Nectar</Button>
           <Button variant="outline" onClick={() => setShowSettings(true)}><SettingsIcon className="mr-1.5 h-4 w-4" /> Settings</Button>
           <Button variant="outline" onClick={() => setShowAssign(true)}><Users className="mr-1.5 h-4 w-4" /> Assign</Button>
-          <Button variant="outline" className="text-rose-700 hover:text-rose-800 hover:bg-rose-50 border-rose-200"
+          <Button variant="outline" className="text-danger-700 hover:text-danger-800 hover:bg-danger-50 border-danger-200"
             onClick={() => setDeleteOpen(true)}>
             <Trash2 className="mr-1.5 h-4 w-4" /> Delete
           </Button>
@@ -208,7 +208,7 @@ function EditForm() {
       </div>
 
       {isNectarDraft && (
-        <div className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+        <div className="rounded-md border border-warning-300 bg-warning-50 px-3 py-2 text-sm text-warning-800">
           <Sparkles className="inline h-4 w-4 mr-1" /> <strong>Nectar draft</strong> — review and edit every field before publishing.
         </div>
       )}
@@ -419,13 +419,13 @@ function EditForm() {
 function DirtyBadge({ isDirty, verbose }: { isDirty: boolean; verbose?: boolean }) {
   if (isDirty) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800 border border-amber-200">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-50 px-2.5 py-1 text-xs font-medium text-warning-800 border border-warning-200">
         <CircleDot className="h-3 w-3" /> {verbose ? "Unsaved changes" : "Unsaved"}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 border border-emerald-200">
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-success-50 px-2.5 py-1 text-xs font-medium text-success-700 border border-success-200">
       <Check className="h-3 w-3" /> {verbose ? "All changes saved" : "Saved"}
     </span>
   );
@@ -579,7 +579,7 @@ function RoutingBehaviorCard({
 
       <div className="flex flex-wrap items-center gap-2">
         <Button type="button" variant="outline" size="sm" onClick={suggest} disabled={busy}>
-          <Sparkles className="mr-1.5 h-3.5 w-3.5 text-amber-500" />
+          <Sparkles className="mr-1.5 h-3.5 w-3.5 text-warning-500" />
           {busy ? "Thinking…" : proposal ? "Suggest again" : "Suggest routing"}
         </Button>
         {proposal && (
@@ -590,9 +590,9 @@ function RoutingBehaviorCard({
       </div>
 
       {proposal && (
-        <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 space-y-2">
+        <div className="rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-xs text-warning-900 space-y-2">
           <p>
-            <Sparkles className="inline h-3.5 w-3.5 mr-1 text-amber-600" />
+            <Sparkles className="inline h-3.5 w-3.5 mr-1 text-warning-600" />
             Nectar suggests <strong>{ROUTING_BEHAVIORS.find((b) => b.value === proposal.behavior)?.label}</strong>. {proposal.rationale}
           </p>
           {chosen !== proposal.behavior && (
@@ -628,7 +628,7 @@ function RoutingBehaviorCard({
       </div>
 
       {chosenSpec && (
-        <div className={`rounded-md border px-3 py-2 text-xs ${chosenSpec.wired ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-slate-200 bg-slate-50 text-slate-700"}`}>
+        <div className={`rounded-md border px-3 py-2 text-xs ${chosenSpec.wired ? "border-success-200 bg-success-50 text-success-900" : "border-haze-200 bg-haze-50 text-haze-700"}`}>
           <p className="font-medium">{chosenSpec.label}</p>
           <p className="mt-0.5">{chosenSpec.implication}</p>
           {!chosenSpec.wired && (
@@ -716,7 +716,7 @@ function TrackedDataConfig({
   }
 
   return (
-    <div className="space-y-3 rounded-md border border-slate-200 bg-slate-50/60 p-3">
+    <div className="space-y-3 rounded-md border border-haze-200 bg-haze-50/60 p-3">
       <div className="grid gap-1.5">
         <Label className="text-xs">Client targeting</Label>
         <div className="rounded-md border border-input bg-background px-3 py-2 text-xs flex items-center justify-between gap-3">
@@ -748,7 +748,7 @@ function TrackedDataConfig({
               return (
                 <label
                   key={c.code}
-                  className={`flex items-start gap-2 rounded px-2 py-1 text-xs cursor-pointer min-h-[36px] ${on ? "bg-emerald-50" : "hover:bg-muted"}`}
+                  className={`flex items-start gap-2 rounded px-2 py-1 text-xs cursor-pointer min-h-[36px] ${on ? "bg-success-50" : "hover:bg-muted"}`}
                 >
                   <input
                     type="checkbox"

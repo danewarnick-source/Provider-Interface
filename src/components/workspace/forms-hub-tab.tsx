@@ -51,9 +51,9 @@ export function FormsHubTab({ clientId, clientName }: { clientId: string; client
     <>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {/* Incident Report — dedicated §1.27 form, available to everyone */}
-        <Card className="flex flex-col border-amber-300 p-4">
+        <Card className="flex flex-col border-warning-300 p-4">
           <div className="flex items-start gap-2">
-            <AlertTriangle className="h-4 w-4 mt-0.5 text-amber-600 shrink-0" />
+            <AlertTriangle className="h-4 w-4 mt-0.5 text-warning-600 shrink-0" />
             <div className="min-w-0 flex-1">
               <p className="font-semibold text-sm leading-tight">Incident Report</p>
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -98,7 +98,7 @@ export function FormsHubTab({ clientId, clientName }: { clientId: string; client
                       <CalendarClock className="h-3 w-3" /> {describeFrequency(f.frequency, f.schedule ?? {})}
                     </p>
                     {submittedThisPeriod && (
-                      <Badge variant="outline" className="mt-2 text-[10px] gap-1 border-emerald-300 text-emerald-700">
+                      <Badge variant="outline" className="mt-2 text-[10px] gap-1 border-success-300 text-success-700">
                         <CheckCircle2 className="h-3 w-3" /> Submitted this period
                       </Badge>
                     )}

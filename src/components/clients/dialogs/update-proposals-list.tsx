@@ -50,7 +50,7 @@ export function UpdateProposalsList({
         {proposals.map((p) => (
           <label
             key={p.field_key}
-            className={`flex cursor-pointer items-start gap-3 p-3 hover:bg-muted/40 ${p.changed ? "bg-amber-50/50" : ""}`}
+            className={`flex cursor-pointer items-start gap-3 p-3 hover:bg-muted/40 ${p.changed ? "bg-warning-50/50" : ""}`}
           >
             <Checkbox
               className="mt-1"
@@ -63,7 +63,7 @@ export function UpdateProposalsList({
                 <Badge
                   variant="outline"
                   className={
-                    p.changed ? "border-amber-300 text-[10px] text-amber-700" : "text-[10px]"
+                    p.changed ? "border-warning-300 text-[10px] text-warning-700" : "text-[10px]"
                   }
                 >
                   {p.changed ? "changed" : "unchanged"}

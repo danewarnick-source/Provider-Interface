@@ -18,7 +18,7 @@ export function PcspReadSummary({ parse, agencyName }: { parse: PcspResult; agen
         {report.line}
       </p>
       {report.noCodes && (
-        <div className={`${BOX} flex-wrap border-hive-gold/50 bg-hive-gold-soft text-hive-ink`}>
+        <div className={`${BOX} flex-wrap border-hive-accent/50 bg-hive-accent-soft text-hive-ink`}>
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <span className="min-w-0 flex-1">{report.noCodes}</span>
           <Button asChild size="sm" variant="outline" className="max-md:min-h-11">

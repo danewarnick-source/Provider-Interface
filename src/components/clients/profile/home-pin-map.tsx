@@ -69,7 +69,7 @@ export default function HomePinMap({
       style={{ height }}
     >
       {!hasPin ? (
-        <div className="pointer-events-none absolute left-2 top-2 z-[1000] max-w-[90%] rounded-md border border-teal-700/20 bg-background/95 px-2.5 py-1.5 text-xs font-semibold text-teal-900 shadow-sm dark:text-teal-100">
+        <div className="pointer-events-none absolute left-2 top-2 z-[1000] max-w-[90%] rounded-md border border-denim-700/20 bg-background/95 px-2.5 py-1.5 text-xs font-semibold text-denim-900 shadow-sm dark:text-denim-100">
           Tap the map to drop a pin on the house
         </div>
       ) : null}

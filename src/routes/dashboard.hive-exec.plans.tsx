@@ -96,7 +96,7 @@ function TierCatalogSection() {
             <ul className="mt-3 space-y-1 text-xs">
               {t.highlights.map((h) => (
                 <li key={h} className="flex items-start gap-1.5">
-                  <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-emerald-600" />
+                  <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-success-600" />
                   <span>{h}</span>
                 </li>
               ))}
@@ -115,7 +115,7 @@ function TierCatalogSection() {
                       key={a}
                       className="flex items-center gap-1.5 text-xs text-[var(--hive-text)]"
                     >
-                      <Sparkles className="h-3 w-3 text-[var(--hive-gold)]" />
+                      <Sparkles className="h-3 w-3 text-[var(--hive-accent-text)]" />
                       {ADDON_CATALOG[a].name}
                     </li>
                   ))}

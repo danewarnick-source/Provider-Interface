@@ -32,7 +32,7 @@ export function FieldRenderer({
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id} className="text-sm font-medium">
-        {field.label}{field.required ? <span className="text-rose-500"> *</span> : null}
+        {field.label}{field.required ? <span className="text-danger-500"> *</span> : null}
       </Label>
       {field.help && <p className="text-xs text-muted-foreground">{field.help}</p>}
       <Inner field={field} id={id} value={value} onChange={onChange} disabled={disabled} />
@@ -118,7 +118,7 @@ function Inner({ field, id, value, onChange, disabled }: { field: FormField; id:
           {Array.from({ length: scale }, (_, i) => i + 1).map((n) => (
             <button key={n} type="button" disabled={disabled} onClick={() => onChange(n)}
               className="min-h-[44px] min-w-[44px] grid place-items-center rounded-md hover:bg-muted">
-              <Star className={`h-6 w-6 ${n <= v ? "fill-amber-400 text-amber-400" : "text-muted-foreground"}`} />
+              <Star className={`h-6 w-6 ${n <= v ? "fill-warning-400 text-warning-400" : "text-muted-foreground"}`} />
             </button>
           ))}
         </div>

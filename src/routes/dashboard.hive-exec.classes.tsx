@@ -90,7 +90,7 @@ function ExecClassesPage() {
         return (
           <section key={type} className="rounded-xl border bg-card p-4">
             <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-              <GraduationCap className="h-4 w-4 text-[var(--hive-gold)]" />
+              <GraduationCap className="h-4 w-4 text-[var(--hive-accent-text)]" />
               {trainingClassLabel(type)}
             </h3>
             {q.isLoading ? (
@@ -149,14 +149,14 @@ function ClassCard({ row, onComplete }: { row: TrainingClassRow; onComplete: () 
             </span>
             <a
               href={`mailto:${r.email}`}
-              className="inline-flex items-center gap-1 text-[var(--hive-gold)] hover:underline"
+              className="inline-flex items-center gap-1 text-[var(--hive-accent-text)] hover:underline"
             >
               <Mail className="h-3 w-3" /> {r.email}
             </a>
             {r.phone ? (
               <a
                 href={`tel:${r.phone}`}
-                className="inline-flex items-center gap-1 text-[var(--hive-gold)] hover:underline"
+                className="inline-flex items-center gap-1 text-[var(--hive-accent-text)] hover:underline"
               >
                 <Phone className="h-3 w-3" /> {r.phone}
               </a>

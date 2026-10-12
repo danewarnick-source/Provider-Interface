@@ -177,7 +177,7 @@ export function GeneralTimeClock({ autoConfirmEnd = false }: { autoConfirmEnd?: 
           <span
             aria-hidden
             className={`inline-flex h-2.5 w-2.5 animate-pulse rounded-full ${
-              running ? "bg-emerald-500" : "bg-rose-500"
+              running ? "bg-success-500" : "bg-danger-500"
             }`}
           />
           <span className="text-sm font-semibold uppercase tracking-wider">
@@ -209,7 +209,7 @@ export function GeneralTimeClock({ autoConfirmEnd = false }: { autoConfirmEnd?: 
                     <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
                     <span>{c.label}</span>
                     {c.requires_description && (
-                      <span className="ml-1 rounded bg-amber-100 px-1.5 py-0 text-[10px] font-bold uppercase tracking-wider text-amber-700">
+                      <span className="ml-1 rounded bg-warning-100 px-1.5 py-0 text-[10px] font-bold uppercase tracking-wider text-warning-700">
                         Note req.
                       </span>
                     )}
@@ -233,8 +233,8 @@ export function GeneralTimeClock({ autoConfirmEnd = false }: { autoConfirmEnd?: 
       <div className="mb-3">
         <Label htmlFor="general-note" className="mb-1 flex items-center gap-1 text-xs font-medium">
           <span>Describe this shift</span>
-          <span aria-hidden className="text-rose-600">*</span>
-          <span className="ml-1 rounded bg-rose-100 px-1.5 py-0 text-[10px] font-bold uppercase tracking-wider text-rose-700">
+          <span aria-hidden className="text-danger-600">*</span>
+          <span className="ml-1 rounded bg-danger-100 px-1.5 py-0 text-[10px] font-bold uppercase tracking-wider text-danger-700">
             Required
           </span>
         </Label>
@@ -258,13 +258,13 @@ export function GeneralTimeClock({ autoConfirmEnd = false }: { autoConfirmEnd?: 
           aria-required="true"
           aria-invalid={showNoteError && !noteValid}
           className={`min-h-[3rem] resize-none text-sm ${
-            showNoteError && !noteValid ? "border-rose-500 focus-visible:ring-rose-500" : ""
+            showNoteError && !noteValid ? "border-danger-500 focus-visible:ring-danger-500" : ""
           }`}
         />
         <p
           className={`mt-1 text-[11px] ${
             showNoteError && !noteValid
-              ? "font-medium text-rose-700"
+              ? "font-medium text-danger-700"
               : "text-muted-foreground"
           }`}
         >
@@ -291,7 +291,7 @@ export function GeneralTimeClock({ autoConfirmEnd = false }: { autoConfirmEnd?: 
             onClick={onStop}
             disabled={stopping}
             style={{ backgroundColor: "#dc2626", color: "#ffffff" }}
-            className="relative z-10 flex h-14 w-full items-center justify-center gap-2 rounded-xl !bg-rose-600 text-base font-bold uppercase tracking-wider !text-white shadow-lg shadow-rose-600/30 transition-all duration-150 hover:!bg-rose-700 active:scale-[0.98]"
+            className="relative z-10 flex h-14 w-full items-center justify-center gap-2 rounded-xl !bg-danger-600 text-base font-bold uppercase tracking-wider !text-white shadow-lg shadow-danger-600/30 transition-all duration-150 hover:!bg-danger-700 active:scale-[0.98]"
           >
             <Square className="h-5 w-5 fill-current" /> End {shift!.category} Shift
           </Button>
@@ -301,13 +301,13 @@ export function GeneralTimeClock({ autoConfirmEnd = false }: { autoConfirmEnd?: 
             onClick={onStart}
             disabled={!canStart}
             style={{ backgroundColor: "#059669", color: "#ffffff" }}
-            className="flex h-14 w-full items-center justify-center gap-2 rounded-xl !bg-emerald-600 text-base font-bold uppercase tracking-wider !text-white shadow-lg shadow-emerald-600/30 transition-all duration-150 hover:!bg-emerald-700 active:scale-[0.98] disabled:opacity-60"
+            className="flex h-14 w-full items-center justify-center gap-2 rounded-xl !bg-success-600 text-base font-bold uppercase tracking-wider !text-white shadow-lg shadow-success-600/30 transition-all duration-150 hover:!bg-success-700 active:scale-[0.98] disabled:opacity-60"
           >
             <Play className="h-5 w-5 fill-current" /> Clock In · {active?.label ?? "—"}
           </Button>
         )}
         {!running && requiresDesc && !canStart && (
-          <p className="mt-2 text-center text-[11px] font-medium text-amber-700">
+          <p className="mt-2 text-center text-[11px] font-medium text-warning-700">
             Add a short description above before clocking in.
           </p>
         )}
@@ -329,7 +329,7 @@ export function GeneralTimeClock({ autoConfirmEnd = false }: { autoConfirmEnd?: 
                 void confirmStop();
               }}
               disabled={stopping}
-              className="bg-rose-600 text-white hover:bg-rose-700"
+              className="bg-danger-600 text-white hover:bg-danger-700"
             >
               {stopping ? "Ending…" : "End shift"}
             </AlertDialogAction>

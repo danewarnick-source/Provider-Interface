@@ -263,7 +263,7 @@ export function CompanyPoliciesTab({ orgId }: { orgId: string }) {
         <p className="text-sm text-muted-foreground">Loading company policies…</p>
       ) : policies.length === 0 ? (
         <div className="rounded-xl border bg-card p-8 text-center">
-          <BookOpen className="mx-auto h-8 w-8 text-[var(--hive-gold)]" />
+          <BookOpen className="mx-auto h-8 w-8 text-[var(--hive-accent-text)]" />
           <p className="mt-3 font-medium">No company policies yet</p>
           <p className="mt-1 text-sm text-muted-foreground">
             Add one or start from a template. This binder is internal — it is not the

@@ -45,7 +45,7 @@ export function RecordDialog({
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-3">{children}</div>
-        {problem ? <p className="text-xs text-amber-700">{problem}</p> : null}
+        {problem ? <p className="text-xs text-warning-700">{problem}</p> : null}
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             Cancel

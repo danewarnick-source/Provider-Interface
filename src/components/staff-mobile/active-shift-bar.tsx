@@ -145,7 +145,7 @@ export function ActiveShiftBar({ framed = false }: { framed?: boolean }) {
             {elapsed}
           </span>
           {isClient && (
-            <span className="font-mono text-[11px] font-semibold tabular-nums text-[var(--hive-gold)]">
+            <span className="font-mono text-[11px] font-semibold tabular-nums text-[var(--hive-accent-text)]">
               {fmtUSD(live.liveEarnings)}
             </span>
           )}
@@ -184,7 +184,7 @@ export function ActiveShiftBar({ framed = false }: { framed?: boolean }) {
                 void confirmGeneralStop();
               }}
               disabled={stopping}
-              className="bg-rose-600 text-white hover:bg-rose-700"
+              className="bg-danger-600 text-white hover:bg-danger-700"
             >
               {stopping ? "Ending…" : "End shift"}
             </AlertDialogAction>

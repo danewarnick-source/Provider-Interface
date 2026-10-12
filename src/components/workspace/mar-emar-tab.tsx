@@ -342,7 +342,7 @@ function MedicationDirectivesPanel({ med }: { med: Medication }) {
   return (
     <div className="space-y-3">
       {/* Name & Purpose */}
-      <div className="rounded-lg border border-border bg-slate-50 p-3 dark:bg-slate-900/40">
+      <div className="rounded-lg border border-border bg-haze-50 p-3 dark:bg-haze-900/40">
         <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
           Medication Name & Clinical Purpose
         </p>
@@ -358,7 +358,7 @@ function MedicationDirectivesPanel({ med }: { med: Medication }) {
       </div>
 
       {/* Routes & Dosage */}
-      <div className="rounded-lg border border-border bg-slate-50 p-3 dark:bg-slate-900/40">
+      <div className="rounded-lg border border-border bg-haze-50 p-3 dark:bg-haze-900/40">
         <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
           Route of Administration & Dosage Instructions
         </p>
@@ -383,11 +383,11 @@ function MedicationDirectivesPanel({ med }: { med: Medication }) {
 
       {/* PRN notice */}
       {med.is_prn && (
-        <div className="rounded-lg border border-amber-500/40 bg-amber-50 p-3 dark:bg-amber-950/20">
-          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+        <div className="rounded-lg border border-warning-500/40 bg-warning-50 p-3 dark:bg-warning-950/20">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-warning-700 dark:text-warning-300">
             PRN / As-Needed Medication
           </p>
-          <p className="text-xs text-amber-800 dark:text-amber-200">
+          <p className="text-xs text-warning-800 dark:text-warning-200">
             {med.prn_instructions ?? "Administer only when needed. Reason must be documented at each administration."}
           </p>
         </div>
@@ -395,15 +395,15 @@ function MedicationDirectivesPanel({ med }: { med: Medication }) {
 
       {/* Controlled substance */}
       {med.is_controlled && (
-        <div className="rounded-lg border border-purple-500/40 bg-purple-50 p-3 dark:bg-purple-950/20">
-          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300">
+        <div className="rounded-lg border border-denim-500/40 bg-denim-50 p-3 dark:bg-denim-950/20">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-denim-700 dark:text-denim-300">
             Controlled Substance
           </p>
-          <p className="text-xs text-purple-800 dark:text-purple-200">
+          <p className="text-xs text-denim-800 dark:text-denim-200">
             Pill count verification required at every administration. Current count must be recorded.
           </p>
           {med.pill_count_current !== null && (
-            <p className="mt-1 text-xs font-semibold text-purple-800 dark:text-purple-200">
+            <p className="mt-1 text-xs font-semibold text-denim-800 dark:text-denim-200">
               Last recorded count: {med.pill_count_current} pills
             </p>
           )}
@@ -413,27 +413,27 @@ function MedicationDirectivesPanel({ med }: { med: Medication }) {
       {/* Adverse effects & choking risk — Contract requirement section (3) */}
       <div className={`rounded-lg border-2 p-3 ${
         med.choking_risk
-          ? "border-rose-500 bg-rose-50 dark:bg-rose-950/20"
-          : "border-border bg-slate-50 dark:bg-slate-900/40"
+          ? "border-danger-500 bg-danger-50 dark:bg-danger-950/20"
+          : "border-border bg-haze-50 dark:bg-haze-900/40"
       }`}>
         <p className={`mb-1 text-[10px] font-bold uppercase tracking-wider ${
-          med.choking_risk ? "text-rose-700 dark:text-rose-300" : "text-muted-foreground"
+          med.choking_risk ? "text-danger-700 dark:text-danger-300" : "text-muted-foreground"
         }`}>
           Adverse Effects & Reaction Profile
         </p>
         {med.choking_risk && (
-          <div className="mb-2 flex items-start gap-2 rounded border border-rose-500 bg-rose-100 px-2 py-1.5 dark:bg-rose-900/40">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600" />
+          <div className="mb-2 flex items-start gap-2 rounded border border-danger-500 bg-danger-100 px-2 py-1.5 dark:bg-danger-900/40">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-danger-600" />
             <div>
-              <p className="text-xs font-bold text-rose-800 dark:text-rose-200">
+              <p className="text-xs font-bold text-danger-800 dark:text-danger-200">
                 CHOKING / SWALLOWING RISK IDENTIFIED
               </p>
-              <p className="text-xs text-rose-700 dark:text-rose-300">
+              <p className="text-xs text-danger-700 dark:text-danger-300">
                 This medication may contribute to swallowing difficulties or enhance the prospects of choking.
                 Confirm posture is upright and crushed-med policy per care plan is followed.
               </p>
               {med.choking_risk_details && (
-                <p className="mt-1 text-xs text-rose-700 dark:text-rose-300 italic">
+                <p className="mt-1 text-xs text-danger-700 dark:text-danger-300 italic">
                   {med.choking_risk_details}
                 </p>
               )}
@@ -610,14 +610,14 @@ function AdminLogDialog({
 
           {/* Choking alert at top if applicable */}
           {med?.choking_risk && (
-            <div className="flex items-start gap-2 rounded-lg border-2 border-rose-500 bg-rose-50 px-3 py-2.5 dark:bg-rose-950/30">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600" />
+            <div className="flex items-start gap-2 rounded-lg border-2 border-danger-500 bg-danger-50 px-3 py-2.5 dark:bg-danger-950/30">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-danger-600" />
               <div>
-                <p className="text-xs font-bold text-rose-800 dark:text-rose-200">
+                <p className="text-xs font-bold text-danger-800 dark:text-danger-200">
                   CHOKING RISK — Confirm upright posture before administering.
                 </p>
                 {med.choking_risk_details && (
-                  <p className="text-[11px] text-rose-700 dark:text-rose-300">{med.choking_risk_details}</p>
+                  <p className="text-[11px] text-danger-700 dark:text-danger-300">{med.choking_risk_details}</p>
                 )}
               </div>
             </div>
@@ -625,11 +625,11 @@ function AdminLogDialog({
 
           {/* PRN Reason — Contract: "reason the medication was taken if PRN" */}
           {med?.is_prn && (
-            <div className="rounded-lg border border-amber-500/40 bg-amber-50 p-3 dark:bg-amber-950/20 space-y-2">
-              <Label className="text-xs font-semibold text-amber-800 dark:text-amber-200">
+            <div className="rounded-lg border border-warning-500/40 bg-warning-50 p-3 dark:bg-warning-950/20 space-y-2">
+              <Label className="text-xs font-semibold text-warning-800 dark:text-warning-200">
                 PRN Reason — Required *
               </Label>
-              <p className="text-[11px] text-amber-700 dark:text-amber-300">
+              <p className="text-[11px] text-warning-700 dark:text-warning-300">
                 {med.prn_instructions ?? "Document why this as-needed medication is being administered at this time."}
               </p>
               <Textarea
@@ -637,7 +637,7 @@ function AdminLogDialog({
                 value={prnReason}
                 onChange={(e) => setPrnReason(e.target.value)}
                 placeholder="Describe the reason this PRN medication is being administered now..."
-                className="text-sm bg-white dark:bg-slate-900"
+                className="text-sm bg-white dark:bg-haze-900"
               />
             </div>
           )}
@@ -653,7 +653,7 @@ function AdminLogDialog({
                 <span className="text-[10px] text-muted-foreground">(from medication profile)</span>
               </div>
             ) : (
-              <div className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/20 dark:text-amber-200">
+              <div className="rounded-md border border-warning-300 bg-warning-50 px-3 py-2 text-xs text-warning-800 dark:bg-warning-950/20 dark:text-warning-200">
                 No route on file — set it on this medication's profile.
               </div>
             )}
@@ -661,12 +661,12 @@ function AdminLogDialog({
 
           {/* Controlled substance pill count */}
           {med?.is_controlled && (
-            <div className="rounded-lg border border-purple-500/40 bg-purple-50 p-3 dark:bg-purple-950/20 space-y-2">
-              <Label className="text-xs font-semibold text-purple-800 dark:text-purple-200">
+            <div className="rounded-lg border border-denim-500/40 bg-denim-50 p-3 dark:bg-denim-950/20 space-y-2">
+              <Label className="text-xs font-semibold text-denim-800 dark:text-denim-200">
                 Controlled Substance — Current count *
               </Label>
               {med.pill_count_current !== null && (
-                <p className="text-[11px] text-purple-700 dark:text-purple-300">
+                <p className="text-[11px] text-denim-700 dark:text-denim-300">
                   Last recorded count: <span className="font-semibold">{med.pill_count_current}</span> pills
                   {" → "}expected after this dose: <span className="font-semibold">{med.pill_count_current - 1}</span>
                 </p>
@@ -676,18 +676,18 @@ function AdminLogDialog({
                 value={pillCount}
                 onChange={(e) => setPillCount(e.target.value)}
                 placeholder={med.pill_count_current != null ? `Expected ${med.pill_count_current - 1}` : "e.g., 28"}
-                className="h-9 bg-white dark:bg-slate-900"
+                className="h-9 bg-white dark:bg-haze-900"
               />
-              <p className="text-[11px] text-purple-700 dark:text-purple-300">
+              <p className="text-[11px] text-denim-700 dark:text-denim-300">
                 Count remaining after this dose. Variance from the expected count is flagged on the audit trail.
               </p>
               {/* Discrepancy alert */}
               {pillCount !== "" &&
                 med.pill_count_current !== null &&
                 parseInt(pillCount, 10) !== med.pill_count_current - 1 && (
-                <div className="flex items-start gap-2 rounded-md border border-amber-400 bg-amber-50 px-3 py-2 dark:bg-amber-950/30">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-                  <div className="text-xs text-amber-800 dark:text-amber-200">
+                <div className="flex items-start gap-2 rounded-md border border-warning-400 bg-warning-50 px-3 py-2 dark:bg-warning-950/30">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning-600" />
+                  <div className="text-xs text-warning-800 dark:text-warning-200">
                     <p className="font-semibold">
                       Count entered: {pillCount} — expected: {med.pill_count_current - 1}
                     </p>
@@ -700,10 +700,10 @@ function AdminLogDialog({
 
           {/* Rescue medication — seizure capture */}
           {med?.is_rescue && (
-            <div className="rounded-lg border-2 border-rose-500/60 bg-rose-50 p-3 dark:bg-rose-950/20 space-y-2">
+            <div className="rounded-lg border-2 border-danger-500/60 bg-danger-50 p-3 dark:bg-danger-950/20 space-y-2">
               <div className="flex items-center gap-1.5">
-                <Siren className="h-4 w-4 text-rose-600" />
-                <Label className="text-xs font-semibold text-rose-800 dark:text-rose-200">
+                <Siren className="h-4 w-4 text-danger-600" />
+                <Label className="text-xs font-semibold text-danger-800 dark:text-danger-200">
                   Rescue medication — seizure details *
                 </Label>
               </div>
@@ -715,7 +715,7 @@ function AdminLogDialog({
                     value={seizureDuration}
                     onChange={(e) => setSeizureDuration(e.target.value)}
                     placeholder="e.g., 120"
-                    className="h-9 bg-white dark:bg-slate-900"
+                    className="h-9 bg-white dark:bg-haze-900"
                   />
                 </div>
                 <div className="grid gap-1">
@@ -724,7 +724,7 @@ function AdminLogDialog({
                     value={seizureOutcome}
                     onChange={(e) => setSeizureOutcome(e.target.value)}
                     placeholder="e.g., resolved, slept, transported"
-                    className="h-9 bg-white dark:bg-slate-900"
+                    className="h-9 bg-white dark:bg-haze-900"
                   />
                 </div>
               </div>
@@ -751,17 +751,17 @@ function AdminLogDialog({
           </div>
 
           {/* Medication error flag */}
-          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-rose-500/40 bg-rose-50 p-3 dark:bg-rose-950/20">
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-danger-500/40 bg-danger-50 p-3 dark:bg-danger-950/20">
             <Checkbox
               checked={isMedError}
               onCheckedChange={(c) => setIsMedError(!!c)}
               className="mt-0.5"
             />
             <div className="flex-1">
-              <p className="text-xs font-semibold text-rose-800 dark:text-rose-200">
+              <p className="text-xs font-semibold text-danger-800 dark:text-danger-200">
                 This is a medication error requiring immediate reporting.
               </p>
-              <p className="mt-0.5 text-[11px] text-rose-700 dark:text-rose-300">
+              <p className="mt-0.5 text-[11px] text-danger-700 dark:text-danger-300">
                 Notifies your administrator and flags this record for review (SOW c4).
               </p>
               {isMedError && (
@@ -770,7 +770,7 @@ function AdminLogDialog({
                   value={errorDescription}
                   onChange={(e) => setErrorDescription(e.target.value)}
                   placeholder="Briefly describe the medication error (what happened, who was notified)..."
-                  className="mt-2 bg-white text-sm dark:bg-slate-900"
+                  className="mt-2 bg-white text-sm dark:bg-haze-900"
                   maxLength={2000}
                 />
               )}
@@ -790,7 +790,7 @@ function AdminLogDialog({
           </div>
 
           {/* Attestation */}
-          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-50/60 p-3 dark:border-amber-500/30 dark:bg-amber-950/20">
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-warning-500/30 bg-warning-50/60 p-3 dark:border-warning-500/30 dark:bg-warning-950/20">
             <Checkbox
               checked={attested}
               onCheckedChange={(c) => setAttested(!!c)}
@@ -803,11 +803,11 @@ function AdminLogDialog({
 
           {/* Second-witness confirmation — required protocol for controlled substances */}
           {med?.is_controlled && (
-            <div className="rounded-lg border border-purple-500/40 bg-purple-50 p-3 dark:bg-purple-950/20 space-y-2">
-              <p className="text-xs font-semibold text-purple-800 dark:text-purple-200">
+            <div className="rounded-lg border border-denim-500/40 bg-denim-50 p-3 dark:bg-denim-950/20 space-y-2">
+              <p className="text-xs font-semibold text-denim-800 dark:text-denim-200">
                 Controlled Substance — Second Witness Required
               </p>
-              <p className="text-[11px] text-purple-700 dark:text-purple-300">
+              <p className="text-[11px] text-denim-700 dark:text-denim-300">
                 A second staff member must verify this administration. Select the witness from the list, or mark unavailable to flag for later confirmation.
               </p>
               {!noSecondWitness && (
@@ -815,7 +815,7 @@ function AdminLogDialog({
                   value={secondWitnessId ?? ""}
                   onValueChange={(v) => setSecondWitnessId(v || null)}
                 >
-                  <SelectTrigger className="bg-white dark:bg-slate-900">
+                  <SelectTrigger className="bg-white dark:bg-haze-900">
                     <SelectValue placeholder="Select second witness..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -827,7 +827,7 @@ function AdminLogDialog({
                   </SelectContent>
                 </Select>
               )}
-              <label className="flex cursor-pointer items-center gap-2 text-[11px] text-purple-700 dark:text-purple-300">
+              <label className="flex cursor-pointer items-center gap-2 text-[11px] text-denim-700 dark:text-denim-300">
                 <Checkbox
                   checked={noSecondWitness}
                   onCheckedChange={(c) => {
@@ -852,7 +852,7 @@ function AdminLogDialog({
             disabled={!canSubmit}
             className={
               isMedError
-                ? "bg-rose-600 hover:bg-rose-700 text-white"
+                ? "bg-danger-600 hover:bg-danger-700 text-white"
                 : "bg-gradient-amber text-primary-foreground shadow-sm hover:opacity-95"
             }
           >
@@ -969,9 +969,9 @@ function ComplianceHistory({ logs, meds }: { logs: EmarLog[]; meds: Medication[]
           <p className="text-2xl font-bold text-foreground">{total}</p>
           <p className="text-[11px] text-muted-foreground">Total Passes</p>
         </div>
-        <div className="rounded-lg border border-emerald-500/30 bg-emerald-50 p-3 text-center dark:bg-emerald-950/20">
-          <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{administered}</p>
-          <p className="text-[11px] text-emerald-600 dark:text-emerald-400">Self-administered</p>
+        <div className="rounded-lg border border-success-500/30 bg-success-50 p-3 text-center dark:bg-success-950/20">
+          <p className="text-2xl font-bold text-success-700 dark:text-success-300">{administered}</p>
+          <p className="text-[11px] text-success-600 dark:text-success-400">Self-administered</p>
         </div>
         <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-center">
           <p className="text-2xl font-bold text-primary">{rate}%</p>
@@ -1003,26 +1003,26 @@ function ComplianceHistory({ logs, meds }: { logs: EmarLog[]; meds: Medication[]
                 </td>
                 <td className="px-3 py-2">
                   {medMap.get(l.medication_id) ?? "—"}
-                  {l.is_prn && <Badge className="ml-1 bg-amber-100 text-amber-800 text-[9px] dark:bg-amber-950/40 dark:text-amber-200">PRN</Badge>}
+                  {l.is_prn && <Badge className="ml-1 bg-warning-100 text-warning-800 text-[9px] dark:bg-warning-950/40 dark:text-warning-200">PRN</Badge>}
                 </td>
                 <td className="px-3 py-2">
                   <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                     normalizeEmarStatus(l.status) === "self_administered"
-                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200"
+                      ? "bg-success-100 text-success-800 dark:bg-success-950/40 dark:text-success-200"
                       : normalizeEmarStatus(l.status) === "refused"
-                      ? "bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-200"
-                      : "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-200"
+                      ? "bg-danger-100 text-danger-800 dark:bg-danger-950/40 dark:text-danger-200"
+                      : "bg-warning-100 text-warning-800 dark:bg-warning-950/40 dark:text-warning-200"
                   }`}>
                     {EMAR_STATUS_LABELS[normalizeEmarStatus(l.status)]}
                   </span>
                   {l.is_medication_error && (
-                    <Badge className="ml-1 bg-rose-500 text-white text-[9px]">Error</Badge>
+                    <Badge className="ml-1 bg-danger-500 text-white text-[9px]">Error</Badge>
                   )}
                 </td>
                 <td className="px-3 py-2 text-muted-foreground">{l.staff_name ?? "—"}</td>
                 <td className="px-3 py-2">
                   {l.signature_attestation
-                    ? <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                    ? <ShieldCheck className="h-4 w-4 text-success-500" />
                     : <span className="text-muted-foreground/40">—</span>}
                 </td>
                 <td className="px-3 py-2 text-right">
@@ -1144,10 +1144,10 @@ function MarCalendarView({
 
   const statusColor = (l: EmarLog) => {
     const s = normalizeEmarStatus(l.status);
-    if (s === "self_administered") return "bg-emerald-500";
-    if (s === "refused") return "bg-rose-600";
-    if (s === "missed") return "bg-amber-400";
-    return "bg-rose-400";
+    if (s === "self_administered") return "bg-success-500";
+    if (s === "refused") return "bg-danger-600";
+    if (s === "missed") return "bg-warning-400";
+    return "bg-danger-400";
   };
 
   return (
@@ -1173,9 +1173,9 @@ function MarCalendarView({
 
       {/* Legend */}
       <div className="flex flex-wrap gap-3 border-b border-border px-4 py-2 text-[11px]">
-        <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Self-administered</span>
-        <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-rose-600" /> Refused</span>
-        <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-amber-400" /> Missed</span>
+        <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-success-500" /> Self-administered</span>
+        <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-danger-600" /> Refused</span>
+        <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-warning-400" /> Missed</span>
         <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full border border-border bg-muted" /> Scheduled</span>
       </div>
 
@@ -1215,9 +1215,9 @@ function MarCalendarView({
                       <div className="text-[11px] text-muted-foreground">
                         {med.dosage && <span>{med.dosage}</span>}
                         {time !== "PRN" && <span className="ml-1 font-mono">{time}</span>}
-                        {med.is_controlled && <span className="ml-1 font-bold text-purple-600">C</span>}
-                        {med.is_prn && <span className="ml-1 font-bold text-amber-600">PRN</span>}
-                        {!med.is_active && <span className="ml-1 text-rose-500">D/C</span>}
+                        {med.is_controlled && <span className="ml-1 font-bold text-denim-600">C</span>}
+                        {med.is_prn && <span className="ml-1 font-bold text-warning-600">PRN</span>}
+                        {!med.is_active && <span className="ml-1 text-danger-500">D/C</span>}
                       </div>
                     </td>
                     {days.map((d) => {
@@ -1235,7 +1235,7 @@ function MarCalendarView({
                                 <button className={`flex h-10 w-full items-center justify-center hover:opacity-80 transition relative`}>
                                   <span className={`h-5 w-5 rounded-full ${statusColor(log)}`} />
                                   {log.is_medication_error && (
-                                    <span className="absolute h-1.5 w-1.5 rounded-full bg-rose-600 top-0.5 right-0.5" />
+                                    <span className="absolute h-1.5 w-1.5 rounded-full bg-danger-600 top-0.5 right-0.5" />
                                   )}
                                 </button>
                               </PopoverTrigger>
@@ -1244,15 +1244,15 @@ function MarCalendarView({
                                 <div className="flex gap-1.5">
                                   <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize ${
                                     normalizeEmarStatus(log.status) === "self_administered"
-                                      ? "bg-emerald-100 text-emerald-800"
+                                      ? "bg-success-100 text-success-800"
                                       : normalizeEmarStatus(log.status) === "refused"
-                                      ? "bg-rose-100 text-rose-800"
-                                      : "bg-amber-100 text-amber-800"
+                                      ? "bg-danger-100 text-danger-800"
+                                      : "bg-warning-100 text-warning-800"
                                   }`}>
                                     {EMAR_STATUS_LABELS[normalizeEmarStatus(log.status)]}
                                   </span>
                                   {log.is_medication_error && (
-                                    <span className="rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-semibold text-white">Error Filed</span>
+                                    <span className="rounded-full bg-danger-500 px-2 py-0.5 text-[10px] font-semibold text-white">Error Filed</span>
                                   )}
                                 </div>
                                 {log.administered_at && <p>Time: {fmtDateTime(log.administered_at)}</p>}
@@ -1261,7 +1261,7 @@ function MarCalendarView({
                                 {log.notes && <p className="text-muted-foreground">Notes: {log.notes}</p>}
                                 {log.staff_name && <p>Staff: {log.staff_name}</p>}
                                 {log.signature_attestation && (
-                                  <div className="flex items-center gap-1 text-emerald-700 dark:text-emerald-300">
+                                  <div className="flex items-center gap-1 text-success-700 dark:text-success-300">
                                     <ShieldCheck className="h-3 w-3" />
                                     <span>Self-admin attested</span>
                                   </div>
@@ -1645,7 +1645,7 @@ export function MarEmarTab({
               <Button
                 variant="outline"
                 size="sm"
-                className="h-7 gap-1 text-[11px] border-emerald-500/40 text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
+                className="h-7 gap-1 text-[11px] border-success-500/40 text-success-700 hover:bg-success-50 dark:text-success-400 dark:hover:bg-success-950/30"
                 onClick={() => setDisableConfirmOpen(true)}
                 title="Turn off self-directed self-administration support (returns client to eligibility gate; records preserved)"
               >
@@ -1724,14 +1724,14 @@ export function MarEmarTab({
 
       {/* Medication error alert */}
       {errorCount > 0 && (
-        <div className="rounded-xl border-2 border-rose-500 bg-rose-50 p-4 dark:bg-rose-950/30">
+        <div className="rounded-xl border-2 border-danger-500 bg-danger-50 p-4 dark:bg-danger-950/30">
           <div className="flex items-start gap-3">
-            <AlertOctagon className="mt-0.5 h-5 w-5 shrink-0 text-rose-600" />
+            <AlertOctagon className="mt-0.5 h-5 w-5 shrink-0 text-danger-600" />
             <div>
-              <p className="font-semibold text-rose-800 dark:text-rose-200">
+              <p className="font-semibold text-danger-800 dark:text-danger-200">
                 Medication Error on File — Action Required
               </p>
-              <p className="mt-0.5 text-sm text-rose-700 dark:text-rose-300">
+              <p className="mt-0.5 text-sm text-danger-700 dark:text-danger-300">
                 {errorCount} medication error{errorCount > 1 ? "s have" : " has"} been flagged today.
                 Your administrator has been notified. A Critical Event Report is required.
               </p>
@@ -1751,7 +1751,7 @@ export function MarEmarTab({
             <Clock className="mr-1.5 h-3.5 w-3.5" />
             Today's Pass
             {pendingCount > 0 && (
-              <Badge className="ml-1.5 bg-amber-500 text-white text-[10px]">{pendingCount}</Badge>
+              <Badge className="ml-1.5 bg-warning-500 text-white text-[10px]">{pendingCount}</Badge>
             )}
           </TabsTrigger>
           <TabsTrigger value="calendar" className="flex-1">
@@ -1796,12 +1796,12 @@ export function MarEmarTab({
             </div>
             <div className="flex gap-2">
               {pendingCount > 0 && (
-                <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+                <Badge className="bg-warning-100 text-warning-800 dark:bg-warning-950/40 dark:text-warning-200">
                   {pendingCount} pending
                 </Badge>
               )}
               {passes.filter((p) => normalizeEmarStatus(p.log?.status ?? "") === "self_administered").length > 0 && (
-                <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
+                <Badge className="bg-success-100 text-success-800 dark:bg-success-950/40 dark:text-success-200">
                   {passes.filter((p) => normalizeEmarStatus(p.log?.status ?? "") === "self_administered").length} self-administered
                 </Badge>
               )}
@@ -1849,17 +1849,17 @@ export function MarEmarTab({
 
                     return (
                       <li key={`${p.med.id}-${p.time}`}>
-                        <Card className={`flex flex-col gap-3 p-4 sm:flex-row sm:items-center ${errored ? "border-rose-300 bg-rose-50/40 dark:bg-rose-950/10" : ""}`}>
+                        <Card className={`flex flex-col gap-3 p-4 sm:flex-row sm:items-center ${errored ? "border-danger-300 bg-danger-50/40 dark:bg-danger-950/10" : ""}`}>
                           {/* Pill icon tile */}
                           <div
                             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
                               isPrnControlled
-                                ? "bg-rose-100 dark:bg-rose-950/30"
-                                : "bg-amber-100 dark:bg-amber-950/30"
+                                ? "bg-danger-100 dark:bg-danger-950/30"
+                                : "bg-warning-100 dark:bg-warning-950/30"
                             }`}
                           >
                             <Pill className={`h-5 w-5 ${
-                              isPrnControlled ? "text-rose-600" : "text-amber-600"
+                              isPrnControlled ? "text-danger-600" : "text-warning-600"
                             }`} />
                           </div>
 
@@ -1876,12 +1876,12 @@ export function MarEmarTab({
                                 <span className="text-xs text-muted-foreground">· {p.med.route}</span>
                               )}
                               {p.med.is_prn && (
-                                <span className="ml-1 inline-flex items-center rounded-full border border-rose-300 bg-rose-50 px-2 py-0.5 text-[10px] font-semibold text-rose-700 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-200">
+                                <span className="ml-1 inline-flex items-center rounded-full border border-danger-300 bg-danger-50 px-2 py-0.5 text-[10px] font-semibold text-danger-700 dark:border-danger-800 dark:bg-danger-950/30 dark:text-danger-200">
                                   PRN{p.med.is_controlled ? " · Schedule IV" : ""}
                                 </span>
                               )}
                               {p.med.choking_risk && (
-                                <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
+                                <span className="inline-flex items-center gap-1 rounded-full border border-warning-300 bg-warning-50 px-2 py-0.5 text-[10px] font-semibold text-warning-800 dark:border-warning-800 dark:bg-warning-950/30 dark:text-warning-200">
                                   <AlertTriangle className="h-3 w-3" /> Choking risk
                                 </span>
                               )}
@@ -1893,9 +1893,9 @@ export function MarEmarTab({
 
                             {/* Refill alerts */}
                             {p.med.is_controlled && p.med.pill_count_current !== null && p.med.pill_count_current <= 5 && (
-                              <div className="mt-1.5 flex items-center gap-1.5 rounded-md border border-amber-400 bg-amber-50 px-2 py-1 dark:bg-amber-950/20">
-                                <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-600" />
-                                <p className="text-[11px] font-semibold text-amber-800 dark:text-amber-200">
+                              <div className="mt-1.5 flex items-center gap-1.5 rounded-md border border-warning-400 bg-warning-50 px-2 py-1 dark:bg-warning-950/20">
+                                <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-warning-600" />
+                                <p className="text-[11px] font-semibold text-warning-800 dark:text-warning-200">
                                   Refill needed — {p.med.pill_count_current} dose{p.med.pill_count_current !== 1 ? "s" : ""} remaining
                                 </p>
                               </div>
@@ -1903,9 +1903,9 @@ export function MarEmarTab({
                             {p.med.refill_date && (() => {
                               const daysUntil = Math.ceil((new Date(p.med.refill_date!).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
                               return daysUntil <= 7 ? (
-                                <div className="mt-1.5 flex items-center gap-1.5 rounded-md border border-blue-400 bg-blue-50 px-2 py-1 dark:bg-blue-950/20">
-                                  <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-blue-600" />
-                                  <p className="text-[11px] font-semibold text-blue-800 dark:text-blue-200">
+                                <div className="mt-1.5 flex items-center gap-1.5 rounded-md border border-denim-400 bg-denim-50 px-2 py-1 dark:bg-denim-950/20">
+                                  <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-denim-600" />
+                                  <p className="text-[11px] font-semibold text-denim-800 dark:text-denim-200">
                                     Refill due {new Date(p.med.refill_date!).toLocaleDateString()} — confirm supply is on hand
                                   </p>
                                 </div>
@@ -1916,13 +1916,13 @@ export function MarEmarTab({
                             <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                               {passed && !errored && (
                                 <>
-                                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-success-100 px-2 py-0.5 text-[11px] font-medium text-success-800 dark:bg-success-950/40 dark:text-success-200">
                                     <CheckCircle2 className="h-3 w-3" />
                                     Self-administered {p.log?.administered_at ? fmtTime(p.log.administered_at) : ""}
                                   </span>
                                   {p.log?.signature_attestation && (
                                     <span className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[10px] text-muted-foreground">
-                                      <ShieldCheck className="h-3 w-3 text-emerald-500" /> Self-admin attested
+                                      <ShieldCheck className="h-3 w-3 text-success-500" /> Self-admin attested
                                     </span>
                                   )}
                                 </>
@@ -1934,12 +1934,12 @@ export function MarEmarTab({
                                 </span>
                               )}
                               {errored && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-rose-500 px-2 py-0.5 text-[11px] font-semibold text-white">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-danger-500 px-2 py-0.5 text-[11px] font-semibold text-white">
                                   <AlertOctagon className="h-3 w-3" /> Medication error filed
                                 </span>
                               )}
                               {overdue && !p.log && (
-                                <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+                                <span className="inline-flex items-center rounded-full bg-warning-100 px-2 py-0.5 text-[11px] font-medium text-warning-800 dark:bg-warning-950/40 dark:text-warning-200">
                                   Window passed — documentation required
                                 </span>
                               )}
@@ -1961,7 +1961,7 @@ export function MarEmarTab({
                                   return (
                                     <li key={h.id} className="flex flex-wrap items-center gap-1.5">
                                       <span className="font-mono">{when}</span>
-                                      <span className={`capitalize ${isAdmin ? "text-emerald-700 dark:text-emerald-300 font-medium" : ""}`}>
+                                      <span className={`capitalize ${isAdmin ? "text-success-700 dark:text-success-300 font-medium" : ""}`}>
                                         {h.status}{isAdmin ? " ✓" : ""}
                                       </span>
                                       <span>— {h.staff_name || "Staff"}</span>
@@ -2031,12 +2031,12 @@ export function MarEmarTab({
                   <div className="flex items-center gap-2">
                     <Pill className="h-4 w-4 text-primary" />
                     <span className="font-semibold text-sm">{med.medication_name}</span>
-                    {med.is_controlled && <Badge className="bg-purple-100 text-purple-800 text-[10px]">Controlled</Badge>}
-                    {med.is_prn && <Badge className="bg-amber-100 text-amber-800 text-[10px]">PRN</Badge>}
+                    {med.is_controlled && <Badge className="bg-denim-100 text-denim-800 text-[10px]">Controlled</Badge>}
+                    {med.is_prn && <Badge className="bg-warning-100 text-warning-800 text-[10px]">PRN</Badge>}
                     {!med.is_active && <Badge variant="outline" className="text-[10px]">Discontinued</Badge>}
                   </div>
                   {med.choking_risk && (
-                    <Badge className="bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-200 gap-1">
+                    <Badge className="bg-danger-100 text-danger-800 dark:bg-danger-950/40 dark:text-danger-200 gap-1">
                       <AlertTriangle className="h-3 w-3" /> Choking Risk
                     </Badge>
                   )}

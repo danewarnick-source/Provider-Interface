@@ -31,11 +31,11 @@ const STATUS_LABEL: Record<StatusChoice, string> = {
 };
 
 const STATUS_BADGE_CLASS: Record<string, string> = {
-  observed: "bg-emerald-100 text-emerald-800 border-emerald-300",
-  refused: "bg-rose-100 text-rose-800 border-rose-300",
-  missed: "bg-amber-100 text-amber-900 border-amber-300",
-  loa: "bg-sky-100 text-sky-800 border-sky-300",
-  omitted: "bg-amber-100 text-amber-900 border-amber-300",
+  observed: "bg-success-100 text-success-800 border-success-300",
+  refused: "bg-danger-100 text-danger-800 border-danger-300",
+  missed: "bg-warning-100 text-warning-900 border-warning-300",
+  loa: "bg-denim-100 text-denim-800 border-denim-300",
+  omitted: "bg-warning-100 text-warning-900 border-warning-300",
 };
 
 type ClientHeader = {
@@ -519,7 +519,7 @@ function LogDoseDialog({
             <Label htmlFor="note">
               Note{" "}
               {status && status !== "observed" ? (
-                <span className="text-rose-600">*</span>
+                <span className="text-danger-600">*</span>
               ) : (
                 <span className="text-muted-foreground">(optional)</span>
               )}

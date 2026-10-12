@@ -372,7 +372,7 @@ function HostRow({
           className="h-8 w-24 text-right tabular-nums"
         />
       </td>
-      <td className={`px-3 py-2 text-right tabular-nums font-medium ${row.tnsMargin >= 0 ? "text-emerald-600" : "text-destructive"}`}>
+      <td className={`px-3 py-2 text-right tabular-nums font-medium ${row.tnsMargin >= 0 ? "text-success-600" : "text-destructive"}`}>
         {fmtUSD(row.tnsMargin)}
       </td>
     </tr>

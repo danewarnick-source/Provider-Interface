@@ -79,7 +79,7 @@ function HealthKpi({
       : tone === "warn"
         ? "border-[#fed7aa] bg-[#fffdf7]"
         : tone === "good"
-          ? "border-emerald-200 bg-emerald-50/60"
+          ? "border-success-200 bg-success-50/60"
           : "border-border bg-card";
   return (
     <div className={`rounded-xl border p-4 shadow-sm ${toneClass}`}>
@@ -104,7 +104,7 @@ function HealthBucket({
 }) {
   if (rows.length === 0) return null;
   const dot =
-    tone === "risk" ? "bg-red-500" : tone === "warn" ? "bg-amber-500" : "bg-emerald-500";
+    tone === "risk" ? "bg-danger-500" : tone === "warn" ? "bg-warning-500" : "bg-success-500";
   return (
     <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
       <h3 className="mb-3 flex items-center gap-2 font-display text-base font-semibold">

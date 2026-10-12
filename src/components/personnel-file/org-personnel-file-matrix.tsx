@@ -152,7 +152,7 @@ export function OrgPersonnelFileMatrix({
   }
   if (q.error) {
     return (
-      <div className="rounded-2xl border border-rose-200 bg-rose-50/30 p-6 text-sm text-rose-700">
+      <div className="rounded-2xl border border-danger-200 bg-danger-50/30 p-6 text-sm text-danger-700">
         {q.error instanceof Error ? q.error.message : "Could not load the staff file."}
       </div>
     );
@@ -314,11 +314,11 @@ function MatrixRow({
 function StatusCount({ count, tone }: { count: number; tone: "missing" | "due_soon" | "on_file" }) {
   const cls =
     tone === "on_file"
-      ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+      ? "border-success-300 bg-success-50 text-success-800"
       : tone === "due_soon"
-        ? "border-amber-300 bg-amber-50 text-amber-900"
+        ? "border-warning-300 bg-warning-50 text-warning-900"
         : count > 0
-          ? "border-rose-200 bg-rose-50 text-rose-800"
+          ? "border-danger-200 bg-danger-50 text-danger-800"
           : "border-border bg-muted/40 text-muted-foreground";
   return (
     <span

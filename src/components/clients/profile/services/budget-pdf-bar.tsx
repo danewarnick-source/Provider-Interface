@@ -37,7 +37,7 @@ export function BudgetPdfBar({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="text-xs text-muted-foreground">
           {latest ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/60 bg-emerald-50 px-2.5 py-1 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-success-300/60 bg-success-50 px-2.5 py-1 text-success-800 dark:bg-success-950/40 dark:text-success-200">
               <CheckCircle2 className="h-3.5 w-3.5" />
               Saved to client file {new Date(latest.uploaded_at).toLocaleDateString()}
               {pdf.shipped.length > 1 ? ` (${pdf.shipped.length} copies)` : ""}
