@@ -147,7 +147,6 @@ describe("prefillFromPcsp", () => {
       pid: "0000000",
       dob: "1990-01-02",
       residentialAddress: "100 Sample Street",
-      mailingAddress: "",
       phone: "555-0100",
       supportCoordinator: {
         name: "Casey Sample",

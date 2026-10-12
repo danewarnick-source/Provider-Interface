@@ -12,7 +12,7 @@ import { currentPlan, type ClientPlan } from "@/lib/clients/plans";
 import { pcspState, type PcspState } from "@/lib/clients/pcsp-status";
 
 const CLIENT_COLUMNS =
-  "id, organization_id, first_name, last_name, date_of_birth, phone_number, medicaid_id, client_pid, insurance, admission_date, discharge_date, account_status, team_id, special_directions, about_me, physical_address, mailing_address, client_photo_url, client_photo_taken_on, is_own_guardian, hr_applicable, feature_config, disability_category";
+  "id, organization_id, first_name, last_name, date_of_birth, phone_number, medicaid_id, client_pid, insurance, admission_date, discharge_date, account_status, team_id, special_directions, about_me, physical_address, client_photo_url, client_photo_taken_on, is_own_guardian, hr_applicable, feature_config, disability_category";
 
 export type ClientProfileRow = {
   id: string;
@@ -31,7 +31,6 @@ export type ClientProfileRow = {
   special_directions: string | null;
   about_me: string | null;
   physical_address: string | null;
-  mailing_address: string | null;
   client_photo_url: string | null;
   client_photo_taken_on: string | null;
   is_own_guardian: boolean | null;

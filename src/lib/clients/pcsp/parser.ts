@@ -75,7 +75,7 @@ function splitSections(body: L[]): PcspSection[] {
 function emptyResult(): PcspResult {
   return {
     plan: { start: null, end: null, activatedOn: null, status: null, meetingDate: null },
-    person: { name: "", pid: "", dob: null, residentialAddress: "", mailingAddress: "", phone: "", supportCoordinator: { name: "", email: "", phone: "", company: "" } },
+    person: { name: "", pid: "", dob: null, residentialAddress: "", phone: "", supportCoordinator: { name: "", email: "", phone: "", company: "" } },
     goals: [], nonGoalSupports: [], purchasedServices: [], budget: [], risks: [], aboutMe: [], lastYearGoals: [], issues: [],
   };
 }

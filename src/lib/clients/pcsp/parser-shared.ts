@@ -30,7 +30,7 @@ export type LastYearGoal = { goal: string; ongoing: boolean | null; status: stri
 
 export type PcspResult = {
   plan: { start: string | null; end: string | null; activatedOn: string | null; status: string | null; meetingDate: string | null };
-  person: { name: string; pid: string; dob: string | null; residentialAddress: string; mailingAddress: string; phone: string;
+  person: { name: string; pid: string; dob: string | null; residentialAddress: string; phone: string;
     supportCoordinator: { name: string; email: string; phone: string; company: string } };
   goals: Goal[];
   nonGoalSupports: NonGoalSupport[];

@@ -223,7 +223,7 @@ export async function applyExtractedFieldsToClient(
   const { data: client, error: cErr } = await supabase
     .from("clients")
     .select(
-      "id, first_name, last_name, date_of_birth, medicaid_id, phone_number, physical_address, mailing_address, " +
+      "id, first_name, last_name, date_of_birth, medicaid_id, phone_number, physical_address, " +
       "is_own_guardian, " +
       "special_directions, allergies, dysphagia, swallowing_alerts, self_admin_med_support, " +
       "team_id, " +
@@ -361,7 +361,6 @@ export async function applyExtractedFieldsToClient(
   setScalarText("medicaid_id", "medicaid_id");
   setScalarText("phone_number", "phone");
   setScalarText("physical_address", "physical_address");
-  setScalarText("mailing_address", "mailing_address");
 
   const isOwn = byKey.get("is_own_guardian");
   const isOwnVal = isOwn ? fieldBool(isOwn) : null;
@@ -930,7 +929,9 @@ export async function applyExtractedFieldsToClient(
   // extracted is lost. Unknown keys are logged once so we can detect future drops.
   const KNOWN_CORE = new Set<string>([
     "first_name", "last_name", "full_name", "dob", "date_of_birth", "medicaid_id", "phone",
-    "physical_address", "mailing_address",
+    "physical_address",
+    // Mailing address is no longer kept: known so it is dropped, not turned into a custom field.
+    "mailing_address",
     // Contacts (→ client_contacts) and the must-knows alert (→ special_directions)
     ...Object.keys(LEGACY_CONTACT_KEYS), LEGACY_ALERT_KEY,
     "is_own_guardian",

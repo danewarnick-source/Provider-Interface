@@ -87,7 +87,6 @@ Common field_key values to extract when present (use field_group to bucket relat
     labels as Medicaid ID and extract the value into medicaid_id (digits only). Do NOT emit a
     separate PID/person_id field — there is no such column.
   Address (group "address"): physical_address  -- client's Residential Address (service/home street).
-    mailing_address (value_text) -- the client's Mailing Address when listed separately on the PCSP.
   Emergency contact (group "emergency_contact"): emergency_contact_name, emergency_contact_phone, emergency_contact_relationship, emergency_contact_instructions.
     ALWAYS split name and phone into TWO separate fields. Never combine.
     If a SECOND emergency contact is listed, emit emergency_contact_2_name,
