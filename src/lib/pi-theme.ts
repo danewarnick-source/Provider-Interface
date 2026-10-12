@@ -4,11 +4,6 @@
  * system — the same numbers as the --denim-* CSS variables in
  * src/styles/hive-theme.css, read from DENIM in design-tokens.ts so they
  * cannot drift. Prefer the CSS variables / Tailwind utilities in components.
- *
- * Key names are kept from the earlier palette so importers keep compiling:
- * `navy`/`n*` are Denim blues, `cream` is the paper surface, `gold` /
- * `goldSoft` now carry the Denim green accent (no gold anywhere) and `amber`
- * is the warning status text.
  */
 
 import { DENIM, DENIM_FONTS, DENIM_STATUS } from "./design-tokens.ts";
@@ -20,8 +15,8 @@ export const PI_THEME = {
   n3: DENIM.pt2,
   sideTop: DENIM.deep,
   sideBot: DENIM.pri,
-  /** Paper surface (was the cream canvas). */
-  cream: DENIM.paper,
+  /** Paper surface. */
+  paper: DENIM.paper,
   /** Text ramp on light surfaces. */
   c70: DENIM.text,
   c50: DENIM.muted,
@@ -29,19 +24,15 @@ export const PI_THEME = {
   c14: DENIM.line,
   c08: DENIM.line,
   c04: DENIM.pt0,
-  /** Denim green accent (key name kept for importers). */
-  gold: DENIM.accd,
-  /** Denim green tint (key name kept for importers). */
-  goldSoft: DENIM.acct,
   accent: DENIM.acc,
   accentText: DENIM.accd,
   accentSoft: DENIM.acct,
   ok: DENIM.acc,
   red: DENIM_STATUS.danger,
-  /** Warning text — status meaning kept (key name kept for importers). */
-  amber: DENIM_STATUS.warnText,
-  /** Heading face (Manrope). Key name kept for importers. */
-  serif: DENIM_FONTS.heading,
+  /** Warning status text. */
+  warnText: DENIM_STATUS.warnText,
+  /** Heading face (Manrope). */
+  heading: DENIM_FONTS.heading,
   sans: DENIM_FONTS.body,
   shadow1:
     "0 0 0 1px rgba(27, 51, 80, 0.08), 0 1px 2px rgba(27, 51, 80, 0.05), 0 8px 20px -14px rgba(27, 51, 80, 0.28)",

@@ -509,7 +509,7 @@ function MessageCenter() {
           {files.length} attachment{files.length === 1 ? "" : "s"}
         </div>
         <NectarButton
-          variant="amber"
+          variant="accent"
           icon={<Send className="h-4 w-4" />}
           onClick={handleSend}
           disabled={!canSend}

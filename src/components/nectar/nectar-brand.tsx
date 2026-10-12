@@ -249,7 +249,7 @@ export function NectarHeader({
 /* -------------------------------------------------------------------------- */
 
 type NectarButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "amber" | "ghost";
+  variant?: "primary" | "accent" | "ghost";
   loading?: boolean;
   icon?: ReactNode;
 };
@@ -262,7 +262,7 @@ export const NectarButton = forwardRef<HTMLButtonElement, NectarButtonProps>(
     const base =
       "inline-flex min-h-[40px] items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold shadow-[var(--denim-shadow-sm)] transition disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pri/30 focus-visible:ring-offset-2";
     const styles =
-      variant === "amber"
+      variant === "accent"
         ? "bg-[var(--hive-primary)] text-[var(--hive-primary-fg)] hover:bg-[var(--hive-primary-hover)]"
         : variant === "ghost"
         ? "border border-acctb bg-acct text-accd hover:bg-acclh"

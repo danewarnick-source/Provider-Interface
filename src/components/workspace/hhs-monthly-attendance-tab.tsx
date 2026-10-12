@@ -141,7 +141,7 @@ export function HhsMonthlyAttendanceTab({
         {/* Counts */}
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <CountTile label="Present" value={counts.present} tone="green" />
-          <CountTile label="Away" value={counts.away} tone="amber" />
+          <CountTile label="Away" value={counts.away} tone="warning" />
           <CountTile label="Unbillable" value={counts.blocked} tone="red" />
           <CountTile label="No entry" value={counts.noEntry} tone="muted" />
         </div>
@@ -258,10 +258,10 @@ export function HhsMonthlyAttendanceTab({
   );
 }
 
-function CountTile({ label, value, tone }: { label: string; value: number; tone: "green" | "amber" | "red" | "muted" }) {
+function CountTile({ label, value, tone }: { label: string; value: number; tone: "green" | "warning" | "red" | "muted" }) {
   const toneCls = {
     green: "border-success-300 bg-success-50 text-success-800 dark:border-success-800 dark:bg-success-950/30 dark:text-success-200",
-    amber: "border-warning-300 bg-warning-50 text-warning-800 dark:border-warning-800 dark:bg-warning-950/30 dark:text-warning-200",
+    warning: "border-warning-300 bg-warning-50 text-warning-800 dark:border-warning-800 dark:bg-warning-950/30 dark:text-warning-200",
     red: "border-danger-300 bg-danger-50 text-danger-800 dark:border-danger-900 dark:bg-danger-950/30 dark:text-danger-200",
     muted: "border-border bg-muted/40 text-muted-foreground",
   }[tone];

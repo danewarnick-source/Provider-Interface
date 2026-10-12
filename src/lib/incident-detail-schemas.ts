@@ -22,7 +22,7 @@ export type DetailBlock = {
   key: DetailCategoryKey;
   title: string;
   /** Optional intro / legal notice rendered above the fields. */
-  notice?: { tone: "info" | "amber" | "red"; text: string };
+  notice?: { tone: "info" | "warning" | "red"; text: string };
   fields: DetailField[];
 };
 

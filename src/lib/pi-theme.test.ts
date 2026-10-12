@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { DENIM, DENIM_FONTS } from "./design-tokens.ts";
 import { PI_THEME } from "./pi-theme.ts";
-import { PI_ACCENT, PI_ACTION, PI_CREAM, PI_NAVY, PI_THEME as FROM_LANDING } from "./pi-landing.ts";
+import { PI_ACCENT, PI_ACTION, PI_PAPER, PI_NAVY, PI_THEME as FROM_LANDING } from "./pi-landing.ts";
 
 function read(rel: string) {
   return readFileSync(new URL(rel, import.meta.url), "utf8");
@@ -17,18 +17,15 @@ describe("PI theme tokens", () => {
     assert.equal(PI_THEME.n2, DENIM.pt);
     assert.equal(PI_THEME.n3, DENIM.pt2);
     assert.equal(PI_THEME.sideTop, DENIM.deep);
-    assert.equal(PI_THEME.cream, DENIM.paper);
+    assert.equal(PI_THEME.paper, DENIM.paper);
     assert.equal(PI_THEME.c70, DENIM.text);
     assert.equal(PI_THEME.c50, DENIM.muted);
     assert.equal(PI_THEME.c08, DENIM.line);
-    // Former gold keys carry the Denim green accent.
-    assert.equal(PI_THEME.gold, DENIM.accd);
-    assert.equal(PI_THEME.goldSoft, DENIM.acct);
     assert.equal(PI_THEME.accent, DENIM.acc);
     assert.equal(PI_THEME.ok, DENIM.acc);
     assert.equal(PI_THEME.red, "#D92D20");
-    assert.equal(PI_THEME.amber, "#B54708");
-    assert.equal(PI_THEME.serif, DENIM_FONTS.heading);
+    assert.equal(PI_THEME.warnText, "#B54708");
+    assert.equal(PI_THEME.heading, DENIM_FONTS.heading);
     assert.equal(PI_THEME.sans, DENIM_FONTS.body);
     assert.equal(PI_THEME.grainOpacity, 0);
     assert.equal(PI_THEME.cardBg, DENIM.paper);
@@ -42,7 +39,7 @@ describe("PI theme tokens", () => {
   it("re-exports from pi-landing so landing and app cannot drift", () => {
     assert.equal(FROM_LANDING, PI_THEME);
     assert.equal(PI_NAVY, PI_THEME.navy);
-    assert.equal(PI_CREAM, PI_THEME.cream);
+    assert.equal(PI_PAPER, PI_THEME.paper);
     assert.equal(PI_ACCENT, DENIM.acc);
     assert.equal(PI_ACTION, DENIM.pri);
   });

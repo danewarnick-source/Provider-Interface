@@ -548,7 +548,7 @@ export function PunchPad({
   // ── GPS status label ────────────────────────────────────────────────────────
   const gpsStatusLabel = (() => {
     if (hardwareDenied)
-      return { text: "⚠️ Location blocked — open device Settings and enable location for this site. Clock-in is held until GPS is available.", color: "amber" as const };
+      return { text: "⚠️ Location blocked — open device Settings and enable location for this site. Clock-in is held until GPS is available.", color: "warning" as const };
     if (gpsAcquiring || !livePos)
       return { text: "📡 Acquiring high-accuracy GPS — wait for a live fix before clocking in.", color: "neutral" as const };
     if (!serviceCode)
@@ -556,9 +556,9 @@ export function PunchPad({
     if (!isEvvLockedCode(serviceCode))
       return { text: `🛈 ${serviceCode} — GPS logged passively, geofence not enforced for this code.`, color: "neutral" as const };
     if (livePos && !gpsConfident)
-      return { text: `📡 GPS is too coarse to confirm you are at the saved home pin (±${Math.round(livePos.acc)} m). Wait for a better fix — this is not an out-of-zone reading.`, color: "amber" as const };
+      return { text: `📡 GPS is too coarse to confirm you are at the saved home pin (±${Math.round(livePos.acc)} m). Wait for a better fix — this is not an out-of-zone reading.`, color: "warning" as const };
     if (geofenceDecision.kind === "no_home_pin")
-      return { text: "📍 GPS live. No home pin is saved on this client — an administrator should set it. Geofence is not enforced until a pin exists.", color: "amber" as const };
+      return { text: "📍 GPS live. No home pin is saved on this client — an administrator should set it. Geofence is not enforced until a pin exists.", color: "warning" as const };
     const matchedHere = livePos && gpsConfident ? matchApprovedLocation({ lat: livePos.lat, lng: livePos.lng }) : null;
     if (matchedHere)
       return { text: `🟢 GPS confirmed — inside approved location "${matchedHere.label}". No variance required.`, color: "green" as const };
@@ -568,7 +568,7 @@ export function PunchPad({
   })();
 
   const gpsStripClass = {
-    amber:   "border-warning-500/40 bg-warning-500/10 text-warning-900 dark:text-warning-200",
+    warning: "border-warning-500/40 bg-warning-500/10 text-warning-900 dark:text-warning-200",
     neutral: "border-border bg-muted/40 text-muted-foreground",
     green:   "border-success-500/40 bg-success-500/10 text-success-800 dark:text-success-200",
     red:     "border-danger-500/40 bg-danger-500/10 text-danger-800 dark:text-danger-200",

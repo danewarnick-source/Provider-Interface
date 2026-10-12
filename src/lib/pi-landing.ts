@@ -19,8 +19,8 @@ export const PI_HERO_SUPPORT = PI_SUBHEAD;
 export const PI_NAVY = PI_THEME.navy;
 export const PI_NAVY_RAISED = PI_THEME.n1;
 /** Paper surface (name kept for importers). */
-export const PI_CREAM = PI_THEME.cream;
-export const PI_CREAM_MUTED = PI_THEME.c50;
+export const PI_PAPER = PI_THEME.paper;
+export const PI_PAPER_MUTED = PI_THEME.c50;
 /** Denim green accent. */
 export const PI_ACCENT = PI_THEME.accent;
 export const PI_ACTION = PI_THEME.buttons.primaryBg;
