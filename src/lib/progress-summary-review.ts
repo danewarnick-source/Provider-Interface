@@ -3,8 +3,10 @@
 // This module is the pure part:
 //   - the guards on Nectar's per-box drafts (buildDrafts): every date and
 //     number in a draft must come from that box's text or its records
-//     (unsupportedFacts), the person's own dates and numbers must survive
-//     (droppedFacts), sentences are never repeated (dedupeFields), and the
+//     (unsupportedFacts); dates and numbers the person typed that are in no
+//     record and the draft left out are only a warning (droppedFacts), since
+//     a summary drops dates on purpose; sentences are never repeated
+//     (dedupeFields), and the
 //     incident box never says "no incidents" when there are reports. A draft
 //     that fails leaves the box unchanged (draftFailureMessage says why);
 //   - the goal check, decided in code (goalCovered): a goal is covered when
@@ -288,9 +290,14 @@ export function dedupeFields(fields: ReadonlyArray<[FieldKey, string]>): Map<Fie
 export interface BoxDraft {
   field: FieldKey;
   text: string;
+  /**
+   * Dates / numbers the person typed by hand (in no record) that the draft
+   * left out. Only a warning: the draft is still used, and Undo puts them back.
+   */
+  dropped?: string[];
 }
 
-export type DraftFailureReason = "unsupported" | "dropped" | "no_incidents" | "unchanged";
+export type DraftFailureReason = "unsupported" | "no_incidents" | "unchanged";
 
 export interface DraftFailure {
   field: FieldKey;
@@ -325,10 +332,12 @@ export const saysNoIncidents = (text: string) => NO_INCIDENTS_RE.test(text);
 
 /**
  * Nectar's drafts made safe to write into their boxes: a draft with a date
- * or number in neither its box nor its records, one that loses a date or
- * number the person typed, or an incident draft that says "no incidents"
- * while there are reports is not used; repeated sentences are removed; a
- * draft equal to the box changes nothing.
+ * or number in neither its box nor its records, or an incident draft that
+ * says "no incidents" while there are reports, is not used; repeated
+ * sentences are removed; a draft equal to the box changes nothing. A
+ * summary leaves out dates and numbers on purpose, so a draft that drops
+ * them is used; only the ones the person typed that are in no record are
+ * listed (`dropped`) as a warning.
  */
 export function buildDrafts(input: DraftInput): DraftResult {
   const failed: DraftFailure[] = [];
@@ -356,16 +365,12 @@ export function buildDrafts(input: DraftInput): DraftResult {
       failed.push({ field, reason: "unchanged", facts: [] });
       continue;
     }
-    const drops = droppedFacts(typed, [text]);
-    if (drops.length) {
-      failed.push({ field, reason: "dropped", facts: drops });
-      continue;
-    }
     if (field === "incidentNotes" && input.hasIncidents && saysNoIncidents(text)) {
       failed.push({ field, reason: "no_incidents", facts: [] });
       continue;
     }
-    drafts.push({ field, text });
+    const dropped = droppedFacts(typed, [text, ...input.extra(field)]);
+    drafts.push(dropped.length ? { field, text, dropped } : { field, text });
   }
   return { drafts, failed };
 }
@@ -383,13 +388,16 @@ export function draftFailureMessage(f: Pick<DraftFailure, "reason" | "facts">): 
   switch (f.reason) {
     case "unsupported":
       return `Nectar's draft wasn't used: it had dates or numbers that aren't in this box or its records${list}.`;
-    case "dropped":
-      return `Nectar's draft wasn't used: it left out dates or numbers you wrote${list}.`;
     case "no_incidents":
       return "Nectar's draft wasn't used: it said there were no incidents, but this period has incident reports.";
     case "unchanged":
       return "Nectar had nothing to change in this box.";
   }
+}
+
+/** The one line shown under a drafted box that left out something typed by hand. */
+export function draftWarningMessage(dropped: readonly string[]): string {
+  return `Check the draft: it left out dates or numbers you typed that aren't in any record (${dropped.join(", ")}). Undo puts them back.`;
 }
 
 // ─── Goal check (in code) ──────────────────────────────────────────────────

@@ -1,9 +1,11 @@
 // The progress summary as a document, laid out like the support strategies
 // document: provider and title, the draft mark, the details, then each goal
-// → "Support:" / "Support details:" → "Progress / summary of services" → the
-// evidence pulled for that goal; then General, Incidents and General notes.
-// Editable in place (the editor) or read-only (the preview and a finalized
-// summary). Built from buildSummaryDoc.
+// → "Support:" / "Support details:" → "Progress / summary of services"; then
+// Incidents and General notes. Editable in place (the editor) or read-only
+// (the preview and a finalized summary). Only the editor lists the source
+// records (each goal's evidence, General, the incident reports and added
+// incidents) so the admin can see them; the read-only document shows just the
+// summary, like the PDF. Built from buildSummaryDoc.
 
 import type { ReactNode } from "react";
 import { Plus, Sparkles, X } from "lucide-react";
@@ -14,7 +16,7 @@ import {
   NO_PROGRESS_TEXT,
   evidenceHeading,
   filledIncidents,
-  manualIncidentLine,
+  incidentsParagraph,
   type ManualIncident,
   type SummaryDoc,
   type SummaryEditorState,
@@ -123,16 +125,16 @@ export function SummaryDocument({ doc, edit }: { doc: SummaryDoc; edit?: DocEdit
                 <p className="whitespace-pre-wrap">{g.progress || NO_PROGRESS_TEXT}</p>
               )}
             </div>
-            {edit && !g.evidence.length ? null : (
+            {edit && g.evidence.length ? (
               <div className="pl-2">
                 <EvidenceList lines={g.evidence} />
               </div>
-            )}
+            ) : null}
           </section>
         );
       })}
 
-      {doc.general.evidence.length ? (
+      {edit && doc.general.evidence.length ? (
         <section className="space-y-2 border-t border-hive-border pt-3">
           <p className="font-semibold text-hive-ink">General</p>
           <p className="text-xs text-muted-foreground">Not tied to a goal.</p>
@@ -142,20 +144,19 @@ export function SummaryDocument({ doc, edit }: { doc: SummaryDoc; edit?: DocEdit
 
       <section className="space-y-2 border-t border-hive-border pt-3">
         <p className="font-semibold text-hive-ink">
-          Incidents (
-          {doc.incidents.records.length +
-            (edit ? filledIncidents(edit.editor.incidents).length : doc.incidents.manual.length)}
-          )
+          {edit
+            ? `Incidents (${doc.incidents.records.length + filledIncidents(edit.editor.incidents).length})`
+            : "Incidents"}
         </p>
-        {doc.incidents.records.length ? (
-          <ul className="list-disc space-y-0.5 pl-5 text-xs">
-            {doc.incidents.records.map((r, i) => (
-              <li key={i}>{r}</li>
-            ))}
-          </ul>
-        ) : null}
         {edit ? (
           <>
+            {doc.incidents.records.length ? (
+              <ul className="list-disc space-y-0.5 pl-5 text-xs">
+                {doc.incidents.records.map((r, i) => (
+                  <li key={i}>{r}</li>
+                ))}
+              </ul>
+            ) : null}
             {edit.editor.incidents.map((m) => (
               <div
                 key={m.id}
@@ -222,23 +223,7 @@ export function SummaryDocument({ doc, edit }: { doc: SummaryDoc; edit?: DocEdit
             {edit.review?.("incidentNotes")}
           </>
         ) : (
-          <>
-            {doc.incidents.manual.length ? (
-              <ul className="list-disc space-y-0.5 pl-5 text-xs">
-                {doc.incidents.manual.map((m) => (
-                  <li key={m.id}>{manualIncidentLine(m)}</li>
-                ))}
-              </ul>
-            ) : null}
-            {doc.incidents.notes ? (
-              <p className="whitespace-pre-wrap">{doc.incidents.notes}</p>
-            ) : null}
-            {!doc.incidents.records.length &&
-            !doc.incidents.manual.length &&
-            !doc.incidents.notes ? (
-              <p className="text-xs text-muted-foreground">No incidents this period.</p>
-            ) : null}
-          </>
+          <p className="whitespace-pre-wrap">{incidentsParagraph(doc)}</p>
         )}
       </section>
 

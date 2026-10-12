@@ -24,6 +24,17 @@ describe("Nectar helper (progress-summary-draft.functions.ts)", () => {
     assert.match(run, /const patch: Record<string, unknown> = \{ status, plan_id: source\.planId \}/);
     assert.match(run, /saveReview\(sb, row, patch, editor, review/);
   });
+  it("drafts a summary of the whole period, not a log: no dates, staff names or retelling", () => {
+    assert.match(src, /WRITE A SUMMARY OF THE WHOLE PERIOD, NOT A LOG/);
+    assert.match(src, /NO dates, times or days of the week\. NO staff names\. NO report numbers\./);
+    assert.match(src, /At most one short quote per box/);
+    assert.match(src, /Goal boxes: one paragraph, 3–6 sentences/);
+    assert.match(src, /General notes: one paragraph, 2–4 sentences/);
+    assert.match(src, /whether restraint was used/);
+    assert.match(src, /recommendations or plans that are not in/);
+    assert.doesNotMatch(src, /Keep EVERY fact written/, "summaries drop dates on purpose");
+    assert.match(src, /EVIDENCE_KIND_LABEL\[e\.kind\]/, "records go to Nectar without staff names");
+  });
   it("Review with Nectar only asks yes/no for goals with zero overlap, and only a 'no' counts", () => {
     assert.match(src, /goalsNeedingAreaCheck\(/);
     assert.match(src, /same_area/);
@@ -36,6 +47,16 @@ describe("Nectar helper (progress-summary-draft.functions.ts)", () => {
   });
   it("nothing from the old gate is left", () => {
     assert.doesNotMatch(src, /off_goal|misplaced|moveTo|out_of_period|"vague"|linkSuggestions|cleanNectarFindings/);
+  });
+});
+
+describe("the preview shows the summary only (summary-document.tsx)", () => {
+  const docSrc = read("../components/summaries/summary-document.tsx");
+  it("evidence lists and incident records are in the editor only", () => {
+    assert.match(docSrc, /\{edit && g\.evidence\.length \? \(/);
+    assert.match(docSrc, /\{edit && doc\.general\.evidence\.length \? \(/);
+    assert.match(docSrc, /<p className="whitespace-pre-wrap">\{incidentsParagraph\(doc\)\}<\/p>/);
+    assert.doesNotMatch(docSrc, /manualIncidentLine/);
   });
 });
 
@@ -58,6 +79,7 @@ describe("the editor never blocks (summary-editor.tsx, use-summary-editor.ts)", 
     assert.doesNotMatch(panel, /Accept|Show original|Hide original|wordDiff|SuggestionCard/);
     assert.doesNotMatch(editor, /Undo all/);
     assert.match(hook, /applyDraft\(next, d\)/);
+    assert.match(hook, /draftWarningMessage\(d\.dropped\)/, "a lost hand-typed number only warns");
     assert.match(hook, /textFields\(goalIds\)\.filter\(canDraft\)/, "every box with text or records");
   });
   it("Review with Nectar is an outlined button next to Draft all boxes", () => {

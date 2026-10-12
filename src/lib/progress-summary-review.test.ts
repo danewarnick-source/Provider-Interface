@@ -14,6 +14,7 @@ import {
   dedupeFields,
   dismissKey,
   draftFailureMessage,
+  draftWarningMessage,
   droppedFacts,
   emptyReviewState,
   findDates,
@@ -201,7 +202,7 @@ describe("rewrite validation", () => {
     ["general", JOBY_EDITOR.general],
     ["incidentNotes", "Joby fell on 11/2."],
   ]);
-  it("buildDrafts: a made-up date or a lost typed date leaves the box unchanged; each box on its own", () => {
+  it("buildDrafts: a made-up date leaves the box unchanged; a lost hand-typed date only warns; each box on its own", () => {
     const res = buildDrafts({
       current,
       proposed: new Map<FieldKey, string>([
@@ -212,11 +213,48 @@ describe("rewrite validation", () => {
       extra: () => [],
       order,
     });
-    assert.deepEqual(res.failed, [
-      { field: "goal:talent", reason: "unsupported", facts: ["9/21"] },
-      { field: "goal:ils", reason: "dropped", facts: ["8/5", "September"] },
+    assert.deepEqual(res.failed, [{ field: "goal:talent", reason: "unsupported", facts: ["9/21"] }]);
+    assert.deepEqual(res.drafts, [
+      {
+        field: "goal:ils",
+        text: "Joby planned and cooked meals with staff and did her own laundry every week.",
+        dropped: ["8/5", "September"],
+      },
+      { field: "incidentNotes", text: "Joby fell on 11/2 and was checked by staff." },
     ]);
-    assert.deepEqual(res.drafts, [{ field: "incidentNotes", text: "Joby fell on 11/2 and was checked by staff." }]);
+  });
+  it("a summary that drops the records' dates and numbers is used with no warning", () => {
+    const records = [
+      "2026-10-03 Joby needed 3 prompts to finish a load of laundry.",
+      "2026-10-17 Laundry with 2 prompts.",
+      "2026-11-20 Laundry with 1 prompt, a reminder to clean the lint trap.",
+    ];
+    const res = buildDrafts({
+      current: new Map<FieldKey, string>([["goal:ils", "On 10/3 Joby needed 3 prompts for laundry."]]),
+      proposed: new Map<FieldKey, string>([
+        [
+          "goal:ils",
+          "Joby went from needing three prompts to complete a load of laundry to needing one, usually a reminder to clean the lint trap.",
+        ],
+      ]),
+      extra: () => records,
+      order: ["goal:ils"],
+    });
+    assert.deepEqual(res.failed, []);
+    assert.equal(res.drafts.length, 1);
+    assert.equal(res.drafts[0].dropped, undefined);
+  });
+  it("a draft with an invented number is rejected, even when it drops dates on purpose", () => {
+    const res = buildDrafts({
+      current: new Map<FieldKey, string>([["goal:ils", ""]]),
+      proposed: new Map<FieldKey, string>([
+        ["goal:ils", "Joby cooked dinner 12 times this period and needed 2 prompts each time."],
+      ]),
+      extra: () => ["2026-10-04 Cooked baked chicken with 2 prompts."],
+      order: ["goal:ils"],
+    });
+    assert.deepEqual(res.drafts, []);
+    assert.deepEqual(res.failed, [{ field: "goal:ils", reason: "unsupported", facts: ["12"] }]);
   });
   it("a box's records can supply dates and numbers, and an empty box is drafted from them", () => {
     const res = buildDrafts({
@@ -254,11 +292,14 @@ describe("rewrite validation", () => {
     assert.equal(saysNoIncidents("After the fall there were no further incidents."), false);
   });
   it("each failure has a one-line message", () => {
-    for (const reason of ["unsupported", "dropped", "no_incidents", "unchanged"] as const) {
+    for (const reason of ["unsupported", "no_incidents", "unchanged"] as const) {
       const m = draftFailureMessage({ reason, facts: ["9/21"] });
       assert.ok(m && !m.includes("\n"), reason);
     }
-    assert.match(draftFailureMessage({ reason: "dropped", facts: ["8/5"] }), /\(8\/5\)/);
+    assert.match(draftFailureMessage({ reason: "unsupported", facts: ["9/21"] }), /\(9\/21\)/);
+    const w = draftWarningMessage(["8/5", "September"]);
+    assert.ok(!w.includes("\n"));
+    assert.match(w, /\(8\/5, September\)/);
   });
 });
 

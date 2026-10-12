@@ -2,9 +2,13 @@
 // and the text saved as the summary. Same shape as the support strategies
 // document: header (provider, client, support coordinator, period, services,
 // cadence/due), then each goal → its supports ("Support:", "Support
-// details:") → "Progress / summary of services" → the evidence pulled for
-// that goal (approved daily logs, submitted shift notes), then General
-// (evidence not tied to a goal), Incidents and general notes.
+// details:") → "Progress / summary of services", then the incidents
+// paragraph, general notes and the finalized-by block.
+//
+// The model also carries the source records (each goal's evidence, records
+// not tied to a goal, the incident reports and added incidents). Only the
+// editor shows them, so the admin can see what a box was drafted from; the
+// preview, the PDF and the saved text never print them.
 //
 // Also the editor state saved with the draft. Nectar never writes into it
 // directly: its rewrites are suggestions (progress-summary-review.ts) the
@@ -445,7 +449,16 @@ export function evidenceHeading(count: number): string {
   return `Evidence this period (${count})`;
 }
 
-/** The document as plain text: saved as the draft / final content. */
+/** The incidents as the document prints them: the paragraph, never the record list. */
+export function incidentsParagraph(doc: SummaryDoc): string {
+  const { notes, records, manual } = doc.incidents;
+  if (notes) return notes;
+  const n = records.length + manual.length;
+  if (!n) return "No incidents this period.";
+  return n === 1 ? "1 incident report this period." : `${n} incident reports this period.`;
+}
+
+/** The document as plain text: saved as the draft / final content. No source records. */
 export function summaryDocText(doc: SummaryDoc): string {
   const lines: string[] = [doc.provider, doc.title.toUpperCase()];
   if (doc.draftMark) lines.push(doc.draftMark);
@@ -457,22 +470,8 @@ export function summaryDocText(doc: SummaryDoc): string {
       if (s.details) lines.push(`Support details: ${s.details}`);
     }
     lines.push("Progress / summary of services:", g.progress || NO_PROGRESS_TEXT);
-    lines.push(`${evidenceHeading(g.evidence.length)}:`, ...g.evidence.map((e) => `- ${e}`));
   });
-  lines.push("", "GENERAL");
-  if (doc.general.evidence.length) {
-    lines.push(
-      `${evidenceHeading(doc.general.evidence.length)}:`,
-      ...doc.general.evidence.map((e) => `- ${e}`),
-    );
-  }
-  lines.push("", `INCIDENTS (${doc.incidents.records.length + doc.incidents.manual.length})`);
-  for (const r of doc.incidents.records) lines.push(`- ${r}`);
-  for (const m of doc.incidents.manual) lines.push(`- ${manualIncidentLine(m)}`);
-  if (doc.incidents.notes) lines.push(doc.incidents.notes);
-  if (!doc.incidents.records.length && !doc.incidents.manual.length && !doc.incidents.notes) {
-    lines.push("No incidents this period.");
-  }
+  lines.push("", "INCIDENTS", incidentsParagraph(doc));
   lines.push("", "GENERAL NOTES", doc.general.notes || "None.");
   if (doc.signoff.length) lines.push("", ...doc.signoff);
   return lines.join("\n");

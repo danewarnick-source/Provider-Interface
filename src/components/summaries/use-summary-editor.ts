@@ -32,6 +32,7 @@ import {
   blankGoals,
   dismissKey,
   draftFailureMessage,
+  draftWarningMessage,
   emptyReviewState,
   fieldText,
   pushUndo,
@@ -302,6 +303,7 @@ export function useSummaryEditor({
       }
       setDraftNotes((n) => {
         const next = { ...n };
+        for (const d of res.drafts) if (d.dropped?.length) next[d.field] = draftWarningMessage(d.dropped);
         for (const f of res.failed) next[f.field] = draftFailureMessage(f);
         return next;
       });

@@ -4,6 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
 import {
+  EVIDENCE_KIND_LABEL,
   emptyEditorState,
   filledIncidents,
   groupEvidence,
@@ -34,8 +35,9 @@ import { loadSummarySource } from "@/lib/progress-summary-source.server";
  * advises, the person decides, and nothing here blocks Finalize.
  *
  *  - draftSummaryBoxes: "Draft with Nectar" on one box, or "Draft all
- *    boxes". Each box is drafted alone into clean prose using only what is
- *    in that box plus its records: a goal's shift notes and daily logs, the
+ *    boxes". Each box is drafted alone as a summary of the whole period
+ *    (SUMMARY_STYLE: by theme and trend, no dates, names or note-by-note
+ *    retelling) using only what is in that box plus its records: a goal's shift notes and daily logs, the
  *    period's incident reports and admin-added incidents for the incident
  *    box, records not tied to a goal for the general notes. The drafts go
  *    back to the editor, which writes each into its box with an Undo (the
@@ -87,10 +89,12 @@ const clip = (s: string, n: number) => {
   return t.length > n ? `${t.slice(0, n)}…` : t;
 };
 
+// Records go in dated (so Nectar can see the trend over the period) but
+// without staff names or report numbers, which never belong in a summary.
 function evidenceBlock(list: readonly SummaryEvidence[], n = 600): string {
   return list.length
     ? list
-        .map((e) => `- [${e.date}] ${e.who ?? e.kind}${e.code ? ` (${e.code})` : ""}: ${clip(e.text, n)}`)
+        .map((e) => `- [${e.date}] ${EVIDENCE_KIND_LABEL[e.kind]}${e.code ? ` (${e.code})` : ""}: ${clip(e.text, n)}`)
         .join("\n")
     : "(none)";
 }
@@ -108,9 +112,21 @@ function proposedFields(parsed: Record<string, unknown>, fields: readonly FieldK
   return out;
 }
 
-const NEVER_INVENT = `- NEVER add facts. No new events, activities, dates, numbers, names, medications, staff actions, conversations, milestones, regressions or quotes. Every date and number you write must already be in that box's text or that goal's records.`;
+const NEVER_INVENT = `- NEVER invent anything: no events, activities, numbers, names, medications, staff actions, conversations, milestones, regressions, quotes, recommendations or plans that are not in that box's text or its records. Any number you write must already be there.`;
 
-const STYLE = `- Past tense, third person, professional, objective. Plain sentences in short organized paragraphs: no headings, bullets, markdown or code fences.`;
+const STYLE = `- Past tense, third person, professional, objective. Plain sentences in one paragraph: no headings, bullets, markdown or code fences.`;
+
+/** How a box reads: a summary of the whole period, never a retelling of the notes. */
+const SUMMARY_STYLE = `WRITE A SUMMARY OF THE WHOLE PERIOD, NOT A LOG:
+- Group what happened by theme. Show the trend over the period (e.g. "went from needing three prompts to needing one"), how often things happened ("most days", "weekly", "a few times"), the level of support needed, and how the person responded.
+- NO dates, times or days of the week. NO staff names. NO report numbers. No shift-by-shift or note-by-note retelling, and never sentences like "On October 9th…" or "During one shift…".
+- At most one short quote per box, and only if it shows the person's own view in their own words from the records.
+- Goal boxes: one paragraph, 3–6 sentences, about progress on that goal.
+- General notes: one paragraph, 2–4 sentences: the services provided, how the person did overall, and anything notable not tied to a goal.
+- Incident notes: one short paragraph: a plain description of each incident, its outcome, and whether restraint was used (only if the records say). No report numbers or dates. When any incident report or added incident is listed, describe them; NEVER write that there were no incidents.
+
+EXAMPLE of the style (a goal box):
+"Joby made steady progress on laundry, cooking and budgeting this period. She went from needing three prompts to complete a load of laundry to needing one, usually a reminder to clean the lint trap, and now sorts, washes, dries and puts away her clothes on her own. She cooked simple dinners such as baked chicken and rice, setting the oven and timer herself while staff checked that food was done. She completed her weekly budget review with one or two prompts. Joby told staff, \"I almost did it all by myself.\""`;
 
 const editorInput = z
   .record(z.string(), z.unknown())
@@ -248,12 +264,12 @@ ${(addedIncidents.length ? addedIncidents.map((l) => `- ${l}`).join("\n") : "(no
 ${evidenceBlock(grouped.general).replace(/^/gm, "  ")}`;
         })
         .join("\n\n");
-      const system = `You are NECTAR, helping an admin tidy boxes of a Utah DSPD ${reqs.cadence ?? "quarterly"} progress summary. You advise; the admin decides.
+      const system = `You are NECTAR, drafting boxes of a Utah DSPD ${reqs.cadence ?? "quarterly"} progress summary for an admin to review. You advise; the admin decides.
+
+${SUMMARY_STYLE}
 
 RULES:
-- Write EACH box on its own into clean, professional, organized prose, using only what is in that box and the records listed under it (a goal's records; the incident reports and added incidents; records not tied to a goal). A box with no text is written from its records.
-- Incident notes: when any incident report or added incident is listed, summarize them. NEVER write that there were no incidents.
-- You may make reasonable inferences the way shift-note coaching does: group related items, connect cause and effect that the text already implies, use clearer wording. Keep EVERY fact written (same dates, numbers and names), including plans for next period.
+- Write EACH box on its own, using only what is in that box's text and the records listed under it (a goal's records; the incident reports and added incidents; records not tied to a goal). A box with no text is written from its records. Text the admin typed is the most important source: keep its meaning, and keep any plans for next period it states.
 - Do NOT move text from one box to another. Do not write about other boxes.
 - Never write the same sentence twice.
 ${NEVER_INVENT}

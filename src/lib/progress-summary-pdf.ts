@@ -1,8 +1,9 @@
 // Renders the progress summary document (progress-summary-doc.ts) as a PDF
 // with the support strategies PDF layout (strategies-pdf-layout.ts): title
 // block (with the agency logo when there is one), the details table, the
-// draft mark, each goal with its supports, progress and evidence, General,
-// Incidents, general notes and the sign-off. Pure (no Supabase), node --test.
+// draft mark, each goal with its supports and progress, the incidents
+// paragraph, general notes and the sign-off. The source records (evidence,
+// incident reports) are never printed. Pure (no Supabase), node --test.
 
 import { PDFDocument } from "pdf-lib";
 import {
@@ -18,12 +19,7 @@ import {
   stampPageNumbers,
   titleBlock,
 } from "./clients/strategies-pdf-layout.ts";
-import {
-  NO_PROGRESS_TEXT,
-  evidenceHeading,
-  manualIncidentLine,
-  type SummaryDoc,
-} from "./progress-summary-doc.ts";
+import { NO_PROGRESS_TEXT, incidentsParagraph, type SummaryDoc } from "./progress-summary-doc.ts";
 
 export type PdfLogo = { bytes: Uint8Array; type: "png" | "jpg" };
 
@@ -63,13 +59,6 @@ export async function renderSummaryPdf(
   }
   factsGrid(c, doc.facts);
 
-  const evidence = (lines: string[], indent = 8) => {
-    c.gap(2);
-    c.text(evidenceHeading(lines.length), { size: 8, bold: true, color: MUTED, indent });
-    if (lines.length) for (const l of lines) c.bullet(l, indent + 6, 8.5);
-    else c.text("None.", { size: 9, color: MUTED, indent: indent + 6 });
-  };
-
   doc.goals.forEach((g, gi) => {
     c.gap(8);
     c.ensure(60);
@@ -84,30 +73,12 @@ export async function renderSummaryPdf(
     c.gap(4);
     c.text("Progress / summary of services", { size: 8, bold: true, color: MUTED, indent: 8 });
     c.text(g.progress || NO_PROGRESS_TEXT, { size: 10, indent: 8 });
-    evidence(g.evidence);
   });
 
-  if (doc.general.evidence.length) {
-    c.gap(10);
-    c.rule();
-    c.text("General", { size: 12, bold: true, color: ACCENT, lead: 16 });
-    evidence(doc.general.evidence, 0);
-  }
-
-  const { records, manual, notes } = doc.incidents;
   c.gap(10);
   c.rule();
-  c.text(`Incidents (${records.length + manual.length})`, {
-    size: 12,
-    bold: true,
-    color: ACCENT,
-    lead: 16,
-  });
-  for (const r of records) c.bullet(r, 6, 9.5);
-  for (const m of manual) c.bullet(manualIncidentLine(m), 6, 9.5);
-  if (notes) c.text(notes, { size: 10 });
-  if (!records.length && !manual.length && !notes)
-    c.text("No incidents this period.", { color: MUTED });
+  c.text("Incidents", { size: 12, bold: true, color: ACCENT, lead: 16 });
+  c.text(incidentsParagraph(doc), { size: 10 });
 
   c.gap(10);
   c.rule();

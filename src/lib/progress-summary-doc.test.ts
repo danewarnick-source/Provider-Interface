@@ -290,7 +290,7 @@ describe("the document", () => {
     assert.equal(doc.general.evidence.length, 2);
   });
 
-  it("as text: goal blocks, blank progress gets the no-documentation line, incidents, notes", () => {
+  it("as text: goal blocks, blank progress gets the no-documentation line, the incidents paragraph, notes; no source records", () => {
     const text = summaryDocText(buildSummaryDoc(input));
     assert.match(
       text,
@@ -298,17 +298,19 @@ describe("the document", () => {
     );
     assert.match(
       text,
-      /GOAL 1: Pat will cook a meal\.\nSupport: Meal prep coaching\nSupport details: Twice a week\nProgress \/ summary of services:\nCooked twice\.\nEvidence this period \(1\):\n- Oct 3, 2026/,
+      /GOAL 1: Pat will cook a meal\.\nSupport: Meal prep coaching\nSupport details: Twice a week\nProgress \/ summary of services:\nCooked twice\.\n\nGOAL 2/,
     );
     assert.match(
       text,
-      /GOAL 2: Pat will ride the bus\.\nProgress \/ summary of services:\nNo documentation in this period supports progress on this goal\.\nEvidence this period \(0\):/,
+      /GOAL 2: Pat will ride the bus\.\nProgress \/ summary of services:\nNo documentation in this period supports progress on this goal\.\n\nINCIDENTS\n2 incident reports this period\.\n\nGENERAL NOTES\nOverall steady\.$/,
     );
-    assert.match(
-      text,
-      /INCIDENTS \(2\)\n- Oct 3, 2026 · #IR-7 · Fall: Slipped\.\n- Oct 9, 2026 · Fell in kitchen · Follow-up: Nurse checked/,
+    assert.doesNotMatch(text, /Evidence this period|Cooked pasta|#IR-7|Slipped|Fell in kitchen|GENERAL\n/);
+    const withNotes = summaryDocText(
+      buildSummaryDoc({ ...input, editor: { ...editor, incidentNotes: "Pat slipped once and was not hurt." } }),
     );
-    assert.match(text, /GENERAL NOTES\nOverall steady\.$/);
+    assert.match(withNotes, /INCIDENTS\nPat slipped once and was not hurt\.\n/);
+    const none = summaryDocText(buildSummaryDoc({ ...input, evidence: [], editor: { ...editor, incidents: [] } }));
+    assert.match(none, /INCIDENTS\nNo incidents this period\./);
   });
 
   it("manual incident line and file name", () => {
