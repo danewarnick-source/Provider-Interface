@@ -1,6 +1,6 @@
 // Profile section: "About <first name>" (lead, full width), then Identity |
-// Service address side by side, extra service locations, and More details
-// (custom fields). The photo lives in the header; "Person prefers no photo"
+// Service address (with any extra service locations) side by side, and More
+// details (custom fields). The photo lives in the header; "Person prefers no photo"
 // (setup) is listed under "Show hidden sections".
 
 import { HomePinCard } from "@/components/clients/profile/home-pin-card";
@@ -11,7 +11,6 @@ import { hiddenCards } from "@/lib/clients/support-scope";
 import { AboutCard } from "./about-card";
 import { IdentityCard } from "./identity-card";
 import { MoreDetailsCard } from "./more-details-card";
-import { ServiceLocationsCard } from "./service-locations-card";
 
 export function ProfileSection({
   orgId,
@@ -35,9 +34,8 @@ export function ProfileSection({
       />
       <div className="grid items-stretch gap-5 md:grid-cols-2 [&>*]:h-full">
         <IdentityCard key={clientId} orgId={orgId} data={data} onChanged={onChanged} />
-        <HomePinCard clientId={clientId} codes={data.codes} />
+        <HomePinCard orgId={orgId} clientId={clientId} codes={data.codes} />
       </div>
-      <ServiceLocationsCard orgId={orgId} clientId={clientId} codes={data.codes} />
       <MoreDetailsCard clientId={clientId} />
       <HiddenSections orgId={orgId} clientId={clientId} cards={hiddenCards("profile", scope)} />
     </div>

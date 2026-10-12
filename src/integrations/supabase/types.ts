@@ -2217,6 +2217,8 @@ export type Database = {
           latitude: number
           longitude: number
           organization_id: string
+          reason: string | null
+          reason_note: string | null
           updated_at: string
           updated_by: string | null
         }
@@ -2233,6 +2235,8 @@ export type Database = {
           latitude: number
           longitude: number
           organization_id: string
+          reason?: string | null
+          reason_note?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -2249,6 +2253,8 @@ export type Database = {
           latitude?: number
           longitude?: number
           organization_id?: string
+          reason?: string | null
+          reason_note?: string | null
           updated_at?: string
           updated_by?: string | null
         }
