@@ -135,7 +135,7 @@ function ComplianceSetupPage() {
       </Link>
 
       <div>
-        <h1 className="flex items-center gap-2 text-xl font-semibold">
+        <h1 className="font-display flex items-center gap-2 text-xl font-bold tracking-[-0.025em] text-deep">
           <ClipboardList className="h-5 w-5" /> Agency setup
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -148,7 +148,7 @@ function ComplianceSetupPage() {
       {search.reason === "setup_incomplete" ? (
         <div
           data-testid="setup-redirect-reason"
-          className="rounded-xl border border-amber-300/50 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+          className="rounded-xl border border-warning-200 bg-warning-50 px-4 py-3 text-sm text-warning-700"
         >
           Staff and client screens stay closed until required operating questions are answered.
           Skip is disabled at {status.progressLabel}.
@@ -161,7 +161,7 @@ function ComplianceSetupPage() {
         <p className="text-sm text-muted-foreground">Loading setup facts…</p>
       ) : (
         <form
-          className="space-y-5 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]"
+          className="space-y-5 rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--shadow-card)]"
           onSubmit={(e) => {
             e.preventDefault();
             if (!canEdit) return;
@@ -283,7 +283,7 @@ function ComplianceSetupPage() {
         </form>
       )}
 
-      <section className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
+      <section className="rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--shadow-card)]">
         <h2 className="text-sm font-semibold">What this means for the register</h2>
         <p className="mt-1 text-xs text-muted-foreground">
           Awarded codes{" "}
@@ -323,7 +323,7 @@ function ComplianceSetupPage() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
+      <section className="rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--shadow-card)]">
         <h2 className="text-sm font-semibold">Live paths on the current catalog</h2>
         <p className="mt-1 text-xs text-muted-foreground">
           Each path uses a concrete fact the engine already reads. Exceptions are on the catalog

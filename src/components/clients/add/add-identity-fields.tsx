@@ -74,11 +74,18 @@ export function AddIdentityFields({
             maxLength={100}
           />
         </Field>
-        <Field label="Birth date">
+        <Field label="Date of birth" tag={has("date_of_birth")}>
           <Input
             type="date"
             value={form.date_of_birth ?? ""}
             onChange={(e) => set({ date_of_birth: e.target.value || null })}
+          />
+        </Field>
+        <Field label="Start date">
+          <Input
+            type="date"
+            value={form.start_date ?? ""}
+            onChange={(e) => set({ start_date: e.target.value || null })}
           />
         </Field>
         <Field label="Phone" tag={has("phone")}>
@@ -109,7 +116,7 @@ export function AddIdentityFields({
       </div>
       {duplicate && (
         <p
-          className="flex items-center gap-1.5 rounded-md border border-rose-300/60 bg-rose-50 px-3 py-2 text-xs text-rose-800 dark:bg-rose-950/30 dark:text-rose-300"
+          className="flex items-center gap-1.5 rounded-md border border-danger-300/60 bg-danger-50 px-3 py-2 text-xs text-danger-800 dark:bg-danger-950/30 dark:text-danger-300"
           role="alert"
         >
           <AlertTriangle className="h-3.5 w-3.5 shrink-0" />

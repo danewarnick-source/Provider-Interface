@@ -141,7 +141,7 @@ export function HhsMonthlyAttendanceTab({
         {/* Counts */}
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <CountTile label="Present" value={counts.present} tone="green" />
-          <CountTile label="Away" value={counts.away} tone="amber" />
+          <CountTile label="Away" value={counts.away} tone="warning" />
           <CountTile label="Unbillable" value={counts.blocked} tone="red" />
           <CountTile label="No entry" value={counts.noEntry} tone="muted" />
         </div>
@@ -167,9 +167,9 @@ export function HhsMonthlyAttendanceTab({
               const cls = future
                 ? "bg-muted/30 text-muted-foreground/40"
                 : status === "Present"
-                  ? "bg-green-200 dark:bg-green-900/40 text-green-900 dark:text-green-100 border-green-400"
+                  ? "bg-success-200 dark:bg-success-900/40 text-success-900 dark:text-success-100 border-success-400"
                   : status === "Away"
-                    ? "bg-amber-200 dark:bg-amber-900/40 text-amber-900 dark:text-amber-100 border-amber-400"
+                    ? "bg-warning-200 dark:bg-warning-900/40 text-warning-900 dark:text-warning-100 border-warning-400"
                     : "bg-background";
               const title = status
                 ? `Day ${day}: ${status}${rec?.away_category ? ` (${rec.away_category})` : ""}${blocked ? ` · unbillable: ${blocked.blocked_reason ?? "—"}` : ""}`
@@ -182,7 +182,7 @@ export function HhsMonthlyAttendanceTab({
                   <div className="absolute left-1 top-0.5">{day}</div>
                   {status === "Present" && <div className="absolute right-1 top-0.5 text-[9px]">✓</div>}
                   {status === "Away" && <div className="absolute right-1 top-0.5 text-[8px] font-bold">AWAY</div>}
-                  {blocked && <div className="absolute bottom-1 right-1 h-1.5 w-1.5 rounded-full bg-red-500" />}
+                  {blocked && <div className="absolute bottom-1 right-1 h-1.5 w-1.5 rounded-full bg-danger-500" />}
                 </div>
               );
             })}
@@ -191,11 +191,11 @@ export function HhsMonthlyAttendanceTab({
 
         {/* Unbillable reasons list */}
         {(data?.blocked ?? []).length > 0 && (
-          <div className="rounded-lg border border-red-200 bg-red-50/60 p-2 text-xs dark:border-red-900 dark:bg-red-950/20">
-            <p className="mb-1 font-semibold text-red-800 dark:text-red-200">Unbillable days</p>
+          <div className="rounded-lg border border-danger-200 bg-danger-50/60 p-2 text-xs dark:border-danger-900 dark:bg-danger-950/20">
+            <p className="mb-1 font-semibold text-danger-800 dark:text-danger-200">Unbillable days</p>
             <ul className="space-y-0.5">
               {(data?.blocked ?? []).slice().sort((a, b) => a.record_date.localeCompare(b.record_date)).map((b) => (
-                <li key={b.record_date} className="text-red-700 dark:text-red-300">
+                <li key={b.record_date} className="text-danger-700 dark:text-danger-300">
                   {b.record_date} — {b.blocked_reason ?? "Not billable"}
                 </li>
               ))}
@@ -207,7 +207,7 @@ export function HhsMonthlyAttendanceTab({
         <div className="rounded-lg border p-3">
           {cert ? (
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              <Badge className="gap-1 bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/15 dark:text-emerald-300">
+              <Badge className="gap-1 bg-success-500/15 text-success-700 hover:bg-success-500/15 dark:text-success-300">
                 <CheckCircle2 className="h-3.5 w-3.5" /> Certified
               </Badge>
               <span className="text-muted-foreground">
@@ -219,7 +219,7 @@ export function HhsMonthlyAttendanceTab({
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2 text-sm">
                 {needsCertification && (
-                  <Badge variant="outline" className="gap-1 border-amber-400 text-amber-700 dark:text-amber-300">
+                  <Badge variant="outline" className="gap-1 border-warning-400 text-warning-700 dark:text-warning-300">
                     <AlertTriangle className="h-3.5 w-3.5" /> Needs certification
                   </Badge>
                 )}
@@ -258,11 +258,11 @@ export function HhsMonthlyAttendanceTab({
   );
 }
 
-function CountTile({ label, value, tone }: { label: string; value: number; tone: "green" | "amber" | "red" | "muted" }) {
+function CountTile({ label, value, tone }: { label: string; value: number; tone: "green" | "warning" | "red" | "muted" }) {
   const toneCls = {
-    green: "border-green-300 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950/30 dark:text-green-200",
-    amber: "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-200",
-    red: "border-red-300 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/30 dark:text-red-200",
+    green: "border-success-300 bg-success-50 text-success-800 dark:border-success-800 dark:bg-success-950/30 dark:text-success-200",
+    warning: "border-warning-300 bg-warning-50 text-warning-800 dark:border-warning-800 dark:bg-warning-950/30 dark:text-warning-200",
+    red: "border-danger-300 bg-danger-50 text-danger-800 dark:border-danger-900 dark:bg-danger-950/30 dark:text-danger-200",
     muted: "border-border bg-muted/40 text-muted-foreground",
   }[tone];
   return (

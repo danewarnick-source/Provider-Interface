@@ -89,9 +89,9 @@ export function NectarShiftNoteDraft({
   }
 
   return (
-    <div className="space-y-2 rounded-md border border-amber-500/40 bg-amber-500/5 p-3">
+    <div className="space-y-2 rounded-[var(--denim-r)] border border-pt2 bg-pt p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs font-semibold text-amber-900 dark:text-amber-100">
+        <p className="text-xs font-semibold text-pri">
           NECTAR draft
         </p>
         <Button
@@ -100,7 +100,7 @@ export function NectarShiftNoteDraft({
           variant="outline"
           onClick={() => void runDraft()}
           disabled={busy || !ready}
-          className="border-amber-600/60 text-amber-800 hover:bg-amber-50"
+          className="border-pt2 text-pri hover:bg-pt0"
         >
           {busy ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-2 h-3.5 w-3.5" />}
           Draft with NECTAR

@@ -49,6 +49,8 @@ import {
 } from "@/lib/nectar-completeness";
 import { ClientAccessGate } from "@/components/clients/shared/client-access-gate";
 import { useSupportsForCode } from "@/components/clients/shared/hooks/use-plan-goals";
+import { ShiftFocus } from "@/components/clients/shared/shift-focus";
+import { DENIM } from "@/lib/design-tokens";
 
 const hhsSearch = z.object({
   tab: z.string().optional(),
@@ -161,18 +163,18 @@ export function HhsClientHub({ clientId }: { clientId: string }) {
       </Link>
 
       <div className="flex flex-wrap items-center gap-2">
-        <h1 className="text-base font-semibold">{fullName}</h1>
-        <Badge className="bg-amber-500 text-[10px]">HHS</Badge>
+        <h1 className="font-display text-base font-bold tracking-[-0.01em] text-deep">{fullName}</h1>
+        <Badge className="bg-pt text-pri text-[10px] hover:bg-pt">HHS</Badge>
       </div>
 
       {client.special_directions && (
-        <div className="flex items-start gap-2 rounded-lg border border-amber-500 bg-amber-50 px-3 py-2 dark:bg-amber-950/20">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+        <div className="flex items-start gap-2 rounded-lg border border-warning-500 bg-warning-50 px-3 py-2 dark:bg-warning-950/20">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning-600" />
           <div className="min-w-0">
-            <p className="text-xs font-semibold text-amber-800 dark:text-amber-200">
+            <p className="text-xs font-semibold text-warning-800 dark:text-warning-200">
               Special Directions & Clinical Alerts
             </p>
-            <p className="mt-0.5 whitespace-pre-wrap text-xs text-amber-700 dark:text-amber-300">
+            <p className="mt-0.5 whitespace-pre-wrap text-xs text-warning-700 dark:text-warning-300">
               {client.special_directions}
             </p>
           </div>
@@ -281,8 +283,8 @@ function DailyNoteTab({
   function clearCanvas() {
     const c = canvasRef.current; const ctx = getCtx();
     if (!c || !ctx) return;
-    ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, c.width, c.height);
-    ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2; ctx.lineCap = "round";
+    ctx.fillStyle = DENIM.paper; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.strokeStyle = DENIM.ink; ctx.lineWidth = 2; ctx.lineCap = "round";
     hasSigRef.current = false;
   }
   function pointerPos(e: React.PointerEvent<HTMLCanvasElement>) {
@@ -444,6 +446,7 @@ function DailyNoteTab({
 
         {/* Goals → HHS supports — phone-friendly tap rows (≥44px), full-width, easy to check */}
         <div>
+          <ShiftFocus clientId={client.id} groups={supports.groups} serviceCode="HHS" className="mb-3" />
           <Label>Goals worked on today</Label>
           <div className="mt-2 space-y-3">
             {supports.groups.length === 0 && (
@@ -498,13 +501,13 @@ function DailyNoteTab({
             className="mt-1"
           />
           <div className="mt-1.5 flex items-center justify-between text-xs">
-            <span className={narrativeOk ? "text-emerald-600" : "text-amber-600"}>
+            <span className={narrativeOk ? "text-accd" : "text-warning-700"}>
               {narrativeOk ? `✓ Minimum met` : `${Math.max(0, MIN_WORDS - words)} more words required`}
             </span>
             <span className="font-mono text-muted-foreground">{words} / {MIN_WORDS} words</span>
           </div>
           {showNarrativeError && !narrativeOk && (
-            <div className="mt-2 rounded-md border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-700 dark:text-rose-300">
+            <div className="mt-2 rounded-md border border-danger-500/40 bg-danger-500/10 px-3 py-2 text-xs text-danger-700 dark:text-danger-300">
               Your narrative must be at least {MIN_WORDS} words and describe how you supported the person.
             </div>
           )}
@@ -541,7 +544,7 @@ function DailyNoteTab({
         {/* Signature */}
         <div>
           <Label>Caregiver Signature</Label>
-          <div className="mt-1 overflow-hidden rounded-xl border-2 border-slate-300 bg-white p-1 shadow-inner dark:border-slate-700">
+          <div className="mt-1 overflow-hidden rounded-xl border-2 border-haze-300 bg-white p-1 shadow-inner dark:border-haze-700">
             <canvas
               ref={canvasRef} width={600} height={140}
               onPointerDown={onPointerDown} onPointerMove={onPointerMove}
@@ -553,14 +556,14 @@ function DailyNoteTab({
           <div className="mt-1.5 flex items-center justify-between text-xs">
             <span className="text-muted-foreground">Sign with your finger or mouse to attest this entry.</span>
             <button type="button" onClick={clearCanvas}
-              className="inline-flex items-center gap-1 font-medium text-slate-500 hover:text-slate-900 hover:underline dark:hover:text-slate-100">
+              className="inline-flex items-center gap-1 font-medium text-haze-500 hover:text-haze-900 hover:underline dark:hover:text-haze-100">
               <Eraser className="h-3 w-3" /> Clear
             </button>
           </div>
         </div>
 
         {nectarUsed && (
-          <label className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-2 text-xs">
+          <label className="flex items-start gap-2 rounded-xl border border-pt2 bg-pt p-2 text-xs text-pri">
             <Checkbox checked={nectarAssistChecked} onCheckedChange={(c) => setNectarAssistChecked(!!c)} />
             <span>I used NECTAR to help draft this note. I reviewed the draft and confirm it is accurate.</span>
           </label>
@@ -629,7 +632,7 @@ function DailyNoteTab({
           onMouseEnter={() => { if (!narrativeOk) setShowNarrativeError(true); }}
           onClick={() => { if (!narrativeOk) setShowNarrativeError(true); }}>
           <Button
-            className="h-12 w-full bg-emerald-600 text-base font-semibold hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
+            className="h-12 w-full bg-success-600 text-base font-semibold hover:bg-success-700 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
             onClick={() => handleSubmit()}
             disabled={!hasGoal || !narrativeOk || aiBusy || !triggersResolved || !finalAttest || (nectarUsed && !nectarAssistChecked) || !medDosesResolved || !incidentAnswer}>
             {aiBusy
@@ -641,7 +644,7 @@ function DailyNoteTab({
 
       <Dialog open={!!interlock} onOpenChange={(o) => !o && setInterlock(null)}>
         <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle className="text-amber-700">🚨 NECTAR Compliance Lock</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="text-warning-700">🚨 NECTAR Compliance Lock</DialogTitle></DialogHeader>
           <p className="text-sm">{interlock?.msg}</p>
           <DialogFooter>
             <Button onClick={() => {
@@ -908,7 +911,7 @@ function IncidentFormDialog({ orgId, clientId, onClose }: { orgId: string; clien
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">🚨 Form C — Critical Incident Report</DialogTitle>
-          <p className="text-xs text-amber-700">INTERNAL ASSISTANCE INTAKE for administration review. NOT a direct UPI state submission.</p>
+          <p className="text-xs text-warning-700">INTERNAL ASSISTANCE INTAKE for administration review. NOT a direct UPI state submission.</p>
         </DialogHeader>
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-2">
@@ -981,8 +984,8 @@ function IncidentFormDialog({ orgId, clientId, onClose }: { orgId: string; clien
           </div>
 
           {trigger && (
-            <div className="rounded border border-red-400 bg-red-50 dark:bg-red-950/30 p-3">
-              <Label className="text-red-700">⚠️ Immediate Protective Actions Taken to Keep Client Safe *</Label>
+            <div className="rounded border border-danger-400 bg-danger-50 dark:bg-danger-950/30 p-3">
+              <Label className="text-danger-700">⚠️ Immediate Protective Actions Taken to Keep Client Safe *</Label>
               <Textarea rows={3} value={protective} onChange={(e) => setProtective(e.target.value)} />
             </div>
           )}

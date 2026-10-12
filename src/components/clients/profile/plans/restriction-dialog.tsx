@@ -92,13 +92,13 @@ export function RestrictionDialog({
             {record.restriction_title} — {clientName}
           </DialogTitle>
         </DialogHeader>
-        <div className="flex items-center justify-between rounded-md border border-border bg-muted/30 px-3 py-2">
+        <div className="flex items-center justify-between rounded-xl border border-line bg-pt0 px-3 py-2">
           <span className="text-sm font-medium">
             {completion.isComplete ? "Fully documented" : "Incomplete documentation"}
           </span>
           <Badge
             variant={completion.isComplete ? "default" : "outline"}
-            className={completion.isComplete ? "bg-emerald-600 hover:bg-emerald-600" : "border-amber-400 text-amber-800"}
+            className={completion.isComplete ? "bg-acc hover:bg-acc" : "border-warning-200 bg-warning-50 text-warning-700"}
           >
             {completion.completedCount}/{completion.total}
           </Badge>
@@ -110,9 +110,9 @@ export function RestrictionDialog({
               <div key={def.key} className="space-y-2 rounded-md border border-border p-3">
                 <div className="flex items-start gap-2">
                   {isComplete ? (
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-acc" />
                   ) : (
-                    <Circle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                    <Circle className="mt-0.5 h-4 w-4 shrink-0 text-warning-500" />
                   )}
                   <div>
                     <div className="text-sm font-medium">
@@ -159,10 +159,10 @@ export function RestrictionDialog({
           )}
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>Close</Button>
+          <Button variant="outline" onClick={onClose}>Close</Button>
           {canManage && (
             <Button disabled={save.isPending} onClick={() => save.mutate()}>
-              Save
+              Save restriction
             </Button>
           )}
         </DialogFooter>

@@ -81,27 +81,61 @@ function escapeHtml(s: string): string {
     .replace(/'/g, "&#39;");
 }
 
+/**
+ * Denim email palette — exact mirror of DENIM / DENIM_FONTS in
+ * src/lib/design-tokens.ts (edge functions can't import from src/).
+ */
+const DENIM = {
+  deep: "#1B3350",
+  pri: "#274C77",
+  acc: "#4D9F3A",
+  pt: "#EAF0F6",
+  bg: "#F6F8FA",
+  paper: "#FFFFFF",
+  ink: "#17283D",
+  text: "#3E4B5A",
+  muted: "#5F6B78",
+  line: "#E1E7EE",
+  ondarkp: "#CBD8E6",
+} as const;
+const EMAIL_BODY_FONT = "Figtree, Arial, 'Segoe UI', sans-serif";
+const EMAIL_HEADING_FONT = "Manrope, Arial, 'Segoe UI', sans-serif";
+
 function wrap(inner: string): string {
   return `
-    <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0f1b3d">
-      <div style="border-bottom:2px solid #e2e8f0;padding-bottom:12px;margin-bottom:20px">
-        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#64748b">HIVE</div>
+    <div style="background:${DENIM.bg};padding:24px 12px;font-family:${EMAIL_BODY_FONT};color:${DENIM.text};font-size:15px;line-height:1.6">
+    <div style="max-width:560px;margin:0 auto;background:${DENIM.paper};border:1px solid ${DENIM.line};border-radius:14px;overflow:hidden">
+      <div style="background:${DENIM.deep};padding:18px 24px">
+        <div style="font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:${DENIM.ondarkp}">HIVE</div>
       </div>
+      <div style="height:3px;background:${DENIM.acc}"></div>
+      <div style="padding:24px">
       ${inner}
+      </div>
+    </div>
     </div>
   `;
+}
+
+function codeHtml(token: string): string {
+  return `
+          <p style="margin:28px 0;text-align:center">
+            <span style="display:inline-block;font-family:${EMAIL_HEADING_FONT};font-size:32px;font-weight:700;letter-spacing:.2em;color:${DENIM.deep};background:${DENIM.pt};padding:16px 24px;border-radius:14px">
+              ${escapeHtml(token)}
+            </span>
+          </p>`;
 }
 
 function buttonHtml(href: string, label: string): string {
   return `
     <p style="margin:28px 0">
       <a href="${href}"
-         style="display:inline-block;background:#0f1b3d;color:#fff;text-decoration:none;padding:12px 24px;border-radius:6px;font-weight:600">
+         style="display:inline-block;background:${DENIM.pri};color:#FFFFFF;text-decoration:none;padding:12px 26px;border-radius:999px;font-weight:600">
         ${escapeHtml(label)}
       </a>
     </p>
-    <p style="color:#666;font-size:12px">If the button doesn't work, copy and paste this link into your browser:<br/>
-      <span style="word-break:break-all">${href}</span>
+    <p style="color:${DENIM.muted};font-size:12px">If the button doesn't work, copy and paste this link into your browser:<br/>
+      <span style="word-break:break-all;color:${DENIM.pri}">${href}</span>
     </p>
   `;
 }
@@ -189,12 +223,8 @@ function buildEmail(
         subject: "Verify your email for HIVE",
         html: wrap(`
           <p>Welcome to HIVE. Enter this code to verify your email and finish creating your account:</p>
-          <p style="margin:28px 0;text-align:center">
-            <span style="display:inline-block;font-size:32px;font-weight:800;letter-spacing:.2em;background:#f1f5f9;padding:16px 24px;border-radius:8px">
-              ${escapeHtml(data.token)}
-            </span>
-          </p>
-          <p style="color:#666;font-size:12px">This code expires shortly. If you didn't try to sign up, you can ignore this email.</p>
+          ${codeHtml(data.token)}
+          <p style="color:${DENIM.muted};font-size:12px">This code expires shortly. If you didn't try to sign up, you can ignore this email.</p>
         `),
       };
     }
@@ -205,7 +235,7 @@ function buildEmail(
         html: wrap(`
           <p>We received a request to reset the password for this HIVE account.</p>
           ${buttonHtml(link, "Reset password")}
-          <p style="color:#666;font-size:12px;margin-top:24px">This link expires in 1 hour. If you didn't request a password reset, you can safely ignore this email.</p>
+          <p style="color:${DENIM.muted};font-size:12px;margin-top:24px">This link expires in 1 hour. If you didn't request a password reset, you can safely ignore this email.</p>
         `),
       };
     }
@@ -226,7 +256,7 @@ function buildEmail(
         html: wrap(`
           <p>Confirm this address to finish updating the email on your HIVE account.</p>
           ${buttonHtml(link, "Confirm new email")}
-          <p style="color:#666;font-size:12px;margin-top:24px">If you didn't request this change, you can safely ignore this email.</p>
+          <p style="color:${DENIM.muted};font-size:12px;margin-top:24px">If you didn't request this change, you can safely ignore this email.</p>
         `),
       };
     }
@@ -235,11 +265,7 @@ function buildEmail(
         subject: "Your HIVE confirmation code",
         html: wrap(`
           <p>Use this code to confirm the action you're taking on your HIVE account:</p>
-          <p style="margin:28px 0;text-align:center">
-            <span style="display:inline-block;font-size:32px;font-weight:800;letter-spacing:.2em;background:#f1f5f9;padding:16px 24px;border-radius:8px">
-              ${escapeHtml(data.token)}
-            </span>
-          </p>
+          ${codeHtml(data.token)}
         `),
       };
     }

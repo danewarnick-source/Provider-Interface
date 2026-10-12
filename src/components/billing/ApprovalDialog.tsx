@@ -64,9 +64,9 @@ export interface ApprovalDialogProps {
 function statusBadge(status: ApprovalRequestRow["status"]) {
   switch (status) {
     case "pending":
-      return <Badge variant="outline" className="border-amber-500/60 text-amber-700 dark:text-amber-300">Pending PI review</Badge>;
+      return <Badge variant="outline" className="border-warning-500/60 text-warning-700 dark:text-warning-300">Pending PI review</Badge>;
     case "approved":
-      return <Badge variant="outline" className="border-emerald-500/60 text-emerald-700 dark:text-emerald-300"><ShieldCheck className="mr-1 h-3 w-3" />Approved</Badge>;
+      return <Badge variant="outline" className="border-success-500/60 text-success-700 dark:text-success-300"><ShieldCheck className="mr-1 h-3 w-3" />Approved</Badge>;
     case "denied":
       return <Badge variant="outline" className="border-destructive/60 text-destructive"><ShieldAlert className="mr-1 h-3 w-3" />Denied</Badge>;
     case "withdrawn":
@@ -174,7 +174,7 @@ function NewRequestForm({
 • The PCSP is out of date — the client transferred to us on <date> and a corrected PCSP is being issued.
 • We have a PI-approved cross-agency arrangement for continuity of care.`}
           />
-          <div className={`mt-1 text-[10px] ${remaining > 0 ? "text-muted-foreground" : "text-emerald-600"}`}>
+          <div className={`mt-1 text-[10px] ${remaining > 0 ? "text-muted-foreground" : "text-success-600"}`}>
             {remaining > 0 ? `Add at least ${remaining} more character${remaining === 1 ? "" : "s"}.` : "Ready to submit."}
           </div>
         </div>
@@ -348,7 +348,7 @@ function ThreadView({ requestId, onClose, allowResolution }: { requestId: string
                 </Button>
                 <Button
                   size="sm"
-                  className="bg-emerald-600 hover:bg-emerald-700"
+                  className="bg-success-600 hover:bg-success-700"
                   onClick={() => setSignMode("approve")}
                   disabled={postM.isPending}
                 >
@@ -399,7 +399,7 @@ function ThreadView({ requestId, onClose, allowResolution }: { requestId: string
             </Button>
             <Button
               size="sm"
-              className={signMode === "approve" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-destructive hover:bg-destructive/90"}
+              className={signMode === "approve" ? "bg-success-600 hover:bg-success-700" : "bg-destructive hover:bg-destructive/90"}
               onClick={() => postM.mutate({ action: signMode, signatureName: sigName.trim(), signatureAttested: sigAttested })}
               disabled={postM.isPending || sigName.trim().length < 2 || !sigAttested}
             >
@@ -424,7 +424,7 @@ function MessageBubble({ m, viewer }: { m: ApprovalMessageRow; viewer: SenderRol
   const bubble = mine
     ? "bg-primary/10 border-primary/30"
     : m.sender_role === "hive_admin"
-      ? "bg-amber-50 border-amber-300/50 dark:bg-amber-950/30"
+      ? "bg-warning-50 border-warning-300/50 dark:bg-warning-950/30"
       : "bg-card border-border";
   const roleLabel = m.sender_role === "hive_admin" ? "PI Admin" : "Provider";
   return (
@@ -437,7 +437,7 @@ function MessageBubble({ m, viewer }: { m: ApprovalMessageRow; viewer: SenderRol
           <span>·</span>
           <span>{fmt(m.created_at)}</span>
           {m.action === "approve" && (
-            <Badge variant="outline" className="ml-1 border-emerald-500/60 text-emerald-700">Approved</Badge>
+            <Badge variant="outline" className="ml-1 border-success-500/60 text-success-700">Approved</Badge>
           )}
           {m.action === "deny" && (
             <Badge variant="outline" className="ml-1 border-destructive/60 text-destructive">Denied</Badge>

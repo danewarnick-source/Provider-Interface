@@ -196,7 +196,7 @@ export function NectarSearchBar({
     <div ref={wrapRef} className={wrapCls}>
       <div className="relative">
         <PiMark
-          variant="gold"
+          variant="brand"
           className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2"
         />
         <input
@@ -217,8 +217,8 @@ export function NectarSearchBar({
           aria-autocomplete="list"
           className={
             isDesktop
-              ? "h-9 w-full rounded-md border border-[var(--hive-border)] bg-[var(--hive-surface)] pl-8 pr-9 text-sm text-[var(--hive-text)] placeholder:text-[var(--hive-text-muted)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--hive-gold)]/40"
-              : "h-11 w-full rounded-md border border-[var(--hive-border)] bg-[var(--hive-surface)] pl-8 pr-9 text-sm text-[var(--hive-text)] placeholder:text-[var(--hive-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--hive-gold)]/40"
+              ? "h-9 w-full rounded-md border border-[var(--hive-border)] bg-[var(--hive-surface)] pl-8 pr-9 text-sm text-[var(--hive-text)] placeholder:text-[var(--hive-text-muted)] shadow-[var(--denim-shadow-sm)] focus:outline-none focus:ring-2 focus:ring-[var(--hive-accent)]/40"
+              : "h-11 w-full rounded-md border border-[var(--hive-border)] bg-[var(--hive-surface)] pl-8 pr-9 text-sm text-[var(--hive-text)] placeholder:text-[var(--hive-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--hive-accent)]/40"
           }
         />
         <Search className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--hive-text-muted)]" />
@@ -230,8 +230,8 @@ export function NectarSearchBar({
           role="listbox"
           className={
             isDesktop
-              ? "absolute left-0 right-0 top-[calc(100%+6px)] z-50 max-h-[60vh] overflow-y-auto rounded-lg border border-[var(--hive-border)] bg-[var(--hive-surface)] p-1 shadow-lg"
-              : "absolute left-0 right-0 top-[calc(100%+6px)] z-50 max-h-[55vh] overflow-y-auto rounded-lg border border-[var(--hive-border)] bg-[var(--hive-surface)] p-1 shadow-lg"
+              ? "absolute left-0 right-0 top-[calc(100%+6px)] z-50 max-h-[60vh] overflow-y-auto rounded-lg border border-[var(--hive-border)] bg-[var(--hive-surface)] p-1 shadow-[var(--denim-shadow)]"
+              : "absolute left-0 right-0 top-[calc(100%+6px)] z-50 max-h-[55vh] overflow-y-auto rounded-lg border border-[var(--hive-border)] bg-[var(--hive-surface)] p-1 shadow-[var(--denim-shadow)]"
           }
         >
           {results.length === 0 && (
@@ -293,7 +293,7 @@ function SectionGroup({
                     onClick={r.onSelect}
                     className={`flex w-full min-h-[40px] items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm ${
                       isActive
-                        ? "bg-[color-mix(in_srgb,var(--hive-gold)_14%,var(--hive-canvas))] text-[var(--hive-text)]"
+                        ? "bg-[color-mix(in_srgb,var(--hive-accent)_14%,var(--hive-canvas))] text-[var(--hive-text)]"
                         : "text-[var(--hive-text)] hover:bg-[var(--hive-canvas)]"
                     }`}
                     role="option"
@@ -307,7 +307,7 @@ function SectionGroup({
                       </span>
                     )}
                     {r.kind === "ask" && (
-                      <ArrowRight className="h-3.5 w-3.5 text-[var(--hive-gold)]" />
+                      <ArrowRight className="h-3.5 w-3.5 text-[var(--hive-accent-text)]" />
                     )}
                   </button>
                 </li>
@@ -325,5 +325,5 @@ function KindIcon({ kind }: { kind: ResultKind }) {
   if (kind === "page") return <MapPin className={`${cls} text-muted-foreground`} />;
   if (kind === "client") return <Contact2 className={`${cls} text-[var(--hive-text)]`} />;
   if (kind === "staff") return <Users className={`${cls} text-[var(--hive-text)]`} />;
-  return <PiMark variant="gold" className={cls} />;
+  return <PiMark variant="brand" className={cls} />;
 }

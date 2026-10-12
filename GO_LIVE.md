@@ -89,7 +89,7 @@ Deadlines (`/dashboard/deadlines`) **redirects** to Compliance → Action Requir
 | Add staff (working path) | Employees hub → **Add manually** | `createEmployeeManually` → Auth admin `createUser` + profile + membership | Yes. Forces `must_change_password`. |
 | Invite by email | Employees / Invitations / Team Access | Inserts `invitations`; Employees/Invitations also call Resend | Email may send. **Accept is not wired** — see B-1. |
 | Add client | Clients hub → Add New Client | `clients.insert` | Yes |
-| Smart Import | `/dashboard/smart-import` from Clients | `smart-import.functions.ts` + commit | Yes when Bedrock is configured |
+| Import clients (spreadsheet) | Clients → Add client → Import several clients from a spreadsheet | `addClient` per reviewed row | Yes. No AI. |
 | 1056 authorizations | Client billing / Billing → Imports | `client_billing_codes` upsert | Yes. No 1056 → staff should not clock that code. |
 | Caseload assign | Employees roster → caseload dialog | `staff_assignments` | Yes. Empty caseload = empty staff Home. |
 | Scheduler | `/dashboard/scheduler` | `scheduler.functions.ts` | Yes. Sole-worker assign requires `profiles.has_passed_launchpad`. |

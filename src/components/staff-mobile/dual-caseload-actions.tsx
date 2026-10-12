@@ -37,7 +37,7 @@ export function DualCaseloadActions({
   return (
     <div className="grid gap-2">
       {noteLabel ? (
-        <Button asChild size="lg" variant="outline" className="h-12 w-full text-base">
+        <Button asChild size="lg" variant="outline" className="h-12 w-full rounded-full text-base">
           <Link
             to="/dashboard/hhs-hub/$clientId"
             params={{ clientId }}
@@ -52,7 +52,7 @@ export function DualCaseloadActions({
         <Button
           asChild
           size="lg"
-          className="h-12 w-full bg-[#117a52] text-base text-white shadow-sm hover:bg-[#0f6b48]"
+          className="h-12 w-full rounded-full bg-acc text-base text-white shadow-[var(--denim-btn-shadow)] hover:bg-accd"
         >
           <Link
             to="/dashboard/workspace/$clientId"

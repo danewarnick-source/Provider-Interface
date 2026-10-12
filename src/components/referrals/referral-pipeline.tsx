@@ -61,12 +61,12 @@ function ChannelIcon({ ch }: { ch: string | null }) {
 
 export function ReferralStageBadge({ stage }: { stage: ReferralStage }) {
   const tone: Record<ReferralStage, string> = {
-    new: "bg-slate-100 text-slate-700",
-    reviewing: "bg-sky-100 text-sky-800",
-    initial_contact: "bg-indigo-100 text-indigo-800",
-    iso_meeting: "bg-violet-100 text-violet-800",
-    follow_up: "bg-amber-100 text-amber-800",
-    decision: "bg-emerald-100 text-emerald-800",
+    new: "bg-pt0 text-muted-foreground ring-1 ring-line",
+    reviewing: "bg-pt text-pri",
+    initial_contact: "bg-pt text-pri",
+    iso_meeting: "bg-pt text-pri",
+    follow_up: "bg-warning-50 text-warning-700",
+    decision: "bg-acct text-accd ring-1 ring-acctb",
   };
   return (
     <span
@@ -593,16 +593,16 @@ export function PipelineStatsBar({
           </Badge>
         </span>
       ))}
-      <span className="ml-auto inline-flex items-center gap-1 text-emerald-700">
+      <span className="ml-auto inline-flex items-center gap-1 text-success-700">
         <CheckCircle2 className="h-3.5 w-3.5" />
         Placed: {stats.placed}
       </span>
-      <span className="inline-flex items-center gap-1 text-slate-600">
+      <span className="inline-flex items-center gap-1 text-haze-600">
         <XCircle className="h-3.5 w-3.5" />
         Passed: {stats.passed}
       </span>
       <span className="inline-flex items-center gap-1">
-        <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
+        <AlertTriangle className="h-3.5 w-3.5 text-warning-600" />
         Total active: {stats.total}
       </span>
     </div>

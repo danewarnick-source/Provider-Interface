@@ -138,7 +138,7 @@ export function CertReviewPanel({ completionId }: { completionId: string }) {
 
   if (!orgId) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
+      <div className="rounded-[var(--denim-r)] border border-line bg-paper p-6 text-sm text-muted-foreground shadow-[var(--denim-shadow-sm)]">
         Select an organization to review this certificate.
       </div>
     );
@@ -148,7 +148,7 @@ export function CertReviewPanel({ completionId }: { completionId: string }) {
   }
   if (!review) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
+      <div className="rounded-[var(--denim-r)] border border-line bg-paper p-6 text-sm text-muted-foreground shadow-[var(--denim-shadow-sm)]">
         This upload is not on the review queue.
       </div>
     );
@@ -160,41 +160,41 @@ export function CertReviewPanel({ completionId }: { completionId: string }) {
   return (
     <section data-testid="cert-review" className="space-y-5">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-          Review certificate
-        </p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">{review.title}</h1>
+        <p className="denim-eyebrow">Review certificate</p>
+        <h1 className="mt-1 font-display text-2xl font-bold tracking-[-0.025em] text-deep">
+          {review.title}
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {review.staffName} · {review.extractedCredential ?? "Certificate"}
         </p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)]">
-        <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
+        <div className="space-y-3 rounded-[var(--denim-r)] border border-line bg-paper p-5 shadow-[var(--denim-shadow)]">
           <p className="text-sm font-medium">Certificate preview</p>
           {previewUrl && isImage ? (
             <img
               alt={review.uploadFilename ?? "Certificate"}
               src={previewUrl}
-              className="max-h-[28rem] w-full rounded-md object-contain bg-muted"
+              className="max-h-[28rem] w-full rounded-xl object-contain bg-muted"
             />
           ) : previewUrl ? (
             <iframe
               title={review.uploadFilename ?? "Certificate"}
               src={previewUrl}
-              className="h-[28rem] w-full rounded-md border"
+              className="h-[28rem] w-full rounded-xl border"
             />
           ) : (
             <p className="text-sm text-muted-foreground">No file preview available.</p>
           )}
         </div>
 
-        <aside className="space-y-4 rounded-2xl border border-border bg-card p-4">
+        <aside className="space-y-4 rounded-[var(--denim-r)] border border-line bg-paper p-5 shadow-[var(--denim-shadow)]">
           <div className="flex items-center justify-between gap-2">
             <p className="text-sm font-medium">Extracted details</p>
             <span
               data-testid="cert-review-status"
-              className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-900"
+              className="rounded-full bg-warning-50 px-2.5 py-0.5 text-xs font-medium text-warning-700 ring-1 ring-warning-200"
             >
               {certReviewStatusLabel(status)}
             </span>
@@ -220,7 +220,7 @@ export function CertReviewPanel({ completionId }: { completionId: string }) {
           {warn ? (
             <p
               data-testid="cert-review-expiration-warn"
-              className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-950"
+              className="rounded-xl border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-800"
             >
               {warn}
             </p>

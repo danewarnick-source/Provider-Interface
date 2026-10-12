@@ -298,7 +298,6 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
     case "training_tracks":
     case "courses":
     case "course_assignments":
-    case "import_subjects":
     case "auditor_accounts":
     case "staff_types":
     case "hr_documents":

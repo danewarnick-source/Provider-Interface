@@ -35,10 +35,10 @@ export function StaffMobilePreviewFrame({
 
   return (
     <MobileShellProvider>
-      <div className="min-h-[calc(100vh-4rem)] w-full bg-slate-200/70 px-4 py-6">
+      <div className="min-h-[calc(100vh-4rem)] w-full bg-pt0 px-4 py-6">
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-5">
-          <div className="flex items-center gap-2 rounded-full border border-slate-300 bg-white/80 p-1 shadow-sm">
-            <Smartphone className="ml-2 h-4 w-4 text-slate-500" />
+          <div className="flex items-center gap-2 denim-glass rounded-full p-1">
+            <Smartphone className="ml-2 h-4 w-4 text-muted-foreground" />
             {DEVICES.map((d) => {
               const active = d.id === device.id;
               return (
@@ -47,8 +47,8 @@ export function StaffMobilePreviewFrame({
                   onClick={() => setDevice(d)}
                   className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                     active
-                      ? "bg-[var(--hive-text)] text-white"
-                      : "text-slate-600 hover:bg-slate-100"
+                      ? "bg-pri text-white"
+                      : "text-muted-foreground hover:bg-pt hover:text-pri"
                   }`}
                 >
                   {d.label}
@@ -61,11 +61,11 @@ export function StaffMobilePreviewFrame({
           </div>
 
           <div
-            className="relative shrink-0 rounded-[2.75rem] border-[12px] border-slate-900 bg-slate-900 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.45)]"
+            className="relative shrink-0 rounded-[2.75rem] border-[12px] border-deep bg-deep shadow-[0_30px_60px_-20px_rgba(27,51,80,0.5)]"
             style={{ width: device.w + 24, height: device.h + 24 }}
           >
             {/* Notch */}
-            <div className="pointer-events-none absolute left-1/2 top-[6px] z-50 h-6 w-32 -translate-x-1/2 rounded-b-2xl bg-slate-900" />
+            <div className="pointer-events-none absolute left-1/2 top-[6px] z-50 h-6 w-32 -translate-x-1/2 rounded-b-2xl bg-deep" />
 
             {/* Screen — positioning context for every overlay */}
             <FrameScreen
@@ -77,7 +77,7 @@ export function StaffMobilePreviewFrame({
             </FrameScreen>
           </div>
 
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             QA preview · interactive · {device.w}×{device.h}
           </p>
         </div>
@@ -112,7 +112,7 @@ function FrameScreen({
   return (
     <div
       ref={ref}
-      className="relative overflow-hidden rounded-[2rem] bg-[var(--hive-text)]"
+      className="relative overflow-hidden rounded-[2rem] bg-[var(--hive-canvas)]"
       style={{ width, height }}
     >
       <div className="absolute inset-0 flex flex-col">
@@ -123,8 +123,8 @@ function FrameScreen({
           data-staff-phone-scroller
           className={
             isAskNectar
-              ? "flex-1 overflow-hidden bg-[#f7f8fb]"
-              : "flex-1 overflow-y-auto overscroll-contain bg-[#f7f8fb] px-3 pt-4"
+              ? "flex-1 overflow-hidden bg-[var(--hive-canvas)]"
+              : "flex-1 overflow-y-auto overscroll-contain bg-[var(--hive-canvas)] px-3 pt-4"
           }
           style={isAskNectar ? undefined : { paddingBottom: staffMainBottomPadCss(barVisible) }}
         >

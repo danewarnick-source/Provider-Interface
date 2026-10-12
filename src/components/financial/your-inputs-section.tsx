@@ -204,7 +204,7 @@ export function YourInputsSection({
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="font-medium">{e.label}</span>
                           {e.is_estimate && (
-                            <span className="rounded-full border border-amber-400/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300">
+                            <span className="rounded-full border border-warning-400/40 bg-warning-500/10 px-1.5 py-0.5 text-[10px] font-medium text-warning-700 dark:text-warning-300">
                               Estimate
                             </span>
                           )}

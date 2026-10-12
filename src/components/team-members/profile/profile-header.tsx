@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PersonAvatar } from "@/components/person/person-avatar";
+import { DeletePersonDialog } from "@/components/people/delete-person-dialog";
 import { useAccess } from "@/hooks/use-access";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
@@ -44,10 +45,10 @@ import { isReadyAlone, readyAloneLabel } from "@/lib/team-members/readiness";
 const profileRoute = getRouteApi("/dashboard/team-members/$staffId");
 
 const TONE: Record<BadgeTone, string> = {
-  ok: "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-300",
-  warn: "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300",
-  bad: "border-destructive/30 bg-destructive/10 text-destructive",
-  muted: "border-border bg-muted text-muted-foreground",
+  ok: "border-acctb bg-acct text-accd",
+  warn: "border-warning-200 bg-warning-50 text-warning-700",
+  bad: "border-danger-200 bg-danger-50 text-danger-700",
+  muted: "border-pt2 bg-pt text-pri",
 };
 
 const STATUS_TONE: Record<MemberStatus, string> = {
@@ -116,6 +117,10 @@ export function ProfileHeader({
   const reactivateFn = useServerFn(reactivateMember);
   const [resetTarget, setResetTarget] = useState<ResetPasswordTarget | null>(null);
   const [deactivating, setDeactivating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  // Made-by-mistake delete: never yourself or an Owner (the server refuses too).
+  const canDelete =
+    canCategory("delete_people", "edit") && m.userId !== user?.id && m.accessLevel !== "owner";
 
   const badges = useMemo(
     () =>
@@ -210,7 +215,8 @@ export function ProfileHeader({
 
   return (
     <div className="space-y-3" data-testid="profile-header">
-      <Button variant="ghost" size="sm" asChild className="-ml-2">
+      {/* Phones only: on desktop "← All team members" is in the sidebar. */}
+      <Button variant="ghost" size="sm" asChild className="-ml-2 md:hidden">
         <Link to="/dashboard/team-members" search={backSearch} data-testid="profile-back">
           <ArrowLeft className="mr-1 h-4 w-4" /> Team Members
         </Link>
@@ -226,7 +232,7 @@ export function ProfileHeader({
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h1
-                className="text-xl font-semibold leading-tight"
+                className="font-display text-2xl font-bold leading-tight tracking-[-0.025em] text-deep"
                 data-testid="staff-profile-heading"
               >
                 {p.displayName}
@@ -246,7 +252,7 @@ export function ProfileHeader({
               ))}
               {m.presetName ? (
                 <Chip
-                  className="border-primary/30 bg-primary/5 text-foreground"
+                  className="border-pt2 bg-paper text-pri"
                   title="Access preset"
                   testId="profile-preset"
                 >
@@ -355,6 +361,15 @@ export function ProfileHeader({
             {menu.includes("reactivate") ? (
               <DropdownMenuItem onSelect={() => reactivate.mutate()}>Reactivate</DropdownMenuItem>
             ) : null}
+            {canDelete ? (
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onSelect={() => setDeleting(true)}
+                data-testid="profile-delete"
+              >
+                Delete team member…
+              </DropdownMenuItem>
+            ) : null}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -363,6 +378,14 @@ export function ProfileHeader({
         organizationId={orgId}
         target={resetTarget}
         onClose={() => setResetTarget(null)}
+      />
+      <DeletePersonDialog
+        open={deleting}
+        onOpenChange={setDeleting}
+        orgId={orgId}
+        kind="member"
+        id={m.userId}
+        onDeleted={() => void navigate({ to: "/dashboard/team-members", search: backSearch })}
       />
       <DeactivateDialog
         name={deactivating ? p.displayName : null}

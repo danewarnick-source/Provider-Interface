@@ -10,7 +10,7 @@ type TableSupabase = { from: (table: string) => any };
 const PLAN_COLUMNS =
   "id, client_id, start_date, end_date, activated_on, meeting_date, status, label, source, document_id, created_at";
 export const GOAL_COLUMNS =
-  "id, client_id, plan_id, carried_from_goal_id, goal_text, domain, current_status, strengths, barriers, success_person, success_team, sort, status, ended_on";
+  "id, client_id, plan_id, carried_from_goal_id, goal_text, domain, current_status, strengths, barriers, success_person, success_team, sort, status, ended_on, kind";
 export const SUPPORT_COLUMNS =
   "id, goal_id, support_text, details, start_date, end_date, our_codes, other_providers, health_needs, sort";
 

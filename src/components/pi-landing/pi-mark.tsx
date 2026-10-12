@@ -1,17 +1,24 @@
 import { useId } from "react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
+import { DENIM } from "@/lib/design-tokens";
 import { PI_PRODUCT_NAME, PI_PRODUCT_SHORT, PI_WORDMARK } from "@/lib/pi-landing";
 
-export type PiMarkVariant = "inherit" | "cream" | "hero" | "gold";
+export type PiMarkVariant = "inherit" | "brand";
 
-/** The one brand gradient — antique gold to cream. Same stops on the homepage and in app chrome. */
-export const PI_MARK_GRADIENT = { from: "#e8d5a0", to: "#b8985a" } as const;
+/** Denim brand mark: navy tile (pri → deep) with green π bars. Same on every surface. */
+export const PI_MARK_COLORS = {
+  tileFrom: DENIM.pri,
+  tileTo: DENIM.deep,
+  barFrom: DENIM.accl,
+  barTo: DENIM.acc,
+} as const;
 
 /**
- * Squared π: three rects (x4 y4 w28 h5; x9 y9 w5 h23; x22 y9 w5 h23).
+ * Squared π: three rects (x4 y5 w28 h5; x9 y10 w5 h22; x22 y10 w5 h22).
  * viewBox 0 0 36 36. Not a squiggly mathematical pi. Not a honeycomb.
- * `gold` is the product mark used everywhere the logo appears (PiBrand).
+ * `brand` is the product mark used everywhere the logo appears (PiBrand): a
+ * rounded navy tile with green bars.
  * `inherit` is for icon-sized uses that follow the surrounding text color.
  * Never pair this mark with a NECTAR wordmark in chrome.
  */
@@ -29,13 +36,7 @@ export function PiMark({
   height?: number;
 }) {
   const rawId = useId();
-  const gid = `pi-mark-g-${rawId.replace(/:/g, "")}`;
-  const gradient = variant === "hero" || variant === "gold";
-  const fill = gradient ? `url(#${gid})` : variant === "cream" ? "#f3efe6" : "currentColor";
-  const stops =
-    variant === "gold"
-      ? { from: PI_MARK_GRADIENT.from, to: PI_MARK_GRADIENT.to }
-      : { from: "#fbf8f1", to: "#d9c98e" };
+  const base = `pi-mark-${rawId.replace(/:/g, "")}`;
 
   return (
     <svg
@@ -48,25 +49,37 @@ export function PiMark({
       className={cn("text-current", className)}
     >
       {title ? <title>{title}</title> : null}
-      {gradient ? (
-        <defs>
-          <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor={stops.from} />
-            <stop offset="1" stopColor={stops.to} />
-          </linearGradient>
-        </defs>
-      ) : null}
-      <rect x="4" y="4" width="28" height="5" fill={fill} />
-      <rect x="9" y="9" width="5" height="23" fill={fill} />
-      <rect x="22" y="9" width="5" height="23" fill={fill} />
+      {variant === "brand" ? (
+        <>
+          <defs>
+            <linearGradient id={`${base}-t`} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor={PI_MARK_COLORS.tileFrom} />
+              <stop offset="1" stopColor={PI_MARK_COLORS.tileTo} />
+            </linearGradient>
+            <linearGradient id={`${base}-b`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor={PI_MARK_COLORS.barFrom} />
+              <stop offset="1" stopColor={PI_MARK_COLORS.barTo} />
+            </linearGradient>
+          </defs>
+          <rect width="36" height="36" rx="9" fill={`url(#${base}-t)`} />
+          <g transform="translate(18 18.6) scale(.62) translate(-18 -18.5)" fill={`url(#${base}-b)`}>
+            <rect x="4" y="5" width="28" height="5" rx=".8" />
+            <rect x="9" y="10" width="5" height="22" rx=".8" />
+            <rect x="22" y="10" width="5" height="22" rx=".8" />
+          </g>
+        </>
+      ) : (
+        <g fill="currentColor">
+          <rect x="4" y="4" width="28" height="5" />
+          <rect x="9" y="9" width="5" height="23" />
+          <rect x="22" y="9" width="5" height="23" />
+        </g>
+      )}
     </svg>
   );
 }
 
-/**
- * Public homepage π. 30×30 viewBox, the same antique-gold gradient as
- * PiMark variant="gold" so the logo reads identically on every surface.
- */
+/** Public homepage π — the same Denim brand mark, sized for the header. */
 export function PiHomepageMark({
   className,
   title,
@@ -76,30 +89,14 @@ export function PiHomepageMark({
   title?: string;
   size?: number;
 }) {
-  const rawId = useId();
-  const gid = `pi-home-g-${rawId.replace(/:/g, "")}`;
-
   return (
-    <svg
-      viewBox="0 0 30 30"
+    <PiMark
+      variant="brand"
       width={size}
       height={size}
-      fill="none"
-      aria-hidden={title ? undefined : true}
-      role={title ? "img" : undefined}
+      title={title}
       className={cn("shrink-0", className)}
-    >
-      {title ? <title>{title}</title> : null}
-      <defs>
-        <linearGradient id={gid} x1="15" y1="3" x2="15" y2="27.5">
-          <stop offset="0" stopColor={PI_MARK_GRADIENT.from} />
-          <stop offset="1" stopColor={PI_MARK_GRADIENT.to} />
-        </linearGradient>
-      </defs>
-      <rect x="2" y="3" width="26" height="5.5" rx="1" fill={`url(#${gid})`} />
-      <rect x="6.5" y="8.5" width="5.5" height="19" rx="1" fill={`url(#${gid})`} />
-      <rect x="18" y="8.5" width="5.5" height="19" rx="1" fill={`url(#${gid})`} />
-    </svg>
+    />
   );
 }
 
@@ -130,7 +127,7 @@ export function PiBrandLockup({
 }) {
   return (
     <Link to={to} className="logo" aria-label={PI_PRODUCT_NAME}>
-      <PiMark variant="gold" width={markSize} height={markSize} className="mark" />
+      <PiMark variant="brand" width={markSize} height={markSize} className="mark" />
       <div className="name">
         {PI_PRODUCT_SHORT}
         <small>{PI_PRODUCT_NAME}</small>
@@ -153,7 +150,7 @@ export function PiWordmark({
   /** Compact chrome: π + PI. Full marketing: π + PROVIDER INTERFACE. Defaults true in app chrome. */
   short?: boolean;
   to?: "/";
-  /** chrome = cream on dusk; canvas = cream on dusk public pages. */
+  /** chrome = white on the navy sidebar; canvas = white on a navy band. */
   tone?: "chrome" | "canvas";
   markClassName?: string;
   wordClassName?: string;
@@ -163,18 +160,19 @@ export function PiWordmark({
     <span
       className={cn(
         "inline-flex items-center gap-3",
-        tone === "canvas" ? "text-[#f3efe6]" : "text-[#f3efe6]",
+        "text-white",
         className,
       )}
     >
       <PiMark
+        variant="brand"
         className={cn(compact || short ? "h-7 w-7" : "h-8 w-8", "shrink-0", markClassName)}
         title={PI_PRODUCT_NAME}
       />
       <span
         className={cn(
-          "font-sans font-medium uppercase tracking-[0.22em] text-[#f3efe6]",
-          compact || short ? "text-[11px]" : "text-[12px] sm:text-[13px]",
+          "font-display font-bold tracking-[-0.02em] text-white",
+          compact || short ? "text-[14px]" : "text-[15.5px]",
           wordClassName,
         )}
       >

@@ -16,7 +16,7 @@ import type { TeamMemberProfileTab } from "@/lib/team-members/profile-tabs";
 
 const TONE_ROW: Record<AttentionItem["tone"], string> = {
   bad: "text-destructive",
-  warn: "text-amber-700 dark:text-amber-300",
+  warn: "text-warning-700",
 };
 
 /** The full attention strip (Overview only; the shell draws a pill elsewhere). */
@@ -24,13 +24,10 @@ export function AttentionStrip({ items }: { items: AttentionItem[] }) {
   const router = useRouter();
   if (!items.length) return null;
   return (
-    <Card
-      className="border-amber-300 bg-amber-50/60 dark:border-amber-500/40 dark:bg-amber-500/5"
-      data-testid="profile-attention"
-    >
+    <Card className="border-warning-200 bg-warning-50" data-testid="profile-attention">
       <CardContent className="space-y-2 p-4">
         <p className="flex items-center gap-2 text-sm font-semibold">
-          <AlertTriangle className="h-4 w-4 text-amber-600" aria-hidden />
+          <AlertTriangle className="h-4 w-4 text-warning-700" aria-hidden />
           {items.length} {items.length === 1 ? "thing needs" : "things need"} attention
         </p>
         <ul className="divide-y divide-border/60">
@@ -85,7 +82,9 @@ function Stat({
   return (
     <div className="min-w-0" data-testid={testId}>
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="text-xl font-semibold tabular-nums">{value ?? "—"}</p>
+      <p className="font-display text-xl font-bold tabular-nums tracking-[-0.01em] text-deep">
+        {value ?? "—"}
+      </p>
       {value === null && reason ? (
         <p className="text-[11px] leading-tight text-muted-foreground">{reason}</p>
       ) : null}
@@ -131,7 +130,7 @@ function ThisWeekCard({ week, today }: { week: ThisWeek; today: string }) {
                 <div
                   className={cn(
                     "w-full rounded-sm",
-                    d.hours > 0 ? "bg-hive-gold" : "bg-muted",
+                    d.hours > 0 ? "bg-hive-accent" : "bg-muted",
                     d.date === today && "ring-1 ring-foreground/30",
                   )}
                   style={{ height: `${Math.max(4, (d.hours / max) * 56)}px` }}
@@ -144,7 +143,7 @@ function ThisWeekCard({ week, today }: { week: ThisWeek; today: string }) {
         ) : null}
         {week.hours && week.hours.stillClockedIn > 0 ? (
           <p
-            className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-300"
+            className="flex items-center gap-1.5 text-xs text-warning-700"
             data-testid="overview-still-clocked-in"
           >
             <Clock className="h-3.5 w-3.5" aria-hidden />
@@ -197,9 +196,7 @@ export function OverviewSection({
             <p
               className={cn(
                 "text-xs",
-                readiness.every(isReadyAlone)
-                  ? "text-emerald-700 dark:text-emerald-300"
-                  : "text-amber-700 dark:text-amber-300",
+                readiness.every(isReadyAlone) ? "text-accd" : "text-warning-700",
               )}
             >
               {readyAlone}

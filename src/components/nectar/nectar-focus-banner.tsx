@@ -33,26 +33,26 @@ export function NectarFocusBanner() {
     <div
       role="region"
       aria-label="NECTAR guidance"
-      className="relative mb-4 overflow-hidden rounded-2xl border border-[color:var(--amber-400,var(--hive-gold))]/50 bg-gradient-to-br from-[#0b1733] via-[#0d1a3a] to-[#0b1733] p-4 text-amber-50 shadow-lg sm:p-5"
+      className="denim-band relative mb-4 overflow-hidden rounded-[20px] p-4 text-white shadow-[var(--denim-shadow)] sm:p-5"
     >
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[color:var(--amber-500,var(--hive-gold))] text-[#0b1733]">
+        <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-acc text-white">
           <Sparkles className="h-5 w-5" />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="text-[11px] font-semibold uppercase tracking-wide text-[color:var(--amber-400,var(--hive-gold))]">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.1em] text-accl">
             {content.eyebrow}
           </div>
-          <h3 className="mt-0.5 font-display text-base font-semibold text-amber-50">
+          <h3 className="mt-0.5 font-display text-base font-semibold text-white">
             {content.title}
           </h3>
-          <p className="mt-1 text-sm leading-relaxed text-amber-100/90">{content.why}</p>
-          <ol className="mt-2 space-y-1 text-sm text-amber-100/90">
+          <p className="mt-1 text-sm leading-relaxed text-ondark">{content.why}</p>
+          <ol className="mt-2 space-y-1 text-sm text-ondark">
             {content.steps.map((step, i) => (
               <li key={i} className="flex gap-2">
                 <span
                   aria-hidden
-                  className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-[11px] font-semibold text-amber-100"
+                  className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-[11px] font-semibold text-white"
                 >
                   {i + 1}
                 </span>
@@ -70,7 +70,7 @@ export function NectarFocusBanner() {
             }
             setDismissed(true);
           }}
-          className="shrink-0 text-amber-100 hover:bg-white/10 hover:text-amber-50"
+          className="shrink-0 text-ondark hover:bg-white/10 hover:text-white"
           aria-label="Dismiss NECTAR guidance"
         >
           <X className="h-4 w-4" />

@@ -42,7 +42,7 @@ export function FieldEditor({
           {dragHandle}
           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{TYPE_LABEL[field.type]}</div>
           {controller && (
-            <Badge variant="outline" className="text-[10px] gap-1 border-teal-300 text-teal-700">
+            <Badge variant="outline" className="text-[10px] gap-1 border-denim-300 text-denim-700">
               <GitBranch className="h-3 w-3" /> Conditional → Q{controller.index + 1}
             </Badge>
           )}
@@ -51,7 +51,7 @@ export function FieldEditor({
         <div className="flex gap-1">
           <Button size="icon" variant="ghost" onClick={onMoveUp} className="h-8 w-8"><ArrowUp className="h-4 w-4" /></Button>
           <Button size="icon" variant="ghost" onClick={onMoveDown} className="h-8 w-8"><ArrowDown className="h-4 w-4" /></Button>
-          <Button size="icon" variant="ghost" onClick={onRemove} className="h-8 w-8 text-rose-600"><Trash2 className="h-4 w-4" /></Button>
+          <Button size="icon" variant="ghost" onClick={onRemove} className="h-8 w-8 text-danger-600"><Trash2 className="h-4 w-4" /></Button>
         </div>
       </div>
 
@@ -115,7 +115,7 @@ export function FieldEditor({
                     }} maxLength={100} />
                     <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0"
                       onClick={() => patch({ options: (field.options ?? []).filter((_, j) => j !== i) })}>
-                      <Trash2 className="h-4 w-4 text-rose-600" />
+                      <Trash2 className="h-4 w-4 text-danger-600" />
                     </Button>
                   </div>
                 ))}

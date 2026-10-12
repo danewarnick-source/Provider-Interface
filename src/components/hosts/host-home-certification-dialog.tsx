@@ -112,6 +112,7 @@ export function HostCertificationPanel({
       const { data, error } = await supabase
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", orgId)
         .in("id", clientIds);
       if (error) throw error;
@@ -130,14 +131,14 @@ export function HostCertificationPanel({
     const ms = due.getTime() - Date.now();
     const days = Math.round(ms / 86_400_000);
     if (ms < 0) return { label: `Overdue by ${Math.abs(days)}d`, tone: "rose" as const };
-    if (days <= 30) return { label: `Due in ${days}d`, tone: "amber" as const };
+    if (days <= 30) return { label: `Due in ${days}d`, tone: "warning" as const };
     return { label: `Certified through ${latest.next_due_date}`, tone: "emerald" as const };
   }, [latest]);
 
   const toneClasses =
-    status.tone === "rose" ? "bg-rose-100 text-rose-800 border-rose-300"
-    : status.tone === "amber" ? "bg-amber-100 text-amber-800 border-amber-300"
-    : "bg-emerald-100 text-emerald-800 border-emerald-300";
+    status.tone === "rose" ? "bg-danger-50 text-danger-700 border-danger-200"
+    : status.tone === "warning" ? "bg-warning-50 text-warning-700 border-warning-200"
+    : "bg-acct text-accd border-acctb";
 
   return (
     <section className="space-y-3 rounded-md border border-border bg-card p-3">
@@ -221,13 +222,13 @@ export function HostCertBadge({ orgId, hostCardId }: { orgId: string; hostCardId
   const due = new Date(`${q.data}T23:59:59`);
   const days = Math.round((due.getTime() - Date.now()) / 86_400_000);
   if (days < 0) return <Badge variant="destructive" className="text-[10px]">Cert overdue</Badge>;
-  if (days <= 30) return <Badge className="bg-amber-500 text-[10px] hover:bg-amber-500">Cert due {days}d</Badge>;
-  return <Badge className="bg-emerald-600 text-[10px] hover:bg-emerald-600">Cert ✓</Badge>;
+  if (days <= 30) return <Badge className="bg-warning-500 text-[10px] hover:bg-warning-500">Cert due {days}d</Badge>;
+  return <Badge className="bg-acc text-[10px] text-white hover:bg-acc">Cert ✓</Badge>;
 }
 
 function determinationBadge(d: CertRow["determination"]) {
-  if (d === "certified") return <Badge className="bg-emerald-600 hover:bg-emerald-600">Certified</Badge>;
-  if (d === "certified_with_corrections") return <Badge className="bg-amber-500 hover:bg-amber-500">Cert. w/ corrections</Badge>;
+  if (d === "certified") return <Badge className="bg-acc text-white hover:bg-acc">Certified</Badge>;
+  if (d === "certified_with_corrections") return <Badge className="bg-warning-500 hover:bg-warning-500">Cert. w/ corrections</Badge>;
   return <Badge variant="destructive">Not certified</Badge>;
 }
 
@@ -365,6 +366,7 @@ function CertificationFormDialog({
       const { data, error: cErr } = await supabase
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", orgId)
         .in("id", activeIds)
         .order("last_name");
@@ -556,7 +558,7 @@ function CertificationFormDialog({
               <Label>Inspector (staff name)</Label>
               <Input value={inspectorName} onChange={(e) => setInspectorName(e.target.value)} />
             </div>
-            <div className="md:col-span-2 flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 p-3 dark:bg-amber-950/20">
+            <div className="md:col-span-2 flex items-start gap-2 rounded-md border border-warning-300 bg-warning-50 p-3 dark:bg-warning-950/20">
               <Checkbox
                 id="not-host"
                 checked={notHostConfirmed}
@@ -682,7 +684,7 @@ function CertificationFormDialog({
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Attestation & E-Signature
             </h3>
-            <div className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 p-3 dark:bg-amber-950/20">
+            <div className="flex items-start gap-2 rounded-md border border-warning-300 bg-warning-50 p-3 dark:bg-warning-950/20">
               <Checkbox
                 id="attest"
                 checked={attestationConfirmed}
@@ -713,7 +715,7 @@ function CertificationFormDialog({
             </div>
             {!canSubmit && (
               <div className="flex items-start gap-2 rounded-md bg-background p-2 text-xs">
-                <AlertTriangle className="mt-0.5 h-4 w-4 text-amber-600" />
+                <AlertTriangle className="mt-0.5 h-4 w-4 text-warning-600" />
                 <div>
                   Before submitting: select the person, answer every checklist item, add a note to every
                   "Does Not Meet"{isCertifying ? ", confirm the inspector is not the host home staff, check the attestation, and enter signature name + title" : ""}.
@@ -751,9 +753,9 @@ function ChecklistItemRow({
       onClick={() => onChange(s, note)}
       className={`min-h-[36px] rounded border px-2 py-1 text-xs font-medium transition ${
         status === s
-          ? s === "meets" ? "border-emerald-500 bg-emerald-500 text-white"
-          : s === "does_not_meet" ? "border-rose-500 bg-rose-500 text-white"
-          : "border-slate-500 bg-slate-500 text-white"
+          ? s === "meets" ? "border-success-500 bg-success-500 text-white"
+          : s === "does_not_meet" ? "border-danger-500 bg-danger-500 text-white"
+          : "border-haze-500 bg-haze-500 text-white"
           : "border-border bg-background hover:bg-muted"
       }`}
     >
@@ -762,7 +764,7 @@ function ChecklistItemRow({
   );
   const noteMissing = status === "does_not_meet" && !note.trim();
   return (
-    <div className={`rounded-md border p-2 ${noteMissing ? "border-rose-400" : ""}`}>
+    <div className={`rounded-md border p-2 ${noteMissing ? "border-danger-400" : ""}`}>
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div className="text-sm">{label}</div>
         <div className="flex shrink-0 items-center gap-1">
@@ -773,14 +775,14 @@ function ChecklistItemRow({
       </div>
       {status === "does_not_meet" && (
         <Input
-          className={`mt-2 ${noteMissing ? "border-rose-400" : ""}`}
+          className={`mt-2 ${noteMissing ? "border-danger-400" : ""}`}
           placeholder='Required: note explaining "Does Not Meet"'
           value={note}
           onChange={(e) => onChange(status, e.target.value)}
         />
       )}
       {status === "meets" && (
-        <div className="mt-1 inline-flex items-center gap-1 text-[11px] text-emerald-700">
+        <div className="mt-1 inline-flex items-center gap-1 text-[11px] text-success-700">
           <CheckCircle2 className="h-3 w-3" /> OK
         </div>
       )}

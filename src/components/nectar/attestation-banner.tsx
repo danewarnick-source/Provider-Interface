@@ -76,8 +76,8 @@ export function AttestationBanner({
   return (
     <div
       className={cn(
-        "rounded-xl border border-amber-300/70 bg-amber-50/70 px-4 py-3 text-amber-900 backdrop-blur",
-        "dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100",
+        "rounded-[var(--denim-r)] border border-warning-200 bg-warning-50 px-4 py-3 text-warning-800 backdrop-blur",
+        "dark:border-warning-500/30 dark:bg-warning-500/10 dark:text-warning-100",
         compact && "px-3 py-2 text-sm",
         className,
       )}
@@ -100,7 +100,7 @@ export function AttestationBanner({
               </label>
               <Button
                 size="sm"
-                className="bg-amber-500 text-amber-950 hover:bg-amber-400"
+                className="bg-warning-700 text-white hover:bg-warning-800"
                 disabled={!agreed || mutation.isPending}
                 onClick={() => mutation.mutate()}
               >

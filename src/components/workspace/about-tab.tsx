@@ -153,7 +153,7 @@ export function AboutTab({ client }: { client: CaseloadClient }) {
         </Group>
 
         <Group header="Enrollment">
-          <Row label="Admitted">{identity?.admission_date ? fmtDate(identity.admission_date) : null}</Row>
+          <Row label="Start date">{identity?.admission_date ? fmtDate(identity.admission_date) : null}</Row>
           <Row label="Discharge date">
             {identity?.admission_date || identity?.discharge_date
               ? (identity?.discharge_date
@@ -189,13 +189,13 @@ export function AboutTab({ client }: { client: CaseloadClient }) {
           <Row label="Primary care">{primaryDoctor ? contactLine(primaryDoctor) : null}</Row>
           <Row label="Plan year ends">
             {pcspExp ? (
-              <span className={cn("inline-flex items-center gap-1", pcspWarn && "text-red-600 font-semibold")}>
+              <span className={cn("inline-flex items-center gap-1", pcspWarn && "text-danger-600 font-semibold")}>
                 {pcspWarn ? <AlertTriangle className="h-3.5 w-3.5" /> : null}
                 {fmtDate(pcspExp)}
               </span>
             ) : null}
           </Row>
-          <Row label="Admitted">{identity?.admission_date ? fmtDate(identity.admission_date) : null}</Row>
+          <Row label="Start date">{identity?.admission_date ? fmtDate(identity.admission_date) : null}</Row>
         </Card>
       )}
 
@@ -275,7 +275,7 @@ export function AboutTab({ client }: { client: CaseloadClient }) {
       {/* Interests / hobbies */}
       <Card className="p-5">
         <h3 className="mb-3 flex items-center gap-1.5 text-sm font-semibold">
-          <Heart className="h-3.5 w-3.5 text-rose-500" /> Interests & Hobbies
+          <Heart className="h-3.5 w-3.5 text-danger-500" /> Interests & Hobbies
         </h3>
         {staffCare?.about_me ? (
           <p className="whitespace-pre-wrap text-sm">{staffCare.about_me}</p>

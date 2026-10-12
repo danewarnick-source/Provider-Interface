@@ -63,7 +63,7 @@ export function PublishModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-amber-500" /> Publish &amp; notify staff</DialogTitle>
+          <DialogTitle className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-acc" /> Publish &amp; notify staff</DialogTitle>
           <DialogDescription>Nectar drafted this from your form. Edit anything, then confirm — every assigned staff member will see it.</DialogDescription>
         </DialogHeader>
         {drafting ? (

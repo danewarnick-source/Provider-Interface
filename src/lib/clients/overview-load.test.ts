@@ -23,6 +23,19 @@ describe("client overview loaders", () => {
     assert.doesNotMatch(team + load, /\brole\b/);
   });
 
+  it("show only published, not cancelled shifts in Coming up", () => {
+    const fnBody = load.slice(load.indexOf("async function loadUpcomingShifts"));
+    assert.match(fnBody, /\.eq\("published", true\)/);
+    assert.match(fnBody, /\.neq\("status", "cancelled"\)/);
+  });
+
+  it("name note authors from the punch's staff and the log's author, in two queries", () => {
+    assert.match(load, /staff_id, service_type_code, shift_note_text/);
+    assert.match(load, /log_date, user_id, narrative/);
+    assert.match(load, /loadPeopleNames\(/);
+    assert.match(team, /from\("profiles"\)\.select\("id, full_name, first_name, last_name"\)/);
+  });
+
   it("check the caller can see the client first", () => {
     assert.match(fn, /assertCanManageClient\(/);
     assert.match(fn, /action: "view"/);

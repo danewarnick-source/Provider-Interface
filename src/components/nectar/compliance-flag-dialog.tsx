@@ -92,7 +92,7 @@ export function ComplianceFlagDialog({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <ShieldAlert className="h-5 w-5 text-amber-500" />
+            <ShieldAlert className="h-5 w-5 text-warning-500" />
             NECTAR: this entry appears to conflict with an obligation you confirmed
           </DialogTitle>
           <DialogDescription>
@@ -107,7 +107,7 @@ export function ComplianceFlagDialog({
               <div key={c.ruleId} className="border rounded-md p-3 space-y-2 bg-card">
                 <div className="text-sm">
                   <span className="font-medium">Your source states:</span>
-                  <blockquote className="mt-1 pl-3 border-l-2 border-amber-500 italic text-muted-foreground">
+                  <blockquote className="mt-1 pl-3 border-l-2 border-warning-500 italic text-muted-foreground">
                     "{c.source.verbatim}"
                   </blockquote>
                   {c.source.citation && (

@@ -4,10 +4,10 @@ import { PI_PRODUCT_NAME, PI_PRODUCT_SHORT, PI_WORDMARK } from "@/lib/pi-landing
 import { PiMark } from "@/components/pi-landing/pi-mark";
 
 /**
- * chrome  = on the dark navy sidebar / top bar (cream wordmark)
- * canvas  = on a dark public/auth backdrop (cream wordmark)
- * on-light = on the pale canvas or a white card (ink wordmark)
- * The π mark itself is the same antique-gold gradient on every tone.
+ * chrome  = on the navy sidebar (white wordmark)
+ * canvas  = on a navy public/auth band (white wordmark)
+ * on-light = on the pale canvas, glass bar or a white card (--pri wordmark)
+ * The π mark itself is the same Denim tile (navy + green) on every tone.
  */
 export type PiBrandTone = "chrome" | "canvas" | "on-light";
 export type PiBrandSize = "sm" | "md" | "lg";
@@ -18,23 +18,23 @@ const markSizes: Record<PiBrandSize, string> = {
   lg: "h-10 w-10",
 };
 
-/* Mirrors .pi-home-logo-pi on the public homepage: bold, 0.22em tracking, uppercase. */
+/* Denim wordmark: Manrope 700, -0.02em tracking. */
 const textSizes: Record<PiBrandSize, string> = {
-  sm: "text-[11px]",
-  md: "text-[13px]",
-  lg: "text-[15px]",
+  sm: "text-[14px]",
+  md: "text-[15.5px]",
+  lg: "text-[18px]",
 };
 
 const toneText: Record<PiBrandTone, string> = {
-  chrome: "text-[var(--hive-chrome-text)]",
-  canvas: "text-[var(--hive-chrome-text)]",
-  "on-light": "text-[var(--hive-text)]",
+  chrome: "text-white",
+  canvas: "text-white",
+  "on-light": "text-pri",
 };
 
 const toneMuted: Record<PiBrandTone, string> = {
   chrome: "text-[var(--hive-chrome-text-muted)]",
   canvas: "text-[var(--hive-chrome-text-muted)]",
-  "on-light": "text-[var(--hive-text-muted)]",
+  "on-light": "text-muted-foreground",
 };
 
 /**
@@ -66,7 +66,7 @@ export function PiBrand({
   const inner = (
     <span className={cn("inline-flex min-w-0 items-center gap-3", toneText[tone], className)}>
       <PiMark
-        variant="gold"
+        variant="brand"
         className={cn(stacked ? "h-[38px] w-[38px]" : markSizes[size], "shrink-0", markClassName)}
         title={PI_PRODUCT_NAME}
       />
@@ -75,7 +75,7 @@ export function PiBrand({
           <span className="flex min-w-0 flex-col gap-0.5 leading-none">
             <span
               className={cn(
-                "font-sans text-[15px] font-bold uppercase tracking-[0.22em]",
+                "font-display text-[15.5px] font-bold tracking-[-0.02em]",
                 toneText[tone],
                 textClassName,
               )}
@@ -84,7 +84,7 @@ export function PiBrand({
             </span>
             <span
               className={cn(
-                "font-sans text-[10px] font-medium uppercase tracking-[0.2em]",
+                "font-sans text-[10px] font-semibold uppercase tracking-[0.12em]",
                 toneMuted[tone],
               )}
             >
@@ -94,7 +94,7 @@ export function PiBrand({
         ) : (
           <span
             className={cn(
-              "font-sans font-bold uppercase leading-none tracking-[0.22em]",
+              "font-display font-bold leading-none tracking-[-0.02em]",
               textSizes[size],
               toneText[tone],
               textClassName,

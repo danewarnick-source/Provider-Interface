@@ -178,8 +178,8 @@ function CompanyDetailPage() {
         <ArrowLeft className="h-3.5 w-3.5" /> Back to companies
       </button>
 
-      <header className="rounded-xl border border-border bg-card p-4 shadow-sm">
-        <h1 className="font-display text-2xl font-bold text-[var(--hive-text)]">{d?.name ?? "Loading…"}</h1>
+      <header className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
+        <h1 className="font-display text-2xl font-bold text-deep">{d?.name ?? "Loading…"}</h1>
         <p className="text-xs text-muted-foreground">
           Account &amp; billing only — no client records or PHI accessible from this view.
         </p>
@@ -189,7 +189,7 @@ function CompanyDetailPage() {
             {d?.billing_sms_phone ? (
               <span className="font-mono text-foreground">{d.billing_sms_phone}</span>
             ) : (
-              <span className="text-amber-600">none on file</span>
+              <span className="text-warning-600">none on file</span>
             )}
           </span>
         </div>
@@ -208,7 +208,7 @@ function CompanyDetailPage() {
         <MasterController organizationId={orgId} />
       ) : (
       <>
-      <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <section className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
         <div className="mb-3 flex items-center justify-between gap-2">
 
           <h2 className="flex items-center gap-2 font-display text-lg font-semibold">
@@ -279,7 +279,7 @@ function CompanyDetailPage() {
               type="button"
               onClick={() => saveContact.mutate()}
               disabled={saveContact.isPending}
-              className="inline-flex items-center gap-1 rounded-md bg-[var(--hive-text)] px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-[#1a2a5a] disabled:opacity-50"
+              className="inline-flex items-center gap-1 rounded-full bg-pri px-3 py-1.5 text-xs font-medium text-white shadow-[var(--denim-shadow-sm)] hover:bg-deep disabled:opacity-50"
             >
               <Save className="h-3.5 w-3.5" /> Save account contact
             </button>
@@ -307,7 +307,7 @@ function CompanyDetailPage() {
             type="button"
             disabled={!nameDirty || !nameEdit.trim() || saveNames.isPending}
             onClick={() => { setAttest(false); setConfirmOpen(true); }}
-            className="inline-flex items-center gap-1 rounded-md bg-[var(--hive-text)] px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-[#1a2a5a] disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-full bg-pri px-3 py-1.5 text-sm font-medium text-white shadow-[var(--denim-shadow-sm)] hover:bg-deep disabled:opacity-50"
           >
             <Save className="h-3.5 w-3.5" /> Save name changes…
           </button>
@@ -315,10 +315,10 @@ function CompanyDetailPage() {
       </section>
 
       {confirmOpen && d ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
-          <div className="w-full max-w-lg rounded-xl border border-border bg-card p-5 shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--denim-overlay)] backdrop-blur-[4px] p-4" role="dialog" aria-modal="true">
+          <div className="w-full max-w-lg rounded-xl border border-border bg-card p-5 shadow-[var(--denim-shadow)]">
             <div className="mb-3 flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-600" />
+              <AlertTriangle className="h-5 w-5 text-warning-600" />
               <h3 className="font-display text-lg font-semibold">Confirm identifying-info change</h3>
             </div>
             <p className="mb-3 text-sm text-muted-foreground">
@@ -364,7 +364,7 @@ function CompanyDetailPage() {
                 type="button"
                 disabled={!attest || saveNames.isPending}
                 onClick={() => saveNames.mutate()}
-                className="inline-flex items-center gap-1 rounded-md bg-[var(--hive-text)] px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-[#1a2a5a] disabled:opacity-50"
+                className="inline-flex items-center gap-1 rounded-full bg-pri px-3 py-1.5 text-sm font-medium text-white shadow-[var(--denim-shadow-sm)] hover:bg-deep disabled:opacity-50"
               >
                 <Save className="h-3.5 w-3.5" /> Confirm &amp; save
               </button>
@@ -382,7 +382,7 @@ function CompanyDetailPage() {
       </div>
 
       {d?.signup ? (
-        <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+        <section className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
           <div className="mb-3 flex items-center justify-between gap-2">
             <h2 className="font-display text-lg font-semibold">Submitted at signup</h2>
             <span className="text-[11px] uppercase tracking-wide text-muted-foreground">Read-only · provider self-reported</span>
@@ -404,7 +404,7 @@ function CompanyDetailPage() {
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+        <section className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
           <div className="mb-3 flex items-center justify-between gap-2">
             <h2 className="font-display text-lg font-semibold">Operator controls</h2>
             <StatusPill status={status} />
@@ -454,12 +454,12 @@ function CompanyDetailPage() {
                 <span className="text-foreground">{fmtMoney(d.subscription.mrr_cents)}</span> MRR (live)
               </div>
               {d.subscription.past_due_since ? (
-                <div className="mt-1 text-amber-700">
+                <div className="mt-1 text-warning-700">
                   Past due since {new Date(d.subscription.past_due_since).toLocaleDateString()}
                 </div>
               ) : null}
               {d.subscription.locked_at ? (
-                <div className="mt-1 text-red-700">
+                <div className="mt-1 text-danger-700">
                   Locked at {new Date(d.subscription.locked_at).toLocaleString()}
                 </div>
               ) : null}
@@ -468,7 +468,7 @@ function CompanyDetailPage() {
             <div className="mt-3 text-xs text-muted-foreground">No subscription on file yet.</div>
           )}
 
-          <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3">
+          <div className="mt-4 rounded-md border border-warning-200 bg-warning-50 p-3">
             <label className="flex items-start gap-2 text-sm">
               <input
                 type="checkbox"
@@ -506,7 +506,7 @@ function CompanyDetailPage() {
             <div className="mt-2 flex flex-wrap gap-2">
               <button
                 type="button"
-                className={`rounded-md border px-3 py-1.5 text-sm ${d?.pricing_schedule === "founding" ? "border-[var(--hive-text)] bg-[var(--hive-text)] text-white" : "border-border"}`}
+                className={`rounded-md border px-3 py-1.5 text-sm ${d?.pricing_schedule === "founding" ? "border-pri bg-pri text-white" : "border-border"}`}
                 onClick={() => {
                   scheduleFn({ data: { organizationId: orgId, schedule: "founding" } })
                     .then(() => {
@@ -521,7 +521,7 @@ function CompanyDetailPage() {
               </button>
               <button
                 type="button"
-                className={`rounded-md border px-3 py-1.5 text-sm ${d?.pricing_schedule !== "founding" ? "border-[var(--hive-text)] bg-[var(--hive-text)] text-white" : "border-border"}`}
+                className={`rounded-md border px-3 py-1.5 text-sm ${d?.pricing_schedule !== "founding" ? "border-pri bg-pri text-white" : "border-border"}`}
                 onClick={() => {
                   scheduleFn({ data: { organizationId: orgId, schedule: "list" } })
                     .then(() => {
@@ -547,14 +547,14 @@ function CompanyDetailPage() {
               type="button"
               onClick={() => save.mutate()}
               disabled={save.isPending}
-              className="inline-flex items-center gap-1 rounded-md bg-[var(--hive-text)] px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-[#1a2a5a] disabled:opacity-50"
+              className="inline-flex items-center gap-1 rounded-full bg-pri px-3 py-1.5 text-sm font-medium text-white shadow-[var(--denim-shadow-sm)] hover:bg-deep disabled:opacity-50"
             >
               <Save className="h-3.5 w-3.5" /> Save subscription
             </button>
           </div>
         </section>
 
-        <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+        <section className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
           <h2 className="mb-3 flex items-center gap-2 font-display text-lg font-semibold">
             <Activity className="h-4 w-4" /> Support tickets
           </h2>
@@ -590,7 +590,7 @@ function TabButton({ active, onClick, icon: Icon, children }: { active: boolean;
       onClick={onClick}
       className={`inline-flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
         active
-          ? "border-[var(--hive-text)] text-[var(--hive-text)]"
+          ? "border-pri text-pri"
           : "border-transparent text-muted-foreground hover:text-foreground"
       }`}
     >
@@ -611,10 +611,10 @@ function ReadOnly({ label, value, mono }: { label: string; value: string | numbe
 
 function StatusPill({ status }: { status: string }) {
   const map: Record<string, string> = {
-    active: "bg-emerald-100 text-emerald-700",
-    past_due: "bg-amber-100 text-amber-700",
-    locked: "bg-red-100 text-red-700",
-    cancelled: "bg-gray-100 text-gray-600",
+    active: "bg-success-100 text-success-700",
+    past_due: "bg-warning-100 text-warning-700",
+    locked: "bg-danger-100 text-danger-700",
+    cancelled: "bg-haze-100 text-haze-600",
   };
   return (
     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${map[status] ?? "bg-muted"}`}>
@@ -636,11 +636,11 @@ function UsageTile({
   icon: Icon, label, value,
 }: { icon: typeof Users; label: string; value: string | number }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+    <div className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
       <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
         <Icon className="h-3.5 w-3.5" /> {label}
       </div>
-      <div className="mt-1 font-display text-2xl font-bold tabular-nums text-[var(--hive-text)]">{value}</div>
+      <div className="mt-1 font-display text-2xl font-bold tabular-nums text-deep">{value}</div>
     </div>
   );
 }

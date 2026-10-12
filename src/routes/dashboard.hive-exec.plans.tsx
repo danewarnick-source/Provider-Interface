@@ -48,9 +48,9 @@ function PlansAndBilling() {
 
 function Header() {
   return (
-    <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+    <div className="rounded-xl border border-border bg-card p-5 shadow-[var(--denim-shadow-sm)]">
       <div className="flex items-center gap-3">
-        <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hive-text)] text-white">
+        <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-pri text-white">
           <CreditCard className="h-5 w-5" />
         </span>
         <div>
@@ -70,7 +70,7 @@ function Header() {
 
 function TierCatalogSection() {
   return (
-    <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+    <section className="rounded-xl border border-border bg-card p-5 shadow-[var(--denim-shadow-sm)]">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="font-display text-base font-semibold">Tier catalog</h3>
         <span className="text-xs text-muted-foreground">
@@ -84,10 +84,10 @@ function TierCatalogSection() {
             className="flex flex-col rounded-lg border border-border bg-background p-4"
           >
             <div className="flex items-baseline justify-between">
-              <div className="font-display text-base font-semibold text-[var(--hive-text)]">
+              <div className="font-display text-base font-semibold text-deep">
                 {t.name}
               </div>
-              <div className="text-sm font-medium text-[#7a4a0a]">
+              <div className="text-sm font-medium text-deep">
                 {formatTierPrice(t)}
               </div>
             </div>
@@ -96,7 +96,7 @@ function TierCatalogSection() {
             <ul className="mt-3 space-y-1 text-xs">
               {t.highlights.map((h) => (
                 <li key={h} className="flex items-start gap-1.5">
-                  <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-emerald-600" />
+                  <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-success-600" />
                   <span>{h}</span>
                 </li>
               ))}
@@ -115,7 +115,7 @@ function TierCatalogSection() {
                       key={a}
                       className="flex items-center gap-1.5 text-xs text-[var(--hive-text)]"
                     >
-                      <Sparkles className="h-3 w-3 text-[var(--hive-gold)]" />
+                      <Sparkles className="h-3 w-3 text-[var(--hive-accent-text)]" />
                       {ADDON_CATALOG[a].name}
                     </li>
                   ))}
@@ -166,7 +166,7 @@ function CompanyTierAssignmentSection() {
   });
 
   return (
-    <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+    <section className="rounded-xl border border-border bg-card p-5 shadow-[var(--denim-shadow-sm)]">
       <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <h3 className="font-display text-base font-semibold">Tier assignment</h3>
@@ -309,7 +309,7 @@ function CompanyTierAssignmentSection() {
                           tier.addons.map((a) => (
                             <span
                               key={a}
-                              className="inline-flex items-center gap-1 rounded-full bg-[#fff7ed] px-2 py-0.5 text-[11px] font-medium text-[#9a3412]"
+                              className="inline-flex items-center gap-1 rounded-full bg-pt px-2 py-0.5 text-[11px] font-medium text-pri"
                             >
                               <Sparkles className="h-2.5 w-2.5" />
                               {ADDON_CATALOG[a].name}
@@ -350,7 +350,7 @@ function StripeStatusSection() {
   const mrr = kpisQ.data?.mrr_cents ?? 0;
 
   return (
-    <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+    <section className="rounded-xl border border-border bg-card p-5 shadow-[var(--denim-shadow-sm)]">
       <h3 className="font-display text-base font-semibold">Stripe (test mode)</h3>
       <p className="mt-1 text-xs text-muted-foreground">
         New agencies pay $69 per client / month ($350 minimum). Checkout uses the
@@ -361,7 +361,7 @@ function StripeStatusSection() {
       </p>
       <div className="mt-3 rounded-lg border border-border bg-background p-4">
         <div className="text-xs uppercase tracking-wide text-muted-foreground">MRR (paying companies)</div>
-        <div className="mt-1 font-display text-xl font-bold tabular-nums text-[var(--hive-text)]">
+        <div className="mt-1 font-display text-xl font-bold tabular-nums text-deep">
           {fmtMoney(mrr)}
         </div>
       </div>

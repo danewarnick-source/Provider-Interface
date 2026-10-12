@@ -1,6 +1,7 @@
-// Client profile layout: the shared person-profile shell (side menu, phone
-// scroll row, attention pill) with the client sections. Sections the viewer
-// can't open are hidden; each section shows how many items need attention.
+// Client profile layout: the shared person-profile shell (the sidebar menu on
+// desktop, phone scroll row, attention pill) with the client sections.
+// Sections the viewer can't open are hidden; each section shows how many
+// items need attention.
 
 import type { ReactNode } from "react";
 import {
@@ -17,6 +18,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { ProfileShell, type ProfileShellSection } from "@/components/profile-shell/profile-shell";
+import type { SidebarProfile } from "@/components/profile-shell/sidebar-takeover";
+import type { ProfileTone } from "@/components/profile-shell/tones";
 import {
   CLIENT_PROFILE_SECTIONS,
   CLIENT_SECTION_LABEL,
@@ -36,6 +39,20 @@ const SECTION_ICON: Record<ClientProfileSection, LucideIcon> = {
   activity: Activity,
 };
 
+/** Section tones, matching the cards inside each section. */
+const SECTION_TONE: Record<ClientProfileSection, ProfileTone> = {
+  overview: "neutral",
+  profile: "profile",
+  contacts: "info",
+  health: "danger",
+  plans: "ok",
+  services: "profile",
+  money: "neutral",
+  file: "info",
+  team: "ok",
+  activity: "neutral",
+};
+
 export function ClientProfileShell({
   header,
   visible,
@@ -44,6 +61,7 @@ export function ClientProfileShell({
   active,
   onSelect,
   children,
+  sidebar,
 }: {
   header: ReactNode;
   visible: readonly ClientProfileSection[];
@@ -52,6 +70,8 @@ export function ClientProfileShell({
   active: ClientProfileSection;
   onSelect: (section: ClientProfileSection) => void;
   children: ReactNode;
+  /** The back link and the person at the top of the sidebar menu. */
+  sidebar?: Pick<SidebarProfile, "back" | "person">;
 }) {
   const sections: ProfileShellSection<ClientProfileSection>[] = CLIENT_PROFILE_SECTIONS.map(
     (key) => {
@@ -60,6 +80,7 @@ export function ClientProfileShell({
         key,
         label: CLIENT_SECTION_LABEL[key],
         icon: SECTION_ICON[key],
+        tone: SECTION_TONE[key],
         visible: visible.includes(key),
         badge: count > 0 ? { count, tone: "warn" as const } : null,
       };
@@ -75,6 +96,7 @@ export function ClientProfileShell({
       activeKey={active}
       onSelect={onSelect}
       panel={null}
+      sidebar={sidebar}
     >
       {children}
     </ProfileShell>

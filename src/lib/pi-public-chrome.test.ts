@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { PI_HOME_GOLD, PI_HOME_GOLD2, PI_PUBLIC_NAV } from "./pi-homepage.ts";
+import { PI_PUBLIC_NAV } from "./pi-homepage.ts";
 
 function read(rel: string) {
   return readFileSync(new URL(rel, import.meta.url), "utf8");
@@ -52,7 +52,8 @@ describe("public pages share homepage marketing chrome", () => {
     const footer = read("../components/pi-landing/pi-public-footer.tsx");
     const page = read("../components/pi-landing/pi-public-page.tsx");
     assert.match(header, /pi-home-nav/);
-    assert.match(header, /pi-home-btn cream sm/);
+    assert.match(header, /pi-home-btn primary sm/);
+    assert.match(page, /denim-field/);
     assert.match(header, /PI_PUBLIC_NAV/);
     assert.match(header, /PI_HOME_NAV/);
     assert.match(footer, /pi-home-foot/);
@@ -66,35 +67,41 @@ describe("public pages share homepage marketing chrome", () => {
     assert.doesNotMatch(footer, /PI_FOOTER_LINKS/);
   });
 
-  it("does not put bright yellow back on public marketing CSS", () => {
+  it("keeps gold, cream, and the old navy off public marketing CSS", () => {
     const homeCss = read("../components/pi-landing/pi-homepage.css");
     const landingCss = read("../components/pi-landing/pi-landing.css");
-    assert.match(homeCss, new RegExp(PI_HOME_GOLD.replace("#", "#")));
-    assert.match(homeCss, new RegExp(PI_HOME_GOLD2.replace("#", "#")));
-    assert.match(landingCss, /#c4a35a/);
-    assert.doesNotMatch(landingCss, /--gold: #c9a227/);
-    assert.doesNotMatch(homeCss, /#c9a227/);
+    for (const css of [homeCss, landingCss]) {
+      assert.doesNotMatch(css, /#c4a35a|#d9c284|#c9a227|#f3efe6|#0a1120|#0a0f1c/i);
+      assert.doesNotMatch(css, /gold|cream/i);
+      assert.doesNotMatch(css, /Newsreader|Iowan/);
+    }
+    assert.match(landingCss, /backdrop-filter: saturate\(1\.6\) blur\(18px\)/);
+    assert.match(landingCss, /border-radius: 999px/);
+    assert.match(homeCss, /background: var\(--denim-deep\)/);
     const signup = read("../routes/signup.tsx");
-    assert.match(signup, /#3a4553/);
+    assert.doesNotMatch(signup, /#3a4553/);
     assert.doesNotMatch(signup, /rgba\(255,255,255,0\.5\)/);
     const contact = read("../components/landing/contact.tsx");
     assert.doesNotMatch(contact, /bg-\[color:var\(--surface-2\)\]/);
     assert.doesNotMatch(contact, /careacademy/);
-    assert.match(contact, /pi-home-btn gold/);
+    assert.match(contact, /pi-home-btn primary/);
+    assert.match(contact, /pi-home-card/);
+    assert.doesNotMatch(contact, /gold|cream/);
   });
 
-  it("keeps Sign in on the paper auth surface as the platform primary, not gold", () => {
+  it("keeps Sign in on the paper auth surface as the Denim primary pill", () => {
     const login = read("../routes/login.tsx");
     const forgot = read("../routes/forgot-password.tsx");
     const homeCss = read("../components/pi-landing/pi-homepage.css");
     assert.match(login, /pi-home-btn primary/);
-    assert.doesNotMatch(login, /pi-home-btn gold/);
+    assert.match(login, /pi-home-card/);
+    assert.doesNotMatch(login, /pi-home-btn gold|cream-card/);
     assert.match(forgot, /pi-home-btn primary/);
-    assert.match(homeCss, /\.pi-home-paper \.pi-home-btn\.primary \{/);
-    assert.match(homeCss, /background: var\(--hive-primary\)/);
-    assert.doesNotMatch(
-      homeCss.slice(homeCss.indexOf(".pi-home-paper .pi-home-btn.gold")),
-      /background: var\(--hive-gold\)/,
+    assert.match(homeCss, /\.pi-home-btn\.primary \{/);
+    assert.match(homeCss, /background: var\(--denim-pri\)/);
+    assert.match(
+      homeCss,
+      /\.pi-home-card \{[\s\S]*border-radius: 20px[\s\S]*box-shadow: var\(--denim-shadow\)/,
     );
   });
 });

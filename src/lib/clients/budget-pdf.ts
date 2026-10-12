@@ -8,6 +8,7 @@
 //   • deferred "Email budget" action (will attach the same bytes)
 
 import { PDFDocument, StandardFonts, rgb, PDFPage, PDFFont, PDFImage } from "pdf-lib";
+import { DENIM, DENIM_STATUS, hexToRgb } from "../design-tokens";
 
 export type BudgetPdfLine = {
   label: string;
@@ -47,20 +48,28 @@ const COL = {
   notes: 126,
 };
 
-// Muted, editorial palette. Neutral grays with a single accent for the
-// difference tile — nothing here reads like a promo poster.
+// Denim palette (PDFs can't read CSS variables). Navy headings, blue accent
+// nib, Denim green / red status for the totals — nothing reads like a poster.
+function pdfColor(hex: string) {
+  const [r, g, b] = hexToRgb(hex);
+  return rgb(r / 255, g / 255, b / 255);
+}
 const C = {
-  ink: rgb(0.09, 0.09, 0.11),
-  text: rgb(0.16, 0.17, 0.20),
-  muted: rgb(0.42, 0.44, 0.48),
-  faint: rgb(0.62, 0.64, 0.68),
-  rule: rgb(0.82, 0.83, 0.86),
-  ruleSoft: rgb(0.90, 0.91, 0.93),
-  zebra: rgb(0.973, 0.976, 0.98),
-  band: rgb(0.94, 0.95, 0.97),
-  accent: rgb(0.11, 0.30, 0.55),      // deep navy
-  positive: rgb(0.02, 0.42, 0.24),    // subdued green
-  danger: rgb(0.62, 0.14, 0.20),      // subdued red
+  navy: pdfColor(DENIM.deep),
+  ink: pdfColor(DENIM.ink),
+  text: pdfColor(DENIM.text),
+  muted: pdfColor(DENIM.muted),
+  faint: pdfColor(DENIM.muted),
+  rule: pdfColor(DENIM.line),
+  ruleSoft: pdfColor(DENIM.pt),
+  zebra: pdfColor(DENIM.bg),
+  band: pdfColor(DENIM.pt0),
+  accent: pdfColor(DENIM.pri),
+  positive: pdfColor(DENIM_STATUS.successText),
+  danger: pdfColor(DENIM_STATUS.dangerText),
+  positiveFill: pdfColor(DENIM.accd),
+  dangerFill: pdfColor(DENIM_STATUS.danger),
+  white: rgb(1, 1, 1),
 };
 
 function fmt$(n: number): string {
@@ -199,7 +208,7 @@ export async function renderClientBudgetPdf(p: BudgetPdfPayload): Promise<Uint8A
     } else {
       page.drawText(p.orgName || "Organization", {
         x: MARGIN_X, y: headerTop - 14,
-        size: 16, font: bold, color: C.ink,
+        size: 16, font: bold, color: C.navy,
       });
     }
 
@@ -209,7 +218,7 @@ export async function renderClientBudgetPdf(p: BudgetPdfPayload): Promise<Uint8A
       size: 11, font: bold, color: C.muted,
     });
     drawRight(p.clientName || "—", PAGE_W - MARGIN_X, titleY - 22, {
-      size: 18, font: bold, color: C.ink,
+      size: 18, font: bold, color: C.navy,
     });
     drawRight(`Period: ${p.periodLabel}`, PAGE_W - MARGIN_X, titleY - 40, {
       size: 10.5, color: C.text,
@@ -289,13 +298,13 @@ export async function renderClientBudgetPdf(p: BudgetPdfPayload): Promise<Uint8A
 
     page.drawRectangle({
       x: MARGIN_X, y: bandBottom,
-      width: CONTENT_W, height: bandH, color: C.ink,
+      width: CONTENT_W, height: bandH, color: C.navy,
     });
     drawText(title.toUpperCase(), MARGIN_X + 12, bandTextY, {
-      size: bandFontSize, font: bold, color: rgb(1, 1, 1),
+      size: bandFontSize, font: bold, color: C.white,
     });
     drawRight(`Subtotal  ${fmt$(sub)}`, PAGE_W - MARGIN_X - 12, bandTextY, {
-      size: bandFontSize, font: bold, color: rgb(1, 1, 1),
+      size: bandFontSize, font: bold, color: C.white,
     });
     y = bandBottom - 8; // clean gap between band and column-header row
 
@@ -394,12 +403,13 @@ export async function renderClientBudgetPdf(p: BudgetPdfPayload): Promise<Uint8A
   summaryTiles.forEach((t, i) => {
     const x = MARGIN_X + i * (tileW + gap);
     if (t.emphasize) {
-      page.drawRectangle({ x, y: tileY, width: tileW, height: tileH, color: t.color });
+      const fill = t.color === C.positive ? C.positiveFill : C.dangerFill;
+      page.drawRectangle({ x, y: tileY, width: tileW, height: tileH, color: fill });
       drawText(t.label.toUpperCase(), x + 10, tileY + tileH - 14, {
-        size: 8, font: bold, color: rgb(1, 1, 1),
+        size: 8, font: bold, color: C.white,
       });
       drawText(fmt$(t.value), x + 10, tileY + 14, {
-        size: 18, font: bold, color: rgb(1, 1, 1),
+        size: 18, font: bold, color: C.white,
       });
     } else {
       page.drawRectangle({

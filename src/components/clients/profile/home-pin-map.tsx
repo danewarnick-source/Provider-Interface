@@ -6,10 +6,11 @@
 import { useEffect } from "react";
 import { MapContainer, TileLayer, Circle, Marker, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
+import { DENIM } from "@/lib/design-tokens";
 
 const houseIcon = L.divIcon({
   className: "evv-house-pin",
-  html: `<div style="background:#0f766e;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.35);border:2px solid #fff;cursor:grab;"><span style="display:block;width:10px;height:10px;margin:11px auto 0;border-radius:50%;background:#fff;transform:rotate(45deg);"></span></div>`,
+  html: `<div style="background:var(--denim-pri);width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(27,51,80,.35);border:2px solid #fff;cursor:grab;"><span style="display:block;width:10px;height:10px;margin:11px auto 0;border-radius:50%;background:var(--denim-acc);transform:rotate(45deg);"></span></div>`,
   iconSize: [36, 36],
   iconAnchor: [18, 36],
 });
@@ -69,7 +70,7 @@ export default function HomePinMap({
       style={{ height }}
     >
       {!hasPin ? (
-        <div className="pointer-events-none absolute left-2 top-2 z-[1000] max-w-[90%] rounded-md border border-teal-700/20 bg-background/95 px-2.5 py-1.5 text-xs font-semibold text-teal-900 shadow-sm dark:text-teal-100">
+        <div className="pointer-events-none absolute left-2 top-2 z-[1000] max-w-[90%] rounded-xl border border-line bg-paper/95 px-2.5 py-1.5 text-xs font-semibold text-deep shadow-[var(--denim-shadow-sm)]">
           Tap the map to drop a pin on the house
         </div>
       ) : null}
@@ -93,8 +94,9 @@ export default function HomePinMap({
               center={[lat, lng]}
               radius={radiusMeters}
               pathOptions={{
-                color: "#0f766e",
-                fillColor: "#14b8a6",
+                // Leaflet writes SVG attributes, which can't read CSS vars.
+                color: DENIM.pri,
+                fillColor: DENIM.steel,
                 fillOpacity: 0.18,
                 weight: 2,
               }}

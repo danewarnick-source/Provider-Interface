@@ -92,6 +92,11 @@ import {
 } from "@/lib/auth-session-boot";
 import { PortalViewSwitcher } from "@/components/portal-view-switcher";
 import { PiBrand } from "@/components/brand/pi-brand";
+import { ProfileSidebar } from "@/components/profile-shell/profile-sidebar";
+import {
+  SidebarTakeoverProvider,
+  useSidebarProfile,
+} from "@/components/profile-shell/sidebar-takeover";
 import { PiMark } from "@/components/pi-landing/pi-mark";
 
 import { BillingBanner } from "@/components/billing/billing-banner";
@@ -708,12 +713,13 @@ function DashboardLayout() {
   return (
     <GuidedTourProvider>
       <DraftJobsProvider>
+        <SidebarTakeoverProvider>
         <div className="flex h-screen h-[100dvh] flex-col overflow-hidden">
           <ImpersonationBanner />
           {isCognitoAuth() && (orgError || awsDbFailed) && (
             <div
               data-testid="cognito-bootstrap-error"
-              className="shrink-0 border-b border-amber-300/60 bg-amber-50 px-4 py-2 text-center text-xs text-amber-950 md:px-6"
+              className="shrink-0 border-b border-warning-300/60 bg-warning-50 px-4 py-2 text-center text-xs text-warning-950 md:px-6"
             >
               {awsDbErrorMessage ||
                 (orgQueryError instanceof Error ? orgQueryError.message : null) ||
@@ -736,18 +742,22 @@ function DashboardLayout() {
                 : "grid min-h-0 min-w-0 w-full flex-1 md:grid-cols-[260px_minmax(0,1fr)]"
             }
           >
-            <aside className="hive-chrome hidden h-full flex-col overflow-y-auto border-r border-[var(--hive-chrome-border)] md:flex">
-              <SidebarBody {...sidebarProps} />
+            <aside className="hive-chrome hidden h-full flex-col overflow-y-auto md:flex">
+              <DesktopSidebar {...sidebarProps} />
             </aside>
 
             <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
-              <header
-                className="hive-chrome flex min-h-16 shrink-0 items-center justify-between gap-2 border-b border-[var(--hive-chrome-border)] px-4 md:px-6"
+              {/* Floating Denim glass bar: it sits above the scroller (main), so it stays put. */}
+              <div
+                className="relative z-30 shrink-0 bg-[var(--hive-canvas)] pb-1.5 [--bar-gutter:0.75rem] [--bar-top:0.75rem] md:[--bar-gutter:2rem] md:[--bar-top:0.875rem]"
                 style={{
-                  paddingTop: "env(safe-area-inset-top)",
-                  paddingLeft: "max(1rem, env(safe-area-inset-left))",
-                  paddingRight: "max(1rem, env(safe-area-inset-right))",
+                  paddingTop: "max(var(--bar-top), env(safe-area-inset-top))",
+                  paddingLeft: "max(var(--bar-gutter), env(safe-area-inset-left))",
+                  paddingRight: "max(var(--bar-gutter), env(safe-area-inset-right))",
                 }}
+              >
+              <header
+                className={`denim-glass flex min-h-[58px] items-center justify-between gap-2 rounded-[20px] py-1.5 pl-2.5 pr-2 md:rounded-full md:pl-5 ${GLASS_BAR_CONTROLS}`}
               >
                 <div className="flex items-center gap-2 min-w-0">
                   {/* Staff phones use the avatar drawer. Keep this control out of
@@ -757,7 +767,7 @@ function DashboardLayout() {
                       <SheetTrigger asChild>
                         <button
                           type="button"
-                          className="hive-chrome-btn h-10 w-10 shrink-0 md:hidden"
+                          className={`${GLASS_BTN} h-10 w-10 shrink-0 md:hidden`}
                           aria-label="Open menu"
                         >
                           <Menu className="h-5 w-5" />
@@ -765,7 +775,7 @@ function DashboardLayout() {
                       </SheetTrigger>
                       <SheetContent
                         side="left"
-                        className="hive-chrome w-[280px] p-0 [&>button]:text-[var(--hive-chrome-text)]"
+                        className="hive-chrome hive-chrome-sheet w-[280px] border-r-0 p-0"
                         onPointerDownOutside={preventSheetDismissForPortalViewMenu}
                         onFocusOutside={preventSheetDismissForPortalViewMenu}
                         onInteractOutside={preventSheetDismissForPortalViewMenu}
@@ -778,12 +788,12 @@ function DashboardLayout() {
                     </Sheet>
                   )}
                   <div className="min-w-0">
-                    <h1 className="truncate text-lg font-semibold tracking-tight text-[var(--hive-chrome-text)]">
+                    <h1 className="truncate font-display text-base font-bold tracking-[-0.01em] text-deep md:text-lg">
                       {pageTitle}
                     </h1>
                     <p
                       data-testid="shell-org-subtitle"
-                      className="text-xs leading-snug whitespace-normal break-words text-[var(--hive-chrome-text-muted)]"
+                      className="text-xs leading-snug whitespace-normal break-words text-muted-foreground"
                       title={
                         isHiveExecView
                           ? "Provider Interface · Exec"
@@ -833,7 +843,7 @@ function DashboardLayout() {
                       aria-label={mobileSearchOpen ? "Close NECTAR search" : "Open NECTAR search"}
                       aria-expanded={mobileSearchOpen}
                       onClick={() => setMobileSearchOpen((v) => !v)}
-                      className="hive-chrome-btn h-10 w-10 md:hidden"
+                      className={`${GLASS_BTN} h-10 w-10 md:hidden`}
                     >
                       <Search className="h-4 w-4" />
                     </button>
@@ -842,10 +852,10 @@ function DashboardLayout() {
                     type="button"
                     onClick={() => setTaskCenterOpen(true)}
                     data-tour="nav.help"
-                    className="hive-chrome-btn h-10 px-3 text-xs font-semibold"
+                    className={`${GLASS_BTN} h-10 px-3 text-xs font-semibold`}
                     title="Open Nectar"
                   >
-                    <PiMark variant="gold" className="h-3.5 w-3.5" />
+                    <PiMark variant="brand" className="h-3.5 w-3.5" />
                     <span className="hidden md:inline">Nectar</span>
                   </button>
                   {isAdminCapable && effectiveView === "admin" && <DraftJobsHeaderPill />}
@@ -853,17 +863,18 @@ function DashboardLayout() {
                   <button
                     type="button"
                     onClick={() => void signOut()}
-                    className="hive-chrome-btn h-10 w-10 md:hidden"
+                    className={`${GLASS_BTN} h-10 w-10 md:hidden`}
                     aria-label="Sign out"
                   >
                     <LogOut className="h-4 w-4" />
                   </button>
                 </div>
               </header>
+              </div>
               {/* Collapsed-by-default NECTAR ask bar on phones — expands from the
               header icon; the desktop inline bar is unchanged. */}
               {mobileSearchOpen && !isHiveExecView && !isStaffPhoneChrome && (
-                <div className="hive-chrome border-b border-[var(--hive-chrome-border)] px-4 py-2 md:hidden">
+                <div className="shrink-0 bg-[var(--hive-canvas)] px-3 pb-2 md:hidden">
                   <NectarSearchBar
                     nav={allNav.map((n) => ({ to: n.to, label: n.label }))}
                     isAdminCapable={isAdminCapable && effectiveView === "admin"}
@@ -882,13 +893,13 @@ function DashboardLayout() {
               {!isHiveExecView && !isStatePreview && <DemoOrgBanner />}
 
               {isStatePreview && (
-                <div className="flex items-center justify-between gap-3 border-b border-[var(--hive-gold)]/30 bg-[var(--hive-gold)]/[0.08] px-4 py-2 text-xs md:px-6">
-                  <div className="flex items-center gap-2 text-[#9a3412]">
+                <div className="flex items-center justify-between gap-3 border-y border-pt2 bg-pt px-4 py-2 text-xs md:px-6">
+                  <div className="flex items-center gap-2 text-pri">
                     <MapPin className="h-3.5 w-3.5" />
                     <span className="font-semibold uppercase tracking-wider">
                       State Build/Preview
                     </span>
-                    <span className="text-[#9a3412]/80">
+                    <span className="text-pri/80">
                       {currentPreviewState?.name ?? "No state selected"} ·{" "}
                       {subView === "admin" ? "Admin view" : "Staff view"} · template/sample data,
                       not live company records
@@ -898,7 +909,7 @@ function DashboardLayout() {
                     <Link
                       to="/dashboard/hive-exec/states/$stateCode"
                       params={{ stateCode: currentPreviewState.code }}
-                      className="hidden md:inline-flex items-center gap-1 rounded-md border border-[var(--hive-gold)]/40 bg-white/60 px-2 py-0.5 text-[11px] font-medium text-[#9a3412] hover:bg-white"
+                      className="hidden md:inline-flex items-center gap-1 rounded-full border border-pt2 bg-paper/70 px-2.5 py-0.5 text-[11px] font-medium text-pri hover:bg-paper"
                     >
                       Edit template
                     </Link>
@@ -914,17 +925,17 @@ function DashboardLayout() {
                 className={
                   isMobilePreview
                     ? "min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-[var(--hive-canvas)]"
-                    : "min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-[var(--hive-canvas)] px-4 py-6 md:px-8"
+                    : "min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-[var(--hive-canvas)] px-4 pb-6 pt-4 md:px-8"
                 }
               >
                 {isStatePreview && !stateCode ? (
-                  <div className="mx-auto max-w-xl rounded-lg border border-dashed border-border bg-background p-8 text-center text-sm text-muted-foreground">
+                  <div className="mx-auto max-w-xl rounded-[var(--denim-r)] border border-dashed border-pt2 bg-paper p-8 text-center text-sm text-muted-foreground">
                     Select a state from the sidebar to load the platform configured as that state.
                   </div>
                 ) : isComingSoonPreview ? (
-                  <div className="mx-auto max-w-xl rounded-lg border border-dashed border-[var(--hive-gold)]/40 bg-[var(--hive-gold)]/[0.06] p-10 text-center">
-                    <MapPin className="mx-auto h-8 w-8 text-[var(--hive-gold)]" />
-                    <h2 className="mt-3 text-lg font-semibold tracking-tight">
+                  <div className="mx-auto max-w-xl rounded-[var(--denim-r)] border border-dashed border-pt2 bg-paper p-10 text-center shadow-[var(--denim-shadow-sm)]">
+                    <MapPin className="mx-auto h-8 w-8 text-pri" />
+                    <h2 className="mt-3 font-display text-lg font-semibold tracking-[-0.01em] text-deep">
                       Coming soon for {currentPreviewState?.name}
                     </h2>
                     <p className="mt-2 text-sm text-muted-foreground">
@@ -935,7 +946,7 @@ function DashboardLayout() {
                       <Link
                         to="/dashboard/hive-exec/states/$stateCode"
                         params={{ stateCode: currentPreviewState.code }}
-                        className="mt-4 inline-flex items-center gap-1 rounded-md border border-[var(--hive-gold)]/40 bg-white px-3 py-1.5 text-xs font-medium text-[#9a3412] hover:bg-[var(--hive-gold)]/10"
+                        className="mt-4 inline-flex items-center gap-1 rounded-full bg-pri px-4 py-1.5 text-xs font-semibold text-white shadow-[var(--denim-btn-shadow)] hover:bg-deep"
                       >
                         Build {currentPreviewState.name} template
                       </Link>
@@ -954,10 +965,30 @@ function DashboardLayout() {
             </div>
           </div>
         </div>
+        </SidebarTakeoverProvider>
       </DraftJobsProvider>
     </GuidedTourProvider>
   );
 }
+
+/** Light ghost pill for controls on the floating glass top bar. */
+const GLASS_BTN =
+  "inline-flex items-center justify-center gap-1.5 rounded-full text-pri transition-colors duration-200 ease-denim hover:bg-pt hover:text-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pri";
+
+/**
+ * Bell / draft-jobs pills render `.hive-chrome-btn` (built for the navy chrome);
+ * on the glass bar they take the same light ghost look as GLASS_BTN.
+ */
+const GLASS_BAR_CONTROLS =
+  "[&_.hive-chrome-btn]:border-transparent [&_.hive-chrome-btn]:bg-transparent [&_.hive-chrome-btn]:text-pri [&_.hive-chrome-btn:hover]:border-transparent [&_.hive-chrome-btn:hover]:bg-pt [&_.hive-chrome-btn:hover]:text-deep [&_.hive-chrome-btn:focus-visible]:outline-pri [&_.hive-chrome-btn_span]:ring-white";
+
+/** Navy sidebar nav: fully rounded pills, left padding clears the active dot. */
+const NAV_ITEM =
+  "flex items-center gap-3 rounded-full py-2 pl-6 pr-3 text-sm transition-colors duration-200 ease-denim [&_svg]:shrink-0";
+const NAV_IDLE = "text-ondark hover:bg-white/6 hover:text-white [&_svg]:text-ondarkp";
+const NAV_LOCKED =
+  "text-ondark/45 hover:bg-white/6 hover:text-ondark/70 [&_svg]:text-ondarkp/60";
+const NAV_SECTION_LABEL = "text-[11px] font-semibold uppercase tracking-[0.1em] text-ondarkp/70";
 
 /**
  * Hoisted to module scope so it keeps a stable component identity across
@@ -976,7 +1007,7 @@ function CompanyClientsBridge({
   return (
     <button
       type="button"
-      className="mt-3 flex w-full items-center justify-center gap-2 rounded-md border border-[var(--hive-gold)]/40 bg-[var(--hive-gold)]/10 px-3 py-2 text-xs font-semibold text-[var(--hive-gold)] hover:bg-[var(--hive-gold)]/20"
+      className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-white/15 bg-white/6 px-3 py-2 text-xs font-semibold text-ondark hover:bg-white/10 hover:text-white"
       onClick={() => {
         // Switch to company Admin portal and open Clients — hive-exec
         // nav intentionally excludes PHI; this is the explicit bridge.
@@ -1086,13 +1117,13 @@ function SidebarBody({
   }, [activeExecDomain]);
   return (
     <>
-      <div className="flex h-16 items-center border-b border-[var(--hive-chrome-border)] px-5">
+      <div className="flex h-16 items-center border-b border-sidebar-border px-5">
         <PiBrand to="/dashboard" tone="chrome" size="md" stacked />
       </div>
 
       {(isAdminCapable || isExecutive) && (
         <div className="border-b border-sidebar-border px-4 py-4">
-          <label className="mb-2 block text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/60">
+          <label className={`mb-2 block ${NAV_SECTION_LABEL}`}>
             Portal View
           </label>
           <PortalViewSwitcher
@@ -1125,12 +1156,12 @@ function SidebarBody({
           )}
 
           {isStatePreview && (
-            <div className="mt-3 space-y-2 rounded-md border border-[var(--hive-gold)]/30 bg-[var(--hive-gold)]/[0.06] p-2">
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/70">
+            <div className="mt-3 space-y-2 rounded-xl border border-sidebar-border bg-white/4 p-2">
+              <label className={`block ${NAV_SECTION_LABEL}`}>
                 State
               </label>
               <Select value={stateCode ?? ""} onValueChange={(v) => setStateCode(v)}>
-                <SelectTrigger className="w-full border-sidebar-border bg-sidebar text-sidebar-foreground">
+                <SelectTrigger className="w-full border-sidebar-border bg-white/6 text-ondark">
                   <SelectValue placeholder="Select a state" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1163,10 +1194,10 @@ function SidebarBody({
                 <button
                   type="button"
                   onClick={() => setSubView("admin")}
-                  className={`flex-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
+                  className={`flex-1 rounded-full px-2 py-1 text-[11px] font-medium transition-colors ${
                     subView === "admin"
-                      ? "bg-[var(--hive-gold)] text-white"
-                      : "bg-sidebar text-sidebar-foreground/70 hover:bg-sidebar-accent"
+                      ? "bg-pri text-white"
+                      : "bg-white/4 text-ondark/75 hover:bg-white/8 hover:text-white"
                   }`}
                 >
                   Admin
@@ -1174,10 +1205,10 @@ function SidebarBody({
                 <button
                   type="button"
                   onClick={() => setSubView("staff")}
-                  className={`flex-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
+                  className={`flex-1 rounded-full px-2 py-1 text-[11px] font-medium transition-colors ${
                     subView === "staff"
-                      ? "bg-[var(--hive-gold)] text-white"
-                      : "bg-sidebar text-sidebar-foreground/70 hover:bg-sidebar-accent"
+                      ? "bg-pri text-white"
+                      : "bg-white/4 text-ondark/75 hover:bg-white/8 hover:text-white"
                   }`}
                 >
                   Staff
@@ -1187,7 +1218,7 @@ function SidebarBody({
                 <Link
                   to="/dashboard/hive-exec/states/$stateCode"
                   params={{ stateCode: currentPreviewState.code }}
-                  className="block rounded-md border border-[var(--hive-gold)]/30 bg-sidebar px-2 py-1 text-center text-[11px] font-medium text-[var(--hive-gold)] hover:bg-[var(--hive-gold)]/10"
+                  className="block rounded-full border border-sidebar-border px-2 py-1 text-center text-[11px] font-medium text-ondark hover:bg-white/6 hover:text-white"
                 >
                   Edit {currentPreviewState.name} template
                 </Link>
@@ -1203,13 +1234,11 @@ function SidebarBody({
             <Link
               to={COMMAND_CENTER_ITEM.to}
               onClick={onNavigate}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                pathname === COMMAND_CENTER_ITEM.to
-                  ? "hive-nav-active"
-                  : "text-[var(--hive-chrome-text)]/75 hover:bg-[color-mix(in_srgb,white_10%,transparent)] hover:text-[var(--hive-chrome-text)]"
+              className={`${NAV_ITEM} font-medium ${
+                pathname === COMMAND_CENTER_ITEM.to ? "hive-nav-active" : NAV_IDLE
               }`}
             >
-              <LayoutDashboard className="h-4 w-4" />
+              <LayoutDashboard className="h-[18px] w-[18px]" />
               <span className="flex-1">{COMMAND_CENTER_ITEM.label}</span>
             </Link>
             {execVisibleDomains.map((d) => {
@@ -1219,7 +1248,7 @@ function SidebarBody({
                   <button
                     type="button"
                     onClick={() => toggleDomain(d.id)}
-                    className="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/60 hover:bg-sidebar-accent/50"
+                    className={`flex w-full items-center justify-between rounded-full py-1.5 pl-6 pr-3 hover:bg-white/6 ${NAV_SECTION_LABEL}`}
                     aria-expanded={!isCollapsed}
                   >
                     <span>{d.label}</span>
@@ -1238,18 +1267,16 @@ function SidebarBody({
                             key={t.to}
                             to={t.to}
                             onClick={onNavigate}
-                            className={`flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
-                              active
-                                ? "hive-nav-active"
-                                : "text-[var(--hive-chrome-text)]/75 hover:bg-[color-mix(in_srgb,white_10%,transparent)] hover:text-[var(--hive-chrome-text)]"
+                            className={`${NAV_ITEM} justify-between gap-2 ${
+                              active ? "hive-nav-active" : NAV_IDLE
                             }`}
                           >
-                            <span className="inline-flex items-center gap-2">
-                              <Icon className="h-4 w-4" /> {t.label}
+                            <span className="inline-flex items-center gap-3">
+                              <Icon className="h-[18px] w-[18px]" /> {t.label}
                             </span>
                             {badgeCount > 0 && (
                               <span
-                                className={`inline-flex min-w-[20px] items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold ${active ? "bg-white text-[var(--hive-text)]" : "bg-[var(--hive-gold)] text-white"}`}
+                                className={`inline-flex min-w-[20px] items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold ${active ? "bg-white text-pri" : "bg-acc text-white"}`}
                               >
                                 {badgeCount}
                               </span>
@@ -1279,9 +1306,9 @@ function SidebarBody({
                   data-tour={`nav.${slug}`}
                   onClick={() => item.feature && setUpgradeFeatureKey(item.feature)}
                   aria-label={`${item.label} — locked. Click to request upgrade.`}
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/40 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground/60 transition-colors cursor-pointer"
+                  className={`${NAV_ITEM} w-full cursor-pointer ${NAV_LOCKED}`}
                 >
-                  <Icon className="h-4 w-4 opacity-60" />
+                  <Icon className="h-[18px] w-[18px]" />
                   <span className="flex-1 text-left">{item.label}</span>
                   <Lock className="h-3 w-3 opacity-70" />
                 </button>
@@ -1294,15 +1321,11 @@ function SidebarBody({
                 to={item.to}
                 onClick={onNavigate}
                 data-tour={`nav.${slug}`}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
-                  active
-                    ? "hive-nav-active"
-                    : isNectar
-                      ? "text-[var(--hive-chrome-text)] hover:bg-[color-mix(in_srgb,white_10%,transparent)]"
-                      : "text-[var(--hive-chrome-text)]/75 hover:bg-[color-mix(in_srgb,white_10%,transparent)] hover:text-[var(--hive-chrome-text)]"
+                className={`${NAV_ITEM} ${
+                  active ? "hive-nav-active" : isNectar ? `${NAV_IDLE} font-medium` : NAV_IDLE
                 }`}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-[18px] w-[18px]" />
                 <span className="flex-1">{item.label}</span>
                 {item.to === "/dashboard/inbox" && inboxUnread > 0 && (
                   <span
@@ -1324,16 +1347,16 @@ function SidebarBody({
                 <PiBrand tone="chrome" size="sm" showText={false} markClassName="h-6 w-6" />
               </span>
               <div className="min-w-0">
-                <span className="text-sm font-bold tracking-wide text-[var(--hive-chrome-text)]">
+                <span className="font-display text-sm font-bold tracking-[-0.01em] text-white">
                   Nectar
                 </span>
-                <p className="text-[11px] leading-relaxed text-[var(--hive-chrome-text)]/55">
+                <p className="text-[11px] leading-relaxed text-ondarkp/70">
                   The brain. Tabs below feed it the data the rest of Provider Interface reads from.
                 </p>
               </div>
             </div>
 
-            <div className="mx-1 space-y-0.5 rounded-xl border border-[color-mix(in_srgb,white_14%,transparent)] p-1.5">
+            <div className="mx-1 space-y-0.5 rounded-[var(--denim-r)] border border-sidebar-border bg-white/3 p-1.5">
               {nectarNav.map((item) => {
                 const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
                 const Icon = item.icon;
@@ -1347,9 +1370,9 @@ function SidebarBody({
                       onClick={() => item.feature && setUpgradeFeatureKey(item.feature)}
                       data-tour={`nav.${slug}`}
                       aria-label={`${item.label} — locked. Click to request upgrade.`}
-                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--hive-chrome-text)]/40 transition-colors hover:bg-[color-mix(in_srgb,white_10%,transparent)] hover:text-[var(--hive-chrome-text)]/60"
+                      className={`${NAV_ITEM} w-full ${NAV_LOCKED}`}
                     >
-                      <Icon className="h-4 w-4" />
+                      <Icon className="h-[18px] w-[18px]" />
                       <span className="flex-1 text-left">{item.label}</span>
                       <Lock className="h-3 w-3 opacity-70" />
                     </button>
@@ -1361,13 +1384,9 @@ function SidebarBody({
                     to={item.to}
                     onClick={onNavigate}
                     data-tour={`nav.${slug}`}
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
-                      active
-                        ? "hive-nav-active"
-                        : "text-[var(--hive-chrome-text)]/75 hover:bg-[color-mix(in_srgb,white_10%,transparent)] hover:text-[var(--hive-chrome-text)]"
-                    }`}
+                    className={`${NAV_ITEM} ${active ? "hive-nav-active" : NAV_IDLE}`}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-[18px] w-[18px]" />
                     {item.label}
                   </Link>
                 );
@@ -1387,41 +1406,82 @@ function SidebarBody({
         />
       )}
 
-      <div className="border-t border-sidebar-border p-4">
-        <div className="mb-3 text-xs text-sidebar-foreground/60">
-          <div className="font-medium text-sidebar-foreground">
-            {user?.user_metadata?.full_name ?? user?.email}
-          </div>
-          <div className="mt-2">
-            {isHiveExecView ? (
-              <div className="flex items-center justify-between">
-                <span className="truncate">Provider Interface</span>
-                <span className="ml-2 rounded-full bg-sidebar-accent px-2 py-0.5 text-[10px] uppercase tracking-wider">
-                  Exec
+      <SidebarFooter
+        user={user}
+        accessLabel={accessLabel}
+        isHiveExecView={isHiveExecView}
+        signOut={signOut}
+      />
+    </>
+  );
+}
+
+/** User, org and sign-out at the bottom of the sidebar (the main menu and a profile's menu). */
+function SidebarFooter({
+  user,
+  accessLabel,
+  isHiveExecView,
+  signOut,
+}: Pick<SidebarBodyProps, "user" | "accessLabel" | "isHiveExecView" | "signOut">) {
+  return (
+    <div className="border-t border-sidebar-border p-4">
+      <div className="mb-3 text-xs text-ondarkp">
+        <div className="font-medium text-white">
+          {user?.user_metadata?.full_name ?? user?.email}
+        </div>
+        <div className="mt-2">
+          {isHiveExecView ? (
+            <div className="flex items-center justify-between">
+              <span className="truncate">Provider Interface</span>
+              <span className="ml-2 rounded-full bg-white/8 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-ondark">
+                Exec
+              </span>
+            </div>
+          ) : (
+            <>
+              <OrgSwitcher />
+              <div className="mt-1.5 flex justify-end">
+                <span className="rounded-full bg-white/8 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-ondark">
+                  {accessLabel}
                 </span>
               </div>
-            ) : (
-              <>
-                <OrgSwitcher />
-                <div className="mt-1.5 flex justify-end">
-                  <span className="rounded-full bg-sidebar-accent px-2 py-0.5 text-[10px] uppercase tracking-wider">
-                    {accessLabel}
-                  </span>
-                </div>
-              </>
-            )}
-          </div>
+            </>
+          )}
         </div>
-
-        <Button
-          onClick={signOut}
-          variant="outline"
-          size="sm"
-          className="w-full border-sidebar-border bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-        >
-          <LogOut className="mr-2 h-3.5 w-3.5" /> Sign out
-        </Button>
       </div>
-    </>
+
+      <Button
+        onClick={signOut}
+        variant="outline"
+        size="sm"
+        className="w-full rounded-full border-sidebar-border bg-transparent text-ondark hover:bg-white/6 hover:text-white"
+      >
+        <LogOut className="mr-2 h-3.5 w-3.5" /> Sign out
+      </Button>
+    </div>
+  );
+}
+
+/**
+ * The desktop sidebar: the main menu, or the open profile's section menu
+ * while a client or team member profile has taken it over
+ * (profile-shell/sidebar-takeover.tsx). The phone drawer always uses
+ * SidebarBody, so it keeps the main menu.
+ */
+function DesktopSidebar(props: Omit<SidebarBodyProps, "onNavigate">) {
+  const profile = useSidebarProfile();
+  if (!profile) return <SidebarBody {...props} />;
+  return (
+    <ProfileSidebar
+      profile={profile}
+      footer={
+        <SidebarFooter
+          user={props.user}
+          accessLabel={props.accessLabel}
+          isHiveExecView={props.isHiveExecView}
+          signOut={props.signOut}
+        />
+      }
+    />
   );
 }

@@ -115,7 +115,7 @@ export function EvvConsentGate({ children }: { children: ReactNode }) {
             </p>
 
             {declined && (
-              <p className="mt-3 rounded-md border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-700 dark:text-rose-300">
+              <p className="mt-3 rounded-md border border-danger-500/40 bg-danger-500/10 px-3 py-2 text-xs text-danger-700 dark:text-danger-300">
                 You previously declined EVV tracking. You must accept to access
                 the time clock. Contact your administrator if this was in error.
               </p>
@@ -132,7 +132,7 @@ export function EvvConsentGate({ children }: { children: ReactNode }) {
               Decline &amp; Exit
             </Button>
             <Button
-              className="h-12 w-full bg-emerald-600 text-white hover:bg-emerald-700 sm:w-auto"
+              className="h-12 w-full bg-success-600 text-white hover:bg-success-700 sm:w-auto"
               onClick={() => record("Accepted")}
               disabled={submitting}
             >

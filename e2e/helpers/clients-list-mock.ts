@@ -9,7 +9,6 @@ import { CLIENT_LIST, TEAMS } from "../fixtures/tns-roster";
 import {
   applyListFilters,
   listReadiness,
-  rowNeedsAttention,
   searchTerms,
   sortRows,
   type ClientListRow,
@@ -18,12 +17,11 @@ import {
 const here = path.dirname(fileURLToPath(import.meta.url));
 const SAMPLE = path.join(here, "../../src/lib/clients/pcsp/fixture/sample-expected.json");
 
-export const DRAFT_SUBJECT_ID = "00000000-0000-4000-a000-0000000006d1";
 export const NEW_CLIENT_ID = "00000000-0000-4000-a000-0000000000c2";
 
 export const clientListCalls = { list: 0, add: 0, bodies: [] as string[] };
 
-export type ClientListMockOpts = { emptyClients?: boolean; noDrafts?: boolean };
+export type ClientListMockOpts = { emptyClients?: boolean };
 
 type SerovalNode = {
   t?: number;
@@ -73,54 +71,32 @@ function rows(opts: ClientListMockOpts): ClientListRow[] {
     const codes = [...c.codes];
     const row: ClientListRow = {
       id: c.id,
-      kind: "client",
       first_name: c.first_name,
       last_name: c.last_name,
+      preferred_name: null,
       photo_url: null,
       medicaid_id: c.medicaid_id,
       client_pid: null,
       account_status: "active",
       codes,
+      endedCodes: null,
+      planExpired: false,
       home: team ? { id: team.id, name: team.team_name } : null,
       unitsLeft: codes.length ? { code: codes[0], left: 800, annual: 1000, pct: 80 } : null,
-      nextDue: codes.length ? { label: "Summary due", date: "2027-01-15", days: 90 } : null,
+      needsUnits: false,
+      nextDue: codes.length
+        ? { kind: "summary", label: "Summary due", date: "2027-01-15", days: 90 }
+        : null,
       staff: [],
       readiness: listReadiness({
         codes,
         staffCount: codes.length ? 1 : 0,
         hasPin: true,
-        guardianOk: true,
+        guardianGap: null,
       }),
-      needsAttention: false,
     };
-    row.needsAttention = rowNeedsAttention(row);
     return row;
   });
-}
-
-function draftRows(opts: ClientListMockOpts, terms: string[]): ClientListRow[] {
-  if (opts.emptyClients || opts.noDrafts) return [];
-  const name = "Jordan Draftsample";
-  if (!terms.every((t) => name.toLowerCase().includes(t))) return [];
-  return [
-    {
-      id: DRAFT_SUBJECT_ID,
-      kind: "draft",
-      first_name: "Jordan",
-      last_name: "Draftsample",
-      photo_url: null,
-      medicaid_id: null,
-      client_pid: null,
-      account_status: null,
-      codes: [],
-      home: null,
-      unitsLeft: null,
-      nextDue: null,
-      staff: [],
-      readiness: { ready: false, missing: ["Finish setup"] },
-      needsAttention: true,
-    },
-  ];
 }
 
 export function listClientsPayload(body: string, opts: ClientListMockOpts) {
@@ -138,14 +114,9 @@ export function listClientsPayload(body: string, opts: ClientListMockOpts) {
     code: field(body, "code"),
     homeId: field(body, "homeId"),
     staffId: field(body, "staffId"),
-    needsAttention: field(body, "needsAttention") === "true",
   };
-  const drafts =
-    view === "active" && !filters.code && !filters.homeId && !filters.staffId
-      ? draftRows(opts, terms)
-      : [];
   return {
-    rows: sortRows(applyListFilters([...drafts, ...matched], filters)),
+    rows: sortRows(applyListFilters(matched, filters)),
     counts: { active: rows(opts).length, discharged: 0 },
     homes: TEAMS.map((t) => ({ id: t.id, name: t.team_name })),
     staffOptions: [],
@@ -162,34 +133,20 @@ function duplicateOf(body: string): { id: string; name: string } | null {
 
 /** Payload for the Add client server functions, or undefined when `fn` isn't one. */
 export function addClientPayload(fn: string, body: string): unknown {
-  if (/^findClientByMedicaidId/.test(fn)) return duplicateOf(body);
-  if (/^readPcspForNewClient/.test(fn)) return JSON.parse(fs.readFileSync(SAMPLE, "utf8"));
-  if (/^loadImportDraft/.test(fn)) {
-    return {
-      name: "Jordan Draftsample",
-      form: {
-        first_name: "Jordan",
-        last_name: "Draftsample",
-        date_of_birth: null,
-        medicaid_id: "",
-        client_pid: "",
-        phone: "",
-        address: "",
-        support_coordinator: { name: "", phone: "", email: "", relationship: "", company: "" },
-        is_own_guardian: true,
-        guardian: { name: "", phone: "", email: "", relationship: "", company: "" },
-        codes: [{ code: "DSI", waiting: true, start: null, end: null, units: null, rate: null }],
-        home_id: null,
-        geofence_radius_feet: 1000,
-      },
-    };
+  if (/^findClientsByMedicaidIds/.test(fn)) {
+    return CLIENT_LIST.filter((c) => c.medicaid_id && body.includes(c.medicaid_id)).map((c) => ({
+      id: c.id,
+      name: `${c.first_name} ${c.last_name}`,
+      medicaidId: c.medicaid_id,
+    }));
   }
+  if (/^readPcspForNewClient/.test(fn)) return JSON.parse(fs.readFileSync(SAMPLE, "utf8"));
   if (/^addClient/.test(fn)) {
     clientListCalls.add++;
     const existing = duplicateOf(body);
     return existing
       ? { status: "duplicate", existing }
-      : { status: "created", id: NEW_CLIENT_ID, pinFound: true, gaps: [] };
+      : { status: "created", id: NEW_CLIENT_ID, pinFound: true };
   }
   return undefined;
 }

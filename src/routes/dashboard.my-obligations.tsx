@@ -222,10 +222,10 @@ function PendingReviewCard({
 }) {
   const ob = instance.obligation;
   return (
-    <div className="rounded-xl border border-amber-300/60 bg-amber-500/10 p-4 shadow-[var(--shadow-card)]">
+    <div className="rounded-[var(--denim-r)] border border-warning-200 bg-warning-50 p-5 shadow-[var(--denim-shadow-sm)]">
       <p className="font-semibold">{resolveObligationTitle(ob, instance)}</p>
       <p className="text-sm text-muted-foreground">{instance.period_key}</p>
-      <div className="mt-2 flex items-start gap-2 text-sm text-amber-900 dark:text-amber-200">
+      <div className="mt-2 flex items-start gap-2 text-sm text-warning-700">
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
         <div>
           <p className="font-medium">NECTAR couldn't verify this upload</p>
@@ -368,10 +368,10 @@ function OpenCard({
     return (
       <div
         id={`packet-${instance.id}`}
-        className="rounded-xl border border-amber-300/60 bg-amber-500/10 p-4 shadow-[var(--shadow-card)]"
+        className="rounded-[var(--denim-r)] border border-warning-200 bg-warning-50 p-5 shadow-[var(--denim-shadow-sm)]"
       >
         <p className="font-semibold">{resolveObligationTitle(ob, instance)}</p>
-        <div className="mt-2 flex items-start gap-2 text-sm text-amber-900 dark:text-amber-200">
+        <div className="mt-2 flex items-start gap-2 text-sm text-warning-700">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
             <p className="font-medium">
@@ -406,14 +406,14 @@ function OpenCard({
       )}
       <p className="mt-1 text-sm font-medium text-muted-foreground">{cadenceDescription(ob)}</p>
       {correctionNote ? (
-        <div className="mt-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+        <div className="mt-2 rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-700">
           <p className="font-medium">Correction requested — re-upload</p>
           <p className="mt-1">{correctionNote}</p>
         </div>
       ) : null}
       {obligationIsRequired(ob) ? (
         <p
-          className={`mt-1 text-lg font-semibold ${due.overdue ? "text-destructive" : "text-warning-foreground"}`}
+          className={`mt-1 text-lg font-semibold ${due.overdue ? "text-destructive" : "text-warning-700"}`}
         >
           {`${obligationFileStatusLabel(
             obligationFileStatus({
@@ -429,7 +429,7 @@ function OpenCard({
         </p>
       )}
       {overridden ? (
-        <p data-testid="override-state" className="mt-1 text-sm font-medium text-amber-800">
+        <p data-testid="override-state" className="mt-1 text-sm font-medium text-warning-700">
           Overridden{overrideUntil ? ` until ${overrideUntil}` : ""}. Override on file. The
           requirement is not complete.
         </p>
@@ -544,7 +544,7 @@ function OpenCard({
                 </Button>
               </a>
             ) : (
-              <p className="mt-2 text-xs text-amber-800">
+              <p className="mt-2 text-xs text-warning-700">
                 Waiting on your administrator — this duty needs a published form before you can
                 complete it.
               </p>
@@ -982,7 +982,7 @@ function MyObligationsPage() {
       </div>
 
       <AttentionStrip />
-      <div className="rounded-2xl border border-border bg-card px-4 py-3">
+      <div className="rounded-[var(--denim-r)] border border-border bg-card px-4 py-3">
         <p className="text-sm font-medium">Evidence sent to you</p>
         <p className="mt-1 text-xs text-muted-foreground">
           Admin-owned packs stay off this list until someone clicks Send to staff.
@@ -1072,7 +1072,7 @@ function MyObligationsPage() {
             key={key}
             type="button"
             onClick={() => setTab(key)}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium ${tab === key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-[var(--hive-hover)]"}`}
+            className={`rounded-full px-3.5 py-1.5 text-xs font-medium ${tab === key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-pt"}`}
           >
             {label}
           </button>
@@ -1080,7 +1080,7 @@ function MyObligationsPage() {
       </div>
 
       {unlinkedFormCount > 0 && (
-        <div className="rounded-lg border border-amber-300/50 bg-amber-50 px-3 py-2.5 text-sm text-amber-950">
+        <div className="rounded-xl border border-warning-200 bg-warning-50 px-3 py-2.5 text-sm text-warning-700">
           {unlinkedFormCount} {unlinkedFormCount === 1 ? "duty is" : "duties are"} waiting on a
           published form. Ask an administrator to attach {unlinkedFormCount === 1 ? "it" : "them"}{" "}
           under Compliance — nothing for you to complete here yet.

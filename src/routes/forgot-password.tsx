@@ -40,7 +40,7 @@ function ForgotPassword() {
   return (
     <AuthShell title="Reset your password" subtitle="We'll send you a secure link to set a new password.">
       {sent ? (
-        <div className="rounded-lg border border-[var(--hive-border)] bg-[var(--hive-surface)] p-4 text-sm text-[var(--hive-text)]">
+        <div className="rounded-xl border border-acctb bg-acct p-4 text-sm text-accd">
           We've sent a password reset link to your email. It will expire in 1 hour.
         </div>
       ) : (
@@ -53,7 +53,7 @@ function ForgotPassword() {
         </form>
       )}
       <p className="mt-6 text-center text-sm text-[var(--hive-text-muted)]">
-        Remembered it? <Link to="/login" className="font-medium text-[var(--hive-text)] hover:underline">Sign in</Link>
+        Remembered it? <Link to="/login" className="font-medium text-pri hover:underline">Sign in</Link>
       </p>
     </AuthShell>
   );

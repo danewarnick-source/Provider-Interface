@@ -61,7 +61,7 @@ export function EvidenceDueFields({
               onClick={() => onChange({ ...value, firstDueRule: opt.value })}
               className={`rounded-full border px-2.5 py-1 text-xs ${
                 value.firstDueRule === opt.value
-                  ? "border-[var(--hive-accent,#2f6fed)] bg-[var(--hive-accent,#2f6fed)]/10 font-semibold"
+                  ? "border-pri bg-pt font-semibold text-pri"
                   : "border-border bg-background"
               }`}
             >
@@ -82,7 +82,7 @@ export function EvidenceDueFields({
           <p className="mt-1 text-xs text-muted-foreground">Due {computedFirst}</p>
         ) : null}
         {hireMissing ? (
-          <p className="mt-1 text-xs text-rose-700">
+          <p className="mt-1 text-xs text-danger-700">
             Needs a hire date on this employee, or Set a date.
           </p>
         ) : null}
@@ -112,7 +112,7 @@ export function EvidenceDueFields({
               }}
               className={`rounded-full border px-2.5 py-1 text-xs ${
                 nextValue === opt.value
-                  ? "border-[var(--hive-accent,#2f6fed)] bg-[var(--hive-accent,#2f6fed)]/10 font-semibold"
+                  ? "border-pri bg-pt font-semibold text-pri"
                   : "border-border bg-background"
               }`}
             >

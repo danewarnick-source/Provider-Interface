@@ -265,17 +265,17 @@ function ShiftCard({ s }: { s: ScheduledShift }) {
 
   const statusTone =
     s.status === "accepted"
-      ? "bg-[#117a52]/10 text-[#0d5c3d]"
+      ? "bg-acc/10 text-accd"
       : s.status === "declined"
         ? "bg-destructive/10 text-destructive"
         : "bg-muted text-muted-foreground";
 
   const card = (
-    <article className="rounded-xl border border-border bg-card p-4 shadow-sm transition active:scale-[0.99] hover:border-[color:var(--amber-600,var(--hive-gold))]/60">
+    <article className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)] transition active:scale-[0.99] hover:border-steel">
       <div className="flex items-start gap-3">
         <span
           aria-hidden
-          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[color:var(--navy-900,var(--hive-text))] text-sm font-semibold text-white"
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-deep text-sm font-semibold text-white"
         >
           {initials || <User className="h-5 w-5" />}
         </span>
@@ -294,7 +294,7 @@ function ShiftCard({ s }: { s: ScheduledShift }) {
             </div>
             <div className="flex shrink-0 flex-col items-end gap-1">
               {s.is_updated && (
-                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800">
+                <span className="rounded-full bg-warning-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-warning-800">
                   Updated
                 </span>
               )}
@@ -316,7 +316,7 @@ function ShiftCard({ s }: { s: ScheduledShift }) {
             <span
               className={`inline-flex items-center rounded-md border px-2 py-0.5 font-mono text-xs font-semibold ${
                 code
-                  ? "border-[color:var(--amber-600,var(--hive-gold))]/40 bg-[image:var(--gradient-amber)] text-[color:var(--navy-900,var(--hive-text))]"
+                  ? "border-pt2 bg-pt text-pri"
                   : "border-border bg-muted text-muted-foreground"
               }`}
             >
@@ -328,7 +328,7 @@ function ShiftCard({ s }: { s: ScheduledShift }) {
           </div>
         </div>
       </div>
-      <div className="mt-3 flex items-center justify-between gap-2 text-xs font-semibold text-[color:var(--amber-700,var(--hive-gold))]">
+      <div className="mt-3 flex items-center justify-between gap-2 text-xs font-semibold text-pri">
         <RequestSwapDialog
           shiftId={s.id}
           shiftLabel={`${s.client_name} · ${fmtTimeRange(s.starts_at, s.ends_at)}`}
@@ -336,7 +336,7 @@ function ShiftCard({ s }: { s: ScheduledShift }) {
             <button
               type="button"
               onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+              className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-[11px] text-muted-foreground hover:text-foreground"
             >
               <ArrowLeftRight className="h-3 w-3" /> Request swap
             </button>
@@ -458,20 +458,20 @@ function GroupCard({ shifts }: { shifts: ScheduledShift[] }) {
   const hideStatus = allDraft || scheduleStaffHidesStatusBadge(groupStatus);
   const statusTone =
     groupStatus === "accepted"
-      ? "bg-[#117a52]/10 text-[#0d5c3d]"
+      ? "bg-acc/10 text-accd"
       : groupStatus === "declined"
         ? "bg-destructive/10 text-destructive"
         : "bg-muted text-muted-foreground";
   const pendingIds = shifts.filter((s) => (s.status === "pending" || s.status === "published") && s.published).map((s) => s.id);
   return (
-    <article className="rounded-xl border border-border bg-card p-4 shadow-sm">
+    <article className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{home}</p>
           <h3 className="mt-0.5 break-words text-base font-semibold leading-snug text-foreground">{names}</h3>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
-          <span className="rounded-full bg-[color:var(--amber-600,var(--hive-gold))]/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[color:var(--amber-700,var(--hive-gold))]">
+          <span className="rounded-full bg-pt px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-pri">
             {ratioLabel}
           </span>
           {!hideStatus && (
@@ -493,7 +493,7 @@ function GroupCard({ shifts }: { shifts: ScheduledShift[] }) {
               <Link
                 to={daily ? "/dashboard/hhs-hub/$clientId" : "/dashboard/workspace/$clientId"}
                 params={{ clientId: s.client_id }}
-                className="flex items-center justify-between gap-2 rounded-md border border-border bg-surface-warm px-2 py-1.5 text-xs hover:border-[color:var(--amber-600,var(--hive-gold))]/60"
+                className="flex items-center justify-between gap-2 rounded-md border border-border bg-pt0 px-2 py-1.5 text-xs hover:border-steel"
               >
                 <span className="truncate font-medium text-foreground">{s.client_name}</span>
               </Link>
@@ -567,7 +567,7 @@ function ShiftList({ shifts }: { shifts: ScheduledShift[] }) {
 
 function EmptyState() {
   return (
-    <div className="rounded-xl border border-dashed border-border bg-surface-warm p-6 text-center">
+    <div className="rounded-xl border border-dashed border-border bg-pt0 p-6 text-center">
       <p className="text-sm font-semibold text-foreground">No shifts scheduled</p>
       <p className="mt-1 text-sm text-muted-foreground">
         Need to clock in? Open My Caseload to start a client shift.
@@ -680,7 +680,7 @@ function SchedulePage() {
               onClick={() => setView(v)}
               className={`min-h-[40px] rounded-md px-3 text-sm font-semibold capitalize transition ${
                 active
-                  ? "bg-card text-foreground shadow-sm"
+                  ? "bg-card text-foreground shadow-[var(--denim-shadow-sm)]"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -708,7 +708,7 @@ function SchedulePage() {
           <button
             type="button"
             onClick={goToday}
-            className="text-[11px] font-medium uppercase tracking-wide text-[color:var(--amber-700,var(--hive-gold))] hover:underline"
+            className="text-[11px] font-medium uppercase tracking-wide text-accd hover:underline"
           >
             Jump to today
           </button>
@@ -735,7 +735,7 @@ function SchedulePage() {
               <li key={sess.id}>
                 <Link
                   to="/dashboard/scheduler"
-                  className="block rounded-xl border border-border bg-card p-3 shadow-sm hover:border-[color:var(--amber-600,var(--hive-gold))]/60"
+                  className="block rounded-xl border border-border bg-card p-3 shadow-[var(--denim-shadow-sm)] hover:border-steel"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
@@ -750,7 +750,7 @@ function SchedulePage() {
                         <span className="tabular-nums">{fmtTimeRange(sess.start_time, sess.end_time)}</span>
                       </p>
                     </div>
-                    <span className="rounded-full bg-[color:var(--amber-600,var(--hive-gold))]/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[color:var(--amber-700,var(--hive-gold))]">
+                    <span className="rounded-full bg-pt px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-pri">
                       One clock-in · roster
                     </span>
                   </div>
@@ -831,7 +831,7 @@ function CollapsibleGeneralClock() {
                 <span
                   aria-hidden
                   className={`inline-flex h-2.5 w-2.5 shrink-0 rounded-full ${
-                    running ? "bg-emerald-500 animate-pulse" : "bg-rose-500"
+                    running ? "bg-success-500 animate-pulse" : "bg-danger-500"
                   }`}
                 />
                 <div className="min-w-0 flex-1">
@@ -872,12 +872,12 @@ function MyTimeOffPanel() {
     new Date(d + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" });
   const tone = (s: string) =>
     s === "approved"
-      ? "bg-emerald-100 text-emerald-800"
+      ? "bg-success-100 text-success-800"
       : s === "denied"
-      ? "bg-rose-100 text-rose-800"
+      ? "bg-danger-100 text-danger-800"
       : s === "cancelled"
       ? "bg-muted text-muted-foreground"
-      : "bg-amber-100 text-amber-900";
+      : "bg-warning-100 text-warning-900";
   return (
     <section className="rounded-lg border border-border bg-card p-3">
       <div className="mb-2 flex items-center justify-between">

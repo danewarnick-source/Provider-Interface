@@ -33,7 +33,7 @@ function OrgAgreementsPage() {
       <Link to="/dashboard/hive-exec/agreements" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-3.5 w-3.5" /> Back to matrix
       </Link>
-      <h1 className="font-display text-lg font-semibold text-[var(--hive-text)]">Organization Agreements</h1>
+      <h1 className="font-display text-lg font-semibold text-deep">Organization Agreements</h1>
 
       {q.isLoading && <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">Loading…</div>}
 
@@ -81,17 +81,17 @@ function AgreementRow({ orgId, item }: { orgId: string; item: OrgAgreementCheckl
   });
 
   const border =
-    item.attention === "overdue" ? "border-[#fecaca]" : item.attention === "expiring_soon" ? "border-[#fed7aa]" : "border-border";
+    item.attention === "overdue" ? "border-danger-200" : item.attention === "expiring_soon" ? "border-warning-200" : "border-border";
 
   return (
-    <section className={`rounded-xl border ${border} bg-card p-4 shadow-sm`}>
+    <section className={`rounded-xl border ${border} bg-card p-4 shadow-[var(--denim-shadow-sm)]`}>
       <header className="mb-3 flex items-center justify-between">
         <div>
           <h2 className="font-semibold">{item.name}</h2>
           {item.description && <p className="text-xs text-muted-foreground">{item.description}</p>}
         </div>
         {item.attention && (
-          <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${item.attention === "overdue" ? "bg-[#fecaca] text-[#7f1d1d]" : "bg-[#fef3c7] text-[#78350f]"}`}>
+          <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${item.attention === "overdue" ? "bg-danger-200 text-danger-900" : "bg-warning-50 text-warning-700"}`}>
             {item.attention === "overdue" ? "Overdue" : "Expiring soon"}
           </span>
         )}

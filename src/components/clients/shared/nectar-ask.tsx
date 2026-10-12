@@ -63,9 +63,9 @@ export function NectarAsk({
 
   if (answeredSummary) {
     return (
-      <div className="rounded-md border border-emerald-300/60 bg-emerald-50/30 p-3 text-sm dark:bg-emerald-950/10">
+      <div className="rounded-xl border border-acctb bg-acct p-3 text-sm">
         <div className="flex items-start gap-2">
-          <Check className="mt-0.5 h-4 w-4 text-emerald-600" />
+          <Check className="mt-0.5 h-4 w-4 text-accd" />
           <div className="flex-1">
             <div className="text-xs text-muted-foreground">{question}</div>
             <div className="mt-0.5 font-medium">{answeredSummary}</div>
@@ -85,7 +85,7 @@ export function NectarAsk({
           </button>
         </div>
         {mode === "manual" && manualForm && (
-          <div className="mt-3 border-t border-emerald-300/40 pt-3">{manualForm}</div>
+          <div className="mt-3 border-t border-acctb pt-3">{manualForm}</div>
         )}
       </div>
     );
@@ -178,7 +178,7 @@ export function NectarAsk({
   };
 
   return (
-    <div className="rounded-md border border-amber-300/60 bg-amber-50/20 p-3 text-sm dark:bg-amber-950/10">
+    <div className="rounded-xl border border-pt2 bg-pt0 p-3 text-sm">
       <div className="flex items-start gap-2">
         <Sparkles className="mt-0.5 h-4 w-4 text-primary" />
         <div className="flex-1 space-y-1">
@@ -260,7 +260,7 @@ export function NectarAsk({
       )}
 
       {mode === "manual" && manualForm && (
-        <div className="mt-3 border-t border-amber-300/40 pt-3">{manualForm}</div>
+        <div className="mt-3 border-t border-pt2 pt-3">{manualForm}</div>
       )}
     </div>
   );

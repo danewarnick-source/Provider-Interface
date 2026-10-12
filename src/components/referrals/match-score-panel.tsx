@@ -37,16 +37,16 @@ const ALL_COMPONENTS: ScoredComponent[] = [
 ];
 
 function scoreTone(score: number): { bg: string; text: string; label: string } {
-  if (score >= 8) return { bg: "bg-emerald-100", text: "text-emerald-900", label: "Strong" };
-  if (score >= 6) return { bg: "bg-amber-100", text: "text-amber-900", label: "Middling" };
-  if (score >= 4) return { bg: "bg-orange-100", text: "text-orange-900", label: "Weak" };
-  return { bg: "bg-rose-100", text: "text-rose-900", label: "Poor" };
+  if (score >= 8) return { bg: "bg-acct", text: "text-accd", label: "Strong" };
+  if (score >= 6) return { bg: "bg-warning-50", text: "text-warning-700", label: "Middling" };
+  if (score >= 4) return { bg: "bg-warning-50", text: "text-warning-700", label: "Weak" };
+  return { bg: "bg-danger-50", text: "text-danger-700", label: "Poor" };
 }
 
 function ReasonIcon({ s }: { s: MatchReason["severity"] }) {
-  if (s === "positive") return <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />;
-  if (s === "flag") return <AlertTriangle className="h-3.5 w-3.5 text-rose-600" />;
-  if (s === "negative") return <XCircle className="h-3.5 w-3.5 text-orange-600" />;
+  if (s === "positive") return <CheckCircle2 className="h-3.5 w-3.5 text-success-600" />;
+  if (s === "flag") return <AlertTriangle className="h-3.5 w-3.5 text-danger-600" />;
+  if (s === "negative") return <XCircle className="h-3.5 w-3.5 text-warning-600" />;
   return <Minus className="h-3.5 w-3.5 text-muted-foreground" />;
 }
 
@@ -206,7 +206,7 @@ export function MatchScorePanel({
           {score.isLoading ? (
             <p className="text-xs text-muted-foreground">Loading…</p>
           ) : score.isError ? (
-            <p className="text-xs text-rose-700">
+            <p className="text-xs text-danger-700">
               {(score.error as Error).message}
             </p>
           ) : s ? (
@@ -214,10 +214,10 @@ export function MatchScorePanel({
               <div
                 className={`rounded-md border px-2.5 py-1.5 text-[11px] ${
                   isInsufficient
-                    ? "border-amber-300 bg-amber-50 text-amber-900"
+                    ? "border-warning-300 bg-warning-50 text-warning-900"
                     : scoredCount < totalCount
-                      ? "border-amber-200 bg-amber-50/60 text-amber-900"
-                      : "border-emerald-200 bg-emerald-50/60 text-emerald-900"
+                      ? "border-warning-200 bg-warning-50/60 text-warning-900"
+                      : "border-success-200 bg-success-50/60 text-success-900"
                 }`}
               >
                 {isInsufficient ? (
@@ -298,7 +298,7 @@ export function MatchScorePanel({
                       <span
                         className={
                           r.severity === "flag"
-                            ? "font-medium text-rose-900"
+                            ? "font-medium text-danger-900"
                             : ""
                         }
                       >

@@ -1,56 +1,63 @@
 /**
- * Locked Provider Interface visual tokens — landing and Admin chrome share this
- * object so colors cannot drift. Values match Dane's PI HTML landing CSS.
+ * Provider Interface visual tokens for JS consumers (inline styles, the
+ * in-app certificate, the training engine). Values are the Denim design
+ * system — the same numbers as the --denim-* CSS variables in
+ * src/styles/hive-theme.css, read from DENIM in design-tokens.ts so they
+ * cannot drift. Prefer the CSS variables / Tailwind utilities in components.
  */
 
-export const PI_GRAIN_SVG =
-  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>";
+import { DENIM, DENIM_FONTS, DENIM_STATUS } from "./design-tokens.ts";
 
 export const PI_THEME = {
-  navy: "#0a1120",
-  n1: "#0e1729",
-  n2: "#121d33",
-  n3: "#17243d",
-  sideTop: "#121d33",
-  sideBot: "#0a1120",
-  cream: "#f3efe6",
-  c70: "rgba(243, 239, 230, 0.72)",
-  c50: "rgba(243, 239, 230, 0.5)",
-  c30: "rgba(243, 239, 230, 0.3)",
-  c14: "rgba(243, 239, 230, 0.14)",
-  c08: "rgba(243, 239, 230, 0.08)",
-  c04: "rgba(243, 239, 230, 0.04)",
-  gold: "#c9a227",
-  goldSoft: "rgba(201, 162, 39, 0.16)",
-  ok: "#5fae7f",
-  red: "#e08a80",
-  amber: "#d4af37",
-  serif: '"Newsreader", Georgia, serif',
-  sans: '"Inter", system-ui, sans-serif',
+  navy: DENIM.deep,
+  n1: DENIM.pri,
+  n2: DENIM.pt,
+  n3: DENIM.pt2,
+  sideTop: DENIM.deep,
+  sideBot: DENIM.pri,
+  /** Paper surface. */
+  paper: DENIM.paper,
+  /** Text ramp on light surfaces. */
+  c70: DENIM.text,
+  c50: DENIM.muted,
+  c30: DENIM.pt2,
+  c14: DENIM.line,
+  c08: DENIM.line,
+  c04: DENIM.pt0,
+  accent: DENIM.acc,
+  accentText: DENIM.accd,
+  accentSoft: DENIM.acct,
+  ok: DENIM.acc,
+  red: DENIM_STATUS.danger,
+  /** Warning status text. */
+  warnText: DENIM_STATUS.warnText,
+  /** Heading face (Manrope). */
+  heading: DENIM_FONTS.heading,
+  sans: DENIM_FONTS.body,
   shadow1:
-    "0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -8px rgba(0, 0, 0, 0.6)",
+    "0 0 0 1px rgba(27, 51, 80, 0.08), 0 1px 2px rgba(27, 51, 80, 0.05), 0 8px 20px -14px rgba(27, 51, 80, 0.28)",
   shadow2:
-    "0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 2px 4px rgba(0, 0, 0, 0.45), 0 24px 48px -16px rgba(0, 0, 0, 0.7)",
-  cardBg: "linear-gradient(180deg, #121d33, #0e1729)",
-  heroTileBg: "linear-gradient(135deg, #121d33, #0e1729 60%, #0c1425)",
+    "0 0 0 1px rgba(27, 51, 80, 0.08), 0 2px 4px rgba(27, 51, 80, 0.05), 0 24px 56px -20px rgba(27, 51, 80, 0.32)",
+  cardBg: DENIM.paper,
+  /** Navy feature band (CSS var; PI_THEME is only used in inline styles). */
+  heroTileBg: "var(--denim-band)",
   hairlines: {
-    faint: "rgba(243, 239, 230, 0.08)",
-    soft: "rgba(243, 239, 230, 0.14)",
-    mid: "rgba(243, 239, 230, 0.3)",
+    faint: DENIM.line,
+    soft: DENIM.line,
+    mid: DENIM.pt2,
   },
   buttons: {
-    primaryBg: "linear-gradient(180deg, #fbf8f1, #e9e3d6)",
-    primaryFg: "#0a1120",
+    primaryBg: DENIM.pri,
+    primaryFg: DENIM.paper,
     primaryShadow:
-      "0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 -1px 0 rgba(0, 0, 0, 0.08) inset, 0 6px 16px -6px rgba(243, 239, 230, 0.35)",
-    secondaryBg: "linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02))",
-    secondaryFg: "#f3efe6",
-    secondaryBorder: "rgba(243, 239, 230, 0.14)",
+      "inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 10px 24px -10px rgba(39, 76, 119, 0.55)",
+    secondaryBg: "rgba(255, 255, 255, 0.55)",
+    secondaryFg: DENIM.pri,
+    secondaryBorder: DENIM.pt2,
   },
-  avatarBg: ["#17243d", "#121d33"] as const,
-  pageGlow:
-    "radial-gradient(900px 520px at 18% -8%, rgba(201, 162, 39, 0.1), transparent 60%), radial-gradient(1100px 700px at 88% 8%, rgba(60, 90, 150, 0.22), transparent 62%), radial-gradient(800px 600px at 50% 110%, rgba(30, 58, 95, 0.35), transparent 60%)",
-  grainOpacity: 0.045,
+  avatarBg: [DENIM.pt, DENIM.pt2] as const,
+  pageGlow: `radial-gradient(52vw 52vw at 0% 0%, ${DENIM.pt2}, transparent 70%), radial-gradient(44vw 44vw at 100% 30%, ${DENIM.acclh}, transparent 70%), radial-gradient(36vw 36vw at 55% 100%, rgba(96, 150, 186, 0.35), transparent 70%)`,
+  grainOpacity: 0,
 } as const;
 
 export type PiTheme = typeof PI_THEME;

@@ -127,9 +127,9 @@ export function DailyNoteMedsBlock({
   if (active.length === 0) return null;
 
   return (
-    <div className="space-y-3 rounded-xl border-2 border-amber-500/50 bg-amber-500/5 p-3 sm:p-4">
+    <div className="space-y-3 rounded-xl border-2 border-warning-500/50 bg-warning-500/5 p-3 sm:p-4">
       <div className="flex items-start gap-2">
-        <Pill className="mt-0.5 h-4 w-4 shrink-0 text-amber-700 dark:text-amber-300" />
+        <Pill className="mt-0.5 h-4 w-4 shrink-0 text-warning-700 dark:text-warning-300" />
         <div>
           <p className="text-sm font-semibold">Medications — {clientName}</p>
           <p className="mt-0.5 text-[11px] text-muted-foreground">
@@ -187,7 +187,7 @@ export function DailyNoteMedsBlock({
                   }
                   placeholder="Explain why this dose was missed, refused, or LOA."
                   maxLength={200}
-                  className={`text-sm ${r.why.trim() ? "" : "border-rose-400"}`}
+                  className={`text-sm ${r.why.trim() ? "" : "border-danger-400"}`}
                 />
               </div>
             )}

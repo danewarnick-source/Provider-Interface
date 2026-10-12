@@ -507,7 +507,7 @@ export function InHiveCoursePlayer({
                 )}
               >
                 {done ? (
-                  <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0 text-emerald-600" />
+                  <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0 text-success-600" />
                 ) : unlocked ? (
                   <Circle className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
                 ) : (
@@ -533,7 +533,7 @@ export function InHiveCoursePlayer({
             )}
           >
             {passed ? (
-              <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0 text-emerald-600" />
+              <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0 text-success-600" />
             ) : (
               <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-[10px]">
                 EX

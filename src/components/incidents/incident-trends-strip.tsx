@@ -137,7 +137,7 @@ export function IncidentTrendsStrip({
               <BarChart data={monthly} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                 <XAxis dataKey="month" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} width={28} />
-                <Tooltip cursor={{ fill: "hsl(var(--muted))" }} />
+                <Tooltip cursor={{ fill: "var(--denim-pt)" }} />
                 <Bar
                   dataKey="count"
                   radius={[4, 4, 0, 0]}
@@ -145,7 +145,7 @@ export function IncidentTrendsStrip({
                   style={{ cursor: "pointer" }}
                 >
                   {monthly.map((m) => (
-                    <Cell key={m.key} fill={m.key === currentMonthKey ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))"} />
+                    <Cell key={m.key} fill={m.key === currentMonthKey ? "var(--denim-pri)" : "var(--denim-steel)"} />
                   ))}
                 </Bar>
               </BarChart>
@@ -180,9 +180,9 @@ export function IncidentTrendsStrip({
                       <span
                         className={`text-[10px] ${
                           delta > 0
-                            ? "text-rose-600"
+                            ? "text-danger-600"
                             : delta < 0
-                              ? "text-emerald-600"
+                              ? "text-success-600"
                               : "text-muted-foreground"
                         }`}
                       >

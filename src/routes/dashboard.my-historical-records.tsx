@@ -48,8 +48,8 @@ function MyHistoricalRecordsPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-4 p-4 md:p-6">
       <header className="flex items-center gap-2">
-        <Archive className="h-5 w-5 text-amber-700" />
-        <h1 className="text-xl font-semibold">Historical Records</h1>
+        <Archive className="h-5 w-5 text-pri" />
+        <h1 className="font-display text-xl font-bold tracking-[-0.025em] text-deep">Historical Records</h1>
       </header>
       <p className="text-sm text-muted-foreground">
         Past entries an admin imported from another platform and submitted to you. Switch between timesheets and daily

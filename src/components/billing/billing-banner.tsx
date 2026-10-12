@@ -140,7 +140,7 @@ function BannerView({
     switch (kind) {
       case "locked":
         return {
-          tone: "bg-red-600 text-white border-red-700",
+          tone: "bg-danger-600 text-white border-danger-700",
           icon: <Lock className="h-5 w-5 shrink-0" />,
           title: "Your account is locked.",
           body: "Contact us to reactivate.",
@@ -149,7 +149,7 @@ function BannerView({
       case "past_due_critical": {
         const daysLeft = Math.max(1, 30 - daysPastDue);
         return {
-          tone: "bg-red-600 text-white border-red-700",
+          tone: "bg-danger-600 text-white border-danger-700",
           icon: <AlertTriangle className="h-5 w-5 shrink-0" />,
           title: `Urgent — your account locks in ${daysLeft} ${daysLeft === 1 ? "day" : "days"} due to a failed payment.`,
           body: "Your team members will lose all access if not resolved.",
@@ -158,7 +158,7 @@ function BannerView({
       }
       case "past_due_warn":
         return {
-          tone: "bg-amber-500 text-[#0F1A2E] border-amber-600",
+          tone: "bg-warning-100 text-warning-900 border-warning-300",
           icon: <AlertTriangle className="h-5 w-5 shrink-0" />,
           title: `Payment required — your account is ${daysPastDue} ${daysPastDue === 1 ? "day" : "days"} past due.`,
           body: "Update your payment method to avoid a service interruption.",
@@ -166,7 +166,7 @@ function BannerView({
         };
       case "past_due_soft":
         return {
-          tone: "bg-amber-400 text-[#0F1A2E] border-amber-500",
+          tone: "bg-warning-50 text-warning-800 border-warning-200",
           icon: <AlertTriangle className="h-5 w-5 shrink-0" />,
           title: "Payment failed — we'll retry automatically.",
           body: "Update your payment method if your card details have changed.",
@@ -174,7 +174,7 @@ function BannerView({
         };
       case "card_expiring_7":
         return {
-          tone: "bg-amber-400 text-[#0F1A2E] border-amber-500",
+          tone: "bg-warning-50 text-warning-800 border-warning-200",
           icon: <CreditCard className="h-5 w-5 shrink-0" />,
           title: `Your card on file expires on ${expiryDate}.`,
           body: "Update it now to avoid a payment failure.",
@@ -182,7 +182,7 @@ function BannerView({
         };
       case "card_expiring_30":
         return {
-          tone: "bg-yellow-100 text-yellow-900 border-yellow-300",
+          tone: "bg-warning-50 text-warning-700 border-warning-200",
           icon: <CreditCard className="h-5 w-5 shrink-0" />,
           title: "Your card on file expires soon.",
           body: `Update it before ${expiryDate} to keep your service uninterrupted.${daysToExpiry != null ? ` (${daysToExpiry} days)` : ""}`,
@@ -203,7 +203,7 @@ function BannerView({
           type="button"
           onClick={onAction}
           size="sm"
-          className="shrink-0 bg-white text-[#0F1A2E] hover:bg-white/90 border border-white/40"
+          className="shrink-0 rounded-full bg-white text-ink hover:bg-pt0 border border-line"
         >
           {cfg.cta}
         </Button>

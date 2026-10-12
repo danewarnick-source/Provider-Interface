@@ -94,9 +94,9 @@ export function AuthorizedCodesPanel({ orgId }: { orgId: string }) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-amber-300/40 bg-amber-50/40 dark:bg-amber-500/5 p-4">
+      <div className="rounded-[20px] border border-pt2 bg-pt/60 p-4">
         <div className="flex items-start gap-3">
-          <PiMark variant="gold" className="h-5 w-5 mt-0.5" />
+          <PiMark variant="brand" className="h-5 w-5 mt-0.5" />
           <div className="text-sm">
             <div className="font-semibold text-foreground">
               Coverage follows the contract — not current activity
@@ -189,7 +189,7 @@ export function AuthorizedCodesPanel({ orgId }: { orgId: string }) {
               <ShieldCheck className="h-3 w-3" />
               {data?.summary.total ?? 0} total covered
             </Badge>
-            <Badge className="gap-1 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30">
+            <Badge className="gap-1 bg-success-500/15 text-success-700 dark:text-success-300 border-success-500/30">
               <CheckCircle2 className="h-3 w-3" />
               {data?.summary.active ?? 0} active
             </Badge>
@@ -198,7 +198,7 @@ export function AuthorizedCodesPanel({ orgId }: { orgId: string }) {
               {data?.summary.dormant ?? 0} dormant / standby
             </Badge>
             {(data?.summary.inferredOnly ?? 0) > 0 && (
-              <Badge variant="outline" className="gap-1 text-amber-600 border-amber-400/40">
+              <Badge variant="outline" className="gap-1 text-warning-600 border-warning-400/40">
                 {data!.summary.inferredOnly} inferred from data — promote to lock
               </Badge>
             )}
@@ -262,7 +262,7 @@ function CodeRow({
       </div>
       <div className="flex flex-wrap gap-1.5 grow">
         {row.inUse ? (
-          <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 gap-1">
+          <Badge className="bg-success-500/15 text-success-700 dark:text-success-300 border-success-500/30 gap-1">
             <CheckCircle2 className="h-3 w-3" /> Active
           </Badge>
         ) : (
@@ -285,7 +285,7 @@ function CodeRow({
         {row.proposedRequirements > 0 && (
           <Badge
             variant="outline"
-            className="text-[11px] border-amber-400/40 text-amber-700 dark:text-amber-300"
+            className="text-[11px] border-warning-400/40 text-warning-700 dark:text-warning-300"
           >
             {row.proposedRequirements} NECTAR proposal
             {row.proposedRequirements === 1 ? "" : "s"}

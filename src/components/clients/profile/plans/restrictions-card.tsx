@@ -5,18 +5,18 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Plus } from "lucide-react";
+import { Plus, Scale } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccess } from "@/hooks/use-access";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { computeRestrictionCompletion, type RestrictionRecord } from "@/lib/clients/hrc";
 import { updateClient, writeClientRecord } from "@/lib/clients/writes.functions";
 import { NectarAsk } from "@/components/clients/shared/nectar-ask";
-import { CardShell } from "@/components/clients/profile/cards/card-shell";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
+import { StatusTag } from "@/components/clients/profile/cards/card-parts";
 import type { ClientProfileData } from "@/components/clients/profile/use-client-profile";
 import { RestrictionDialog } from "./restriction-dialog";
 import { useLatestDocument } from "./use-latest-document";
@@ -70,7 +70,7 @@ export function RestrictionsCard({ orgId, data }: { orgId: string; data: ClientP
   });
   const rows = [...(q.data ?? [])].sort((a, b) => Number(b.active) - Number(a.active));
   return (
-    <CardShell title="Rights restrictions (HRC)" subtitle="Each restriction needs all 8 elements documented.">
+    <SectionCard icon={Scale} tone="ok" title="Rights restrictions (HRC)" description="Each restriction needs all 8 elements documented.">
       <div className="space-y-3" data-testid="client-restrictions">
         <label className="flex items-center justify-between gap-3 rounded-md border border-border/60 p-3 text-sm">
           <span className="font-medium">Does this client have any rights restrictions?</span>
@@ -87,18 +87,15 @@ export function RestrictionsCard({ orgId, data }: { orgId: string; data: ClientP
                     <button
                       type="button"
                       onClick={() => setOpen(r)}
-                      className="flex w-full items-center justify-between gap-3 rounded-md border border-border px-3 py-2 text-left text-sm hover:bg-muted/50"
+                      className="flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-border px-3 py-2 text-left text-sm hover:bg-muted/50"
                     >
                       <span className="min-w-0 truncate font-medium">
                         {r.restriction_title}
                         {r.active ? "" : " (ended)"}
                       </span>
-                      <Badge
-                        variant="outline"
-                        className={c.isComplete ? "shrink-0 border-emerald-500 text-emerald-700" : "shrink-0 border-amber-400 text-amber-800"}
-                      >
+                      <StatusTag tone={c.isComplete ? "ok" : "profile"} className="shrink-0">
                         {c.completedCount}/{c.total} documented
-                      </Badge>
+                      </StatusTag>
                     </button>
                   </li>
                 );
@@ -107,8 +104,8 @@ export function RestrictionsCard({ orgId, data }: { orgId: string; data: ClientP
             {canEdit ? (
               <div className="flex gap-2">
                 <Input value={title} placeholder="New restriction, e.g. locked pantry at night" onChange={(e) => setTitle(e.target.value)} />
-                <Button size="sm" className="gap-1" disabled={!title.trim() || add.isPending} onClick={() => add.mutate()}>
-                  <Plus className="h-3.5 w-3.5" /> Add
+                <Button disabled={!title.trim() || add.isPending} onClick={() => add.mutate()}>
+                  <Plus className="h-4 w-4" /> Add restriction
                 </Button>
               </div>
             ) : null}
@@ -127,6 +124,6 @@ export function RestrictionsCard({ orgId, data }: { orgId: string; data: ClientP
       {open ? (
         <RestrictionDialog record={open} clientName={data.name} canManage={canEdit} orgId={orgId} onClose={() => setOpen(null)} />
       ) : null}
-    </CardShell>
+    </SectionCard>
   );
 }

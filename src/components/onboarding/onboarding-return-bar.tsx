@@ -16,18 +16,18 @@ export function OnboardingReturnBar() {
   if (status.complete && !fromOnboarding) return null;
 
   return (
-    <div className="sticky top-0 z-40 -mx-4 mb-3 border-b border-amber-300/40 bg-[#0b1733]/95 px-4 py-2 text-amber-50 shadow-sm backdrop-blur sm:-mx-6 sm:px-6">
+    <div className="sticky top-0 z-40 -mx-4 mb-3 border-b border-line bg-paper/85 px-4 py-2 text-pri shadow-[var(--denim-shadow-sm)] backdrop-blur sm:-mx-6 sm:px-6">
       <Link
         to={AGENCY_SETUP_PATH}
         search={{ reason: "setup_incomplete" } as never}
         className="flex items-center justify-between gap-3 text-sm"
       >
         <span className="inline-flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4 text-[color:var(--amber-400,var(--hive-gold))]" />
+          <ArrowLeft className="h-4 w-4 text-pri" />
           <span className="font-medium">Back to agency setup</span>
         </span>
-        <span className="inline-flex items-center gap-2 text-xs text-amber-100/90">
-          <Sparkles className="h-3.5 w-3.5 text-[color:var(--amber-400,var(--hive-gold))]" />
+        <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+          <Sparkles className="h-3.5 w-3.5 text-acc" />
           <span className="tabular-nums">
             {status.progressLabel} operating facts
           </span>

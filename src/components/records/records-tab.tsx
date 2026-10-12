@@ -188,6 +188,7 @@ export function RecordsTab() {
       const { data: members } = await supabase
         .from("organization_members")
         .select("user_id")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .eq("active", true);
       const userIds = Array.from(
@@ -223,6 +224,7 @@ export function RecordsTab() {
       const { data } = await supabase
         .from("clients")
         .select("id, first_name, last_name, team_id")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .order("last_name");
       return (data ?? []).map((c) => ({
@@ -290,6 +292,7 @@ export function RecordsTab() {
       if (team.length > 0) {
         const { data } = await supabase
           .from("clients").select("id")
+          .is("deleted_at", null)
           .eq("organization_id", orgId!).in("team_id", team);
         const t = (data ?? []).map((c) => c.id);
         clientIds = clientIds.length ? clientIds.filter((id) => t.includes(id)) : t;
@@ -723,7 +726,7 @@ export function RecordsTab() {
     <div className="space-y-3">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
-          <h3 className="text-base font-semibold text-[var(--hive-text)]">Records review</h3>
+          <h3 className="font-display text-base font-semibold tracking-[-0.01em] text-deep">Records review</h3>
           <p className="text-xs text-muted-foreground">
             Every work record in one place. Click any row to view and edit every field. Switch to Needs attention to work the exception queue.
           </p>
@@ -731,12 +734,12 @@ export function RecordsTab() {
       </div>
 
       {/* Mode toggle — two-way */}
-      <div className="inline-flex overflow-hidden rounded-md border border-border">
+      <div className="inline-flex overflow-hidden rounded-full border border-line">
         <button
           type="button"
           onClick={() => setMode("all")}
           className={`flex min-h-[36px] items-center gap-2 px-3 py-1.5 text-xs font-medium transition ${
-            mode === "all" ? "bg-[var(--hive-ink)] text-white" : "bg-card text-muted-foreground hover:bg-[var(--hive-hover)]"
+            mode === "all" ? "bg-pri text-white" : "bg-card text-muted-foreground hover:bg-[var(--hive-hover)]"
           }`}
         >
           <ListChecks className="h-3.5 w-3.5" /> All records
@@ -745,18 +748,18 @@ export function RecordsTab() {
           type="button"
           onClick={() => setMode("attention")}
           className={`flex min-h-[36px] items-center gap-2 border-l border-border px-3 py-1.5 text-xs font-medium transition ${
-            mode === "attention" ? "bg-[var(--hive-ink)] text-white" : "bg-card text-muted-foreground hover:bg-[var(--hive-hover)]"
+            mode === "attention" ? "bg-pri text-white" : "bg-card text-muted-foreground hover:bg-[var(--hive-hover)]"
           }`}
         >
           <AlertCircle className="h-3.5 w-3.5" /> Needs attention
-          <span className={`rounded px-1.5 py-0.5 text-[10px] ${mode === "attention" ? "bg-white/20" : "bg-muted text-foreground"}`}>
+          <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${mode === "attention" ? "bg-white/20" : "bg-pt text-pri"}`}>
             {attentionCount}
           </span>
         </button>
       </div>
 
       {/* Type control — 5 buttons, fixed order */}
-      <div className="flex flex-wrap items-center gap-1 rounded-md border border-border bg-card p-1">
+      <div className="flex flex-wrap items-center gap-1 rounded-full border border-line bg-card p-1">
         {([
           ["all", "All types"],
           ["evv", "EVV timesheets"],
@@ -768,8 +771,8 @@ export function RecordsTab() {
             key={k}
             type="button"
             onClick={() => setType(k)}
-            className={`min-h-[36px] rounded px-3 py-1 text-xs font-medium transition ${
-              type === k ? "bg-[var(--hive-ink)] text-white" : "text-muted-foreground hover:bg-[var(--hive-hover)]"
+            className={`min-h-[36px] rounded-full px-3 py-1 text-xs font-medium transition ${
+              type === k ? "bg-pri text-white" : "text-muted-foreground hover:bg-[var(--hive-hover)]"
             }`}
           >
             {label}
@@ -866,7 +869,7 @@ export function RecordsTab() {
           {type === "evv" && (
             <section className="rounded-xl border border-border bg-card p-3 space-y-2">
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-semibold text-[var(--hive-text)]">EVV Export Batches</h3>
+                <h3 className="font-display text-base font-semibold tracking-[-0.01em] text-deep">EVV Export Batches</h3>
                 <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
                   Show archived
@@ -894,7 +897,7 @@ export function RecordsTab() {
                       <div className="flex gap-2">
                         <Button variant="outline" size="sm" onClick={() => reDownloadBatch(b)}>Re-download</Button>
                         {isAdmin && !b.archived_at && (
-                          <Button variant="outline" size="sm" className="text-red-600" onClick={() => setConfirmArchive(b)}>Archive</Button>
+                          <Button variant="outline" size="sm" className="text-danger-600" onClick={() => setConfirmArchive(b)}>Archive</Button>
                         )}
                         {isAdmin && b.archived_at && (
                           <Button variant="outline" size="sm" onClick={() => unarchiveBatch(b)}>Unarchive</Button>
@@ -911,7 +914,7 @@ export function RecordsTab() {
           {type === "non_billable" ? (
             <div className="overflow-x-auto rounded-lg border border-border bg-card">
               <table className="w-full min-w-[700px] text-sm">
-                <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                <thead className="bg-pt0 text-left text-[12.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
                   <tr>
                     <th className="px-3 py-2">Caregiver</th>
                     <th className="px-3 py-2">Category</th>
@@ -934,7 +937,7 @@ export function RecordsTab() {
                       <td className="px-3 py-2 font-mono text-xs">{g.category}</td>
                       <td className="px-3 py-2">{formatPunchDateSpan(g.clock_in_timestamp, g.clock_out_timestamp)}</td>
                       <td className="px-3 py-2">{formatPunchRange(g.clock_in_timestamp, g.clock_out_timestamp)}</td>
-                      <td className={`px-3 py-2 tabular-nums ${isLongOpenPunch(g.duration_min) ? "font-semibold text-amber-800 dark:text-amber-300" : ""}`}>
+                      <td className={`px-3 py-2 tabular-nums ${isLongOpenPunch(g.duration_min) ? "font-semibold text-warning-800 dark:text-warning-300" : ""}`}>
                         {fmtDur(g.duration_min)}
                         {isLongOpenPunch(g.duration_min) && (
                           <span className="ml-1 text-[10px] font-medium uppercase tracking-wider">open punch</span>
@@ -950,7 +953,7 @@ export function RecordsTab() {
             /* Results table — client records (evv_timesheets) */
             <div className="overflow-x-auto rounded-lg border border-border bg-card">
               <table className="w-full min-w-[900px] text-sm">
-                <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                <thead className="bg-pt0 text-left text-[12.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
                   <tr>
                     <th className="px-3 py-2">Caregiver</th>
                     <th className="px-3 py-2">Client</th>
@@ -1003,7 +1006,7 @@ export function RecordsTab() {
                         <td className="px-3 py-2">
                           <div className="flex flex-wrap items-center gap-1">
                             {r.is_out_of_bounds ? (
-                              <span className="inline-flex items-center gap-1 text-xs text-amber-700">
+                              <span className="inline-flex items-center gap-1 text-xs text-warning-700">
                                 <AlertTriangle className="h-3 w-3" /> out
                               </span>
                             ) : (
@@ -1024,7 +1027,7 @@ export function RecordsTab() {
                         <td className="px-3 py-2">
                           {r.awaiting_staff_confirmation ? (
                             <span
-                              className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600"
+                              className="inline-flex items-center gap-1 rounded-full border border-haze-200 bg-haze-50 px-2 py-0.5 text-[11px] font-medium text-haze-600"
                               title={`Imported from a historical spreadsheet — waiting for ${r.staff_name} to review and sign off at My historical timesheets. Nothing to fix here.`}
                             >
                               <Clock3 className="h-3 w-3" /> Awaiting staff confirmation
@@ -1113,20 +1116,20 @@ export function RecordsTab() {
 function ReasonBadge({ ex }: { ex: ReviewException }) {
   if (ex.code === "out_of_geofence") {
     return (
-      <Badge variant="outline" className="gap-1 border-amber-300 text-amber-800">
+      <Badge variant="outline" className="gap-1 border-warning-300 text-warning-800">
         <MapPin className="h-3 w-3" /> {ex.label}
       </Badge>
     );
   }
   if (ex.code === "no_clockout_stale") {
     return (
-      <Badge variant="outline" className="gap-1 border-rose-300 text-rose-800">
+      <Badge variant="outline" className="gap-1 border-danger-300 text-danger-800">
         <Clock className="h-3 w-3" /> {ex.label}
       </Badge>
     );
   }
   return (
-    <Badge variant="outline" className="gap-1 border-orange-300 text-orange-800">
+    <Badge variant="outline" className="gap-1 border-warning-300 text-warning-800">
       <FileWarning className="h-3 w-3" /> {ex.label}
     </Badge>
   );
@@ -1189,8 +1192,8 @@ function InlineTimeCell({
       <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
         <div className="flex flex-col gap-1">
           {isEvv && (
-            <div className="flex items-start gap-1 rounded border border-orange-300 bg-orange-50 px-2 py-1 text-[10px] text-orange-900 dark:border-orange-600 dark:bg-orange-950/40 dark:text-orange-200">
-              <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0 text-orange-500" />
+            <div className="flex items-start gap-1 rounded border border-warning-300 bg-warning-50 px-2 py-1 text-[10px] text-warning-900 dark:border-warning-600 dark:bg-warning-950/40 dark:text-warning-200">
+              <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0 text-warning-500" />
               <span><span className="font-semibold">EVV record.</span> Changes here do not amend the UEVV transmission.</span>
             </div>
           )}
@@ -1227,7 +1230,7 @@ function InlineTimeCell({
         <span className="ml-1 inline-flex items-center rounded-full bg-[var(--hive-ok-soft)] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-[var(--hive-ok-fg)]">evv</span>
       )}
       {row.is_edited_by_admin && (
-        <span className="ml-1 text-[10px] font-medium uppercase tracking-wider text-amber-700">edited</span>
+        <span className="ml-1 text-[10px] font-medium uppercase tracking-wider text-warning-700">edited</span>
       )}
       {row.shift_entry_type === "Manual_Entry" && (
         <span className="ml-1 text-[10px] font-medium uppercase tracking-wider text-[var(--hive-text-muted)]">manual</span>

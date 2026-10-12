@@ -19,11 +19,9 @@ import {
 } from "@/lib/team-members/staff-notes";
 
 const KIND_TONE: Record<StaffNoteKind, string> = {
-  note: "border-border bg-muted text-muted-foreground",
-  praise:
-    "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-300",
-  concern:
-    "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300",
+  note: "border-pt2 bg-pt text-pri",
+  praise: "border-acctb bg-acct text-accd",
+  concern: "border-warning-200 bg-warning-50 text-warning-700",
 };
 
 /**
@@ -72,7 +70,7 @@ export function NotesTab({
         Private to people who manage hiring. Notes can't be edited or deleted.
       </p>
       {canAdd ? (
-        <section className="space-y-3 rounded-2xl border border-border bg-card p-4">
+        <section className="space-y-3 rounded-[var(--denim-r)] border border-line bg-paper p-5 shadow-[var(--denim-shadow-sm)]">
           <RadioGroup
             value={kind}
             onValueChange={(v) => setKind(v as StaffNoteKind)}
@@ -115,7 +113,7 @@ export function NotesTab({
       ) : !notesQ.data?.length ? (
         <p className="text-sm text-muted-foreground">No notes yet.</p>
       ) : (
-        <ul className="divide-y rounded-2xl border border-border bg-card">
+        <ul className="divide-y divide-line rounded-[var(--denim-r)] border border-line bg-paper shadow-[var(--denim-shadow-sm)]">
           {notesQ.data.map((n) => (
             <li key={n.id} className="space-y-1 p-4">
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">

@@ -76,7 +76,7 @@ export function NectarTaskCenter({ trigger, open, onOpenChange, initialGoal, sur
       <div className="flex h-full flex-col">
         <div className="hive-chrome border-b border-[var(--hive-chrome-border)] px-5 py-4">
           <SheetTitle className="flex items-center gap-2.5 text-lg font-semibold text-[var(--hive-chrome-text)]">
-            <PiMark variant="gold" className="h-5 w-5" /> Nectar
+            <PiMark variant="brand" className="h-5 w-5" /> Nectar
           </SheetTitle>
           <p className="mt-1 text-xs text-[var(--hive-chrome-text-muted)]">
             Tell Nectar a goal and it'll build a shared task list, then walk you through each step.
@@ -96,7 +96,7 @@ export function NectarTaskCenter({ trigger, open, onOpenChange, initialGoal, sur
                 ? "e.g. Help me write today's daily note"
                 : "e.g. Help me prepare for my DSPD audit"
             }
-            className="w-full rounded-md border border-[var(--hive-border)] bg-[var(--hive-surface)] px-3 py-2 text-sm text-[var(--hive-text)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--hive-gold)]/40"
+            className="w-full rounded-md border border-[var(--hive-border)] bg-[var(--hive-surface)] px-3 py-2 text-sm text-[var(--hive-text)] shadow-[var(--denim-shadow-sm)] focus:outline-none focus:ring-2 focus:ring-[var(--hive-accent)]/40"
           />
           <button
             onClick={() => goal.trim().length >= 3 && planM.mutate(goal.trim())}
@@ -157,10 +157,10 @@ function GuideCard({
 }) {
   const done = guide.tasks.filter((t) => t.status === "done").length;
   return (
-    <div className="rounded-xl border border-[var(--hive-border)] bg-[var(--hive-surface)] shadow-sm">
+    <div className="rounded-xl border border-[var(--hive-border)] bg-[var(--hive-surface)] shadow-[var(--denim-shadow-sm)]">
       <div className="flex items-start justify-between gap-2 border-b border-[var(--hive-border)] px-4 py-3">
         <div className="min-w-0">
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--hive-gold)]">Guide</div>
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--hive-accent-text)]">Guide</div>
           <div className="truncate text-sm font-semibold text-[var(--hive-text)]">{guide.goal}</div>
           {guide.summary && <p className="mt-0.5 text-xs text-muted-foreground">{guide.summary}</p>}
           <div className="mt-1 text-[11px] text-muted-foreground">{done} of {guide.tasks.length} complete</div>
@@ -179,8 +179,8 @@ function GuideCard({
                   onClick={() => onMarkDone(t)}
                   className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
                     t.status === "done"
-                      ? "border-[var(--hive-gold)] bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]"
-                      : "border-[var(--hive-border)] bg-[var(--hive-canvas)] hover:border-[var(--hive-gold)]"
+                      ? "border-[var(--hive-accent)] bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]"
+                      : "border-[var(--hive-border)] bg-[var(--hive-canvas)] hover:border-[var(--hive-accent)]"
                   }`}
                   aria-label="Mark done"
                 >
@@ -219,14 +219,14 @@ function GuideCard({
 
 function ExplainModal({ task, onClose }: { task: GuideTask; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[var(--denim-overlay)] backdrop-blur-[4px] p-4" onClick={onClose}>
       <div
-        className="max-w-md rounded-xl border border-[#fed7aa] bg-white p-5 shadow-2xl"
+        className="max-w-md rounded-xl border border-pt2 bg-white p-5 shadow-[var(--denim-shadow)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-2 flex items-start justify-between gap-2">
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--hive-gold)]">Nectar · Explain</div>
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--hive-accent-text)]">Nectar · Explain</div>
             <h3 className="text-base font-semibold text-[var(--hive-text)]">{task.title}</h3>
           </div>
           <button onClick={onClose} className="rounded p-1 hover:bg-muted"><X className="h-4 w-4" /></button>
@@ -235,8 +235,8 @@ function ExplainModal({ task, onClose }: { task: GuideTask; onClose: () => void 
         {task.steps.length > 0 ? (
           <ol className="space-y-2 text-sm text-[var(--hive-text)]">
             {task.steps.map((s, i) => (
-              <li key={i} className="rounded-md border border-border bg-[#fbfaf7] px-3 py-2">
-                <span className="mr-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--hive-gold)]">Step {i + 1}</span>
+              <li key={i} className="rounded-md border border-border bg-pt0 px-3 py-2">
+                <span className="mr-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--hive-accent-text)]">Step {i + 1}</span>
                 {s.instruction}
               </li>
             ))}

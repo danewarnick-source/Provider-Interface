@@ -360,7 +360,7 @@ function GrossPage() {
                         <td className="px-3 py-2 text-right tabular-nums font-semibold">{fmtUSD(r.yearGross)}</td>
                         <td className="px-3 py-2 text-right tabular-nums text-xs">
                           {yoy !== null ? (
-                            <span className={yoy >= 0 ? "text-emerald-600" : "text-destructive"}>
+                            <span className={yoy >= 0 ? "text-success-600" : "text-destructive"}>
                               {yoy >= 0 ? "+" : ""}{yoy.toFixed(1)}%
                             </span>
                           ) : (
@@ -406,14 +406,14 @@ function GrossPage() {
                     return (
                       <tr key={r.year} className="hover:bg-muted/30">
                         <td className="px-3 py-2 font-medium">{r.year}</td>
-                        <td className={`px-3 py-2 text-right tabular-nums ${r.q1n >= 0 ? "text-emerald-600" : "text-destructive"}`}>{fmtUSD(r.q1n)}</td>
-                        <td className={`px-3 py-2 text-right tabular-nums ${r.q2n >= 0 ? "text-emerald-600" : "text-destructive"}`}>{fmtUSD(r.q2n)}</td>
-                        <td className={`px-3 py-2 text-right tabular-nums ${r.q3n >= 0 ? "text-emerald-600" : "text-destructive"}`}>{fmtUSD(r.q3n)}</td>
-                        <td className={`px-3 py-2 text-right tabular-nums ${r.q4n >= 0 ? "text-emerald-600" : "text-destructive"}`}>{fmtUSD(r.q4n)}</td>
-                        <td className={`px-3 py-2 text-right tabular-nums font-semibold ${r.yearNet >= 0 ? "text-emerald-600" : "text-destructive"}`}>{fmtUSD(r.yearNet)}</td>
+                        <td className={`px-3 py-2 text-right tabular-nums ${r.q1n >= 0 ? "text-success-600" : "text-destructive"}`}>{fmtUSD(r.q1n)}</td>
+                        <td className={`px-3 py-2 text-right tabular-nums ${r.q2n >= 0 ? "text-success-600" : "text-destructive"}`}>{fmtUSD(r.q2n)}</td>
+                        <td className={`px-3 py-2 text-right tabular-nums ${r.q3n >= 0 ? "text-success-600" : "text-destructive"}`}>{fmtUSD(r.q3n)}</td>
+                        <td className={`px-3 py-2 text-right tabular-nums ${r.q4n >= 0 ? "text-success-600" : "text-destructive"}`}>{fmtUSD(r.q4n)}</td>
+                        <td className={`px-3 py-2 text-right tabular-nums font-semibold ${r.yearNet >= 0 ? "text-success-600" : "text-destructive"}`}>{fmtUSD(r.yearNet)}</td>
                         <td className="px-3 py-2 text-right tabular-nums text-xs">
                           {yoy !== null ? (
-                            <span className={yoy >= 0 ? "text-emerald-600" : "text-destructive"}>
+                            <span className={yoy >= 0 ? "text-success-600" : "text-destructive"}>
                               {yoy >= 0 ? "+" : ""}{yoy.toFixed(1)}%
                             </span>
                           ) : (
@@ -431,7 +431,7 @@ function GrossPage() {
                     <td className="px-3 py-2 text-right tabular-nums">{fmtUSD(totals.q2n)}</td>
                     <td className="px-3 py-2 text-right tabular-nums">{fmtUSD(totals.q3n)}</td>
                     <td className="px-3 py-2 text-right tabular-nums">{fmtUSD(totals.q4n)}</td>
-                    <td className={`px-3 py-2 text-right tabular-nums ${totals.allNet >= 0 ? "text-emerald-600" : "text-destructive"}`}>{fmtUSD(totals.allNet)}</td>
+                    <td className={`px-3 py-2 text-right tabular-nums ${totals.allNet >= 0 ? "text-success-600" : "text-destructive"}`}>{fmtUSD(totals.allNet)}</td>
                     <td className="px-3 py-2"></td>
                   </tr>
                 </tfoot>

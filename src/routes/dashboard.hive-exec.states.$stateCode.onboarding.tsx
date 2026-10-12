@@ -144,7 +144,7 @@ function OnboardingPage() {
 
   if (session.isLoading || !session.data) {
     return (
-      <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+      <div className="rounded-[var(--denim-r)] border border-line bg-paper p-8 text-center text-sm text-muted-foreground shadow-[var(--denim-shadow-sm)]">
         Loading onboarding session…
       </div>
     );
@@ -156,11 +156,11 @@ function OnboardingPage() {
         <Link
           to="/dashboard/hive-exec/states/$stateCode"
           params={{ stateCode }}
-          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-pri"
         >
           <ArrowLeft className="h-3 w-3" /> Back to state
         </Link>
-        <h2 className="font-display text-lg font-semibold">
+        <h2 className="font-display text-lg font-bold tracking-[-0.01em] text-deep">
           {stateCode} — New State Onboarding
         </h2>
         <span className="text-xs text-muted-foreground">
@@ -168,19 +168,19 @@ function OnboardingPage() {
         </span>
       </div>
 
-      <header className="rounded-xl border border-[#fed7aa] bg-gradient-to-r from-[var(--hive-text)] to-[#1a2a5a] p-4 text-white shadow-sm">
+      <header className="denim-band rounded-[20px] p-5 text-white">
         <div className="flex items-center gap-3">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hive-gold)]">
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-acc text-white">
             <ClipboardList className="h-5 w-5" />
           </span>
           <div>
-            <div className="text-xs uppercase tracking-wider text-[#fed7aa]">
+            <div className="text-xs font-semibold uppercase tracking-[0.1em] text-accl">
               PI Executive · State template build
             </div>
-            <h3 className="font-display text-base font-semibold">
+            <h3 className="font-display text-base font-semibold tracking-[-0.01em] text-white">
               Build the {stateCode} template
             </h3>
-            <p className="mt-1 max-w-3xl text-xs text-[#fed7aa]">
+            <p className="mt-1 max-w-3xl text-xs text-ondark">
               Done once per state. Answers configure terminology, codes, training, EVV, and required docs.
               Flag any answer that requires a platform build — those open PI NECTAR tickets on complete.
             </p>
@@ -189,29 +189,29 @@ function OnboardingPage() {
       </header>
 
       {/* Step nav */}
-      <nav className="flex flex-wrap gap-1 rounded-xl border border-border bg-card p-1 shadow-sm">
+      <nav className="flex flex-wrap gap-1 rounded-[var(--denim-r)] border border-line bg-paper p-1 shadow-[var(--denim-shadow-sm)]">
         {ONBOARDING_SECTIONS.map((s, i) => {
           const flaggedHere = flags.some((f) => f.id.startsWith(`${s.key}.`));
           return (
             <button
               key={s.key}
               onClick={() => setStepIdx(i)}
-              className={`inline-flex min-h-[36px] items-center gap-2 rounded-lg px-3 text-xs font-medium transition-colors ${
+              className={`inline-flex min-h-[36px] items-center gap-2 rounded-full px-3 text-xs font-medium transition-colors ${
                 i === stepIdx
-                  ? "bg-[var(--hive-text)] text-white"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ? "bg-pri text-white"
+                  : "text-muted-foreground hover:bg-pt hover:text-pri"
               }`}
             >
               <span className="font-mono">{i + 1}</span> {s.title}
-              {flaggedHere ? <Flag className="h-3 w-3 text-[var(--hive-gold)]" /> : null}
+              {flaggedHere ? <Flag className="h-3 w-3 text-warning-600" /> : null}
             </button>
           );
         })}
       </nav>
 
       {/* Current step */}
-      <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
-        <h3 className="font-display text-base font-semibold">{step.title}</h3>
+      <section className="rounded-[var(--denim-r)] border border-line bg-paper p-5 shadow-[var(--denim-shadow)]">
+        <h3 className="font-display text-base font-semibold tracking-[-0.01em] text-deep">{step.title}</h3>
         <p className="mt-1 text-sm text-muted-foreground">{step.blurb}</p>
 
         <div className="mt-4 space-y-4">
@@ -229,13 +229,13 @@ function OnboardingPage() {
           ))}
         </div>
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4">
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4">
           <div className="flex gap-2">
             <button
               type="button"
               disabled={stepIdx === 0}
               onClick={() => setStepIdx((i) => Math.max(0, i - 1))}
-              className="inline-flex min-h-[40px] items-center gap-1 rounded-md border border-border bg-background px-3 text-sm font-medium disabled:opacity-50 hover:bg-muted"
+              className="inline-flex min-h-[40px] items-center gap-1 rounded-full border border-line bg-paper px-4 text-sm font-medium text-pri disabled:opacity-50 hover:bg-pt"
             >
               <ArrowLeft className="h-3.5 w-3.5" /> Back
             </button>
@@ -243,7 +243,7 @@ function OnboardingPage() {
               type="button"
               onClick={() => save.mutate()}
               disabled={save.isPending}
-              className="inline-flex min-h-[40px] items-center gap-1 rounded-md border border-border bg-background px-3 text-sm font-medium hover:bg-muted disabled:opacity-50"
+              className="inline-flex min-h-[40px] items-center gap-1 rounded-full border border-line bg-paper px-4 text-sm font-medium text-pri hover:bg-pt disabled:opacity-50"
             >
               <Save className="h-3.5 w-3.5" /> Save draft
             </button>
@@ -253,7 +253,7 @@ function OnboardingPage() {
               type="button"
               onClick={() => complete.mutate()}
               disabled={complete.isPending}
-              className="inline-flex min-h-[40px] items-center gap-2 rounded-md bg-[var(--hive-text)] px-4 text-sm font-semibold text-white hover:bg-[#1a2a5a] disabled:opacity-50"
+              className="inline-flex min-h-[40px] items-center gap-2 rounded-full bg-pri px-5 text-sm font-semibold text-white shadow-[var(--denim-btn-shadow)] hover:bg-deep disabled:opacity-50"
             >
               <CheckCircle2 className="h-4 w-4" />
               Complete onboarding & build template
@@ -262,7 +262,7 @@ function OnboardingPage() {
             <button
               type="button"
               onClick={() => setStepIdx((i) => Math.min(totalSteps - 1, i + 1))}
-              className="inline-flex min-h-[40px] items-center gap-1 rounded-md bg-[var(--hive-text)] px-3 text-sm font-semibold text-white hover:bg-[#1a2a5a]"
+              className="inline-flex min-h-[40px] items-center gap-1 rounded-full bg-pri px-4 text-sm font-semibold text-white shadow-[var(--denim-btn-shadow)] hover:bg-deep"
             >
               Next <ArrowRight className="h-3.5 w-3.5" />
             </button>
@@ -271,9 +271,9 @@ function OnboardingPage() {
       </section>
 
       {/* Build-needs summary */}
-      <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
-        <h3 className="flex items-center gap-2 font-display text-base font-semibold">
-          <Wrench className="h-4 w-4 text-[var(--hive-gold)]" />
+      <section className="rounded-[var(--denim-r)] border border-line bg-paper p-5 shadow-[var(--denim-shadow)]">
+        <h3 className="flex items-center gap-2 font-display text-base font-semibold tracking-[-0.01em] text-deep">
+          <Wrench className="h-4 w-4 text-pri" />
           Flagged build needs ({flags.length})
         </h3>
         <p className="mt-1 text-xs text-muted-foreground">
@@ -281,7 +281,7 @@ function OnboardingPage() {
           a PI NECTAR ticket for each one so the structural work is tracked.
         </p>
         {flags.length === 0 ? (
-          <div className="mt-3 rounded-md border border-dashed border-border bg-muted/30 p-3 text-xs text-muted-foreground">
+          <div className="mt-3 rounded-xl border border-dashed border-pt2 bg-pt0 p-3 text-xs text-muted-foreground">
             No build needs flagged yet. Flag any answer that the current platform structure can't represent.
           </div>
         ) : (
@@ -289,11 +289,11 @@ function OnboardingPage() {
             {flags.map((f) => (
               <li
                 key={f.id}
-                className="rounded-md border border-[#fed7aa] bg-[#fff7ed] p-3 text-xs"
+                className="rounded-xl border border-warning-200 bg-warning-50 p-3 text-xs"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <div className="font-medium text-[var(--hive-text)]">
+                    <div className="font-medium text-deep">
                       {f.section} · {f.field}
                     </div>
                     <div className="mt-0.5 font-mono text-[10px] text-muted-foreground">
@@ -309,7 +309,7 @@ function OnboardingPage() {
                   </button>
                 </div>
                 <textarea
-                  className="mt-2 min-h-[60px] w-full rounded border border-border bg-background p-2 font-sans text-xs"
+                  className="mt-2 min-h-[60px] w-full rounded-[10px] border border-line bg-paper p-2 font-sans text-xs"
                   value={f.note}
                   onChange={(e) => updateFlagNote(f.id, e.target.value)}
                 />
@@ -340,12 +340,12 @@ function FieldRow({
   onUpdateFlagNote: (note: string) => void;
 }) {
   return (
-    <div className="rounded-md border border-border bg-background p-3">
+    <div className="rounded-xl border border-line bg-paper p-3">
       <div className="flex items-start justify-between gap-2">
         <label className="block text-sm font-medium text-foreground">
           {field.label}
           {field.buildSensitive ? (
-            <span className="ml-2 inline-block rounded-full bg-[#fed7aa] px-2 py-0.5 text-[10px] font-medium text-[#7c2d12]">
+            <span className="ml-2 inline-block rounded-full bg-warning-50 px-2 py-0.5 text-[10px] font-medium text-warning-700">
               build-sensitive
             </span>
           ) : null}
@@ -353,10 +353,10 @@ function FieldRow({
         <button
           type="button"
           onClick={onToggleFlag}
-          className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium ${
+          className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
             flagged
-              ? "border-[var(--hive-gold)] bg-[#fff7ed] text-[#7c2d12]"
-              : "border-border bg-background text-muted-foreground hover:bg-muted"
+              ? "border-warning-200 bg-warning-50 text-warning-700"
+              : "border-line bg-paper text-muted-foreground hover:bg-pt hover:text-pri"
           }`}
         >
           <Flag className="h-3 w-3" />
@@ -371,7 +371,7 @@ function FieldRow({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={field.placeholder}
-          className="mt-2 min-h-[88px] w-full rounded border border-border bg-card p-2 font-mono text-xs"
+          className="mt-2 min-h-[88px] w-full rounded-[10px] border border-line bg-paper p-2 font-mono text-xs"
         />
       ) : field.type === "number" ? (
         <input
@@ -379,25 +379,25 @@ function FieldRow({
           value={value}
           onChange={(e) => onChange(e.target.value.replace(/[^0-9]/g, ""))}
           placeholder={field.placeholder}
-          className="mt-2 min-h-[40px] w-full rounded border border-border bg-card px-2 text-sm"
+          className="mt-2 min-h-[40px] w-full rounded-[10px] border border-line bg-paper px-2.5 text-sm"
         />
       ) : (
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={field.placeholder}
-          className="mt-2 min-h-[40px] w-full rounded border border-border bg-card px-2 text-sm"
+          className="mt-2 min-h-[40px] w-full rounded-[10px] border border-line bg-paper px-2.5 text-sm"
         />
       )}
       {flagged && flag ? (
-        <div className="mt-2 rounded-md border border-[#fed7aa] bg-[#fff7ed] p-2">
-          <div className="text-[10px] font-medium uppercase tracking-wider text-[#7c2d12]">
+        <div className="mt-2 rounded-xl border border-warning-200 bg-warning-50 p-2">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.06em] text-warning-700">
             Build need note (becomes ticket detail)
           </div>
           <textarea
             value={flag.note}
             onChange={(e) => onUpdateFlagNote(e.target.value)}
-            className="mt-1 min-h-[48px] w-full rounded border border-border bg-background p-2 text-xs"
+            className="mt-1 min-h-[48px] w-full rounded-[10px] border border-line bg-paper p-2 text-xs"
           />
         </div>
       ) : null}

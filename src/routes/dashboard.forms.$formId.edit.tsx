@@ -186,21 +186,21 @@ function EditForm() {
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={() => navigate({ to: "/dashboard/forms" })}><ChevronLeft className="h-4 w-4" /></Button>
           <div>
-            <h1 className="text-xl font-semibold tracking-tight">Form builder</h1>
+            <h1 className="font-display text-xl font-bold tracking-[-0.025em] text-deep">Form builder</h1>
             <p className="text-xs text-muted-foreground">{data?.form?.status ?? "draft"} · {describeFrequency(frequency, schedule)}</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <DirtyBadge isDirty={isDirty} />
-          <Button variant="outline" onClick={() => setShowNectar(true)}><Sparkles className="mr-1.5 h-4 w-4 text-amber-500" /> Build with Nectar</Button>
+          <Button variant="outline" onClick={() => setShowNectar(true)}><Sparkles className="mr-1.5 h-4 w-4 text-acc" /> Build with Nectar</Button>
           <Button variant="outline" onClick={() => setShowSettings(true)}><SettingsIcon className="mr-1.5 h-4 w-4" /> Settings</Button>
           <Button variant="outline" onClick={() => setShowAssign(true)}><Users className="mr-1.5 h-4 w-4" /> Assign</Button>
-          <Button variant="outline" className="text-rose-700 hover:text-rose-800 hover:bg-rose-50 border-rose-200"
+          <Button variant="outline" className="text-danger-700 hover:text-danger-800 hover:bg-danger-50 border-danger-200"
             onClick={() => setDeleteOpen(true)}>
             <Trash2 className="mr-1.5 h-4 w-4" /> Delete
           </Button>
           <Button onClick={persist} disabled={busy}><Save className="mr-1.5 h-4 w-4" /> Save</Button>
-          <Button variant="default" className="bg-[var(--hive-ink)] hover:bg-[#0e5a68]"
+          <Button variant="default" className="bg-deep hover:bg-pri"
             onClick={async () => { const ok = await persist(); if (ok) setShowPublish(true); }}>
             <Send className="mr-1.5 h-4 w-4" /> Publish
           </Button>
@@ -208,7 +208,7 @@ function EditForm() {
       </div>
 
       {isNectarDraft && (
-        <div className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+        <div className="rounded-xl border border-pt2 bg-pt px-3 py-2 text-sm text-pri">
           <Sparkles className="inline h-4 w-4 mr-1" /> <strong>Nectar draft</strong> — review and edit every field before publishing.
         </div>
       )}
@@ -323,11 +323,11 @@ function EditForm() {
 
         {/* Live preview + admin map */}
         <aside className="space-y-3">
-          <Card className="p-3 bg-[var(--hive-text)] text-white">
-            <p className="text-[10px] uppercase tracking-wider text-white/60">Live staff preview</p>
-            <p className="font-semibold text-sm mt-0.5 truncate">{name || "Untitled form"}</p>
+          <Card className="p-3 bg-pt border-pt2 text-deep">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Live staff preview</p>
+            <p className="font-display font-semibold text-sm mt-0.5 truncate">{name || "Untitled form"}</p>
           </Card>
-          <Card className="p-4 max-h-[60vh] overflow-y-auto space-y-3 bg-white">
+          <Card className="p-4 max-h-[60vh] overflow-y-auto space-y-3 bg-card">
             {fields.length === 0
               ? <p className="text-xs text-center text-muted-foreground">Preview will appear here.</p>
               : <LivePreview fields={fields} />}
@@ -376,7 +376,7 @@ function EditForm() {
       <div className="h-20" aria-hidden />
 
       {/* Sticky Save bar */}
-      <div className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-[0_-2px_10px_rgba(0,0,0,0.06)]">
+      <div className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-[0_-2px_10px_rgba(27,51,80,0.06)]">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2">
           <DirtyBadge isDirty={isDirty} verbose />
           <div className="flex gap-2">
@@ -419,13 +419,13 @@ function EditForm() {
 function DirtyBadge({ isDirty, verbose }: { isDirty: boolean; verbose?: boolean }) {
   if (isDirty) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800 border border-amber-200">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-50 px-2.5 py-1 text-xs font-medium text-warning-700 border border-warning-200">
         <CircleDot className="h-3 w-3" /> {verbose ? "Unsaved changes" : "Unsaved"}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 border border-emerald-200">
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-success-50 px-2.5 py-1 text-xs font-medium text-success-700 border border-success-200">
       <Check className="h-3 w-3" /> {verbose ? "All changes saved" : "Saved"}
     </span>
   );
@@ -579,7 +579,7 @@ function RoutingBehaviorCard({
 
       <div className="flex flex-wrap items-center gap-2">
         <Button type="button" variant="outline" size="sm" onClick={suggest} disabled={busy}>
-          <Sparkles className="mr-1.5 h-3.5 w-3.5 text-amber-500" />
+          <Sparkles className="mr-1.5 h-3.5 w-3.5 text-acc" />
           {busy ? "Thinking…" : proposal ? "Suggest again" : "Suggest routing"}
         </Button>
         {proposal && (
@@ -590,9 +590,9 @@ function RoutingBehaviorCard({
       </div>
 
       {proposal && (
-        <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 space-y-2">
+        <div className="rounded-xl border border-pt2 bg-pt px-3 py-2 text-xs text-pri space-y-2">
           <p>
-            <Sparkles className="inline h-3.5 w-3.5 mr-1 text-amber-600" />
+            <Sparkles className="inline h-3.5 w-3.5 mr-1 text-pri" />
             Nectar suggests <strong>{ROUTING_BEHAVIORS.find((b) => b.value === proposal.behavior)?.label}</strong>. {proposal.rationale}
           </p>
           {chosen !== proposal.behavior && (
@@ -628,7 +628,7 @@ function RoutingBehaviorCard({
       </div>
 
       {chosenSpec && (
-        <div className={`rounded-md border px-3 py-2 text-xs ${chosenSpec.wired ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-slate-200 bg-slate-50 text-slate-700"}`}>
+        <div className={`rounded-md border px-3 py-2 text-xs ${chosenSpec.wired ? "border-success-200 bg-success-50 text-success-900" : "border-haze-200 bg-haze-50 text-haze-700"}`}>
           <p className="font-medium">{chosenSpec.label}</p>
           <p className="mt-0.5">{chosenSpec.implication}</p>
           {!chosenSpec.wired && (
@@ -716,7 +716,7 @@ function TrackedDataConfig({
   }
 
   return (
-    <div className="space-y-3 rounded-md border border-slate-200 bg-slate-50/60 p-3">
+    <div className="space-y-3 rounded-md border border-haze-200 bg-haze-50/60 p-3">
       <div className="grid gap-1.5">
         <Label className="text-xs">Client targeting</Label>
         <div className="rounded-md border border-input bg-background px-3 py-2 text-xs flex items-center justify-between gap-3">
@@ -748,7 +748,7 @@ function TrackedDataConfig({
               return (
                 <label
                   key={c.code}
-                  className={`flex items-start gap-2 rounded px-2 py-1 text-xs cursor-pointer min-h-[36px] ${on ? "bg-emerald-50" : "hover:bg-muted"}`}
+                  className={`flex items-start gap-2 rounded px-2 py-1 text-xs cursor-pointer min-h-[36px] ${on ? "bg-success-50" : "hover:bg-muted"}`}
                 >
                   <input
                     type="checkbox"

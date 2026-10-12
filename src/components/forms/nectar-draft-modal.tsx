@@ -104,7 +104,7 @@ export function NectarDraftModal({
     <Dialog open={open} onOpenChange={(b) => { onOpenChange(b); if (!b) reset(); }}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-amber-500" /> Build with Nectar</DialogTitle>
+          <DialogTitle className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-acc" /> Build with Nectar</DialogTitle>
           <DialogDescription>
             Describe the form OR upload a PDF of an existing form. Nectar generates a draft you can review and edit — it is never auto-published.
           </DialogDescription>
@@ -139,7 +139,7 @@ export function NectarDraftModal({
                 placeholder='E.g. "This is our intake assessment — ignore the agency logo footer."'
                 maxLength={2000} />
             </div>
-            <div className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800 flex gap-2">
+            <div className="rounded-md border border-warning-300 bg-warning-50 px-3 py-2 text-xs text-warning-800 flex gap-2">
               <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
               <span>
                 Nectar extracts the form's <strong>structure</strong> (fields, types, sections) — not a pixel clone.

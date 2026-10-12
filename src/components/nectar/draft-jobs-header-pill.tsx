@@ -18,7 +18,7 @@ export function DraftJobsHeaderPill() {
       className="hive-chrome-btn h-10 px-3 text-xs font-semibold"
       title="NECTAR is drafting requirements from your authoritative sources"
     >
-      <Sparkles className="h-3.5 w-3.5 animate-pulse text-[var(--hive-gold)]" />
+      <Sparkles className="h-3.5 w-3.5 animate-pulse text-[var(--hive-accent-text)]" />
       <span>
         Drafting {activeCount} source{activeCount === 1 ? "" : "s"}
       </span>

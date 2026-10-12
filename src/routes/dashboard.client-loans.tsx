@@ -67,6 +67,7 @@ function LoanArea({ organizationId, lenderName }: { organizationId: string; lend
       const { data, error } = await (supabase as any)
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", organizationId)
         .order("last_name");
       if (error) throw new Error(error.message);

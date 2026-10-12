@@ -39,6 +39,7 @@ function useClientMap(orgId?: string) {
       const { data } = await supabase
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!);
       const map = new Map<string, ClientLite>();
       (data ?? []).forEach((c) => map.set(c.id, c as ClientLite));
@@ -57,7 +58,7 @@ export function HostHomeControl() {
       <div className="flex items-center gap-3">
         <Home className="h-6 w-6 text-primary" />
         <div>
-          <h1 className="text-2xl font-semibold">Host Home Control</h1>
+          <h1 className="font-display text-2xl font-bold tracking-[-0.025em] text-deep">Host Home Control</h1>
           <p className="text-sm text-muted-foreground">
             Oversight desk for 24-hour residential Host Home Supports (HHS).
           </p>
@@ -125,7 +126,7 @@ function DailyNotesTab({ orgId, clientMap }: { orgId?: string; clientMap?: Map<s
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 <Badge variant="outline">{name(clientMap, String(r.client_id))}</Badge>
                 <span>{String(r.record_date)}</span>
-                {r.ai_compliance_status === "Verified" && <Badge className="bg-green-600">✓ NECTAR Verified</Badge>}
+                {r.ai_compliance_status === "Verified" && <Badge className="bg-acct text-accd ring-1 ring-acctb hover:bg-acct">✓ NECTAR Verified</Badge>}
                 {r.ai_compliance_status === "Flagged" && <Badge variant="destructive">⚠ Flagged</Badge>}
               </div>
               <p className="mt-2 text-sm whitespace-pre-wrap">{String(r.narrative)}</p>
@@ -229,12 +230,12 @@ function AttendanceGridTab({ orgId, clientMap }: { orgId?: string; clientMap?: M
           });
           const isOpen = expanded === cid;
           return (
-            <div key={cid} className="rounded-lg border">
+            <div key={cid} className="rounded-[var(--denim-r)] border bg-card shadow-[var(--denim-shadow-sm)]">
               <div className="flex flex-wrap items-center justify-between gap-2 p-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium text-sm">{name(clientMap, cid)}</span>
-                  <Badge className="bg-green-600">📊 {today.toLocaleString(undefined, { month: "long" })}: {present} Days Present (Billable)</Badge>
-                  <Badge className="bg-amber-500">{away} Days Away (Unbillable)</Badge>
+                  <Badge className="bg-acct text-accd ring-1 ring-acctb hover:bg-acct">📊 {today.toLocaleString(undefined, { month: "long" })}: {present} Days Present (Billable)</Badge>
+                  <Badge className="bg-warning-50 text-warning-700 hover:bg-warning-50">{away} Days Away (Unbillable)</Badge>
                 </div>
                 <Button size="sm" variant="outline" onClick={() => setExpanded(isOpen ? null : cid)}>
                   🔍 {isOpen ? "Hide" : "View"} Signed Attendance Ledger
@@ -253,9 +254,9 @@ function AttendanceGridTab({ orgId, clientMap }: { orgId?: string; clientMap?: M
                       const status = rec ? String(rec.presence_status) : null;
                       const init = rec ? String(rec.staff_initials_signature ?? "") : "";
                       const cls = status === "Present"
-                        ? "bg-green-200 dark:bg-green-900/40 border-green-400"
+                        ? "bg-acct border-acctb"
                         : status === "Away"
-                          ? "bg-amber-200 dark:bg-amber-900/40 border-amber-400"
+                          ? "bg-warning-50 border-warning-200"
                           : "bg-muted/30";
                       return (
                         <div key={day} className={`relative h-12 rounded border text-xs flex items-start justify-start p-1 ${cls}`}>
@@ -265,7 +266,7 @@ function AttendanceGridTab({ orgId, clientMap }: { orgId?: string; clientMap?: M
                       );
                     })}
                   </div>
-                  <div className="rounded border-2 border-slate-300 bg-slate-50 dark:bg-slate-900/40 p-3 space-y-2">
+                  <div className="rounded border-2 border-haze-300 bg-haze-50 dark:bg-haze-900/40 p-3 space-y-2">
                     <div className="text-xs font-bold uppercase tracking-wide">⚖️ Legal Audit Panel — Court-Admissible Forensics</div>
                     <p className="text-[11px] italic">
                       Attestation accepted by signer for each green tile:
@@ -363,7 +364,7 @@ function ComplianceAuditsTab({ orgId, clientMap }: { orgId?: string; clientMap?:
                   <Badge variant="outline">{name(clientMap, String(r.client_id))}</Badge>
                   {(r.incident_categories as string[]).map((c, i) => <Badge key={i} variant="secondary">{c}</Badge>)}
                   {status === "upi_filed" ? (
-                    <Badge className="bg-green-600">✅ Filed · UPI {String(r.upi_reference_number)}</Badge>
+                    <Badge className="bg-acct text-accd ring-1 ring-acctb hover:bg-acct">✅ Filed · UPI {String(r.upi_reference_number)}</Badge>
                   ) : (
                     <>
                       <Badge variant="destructive">{fmtTimer(String(r.created_at), 24)} (24h initial)</Badge>
@@ -415,7 +416,7 @@ function ComplianceAuditsTab({ orgId, clientMap }: { orgId?: string; clientMap?:
 function Stat({ label, v }: { label: string; v: number }) {
   return (
     <div className="rounded-lg border p-3">
-      <div className="text-2xl font-bold">{v}</div>
+      <div className="font-display text-2xl font-bold">{v}</div>
       <div className="text-xs text-muted-foreground">{label}</div>
     </div>
   );

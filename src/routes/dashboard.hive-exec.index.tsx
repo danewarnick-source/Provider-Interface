@@ -76,17 +76,17 @@ function CompaniesPage() {
         <Link
           key={cls.id}
           to="/dashboard/hive-exec/classes"
-          className="flex items-start justify-between gap-3 rounded-xl border-2 border-[var(--hive-gold)] bg-gradient-to-r from-[#fff7ed] to-[#ffedd5] p-4 shadow-sm"
+          className="flex items-start justify-between gap-3 rounded-xl border-2 border-[var(--hive-accent)] bg-pt p-4 shadow-[var(--denim-shadow-sm)]"
         >
           <div>
-            <div className="font-display text-base font-bold text-[var(--hive-text)]">
+            <div className="font-display text-base font-bold text-deep">
               {cls.providerName} submitted a {trainingClassLabel(cls.trainingType)} class
             </div>
-            <div className="mt-1 text-xs text-[#9a3412]">
+            <div className="mt-1 text-xs text-pri">
               {cls.roster.map((r) => formatRosterContactLine(r)).join(" · ")}
             </div>
           </div>
-          <span className="inline-flex items-center rounded-md bg-[var(--hive-text)] px-3 py-2 text-sm font-semibold text-white">
+          <span className="inline-flex items-center rounded-full bg-pri px-3 py-2 text-sm font-semibold text-white">
             Open Training
           </span>
         </Link>
@@ -95,23 +95,23 @@ function CompaniesPage() {
       {pendingCount > 0 && (
         <Link
           to="/dashboard/hive-exec/upgrade-requests"
-          className="group flex items-center justify-between gap-3 rounded-xl border-2 border-[var(--hive-gold)] bg-gradient-to-r from-[#fff7ed] to-[#ffedd5] p-4 shadow-sm transition-all hover:shadow-md"
+          className="group flex items-center justify-between gap-3 rounded-xl border-2 border-[var(--hive-accent)] bg-pt p-4 shadow-[var(--denim-shadow-sm)] transition-all hover:shadow-[var(--denim-shadow-sm)]"
         >
           <div className="flex items-center gap-3">
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--hive-gold)] text-white shadow-sm">
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--hive-accent)] text-white shadow-[var(--denim-shadow-sm)]">
               <Sparkles className="h-5 w-5" />
             </span>
             <div>
-              <div className="font-display text-base font-bold text-[var(--hive-text)]">
+              <div className="font-display text-base font-bold text-deep">
                 {pendingCount} {pendingCount === 1 ? "organization is" : "organizations are"}{" "}
                 requesting upgrades
               </div>
-              <div className="text-xs text-[#9a3412]">
+              <div className="text-xs text-pri">
                 Pending feature access requests — grant or dismiss from the queue.
               </div>
             </div>
           </div>
-          <span className="inline-flex items-center gap-1 rounded-md bg-[var(--hive-text)] px-3 py-2 text-sm font-semibold text-white group-hover:bg-[#1a2a5a]">
+          <span className="inline-flex items-center gap-1 rounded-full bg-pri px-3 py-2 text-sm font-semibold text-white group-hover:bg-deep">
             Review queue <ArrowRight className="h-4 w-4" />
           </span>
         </Link>
@@ -129,7 +129,7 @@ function CompaniesPage() {
         <Kpi icon={Lock} label="Locked" value={k?.locked_companies ?? "—"} tone="warn" />
       </div>
 
-      <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <section className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
         <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <h2 className="font-display text-lg font-semibold">Customer companies</h2>
           <div className="flex flex-col gap-2 md:flex-row">
@@ -240,22 +240,20 @@ function Kpi({
 }) {
   return (
     <div
-      className={`rounded-xl border p-4 shadow-sm ${tone === "warn" ? "border-[#fecaca] bg-[#fef2f2]" : "border-border bg-card"}`}
+      className={`rounded-xl border p-4 shadow-[var(--denim-shadow-sm)] ${tone === "warn" ? "border-danger-200 bg-danger-50" : "border-border bg-card"}`}
     >
       <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
         <Icon className="h-3.5 w-3.5" /> {label}
       </div>
-      <div className="mt-1 font-display text-2xl font-bold tabular-nums text-[var(--hive-text)]">
-        {value}
-      </div>
+      <div className="mt-1 font-display text-2xl font-bold tabular-nums text-deep">{value}</div>
     </div>
   );
 }
 
 function PlanBadge({ plan }: { plan: string }) {
   const map: Record<string, string> = {
-    hive_standard: "bg-[#fff7ed] text-[#9a3412]",
-    enterprise: "bg-[var(--hive-text)] text-white",
+    hive_standard: "bg-pt text-pri",
+    enterprise: "bg-pri text-white",
   };
   const label = plan === "hive_standard" ? "Standard" : plan === "enterprise" ? "Enterprise" : plan;
   return (
@@ -267,12 +265,12 @@ function PlanBadge({ plan }: { plan: string }) {
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    active: "bg-emerald-100 text-emerald-700",
-    past_due: "bg-amber-100 text-amber-700",
-    locked: "bg-red-100 text-red-700",
-    cancelled: "bg-gray-100 text-gray-600",
-    canceled: "bg-gray-100 text-gray-600",
-    inactive: "bg-slate-100 text-slate-600",
+    active: "bg-success-100 text-success-700",
+    past_due: "bg-warning-100 text-warning-700",
+    locked: "bg-danger-100 text-danger-700",
+    cancelled: "bg-haze-100 text-haze-600",
+    canceled: "bg-haze-100 text-haze-600",
+    inactive: "bg-haze-100 text-haze-600",
   };
   return (
     <span className={`rounded px-2 py-0.5 text-xs ${map[status] ?? "bg-muted"}`}>
@@ -283,9 +281,9 @@ function StatusBadge({ status }: { status: string }) {
 
 function HealthDot({ health }: { health: "good" | "warn" | "risk" }) {
   const map = {
-    good: { dot: "bg-emerald-500", label: "Good" },
-    warn: { dot: "bg-amber-500", label: "Watch" },
-    risk: { dot: "bg-red-500", label: "Risk" },
+    good: { dot: "bg-success-500", label: "Good" },
+    warn: { dot: "bg-warning-500", label: "Watch" },
+    risk: { dot: "bg-danger-500", label: "Risk" },
   }[health];
   return (
     <span className="inline-flex items-center gap-1.5 text-xs">

@@ -1,8 +1,5 @@
 /** Locked Admin Home copy and destinations — feeling-hero B. */
 
-export const ADMIN_HOME_DUSK = "#0B1120";
-export const ADMIN_HOME_PALE_GOLD = "#F3E5AB";
-
 export const ADMIN_HOME_EYEBROW = "WELCOME TO YOUR HOME BASE";
 export const ADMIN_HOME_HEADLINE = "The day just got smaller";
 export const ADMIN_HOME_SUBHEAD =

@@ -83,7 +83,6 @@ export default tseslint.config(
       "src/components/clients/profile/profile-tab.tsx",
       "src/components/clients/profile/face-sheet-info-card.tsx",
       "src/components/staff-mobile/client-quick-info-sheet.tsx",
-      "src/components/smart-import/**",
       "src/components/audit-portal/**",
       "src/components/ai-pdf-importer.tsx",
       "src/routes/dashboard.emar.tsx",

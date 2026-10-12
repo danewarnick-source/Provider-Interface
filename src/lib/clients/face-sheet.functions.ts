@@ -21,6 +21,7 @@ import {
   type ClientContact,
 } from "./contacts";
 import { formatDate } from "./dates";
+import { DENIM, hexToRgb } from "../design-tokens";
 import { currentPlan, type ClientPlan } from "./plans";
 
 const NOT_ON_FILE = "Not on file";
@@ -189,10 +190,17 @@ type Ctx = {
   photoImg: PDFImage | null;
 };
 
-const INK = rgb(0.08, 0.09, 0.12);
-const MUTED = rgb(0.42, 0.45, 0.5);
-const BORDER = rgb(0.82, 0.84, 0.88);
-const ACCENT = rgb(0.08, 0.35, 0.6);
+/** Denim hex → pdf-lib color (PDFs can't read CSS variables). */
+function pdfColor(hex: string) {
+  const [r, g, b] = hexToRgb(hex);
+  return rgb(r / 255, g / 255, b / 255);
+}
+const INK = pdfColor(DENIM.ink);
+const HEADING = pdfColor(DENIM.deep);
+const MUTED = pdfColor(DENIM.muted);
+const BORDER = pdfColor(DENIM.line);
+const ACCENT = pdfColor(DENIM.pri);
+const SECTION_FILL = pdfColor(DENIM.pt);
 
 const PAGE_W = 612;
 const PAGE_H = 792;
@@ -253,13 +261,13 @@ function drawKV(
 }
 
 function sectionHeader(page: PDFPage, title: string, x: number, y: number, w: number, helvB: PDFFont): number {
-  page.drawRectangle({ x, y: y - 14, width: w, height: 14, color: rgb(0.94, 0.96, 0.98) });
+  page.drawRectangle({ x, y: y - 14, width: w, height: 14, color: SECTION_FILL });
   page.drawText(title.toUpperCase(), {
     x: x + 6,
     y: y - 10,
     size: 8,
     font: helvB,
-    color: ACCENT,
+    color: HEADING,
   });
   return y - 20;
 }
@@ -287,7 +295,7 @@ function drawFaceSheet(page: PDFPage, helv: PDFFont, helvB: PDFFont, ctx: Ctx): 
     const h = logoImg.height * (w / logoImg.width);
     page.drawImage(logoImg, { x: M, y: headerTop - h, width: w, height: h });
   } else {
-    drawText(page, orgDisplayName, M, headerTop - 14, { font: helvB, size: 20, color: INK, maxWidth: 340 });
+    drawText(page, orgDisplayName, M, headerTop - 14, { font: helvB, size: 20, color: HEADING, maxWidth: 340 });
   }
 
   // Org address + phone top-right
@@ -366,16 +374,16 @@ function drawFaceSheet(page: PDFPage, helv: PDFFont, helvB: PDFFont, ctx: Ctx): 
   drawText(page, fullName || "Not on file", M, y, {
     font: helvB,
     size: 20,
-    color: INK,
+    color: HEADING,
     maxWidth: idW,
   });
   y -= 28;
 
   const bandColW = idW / 3 - 6;
   const bandY = y;
-  drawKV(page, "Intake date", fmtDate(client.intake_date as string | null) === NOT_ON_FILE
-    ? fmtDate(client.admission_date as string | null)
-    : fmtDate(client.intake_date as string | null), M, bandY, bandColW, helv, helvB);
+  drawKV(page, "Start date", fmtDate(client.admission_date as string | null) === NOT_ON_FILE
+    ? fmtDate(client.intake_date as string | null)
+    : fmtDate(client.admission_date as string | null), M, bandY, bandColW, helv, helvB);
   const planYear =
     plan && (plan.start_date || plan.end_date)
       ? `${fmtDate(plan.start_date)} – ${fmtDate(plan.end_date)}`

@@ -45,12 +45,12 @@ function flattenGroups(groups: Group[]): FormField[] {
 }
 
 const GROUP_TONES = [
-  "bg-slate-50/60 border-slate-200",
-  "bg-amber-50/40 border-amber-200",
-  "bg-sky-50/40 border-sky-200",
-  "bg-emerald-50/40 border-emerald-200",
-  "bg-violet-50/40 border-violet-200",
-  "bg-rose-50/40 border-rose-200",
+  "bg-pt0 border-line",
+  "bg-pt/60 border-pt2",
+  "bg-acct/60 border-acctb",
+  "bg-denim-50/40 border-denim-200",
+  "bg-haze-50/60 border-haze-200",
+  "bg-acclh/30 border-accl",
 ];
 
 export function SortableFields({
@@ -220,7 +220,7 @@ export function SortableFields({
           })}
         </div>
       </SortableContext>
-      <DragOverlay>{activeId ? <div className="rounded-md border-2 border-primary bg-card/95 px-3 py-2 text-sm shadow-lg">Moving…</div> : null}</DragOverlay>
+      <DragOverlay>{activeId ? <div className="rounded-[10px] border-2 border-primary bg-card/95 px-3 py-2 text-sm shadow-[var(--denim-shadow)]">Moving…</div> : null}</DragOverlay>
     </DndContext>
   );
 }

@@ -535,6 +535,7 @@ export const publishForm = createServerFn({ method: "POST" })
     if ((form.assigned_groups ?? []).includes("all_staff")) {
       const { data: members } = await supabase
         .from("organization_members").select("user_id")
+        .is("deleted_at", null)
         .eq("organization_id", m.organization_id).eq("active", true);
       for (const u of members ?? []) targetUserIds.add(u.user_id);
     } else if ((form.assigned_groups ?? []).length) {
@@ -1013,6 +1014,7 @@ export async function unmetStaffMandatesInternal(
         const { data: clientRows } = await supabase
           .from("clients")
           .select("id, first_name, last_name")
+          .is("deleted_at", null)
           .in("id", unmetClientIds);
         const nameByClient = new Map<string, string>();
         for (const c of (clientRows ?? []) as Array<{ id: string; first_name: string | null; last_name: string | null }>) {
@@ -1119,7 +1121,7 @@ export const recordStaffMandateOverride = createServerFn({ method: "POST" })
     // Resolve staffer + client + overriding-user display names (best-effort).
     const [{ data: staffProfile }, { data: clientRows }, { data: actorProfile }] = await Promise.all([
       supabase.from("profiles").select("id, first_name, last_name, email").eq("id", data.staffId).maybeSingle(),
-      supabase.from("clients").select("id, first_name, last_name").in("id", data.clientIds),
+      supabase.from("clients").select("id, first_name, last_name").is("deleted_at", null).in("id", data.clientIds),
       supabase.from("profiles").select("id, first_name, last_name, email").eq("id", userId).maybeSingle(),
     ]);
     const staffName = staffProfile
@@ -1230,6 +1232,7 @@ export const getAssignDirectory = createServerFn({ method: "GET" })
     adminGuard(m.access_level);
     const { data: members } = await supabase
       .from("organization_members").select("user_id, access_level, job_title")
+      .is("deleted_at", null)
       .eq("organization_id", m.organization_id).eq("active", true);
     const uids = (members ?? []).map((m: { user_id: string }) => m.user_id);
     let profiles: Array<{ id: string; full_name: string | null; email: string | null; staff_type_keys: string[] }> = [];
@@ -1243,6 +1246,7 @@ export const getAssignDirectory = createServerFn({ method: "GET" })
       .eq("organization_id", m.organization_id);
     const { data: clients } = await supabase
       .from("clients").select("id, first_name, last_name")
+      .is("deleted_at", null)
       .eq("organization_id", m.organization_id)
       .order("last_name", { ascending: true });
     return { members: members ?? [], profiles, staffTypes: staffTypes ?? [], clients: clients ?? [] };

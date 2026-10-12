@@ -7,7 +7,6 @@ import {
   SCENARIO_STEPS_BY_CODE,
   THIRTY_DAY_SAS_TOPICS,
 } from "@/lib/in-hive-training-thirty-day-sas";
-import { PI_THEME } from "@/lib/pi-theme";
 import { choiceFollowUp, scoreSegmentGate, shouldPersistResumeStep, shuffleCopy, SEGMENT_GATE_PASS, SEGMENT_GATE_TOTAL } from "@/lib/in-hive-training";
 import { TrainingDiagram, type DiagramId } from "@/components/training/in-hive-diagrams";
 import { SafeHtml } from "@/components/safe-html";
@@ -64,10 +63,10 @@ type Topic = {
 };
 
 /* ───────────────────────── Brand ───────────────────────── */
-const NAVY = PI_THEME.navy;
-const GOLD = PI_THEME.gold;
-const TEAL = PI_THEME.n2;
-const INK = PI_THEME.navy;
+const NAVY = "var(--denim-pri)";
+const ACCENT = "var(--denim-acc)";
+const TEAL = "var(--denim-accd)";
+const INK = "var(--denim-deep)";
 
 /* ───────────────────────── Content: Seizures (worked example) ───────────────────────── */
 const SEIZURE_STEPS: Step[] = [
@@ -1843,10 +1842,10 @@ export function thirtyDayTopicsInSowOrder(): Topic[] {
 }
 
 /* ───────────────────────── UI bits ───────────────────────── */
-const card: React.CSSProperties = { background: "#fff", border: "1px solid #e4e7ef", borderRadius: 14, overflow: "hidden", maxWidth: "100%", width: "100%", margin: "0 auto", boxShadow: "0 12px 40px rgba(11,17,38,.10)" };
+const card: React.CSSProperties = { background: "#fff", border: "1px solid var(--denim-line)", borderRadius: 14, overflow: "hidden", maxWidth: "100%", width: "100%", margin: "0 auto", boxShadow: "0 12px 40px rgba(27,51,80,.10)" };
 const btn = (kind: "pri" | "out" | "dis"): React.CSSProperties => ({
-  font: "inherit", fontSize: 13.5, fontWeight: 600, padding: "11px 18px", borderRadius: 10, cursor: kind === "dis" ? "not-allowed" : "pointer", border: kind === "out" ? "1px solid #cdd2e0" : "none",
-  background: kind === "pri" ? GOLD : kind === "dis" ? "#eef0f5" : "#fff", color: kind === "pri" ? NAVY : kind === "dis" ? "#a3a8b8" : NAVY,
+  font: "inherit", fontSize: 13.5, fontWeight: 600, padding: "11px 18px", borderRadius: 999, cursor: kind === "dis" ? "not-allowed" : "pointer", border: kind === "out" ? "1px solid var(--denim-pt2)" : "none",
+  background: kind === "pri" ? NAVY : kind === "dis" ? "var(--denim-pt)" : "#fff", color: kind === "pri" ? "#fff" : kind === "dis" ? "var(--denim-muted)" : NAVY,
 });
 
 function Accordion({ drops, open, onOpenChange }: { drops: [string, string][]; open?: number | null; onOpenChange?: (n: number | null) => void }) {
@@ -1858,13 +1857,13 @@ function Accordion({ drops, open, onOpenChange }: { drops: [string, string][]; o
     <div>
       {drops.map(([t, b], i) => (
         <div key={i}>
-          <button onClick={() => set(value === i ? null : i)} style={{ width: "100%", textAlign: "left", font: "inherit", fontSize: 13, fontWeight: 600, color: NAVY, background: "#f7f8fb", border: "1px solid #e4e7ef", borderRadius: 10, padding: "11px 13px", marginBottom: 7, cursor: "pointer", display: "flex", justifyContent: "space-between", gap: 10 }}>
+          <button onClick={() => set(value === i ? null : i)} style={{ width: "100%", textAlign: "left", font: "inherit", fontSize: 13, fontWeight: 600, color: NAVY, background: "var(--denim-pt0)", border: "1px solid var(--denim-line)", borderRadius: 10, padding: "11px 13px", marginBottom: 7, cursor: "pointer", display: "flex", justifyContent: "space-between", gap: 10 }}>
             <span>{t}</span><span>{value === i ? "\u25B4" : "\u25BE"}</span>
           </button>
           {value === i && (
             <SafeHtml
               html={b}
-              style={{ fontSize: 12.8, color: "#42485a", lineHeight: 1.6, padding: "2px 4px 12px" }}
+              style={{ fontSize: 12.8, color: "var(--denim-text)", lineHeight: 1.6, padding: "2px 4px 12px" }}
             />
           )}
         </div>
@@ -1920,7 +1919,7 @@ function ScoredChoice({
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, marginBottom: 4 }}>
-        <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: "#b07819" }}>{kicker}</div>
+        <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--denim-accd)" }}>{kicker}</div>
         <SpeakerButton speaking={speaking} onClick={speaking ? onStop : onSpeak} label="Read this slide aloud" />
       </div>
       <div style={{ fontSize: 15.5, fontWeight: 600, color: INK, margin: "5px 0 14px", lineHeight: 1.4 }}>{prompt}</div>
@@ -1938,26 +1937,26 @@ function ScoredChoice({
               font: "inherit",
               fontSize: 13.5,
               padding: "12px 13px",
-              border: `1px solid ${isPicked ? GOLD : "#e4e7ef"}`,
+              border: `1px solid ${isPicked ? NAVY : "var(--denim-line)"}`,
               borderRadius: 12,
-              background: isPicked ? "#fff8e6" : "#fff",
+              background: isPicked ? "var(--denim-pt)" : "#fff",
               cursor: picked ? "default" : "pointer",
-              color: "#2a3040",
+              color: "var(--denim-text)",
               marginBottom: 9,
               display: "flex",
               gap: 10,
               lineHeight: 1.45,
             }}
           >
-            <b style={{ color: "#6b7180" }}>{label}.</b>
+            <b style={{ color: "var(--denim-muted)" }}>{label}.</b>
             <span>{o.t}</span>
           </button>
         );
       })}
       {chosen && (
         <>
-          <div style={{ fontSize: 12.5, color: "#2a3040", background: "#f7f8fb", border: "1px solid #e4e7ef", borderRadius: 11, padding: "11px 13px", lineHeight: 1.5 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4, color: "#5b6172" }}>Recorded</div>
+          <div style={{ fontSize: 12.5, color: "var(--denim-text)", background: "var(--denim-pt0)", border: "1px solid var(--denim-line)", borderRadius: 11, padding: "11px 13px", lineHeight: 1.5 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4, color: "var(--denim-muted)" }}>Recorded</div>
             {choiceFollowUp(chosen.fb)}
           </div>
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 14 }}>
@@ -2152,49 +2151,49 @@ export function TrainingModule({
 
   return (
     <div style={card}>
-      <div style={{ background: NAVY, padding: "13px 17px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ background: "var(--denim-band)", padding: "13px 17px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-          <span style={{ width: 26, height: 26, background: GOLD, clipPath: "polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)" }} />
-          <div><div style={{ color: GOLD, fontSize: 10, fontWeight: 600, letterSpacing: ".1em" }}>Staff training · {topic.code}{readOnly ? " · review" : ""}</div><div style={{ color: "#fff", fontSize: 13, fontWeight: 600 }}>{topic.title}</div></div>
+          <span style={{ width: 26, height: 26, background: ACCENT, clipPath: "polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)" }} />
+          <div><div style={{ color: "var(--denim-accl)", fontSize: 10, fontWeight: 600, letterSpacing: ".1em" }}>Staff training · {topic.code}{readOnly ? " · review" : ""}</div><div style={{ color: "#fff", fontSize: 13, fontWeight: 600 }}>{topic.title}</div></div>
         </div>
       </div>
-      <div style={{ height: 5, background: "#eef0f5" }}><div style={{ height: "100%", width: pct + "%", background: GOLD, transition: "width .35s" }} /></div>
+      <div style={{ height: 5, background: "var(--denim-pt)" }}><div style={{ height: "100%", width: pct + "%", background: ACCENT, transition: "width .35s" }} /></div>
 
       {ttsSupported && (
-        <div style={{ background: "#f7f8fb", borderBottom: "1px solid #e4e7ef", padding: "8px 17px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: 11.5, color: "#5b6172" }}>Auto read-aloud</span>
+        <div style={{ background: "var(--denim-pt0)", borderBottom: "1px solid var(--denim-line)", padding: "8px 17px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 11.5, color: "var(--denim-muted)" }}>Auto read-aloud</span>
           <button
             type="button"
             role="switch"
             aria-checked={autoRead}
             onClick={() => setAutoRead(!autoRead)}
             style={{
-              width: 38, height: 22, borderRadius: 999, border: "1px solid #cdd2e0",
+              width: 38, height: 22, borderRadius: 999, border: "1px solid var(--denim-pt2)",
               background: autoRead ? TEAL : "#fff", position: "relative", cursor: "pointer", padding: 0,
             }}
           >
             <span style={{
               position: "absolute", top: 2, left: autoRead ? 18 : 2,
               width: 16, height: 16, borderRadius: "50%", background: "#fff",
-              boxShadow: "0 1px 2px rgba(0,0,0,.2)", transition: "left .15s",
+              boxShadow: "0 1px 2px rgba(27,51,80,.2)", transition: "left .15s",
             }} />
           </button>
         </div>
       )}
 
       {ttsSupported && showOptIn && !autoRead && step.type === "intro" && (
-        <div style={{ background: "#eaf3fc", borderBottom: "1px solid #b9d6f2", color: "#1c4e80", fontSize: 12.5, padding: "10px 17px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <div style={{ background: "var(--denim-pt)", borderBottom: "1px solid var(--denim-pt2)", color: "var(--denim-pri)", fontSize: 12.5, padding: "10px 17px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <span>Would you like this training read aloud?</span>
           <span style={{ display: "flex", gap: 8 }}>
             <button style={{ ...btn("pri"), padding: "6px 12px", fontSize: 12 }} onClick={() => { setAutoRead(true); setShowOptIn(false); }}>Yes, read aloud</button>
             <button style={{ ...btn("out"), padding: "6px 12px", fontSize: 12 }} onClick={() => setShowOptIn(false)}>No thanks</button>
-            <button aria-label="Dismiss" onClick={() => setShowOptIn(false)} style={{ background: "transparent", border: 0, color: "#1c4e80", cursor: "pointer", fontSize: 16, lineHeight: 1, padding: "0 4px" }}>{"\u00D7"}</button>
+            <button aria-label="Dismiss" onClick={() => setShowOptIn(false)} style={{ background: "transparent", border: 0, color: "var(--denim-pri)", cursor: "pointer", fontSize: 16, lineHeight: 1, padding: "0 4px" }}>{"\u00D7"}</button>
           </span>
         </div>
       )}
 
       {readOnly && (
-        <div style={{ background: "#e1f5ee", borderBottom: "1px solid #9fe1cb", color: "#0f6e56", fontSize: 12.5, padding: "10px 17px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <div style={{ background: "var(--denim-acct)", borderBottom: "1px solid var(--denim-acctb)", color: "var(--denim-accd)", fontSize: 12.5, padding: "10px 17px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <span>
             <b>Completed</b>{previousCompletion ? ` · signed by ${previousCompletion.signedName} on ${new Date(previousCompletion.completedAt).toLocaleDateString()}` : ""}. Reviewing the material won't change your record.
           </span>
@@ -2204,13 +2203,13 @@ export function TrainingModule({
         </div>
       )}
 
-      <div style={{ padding: 20, minHeight: 400, color: "#2a3040" }}>
+      <div style={{ padding: 20, minHeight: 400, color: "var(--denim-text)" }}>
         {step.type === "intro" && (
           <>
-            <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: "#b07819" }}>Code {topic.code}</div>
+            <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--denim-accd)" }}>Code {topic.code}</div>
             <div style={{ fontSize: 21, fontWeight: 700, color: INK, margin: "3px 0 8px" }}>{topic.title}</div>
-            <div style={{ fontSize: 12, color: "#8a8f9e", marginBottom: 14 }}>About {topic.estMin} minutes · {lessons} lessons, {checks} knowledge checks{scenarios ? `, ${scenarios} decision chains` : ""}{readOnly || skipAttest ? "" : ", then you sign"}</div>
-            <div style={{ background: "#f7f8fb", border: "1px solid #e4e7ef", borderRadius: 12, padding: "13px 14px", fontSize: 13.5, lineHeight: 1.6 }}>{topic.intro}</div>
+            <div style={{ fontSize: 12, color: "var(--denim-muted)", marginBottom: 14 }}>About {topic.estMin} minutes · {lessons} lessons, {checks} knowledge checks{scenarios ? `, ${scenarios} decision chains` : ""}{readOnly || skipAttest ? "" : ", then you sign"}</div>
+            <div style={{ background: "var(--denim-pt0)", border: "1px solid var(--denim-line)", borderRadius: 12, padding: "13px 14px", fontSize: 13.5, lineHeight: 1.6 }}>{topic.intro}</div>
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 18 }}>
               {!hideAllTopics && <button style={btn("out")} onClick={onExit}>All topics</button>}
               {hideAllTopics && <span />}
@@ -2228,11 +2227,11 @@ export function TrainingModule({
             <div style={{ fontSize: 21, fontWeight: 700, color: INK, margin: "3px 0 8px" }}>{step.title}</div>
             {step.lead && <div style={{ fontSize: 13.5, lineHeight: 1.6, marginBottom: 13 }}>{step.lead}</div>}
             {step.callout && (
-              <div style={{ borderRadius: 12, padding: "12px 14px", marginBottom: 6, border: `1px solid ${step.callout.v === "crit" ? "#f3c6c6" : "#b9d6f2"}`, background: step.callout.v === "crit" ? "#fdeded" : "#eaf3fc" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".05em", color: step.callout.v === "crit" ? "#a32d2d" : "#185fa5" }}>{step.callout.t}</div>
+              <div style={{ borderRadius: 12, padding: "12px 14px", marginBottom: 6, border: `1px solid ${step.callout.v === "crit" ? "color-mix(in srgb, var(--denim-danger) 30%, #fff)" : "var(--denim-pt2)"}`, background: step.callout.v === "crit" ? "var(--denim-danger-bg)" : "var(--denim-pt)" }}>
+                <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".05em", color: step.callout.v === "crit" ? "var(--denim-danger-text)" : "var(--denim-pri)" }}>{step.callout.t}</div>
                 <SafeHtml
                   html={step.callout.b}
-                  style={{ fontSize: 13, lineHeight: 1.5, marginTop: 5, color: step.callout.v === "crit" ? "#7a2222" : "#1c4e80" }}
+                  style={{ fontSize: 13, lineHeight: 1.5, marginTop: 5, color: step.callout.v === "crit" ? "var(--denim-danger-text)" : "var(--denim-pri)" }}
                 />
               </div>
             )}
@@ -2295,22 +2294,22 @@ export function TrainingModule({
 
         {step.type === "attest" && (
           <>
-            <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: "#4e1f81" }}>Attestation · Electronic signature</div>
+            <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--denim-accd)" }}>Attestation · Electronic signature</div>
             <div style={{ fontSize: 17, fontWeight: 600, color: INK, margin: "4px 0 14px" }}>Confirm and sign</div>
-            <label style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "#f7f8fb", border: "1px solid #e4e7ef", borderRadius: 12, padding: "13px 14px", cursor: "pointer" }}>
+            <label style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "var(--denim-pt0)", border: "1px solid var(--denim-line)", borderRadius: 12, padding: "13px 14px", cursor: "pointer" }}>
               <input type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} style={{ marginTop: 2, width: 17, height: 17, accentColor: NAVY }} />
               <span style={{ fontSize: 12.5, lineHeight: 1.5 }}>{topic.attest}</span>
             </label>
-            <label style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "#fff8e6", border: "1px solid #f5d889", borderRadius: 12, padding: "13px 14px", cursor: "pointer", marginTop: 10 }}>
-              <input type="checkbox" checked={esignConsent} onChange={e => setEsignConsent(e.target.checked)} style={{ marginTop: 2, width: 17, height: 17, accentColor: "#b07819" }} />
+            <label style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "var(--denim-pt)", border: "1px solid var(--denim-pt2)", borderRadius: 12, padding: "13px 14px", cursor: "pointer", marginTop: 10 }}>
+              <input type="checkbox" checked={esignConsent} onChange={e => setEsignConsent(e.target.checked)} style={{ marginTop: 2, width: 17, height: 17, accentColor: NAVY }} />
               <span style={{ fontSize: 12.5, lineHeight: 1.5 }}>
-                <b style={{ display: "block", marginBottom: 3, color: "#7a5208" }}>Electronic signature consent (ESIGN / Utah UETA)</b>
+                <b style={{ display: "block", marginBottom: 3, color: "var(--denim-pri)" }}>Electronic signature consent (ESIGN / Utah UETA)</b>
                 {ESIGN_CONSENT_STATEMENT}
               </span>
             </label>
             <div style={{ marginTop: 12 }}>
-              <div style={{ fontSize: 11, color: "#8a8f9e", marginBottom: 5 }}>Type your full legal name to sign</div>
-              <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Jordan Rivera" style={{ width: "100%", boxSizing: "border-box", font: "inherit", fontSize: 13.5, padding: "10px 12px", border: "1px solid #cdd2e0", borderRadius: 10 }} />
+              <div style={{ fontSize: 11, color: "var(--denim-muted)", marginBottom: 5 }}>Type your full legal name to sign</div>
+              <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Jordan Rivera" style={{ width: "100%", boxSizing: "border-box", font: "inherit", fontSize: 13.5, padding: "10px 12px", border: "1px solid var(--denim-pt2)", borderRadius: 10 }} />
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 18 }}>
               <button style={btn("out")} onClick={back}>Back</button>
@@ -2329,7 +2328,7 @@ export function TrainingModule({
           <>
             <div style={{ textAlign: "center", paddingTop: 6 }}>
               <div style={{ fontSize: 19, fontWeight: 700, color: INK }}>Segment not passed</div>
-              <div style={{ fontSize: 13.5, color: "#5b6172", marginTop: 8, lineHeight: 1.5 }}>
+              <div style={{ fontSize: 13.5, color: "var(--denim-muted)", marginTop: 8, lineHeight: 1.5 }}>
                 You scored {gate.correctCount} of {gate.total || SEGMENT_GATE_TOTAL}. You need {SEGMENT_GATE_PASS} of {SEGMENT_GATE_TOTAL} to pass this Scope of Work segment. You cannot continue until you pass.
               </div>
             </div>
@@ -2351,18 +2350,18 @@ export function TrainingModule({
         {step.type === "complete" && (!skipAttest || gate.passed) && (
           <>
             <div style={{ textAlign: "center", paddingTop: 6 }}>
-              <div style={{ width: 48, height: 48, margin: "0 auto", borderRadius: "50%", background: "#e1f5ee", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, color: "#0f6e56" }}>{"\u2713"}</div>
+              <div style={{ width: 48, height: 48, margin: "0 auto", borderRadius: "50%", background: "var(--denim-acct)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, color: "var(--denim-accd)" }}>{"\u2713"}</div>
               <div style={{ fontSize: 19, fontWeight: 700, color: INK, marginTop: 12 }}>Topic complete</div>
-              <div style={{ fontSize: 12.5, color: "#8a8f9e", marginTop: 4 }}>
+              <div style={{ fontSize: 12.5, color: "var(--denim-muted)", marginTop: 4 }}>
                 {skipAttest
                   ? `Passed ${gate.correctCount}/${gate.total} · ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
                   : `Signed by ${name || "\u2014"} · ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`}
               </div>
             </div>
             <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-              {[[`${gate.correctCount}/${gate.total || SEGMENT_GATE_TOTAL}`, "segment score", "#0f6e56"], [topic.code, "topic", NAVY], [skipAttest ? "Pass" : "\u2713", skipAttest ? "topic passed" : "attestation", "#b07819"]].map(([n, l, c], k) => (
-                <div key={k} style={{ flex: 1, background: "#f7f8fb", border: "1px solid #e4e7ef", borderRadius: 11, padding: 11, textAlign: "center" }}>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: c as string }}>{n}</div><div style={{ fontSize: 11, color: "#8a8f9e" }}>{l}</div>
+              {[[`${gate.correctCount}/${gate.total || SEGMENT_GATE_TOTAL}`, "segment score", "var(--denim-accd)"], [topic.code, "topic", NAVY], [skipAttest ? "Pass" : "\u2713", skipAttest ? "topic passed" : "attestation", "var(--denim-hi)"]].map(([n, l, c], k) => (
+                <div key={k} style={{ flex: 1, background: "var(--denim-pt0)", border: "1px solid var(--denim-line)", borderRadius: 11, padding: 11, textAlign: "center" }}>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: c as string }}>{n}</div><div style={{ fontSize: 11, color: "var(--denim-muted)" }}>{l}</div>
                 </div>
               ))}
             </div>

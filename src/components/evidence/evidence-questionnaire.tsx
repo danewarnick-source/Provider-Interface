@@ -247,7 +247,7 @@ export function EvidenceQuestionnaire({
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-end justify-center bg-black/45 p-0 sm:items-center sm:p-4"
+      className="fixed inset-0 z-40 flex items-end justify-center bg-[rgba(23,40,61,0.45)] p-0 backdrop-blur-[4px] sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="evidence-pack-title"
@@ -255,11 +255,14 @@ export function EvidenceQuestionnaire({
     >
       <div
         data-evidence-quiz=""
-        className="flex max-h-[100dvh] w-full max-w-[680px] flex-col overflow-hidden rounded-t-2xl bg-card shadow-lg sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl"
+        className="flex max-h-[100dvh] w-full max-w-[680px] flex-col overflow-hidden rounded-t-[20px] bg-paper shadow-[var(--denim-shadow)] sm:max-h-[calc(100dvh-2rem)] sm:rounded-[20px]"
         onClick={(event) => event.stopPropagation()}
       >
         <header className="border-b border-border px-5 py-4">
-          <h2 id="evidence-pack-title" className="text-lg font-semibold text-[var(--hive-text)]">
+          <h2
+            id="evidence-pack-title"
+            className="font-display text-lg font-semibold tracking-[-0.01em] text-deep"
+          >
             {title}
           </h2>
           {step === "custom" ? (
@@ -278,7 +281,7 @@ export function EvidenceQuestionnaire({
                   {quizCodes.map((code) => (
                     <label
                       key={code}
-                      className="flex cursor-pointer items-center gap-3 rounded-lg border border-border px-3 py-2 text-sm"
+                      className="flex cursor-pointer items-center gap-3 rounded-xl border border-line px-3 py-2 text-sm transition-colors ease-denim hover:bg-pt0"
                     >
                       <Checkbox
                         checked={answers.serviceCodes.includes(code)}
@@ -292,7 +295,7 @@ export function EvidenceQuestionnaire({
               <section className="rounded-xl border border-border p-3">
                 <h3 className="text-sm font-semibold">Transport</h3>
                 <div className="mt-3 grid gap-2">
-                  <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border px-3 py-2 text-sm">
+                  <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-line px-3 py-2 text-sm transition-colors ease-denim hover:bg-pt0">
                     <input
                       type="radio"
                       name="transport"
@@ -301,7 +304,7 @@ export function EvidenceQuestionnaire({
                     />
                     Yes
                   </label>
-                  <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border px-3 py-2 text-sm">
+                  <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-line px-3 py-2 text-sm transition-colors ease-denim hover:bg-pt0">
                     <input
                       type="radio"
                       name="transport"
@@ -315,7 +318,7 @@ export function EvidenceQuestionnaire({
               <section className="rounded-xl border border-border p-3">
                 <h3 className="text-sm font-semibold">Caseload flags</h3>
                 <div className="mt-3 grid gap-2">
-                  <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border px-3 py-2 text-sm">
+                  <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-line px-3 py-2 text-sm transition-colors ease-denim hover:bg-pt0">
                     <Checkbox
                       checked={answers.worksWithAbi}
                       onCheckedChange={(v) =>
@@ -324,7 +327,7 @@ export function EvidenceQuestionnaire({
                     />
                     ABI
                   </label>
-                  <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border px-3 py-2 text-sm">
+                  <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-line px-3 py-2 text-sm transition-colors ease-denim hover:bg-pt0">
                     <Checkbox
                       checked={answers.maySupportAggressiveBehavior}
                       onCheckedChange={(v) =>
@@ -346,7 +349,7 @@ export function EvidenceQuestionnaire({
                   {quizCodes.map((code) => (
                     <label
                       key={code}
-                      className="flex cursor-pointer items-center gap-3 rounded-lg border border-border px-3 py-2 text-sm"
+                      className="flex cursor-pointer items-center gap-3 rounded-xl border border-line px-3 py-2 text-sm transition-colors ease-denim hover:bg-pt0"
                     >
                       <Checkbox
                         checked={answers.serviceCodes.includes(code)}
@@ -405,7 +408,7 @@ export function EvidenceQuestionnaire({
                                 )}
                                 {row.dualLink ? " · same file on Team Members + Client" : ""}
                               </span>
-                              <span className="mt-2 block text-sm leading-snug text-slate-700">
+                              <span className="mt-2 block text-sm leading-snug text-haze-700">
                                 {row.why}
                               </span>
                               <EvidenceDueFields
@@ -427,7 +430,7 @@ export function EvidenceQuestionnaire({
                                       href={link.href}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="text-xs font-semibold text-[var(--hive-accent,#2f6fed)] underline-offset-2 hover:underline"
+                                      className="text-xs font-semibold text-accd underline-offset-2 hover:underline"
                                     >
                                       {link.label}
                                     </a>
@@ -444,7 +447,7 @@ export function EvidenceQuestionnaire({
                                       [row.key]: e.target.value as EvidenceType,
                                     }))
                                   }
-                                  className="mt-1 h-8 rounded-md border border-input bg-background px-2 text-xs"
+                                  className="mt-1 h-8 rounded-[10px] border border-input bg-paper px-2 text-xs"
                                 >
                                   <option value="upload">Upload</option>
                                   <option value="attestation">Attestation</option>
@@ -459,7 +462,7 @@ export function EvidenceQuestionnaire({
                 </section>
               ))}
 
-              <div className="space-y-3 rounded-xl border border-border bg-muted/30 px-3 py-3">
+              <div className="space-y-3 rounded-xl border border-line bg-pt0 px-3 py-3">
                 <label className="flex items-start gap-3 text-sm">
                   <Checkbox checked={liability} onCheckedChange={(v) => setLiability(v === true)} />
                   <span>{EVIDENCE_LIABILITY_TEXT}</span>
@@ -510,7 +513,7 @@ export function EvidenceQuestionnaire({
                   id="evidence-custom-type"
                   value={customType}
                   onChange={(e) => setCustomType(e.target.value as EvidenceType)}
-                  className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                  className="h-9 rounded-[10px] border border-input bg-paper px-2 text-sm"
                 >
                   <option value="upload">Upload</option>
                   <option value="attestation">Attestation</option>
@@ -531,7 +534,7 @@ export function EvidenceQuestionnaire({
                   placeholder="What this row is for"
                 />
               </div>
-              <div className="space-y-3 rounded-xl border border-border bg-muted/30 px-3 py-3">
+              <div className="space-y-3 rounded-xl border border-line bg-pt0 px-3 py-3">
                 <label className="flex items-start gap-3 text-sm">
                   <Checkbox checked={liability} onCheckedChange={(v) => setLiability(v === true)} />
                   <span>{EVIDENCE_LIABILITY_TEXT}</span>
@@ -606,7 +609,7 @@ export function EvidenceQuestionnaire({
                   Add question
                 </Button>
               </div>
-              <div className="space-y-3 rounded-xl border border-border bg-muted/30 px-3 py-3">
+              <div className="space-y-3 rounded-xl border border-line bg-pt0 px-3 py-3">
                 <label className="flex items-start gap-3 text-sm">
                   <Checkbox checked={liability} onCheckedChange={(v) => setLiability(v === true)} />
                   <span>{EVIDENCE_LIABILITY_TEXT}</span>
@@ -635,7 +638,7 @@ export function EvidenceQuestionnaire({
         </div>
 
         <footer
-          className="flex flex-wrap items-center gap-2 border-t border-border bg-muted/30 px-5 py-3"
+          className="flex flex-wrap items-center gap-2 border-t border-line bg-pt0 px-5 py-3"
           style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
         >
           <Button type="button" variant="outline" onClick={leaveWizard}>

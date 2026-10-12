@@ -27,9 +27,9 @@ interface Props {
 }
 
 const STATUS_META: Record<string, { label: string; tone: string; Icon: typeof ClockIcon }> = {
-  pending:  { label: "Pending admin approval", tone: "bg-amber-100 text-amber-900 border-amber-300", Icon: ClockIcon },
-  approved: { label: "Approved",                tone: "bg-emerald-100 text-emerald-900 border-emerald-300", Icon: CheckCircle2 },
-  denied:   { label: "Denied",                  tone: "bg-rose-100 text-rose-900 border-rose-300", Icon: XCircle },
+  pending:  { label: "Pending admin approval", tone: "bg-warning-50 text-warning-700 border-warning-200", Icon: ClockIcon },
+  approved: { label: "Approved",                tone: "bg-acct text-accd border-acctb", Icon: CheckCircle2 },
+  denied:   { label: "Denied",                  tone: "bg-danger-50 text-danger-700 border-danger-200", Icon: XCircle },
 };
 
 export function ReimbursementShiftPanel({ shiftId, clientId }: Props) {
@@ -56,11 +56,11 @@ export function ReimbursementShiftPanel({ shiftId, clientId }: Props) {
   return (
     <section
       aria-label="Activity Reimbursement"
-      className="rounded-2xl border border-border bg-card/80 p-4 shadow-[var(--shadow-card)] backdrop-blur-sm"
+      className="rounded-[var(--denim-r)] border border-line bg-paper p-4 shadow-[var(--denim-shadow)]"
     >
       <header className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-pt text-pri">
             <Receipt className="h-4 w-4" />
           </span>
           <div className="leading-tight">
@@ -73,7 +73,7 @@ export function ReimbursementShiftPanel({ shiftId, clientId }: Props) {
         <Button
           size="sm"
           onClick={() => setOpenNew(true)}
-          className="h-9 gap-1 bg-amber-500 text-white hover:bg-amber-600"
+          className="h-9 gap-1 rounded-full"
         >
           <Plus className="h-4 w-4" /> Request
         </Button>
@@ -82,7 +82,7 @@ export function ReimbursementShiftPanel({ shiftId, clientId }: Props) {
       {requests.isLoading ? (
         <p className="py-3 text-center text-xs text-muted-foreground">Loading…</p>
       ) : !requests.data?.length ? (
-        <p className="rounded-md border border-dashed border-border bg-muted/40 px-3 py-3 text-center text-[12px] text-muted-foreground">
+        <p className="rounded-xl border border-dashed border-pt2 bg-pt0 px-3 py-3 text-center text-[12px] text-muted-foreground">
           No requests yet. Submit one if an unexpected, reimbursable activity comes up.
         </p>
       ) : (
@@ -116,7 +116,7 @@ function RequestCard({ req, onChange }: { req: ReimbursementRow; onChange: () =>
   const needsPaperwork = req.status === "approved" && !req.summary_submitted_at;
 
   return (
-    <li className="rounded-lg border border-border bg-background/70 p-3">
+    <li className="rounded-xl border border-line bg-pt0 p-3">
       <div className="mb-1.5 flex items-start justify-between gap-2">
         <p className="text-sm font-medium leading-tight">{req.activity_description}</p>
         <Badge variant="outline" className={`shrink-0 gap-1 text-[10px] ${meta.tone}`}>
@@ -133,7 +133,7 @@ function RequestCard({ req, onChange }: { req: ReimbursementRow; onChange: () =>
       )}
       {needsPaperwork && <PaperworkSection req={req} onSaved={onChange} />}
       {req.status === "approved" && req.summary_submitted_at && (
-        <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700">
+        <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-accd">
           <CheckCircle2 className="h-3 w-3" /> Paperwork complete · attached to shift record
         </p>
       )}
@@ -221,8 +221,8 @@ function PaperworkSection({ req, onSaved }: { req: ReimbursementRow; onSaved: ()
   }
 
   return (
-    <div className="mt-3 space-y-3 rounded-md border border-amber-300 bg-amber-50/70 p-3">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-900">
+    <div className="mt-3 space-y-3 rounded-xl border border-warning-200 bg-warning-50 p-3">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">
         End-of-shift paperwork required
       </p>
 
@@ -230,7 +230,7 @@ function PaperworkSection({ req, onSaved }: { req: ReimbursementRow; onSaved: ()
         <Label className="text-[11px] font-medium">Receipts</Label>
         <div className="mt-1 space-y-1">
           {(req.receipt_paths ?? []).map((p) => (
-            <div key={p} className="flex items-center justify-between gap-2 rounded border border-border bg-background/80 px-2 py-1 text-[11px]">
+            <div key={p} className="flex items-center justify-between gap-2 rounded-lg border border-line bg-paper px-2 py-1 text-[11px]">
               <span className="inline-flex min-w-0 items-center gap-1.5 truncate">
                 <FileText className="h-3 w-3 shrink-0 text-muted-foreground" />
                 <span className="truncate font-mono">{p.split("/").pop()}</span>
@@ -238,7 +238,7 @@ function PaperworkSection({ req, onSaved }: { req: ReimbursementRow; onSaved: ()
               <button
                 type="button"
                 onClick={() => removeReceipt(p)}
-                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded text-rose-600 hover:bg-rose-50"
+                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded text-danger-600 hover:bg-danger-50"
                 aria-label="Remove receipt"
               >
                 <Trash2 className="h-3.5 w-3.5" />
@@ -287,7 +287,7 @@ function PaperworkSection({ req, onSaved }: { req: ReimbursementRow; onSaved: ()
       <Button
         onClick={submitPaperwork}
         disabled={busy}
-        className="h-10 w-full bg-amber-500 text-white hover:bg-amber-600"
+        className="h-10 w-full rounded-full"
       >
         {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         Attach to shift record
@@ -352,7 +352,7 @@ function NewRequestDialog({
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Receipt className="h-4 w-4 text-amber-600" />
+            <Receipt className="h-4 w-4 text-pri" />
             Activity Reimbursement Request
           </DialogTitle>
           <DialogDescription>
@@ -404,7 +404,7 @@ function NewRequestDialog({
           <Button
             onClick={() => submit.mutate()}
             disabled={submit.isPending}
-            className="bg-amber-500 text-white hover:bg-amber-600"
+            className="rounded-full"
           >
             {submit.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Send for approval

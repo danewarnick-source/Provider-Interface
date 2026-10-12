@@ -71,6 +71,7 @@ export const getRhsClients = createServerFn({ method: "POST" })
     const { data: rows, error } = await context.supabase
       .from("clients")
       .select("id, first_name, last_name")
+      .is("deleted_at", null)
       .in("id", data.clientIds)
       .order("last_name");
     if (error) throw error;

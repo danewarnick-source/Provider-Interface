@@ -1,14 +1,24 @@
 import { createServerFn } from "@tanstack/react-start";
 import { loadClientContacts, primaryContact, type ClientContact } from "@/lib/clients/contacts";
-import { loadPlanBundle } from "@/lib/clients/plans-load";
-import { noteAddressesAny, summaryGoals, type SummaryGoal } from "@/lib/clients/plan-summaries";
+import type { SummaryGoal } from "@/lib/clients/plan-summaries";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { toIsoDateDay } from "@/lib/iso-date-day";
-import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
+import { FINALIZE_COLUMNS, readReopenHistory, reopenPatch, type ReopenEvent } from "@/lib/progress-summary-reopen";
+import { readReviewState, type SummaryReviewState } from "@/lib/progress-summary-review";
 import {
+  editorFromLegacyText,
+  readEditorState,
+  type SummaryDoc,
+  type SummaryEditorState,
+  type SummaryEvidence,
+} from "@/lib/progress-summary-doc";
+import { loadSummarySource } from "@/lib/progress-summary-source.server";
+import {
+  canFinalizeSummary,
   clientNeedsGoalProgress,
+  finalizeOpensMessage,
   filterPeriodsByFloor,
   recentMonthlyPeriods,
   recentQuarterlyPeriods,
@@ -160,11 +170,13 @@ export const ensureCurrentSummaryPeriods = createServerFn({ method: "POST" })
       const withHive = await (supabase as any)
         .from("clients")
         .select("id, hive_start_date, created_at")
+        .is("deleted_at", null)
         .eq("organization_id", data.organizationId);
       if (withHive.error && /hive_start_date/i.test(withHive.error.message)) {
         const { data: fallback, error: fbErr } = await supabase
           .from("clients")
           .select("id, created_at")
+          .is("deleted_at", null)
           .eq("organization_id", data.organizationId);
         if (fbErr) throw new Error(fbErr.message);
         clientRows = (fallback ?? []).map((c) => ({
@@ -475,34 +487,16 @@ export type SummarySourceBundle = {
   };
   staffNames: string[];
   servicesInPeriod: Array<{ service_code: string; service_start_date: string | null; service_end_date: string | null }>;
-  dailyLogs: Array<{
-    id: string;
-    log_date: string;
-    narrative: string;
-    pcsp_goals_addressed: string[];
-    goal_ids: string[];
-    staff_name: string | null;
-    approved_at: string | null;
-  }>;
-  shiftReports: Array<{
-    id: string;
-    created_at: string;
-    narrative: string | null;
-    staff_name: string | null;
-    service_code: string | null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    goals_worked: any;
-  }>;
-  incidents: Array<{
-    id: string;
-    report_number: string;
-    incident_date: string;
-    incident_types: string[];
-    narrative_before: string;
-    narrative_during: string;
-    narrative_after: string;
-  }>;
-  untaggedSourceCount: number;
+  /** Approved daily logs, submitted shift notes / reports and incidents in the period. */
+  evidence: SummaryEvidence[];
+  /** The editor's fields as last saved (older text-only drafts read back into fields). */
+  editor: SummaryEditorState;
+  /** The document as finalized, when it was finalized from this editor. */
+  finalDoc: SummaryDoc | null;
+  /** Nectar's last run: suggestions waiting, reminders and suggestions hidden with the x. */
+  review: SummaryReviewState;
+  /** Each time the summary was reopened after finalizing, newest first. */
+  reopens: ReopenEvent[];
 };
 
 export const getSummaryWithSource = createServerFn({ method: "POST" })
@@ -565,13 +559,7 @@ export const getSummaryWithSource = createServerFn({ method: "POST" })
       .eq("organization_id", data.organizationId)
       .maybeSingle();
 
-    // Goals → supports for this summary's codes, from the plan in effect at period end.
-    const periodCodes = new Set((summaryRow.service_codes ?? []).map((c) => c.toUpperCase()));
-    const { goals } = summaryGoals(
-      await loadPlanBundle(supabase, summaryRow.client_id),
-      summaryRow.period_end,
-      [...periodCodes],
-    );
+    const source = await loadSummarySource(supabase, data.organizationId, summaryRow);
 
     const { data: services, error: svcErr } = await supabase
       .from("client_billing_codes")
@@ -585,102 +573,11 @@ export const getSummaryWithSource = createServerFn({ method: "POST" })
       return startOk && endOk;
     });
 
-    const { data: logs, error: lErr } = await supabase
-      .from("daily_logs")
-      .select("id, log_date, narrative, pcsp_goals_addressed, goal_ids, user_id, approved_at")
-      .eq("organization_id", data.organizationId)
-      .eq("client_id", summaryRow.client_id)
-      .eq("status", "approved")
-      .gte("log_date", summaryRow.period_start)
-      .lte("log_date", summaryRow.period_end)
-      .order("log_date", { ascending: true });
-    if (lErr) throw new Error(lErr.message);
-
-    const { data: reports, error: rErr } = await supabase
-      .from("shift_reports")
-      .select("id, created_at, narrative, staff_id, goals_worked, submitted_at, scheduled_shift_id")
-      .eq("organization_id", data.organizationId)
-      .eq("client_id", summaryRow.client_id)
-      .gte("created_at", `${summaryRow.period_start}T00:00:00`)
-      .lte("created_at", `${summaryRow.period_end}T23:59:59`)
-      .not("submitted_at", "is", null)
-      .order("created_at", { ascending: true });
-    if (rErr) throw new Error(rErr.message);
-
-    const shiftIds = [...new Set((reports ?? []).map((r) => r.scheduled_shift_id).filter(Boolean))] as string[];
-    const shiftCodeById = new Map<string, string>();
-    if (shiftIds.length > 0) {
-      const { data: shifts } = await supabase
-        .from("scheduled_shifts")
-        .select("id, service_code")
-        .in("id", shiftIds);
-      for (const sh of (shifts ?? []) as Array<{ id: string; service_code: string | null }>) {
-        if (sh.service_code) shiftCodeById.set(sh.id, sh.service_code.toUpperCase());
-      }
-    }
-
-    const { data: incidents, error: iErr } = await supabase
-      .from("incident_reports")
-      .select("id, report_number, incident_date, incident_types, narrative_before, narrative_during, narrative_after")
-      .eq("organization_id", data.organizationId)
-      .or(incidentInvolvesClientOr(summaryRow.client_id))
-      .gte("incident_date", summaryRow.period_start)
-      .lte("incident_date", summaryRow.period_end)
-      .order("incident_date", { ascending: true });
-    if (iErr) throw new Error(iErr.message);
-
-    // Resolve staff names in bulk.
-    const staffIds = new Set<string>();
-    for (const l of logs ?? []) if (l.user_id) staffIds.add(l.user_id);
-    for (const r of reports ?? []) if (r.staff_id) staffIds.add(r.staff_id);
-    const nameById = new Map<string, string>();
-    if (staffIds.size > 0) {
-      const { data: profs } = await supabase
-        .from("profiles")
-        .select("id, first_name, last_name")
-        .in("id", [...staffIds]);
-      for (const p of (profs ?? []) as Array<{ id: string; first_name: string | null; last_name: string | null }>) {
-        nameById.set(p.id, [p.first_name, p.last_name].filter(Boolean).join(" ") || "Staff");
-      }
-    }
-
-    let untaggedSourceCount = 0;
-    const dailyLogs = (logs ?? []).map((l) => {
-      const addressed = (l.pcsp_goals_addressed ?? []) as string[];
-      const goalIds = (l.goal_ids ?? []) as string[];
-      if (!noteAddressesAny({ goal_ids: goalIds, addressed }, goals)) {
-        untaggedSourceCount += 1;
-      }
-      return {
-        id: l.id,
-        log_date: l.log_date,
-        narrative: l.narrative,
-        pcsp_goals_addressed: addressed,
-        goal_ids: goalIds,
-        staff_name: l.user_id ? (nameById.get(l.user_id) ?? null) : null,
-        approved_at: l.approved_at,
-      };
-    });
-
-    const shiftReports = (reports ?? []).map((r) => {
-      const code = r.scheduled_shift_id ? (shiftCodeById.get(r.scheduled_shift_id) ?? null) : null;
-      if (code && periodCodes.size > 0 && !periodCodes.has(code)) {
-        // Code-stamped but outside this period's codes — still list for review.
-        untaggedSourceCount += 1;
-      } else if (!code) {
-        untaggedSourceCount += 1;
-      }
-      return {
-        id: r.id,
-        created_at: r.created_at,
-        narrative: r.narrative,
-        staff_name: r.staff_id ? (nameById.get(r.staff_id) ?? null) : null,
-        service_code: code,
-        goals_worked: r.goals_worked,
-      };
-    });
-
-    const staffNames = [...new Set([...nameById.values()])].sort();
+    const draftSource = (await mergedDraftSource(supabase, data.organizationId, data.summaryId, {})) as {
+      editor?: unknown;
+      final_doc?: SummaryDoc;
+      review?: unknown;
+    };
 
     return {
       summary: summaryRow,
@@ -693,7 +590,7 @@ export const getSummaryWithSource = createServerFn({ method: "POST" })
           "support_coordinator",
         ),
       },
-      goals,
+      goals: source.goals,
       organization: {
         name: org?.name ?? null,
         legal_name: org?.legal_name ?? null,
@@ -701,36 +598,94 @@ export const getSummaryWithSource = createServerFn({ method: "POST" })
         phone: branding?.org_phone ?? null,
         logo_path: branding?.logo_path ?? null,
       },
-      staffNames,
+      staffNames: source.staffNames,
       servicesInPeriod: inPeriod as SummarySourceBundle["servicesInPeriod"],
-      dailyLogs,
-      shiftReports,
-      incidents: (incidents ?? []) as SummarySourceBundle["incidents"],
-      untaggedSourceCount,
+      evidence: source.evidence,
+      editor:
+        readEditorState(draftSource.editor) ??
+        editorFromLegacyText(summaryRow.final_content ?? summaryRow.draft_content, source.goals),
+      finalDoc: draftSource.final_doc ?? null,
+      review: readReviewState(draftSource.review),
+      reopens: readReopenHistory(draftSource),
     };
   });
 
+/** The editor's fields as sent by the client (normalized by readEditorState). */
+const editorInput = z
+  .record(z.string(), z.unknown())
+  .refine((v) => JSON.stringify(v).length <= 200_000, "Summary is too long.");
+
+/** draft_source with `patch` merged in (the Nectar provenance stays). */
+async function mergedDraftSource(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  organizationId: string,
+  summaryId: string,
+  patch: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+  const { data, error } = await supabase
+    .from("client_progress_summaries")
+    .select("draft_source")
+    .eq("id", summaryId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return { ...((data?.draft_source ?? {}) as Record<string, unknown>), ...patch };
+}
+
+/** Autosave: the document text and the editor's fields. Never touches a finalized summary. */
 export const saveSummaryDraft = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) => z.object({
     organizationId: z.string().uuid(),
     summaryId: z.string().uuid(),
     content: z.string().max(50_000),
+    editor: editorInput,
   }).parse(i))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: true };
     await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    const draftSource = await mergedDraftSource(supabase, data.organizationId, data.summaryId, {
+      editor: readEditorState(data.editor),
+    });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any)
       .from("client_progress_summaries")
-      .update({ draft_content: data.content, status: "in_review", updated_at: new Date().toISOString() })
+      .update({
+        draft_content: data.content,
+        draft_source: draftSource,
+        status: "in_review",
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", data.summaryId)
       .eq("organization_id", data.organizationId)
+      .neq("status", "finalized")
       .is("completed_at", null);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+/**
+ * Finalize gate: the period must have reached its last day (Denver time;
+ * canFinalizeSummary). Nothing else blocks it. Nectar's review is optional.
+ */
+async function assertCanFinalize(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  organizationId: string,
+  summaryId: string,
+): Promise<void> {
+  const { data: row, error } = await supabase
+    .from("client_progress_summaries")
+    .select("period_end")
+    .eq("id", summaryId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!row) throw new Error("Summary not found");
+  if (!canFinalizeSummary(row.period_end)) throw new Error(finalizeOpensMessage(row.period_end));
+}
 
 export const finalizeSummary = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -738,6 +693,9 @@ export const finalizeSummary = createServerFn({ method: "POST" })
     organizationId: z.string().uuid(),
     summaryId: z.string().uuid(),
     content: z.string().min(1).max(50_000),
+    editor: editorInput,
+    /** The document as finalized (SummaryDoc), kept so its PDF never changes. */
+    doc: z.record(z.string(), z.unknown()),
     finalizedByName: z.string().min(1).max(200),
     aiReviewAttested: z.boolean(),
   }).parse(i))
@@ -746,14 +704,19 @@ export const finalizeSummary = createServerFn({ method: "POST" })
     if (!supabase || !userId) return { ok: true };
     await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     if (!data.aiReviewAttested) {
-      throw new Error("Confirm you reviewed the Nectar draft against PI documentation before finalizing.");
+      throw new Error("Confirm you reviewed this summary and take responsibility for it before finalizing.");
     }
+    await assertCanFinalize(supabase, data.organizationId, data.summaryId);
     const ts = new Date().toISOString();
 
     // Finalize content now; deadline clears only after UPI or SC send attestation.
     // Keep completed_at null so open-list / Deadlines still show the filing step.
     const patch: Record<string, unknown> = {
       final_content: data.content,
+      draft_source: await mergedDraftSource(supabase, data.organizationId, data.summaryId, {
+        editor: readEditorState(data.editor),
+        final_doc: data.doc,
+      }),
       finalized_at: ts,
       finalized_by: userId,
       finalized_by_name: data.finalizedByName,
@@ -779,6 +742,55 @@ export const finalizeSummary = createServerFn({ method: "POST" })
         .eq("id", data.summaryId)
         .eq("organization_id", data.organizationId));
     }
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/**
+ * Reopen a finalized summary for edits (progress-summary-reopen.ts): the
+ * finalized copy is kept as a superseded version, who / when / why and any
+ * withdrawn filing attestation are recorded, and the row returns to
+ * in_review with every finalize and attestation column cleared — so the
+ * summaries list, deadlines and the client file count it as not done.
+ */
+export const reopenSummary = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({
+    organizationId: z.string().uuid(),
+    summaryId: z.string().uuid(),
+    reason: z.string().max(500).nullable(),
+  }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) throw new Error("Sign in again.");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = supabase as any;
+    const { data: row, error: rErr } = await sb
+      .from("client_progress_summaries")
+      .select(`status, draft_source, ${FINALIZE_COLUMNS.join(", ")}`)
+      .eq("id", data.summaryId)
+      .eq("organization_id", data.organizationId)
+      .maybeSingle();
+    if (rErr) throw new Error(rErr.message);
+    if (!row) throw new Error("Summary not found");
+    const { data: me } = await supabase
+      .from("profiles")
+      .select("first_name, last_name")
+      .eq("id", userId)
+      .maybeSingle();
+    const byName = [me?.first_name, me?.last_name].filter(Boolean).join(" ").trim() || null;
+    const patch = reopenPatch(
+      row,
+      row.draft_source,
+      { by: userId, byName, at: new Date().toISOString() },
+      data.reason,
+    );
+    const { error } = await sb
+      .from("client_progress_summaries")
+      .update(patch)
+      .eq("id", data.summaryId)
+      .eq("organization_id", data.organizationId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

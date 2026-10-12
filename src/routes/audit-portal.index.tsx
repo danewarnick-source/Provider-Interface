@@ -42,9 +42,9 @@ function AuditPortalIndex() {
 
         return (
           <div className="space-y-4">
-            <header className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <header className="rounded-xl border border-haze-200 bg-white p-5 shadow-sm">
               <div className="flex items-start gap-3">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-success-100 text-success-700">
                   <ShieldCheck className="h-5 w-5" />
                 </span>
                 <div>
@@ -61,12 +61,12 @@ function AuditPortalIndex() {
             </header>
 
             {listQ.isLoading ? (
-              <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-sm text-muted-foreground">
+              <div className="rounded-xl border border-haze-200 bg-white p-8 text-center text-sm text-muted-foreground">
                 Loading your granted packages…
               </div>
             ) : rows.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
-                <FileText className="mx-auto h-8 w-8 text-slate-300" />
+              <div className="rounded-xl border border-dashed border-haze-300 bg-white p-8 text-center">
+                <FileText className="mx-auto h-8 w-8 text-haze-300" />
                 <div className="mt-2 text-sm font-medium text-[var(--hive-text)]">No packages yet</div>
                 <div className="mt-1 text-xs text-muted-foreground">
                   A provider organization will notify you when a package is released.
@@ -79,7 +79,7 @@ function AuditPortalIndex() {
                     <Link
                       to="/audit-portal/$packageId"
                       params={{ packageId: p.id }}
-                      className="group flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-[var(--hive-text)] hover:shadow-md"
+                      className="group flex items-center justify-between gap-4 rounded-xl border border-haze-200 bg-white p-4 shadow-sm transition-all hover:border-[var(--hive-text)] hover:shadow-md"
                     >
                       <div className="min-w-0 flex-1 space-y-1">
                         <div className="flex items-center gap-2">
@@ -100,7 +100,7 @@ function AuditPortalIndex() {
                           <span>{p.subject_count} subjects</span>
                         </div>
                       </div>
-                      <ArrowRight className="h-5 w-5 text-slate-300 group-hover:text-[var(--hive-text)]" />
+                      <ArrowRight className="h-5 w-5 text-haze-300 group-hover:text-[var(--hive-text)]" />
                     </Link>
                   </li>
                 ))}

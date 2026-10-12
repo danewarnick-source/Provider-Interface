@@ -203,12 +203,12 @@ export function DocumentEffectiveDatingDialog({
         ) : (
           <div className="space-y-4">
             {sibling && (
-              <div className="rounded-lg border border-amber-300/70 bg-amber-50 p-3 text-sm dark:bg-amber-950/30">
-                <div className="font-medium text-amber-900 dark:text-amber-200">
+              <div className="rounded-lg border border-warning-300/70 bg-warning-50 p-3 text-sm dark:bg-warning-950/30">
+                <div className="font-medium text-warning-900 dark:text-warning-200">
                   A current {label} is already on file
                   {sibling.file_name ? ` (${sibling.file_name})` : ""}.
                 </div>
-                <div className="mt-1 text-xs text-amber-900/80 dark:text-amber-200/80">
+                <div className="mt-1 text-xs text-warning-900/80 dark:text-warning-200/80">
                   Is this new upload replacing it?
                 </div>
                 <RadioGroup
@@ -255,7 +255,7 @@ export function DocumentEffectiveDatingDialog({
                   </blockquote>
                 )}
                 {confidence === "low" && (
-                  <div className="mt-2 flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-300">
+                  <div className="mt-2 flex items-start gap-1.5 text-xs text-warning-700 dark:text-warning-300">
                     <AlertTriangle className="mt-0.5 h-3.5 w-3.5" />
                     Low confidence — please verify against the file before saving.
                   </div>

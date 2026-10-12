@@ -2,9 +2,9 @@ import { ArrowRight, CircleAlert } from "lucide-react";
 import type { PacketNextAction } from "@/lib/obligations/packet";
 
 function urgencyClass(urgency: PacketNextAction["urgency"]): string {
-  if (urgency === "critical") return "border-rose-300 bg-rose-50 text-rose-950";
-  if (urgency === "high") return "border-amber-300 bg-amber-50 text-amber-950";
-  return "border-[var(--hive-gold)]/40 bg-[#fff7ed] text-[var(--hive-text)]";
+  if (urgency === "critical") return "border-danger-200 bg-danger-50 text-danger-700";
+  if (urgency === "high") return "border-warning-200 bg-warning-50 text-warning-700";
+  return "border-pt2 bg-pt text-ink";
 }
 
 export function PacketNextActionCard({
@@ -16,16 +16,18 @@ export function PacketNextActionCard({
 }) {
   if (!nextAction) {
     return (
-      <div className="rounded-xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+      <div className="rounded-[var(--denim-r)] border border-line bg-paper px-4 py-3 text-sm text-muted-foreground shadow-[var(--denim-shadow-sm)]">
         {emptyLabel}
       </div>
     );
   }
 
   return (
-    <div className={`rounded-xl border px-4 py-3 ${urgencyClass(nextAction.urgency)}`}>
-      <p className="text-xs font-semibold uppercase tracking-wide">Next action</p>
-      <p className="mt-1 font-semibold">{nextAction.title}</p>
+    <div
+      className={`rounded-[var(--denim-r)] border px-4 py-3 ${urgencyClass(nextAction.urgency)}`}
+    >
+      <p className="text-[12.5px] font-semibold uppercase tracking-[0.1em]">Next action</p>
+      <p className="mt-1 font-display font-semibold tracking-[-0.01em]">{nextAction.title}</p>
       <p className="mt-0.5 text-sm">{nextAction.reason}</p>
       <a
         href={nextAction.href}
@@ -41,7 +43,7 @@ export function PacketNextActionCard({
 export function PacketScopeNote({ scoped, count }: { scoped: boolean; count: number }) {
   if (!scoped) return null;
   return (
-    <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+    <div className="flex items-start gap-2 rounded-xl border border-line bg-pt0 px-3 py-2 text-xs text-muted-foreground">
       <CircleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
       <p>Showing your scope only ({count} staff). Org-wide view returns when Scope is unset.</p>
     </div>

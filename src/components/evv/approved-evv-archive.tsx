@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { CheckboxMultiSelect } from "@/components/ui/checkbox-multi-select";
 import { EVV_SERVICE_CODES } from "@/lib/evv-codes";
 import { downloadCsv } from "@/lib/utah-evv-export";
-import { HistoricalTimesheetBadge } from "@/components/smart-import/timesheets/historical-timesheet-badge";
+import { HistoricalTimesheetBadge } from "@/components/evv/historical-timesheet-badge";
 import { toast } from "sonner";
 import { isAdminLevel } from "@/lib/access/levels";
 
@@ -133,6 +133,7 @@ export function EvvArchivePage() {
       const { data } = await supabase
         .from("organization_members")
         .select("user_id, profiles:user_id(first_name, last_name)")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .eq("active", true);
       type R = { user_id: string; profiles: { first_name: string; last_name: string } | null };
@@ -154,6 +155,7 @@ export function EvvArchivePage() {
       const { data } = await supabase
         .from("clients")
         .select("id, first_name, last_name, team_id")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .order("last_name");
       return (data ?? []).map((c) => ({
@@ -457,14 +459,14 @@ export function EvvArchivePage() {
                   <td className="px-3 py-2">
                     {fmtTs(inTs)} → {fmtTs(outTs)}
                     {r.is_edited_by_admin && (
-                      <span className="ml-1 text-[10px] font-medium uppercase tracking-wider text-amber-700">edited</span>
+                      <span className="ml-1 text-[10px] font-medium uppercase tracking-wider text-warning-700">edited</span>
                     )}
                   </td>
                   <td className="px-3 py-2 tabular-nums">{fmtDur(r.duration_min)}</td>
                   <td className="px-3 py-2">
                     <div className="flex flex-wrap items-center gap-1">
                       {r.is_out_of_bounds ? (
-                        <span className="inline-flex items-center gap-1 text-xs text-amber-700">
+                        <span className="inline-flex items-center gap-1 text-xs text-warning-700">
                           <AlertTriangle className="h-3 w-3" /> out
                         </span>
                       ) : (
@@ -542,13 +544,13 @@ function FilterLabel({ label, children }: { label: string; children: React.React
 function BillingBadge({ value }: { value: "billed" | "unbilled" | "held" }) {
   if (value === "billed")
     return (
-      <Badge className="gap-1 bg-emerald-100 text-emerald-800 hover:bg-emerald-100">
+      <Badge className="gap-1 bg-success-100 text-success-800 hover:bg-success-100">
         <CheckCircle2 className="h-3 w-3" /> Billed
       </Badge>
     );
   if (value === "held")
     return (
-      <Badge variant="outline" className="gap-1 border-amber-300 text-amber-800">
+      <Badge variant="outline" className="gap-1 border-warning-300 text-warning-800">
         <AlertTriangle className="h-3 w-3" /> Held
       </Badge>
     );
@@ -581,6 +583,7 @@ async function fetchArchive(args: {
     const { data } = await supabase
       .from("clients")
       .select("id")
+      .is("deleted_at", null)
       .eq("organization_id", args.orgId)
       .in("team_id", args.team);
     const teamClientIds = (data ?? []).map((c) => c.id);
@@ -680,6 +683,7 @@ async function fetchArchiveForExport(args: {
     const { data } = await supabase
       .from("clients")
       .select("id")
+      .is("deleted_at", null)
       .eq("organization_id", args.orgId)
       .in("team_id", args.team);
     const teamClientIds = (data ?? []).map((c) => c.id);

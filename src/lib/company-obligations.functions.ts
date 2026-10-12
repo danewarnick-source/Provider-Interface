@@ -201,6 +201,7 @@ async function orgServiceFootprintInternal(
   const clientAttempt = await supabase
     .from("clients")
     .select("disability_category, has_abi")
+    .is("deleted_at", null)
     .eq("organization_id", organizationId)
     .eq("account_status", "active");
   const clientRows = !clientAttempt.error
@@ -209,6 +210,7 @@ async function orgServiceFootprintInternal(
         await supabase
           .from("clients")
           .select("disability_category")
+          .is("deleted_at", null)
           .eq("organization_id", organizationId)
           .eq("account_status", "active")
       ).data;
@@ -365,6 +367,7 @@ export async function snapshotAssigneesInternal(
       supabase
         .from("organization_members")
         .select("user_id, access_level")
+        .is("deleted_at", null)
         .eq("organization_id", organizationId)
         .eq("active", true)
         .in("user_id", directUserIds),
@@ -560,6 +563,7 @@ async function resolveAllAssigneesInternal(
       supabase
         .from("organization_members")
         .select("user_id, access_level")
+        .is("deleted_at", null)
         .eq("organization_id", organizationId)
         .eq("active", true)
         .in("user_id", directUserIds),
@@ -779,6 +783,7 @@ async function fetchClientNamesInternal(
   const { data, error } = await supabase
     .from("clients")
     .select("id, first_name, last_name")
+    .is("deleted_at", null)
     .in("id", clientIds);
   if (error) throw new Error(error.message);
   for (const c of (data ?? []) as Array<{
@@ -1050,6 +1055,7 @@ async function listHomesForServiceInternal(
   const { data: clients, error: clErr } = await supabase
     .from("clients")
     .select("id, team_id")
+    .is("deleted_at", null)
     .eq("organization_id", organizationId)
     .eq("account_status", "active")
     .in("id", clientIds);
@@ -1303,6 +1309,7 @@ export async function notifyObligationManagersInternal(
     const { data: admins, error: adErr } = await supabase
       .from("organization_members")
       .select("user_id, access_level")
+      .is("deleted_at", null)
       .eq("organization_id", organizationId)
       .eq("active", true)
       .eq("access_level", "owner");
@@ -2410,6 +2417,7 @@ export const pauseObligationsForArchivedForm = createServerFn({ method: "POST" }
     const { data: admins, error: adErr } = await supabase
       .from("organization_members")
       .select("user_id")
+      .is("deleted_at", null)
       .eq("organization_id", data.organizationId)
       .eq("active", true)
       .eq("access_level", "owner");
@@ -2958,6 +2966,7 @@ async function resolveAdminRecipients(
     const { data: admins, error: adErr } = await supabase
       .from("organization_members")
       .select("user_id, access_level")
+      .is("deleted_at", null)
       .eq("organization_id", organizationId)
       .eq("active", true)
       .eq("access_level", "owner");

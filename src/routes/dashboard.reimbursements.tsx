@@ -70,11 +70,11 @@ function ApprovalsBody() {
   return (
     <div className="space-y-5 p-4 md:p-6">
       <header className="flex items-center gap-3">
-        <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+        <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-pt text-pri">
           <Receipt className="h-5 w-5" />
         </span>
         <div>
-          <h1 className="text-xl font-semibold">Activity Reimbursements</h1>
+          <h1 className="font-display text-xl font-bold tracking-[-0.025em] text-deep">Activity Reimbursements</h1>
           <p className="text-sm text-muted-foreground">
             Review in-shift reimbursement requests submitted by staff.
           </p>
@@ -128,10 +128,10 @@ function RequestRow({
 }: { row: Row; onDecide: () => void; onChange: () => void }) {
   const tone =
     row.status === "approved"
-      ? "border-emerald-300 bg-emerald-50/60"
+      ? "border-acctb bg-acct/60"
       : row.status === "denied"
-      ? "border-rose-300 bg-rose-50/60"
-      : "border-amber-300 bg-amber-50/60";
+      ? "border-danger-200 bg-danger-50/60"
+      : "border-warning-200 bg-warning-50/60";
 
   return (
     <Card className={`border ${tone} p-4`}>
@@ -165,7 +165,6 @@ function RequestRow({
         {row.status === "pending" && (
           <Button
             onClick={onDecide}
-            className="bg-amber-500 text-white hover:bg-amber-600"
           >
             Review
           </Button>
@@ -287,7 +286,7 @@ function DecisionDialog({
             variant="outline"
             onClick={() => decide("denied")}
             disabled={busy}
-            className="border-rose-300 text-rose-700 hover:bg-rose-50"
+            className="border-danger-300 text-danger-700 hover:bg-danger-50"
           >
             {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Deny
@@ -295,7 +294,7 @@ function DecisionDialog({
           <Button
             onClick={() => decide("approved")}
             disabled={busy}
-            className="bg-amber-500 text-white hover:bg-amber-600"
+            className="bg-acc text-white hover:bg-accd"
           >
             {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Approve

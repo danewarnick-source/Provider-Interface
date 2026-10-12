@@ -114,7 +114,7 @@ function ResetPassword() {
   if (status === "verifying") {
     return (
       <AuthShell title="Verifying reset link…" subtitle="Hang tight for a moment.">
-        <div className="rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground">
+        <div className="rounded-xl border border-line bg-pt0 p-4 text-sm text-muted-foreground">
           Checking your reset link…
         </div>
       </AuthShell>
@@ -124,11 +124,11 @@ function ResetPassword() {
   if (status === "error") {
     return (
       <AuthShell title="Link invalid or expired" subtitle="Reset links expire after 1 hour and can only be used once.">
-        <div className="rounded-lg border border-border bg-card p-4 text-sm">
+        <div className="rounded-xl border border-line bg-pt0 p-4 text-sm">
           {errorMsg || "This reset link is invalid or has expired."}
         </div>
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          <Link to="/forgot-password" className="font-medium text-accent hover:underline">
+          <Link to="/forgot-password" className="font-medium text-pri hover:underline">
             Request a new reset link
           </Link>
         </p>
@@ -141,7 +141,7 @@ function ResetPassword() {
       <form onSubmit={onSubmit} className="grid gap-4">
         <div className="grid gap-2"><Label htmlFor="password">New password</Label><PasswordInput id="password" name="password" minLength={12} required /></div>
         <div className="grid gap-2"><Label htmlFor="confirm">Confirm password</Label><PasswordInput id="confirm" name="confirm" minLength={12} required /></div>
-        <Button type="submit" disabled={busy} className="bg-[var(--hive-sidebar)] text-[var(--hive-chrome-text)] hover:bg-[var(--hive-ink)]">
+        <Button type="submit" disabled={busy} className="rounded-full bg-pri text-white shadow-[var(--denim-btn-shadow)] hover:bg-deep">
           {busy ? "Saving…" : "Update password"}
         </Button>
       </form>

@@ -448,7 +448,7 @@ function GroupRow({ orgId, group }: { orgId: string; group: GroupWithCount }) {
           )}
           <span
             className="h-2 w-2 shrink-0 rounded-full"
-            style={{ backgroundColor: group.color ?? "#6B7280" }}
+            style={{ backgroundColor: group.color ?? "var(--denim-muted)" }}
           />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">

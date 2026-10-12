@@ -144,8 +144,8 @@ export function ProfilePage() {
   }
   if (!profileQ.data) {
     return (
-      <Card className="border-rose-200 bg-rose-50/30" data-testid="profile-not-found">
-        <CardContent className="space-y-3 p-6 text-sm text-rose-700">
+      <Card className="border-danger-200 bg-danger-50/30" data-testid="profile-not-found">
+        <CardContent className="space-y-3 p-6 text-sm text-danger-700">
           <p>
             <ShieldAlert className="mr-2 inline h-4 w-4" />
             This person isn't a team member in this agency.
@@ -192,6 +192,12 @@ export function ProfilePage() {
     }),
   );
   const attention = overview?.attention ?? [];
+  // Job title, else the positions the header shows.
+  const positionLabel = new Map(data.options.staffTypes.map((t) => [t.key, t.label] as const));
+  const jobLine =
+    data.member.jobTitle?.trim() ||
+    data.profile.staffTypeKeys.map((k) => positionLabel.get(k) ?? k).join(", ") ||
+    null;
 
   return (
     <div
@@ -216,6 +222,19 @@ export function ProfilePage() {
         activeKey={activeTab}
         onSelect={select}
         panel={null}
+        sidebar={{
+          back: {
+            label: "All team members",
+            to: "/dashboard/team-members",
+            search: lastRosterSearch(),
+            testId: "profile-sidebar-back",
+          },
+          person: {
+            name: data.profile.displayName,
+            subline: jobLine,
+            photo: { bucket: "staff-photos", path: data.profile.photoPath },
+          },
+        }}
       >
         {activeTab === "overview" ? (
           <OverviewSection

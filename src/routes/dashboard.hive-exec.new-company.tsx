@@ -40,9 +40,9 @@ function NewCompanyPage() {
 
   return (
     <div className="space-y-4">
-      <header className="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <header className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
         <div className="flex items-center gap-3">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[#fff7ed] text-[#9a3412]">
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-pt text-pri">
             <Building2 className="h-5 w-5" />
           </span>
           <div>
@@ -60,7 +60,7 @@ function NewCompanyPage() {
           e.preventDefault();
           if (!disabled) m.mutate();
         }}
-        className="grid gap-4 rounded-xl border border-border bg-card p-5 shadow-sm md:grid-cols-2"
+        className="grid gap-4 rounded-xl border border-border bg-card p-5 shadow-[var(--denim-shadow-sm)] md:grid-cols-2"
       >
         <Field label="Company name" required>
           <input
@@ -144,7 +144,7 @@ function NewCompanyPage() {
           <button
             type="submit"
             disabled={disabled}
-            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-md bg-[var(--hive-gold)] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#b8631a] disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-[var(--hive-accent)] px-4 text-sm font-semibold text-white shadow-[var(--denim-shadow-sm)] hover:bg-accd disabled:opacity-50"
           >
             <Sparkles className="h-4 w-4" />
             {m.isPending ? "Creating…" : "Create company & invite admin"}
@@ -169,7 +169,7 @@ function Field({
   return (
     <label className={`block ${className ?? ""}`}>
       <span className="mb-1 block text-xs font-medium text-muted-foreground">
-        {label} {required ? <span className="text-[#b91c1c]">*</span> : null}
+        {label} {required ? <span className="text-danger-700">*</span> : null}
       </span>
       {children}
     </label>

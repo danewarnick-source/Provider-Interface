@@ -229,7 +229,7 @@ export function ShiftMedDueCheck({
   // All doses already logged elsewhere (real MAR).
   if (medStatus.allDosesLogged) {
     return (
-      <div className="rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-900 dark:text-emerald-200">
+      <div className="rounded-md border border-success-500/40 bg-success-500/10 px-3 py-2 text-xs text-success-900 dark:text-success-200">
         <div className="flex items-center gap-2">
           <CheckCircle2 className="h-4 w-4 shrink-0" />
           <span>
@@ -252,8 +252,8 @@ export function ShiftMedDueCheck({
             ? `1 medication ready to log — signed by ${savedSummary.name}.`
             : `${savedSummary.count} medications ready to log — signed by ${savedSummary.name}.`;
     return (
-      <div className="flex flex-wrap items-center gap-2 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-900 dark:text-emerald-200">
-        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+      <div className="flex flex-wrap items-center gap-2 rounded-md border border-success-500/40 bg-success-500/10 px-3 py-2 text-xs text-success-900 dark:text-success-200">
+        <CheckCircle2 className="h-4 w-4 shrink-0 text-success-600" />
         <span className="min-w-0 flex-1">
           <span className="font-semibold">Saved.</span> {summaryLabel}{" "}
           <span className="text-muted-foreground">
@@ -274,9 +274,9 @@ export function ShiftMedDueCheck({
   }
 
   return (
-    <div className="rounded-xl border-2 border-amber-500/50 bg-amber-500/5 p-3 sm:p-4 space-y-3">
+    <div className="rounded-xl border-2 border-warning-500/50 bg-warning-500/5 p-3 sm:p-4 space-y-3">
       <div className="flex items-start gap-2">
-        <Pill className="mt-0.5 h-4 w-4 shrink-0 text-amber-700 dark:text-amber-300" />
+        <Pill className="mt-0.5 h-4 w-4 shrink-0 text-warning-700 dark:text-warning-300" />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold leading-snug">Medications — {clientName}</p>
           <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
@@ -291,7 +291,7 @@ export function ShiftMedDueCheck({
             type="button"
             size="sm"
             variant="outline"
-            className="flex-1 border-emerald-500/50 hover:bg-emerald-500/10"
+            className="flex-1 border-success-500/50 hover:bg-success-500/10"
             onClick={() => setAnswer("yes")}
           >
             Yes
@@ -330,13 +330,13 @@ export function ShiftMedDueCheck({
             .map((d) => (
               <div
                 key={`${d.medication_id}|${d.scheduled_for_iso}`}
-                className="flex flex-wrap items-center gap-2 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1.5 text-xs"
+                className="flex flex-wrap items-center gap-2 rounded-md border border-success-500/40 bg-success-500/10 px-2.5 py-1.5 text-xs"
               >
-                <CheckCircle2 className="h-3 w-3 shrink-0 text-emerald-600" />
+                <CheckCircle2 className="h-3 w-3 shrink-0 text-success-600" />
                 <span className="font-mono text-[11px]">{d.time_label}</span>
                 <span className="font-medium">{d.medication_name}</span>
                 {d.dosage && <span className="text-muted-foreground">· {d.dosage}</span>}
-                <span className="ml-auto text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
+                <span className="ml-auto text-[11px] font-semibold text-success-700 dark:text-success-300">
                   Logged
                 </span>
               </div>
@@ -352,7 +352,7 @@ export function ShiftMedDueCheck({
               <div
                 key={k}
                 className={`space-y-2 rounded-md border p-2.5 ${
-                  e.checked ? "border-amber-500/50 bg-amber-500/10" : "border-border bg-background"
+                  e.checked ? "border-warning-500/50 bg-warning-500/10" : "border-border bg-background"
                 }`}
               >
                 <label className="flex cursor-pointer items-start gap-2">
@@ -364,7 +364,7 @@ export function ShiftMedDueCheck({
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-1.5 text-xs">
                       {e.checked && (
-                        <AlertTriangle className="h-3 w-3 shrink-0 text-amber-700 dark:text-amber-300" />
+                        <AlertTriangle className="h-3 w-3 shrink-0 text-warning-700 dark:text-warning-300" />
                       )}
                       <span className="font-mono text-[11px]">{d.time_label}</span>
                       <span className="font-semibold">{d.medication_name}</span>
@@ -419,10 +419,10 @@ export function ShiftMedDueCheck({
                           onChange={(ev) => updateEntry(k, "note", ev.target.value)}
                           placeholder="Describe what happened"
                           maxLength={200}
-                          className={`text-xs ${noteRequired ? "border-rose-400" : ""}`}
+                          className={`text-xs ${noteRequired ? "border-danger-400" : ""}`}
                         />
                         {noteRequired && (
-                          <p className="text-[11px] text-rose-600">Note is required.</p>
+                          <p className="text-[11px] text-danger-600">Note is required.</p>
                         )}
                       </div>
                     )}

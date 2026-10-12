@@ -19,6 +19,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { DENIM, DENIM_FONTS, DENIM_STATUS } from "@/lib/design-tokens";
 import {
   askFinancialNectar,
   type NectarFinReport,
@@ -92,7 +93,7 @@ function NectarFinancialPage() {
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="font-display text-xl font-bold tracking-tight inline-flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
+            <Sparkles className="h-5 w-5 text-acc" />
             NECTAR Financial Reporting
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -221,15 +222,15 @@ function ReportCard({ report }: { report: NectarFinReport }) {
     }
     w.document.write(`<!doctype html><html><head><title>NECTAR Financial — ${report.year}</title>
       <style>
-        body { font-family: ui-sans-serif, system-ui, sans-serif; padding: 24px; color: #111; }
-        h1 { font-size: 18px; margin: 0 0 4px; }
-        h2 { font-size: 14px; margin: 16px 0 6px; }
-        .q { color: #444; font-style: italic; margin-bottom: 12px; }
+        body { font-family: ${DENIM_FONTS.body}; padding: 24px; color: ${DENIM.ink}; }
+        h1 { font-family: ${DENIM_FONTS.heading}; font-size: 18px; margin: 0 0 4px; color: ${DENIM.deep}; }
+        h2 { font-family: ${DENIM_FONTS.heading}; font-size: 14px; margin: 16px 0 6px; color: ${DENIM.deep}; }
+        .q { color: ${DENIM.muted}; font-style: italic; margin-bottom: 12px; }
         .pre { white-space: pre-wrap; font-size: 13px; line-height: 1.5; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
-        th, td { border: 1px solid #ddd; padding: 4px 6px; text-align: left; }
-        th { background: #f7f7f7; }
-        .declined { color: #a33; }
+        th, td { border: 1px solid ${DENIM.line}; padding: 4px 6px; text-align: left; }
+        th { background: ${DENIM.pt0}; }
+        .declined { color: ${DENIM_STATUS.dangerText}; }
       </style></head><body>${node.innerHTML}</body></html>`);
     w.document.close();
     w.focus();
@@ -245,11 +246,11 @@ function ReportCard({ report }: { report: NectarFinReport }) {
             <span className="inline-flex items-center gap-1">
               {report.any_declined ? (
                 <>
-                  <ShieldAlert className="h-3 w-3 text-amber-600" /> partial access
+                  <ShieldAlert className="h-3 w-3 text-warning-600" /> partial access
                 </>
               ) : (
                 <>
-                  <ShieldCheck className="h-3 w-3 text-emerald-600" /> full access (requested sources)
+                  <ShieldCheck className="h-3 w-3 text-success-600" /> full access (requested sources)
                 </>
               )}
             </span>
@@ -269,18 +270,18 @@ function ReportCard({ report }: { report: NectarFinReport }) {
       <section className="pre text-sm whitespace-pre-wrap leading-relaxed">{report.answer}</section>
 
       {declined.length > 0 && (
-        <section className="rounded-md border border-amber-300/40 bg-amber-50 dark:bg-amber-950/30 p-3 text-xs space-y-1">
-          <div className="flex items-center gap-2 font-semibold text-amber-700 dark:text-amber-300">
+        <section className="rounded-md border border-warning-300/40 bg-warning-50 dark:bg-warning-950/30 p-3 text-xs space-y-1">
+          <div className="flex items-center gap-2 font-semibold text-warning-700 dark:text-warning-300">
             <AlertTriangle className="h-3.5 w-3.5" /> Declined sources (you do not have access)
           </div>
           <div className="flex flex-wrap gap-1.5">
             {declined.map((s) => (
-              <Badge key={s.source} variant="outline" className="border-amber-400 text-amber-700 dark:text-amber-300">
+              <Badge key={s.source} variant="outline" className="border-warning-400 text-warning-700 dark:text-warning-300">
                 {labelFor(s.source)}
               </Badge>
             ))}
           </div>
-          <p className="italic text-amber-700/80 dark:text-amber-300/80">
+          <p className="italic text-warning-700/80 dark:text-warning-300/80">
             NECTAR did not include any figures from these sources in its answer.
           </p>
         </section>

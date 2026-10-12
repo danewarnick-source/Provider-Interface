@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import { isAdminLevel } from "@/lib/access/levels";
 
 /** Permanent legal/scope banner shown at the top of every eMAR surface.
- *  Deep-navy band with amber warning icon — matches the self-administration
+ *  Deep-navy band with warning icon — matches the self-administration
  *  disclaimer in the eMAR design spec. */
 export function EmarLegalBanner({ compact = false }: { compact?: boolean }) {
   return (
@@ -101,8 +101,8 @@ export function ClinicalSafetyHeader({ client }: { client: ClientSafety }) {
             {client.first_name} {client.last_name}
           </h3>
           {primaryService && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            <span className="inline-flex items-center gap-1 rounded-full border border-success-300 bg-success-50 px-2 py-0.5 text-[11px] font-medium text-success-800 dark:border-success-800 dark:bg-success-950/40 dark:text-success-200">
+              <span className="h-1.5 w-1.5 rounded-full bg-success-500" />
               {primaryService} active
             </span>
           )}
@@ -115,14 +115,14 @@ export function ClinicalSafetyHeader({ client }: { client: ClientSafety }) {
             <span className="text-xs text-muted-foreground">Allergies:</span>
           )}
           {allergies.length === 0 ? (
-            <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">
+            <Badge className="bg-success-100 text-success-800 hover:bg-success-100">
               No known allergies
             </Badge>
           ) : (
             allergies.map((a) => (
               <span
                 key={a}
-                className="inline-flex items-center rounded-full border border-rose-300 bg-rose-50 px-2.5 py-0.5 text-xs font-medium text-rose-800 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-200"
+                className="inline-flex items-center rounded-full border border-danger-300 bg-danger-50 px-2.5 py-0.5 text-xs font-medium text-danger-800 dark:border-danger-800 dark:bg-danger-950/30 dark:text-danger-200"
               >
                 {a}
               </span>
@@ -136,14 +136,14 @@ export function ClinicalSafetyHeader({ client }: { client: ClientSafety }) {
         <div className="mt-3 space-y-1.5">
           {client.dysphagia && (
             <>
-              <p className="flex items-start gap-2 text-xs text-amber-900 dark:text-amber-200">
-                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
+              <p className="flex items-start gap-2 text-xs text-warning-900 dark:text-warning-200">
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning-600" />
                 <span>
                   Choking / swallow-reflex risk — confirm upright posture for every oral med
                 </span>
               </p>
-              <p className="flex items-start gap-2 text-xs text-amber-900 dark:text-amber-200">
-                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
+              <p className="flex items-start gap-2 text-xs text-warning-900 dark:text-warning-200">
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning-600" />
                 <span>
                   Crushed-med policy per care plan — verify which meds may be crushed
                 </span>
@@ -151,8 +151,8 @@ export function ClinicalSafetyHeader({ client }: { client: ClientSafety }) {
             </>
           )}
           {alerts.map((a) => (
-            <p key={a} className="flex items-start gap-2 text-xs text-amber-900 dark:text-amber-200">
-              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
+            <p key={a} className="flex items-start gap-2 text-xs text-warning-900 dark:text-warning-200">
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning-600" />
               <span>{a}</span>
             </p>
           ))}
@@ -267,7 +267,7 @@ export function ClientSafetyEditor({
             <Switch checked={selfAdmin} onCheckedChange={setSelfAdmin} />
           </label>
           {turningOff && (
-            <div className="sm:col-span-2 rounded-md border border-amber-300 bg-amber-50 p-2 text-[11px] text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+            <div className="sm:col-span-2 rounded-md border border-warning-300 bg-warning-50 p-2 text-[11px] text-warning-900 dark:border-warning-800 dark:bg-warning-950 dark:text-warning-200">
               <AlertTriangle className="mr-1 inline h-3.5 w-3.5" />
               You are about to <span className="font-semibold">disable</span> the eMAR for this client.
               {activeMedsCount > 0 ? (
@@ -291,7 +291,7 @@ export function ClientSafetyEditor({
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <AlertTriangle className="h-4 w-4 text-warning-600" />
               Disable eMAR for {client.first_name} {client.last_name}?
             </DialogTitle>
             <DialogDescription>
@@ -392,16 +392,16 @@ export function MedicationProfileCard({
             <h4 className="text-base font-semibold leading-tight">{med.medication_name}</h4>
             {med.dosage && <span className="text-sm text-muted-foreground">{med.dosage}</span>}
             {med.is_prn && (
-              <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 text-[10px]">PRN</Badge>
+              <Badge className="bg-pt text-pri hover:bg-pt text-[10px]">PRN</Badge>
             )}
             {med.is_controlled && (
-              <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100 text-[10px]">Controlled</Badge>
+              <Badge className="bg-denim-100 text-denim-800 hover:bg-denim-100 text-[10px]">Controlled</Badge>
             )}
           </div>
           {med.purpose ? (
             <p className="mt-0.5 text-xs text-muted-foreground">{med.purpose}</p>
           ) : (
-            <p className="mt-0.5 text-xs italic text-amber-700">Clinical purpose missing — admin to complete</p>
+            <p className="mt-0.5 text-xs italic text-warning-700">Clinical purpose missing — admin to complete</p>
           )}
         </div>
         {onEdit && (
@@ -428,7 +428,7 @@ export function MedicationProfileCard({
       </div>
 
       {med.is_prn && med.prn_instructions && (
-        <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-2 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-100">
+        <div className="mt-3 rounded-md border border-warning-200 bg-warning-50 p-2 text-xs text-warning-900 dark:border-warning-700 dark:bg-warning-950/30 dark:text-warning-100">
           <span className="font-semibold">PRN use:</span> {med.prn_instructions}
         </div>
       )}
@@ -448,7 +448,7 @@ export function MedicationProfileCard({
           />
         )}
         {(med.choking_risk || med.contributes_to_swallowing_difficulty) && (
-          <div className="rounded-md border border-rose-300 bg-rose-50 p-2 text-rose-900 dark:border-rose-700 dark:bg-rose-950/30 dark:text-rose-100">
+          <div className="rounded-md border border-danger-300 bg-danger-50 p-2 text-danger-900 dark:border-danger-700 dark:bg-danger-950/30 dark:text-danger-100">
             <p className="flex items-center gap-1.5 font-semibold">
               <AlertTriangle className="h-3.5 w-3.5" />
               Swallowing / choking risk
@@ -462,7 +462,7 @@ export function MedicationProfileCard({
       </div>
 
       {missing.length > 0 && (
-        <div className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-amber-400 bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-900 dark:border-amber-600 dark:bg-amber-950/30 dark:text-amber-100">
+        <div className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-warning-400 bg-warning-50 px-2 py-1 text-[11px] font-medium text-warning-900 dark:border-warning-600 dark:bg-warning-950/30 dark:text-warning-100">
           <AlertTriangle className="h-3 w-3" />
           Incomplete — admin to complete: {missing.join(", ")}
         </div>
@@ -480,7 +480,7 @@ function Field({ label, value, icon }: { label: string; value: string | null; ic
       {value ? (
         <p className="font-medium">{value}</p>
       ) : (
-        <p className="italic text-amber-700">missing</p>
+        <p className="italic text-warning-700">missing</p>
       )}
     </div>
   );
@@ -497,7 +497,7 @@ function Block({
       {body ? (
         <p className="mt-0.5 whitespace-pre-wrap text-xs">{body}</p>
       ) : (
-        missing && <p className="mt-0.5 text-xs italic text-amber-700">{missing}</p>
+        missing && <p className="mt-0.5 text-xs italic text-warning-700">{missing}</p>
       )}
     </div>
   );
@@ -541,7 +541,7 @@ export function MedicationChart({
           <p className="text-xs text-muted-foreground">
             {meds.length} active medication{meds.length === 1 ? "" : "s"}
             {incompleteCount > 0 && (
-              <> · <span className="font-medium text-amber-700">{incompleteCount} incomplete</span></>
+              <> · <span className="font-medium text-warning-700">{incompleteCount} incomplete</span></>
             )}
           </p>
         </div>

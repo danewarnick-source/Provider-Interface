@@ -42,7 +42,7 @@ export function GoalSupportChecklist({
                 <input
                   id={id}
                   type="checkbox"
-                  className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[color:var(--amber-600)]"
+                  className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-pri"
                   checked={on}
                   onChange={(e) => onCheck(s.id, e.target.checked)}
                 />
@@ -60,7 +60,7 @@ export function GoalSupportChecklist({
         <input
           id="goal-baseline"
           type="checkbox"
-          className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[color:var(--amber-600)]"
+          className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-pri"
           checked={baselineChecked}
           onChange={(e) => onBaseline(e.target.checked)}
         />

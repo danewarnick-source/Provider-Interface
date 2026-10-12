@@ -2,10 +2,11 @@
 // lists on the clients row (Client medical: Edit to change).
 
 import { useState } from "react";
+import { ClipboardPlus } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { splitList } from "@/lib/clients/health";
-import { CardShell, GroupHeader } from "@/components/clients/profile/cards/card-shell";
+import { EditButton, SaveBar, SectionCard } from "@/components/clients/profile/cards/section-card";
 import { useCanEditMedical, useSaveHealth, type ClientHealthRow } from "./use-client-health";
 
 const LISTS = [
@@ -26,27 +27,22 @@ export function MedicalListsCard({ orgId, health }: { orgId: string; health: Cli
       chronic_conditions: (health.chronic_conditions ?? []).join("\n"),
     });
   return (
-    <CardShell
+    <SectionCard
+      id="health-conditions"
+      icon={ClipboardPlus}
+      tone="danger"
       title="Allergies, diagnoses and conditions"
-      subtitle="The first diagnosis is the primary one."
-      editing={draft !== null}
-      canEdit={canEdit}
-      onEdit={start}
-      onCancel={() => setDraft(null)}
-      saving={save.isPending}
-      onSave={() =>
-        draft &&
-        save.mutate({
-          allergies: splitList(draft.allergies),
-          diagnoses: splitList(draft.diagnoses),
-          chronic_conditions: splitList(draft.chronic_conditions),
-        })
+      description="What they are allergic to and their diagnoses. The first diagnosis is the primary one."
+      actions={
+        canEdit && draft === null ? (
+          <EditButton label="Edit allergies, diagnoses and conditions" onClick={start} />
+        ) : null
       }
     >
-      <div data-testid="client-health-lists">
+      <div className="space-y-4" data-testid="client-health-lists">
         {LISTS.map((l) => (
           <div key={l.key}>
-            <GroupHeader>{l.label}</GroupHeader>
+            <p className="mb-1.5 text-xs font-medium text-muted-foreground">{l.label}</p>
             {draft ? (
               <Textarea
                 aria-label={l.label}
@@ -69,6 +65,20 @@ export function MedicalListsCard({ orgId, health }: { orgId: string; health: Cli
           </div>
         ))}
       </div>
-    </CardShell>
+      {draft ? (
+        <SaveBar
+          onCancel={() => setDraft(null)}
+          saving={save.isPending}
+          saveLabel="Save health lists"
+          onSave={() =>
+            save.mutate({
+              allergies: splitList(draft.allergies),
+              diagnoses: splitList(draft.diagnoses),
+              chronic_conditions: splitList(draft.chronic_conditions),
+            })
+          }
+        />
+      ) : null}
+    </SectionCard>
   );
 }

@@ -119,7 +119,7 @@ export function ActiveShiftBar({ framed = false }: { framed?: boolean }) {
       className={[
         positioning,
         "select-none text-white",
-        "bg-[#117a52] border-t border-[#0d5c3d] shadow-[0_-4px_12px_-6px_rgba(0,0,0,0.35)]",
+        "bg-accd border-t border-white/15 shadow-[0_-6px_18px_-8px_rgba(27,51,80,0.35)]",
       ].join(" ")}
       style={{ bottom: STAFF_CLOCK_BAR_OFFSET_CSS }}
       role="status"
@@ -128,11 +128,11 @@ export function ActiveShiftBar({ framed = false }: { framed?: boolean }) {
       <button
         type="button"
         onClick={open}
-        className="flex w-full items-center gap-3 px-3 py-2 text-left active:bg-[#0f6b48]"
+        className="flex w-full items-center gap-3 px-3 py-2 text-left active:bg-accd/90"
       >
         <span className="relative inline-flex h-2.5 w-2.5 shrink-0">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#15a06a] opacity-75" />
-          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#15a06a] ring-2 ring-white/70" />
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accl opacity-75" />
+          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-accl ring-2 ring-white/70" />
         </span>
 
         <div className="min-w-0 flex-1 leading-tight">
@@ -145,7 +145,7 @@ export function ActiveShiftBar({ framed = false }: { framed?: boolean }) {
             {elapsed}
           </span>
           {isClient && (
-            <span className="font-mono text-[11px] font-semibold tabular-nums text-[var(--hive-gold)]">
+            <span className="font-mono text-[11px] font-semibold tabular-nums text-accl">
               {fmtUSD(live.liveEarnings)}
             </span>
           )}
@@ -161,7 +161,7 @@ export function ActiveShiftBar({ framed = false }: { framed?: boolean }) {
               onClockOut(e as unknown as React.MouseEvent);
             }
           }}
-          className="ml-1 inline-flex min-h-[36px] shrink-0 cursor-pointer items-center gap-1 rounded-md bg-white/15 px-3 text-xs font-semibold uppercase tracking-wide text-white hover:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          className="ml-1 inline-flex min-h-[36px] shrink-0 cursor-pointer items-center gap-1 rounded-full bg-white/15 px-3.5 text-xs font-semibold uppercase tracking-wide text-white hover:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           aria-label={isGeneral ? "Clock out of non-EVV shift" : "Open shift verification form to clock out"}
           title={isGeneral ? "End this non-EVV / training shift" : "Opens the shift verification form — paperwork required to finalize"}
         >
@@ -184,7 +184,7 @@ export function ActiveShiftBar({ framed = false }: { framed?: boolean }) {
                 void confirmGeneralStop();
               }}
               disabled={stopping}
-              className="bg-rose-600 text-white hover:bg-rose-700"
+              className="bg-danger-600 text-white hover:bg-danger-700"
             >
               {stopping ? "Ending…" : "End shift"}
             </AlertDialogAction>

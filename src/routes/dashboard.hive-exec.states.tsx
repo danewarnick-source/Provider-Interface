@@ -28,8 +28,8 @@ type Row = {
 function StatusChip({ status, isRef }: { status: string; isRef: boolean }) {
   const isActive = status === "active";
   const styles = isActive
-    ? "bg-emerald-100 text-emerald-900 border-emerald-200"
-    : "bg-slate-100 text-slate-600 border-slate-200";
+    ? "bg-success-100 text-success-900 border-success-200"
+    : "bg-haze-100 text-haze-600 border-haze-200";
   const label = isActive ? "Active" : status === "coming_soon" ? "Coming soon" : "Inactive";
   return (
     <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${styles}`}>
@@ -48,10 +48,10 @@ function StatesIndexPage() {
 
   return (
     <div className="space-y-4">
-      <header className="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <header className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hive-text)] text-white">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-pri text-white">
               <MapPin className="h-5 w-5" />
             </span>
             <div>
@@ -65,13 +65,13 @@ function StatesIndexPage() {
             to="/dashboard/hive-exec/base-template"
             className="inline-flex min-h-[36px] items-center gap-2 rounded-md border border-border bg-background px-3 text-xs font-semibold hover:bg-muted"
           >
-            <Sparkles className="h-3.5 w-3.5 text-[var(--hive-gold)]" /> Base template versions
+            <Sparkles className="h-3.5 w-3.5 text-[var(--hive-accent-text)]" /> Base template versions
           </Link>
         </div>
       </header>
 
 
-      <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
+      <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-[var(--denim-shadow-sm)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground">
             <tr>
@@ -120,11 +120,11 @@ function StatesIndexPage() {
                     {stateVer == null ? (
                       <span className="text-muted-foreground">—</span>
                     ) : outdated ? (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 font-medium text-amber-900">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-warning-200 bg-warning-50 px-2 py-0.5 font-medium text-warning-900">
                         v{stateVer} → v{curVer} available
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-medium text-emerald-900">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-success-200 bg-success-50 px-2 py-0.5 font-medium text-success-900">
                         v{stateVer} · current
                       </span>
                     )}
@@ -143,14 +143,14 @@ function StatesIndexPage() {
                         <Link
                           to="/dashboard/hive-exec/states/$stateCode/onboarding"
                           params={{ stateCode: r.code }}
-                          className="inline-flex min-h-[36px] items-center rounded-md bg-[var(--hive-gold)] px-3 text-xs font-semibold text-white hover:bg-[#b8651a]"
+                          className="inline-flex min-h-[36px] items-center rounded-full bg-[var(--hive-accent)] px-3 text-xs font-semibold text-white hover:bg-accd"
                         >
                           Resume onboarding
                         </Link>
                       ) : (
                         <button
                           onClick={() => setChooser(r)}
-                          className="inline-flex min-h-[36px] items-center rounded-md bg-[var(--hive-gold)] px-3 text-xs font-semibold text-white hover:bg-[#b8651a]"
+                          className="inline-flex min-h-[36px] items-center rounded-full bg-[var(--hive-accent)] px-3 text-xs font-semibold text-white hover:bg-accd"
                         >
                           Build {r.code} template
                         </button>
@@ -203,8 +203,8 @@ function StartingPointChooser({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
-      <div className="w-full max-w-lg rounded-xl border border-border bg-card p-5 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--denim-overlay)] backdrop-blur-[4px] p-4" role="dialog" aria-modal="true">
+      <div className="w-full max-w-lg rounded-xl border border-border bg-card p-5 shadow-[var(--denim-shadow)]">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
             <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Starting point</div>
@@ -225,7 +225,7 @@ function StartingPointChooser({
         <div className="space-y-2">
           <label
             className={`flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors ${
-              mode === "blank" ? "border-[var(--hive-gold)] bg-orange-50" : "border-border bg-background hover:bg-muted/40"
+              mode === "blank" ? "border-[var(--hive-accent)] bg-acct" : "border-border bg-background hover:bg-muted/40"
             }`}
           >
             <input
@@ -237,7 +237,7 @@ function StartingPointChooser({
             />
             <div className="min-w-0">
               <div className="flex items-center gap-2 text-sm font-medium">
-                <Sparkles className="h-4 w-4 text-[var(--hive-gold)]" /> Generic PI state template
+                <Sparkles className="h-4 w-4 text-[var(--hive-accent-text)]" /> Generic PI state template
               </div>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 Neutral, state-agnostic base. Structure is in place; state-specific fields are empty for you to fill in.
@@ -247,7 +247,7 @@ function StartingPointChooser({
 
           <label
             className={`flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors ${
-              mode === "copy" ? "border-[var(--hive-gold)] bg-orange-50" : "border-border bg-background hover:bg-muted/40"
+              mode === "copy" ? "border-[var(--hive-accent)] bg-acct" : "border-border bg-background hover:bg-muted/40"
             } ${sources.length === 0 ? "opacity-50" : ""}`}
           >
             <input
@@ -299,7 +299,7 @@ function StartingPointChooser({
           </button>
           <button
             onClick={start}
-            className="inline-flex min-h-[36px] items-center rounded-md bg-[var(--hive-gold)] px-4 text-xs font-semibold text-white hover:bg-[#b8651a]"
+            className="inline-flex min-h-[36px] items-center rounded-full bg-[var(--hive-accent)] px-4 text-xs font-semibold text-white hover:bg-accd"
           >
             Start building
           </button>

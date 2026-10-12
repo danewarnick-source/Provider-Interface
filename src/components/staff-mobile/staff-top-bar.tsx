@@ -49,8 +49,8 @@ export function StaffTopBar({ title, framed = false }: { title: string; framed?:
     (user?.user_metadata?.full_name as string | undefined) ?? user?.email ?? "Staff";
 
   const headerCls = framed
-    ? "relative z-30 flex h-14 shrink-0 items-center border-b border-[color-mix(in_srgb,white_14%,var(--hive-sidebar))] bg-[var(--hive-sidebar)] px-3 text-[var(--hive-chrome-text)]"
-    : "relative z-30 flex h-14 items-center border-b border-[color-mix(in_srgb,white_14%,var(--hive-sidebar))] bg-[var(--hive-sidebar)] px-3 text-[var(--hive-chrome-text)] md:hidden";
+    ? "denim-glass relative z-30 flex h-14 shrink-0 items-center rounded-none border-x-0 border-t-0 px-3 text-deep"
+    : "denim-glass relative z-30 flex h-14 items-center rounded-none border-x-0 border-t-0 px-3 text-deep md:hidden";
 
   return (
     <header
@@ -63,24 +63,24 @@ export function StaffTopBar({ title, framed = false }: { title: string; framed?:
     >
       <div className="flex h-14 w-full items-center justify-between gap-2">
         <div className="flex min-w-0 flex-1 items-center gap-2.5">
-          <span className="inline-flex shrink-0 items-center rounded-lg border border-white/15 bg-white/[0.06] px-2 py-1">
-            <PiBrand tone="chrome" size="sm" />
+          <span className="inline-flex shrink-0 items-center px-1 py-1">
+            <PiBrand tone="on-light" size="sm" />
           </span>
-          <h1 className="truncate text-base font-semibold tracking-tight">{title}</h1>
+          <h1 className="truncate font-display text-base font-bold tracking-[-0.01em] text-deep">{title}</h1>
         </div>
 
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
             <button
               aria-label="Open profile menu"
-              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-white active:scale-95"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-pt2 bg-paper/70 text-pri transition-colors hover:bg-pt active:scale-95"
             >
               <User className="h-4 w-4" />
             </button>
           </SheetTrigger>
           <SheetContent
             side="bottom"
-            className="rounded-t-2xl border-t border-white/10 bg-[#141a3d] p-5 text-white [&>button]:text-white"
+            className="hive-chrome hive-chrome-sheet rounded-t-[28px] border-t-0 p-5 text-white"
             style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1.25rem)" }}
             onPointerDownOutside={preventSheetDismissForPortalViewMenu}
             onFocusOutside={preventSheetDismissForPortalViewMenu}
@@ -88,14 +88,14 @@ export function StaffTopBar({ title, framed = false }: { title: string; framed?:
           >
             <SheetHeader className="text-left">
               <SheetTitle className="text-white">{displayName}</SheetTitle>
-              <SheetDescription className="text-white/80">
+              <SheetDescription className="text-ondarkp">
                 {(org?.organization_name ?? "Workspace") + " · " + LEVEL_LABEL[role]}
               </SheetDescription>
             </SheetHeader>
 
             {isAdminCapable && (
               <div className="mt-5">
-                <label className="mb-2 block text-[10px] font-semibold uppercase tracking-wider text-white/80">
+                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.1em] text-ondarkp/70">
                   Portal View
                 </label>
                 <PortalViewSwitcher
@@ -106,7 +106,7 @@ export function StaffTopBar({ title, framed = false }: { title: string; framed?:
                     resetStaffPhoneScroll(null);
                     void navigate({ to: resolvePortalSwitcherPath(v) });
                   }}
-                  triggerClassName="h-12 border-white/15 bg-white/[0.06] text-white"
+                  triggerClassName="h-12 border-white/15 bg-white/6 text-white"
                   options={[
                     { value: "staff", label: "Staff View" },
                     { value: "admin", label: "Admin View" },
@@ -119,7 +119,7 @@ export function StaffTopBar({ title, framed = false }: { title: string; framed?:
             <Button
               onClick={signOut}
               variant="ghost"
-              className="mt-5 h-12 w-full justify-start border border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white"
+              className="mt-5 h-12 w-full justify-start rounded-full border border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white"
             >
               <LogOut className="mr-2 h-4 w-4" /> Sign out
             </Button>

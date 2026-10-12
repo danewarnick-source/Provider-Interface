@@ -37,7 +37,7 @@ export function BudgetPdfBar({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="text-xs text-muted-foreground">
           {latest ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/60 bg-emerald-50 px-2.5 py-1 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-success-300/60 bg-success-50 px-2.5 py-1 text-success-800 dark:bg-success-950/40 dark:text-success-200">
               <CheckCircle2 className="h-3.5 w-3.5" />
               Saved to client file {new Date(latest.uploaded_at).toLocaleDateString()}
               {pdf.shipped.length > 1 ? ` (${pdf.shipped.length} copies)` : ""}
@@ -47,22 +47,21 @@ export function BudgetPdfBar({
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button size="sm" variant="outline" onClick={pdf.preview} disabled={busy}>
+          <Button variant="outline" onClick={pdf.preview} disabled={busy}>
             <Eye className="mr-2 h-4 w-4" />
-            {label("preview", "Preview")}
+            {label("preview", "Preview PDF")}
           </Button>
-          <Button size="sm" variant="outline" onClick={() => pdf.open("download")} disabled={busy}>
+          <Button variant="outline" onClick={() => pdf.open("download")} disabled={busy}>
             <FileText className="mr-2 h-4 w-4" />
             {label("download", "Download PDF")}
           </Button>
-          <Button size="sm" variant="outline" onClick={() => pdf.open("print")} disabled={busy}>
+          <Button variant="outline" onClick={() => pdf.open("print")} disabled={busy}>
             <Printer className="mr-2 h-4 w-4" />
-            {label("print", "Print")}
+            {label("print", "Print budget")}
           </Button>
           {canEdit && (
             <Button
-              size="sm"
-              variant="secondary"
+              variant="outline"
               onClick={pdf.ship}
               disabled={busy || dirty}
               title={dirty ? "Save your changes first" : "Save a finished copy to the client file"}
@@ -72,8 +71,8 @@ export function BudgetPdfBar({
             </Button>
           )}
           {canEdit && (
-            <Button size="sm" onClick={onSave} disabled={!dirty || saving}>
-              {saving ? "Saving…" : dirty ? "Save changes" : "Saved"}
+            <Button onClick={onSave} disabled={!dirty || saving}>
+              {saving ? "Saving…" : dirty ? "Save budget" : "Budget saved"}
             </Button>
           )}
         </div>
@@ -102,8 +101,8 @@ export function BudgetPdfBar({
           </div>
           <DialogFooter className="gap-2 border-t px-4 py-3 sm:justify-between">
             <div className="text-xs text-muted-foreground">Preview only — nothing is saved.</div>
-            <Button size="sm" variant="secondary" onClick={pdf.closePreview}>
-              Close
+            <Button variant="outline" onClick={pdf.closePreview}>
+              Close preview
             </Button>
           </DialogFooter>
         </DialogContent>

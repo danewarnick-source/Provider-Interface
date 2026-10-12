@@ -58,7 +58,7 @@ function NectarPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-xl border border-[var(--hive-gold)]/30 bg-card p-4 shadow-sm">
+      <section className="rounded-xl border border-[var(--hive-accent)]/30 bg-card p-4 shadow-[var(--denim-shadow-sm)]">
         <div className="mb-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <NectarBadge size="sm" />
@@ -117,10 +117,10 @@ function NectarPage() {
 
 function AlertCard({ alert: a }: { alert: NectarAlert }) {
   const palette = {
-    exhausted: { bg: "bg-[#fef2f2]", border: "border-[#fecaca]", text: "text-[#991b1b]", Icon: AlertTriangle },
-    expired:   { bg: "bg-[#fef2f2]", border: "border-[#fecaca]", text: "text-[#991b1b]", Icon: AlertTriangle },
-    over:      { bg: "bg-[#fff7ed]", border: "border-[#fed7aa]", text: "text-[#9a3412]", Icon: TrendingUp },
-    under:     { bg: "bg-[#eff6ff]", border: "border-[#bfdbfe]", text: "text-[#1e40af]", Icon: TrendingDown },
+    exhausted: { bg: "bg-danger-50", border: "border-danger-200", text: "text-danger-800", Icon: AlertTriangle },
+    expired:   { bg: "bg-danger-50", border: "border-danger-200", text: "text-danger-800", Icon: AlertTriangle },
+    over:      { bg: "bg-warning-50", border: "border-warning-200", text: "text-warning-700", Icon: TrendingUp },
+    under:     { bg: "bg-pt", border: "border-pt2", text: "text-pri", Icon: TrendingDown },
   }[a.kind];
   const Icon = palette.Icon;
 
@@ -128,7 +128,7 @@ function AlertCard({ alert: a }: { alert: NectarAlert }) {
     <Link
       to="/dashboard/billing/$clientId"
       params={{ clientId: a.client_id }}
-      className={`block rounded-lg border ${palette.border} ${palette.bg} p-3 transition hover:shadow-sm`}
+      className={`block rounded-lg border ${palette.border} ${palette.bg} p-3 transition hover:shadow-[var(--denim-shadow-sm)]`}
     >
       <div className={`flex items-start gap-2 ${palette.text}`}>
         <Icon className="mt-0.5 h-4 w-4 shrink-0" />
@@ -177,18 +177,18 @@ function ClientGroups({ alerts }: { alerts: NectarAlert[] }) {
 
 function ClientCard({ group }: { group: { client_id: string; client_name: string; codes: NectarAlert[]; worstKind: string } }) {
   const palette = ({
-    exhausted: { bg: "bg-[#fef2f2]", border: "border-[#fecaca]", text: "text-[#991b1b]", Icon: AlertTriangle },
-    expired:   { bg: "bg-[#fef2f2]", border: "border-[#fecaca]", text: "text-[#991b1b]", Icon: AlertTriangle },
-    over:      { bg: "bg-[#fff7ed]", border: "border-[#fed7aa]", text: "text-[#9a3412]", Icon: TrendingUp },
-    under:     { bg: "bg-[#eff6ff]", border: "border-[#bfdbfe]", text: "text-[#1e40af]", Icon: TrendingDown },
+    exhausted: { bg: "bg-danger-50", border: "border-danger-200", text: "text-danger-800", Icon: AlertTriangle },
+    expired:   { bg: "bg-danger-50", border: "border-danger-200", text: "text-danger-800", Icon: AlertTriangle },
+    over:      { bg: "bg-warning-50", border: "border-warning-200", text: "text-warning-700", Icon: TrendingUp },
+    under:     { bg: "bg-pt", border: "border-pt2", text: "text-pri", Icon: TrendingDown },
   } as Record<string, { bg: string; border: string; text: string; Icon: React.ElementType }>)[group.worstKind]
-    ?? { bg: "bg-[#eff6ff]", border: "border-[#bfdbfe]", text: "text-[#1e40af]", Icon: TrendingDown };
+    ?? { bg: "bg-pt", border: "border-pt2", text: "text-pri", Icon: TrendingDown };
   const Icon = palette.Icon;
   return (
     <Link
       to="/dashboard/billing/$clientId"
       params={{ clientId: group.client_id }}
-      className={`block rounded-lg border ${palette.border} ${palette.bg} p-3 transition hover:shadow-sm`}
+      className={`block rounded-lg border ${palette.border} ${palette.bg} p-3 transition hover:shadow-[var(--denim-shadow-sm)]`}
     >
       <div className={`flex items-start gap-2 ${palette.text}`}>
         <Icon className="mt-0.5 h-4 w-4 shrink-0" />
@@ -293,7 +293,7 @@ function ReportBuilder() {
   }
 
   return (
-    <section className="rounded-xl border border-[var(--hive-gold)]/30 bg-card p-4 shadow-sm">
+    <section className="rounded-xl border border-[var(--hive-accent)]/30 bg-card p-4 shadow-[var(--denim-shadow-sm)]">
       <div className="mb-3 flex items-center gap-3">
         <NectarMark size="sm" />
         <div className="flex flex-1 items-center gap-2">
@@ -343,7 +343,7 @@ function ReportBuilder() {
             type="button"
             onClick={() => saveName.trim() && saveM.mutate(saveName.trim())}
             disabled={saveM.isPending || saveName.trim().length === 0}
-            className="inline-flex items-center gap-1 rounded-md bg-[var(--hive-text)] px-3 py-1 text-xs font-medium text-white disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-full bg-pri px-3 py-1 text-xs font-medium text-white disabled:opacity-50"
           >
             {saveM.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
             Save &amp; pin
@@ -371,7 +371,7 @@ function ReportBuilder() {
       )}
 
       {error && (
-        <p className="mt-3 rounded-md border border-[#fecaca] bg-[#fef2f2] px-3 py-2 text-sm text-[#991b1b]">{error}</p>
+        <p className="mt-3 rounded-md border border-danger-200 bg-danger-50 px-3 py-2 text-sm text-danger-800">{error}</p>
       )}
 
       {result && (
@@ -392,7 +392,7 @@ function ReportBuilder() {
             </button>
           </div>
           {result.notice && (
-            <p className="rounded-md border border-[#fed7aa] bg-[#fff7ed] px-2 py-1 text-xs text-[#9a3412]">
+            <p className="rounded-md border border-pt2 bg-pt px-2 py-1 text-xs text-pri">
               {result.notice}
             </p>
           )}
@@ -479,9 +479,9 @@ function SavedReportsSection({ onRunPrompt }: { onRunPrompt: (p: string) => void
   const reports = q.data ?? [];
 
   return (
-    <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+    <section className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
       <div className="mb-3 flex items-center gap-2">
-        <Pin className="h-4 w-4 text-[var(--hive-gold)]" />
+        <Pin className="h-4 w-4 text-[var(--hive-accent-text)]" />
         <h2 className="font-display text-lg font-semibold">Saved reports</h2>
         <span className="text-xs text-muted-foreground">
           Pin one-tap re-runs and schedule recurring delivery
@@ -501,12 +501,12 @@ function SavedReportsSection({ onRunPrompt }: { onRunPrompt: (p: string) => void
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <div className="flex items-center gap-1 text-sm font-semibold text-[var(--hive-text)]">
-                    {r.pinned && <Pin className="h-3 w-3 text-[var(--hive-gold)]" />}
+                    {r.pinned && <Pin className="h-3 w-3 text-[var(--hive-accent-text)]" />}
                     <span className="truncate">{r.name}</span>
                   </div>
                   <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{r.prompt}</p>
                   {r.schedule && r.schedule.active && (
-                    <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-[#1e40af]">
+                    <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-pri">
                       <Calendar className="h-3 w-3" />
                       {r.schedule.cadence === "weekly"
                         ? `Weekly · ${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][r.schedule.day_of_week ?? 1]} @ ${r.schedule.hour}:00`
@@ -601,8 +601,8 @@ function ScheduleDialog({
   const [pending, setPending] = useState(false);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-      <div className="w-full max-w-md rounded-xl border border-border bg-background p-4 shadow-lg" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--denim-overlay)] backdrop-blur-[4px] p-4" onClick={onClose}>
+      <div className="w-full max-w-md rounded-xl border border-border bg-background p-4 shadow-[var(--denim-shadow)]" onClick={(e) => e.stopPropagation()}>
         <div className="mb-3 flex items-center justify-between">
           <h3 className="font-display text-base font-semibold">Schedule "{report.name}"</h3>
           <button type="button" onClick={onClose} className="rounded-md border border-border p-1"><X className="h-4 w-4" /></button>
@@ -613,12 +613,12 @@ function ScheduleDialog({
             <button
               type="button"
               onClick={() => setCadence("weekly")}
-              className={`flex-1 rounded-md border px-2 py-1.5 text-xs ${cadence === "weekly" ? "border-[var(--hive-text)] bg-[var(--hive-text)] text-white" : "border-border"}`}
+              className={`flex-1 rounded-md border px-2 py-1.5 text-xs ${cadence === "weekly" ? "border-pri bg-pri text-white" : "border-border"}`}
             >Weekly</button>
             <button
               type="button"
               onClick={() => setCadence("monthly")}
-              className={`flex-1 rounded-md border px-2 py-1.5 text-xs ${cadence === "monthly" ? "border-[var(--hive-text)] bg-[var(--hive-text)] text-white" : "border-border"}`}
+              className={`flex-1 rounded-md border px-2 py-1.5 text-xs ${cadence === "monthly" ? "border-pri bg-pri text-white" : "border-border"}`}
             >Monthly</button>
           </div>
 
@@ -697,7 +697,7 @@ function ScheduleDialog({
                 });
               } finally { setPending(false); }
             }}
-            className="inline-flex items-center gap-1 rounded-md bg-[var(--hive-text)] px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-full bg-pri px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
           >
             {pending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
             Save schedule

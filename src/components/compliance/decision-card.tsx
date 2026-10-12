@@ -7,7 +7,7 @@ import "./decision-card.css";
 
 function urgencyBar(urgency: Decision["urgency"]): string {
   if (urgency === "critical") return "var(--hive-danger)";
-  if (urgency === "high") return "var(--hive-gold)";
+  if (urgency === "high") return "var(--hive-warn)";
   return "var(--hive-ok)";
 }
 
@@ -60,7 +60,7 @@ export function DecisionCard({
         {why}
       </p>
       {item.overridden ? (
-        <p data-testid="override-state" className="act-why text-[var(--hive-on-gold)]">
+        <p data-testid="override-state" className="act-why text-[var(--hive-on-accent)]">
           {OVERRIDE_STATE_LABEL}
           {item.overrideUntil ? ` until ${item.overrideUntil}` : ""}. {OVERRIDE_STILL_REQUIRED}
         </p>

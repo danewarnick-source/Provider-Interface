@@ -20,7 +20,7 @@ export function PiAboutPage() {
         <p className="lede">{PI_ABOUT_PAGE_LEAD}</p>
         <div className="pi" style={{ marginTop: 36 }}>
           <div className="pi-mark-well">
-            <PiMark variant="cream" width={88} height={88} className="pi-card-mark" />
+            <PiMark variant="brand" width={88} height={88} className="pi-card-mark" />
             <span className="sr-only">{PI_WHAT_IS_MARK}</span>
           </div>
           <div className="page-copy" style={{ marginTop: 0 }}>

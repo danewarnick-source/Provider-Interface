@@ -58,12 +58,6 @@ export const Route = createFileRoute("/dashboard/scheduler")({
       { title: "Scheduler — Provider Interface" },
       { name: "description", content: "Schedule, Day Program, and Staff view" },
     ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap",
-      },
-    ],
   }),
   validateSearch: (s: Record<string, unknown>): { focus?: string } =>
     typeof s.focus === "string" ? { focus: s.focus } : {},
@@ -96,7 +90,7 @@ function sectionLabelFor(code: string): string {
 }
 
 const NAVY = "var(--hive-ink)";
-const GOLD = "var(--hive-gold)";
+const ACCENT = "var(--hive-accent)";
 const TEAL = "var(--hive-ok)";
 const LINE = "var(--hive-border)";
 
@@ -186,7 +180,7 @@ function SchedulerPage() {
           <button
             onClick={() => publishMut.mutate()}
             disabled={publishMut.isPending || !orgId}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-[var(--hive-gold)] bg-transparent px-3.5 py-2 text-[13px] font-semibold text-[var(--hive-text)] hover:bg-[var(--hive-gold-soft)]"
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[var(--hive-accent)] bg-transparent px-3.5 py-2 text-[13px] font-semibold text-[var(--hive-text)] hover:bg-[var(--hive-accent-soft)]"
           >
             <Send className="h-4 w-4" /> {publishMut.isPending ? "Publishing…" : "Publish"}
           </button>
@@ -231,7 +225,7 @@ function TabBtn({ label, active, onClick }: { label: string; active: boolean; on
       onClick={onClick}
       className={`cursor-pointer border-b-2 px-3 py-1.5 text-[13px] font-semibold ${
         active
-          ? "border-[var(--hive-gold)] text-[var(--hive-text)]"
+          ? "border-[var(--hive-accent)] text-[var(--hive-text)]"
           : "border-transparent text-[var(--hive-text-muted)] hover:text-[var(--hive-text)]"
       }`}
     >
@@ -245,7 +239,7 @@ function ViewBtn({ label, icon, active, onClick }: { label: string; icon?: React
       onClick={onClick}
       className={`inline-flex items-center gap-1 border-b-2 px-3 py-1.5 text-sm font-medium ${
         active
-          ? "border-[var(--hive-gold)] text-[var(--hive-gold)]"
+          ? "border-[var(--hive-accent)] text-[var(--hive-accent-text)]"
           : "border-transparent text-[var(--hive-text-muted)] hover:text-[var(--hive-text)]"
       }`}
     >
@@ -345,7 +339,7 @@ function SchedulerBody({
 
         {/* Legend */}
         <div className="flex items-center gap-3 text-xs text-muted-foreground px-1">
-          <span className="inline-flex items-center gap-1.5"><span style={{ width: 14, height: 14, borderRadius: 4, background: GOLD }} /> Staff</span>
+          <span className="inline-flex items-center gap-1.5"><span style={{ width: 14, height: 14, borderRadius: 4, background: ACCENT }} /> Staff</span>
           <span className="inline-flex items-center gap-1.5"><span style={{ width: 14, height: 14, borderRadius: 999, background: TEAL }} /> Client</span>
           <span>· squares = staff, circles = clients</span>
         </div>
@@ -467,7 +461,7 @@ function CodeSection({
         className="w-full flex items-center gap-2 px-4 py-3 text-left"
       >
         <ChevronRight className="h-4 w-4 transition-transform" style={{ transform: open ? "rotate(90deg)" : "none" }} />
-        <span style={{ background: codeColor(code), color: "#fff", padding: "2px 8px", borderRadius: 6, fontWeight: 800, fontSize: 11, letterSpacing: 0.5 }}>
+        <span style={{ background: codeColor(code), color: "#fff", padding: "2px 8px", borderRadius: 6, fontWeight: 700, fontSize: 11, letterSpacing: 0.5 }}>
           {code}
         </span>
         <span className="text-sm font-semibold text-foreground">· {label}</span>
@@ -478,7 +472,7 @@ function CodeSection({
       {open && (
         <div style={{ borderTop: `1px solid ${LINE}` }}>
           {code === "RHS" && homes.length > 0 && (
-            <div className="px-4 py-2 flex items-center gap-1.5 flex-wrap" style={{ borderBottom: `1px solid ${LINE}`, background: "#fbfaf6" }}>
+            <div className="px-4 py-2 flex items-center gap-1.5 flex-wrap" style={{ borderBottom: `1px solid ${LINE}`, background: "var(--denim-pt0)" }}>
               <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground mr-1">
                 Home:
               </span>
@@ -544,7 +538,7 @@ function HomePill({ label, active, onClick }: { label: string; active: boolean; 
       onClick={onClick}
       style={{
         background: active ? NAVY : "#fff",
-        color: active ? "#fff" : "#333",
+        color: active ? "#fff" : "var(--denim-text)",
         border: `1px solid ${active ? NAVY : LINE}`,
         borderRadius: 999, padding: "5px 10px", fontSize: 12, fontWeight: 600,
       }}
@@ -554,17 +548,17 @@ function HomePill({ label, active, onClick }: { label: string; active: boolean; 
   );
 }
 
-const FALLBACK_PALETTE = ["#3b6aa8", "#7d4cdb", "var(--hive-ink)", "#d6438a", "var(--hive-gold)", "#3a8acc", "#dc3a3a", "#7eb45b", "#4a5b8c", "#a36cd6", "#2e8b75", "#c0593f"];
+const FALLBACK_PALETTE = ["var(--denim-pri)", "var(--denim-steel)", "var(--denim-acc)", "var(--denim-hi)", "var(--denim-accd)", "var(--denim-deep)", "var(--denim-muted)", "var(--denim-text)"];
 function codeColor(code: string): string {
   switch (code) {
-    case "SLH": return "#3b6aa8";
-    case "COM": return "#7d4cdb";
-    case "PAC": return "var(--hive-ink)";
-    case "RP2": return "#d6438a";
-    case "HHS": return "var(--hive-gold)";
-    case "RHS": return "#3a8acc";
-    case "PM1": return "#dc3a3a";
-    case "DSI": return "#7eb45b";
+    case "SLH": return "var(--denim-steel)";
+    case "COM": return "var(--denim-hi)";
+    case "PAC": return "var(--denim-text)";
+    case "RP2": return "var(--denim-accd)";
+    case "HHS": return "var(--denim-pri)";
+    case "RHS": return "var(--denim-deep)";
+    case "PM1": return "var(--denim-muted)";
+    case "DSI": return "var(--denim-acc)";
     default: {
       // Stable hash → palette so unknown codes get a consistent color.
       let h = 0;
@@ -594,7 +588,7 @@ function ClientCell({
       metaLine = (
         <button
           onClick={() => onSetAdminHours(client)}
-          className="text-[11px] underline text-[color:var(--amber-700,var(--hive-gold))]"
+          className="text-[11px] underline text-warning-700"
         >
           Set administrative hours
         </button>
@@ -610,7 +604,7 @@ function ClientCell({
           to="/dashboard/clients/$clientId"
           params={{ clientId: client.id }}
           search={{ section: "services" }}
-          className="text-[11px] underline text-[color:var(--amber-700,var(--hive-gold))]"
+          className="text-[11px] underline text-warning-700"
         >
           Set units
         </Link>
@@ -641,7 +635,7 @@ function ClientCell({
           >
             {client.first_name} {client.last_name}
           </Link>
-          <span style={{ background: "#e9f7f6", color: TEAL, fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 4, letterSpacing: 0.5 }}>
+          <span style={{ background: "var(--denim-acct)", color: TEAL, fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 4, letterSpacing: 0.5 }}>
             CLIENT
           </span>
         </div>
@@ -702,8 +696,8 @@ function DayView({
                         const d = new Date(anchor); d.setHours(h, 0, 0, 0);
                         onAdd({ clientId: c.id, code, day: d });
                       }}
-                      className="border-l border-dashed text-[10px] text-muted-foreground/50 hover:bg-amber-50/40"
-                      style={{ borderColor: "#eee" }}
+                      className="border-l border-dashed text-[10px] text-muted-foreground/50 hover:bg-pt"
+                      style={{ borderColor: "var(--denim-line)" }}
                       title="Add shift"
                     />
                   ))}
@@ -738,8 +732,8 @@ function DayView({
                         display: "flex",
                         alignItems: "center",
                         gap: 6,
-                        background: s.staff_id ? "rgba(245,147,36,0.15)" : "rgba(180,180,180,0.15)",
-                        border: `1px solid ${s.staff_id ? GOLD : "#bbb"}`,
+                        background: s.staff_id ? "var(--denim-acct)" : "var(--denim-pt0)",
+                        border: `1px solid ${s.staff_id ? ACCENT : "var(--denim-pt2)"}`,
                         borderRadius: 6,
                         padding: "0 8px",
                         fontSize: 11,
@@ -753,7 +747,7 @@ function DayView({
                     >
                       <span
                         aria-hidden
-                        style={{ width: 6, height: 6, borderRadius: 999, background: GOLD, flex: "0 0 6px" }}
+                        style={{ width: 6, height: 6, borderRadius: 999, background: ACCENT, flex: "0 0 6px" }}
                       />
                       <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
                     </button>
@@ -795,7 +789,7 @@ function WeekView({
           <div style={{ minWidth: 220, padding: "8px 12px" }} className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Client</div>
           <div className="flex-1 grid" style={{ gridTemplateColumns: "repeat(7, 1fr)" }}>
             {days.map((d) => (
-              <div key={d.toISOString()} className="px-2 py-2 text-center" style={{ background: sameDay(d, today) ? "#fff7e6" : undefined }}>
+              <div key={d.toISOString()} className="px-2 py-2 text-center" style={{ background: sameDay(d, today) ? "var(--denim-pt)" : undefined }}>
                 <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{d.toLocaleDateString(undefined, { weekday: "short" })}</div>
                 <div className="text-sm font-semibold">{d.getDate()}</div>
               </div>
@@ -817,8 +811,8 @@ function WeekView({
                       if (dayShifts[0]) onOpenShift(dayShifts[0].id);
                       else onAdd({ clientId: c.id, code, day: d });
                     }}
-                    className="flex items-center justify-center hover:bg-amber-50/40"
-                    style={{ minHeight: 50, background: sameDay(d, today) ? "#fff7e6" : undefined }}
+                    className="flex items-center justify-center hover:bg-pt"
+                    style={{ minHeight: 50, background: sameDay(d, today) ? "var(--denim-pt)" : undefined }}
                   >
                     {dayShifts.length === 0 ? (
                       <span className="text-xs text-muted-foreground/50">+</span>
@@ -828,8 +822,8 @@ function WeekView({
                         title={s.staff_id ? "Assigned" : "Open"}
                         style={{
                           width: 14, height: 14, borderRadius: 999, margin: "0 2px",
-                          background: s.staff_id ? "#2563d8" : "transparent",
-                          border: s.staff_id ? "none" : `2px solid ${GOLD}`,
+                          background: s.staff_id ? "var(--denim-pri)" : "transparent",
+                          border: s.staff_id ? "none" : `2px solid ${ACCENT}`,
                         }}
                       />
                     ))}
@@ -885,7 +879,7 @@ function MonthView({
                     key={s.id}
                     onClick={() => onOpenShift(s.id)}
                     className="block w-full text-left text-[10px] px-1.5 py-0.5 rounded truncate"
-                    style={{ background: "rgba(245,147,36,0.15)", color: NAVY }}
+                    style={{ background: "var(--denim-acct)", color: NAVY }}
                   >
                     {clientName(s.client_id)} · {code}
                   </button>
@@ -1138,13 +1132,13 @@ function AddShiftDialog({
                       <span className="flex items-center gap-1">
                         {needsAbi && (
                           <AlertTriangle
-                            className="inline h-3 w-3 shrink-0 text-amber-600"
+                            className="inline h-3 w-3 shrink-0 text-warning-600"
                             aria-label="Missing ABI training (reminder only)"
                           />
                         )}
                         {needs30Day && (
                           <AlertTriangle
-                            className="inline h-3 w-3 shrink-0 text-amber-600"
+                            className="inline h-3 w-3 shrink-0 text-warning-600"
                             aria-label="30-day training incomplete (reminder only)"
                           />
                         )}
@@ -1157,7 +1151,7 @@ function AddShiftDialog({
             </Select>
             {clientId && <p className="text-[11px] text-muted-foreground mt-1">Only staff on {clientName}'s team are listed.</p>}
             {trainingReminder && (
-              <p className="text-[11px] text-amber-800 mt-1.5 rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5">
+              <p className="text-[11px] text-warning-800 mt-1.5 rounded-md border border-warning-200 bg-warning-50 px-2 py-1.5">
                 {trainingReminder}
               </p>
             )}
@@ -1170,7 +1164,7 @@ function AddShiftDialog({
           </div>
 
           {/* Recurrence */}
-          <div className="rounded-md border p-3 space-y-2" style={{ borderColor: LINE, background: "#fbfaf6" }}>
+          <div className="rounded-md border p-3 space-y-2" style={{ borderColor: LINE, background: "var(--denim-pt0)" }}>
             <label className="inline-flex items-center gap-2 text-sm font-semibold">
               <input type="checkbox" checked={repeatOn} onChange={(e) => setRepeatOn(e.target.checked)} className="h-4 w-4" />
               Repeat this shift
@@ -1215,7 +1209,7 @@ function AddShiftDialog({
                             className="text-xs font-semibold rounded-full px-3 py-1.5"
                             style={{
                               background: active ? NAVY : "#fff",
-                              color: active ? "#fff" : "#444",
+                              color: active ? "#fff" : "var(--denim-text)",
                               border: `1px solid ${active ? NAVY : LINE}`,
                               minHeight: 32, minWidth: 44,
                             }}
@@ -1286,7 +1280,7 @@ function AddShiftDialog({
               !canManageSchedule ||
               (repeatOn && endMode === "until" && !until)
             }
-            style={{ background: GOLD, color: NAVY }}
+            style={{ background: "var(--denim-pri)", color: "#fff" }}
           >
             {saveMut.isPending ? "Saving…" : "Add shift"}
           </Button>
@@ -1483,9 +1477,9 @@ function ShiftDetailPanel({
 
   return (
     <>
-    <div className="fixed inset-y-0 right-0 z-40 w-full sm:w-[420px] bg-white border-l shadow-xl flex flex-col" style={{ borderColor: LINE }}>
-      <div className="flex items-center gap-2 p-3 border-b" style={{ borderColor: LINE, background: "#fbfaf6" }}>
-        <span style={{ background: codeColor(code), color: "#fff", padding: "2px 8px", borderRadius: 6, fontWeight: 800, fontSize: 11 }}>{code}</span>
+    <div className="fixed inset-y-0 right-0 z-40 w-full sm:w-[420px] bg-white border-l shadow-[var(--denim-shadow)] flex flex-col" style={{ borderColor: LINE }}>
+      <div className="flex items-center gap-2 p-3 border-b" style={{ borderColor: LINE, background: "var(--denim-pt0)" }}>
+        <span style={{ background: codeColor(code), color: "#fff", padding: "2px 8px", borderRadius: 6, fontWeight: 700, fontSize: 11 }}>{code}</span>
         <div className="flex-1 font-semibold text-sm">{client?.first_name} {client?.last_name}</div>
         <button onClick={onClose}><X className="h-4 w-4" /></button>
       </div>
@@ -1517,7 +1511,7 @@ function ShiftDetailPanel({
                 <span className="flex items-center gap-1">
                   {shift.staff_id && missingThirtyDay.has(shift.staff_id) && (
                     <AlertTriangle
-                      className="inline h-3 w-3 shrink-0 text-red-600"
+                      className="inline h-3 w-3 shrink-0 text-danger-600"
                      
                       aria-label="30-day training incomplete"
                     />
@@ -1535,7 +1529,7 @@ function ShiftDetailPanel({
                     <span className="flex items-center gap-1">
                       {needs30Day && (
                         <AlertTriangle
-                          className="inline h-3 w-3 shrink-0 text-red-600"
+                          className="inline h-3 w-3 shrink-0 text-danger-600"
                          
                           aria-label="30-day training incomplete"
                         />
@@ -1565,7 +1559,7 @@ function ShiftDetailPanel({
                       <div className="flex-1 truncate flex items-center gap-1">
                         {needs30Day && (
                           <AlertTriangle
-                            className="inline h-3 w-3 shrink-0 text-red-600"
+                            className="inline h-3 w-3 shrink-0 text-danger-600"
                            
                           />
                         )}
@@ -1652,7 +1646,7 @@ function AdminHoursDialog({ client, onClose }: { client: SchedClient; onClose: (
         <p className="text-[11px] text-muted-foreground text-center">{client.first_name} {client.last_name}</p>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={() => saveMut.mutate()} disabled={saveMut.isPending} style={{ background: GOLD, color: NAVY }}>
+          <Button onClick={() => saveMut.mutate()} disabled={saveMut.isPending} style={{ background: "var(--denim-pri)", color: "#fff" }}>
             {saveMut.isPending ? "Saving…" : "Save"}
           </Button>
         </DialogFooter>
@@ -1693,7 +1687,7 @@ function DayProgramBoard({
     <div className="p-4 max-w-[1400px] mx-auto space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold">Day Program — week of {weekStart.toLocaleDateString(undefined, { month: "short", day: "numeric" })}</h2>
-        <Button onClick={() => setCreateOpen(true)} style={{ background: GOLD, color: NAVY }}>
+        <Button onClick={() => setCreateOpen(true)} style={{ background: "var(--denim-pri)", color: "#fff" }}>
           <Plus className="h-4 w-4 mr-1" /> Add session
         </Button>
       </div>
@@ -1701,7 +1695,7 @@ function DayProgramBoard({
         {(["DSG", "DSP"] as const).map((code) => (
           <div key={code} style={{ background: "#fff", border: `1px solid ${LINE}`, borderRadius: 12 }} className="p-3">
             <div className="flex items-center gap-2 mb-3">
-              <span style={{ background: codeColor(code === "DSG" ? "SLH" : "RHS"), color: "#fff", padding: "2px 8px", borderRadius: 6, fontWeight: 800, fontSize: 11 }}>{code}</span>
+              <span style={{ background: codeColor(code === "DSG" ? "SLH" : "RHS"), color: "#fff", padding: "2px 8px", borderRadius: 6, fontWeight: 700, fontSize: 11 }}>{code}</span>
               <span className="font-semibold">{code === "DSG" ? "Day Support — Group" : "Day Support — Partial"}</span>
             </div>
             {(groups[code] ?? []).length === 0 ? (
@@ -1772,8 +1766,8 @@ function SessionCard({
           {sessStaff.map((s) => {
             const st = sched.staff.find((x) => x.id === s.staff_id);
             return (
-              <span key={s.id} className="text-[11px] font-semibold inline-flex items-center gap-1 px-2 py-1 rounded" style={{ background: "rgba(245,147,36,0.15)" }}>
-                <span style={{ width: 6, height: 6, borderRadius: 2, background: GOLD }} />
+              <span key={s.id} className="text-[11px] font-semibold inline-flex items-center gap-1 px-2 py-1 rounded" style={{ background: "var(--denim-acct)" }}>
+                <span style={{ width: 6, height: 6, borderRadius: 2, background: ACCENT }} />
                 {st?.first_name ?? "Staff"}
               </span>
             );
@@ -1805,8 +1799,8 @@ function SessionCard({
                   {(c.first_name?.[0] ?? "") + (c.last_name?.[0] ?? "")}
                 </span>
                 <span className="text-sm flex-1 truncate">{c.first_name} {c.last_name}</span>
-                <button onClick={() => onMark(cid, true)} className={`text-[11px] px-2 py-0.5 rounded ${state === "present" ? "bg-emerald-100 text-emerald-700 font-semibold" : "text-muted-foreground hover:bg-muted"}`}>Present</button>
-                <button onClick={() => onMark(cid, false)} className={`text-[11px] px-2 py-0.5 rounded ${state === "absent" ? "bg-red-100 text-red-700 font-semibold" : "text-muted-foreground hover:bg-muted"}`}>Absent</button>
+                <button onClick={() => onMark(cid, true)} className={`text-[11px] px-2 py-0.5 rounded ${state === "present" ? "bg-success-100 text-success-700 font-semibold" : "text-muted-foreground hover:bg-muted"}`}>Present</button>
+                <button onClick={() => onMark(cid, false)} className={`text-[11px] px-2 py-0.5 rounded ${state === "absent" ? "bg-danger-100 text-danger-700 font-semibold" : "text-muted-foreground hover:bg-muted"}`}>Absent</button>
               </div>
             );
           })}
@@ -1868,7 +1862,7 @@ function NewSessionDialog({
                 setBusy(false);
               }
             }}
-            style={{ background: GOLD, color: NAVY }}
+            style={{ background: "var(--denim-pri)", color: "#fff" }}
           >
             {busy ? "Saving…" : "Create"}
           </Button>
@@ -1958,14 +1952,14 @@ function StaffViewPreview({
           const isOff = offDates.has(ds);
           const dayShifts = myShifts.filter((s) => sameDay(new Date(s.starts_at), d));
           return (
-            <div key={ds} className="flex items-center gap-3 px-4 py-3" style={{ background: sameDay(d, new Date()) ? "#fffaf0" : undefined }}>
+            <div key={ds} className="flex items-center gap-3 px-4 py-3" style={{ background: sameDay(d, new Date()) ? "var(--denim-pt)" : undefined }}>
               <div className="w-12 text-center">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{d.toLocaleDateString(undefined, { weekday: "short" })}</div>
                 <div className="text-base font-semibold">{d.getDate()}</div>
               </div>
               <div className="flex-1 text-sm">
                 {isOff ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-emerald-50 text-emerald-700 text-xs font-semibold">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-success-50 text-success-700 text-xs font-semibold">
                     Time off
                   </span>
                 ) : dayShifts.length === 0 ? (

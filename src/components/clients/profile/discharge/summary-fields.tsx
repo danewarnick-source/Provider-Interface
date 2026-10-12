@@ -27,7 +27,6 @@ export function SummaryFields({
         {onDraft ? (
           <Button
             type="button"
-            size="sm"
             variant="outline"
             disabled={drafting}
             onClick={onDraft}
@@ -43,7 +42,7 @@ export function SummaryFields({
         ) : null}
       </div>
       {value.draftedByNectar ? (
-        <p className="rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-xs text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+        <p className="rounded-xl border border-warning-200 bg-warning-50 px-2 py-1 text-xs text-warning-800">
           Nectar's draft, from what is on file. Read it, fix anything wrong, then confirm.
         </p>
       ) : null}

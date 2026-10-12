@@ -416,6 +416,7 @@ export async function resolveGroupMembersInternal(
   const [{ data: dirRows, error: dErr }, { data: roleRows, error: rErr }] = await Promise.all([
     supabase.from("org_member_directory").select("id, full_name").in("id", staffIds),
     supabase.from("organization_members").select("user_id, access_level")
+      .is("deleted_at", null)
       .eq("organization_id", organizationId).eq("active", true).in("user_id", staffIds),
   ]);
   if (dErr) throw new Error(dErr.message);

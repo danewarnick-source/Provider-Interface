@@ -111,15 +111,15 @@ export function NoteTriggerPrompt({
             key={hit.kind}
             className={`rounded-lg border p-3 text-sm ${
               resolved
-                ? "border-emerald-300 bg-emerald-50 dark:bg-emerald-950/30"
-                : "border-amber-400 bg-amber-50 dark:bg-amber-950/30"
+                ? "border-success-300 bg-success-50 dark:bg-success-950/30"
+                : "border-warning-400 bg-warning-50 dark:bg-warning-950/30"
             }`}
           >
             <div className="flex items-start gap-2">
               {resolved ? (
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success-600" />
               ) : (
-                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning-600" />
               )}
               <div className="min-w-0 flex-1">
                 <p className="font-medium">
@@ -128,11 +128,11 @@ export function NoteTriggerPrompt({
                 </p>
                 {resolved ? (
                   hit.kind === "incident" && submittedIr ? (
-                    <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-300">
+                    <p className="mt-1 text-xs text-success-700 dark:text-success-300">
                       Resolved — incident report <span className="font-mono">{submittedIr.report_number}</span> submitted for this individual today.
                     </p>
                   ) : (
-                    <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-300">
+                    <p className="mt-1 text-xs text-success-700 dark:text-success-300">
                       Resolved — you can submit this note.
                     </p>
                   )
@@ -164,7 +164,7 @@ export function NoteTriggerPrompt({
                       )}
                     </div>
                     {hit.kind === "incident" && (
-                      <p className="text-[11px] text-amber-800 dark:text-amber-200">
+                      <p className="text-[11px] text-warning-800 dark:text-warning-200">
                         Opening the form is not enough — this note can't be submitted
                         until an Incident Report for this individual is <strong>submitted</strong>,
                         or you explicitly record below that no reportable incident occurred.

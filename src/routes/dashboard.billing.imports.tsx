@@ -33,6 +33,7 @@ function ImportsPage() {
         .from("clients")
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .select("id, medicaid_id" as any)
+        .is("deleted_at", null)
         .eq("organization_id", org!.organization_id);
       if (error) throw error;
       return (data ?? []) as unknown as Array<{ id: string; medicaid_id: string | null }>;

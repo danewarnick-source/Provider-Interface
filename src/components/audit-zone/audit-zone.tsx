@@ -275,6 +275,7 @@ function DocumentPull({ orgId }: { orgId?: string }) {
       const { data } = await supabase
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .order("last_name", { ascending: true })
         .limit(500);
@@ -289,6 +290,7 @@ function DocumentPull({ orgId }: { orgId?: string }) {
       const { data } = await supabase
         .from("organization_members")
         .select("user_id, profiles(id, full_name, email)")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .eq("active", true)
         .limit(500);
@@ -340,10 +342,10 @@ function DocumentPull({ orgId }: { orgId?: string }) {
   }, []);
 
   return (
-    <Card className="bg-card/60 backdrop-blur border-[color:var(--border-light)]">
+    <Card className="border-line">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <Search className="h-4 w-4 text-[color:var(--amber-600)]" />
+          <Search className="h-4 w-4 text-pri" />
           Pull a document or report
         </CardTitle>
         <p className="text-xs text-muted-foreground">
@@ -358,19 +360,19 @@ function DocumentPull({ orgId }: { orgId?: string }) {
           featureName="Pull records in plain language"
           benefit="Ask NECTAR to assemble any pull from your data — e.g. “all of Blake's DSI timesheets for FY26” — instead of building filters by hand. Works across every record type and every plan year on file."
         >
-          <div className="rounded-lg border border-[color:var(--amber-300)] bg-gradient-to-br from-[color:var(--amber-50)]/70 to-white p-3">
+          <div className="rounded-[var(--denim-r)] border border-pt2 bg-pt0 p-3">
             <div className="mb-2 flex items-center gap-2">
               <span
-                className="inline-flex h-6 w-6 items-center justify-center text-[color:var(--amber-600)]"
+                className="inline-flex h-6 w-6 items-center justify-center text-pri"
                 style={{
                   clipPath:
                     "polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)",
-                  background: "linear-gradient(135deg, var(--amber-100), var(--amber-200))",
+                  background: "linear-gradient(135deg, var(--denim-pt), var(--denim-pt2))",
                 }}
               >
                 <Sparkles className="h-3.5 w-3.5" />
               </span>
-              <Label className="text-xs font-semibold uppercase tracking-wide text-[color:var(--amber-700)]">
+              <Label className="text-xs font-semibold uppercase tracking-wide text-pri">
                 NECTAR Infusion
               </Label>
               <span className="text-xs text-muted-foreground">
@@ -402,12 +404,12 @@ function DocumentPull({ orgId }: { orgId?: string }) {
               </Button>
             </div>
             {nectarReply && (
-              <div className="mt-3 rounded-md border border-[color:var(--amber-200)] bg-white/80 p-3 text-sm">
+              <div className="mt-3 rounded-[10px] border border-pt2 bg-paper p-3 text-sm">
                 <NectarAnswer text={nectarReply.answer} />
                 {nectarReply.deepLink && (
                   <a
                     href={nectarReply.deepLink.path}
-                    className="mt-2 inline-block text-xs font-medium text-[color:var(--amber-700)] hover:underline"
+                    className="mt-2 inline-block text-xs font-medium text-pri hover:underline"
                   >
                     {nectarReply.deepLink.label} →
                   </a>
@@ -502,7 +504,7 @@ function DocumentPull({ orgId }: { orgId?: string }) {
           </div>
         </div>
 
-        <div className="divide-y rounded-md border border-[color:var(--border-light)]">
+        <div className="divide-y rounded-md border border-line">
           {pullKey === 0 && (
             <div className="p-8 text-center text-sm text-muted-foreground">
               Choose your criteria above and press <span className="font-medium text-foreground">Pull records</span>.
@@ -568,9 +570,9 @@ type AuditDoc = {
 };
 
 const statusMeta: Record<AuditFile["status"], { label: string; cls: string }> = {
-  building: { label: "Building", cls: "bg-[color:var(--surface-2)] text-foreground" },
-  review_complete: { label: "Review Complete", cls: "bg-[color:var(--amber-100)] text-[color:var(--navy-900)]" },
-  sent_to_audit: { label: "Sent to Audit", cls: "bg-[color:var(--navy-900)] text-white" },
+  building: { label: "Building", cls: "bg-pt text-pri" },
+  review_complete: { label: "Review Complete", cls: "bg-acct text-accd ring-1 ring-acctb" },
+  sent_to_audit: { label: "Sent to Audit", cls: "bg-deep text-white" },
 };
 
 function MonthlyAuditFolders({ orgId }: { orgId?: string }) {
@@ -619,10 +621,10 @@ function MonthlyAuditFolders({ orgId }: { orgId?: string }) {
   });
 
   return (
-    <Card className="bg-card/60 backdrop-blur border-[color:var(--border-light)]">
+    <Card className="border-line">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <FolderArchive className="h-4 w-4 text-[color:var(--amber-600)]" />
+          <FolderArchive className="h-4 w-4 text-pri" />
           Monthly Billing Support Documents
         </CardTitle>
         <p className="text-xs text-muted-foreground">
@@ -639,10 +641,10 @@ function MonthlyAuditFolders({ orgId }: { orgId?: string }) {
               <button
                 key={period}
                 onClick={() => (file ? setOpenId(file.id) : ensureFile.mutate(m))}
-                className="text-left rounded-lg border border-[color:var(--border-light)] bg-white/70 backdrop-blur p-4 hover:border-[color:var(--navy-700)] hover:bg-white transition"
+                className="text-left rounded-[var(--denim-r)] border border-line bg-paper p-4 shadow-[var(--denim-shadow-sm)] hover:border-pri hover:bg-pt0 transition ease-denim"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <FolderArchive className="h-5 w-5 text-[color:var(--navy-700)]" />
+                  <FolderArchive className="h-5 w-5 text-pri" />
                   <Badge className={meta.cls + " border-0"}>{meta.label}</Badge>
                 </div>
                 <div className="mt-3 font-semibold text-sm">{format(m, "MMMM yyyy")}</div>
@@ -882,7 +884,7 @@ function AuditFileDialog({
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FolderArchive className="h-5 w-5 text-[color:var(--amber-600)]" />
+            <FolderArchive className="h-5 w-5 text-pri" />
             {file ? `Audit folder — ${format(new Date(file.period_month), "MMMM yyyy")}` : "Audit folder"}
           </DialogTitle>
         </DialogHeader>
@@ -930,7 +932,7 @@ function AuditFileDialog({
               />
             </div>
 
-            <div className="rounded-md border border-[color:var(--border-light)] divide-y max-h-72 overflow-y-auto">
+            <div className="rounded-md border border-line divide-y max-h-72 overflow-y-auto">
               {(docs ?? []).length === 0 && (
                 <div className="p-6 text-center text-sm text-muted-foreground flex flex-col items-center gap-2">
                   <Plus className="h-5 w-5" />
@@ -1000,9 +1002,9 @@ export function AuditZone() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <FolderArchive className="h-6 w-6 text-[color:var(--amber-600)]" />
+        <FolderArchive className="h-6 w-6 text-pri" />
         <div>
-          <h1 className="text-2xl font-semibold">Audit Zone</h1>
+          <h1 className="font-display text-2xl font-bold tracking-[-0.025em] text-deep">Audit Zone</h1>
           <p className="text-sm text-muted-foreground">
             Pull any record on demand, and build audit-ready monthly folders for the Audit tab.
           </p>

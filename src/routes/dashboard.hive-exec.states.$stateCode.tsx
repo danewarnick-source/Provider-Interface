@@ -64,13 +64,13 @@ function StateDetailPage() {
         <Link
           to="/dashboard/hive-exec/states/$stateCode/onboarding"
           params={{ stateCode }}
-          className="inline-flex min-h-[36px] items-center gap-2 rounded-md bg-[var(--hive-gold)] px-3 text-xs font-semibold text-white hover:bg-[#b8651a]"
+          className="inline-flex min-h-[36px] items-center gap-2 rounded-full bg-[var(--hive-accent)] px-3 text-xs font-semibold text-white hover:bg-accd"
         >
           <Sparkles className="h-3.5 w-3.5" /> Run state onboarding
         </Link>
       </div>
 
-      <nav className="flex flex-wrap gap-1 rounded-xl border border-border bg-card p-1 shadow-sm">
+      <nav className="flex flex-wrap gap-1 rounded-xl border border-border bg-card p-1 shadow-[var(--denim-shadow-sm)]">
         {(
           [
             ["profile", "Profile & Template"],
@@ -83,7 +83,7 @@ function StateDetailPage() {
             key={key}
             onClick={() => setTab(key)}
             className={`inline-flex min-h-[36px] items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors ${
-              tab === key ? "bg-[var(--hive-text)] text-white" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              tab === key ? "bg-pri text-white" : "text-muted-foreground hover:bg-muted hover:text-foreground"
             }`}
           >
             {label}
@@ -158,7 +158,7 @@ function ProfileTab({ stateCode, onJumpToSources }: { stateCode: string; onJumpT
         <button
           onClick={() => publish.mutate()}
           disabled={publish.isPending || !hasTemplate}
-          className="inline-flex min-h-[36px] items-center gap-2 rounded-md bg-[var(--hive-gold)] px-3 text-xs font-semibold text-white shadow-sm hover:bg-[#b8631a] disabled:opacity-50"
+          className="inline-flex min-h-[36px] items-center gap-2 rounded-full bg-[var(--hive-accent)] px-3 text-xs font-semibold text-white shadow-[var(--denim-shadow-sm)] hover:bg-accd disabled:opacity-50"
         >
           <CheckCircle2 className="h-3.5 w-3.5" /> {publish.isPending ? "Publishing…" : "Publish template"}
         </button>
@@ -189,7 +189,7 @@ function ProfileTab({ stateCode, onJumpToSources }: { stateCode: string; onJumpT
       <RequiredDocsEditor value={tpl?.required_documents ?? { docs: [] }} onSave={(v) => saveSection("required_documents", v)} />
       <DepartmentStructureEditor value={tpl?.department_structure ?? { agency_types: [], program_levels: [] }} onSave={(v) => saveSection("department_structure", v)} />
 
-      <div id="sources-pointer" className="scroll-mt-24 rounded-xl border border-sky-200 bg-sky-50/50 p-4 text-xs text-sky-900">
+      <div id="sources-pointer" className="scroll-mt-24 rounded-xl border border-denim-200 bg-denim-50/50 p-4 text-xs text-denim-900">
         <div className="mb-1 inline-flex items-center gap-1 font-semibold">
           <Upload className="h-3.5 w-3.5" /> Upload state-specific documents
         </div>
@@ -200,7 +200,7 @@ function ProfileTab({ stateCode, onJumpToSources }: { stateCode: string; onJumpT
         tab. NECTAR parses uploads into per-state requirements with source attribution.
       </div>
 
-      <div className="rounded-xl border border-amber-200 bg-amber-50/40 p-4 text-xs text-amber-900">
+      <div className="rounded-xl border border-warning-200 bg-warning-50/40 p-4 text-xs text-warning-900">
         <div className="mb-1 inline-flex items-center gap-1 font-semibold">
           <AlertTriangle className="h-3.5 w-3.5" /> Can't be configured?
         </div>
@@ -214,7 +214,7 @@ function ProfileTab({ stateCode, onJumpToSources }: { stateCode: string; onJumpT
 
 function TemplateSectionNav() {
   return (
-    <nav className="sticky top-2 z-10 -mx-1 flex flex-wrap gap-1 rounded-xl border border-border bg-card/95 p-2 shadow-sm backdrop-blur">
+    <nav className="sticky top-2 z-10 -mx-1 flex flex-wrap gap-1 rounded-xl border border-border bg-card/95 p-2 shadow-[var(--denim-shadow-sm)] backdrop-blur">
       {TEMPLATE_SECTIONS.map((s) => (
         <a
           key={s.key}
@@ -226,7 +226,7 @@ function TemplateSectionNav() {
       ))}
       <a
         href="#sources-pointer"
-        className="inline-flex min-h-[32px] items-center gap-1 rounded-md border border-sky-200 bg-sky-50 px-2.5 text-[11px] font-semibold text-sky-900 hover:bg-sky-100"
+        className="inline-flex min-h-[32px] items-center gap-1 rounded-md border border-denim-200 bg-denim-50 px-2.5 text-[11px] font-semibold text-denim-900 hover:bg-denim-100"
       >
         <Upload className="h-3 w-3" /> Documents
       </a>
@@ -278,11 +278,11 @@ function BasicsCard({
   });
 
   return (
-    <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+    <section className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="inline-flex items-center gap-2 font-display text-sm font-semibold">
-          <MapPin className="h-4 w-4 text-[var(--hive-gold)]" />
-          {row?.name ?? stateCode} {row?.is_reference ? <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-900">Reference</span> : null}
+          <MapPin className="h-4 w-4 text-[var(--hive-accent-text)]" />
+          {row?.name ?? stateCode} {row?.is_reference ? <span className="rounded-full bg-pt px-1.5 py-0.5 text-[10px] font-semibold text-pri">Reference</span> : null}
         </h3>
         <span className="text-xs text-muted-foreground">
           {row?.provider_count ?? 0} provider{(row?.provider_count ?? 0) === 1 ? "" : "s"}
@@ -350,7 +350,7 @@ function SectionShell({
   blurb?: string;
 }) {
   return (
-    <section id={id} className="scroll-mt-24 rounded-xl border border-border bg-card p-4 shadow-sm">
+    <section id={id} className="scroll-mt-24 rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="font-display text-sm font-semibold">{title}</h3>
@@ -974,7 +974,7 @@ function SourcesTab({ stateCode }: { stateCode: string }) {
 
   return (
     <div className="space-y-4">
-      <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <section className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
         <h3 className="mb-2 inline-flex items-center gap-2 text-sm font-semibold">
           <Upload className="h-4 w-4" /> Add authoritative source
         </h3>
@@ -985,13 +985,13 @@ function SourcesTab({ stateCode }: { stateCode: string }) {
           <input placeholder="Title (e.g. DSPD Provider Code)" value={title} onChange={(e) => setTitle(e.target.value)} className="min-h-[40px] rounded-md border border-border bg-background px-3 text-sm md:col-span-2" />
           <input placeholder="Jurisdiction (optional)" value={jurisdiction} onChange={(e) => setJurisdiction(e.target.value)} className="min-h-[40px] rounded-md border border-border bg-background px-3 text-sm" />
           <button onClick={() => add.mutate()} disabled={!title.trim() || add.isPending}
-            className="min-h-[40px] rounded-md bg-[var(--hive-gold)] px-3 text-sm font-semibold text-white hover:bg-[#b8631a] disabled:opacity-50 md:col-span-3">
+            className="min-h-[40px] rounded-full bg-[var(--hive-accent)] px-3 text-sm font-semibold text-white hover:bg-accd disabled:opacity-50 md:col-span-3">
             {add.isPending ? "Adding…" : "Add source"}
           </button>
         </div>
       </section>
 
-      <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <section className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
         <h3 className="mb-2 inline-flex items-center gap-2 text-sm font-semibold">
           <FileText className="h-4 w-4" /> Sources
         </h3>
@@ -1009,7 +1009,7 @@ function SourcesTab({ stateCode }: { stateCode: string }) {
                     {r.jurisdiction ?? "—"} · status: {r.parse_status} · derived: {r.derived_count}
                   </div>
                 </div>
-                <button onClick={() => remove.mutate(r.id)} className="text-xs text-[#b91c1c] hover:underline">Remove</button>
+                <button onClick={() => remove.mutate(r.id)} className="text-xs text-danger-700 hover:underline">Remove</button>
               </li>
             ))}
           </ul>
@@ -1031,7 +1031,7 @@ function ProvidersTab({ stateCode }: { stateCode: string }) {
   const rows = (q.data ?? []) as any[];
 
   return (
-    <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+    <section className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
       <h3 className="mb-2 inline-flex items-center gap-2 text-sm font-semibold">
         <Building2 className="h-4 w-4" /> Providers in {stateCode}
       </h3>
@@ -1104,21 +1104,21 @@ function InventoryTab({ stateCode }: { stateCode: string }) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-[var(--hive-gold)]/30 bg-[var(--hive-gold)]/[0.06] p-4">
+      <div className="rounded-xl border border-[var(--hive-accent)]/30 bg-[var(--hive-accent)]/[0.06] p-4">
         <div className="flex items-start gap-3">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--hive-gold)]/15 ring-1 ring-[var(--hive-gold)]/30">
-            <Sparkles className="h-4 w-4 text-[#9a3412]" />
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--hive-accent)]/15 ring-1 ring-[var(--hive-accent)]/30">
+            <Sparkles className="h-4 w-4 text-pri" />
           </span>
           <div className="min-w-0 flex-1">
-            <h3 className="font-display text-sm font-semibold text-[#9a3412]">
+            <h3 className="font-display text-sm font-semibold text-pri">
               NECTAR Inventory — Utah-specific values
             </h3>
-            <p className="mt-1 text-xs text-[#9a3412]/80">
+            <p className="mt-1 text-xs text-pri/80">
               Every value the platform currently assumes is Utah. Items tagged{" "}
               <strong>config</strong> are (or will be) editable on each state's template.
               Items tagged <strong>structural</strong> need real engineering — flag them to open a PI Executive ticket.
             </p>
-            <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-[#9a3412]/80">
+            <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-pri/80">
               <span>{total} total · {extracted} extracted to template · {total - extracted} pending</span>
               <span>{configCount} config · {structuralCount} structural</span>
             </div>
@@ -1130,7 +1130,7 @@ function InventoryTab({ stateCode }: { stateCode: string }) {
         const items = STATE_INVENTORY.filter((i) => i.area === area.key);
         if (items.length === 0) return null;
         return (
-          <section key={area.key} className="rounded-xl border border-border bg-card p-4 shadow-sm">
+          <section key={area.key} className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
             <h4 className="mb-2 text-sm font-semibold tracking-tight">{area.label}</h4>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
@@ -1156,15 +1156,15 @@ function InventoryTab({ stateCode }: { stateCode: string }) {
                       <td className="px-2 py-2 text-[10px] text-muted-foreground">{item.source}</td>
                       <td className="px-2 py-2">
                         {item.kind === "structural" ? (
-                          <span className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[10px] font-medium text-rose-900">
+                          <span className="inline-flex items-center gap-1 rounded-full border border-danger-200 bg-danger-50 px-2 py-0.5 text-[10px] font-medium text-danger-900">
                             Structural
                           </span>
                         ) : item.extracted ? (
-                          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-900">
+                          <span className="inline-flex items-center gap-1 rounded-full border border-success-200 bg-success-50 px-2 py-0.5 text-[10px] font-medium text-success-900">
                             Extracted
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-900">
+                          <span className="inline-flex items-center gap-1 rounded-full border border-warning-200 bg-warning-50 px-2 py-0.5 text-[10px] font-medium text-warning-900">
                             Pending Phase 2
                           </span>
                         )}
@@ -1178,7 +1178,7 @@ function InventoryTab({ stateCode }: { stateCode: string }) {
                             type="button"
                             onClick={() => fileGap.mutate(item)}
                             disabled={fileGap.isPending}
-                            className="inline-flex min-h-[28px] items-center gap-1 rounded-md border border-rose-200 bg-white px-2 text-[10px] font-medium text-rose-900 hover:bg-rose-50 disabled:opacity-50"
+                            className="inline-flex min-h-[28px] items-center gap-1 rounded-md border border-danger-200 bg-white px-2 text-[10px] font-medium text-danger-900 hover:bg-danger-50 disabled:opacity-50"
                           >
                             <AlertTriangle className="h-3 w-3" /> File PI ticket
                           </button>
@@ -1193,7 +1193,7 @@ function InventoryTab({ stateCode }: { stateCode: string }) {
         );
       })}
 
-      <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <section className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
         <h4 className="mb-2 text-sm font-semibold tracking-tight">Filed structural gaps</h4>
         {gapsQ.isLoading ? (
           <div className="text-xs text-muted-foreground">Loading…</div>
@@ -1256,72 +1256,72 @@ function BaseVersionBanner({ stateCode }: { stateCode: string }) {
 
   if (d.upToDate) {
     return (
-      <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-900">
+      <div className="inline-flex items-center gap-2 rounded-full border border-success-200 bg-success-50 px-3 py-1 text-xs font-medium text-success-900">
         <CheckCircle2 className="h-3.5 w-3.5" /> Base template v{d.fromVersion} · current
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-4 text-sm shadow-sm">
+    <div className="rounded-xl border border-warning-200 bg-warning-50/60 p-4 text-sm shadow-[var(--denim-shadow-sm)]">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="inline-flex items-center gap-2 text-amber-900">
+          <div className="inline-flex items-center gap-2 text-warning-900">
             <Sparkles className="h-4 w-4" />
             <span className="font-semibold">Base template update available</span>
-            <span className="rounded-full border border-amber-300 bg-white/70 px-2 py-0.5 font-mono text-[11px]">
+            <span className="rounded-full border border-warning-300 bg-white/70 px-2 py-0.5 font-mono text-[11px]">
               v{d.fromVersion} → v{d.toVersion}
             </span>
           </div>
           {("toTitle" in d) && d.toTitle ? (
-            <div className="mt-1 text-xs font-medium text-amber-950">{d.toTitle}</div>
+            <div className="mt-1 text-xs font-medium text-warning-950">{d.toTitle}</div>
           ) : null}
           {("toSummary" in d) && d.toSummary ? (
-            <p className="mt-0.5 text-xs text-amber-900/80">{d.toSummary}</p>
+            <p className="mt-0.5 text-xs text-warning-900/80">{d.toSummary}</p>
           ) : null}
           {(d.added.length > 0 || d.removed.length > 0) ? (
             <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2">
               {d.added.length > 0 ? (
-                <div className="rounded-md border border-amber-200 bg-white/70 p-2">
-                  <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-900">New / added</div>
-                  <ul className="space-y-0.5 text-[11px] text-amber-950">
+                <div className="rounded-md border border-warning-200 bg-white/70 p-2">
+                  <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-success-900">New / added</div>
+                  <ul className="space-y-0.5 text-[11px] text-warning-950">
                     {d.added.slice(0, 12).map((c, i) => (
                       <li key={i}>
                         <span className="font-mono">{c.section}</span>
                         {c.field ? <span> · {c.field}</span> : null}
-                        {c.note ? <span className="text-amber-900/70"> — {c.note}</span> : null}
+                        {c.note ? <span className="text-warning-900/70"> — {c.note}</span> : null}
                       </li>
                     ))}
-                    {d.added.length > 12 ? <li className="text-amber-900/70">+ {d.added.length - 12} more</li> : null}
+                    {d.added.length > 12 ? <li className="text-warning-900/70">+ {d.added.length - 12} more</li> : null}
                   </ul>
                 </div>
               ) : null}
               {d.removed.length > 0 ? (
-                <div className="rounded-md border border-amber-200 bg-white/70 p-2">
-                  <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-rose-900">Removed</div>
-                  <ul className="space-y-0.5 text-[11px] text-amber-950">
+                <div className="rounded-md border border-warning-200 bg-white/70 p-2">
+                  <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-danger-900">Removed</div>
+                  <ul className="space-y-0.5 text-[11px] text-warning-950">
                     {d.removed.slice(0, 12).map((c, i) => (
                       <li key={i}>
                         <span className="font-mono">{c.section}</span>
                         {c.field ? <span> · {c.field}</span> : null}
                       </li>
                     ))}
-                    {d.removed.length > 12 ? <li className="text-amber-900/70">+ {d.removed.length - 12} more</li> : null}
+                    {d.removed.length > 12 ? <li className="text-warning-900/70">+ {d.removed.length - 12} more</li> : null}
                   </ul>
                 </div>
               ) : null}
             </div>
           ) : (
-            <p className="mt-2 text-xs text-amber-900/80">No field-level changes — version metadata only.</p>
+            <p className="mt-2 text-xs text-warning-900/80">No field-level changes — version metadata only.</p>
           )}
-          <p className="mt-2 text-[11px] text-amber-900/80">
+          <p className="mt-2 text-[11px] text-warning-900/80">
             Upgrading preserves all state-specific values you've already entered. New fields appear blank for you to fill in.
           </p>
         </div>
         <button
           onClick={() => upgrade.mutate(d.toVersion)}
           disabled={upgrade.isPending}
-          className="inline-flex min-h-[36px] shrink-0 items-center gap-2 rounded-md bg-[var(--hive-gold)] px-3 text-xs font-semibold text-white hover:bg-[#b8651a] disabled:opacity-50"
+          className="inline-flex min-h-[36px] shrink-0 items-center gap-2 rounded-full bg-[var(--hive-accent)] px-3 text-xs font-semibold text-white hover:bg-accd disabled:opacity-50"
         >
           <Sparkles className="h-3.5 w-3.5" /> {upgrade.isPending ? "Upgrading…" : `Update to v${d.toVersion}`}
         </button>

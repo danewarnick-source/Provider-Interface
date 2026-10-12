@@ -51,7 +51,7 @@ export function SectionBody({
     case "contacts":
       return <ContactsSection orgId={orgId} data={data} />;
     case "health":
-      return <HealthSection orgId={orgId} data={data} />;
+      return <HealthSection orgId={orgId} data={data} onOpenProfile={() => onSelect("profile")} />;
     case "plans":
       return <PlansSection orgId={orgId} data={data} />;
     case "services":
@@ -61,7 +61,14 @@ export function SectionBody({
     case "file":
       return <FileSection orgId={orgId} data={data} />;
     case "team":
-      return <TeamSection clientId={clientId} orgId={orgId} overview={overview} />;
+      return (
+        <TeamSection
+          clientId={clientId}
+          orgId={orgId}
+          firstName={data.client.first_name?.trim() || data.name}
+          overview={overview}
+        />
+      );
     case "activity":
       return <ActivitySection clientId={clientId} orgId={orgId} />;
   }

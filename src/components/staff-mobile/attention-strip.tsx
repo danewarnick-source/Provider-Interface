@@ -1,11 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { FileText, ChevronRight, BellRing, MessageSquare } from "lucide-react";
+import { FileText, ChevronRight, MessageSquare } from "lucide-react";
 import { listMyThreads } from "@/lib/threads.functions";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { listMyForms, getMyFormNotifications } from "@/lib/forms.functions";
-import { listSmartImportReminders } from "@/lib/smart-import-reminders.functions";
 import {
   periodKeyFor,
   formDueDateFor,
@@ -25,7 +24,7 @@ type Chip = {
 };
 
 /**
- * Compact attention chips for forms and cert reminders.
+ * Compact attention chips for forms and shift questions.
  * Obligation items live on the Staff Obligations tab only.
  */
 export function AttentionStrip() {
@@ -33,7 +32,6 @@ export function AttentionStrip() {
   const orgId = org?.organization_id ?? null;
   const fetchForms = useServerFn(listMyForms);
   const fetchBell = useServerFn(getMyFormNotifications);
-  const fetchSI = useServerFn(listSmartImportReminders);
   const fetchThreads = useServerFn(listMyThreads);
 
   const { data: formsData } = useQuery({
@@ -44,11 +42,6 @@ export function AttentionStrip() {
   const { data: bell } = useQuery({
     queryKey: ["my-form-notifs"],
     queryFn: () => fetchBell(),
-    staleTime: 60_000,
-  });
-  const { data: si } = useQuery({
-    queryKey: ["my-smart-import-reminders"],
-    queryFn: () => fetchSI({ data: { scope: "mine" } }),
     staleTime: 60_000,
   });
   const { data: threads } = useQuery({
@@ -102,21 +95,6 @@ export function AttentionStrip() {
     });
   }
 
-  // Smart Import reminders for me — provisional/expiring certs needing upload.
-  const siCount = (si?.reminders ?? []).length;
-  if (siCount > 0) {
-    const hasCritical = (si?.reminders ?? []).some(
-      (r: { urgency: string }) => r.urgency === "critical",
-    );
-    chips.push({
-      key: "smart-import",
-      to: "/dashboard/my-evidence",
-      icon: BellRing,
-      tone: hasCritical ? "danger" : "warn",
-      label: `${siCount} cert reminder${siCount === 1 ? "" : "s"}`,
-    });
-  }
-
   const threadCount = (threads?.rows ?? []).filter((t) => t.unread_for_me).length;
   if (threadCount > 0) {
     chips.push({
@@ -136,10 +114,10 @@ export function AttentionStrip() {
         const Icon = c.icon;
         const toneCls =
           c.tone === "danger"
-            ? "border-rose-300/60 bg-rose-500/5 text-rose-700 hover:border-rose-400"
+            ? "border-danger-200 bg-danger-50 text-danger-700 hover:border-danger-300"
             : c.tone === "warn"
-              ? "border-amber-300/60 bg-amber-500/5 text-amber-800 hover:border-amber-400"
-              : "border-primary/30 bg-primary/5 text-primary hover:border-primary/50";
+              ? "border-warning-200 bg-warning-50 text-warning-700 hover:border-warning-300"
+              : "border-pt2 bg-pt text-pri hover:border-steel/50";
         return (
           <li key={c.key}>
             <Link

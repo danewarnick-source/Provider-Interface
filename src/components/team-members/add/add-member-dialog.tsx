@@ -97,9 +97,7 @@ export function useTeamMemberFormOptions(organizationId: string | null, enabled:
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="grid gap-3">
-      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        {title}
-      </p>
+      <p className="denim-eyebrow">{title}</p>
       {children}
     </section>
   );
@@ -252,7 +250,7 @@ export function AddTeamMemberDialog({
             </DialogHeader>
             {result.rehireEligible === false && (
               <p
-                className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-200"
+                className="flex items-start gap-2 rounded-xl border border-warning-200 bg-warning-50 p-3 text-sm text-warning-800"
                 role="alert"
               >
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -419,7 +417,7 @@ export function AddTeamMemberDialog({
                     </Select>
                   </Field>
                 </div>
-                <label className="flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2 text-sm">
+                <label className="flex items-center justify-between gap-3 rounded-xl border border-line px-3 py-2 text-sm">
                   <span>Transports clients</span>
                   <Switch
                     checked={draft.transportsClients}
@@ -529,12 +527,12 @@ function CreatedStep({
         </DialogDescription>
       </DialogHeader>
       {inviteError && !invited && (
-        <p className="text-sm text-amber-700 dark:text-amber-300" role="alert">
+        <p className="text-sm text-warning-700" role="alert">
           The invite didn&apos;t send: {inviteError}
         </p>
       )}
       {tempPassword && (
-        <div className="grid gap-2 rounded-md border border-border p-3" data-testid="temp-password">
+        <div className="grid gap-2 rounded-xl border border-line p-3" data-testid="temp-password">
           <div className="text-xs text-muted-foreground">
             Temporary password for {email} · shown once
           </div>

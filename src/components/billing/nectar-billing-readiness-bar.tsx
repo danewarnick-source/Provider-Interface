@@ -127,6 +127,7 @@ function ReadinessBarInner() {
       const { data, error } = await supabase
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!);
       if (error) throw error;
       return (data ?? []) as Array<{ id: string; first_name: string; last_name: string }>;
@@ -303,23 +304,23 @@ function ReadinessBarInner() {
     : holdCount > 0
     ? {
         label: `${holdCount} billing hold${holdCount === 1 ? "" : "s"}`,
-        cls: "bg-[#7a1d1d]/40 text-rose-100 border-rose-300/40",
+        cls: "bg-danger-900/40 text-danger-100 border-danger-300/40",
       }
     : coverageCount > 0
     ? {
         label: `${coverageCount} coverage gap${coverageCount === 1 ? "" : "s"}`,
-        cls: "bg-amber-500/20 text-amber-100 border-amber-300/40",
+        cls: "bg-warning-500/20 text-warning-100 border-warning-300/40",
       }
     : advisoryCount > 0
     ? {
         label: `${advisoryCount} advisory item${advisoryCount === 1 ? "" : "s"}`,
-        cls: "bg-amber-500/20 text-amber-100 border-amber-300/40",
+        cls: "bg-warning-500/20 text-warning-100 border-warning-300/40",
       }
     : {
         label: entryHolds.length === 0 && (dataQ.data?.ts.length ?? 0) === 0
           ? "No entries to evaluate"
           : "No billing holds",
-        cls: "bg-emerald-500/20 text-emerald-100 border-emerald-300/40",
+        cls: "bg-success-500/20 text-success-100 border-success-300/40",
       };
 
   return (
@@ -352,12 +353,12 @@ function ReadinessBarInner() {
               variant="outline"
               onClick={() => setOpen(true)}
               disabled={loading || reviewCount === 0}
-              className="h-8 border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+              className="h-8 rounded-full border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
             >
               <ListChecks className="mr-1.5 h-3.5 w-3.5" />
               Review {reviewCount || ""} item{reviewCount === 1 ? "" : "s"}
             </Button>
-            <Button asChild size="sm" className="h-8 gap-1.5 bg-[image:var(--gradient-amber)] text-[#412402] hover:brightness-105">
+            <Button asChild size="sm" className="h-8 gap-1.5 rounded-full bg-acc text-white hover:bg-accd">
               <Link to="/dashboard/billing/form520">
                 <FileSpreadsheet className="h-3.5 w-3.5" /> Run billing · 520
               </Link>
@@ -379,8 +380,8 @@ function ReadinessBarInner() {
           </DialogHeader>
 
           {reviewCount === 0 ? (
-            <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-4 text-sm">
-              <ShieldCheck className="mr-1.5 inline h-4 w-4 text-emerald-600" />
+            <div className="rounded-lg border border-success-500/30 bg-success-500/5 p-4 text-sm">
+              <ShieldCheck className="mr-1.5 inline h-4 w-4 text-success-600" />
               No billing holds on recorded entries, and no coverage gaps this period.
             </div>
           ) : (
@@ -393,7 +394,7 @@ function ReadinessBarInner() {
                   {entryHolds.map((row) => (
                     <div
                       key={row.timesheet_id}
-                      className="rounded-lg border border-rose-300/40 bg-rose-500/[0.04] p-3"
+                      className="rounded-lg border border-danger-300/40 bg-danger-500/[0.04] p-3"
                     >
                       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                         <p className="text-sm font-medium">
@@ -423,8 +424,8 @@ function ReadinessBarInner() {
                       key={`${it.client_id}-${it.category}-${it.service_code ?? ""}-${i}`}
                       className={`rounded-lg border p-3 ${
                         it.severity === "coverage"
-                          ? "border-amber-400/40 bg-amber-500/[0.04]"
-                          : "border-slate-300/40 bg-muted/40"
+                          ? "border-warning-400/40 bg-warning-500/[0.04]"
+                          : "border-haze-300/40 bg-muted/40"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">

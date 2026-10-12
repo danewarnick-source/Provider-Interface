@@ -138,7 +138,7 @@ export function ServiceCodeRegistryView() {
                       <td className="px-3 py-2">{UNIT_LABEL[r.unit] ?? r.unit}</td>
                       <td className="px-3 py-2">
                         {r.requires_evv ? (
-                          <Badge className="bg-sky-500/15 text-sky-700 hover:bg-sky-500/15 dark:text-sky-300">EVV Yes</Badge>
+                          <Badge className="bg-denim-500/15 text-denim-700 hover:bg-denim-500/15 dark:text-denim-300">EVV Yes</Badge>
                         ) : (
                           <Badge variant="outline" className="text-muted-foreground">EVV No</Badge>
                         )}
@@ -152,7 +152,7 @@ export function ServiceCodeRegistryView() {
                       <td className="px-3 py-2 text-right tabular-nums">{r.max_weekly_hours ?? "—"}</td>
                       <td className="px-3 py-2">
                         {r.asleep_billable ? (
-                          <Badge className="bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/15 dark:text-emerald-300">Yes</Badge>
+                          <Badge className="bg-success-500/15 text-success-700 hover:bg-success-500/15 dark:text-success-300">Yes</Badge>
                         ) : (
                           <span className="text-xs text-muted-foreground">No</span>
                         )}

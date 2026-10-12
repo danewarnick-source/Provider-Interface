@@ -31,11 +31,11 @@ const STATUS_LABEL: Record<StatusChoice, string> = {
 };
 
 const STATUS_BADGE_CLASS: Record<string, string> = {
-  observed: "bg-emerald-100 text-emerald-800 border-emerald-300",
-  refused: "bg-rose-100 text-rose-800 border-rose-300",
-  missed: "bg-amber-100 text-amber-900 border-amber-300",
-  loa: "bg-sky-100 text-sky-800 border-sky-300",
-  omitted: "bg-amber-100 text-amber-900 border-amber-300",
+  observed: "bg-acct text-accd border-acctb",
+  refused: "bg-danger-50 text-danger-700 border-danger-200",
+  missed: "bg-warning-50 text-warning-700 border-warning-200",
+  loa: "bg-pt text-pri border-pt2",
+  omitted: "bg-warning-50 text-warning-700 border-warning-200",
 };
 
 type ClientHeader = {
@@ -252,7 +252,7 @@ export function StaffMedicationsPanel({
 
       {/* 2. Due today */}
       <Card className="p-4">
-        <h3 className="text-base font-semibold">Due today</h3>
+        <h3 className="font-display text-base font-semibold text-deep">Due today</h3>
         <div className="mt-3">
           {rows.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nothing due right now.</p>
@@ -519,7 +519,7 @@ function LogDoseDialog({
             <Label htmlFor="note">
               Note{" "}
               {status && status !== "observed" ? (
-                <span className="text-rose-600">*</span>
+                <span className="text-danger-600">*</span>
               ) : (
                 <span className="text-muted-foreground">(optional)</span>
               )}

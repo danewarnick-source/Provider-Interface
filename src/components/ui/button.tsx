@@ -5,29 +5,30 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold cursor-pointer transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-[18px] [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-[14.5px] font-semibold cursor-pointer transition-[background-color,box-shadow,transform,color] duration-200 ease-denim focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_rgba(39,76,119,0.15)] focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-[18px] [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-[var(--hive-primary)] text-[var(--hive-primary-fg)] hover:bg-[var(--hive-primary-hover)]",
+          "bg-primary text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_10px_24px_-10px_rgba(39,76,119,0.55)] hover:bg-deep hover:-translate-y-px",
         cta:
-          "bg-[var(--hive-primary)] text-[var(--hive-primary-fg)] hover:bg-[var(--hive-primary-hover)]",
+          "bg-primary text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_10px_24px_-10px_rgba(39,76,119,0.55)] hover:bg-deep hover:-translate-y-px",
         secondary:
-          "bg-[var(--hive-surface)] text-[var(--hive-text)] border border-[var(--hive-border)] hover:bg-[var(--hive-canvas)]",
+          "bg-white/55 text-pri shadow-[inset_0_0_0_1px_var(--denim-pt2)] hover:bg-white",
         ghostOnDark:
-          "bg-transparent text-[var(--hive-chrome-text)] border border-[color-mix(in_srgb,white_22%,transparent)] hover:bg-[color-mix(in_srgb,white_10%,transparent)]",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+          "bg-white/5 text-ondark shadow-[inset_0_0_0_1px_rgba(225,234,243,0.22)] hover:bg-white/10 hover:text-white",
+        destructive:
+          "bg-destructive text-destructive-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_10px_24px_-10px_rgba(217,45,32,0.5)] hover:bg-danger-700 hover:-translate-y-px",
         outline:
-          "border border-[var(--hive-border)] bg-[var(--hive-surface)] text-[var(--hive-text)] hover:bg-[var(--hive-canvas)]",
-        ghost: "text-[var(--hive-text)] hover:bg-[var(--hive-muted-surface)] hover:text-[var(--hive-text)]",
-        link: "text-[var(--hive-text)] underline-offset-4 hover:underline",
-        life: "bg-[var(--hive-primary)] text-[var(--hive-primary-fg)] hover:bg-[var(--hive-primary-hover)]",
+          "bg-white/55 text-pri shadow-[inset_0_0_0_1px_var(--denim-pt2)] hover:bg-white",
+        ghost: "text-pri hover:bg-pt",
+        link: "text-pri underline-offset-4 hover:underline hover:text-deep",
+        life: "bg-primary text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_10px_24px_-10px_rgba(39,76,119,0.55)] hover:bg-deep hover:-translate-y-px",
       },
       size: {
-        default: "h-[var(--height-button)] px-4 py-2",
-        sm: "h-[var(--height-button-sm)] rounded-md px-3 text-xs",
-        lg: "h-[var(--height-button-lg)] rounded-lg px-5 text-[15px]",
+        default: "h-[var(--height-button)] px-[18px] py-2",
+        sm: "h-[var(--height-button-sm)] px-3.5 text-[13.5px]",
+        lg: "h-[var(--height-button-lg)] px-6 text-[15px]",
         icon: "h-[var(--height-button)] w-[var(--height-button)]",
       },
     },

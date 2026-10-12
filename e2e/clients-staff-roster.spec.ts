@@ -52,7 +52,7 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     const perRowReads: string[] = [];
     page.on("request", (req) => {
       const url = req.url();
-      if (/rest\/v1\/(client_billing_codes|staff_assignments|client_contacts|import_subjects)|rpc\/client_active_codes/.test(url)) {
+      if (/rest\/v1\/(client_billing_codes|staff_assignments|client_contacts)|rpc\/client_active_codes/.test(url)) {
         perRowReads.push(url);
       }
     });
@@ -67,7 +67,6 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(rosterName(page, "Marcus Rivera")).toBeVisible();
     await expect(page.locator("table").getByText("DSI").first()).toBeVisible();
     await expect(page.locator("table").getByText("Maple House").first()).toBeVisible();
-    await expect(page.locator("table").getByText("Finish setup").first()).toBeVisible();
     expect(clientListCalls.list).toBe(1);
     expect(perRowReads).toHaveLength(0);
 
@@ -122,19 +121,6 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page.getByText("Oak SLH").first()).toBeVisible();
     await expect(page.getByText(/Tommy/i).first()).toBeVisible();
     await shot(page, "client_chart_codes_and_homes");
-  });
-
-  test("3. Old pending page redirects; imported drafts show Finish setup and open Add client", async ({ page }) => {
-    await gotoAdmin(page, "/dashboard/clients/pending");
-    await page.waitForURL(/\/dashboard\/clients\/?(\?.*)?$/);
-    const draft = page.getByTestId("client-draft-row");
-    await expect(draft).toContainText("Finish setup", { timeout: 20_000 });
-    await draft.getByRole("button", { name: /Jordan Draftsample/i }).click();
-    const dialog = page.getByRole("dialog");
-    await expect(dialog.getByText(/Finish setup — Jordan Draftsample/i)).toBeVisible();
-    await expect(dialog.getByLabel(/First name/i)).toHaveValue("Jordan");
-    await expect(dialog.getByTestId("code-line-DSI")).toBeVisible();
-    await shot(page, "clients_draft_finish_setup");
   });
 
   test("Add client: duplicate Medicaid ID blocks save with a link to the existing client", async ({ page }) => {
@@ -348,7 +334,7 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page).toHaveURL(/\/dashboard\/team-members\/?\?.*filter=missing/);
     await expect(page.getByTestId("roster-filter-missing")).toHaveAttribute("aria-pressed", "true");
     await nameLink(page, "Harvey Alisa").click();
-    await page.getByTestId("profile-back").click();
+    await page.locator("aside").getByTestId("profile-sidebar-back").click();
     await expect(page).toHaveURL(/\/dashboard\/team-members\/?\?.*filter=missing/);
     await expect(page).toHaveURL(/sort=-?evidence/);
     await page.getByRole("button", { name: "Clear filter" }).click();
@@ -376,6 +362,13 @@ test.describe("Clients + Staff roster — mocked admin", () => {
       await expect(menu.getByRole("button", { name: new RegExp(`^${label}`) })).toBeVisible();
     }
     await expect(page.getByRole("tab")).toHaveCount(0);
+    // Desktop: the menu is the dark sidebar (one menu only), with the person on top.
+    await expect(menu).toHaveCount(1);
+    await expect(page.locator("aside").getByTestId("profile-section-menu")).toBeVisible();
+    await expect(page.locator("aside").getByTestId("profile-sidebar-person")).toContainText(
+      "Jake Probert",
+    );
+    await expect(page.getByTestId("profile-back")).toBeHidden();
     await expect(page.getByTestId("profile-section-overview")).toHaveAttribute(
       "aria-current",
       "page",
@@ -463,6 +456,8 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await shot(page, "team_member_face_sheet_desktop");
     await page.setViewportSize({ width: 390, height: 844 });
     // Phone: the section menu is one horizontal scroll row above the content.
+    await expect(page.getByTestId("profile-section-menu")).toHaveCount(1);
+    await expect(page.locator("aside").getByTestId("profile-section-menu")).toHaveCount(0);
     const menuList = page.getByTestId("profile-section-menu").locator("ul");
     await expect(menuList).toHaveCSS("flex-direction", "row");
     await expect(menuList).toHaveCSS("overflow-x", "auto");

@@ -60,14 +60,14 @@ export function AuditPortalShell({ children }: Props) {
 
 
   return (
-    <div className="min-h-screen bg-[var(--hive-canvas)]">
-      <header className="border-b border-border bg-card shadow-sm">
+    <div className="min-h-screen bg-[var(--denim-bg)]">
+      <header className="denim-glass sticky top-0 z-50 border-x-0 border-t-0">
         <PageShell width="wide" className="flex items-center justify-between gap-4 py-3">
           <Link to="/audit-portal" className="flex items-center gap-3">
             <PiBrand tone="on-light" size="sm" />
             <div className="border-l border-border pl-3">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">State audit</div>
-              <div className="font-display text-base font-semibold text-foreground">Audit portal</div>
+              <div className="denim-eyebrow">State audit</div>
+              <div className="font-display text-base font-bold tracking-[-0.01em] text-deep">Audit portal</div>
             </div>
           </Link>
           <div className="flex items-center gap-3 text-sm">
@@ -80,7 +80,7 @@ export function AuditPortalShell({ children }: Props) {
                 await completeClientSignOut(() => supabase.auth.signOut());
                 window.location.href = "/audit-portal";
               }}
-              className="inline-flex min-h-[var(--height-button)] items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-[var(--hive-muted-surface)]"
+              className="inline-flex min-h-[var(--height-button)] items-center gap-1.5 rounded-full border border-pt2 bg-paper px-3 py-1.5 text-xs font-medium text-pri hover:bg-pt0"
             >
               <LogOut className="h-3.5 w-3.5" /> Sign out
             </button>
@@ -132,17 +132,20 @@ function AuditorLoginPanel({ onSignedIn }: { onSignedIn: () => void }) {
   }
 
   return (
-    <div className="hive-chrome flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-xl border border-[var(--hive-border)] bg-[var(--hive-surface)] p-8 text-[var(--hive-text)] shadow-xl">
+    <div className="relative flex min-h-screen items-center justify-center overflow-x-clip bg-[var(--denim-bg)] px-4">
+      <div className="denim-field opacity-60" aria-hidden>
+        <div className="denim-orb" />
+      </div>
+      <div className="relative z-[1] w-full max-w-md rounded-[20px] bg-paper p-8 text-ink shadow-[var(--denim-shadow)]">
         <div className="mb-6 flex items-center gap-3">
           <PiBrand tone="on-light" size="md" showText={false} />
           <div>
-            <div className="text-xs uppercase tracking-wider text-muted-foreground">Provider Interface</div>
-            <h1 className="text-lg font-semibold text-[var(--hive-text)]">State Audit Portal</h1>
+            <div className="denim-eyebrow">Provider Interface</div>
+            <h1 className="font-display text-lg font-bold tracking-[-0.01em] text-deep">State Audit Portal</h1>
           </div>
         </div>
 
-        <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+        <div className="mb-4 rounded-xl border border-pt2 bg-pt p-3 text-xs text-pri">
           <div className="flex items-start gap-2">
             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
             <div>
@@ -162,7 +165,7 @@ function AuditorLoginPanel({ onSignedIn }: { onSignedIn: () => void }) {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="username"
-              className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-[var(--hive-text)] focus:outline-none"
+              className="mt-1 min-h-[44px] w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm text-ink focus:border-pri focus:outline-none focus:ring-[3px] focus:ring-pri/15"
             />
           </label>
           <label className="block">
@@ -174,7 +177,7 @@ function AuditorLoginPanel({ onSignedIn }: { onSignedIn: () => void }) {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
-                className="min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-3 py-2 pr-10 text-sm focus:border-[var(--hive-text)] focus:outline-none"
+                className="min-h-[44px] w-full rounded-xl border border-line bg-paper px-3 py-2 pr-10 text-sm text-ink focus:border-pri focus:outline-none focus:ring-[3px] focus:ring-pri/15"
               />
               <button
                 type="button"
@@ -188,7 +191,7 @@ function AuditorLoginPanel({ onSignedIn }: { onSignedIn: () => void }) {
             </div>
           </label>
           {error && (
-            <div className="rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-800">
+            <div className="rounded-xl bg-danger-50 p-2 text-xs text-danger-700">
               {error}
             </div>
           )}
@@ -196,7 +199,7 @@ function AuditorLoginPanel({ onSignedIn }: { onSignedIn: () => void }) {
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex w-full min-h-[44px] items-center justify-center rounded-md bg-[var(--hive-text)] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1a2a5a] disabled:opacity-50"
+            className="inline-flex w-full min-h-[44px] items-center justify-center rounded-full bg-pri px-4 py-2 text-sm font-semibold text-white shadow-[var(--denim-btn-shadow)] transition-colors duration-200 ease-denim hover:bg-deep disabled:opacity-50"
           >
             {submitting ? "Signing in…" : "Sign in to State Audit Portal"}
           </button>

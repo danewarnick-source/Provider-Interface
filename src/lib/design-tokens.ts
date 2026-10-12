@@ -6,15 +6,76 @@
  * in JS (charts, inline styles, tests).
  */
 
+/**
+ * Denim raw values — the same numbers as the --denim-* CSS variables in
+ * src/styles/hive-theme.css. Use ONLY where a CSS variable cannot reach:
+ * PDFs (jsPDF / pdf-lib), HTML email, canvas, standalone error HTML, SVG
+ * rendered outside the app document. Everywhere else use the CSS tokens.
+ */
+export const DENIM = {
+  deep: "#1B3350",
+  pri: "#274C77",
+  steel: "#6096BA",
+  hi: "#4F80AC",
+  acc: "#4D9F3A",
+  accd: "#3B7D2C",
+  accl: "#CDEBC0",
+  acclh: "#DDF2D3",
+  acct: "#EEF7E9",
+  acctb: "#D3EBC8",
+  pt0: "#F4F7FA",
+  pt: "#EAF0F6",
+  pt2: "#D3DFEB",
+  bg: "#F6F8FA",
+  paper: "#FFFFFF",
+  ink: "#17283D",
+  text: "#3E4B5A",
+  muted: "#5F6B78",
+  line: "#E1E7EE",
+  ondark: "#E1EAF3",
+  ondarkp: "#CBD8E6",
+} as const;
+
+/** Status colors (meaning kept; Denim pill shape). */
+export const DENIM_STATUS = {
+  dangerBg: "#FDECEC",
+  dangerText: "#B42318",
+  danger: "#D92D20",
+  warnBg: "#FFF4E5",
+  warnText: "#B54708",
+  successBg: DENIM.acct,
+  successText: DENIM.accd,
+  infoBg: DENIM.pt,
+  infoText: DENIM.pri,
+} as const;
+
+/** Chart series order. */
+export const DENIM_CHART = [DENIM.pri, DENIM.steel, DENIM.acc, DENIM.hi, DENIM.accd] as const;
+
+export const DENIM_FONTS = {
+  body: "Figtree, ui-sans-serif, system-ui, sans-serif",
+  heading: "Manrope, ui-sans-serif, sans-serif",
+  /** Email-safe stacks (clients without web fonts fall back cleanly). */
+  emailBody: "Figtree, Arial, 'Segoe UI', sans-serif",
+  emailHeading: "Manrope, Arial, 'Segoe UI', sans-serif",
+} as const;
+
+/** jsPDF / pdf-lib helpers: "#RRGGBB" → [r, g, b] 0–255. */
+export function hexToRgb(hex: string): [number, number, number] {
+  const h = hex.replace("#", "");
+  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+}
+
 /** Semantic color tokens (map to --hive-* / shadcn vars in hive-theme.css). */
 export const colors = {
   brand: {
-    navy: "var(--hive-sidebar)",
-    gold: "var(--hive-gold)",
-    goldHover: "var(--hive-gold-hover)",
-    goldSoft: "var(--hive-gold-soft)",
-    onGold: "var(--hive-on-gold)",
-    cream: "var(--hive-chrome-text)",
+    navy: "var(--denim-deep)",
+    primary: "var(--denim-pri)",
+    accent: "var(--hive-accent)",
+    accentHover: "var(--hive-accent-hover)",
+    accentSoft: "var(--hive-accent-soft)",
+    onAccent: "var(--hive-on-accent)",
+    onDark: "var(--hive-chrome-text)",
   },
   surface: {
     page: "var(--hive-canvas)",
@@ -34,15 +95,15 @@ export const colors = {
   border: {
     default: "var(--hive-border)",
     divider: "var(--hive-border)",
-    focus: "var(--hive-gold)",
+    focus: "var(--denim-pri)",
   },
   state: {
     success: "var(--hive-ok)",
     successFg: "var(--hive-ok-fg)",
     successSoft: "var(--hive-ok-soft)",
-    warning: "var(--hive-gold)",
-    warningFg: "var(--hive-on-gold)",
-    warningSoft: "var(--hive-gold-soft)",
+    warning: "var(--hive-warn)",
+    warningFg: "var(--hive-warn-fg)",
+    warningSoft: "var(--hive-warn-soft)",
     error: "var(--hive-danger)",
     errorFg: "var(--hive-danger-fg)",
     errorSoft: "var(--hive-danger-soft)",

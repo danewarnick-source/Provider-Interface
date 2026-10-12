@@ -4,19 +4,19 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const alertVariants = cva(
-  "relative w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7",
+  "relative w-full rounded-[var(--denim-r)] border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7",
   {
     variants: {
       variant: {
-        default: "border-border bg-card text-foreground",
+        default: "border-line bg-paper text-foreground",
         destructive:
-          "border-[var(--hive-danger)]/40 bg-[var(--hive-danger-soft)] text-[var(--hive-danger-fg)] [&>svg]:text-[var(--hive-danger)]",
+          "border-danger-200 bg-[var(--hive-danger-soft)] text-[var(--hive-danger-fg)] [&>svg]:text-[var(--hive-danger)]",
         success:
-          "border-[var(--hive-ok)]/40 bg-[var(--hive-ok-soft)] text-[var(--hive-ok-fg)] [&>svg]:text-[var(--hive-ok)]",
+          "border-acctb bg-[var(--hive-ok-soft)] text-[var(--hive-ok-fg)] [&>svg]:text-[var(--hive-ok)]",
         warning:
-          "border-[var(--hive-gold)]/40 bg-[var(--hive-gold-soft)] text-[var(--hive-on-gold)] [&>svg]:text-[var(--hive-gold)]",
+          "border-warning-200 bg-warning-50 text-warning-700 [&>svg]:text-warning-700",
         info:
-          "border-[var(--hive-info)]/40 bg-[var(--hive-info-soft)] text-[var(--hive-info-fg)] [&>svg]:text-[var(--hive-info)]",
+          "border-pt2 bg-[var(--hive-info-soft)] text-[var(--hive-info-fg)] [&>svg]:text-[var(--hive-info)]",
       },
     },
     defaultVariants: {

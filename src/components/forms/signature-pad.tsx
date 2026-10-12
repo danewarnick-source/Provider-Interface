@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { DENIM } from "@/lib/design-tokens";
 
 export function SignaturePad({
   value,
@@ -14,9 +15,9 @@ export function SignaturePad({
     if (!c) return;
     const ctx = c.getContext("2d");
     if (!ctx) return;
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = DENIM.paper;
     ctx.fillRect(0, 0, c.width, c.height);
-    ctx.strokeStyle = "var(--hive-text)";
+    ctx.strokeStyle = DENIM.ink;
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
     if (value) {
@@ -54,14 +55,14 @@ export function SignaturePad({
     const c = canvasRef.current;
     if (!c) return;
     const ctx = c.getContext("2d")!;
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = DENIM.paper;
     ctx.fillRect(0, 0, c.width, c.height);
     onChange?.(null);
   }
 
   return (
     <div className="space-y-2">
-      <div className="rounded-md border border-input bg-white touch-none">
+      <div className="rounded-[10px] border border-input bg-paper touch-none">
         <canvas
           ref={canvasRef}
           width={600}

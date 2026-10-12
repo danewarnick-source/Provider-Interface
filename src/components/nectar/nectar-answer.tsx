@@ -15,7 +15,7 @@ export function NectarAnswer({ text }: { text: string }) {
         components={{
           p: ({ children }) => <p className="mb-1.5 last:mb-0">{children}</p>,
           ul: ({ children }) => (
-            <ul className="my-1.5 list-disc space-y-1 pl-5 marker:text-[var(--hive-gold)]">{children}</ul>
+            <ul className="my-1.5 list-disc space-y-1 pl-5 marker:text-[var(--hive-accent-text)]">{children}</ul>
           ),
           ol: ({ children }) => (
             <ol className="my-1.5 list-decimal space-y-1 pl-5">{children}</ol>
@@ -28,20 +28,20 @@ export function NectarAnswer({ text }: { text: string }) {
             <em className="not-italic text-xs text-muted-foreground">{children}</em>
           ),
           a: ({ children, href }) => (
-            <a href={href} className="text-[var(--hive-gold)] underline underline-offset-2 hover:text-[#b8651a]">
+            <a href={href} className="text-[var(--hive-accent-text)] underline underline-offset-2 hover:text-accd">
               {children}
             </a>
           ),
           // Citation chips: `SOW · 1.8`
           code: ({ children }) => (
-            <span className="ml-1 inline-flex items-center rounded border border-[#fed7aa] bg-[#fff7ed] px-1.5 py-0.5 align-baseline text-[10px] font-medium uppercase tracking-wide text-[#9a3412]">
+            <span className="ml-1 inline-flex items-center rounded border border-pt2 bg-pt px-1.5 py-0.5 align-baseline text-[10px] font-medium uppercase tracking-wide text-pri">
               {children}
             </span>
           ),
           h1: ({ children }) => <p className="font-semibold">{children}</p>,
           h2: ({ children }) => <p className="font-semibold">{children}</p>,
           h3: ({ children }) => <p className="font-semibold">{children}</p>,
-          hr: () => <hr className="my-2 border-[#fed7aa]" />,
+          hr: () => <hr className="my-2 border-pt2" />,
         }}
       >
         {text}

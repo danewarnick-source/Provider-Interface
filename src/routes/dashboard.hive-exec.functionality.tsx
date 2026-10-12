@@ -93,7 +93,7 @@ function ReportCard({ report }: { report: FunctionalityReport }) {
             Mark triaged
           </Button>
         )}
-        <Button size="sm" onClick={() => m.mutate("resolved")} disabled={m.isPending} className="bg-emerald-600 text-white hover:bg-emerald-700">
+        <Button size="sm" onClick={() => m.mutate("resolved")} disabled={m.isPending} className="bg-success-600 text-white hover:bg-success-700">
           <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Resolved
         </Button>
         <Button size="sm" variant="ghost" onClick={() => m.mutate("dismissed")} disabled={m.isPending}>

@@ -991,7 +991,7 @@ describe("Evidence nav + product lock", () => {
     assert.doesNotMatch(quiz, /Each item has a short plain-English explanation/);
     assert.doesNotMatch(quiz, /Client: person-file packs/);
     assert.doesNotMatch(quiz, /Client setup — services on this person/);
-    assert.doesNotMatch(quiz, /amber-50|Not called compliance/);
+    assert.doesNotMatch(quiz, /amber-50|warning-50|Not called compliance/);
     assert.ok(STAFF_QUIZ_CODES.includes("SLH"));
     assert.ok(STAFF_QUIZ_CODES.includes("DSG"));
     assert.ok(STAFF_QUIZ_CODES.includes("DSP"));
@@ -1014,7 +1014,10 @@ describe("Evidence nav + product lock", () => {
   });
 
   it("does not revive requirement_defs dual-write or encoded applicability", () => {
-    const fn = readFileSync(new URL("./evidence.functions.ts", import.meta.url), "utf8");
+    // The Evidence server functions plus the store / item helpers they share with the Client file.
+    const fn = ["./evidence.functions.ts", "./evidence/store.server.ts", "./evidence/items.server.ts"]
+      .map((rel) => readFileSync(new URL(rel, import.meta.url), "utf8"))
+      .join("\n");
     assert.doesNotMatch(fn, /\.from\(["']requirement_defs["']\)/);
     assert.doesNotMatch(fn, /\.from\(["']requirement_applicability["']\)/);
     assert.doesNotMatch(fn, /duty-applicability/);

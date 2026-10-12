@@ -38,6 +38,7 @@ async function fetchMemberships(userId: string): Promise<CurrentMembership[]> {
     .select(
       `id, job_title, organization_id, ${MEMBER_ACCESS_SELECT}, organizations(name, is_demo, legal_name, dba_name, display_acronym)`,
     )
+    .is("deleted_at", null)
     .eq("user_id", userId)
     .eq("active", true);
   if (error) {

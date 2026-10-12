@@ -60,8 +60,8 @@ import {
 } from "@/lib/team-members/readiness";
 
 const TONE: Record<ReadinessBadgeTone, string> = {
-  ok: "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-300",
-  warn: "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300",
+  ok: "border-acctb bg-acct text-accd",
+  warn: "border-warning-200 bg-warning-50 text-warning-700",
   bad: "border-destructive/30 bg-destructive/10 text-destructive",
   muted: "border-border bg-muted text-muted-foreground",
 };
@@ -105,7 +105,7 @@ export function CaseloadTab({
   if (q.isError || !q.data) {
     return (
       <div
-        className="space-y-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-5 text-sm"
+        className="space-y-3 rounded-[var(--denim-r)] border border-danger-200 bg-danger-50 p-5 text-sm"
         data-testid="caseload-error"
       >
         <p className="text-destructive">
@@ -256,7 +256,7 @@ function CaseloadEditor({
 
       {suggestions.length && data.canReviewEvidence ? (
         <div
-          className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
+          className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-warning-200 bg-warning-50 px-4 py-3 text-sm text-warning-800"
           data-testid="caseload-evidence-suggestions"
         >
           <span>New evidence suggestions</span>
@@ -274,9 +274,11 @@ function CaseloadEditor({
         </div>
       ) : null}
 
-      <div className="rounded-2xl border border-border bg-card p-5">
+      <div className="rounded-[var(--denim-r)] border border-line bg-paper p-5 shadow-[var(--denim-shadow)]">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold">Assigned clients</h2>
+          <h2 className="font-display text-sm font-semibold tracking-[-0.01em] text-deep">
+            Assigned clients
+          </h2>
           {canEdit ? (
             <AddClientCombobox
               options={options}
@@ -314,7 +316,7 @@ function CaseloadEditor({
 
       {canEdit && changes.length ? (
         <div
-          className="sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-card px-4 py-3 shadow-lg"
+          className="sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-2 rounded-[var(--denim-r)] border border-line bg-paper px-4 py-3 shadow-[var(--denim-shadow)]"
           data-testid="caseload-save-bar"
         >
           <span className="text-sm text-muted-foreground">
@@ -336,7 +338,7 @@ function CaseloadEditor({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-600" />
+              <AlertTriangle className="h-5 w-5 text-warning-700" />
               Required forms not complete
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
@@ -379,7 +381,7 @@ function CaseloadEditor({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5 text-red-600" />
+              <ShieldAlert className="h-5 w-5 text-danger-600" />
               Required forms block new clients
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
@@ -401,7 +403,7 @@ function CaseloadEditor({
                     />
                   </div>
                 ) : (
-                  <p className="rounded bg-amber-50 px-3 py-2 text-amber-900">
+                  <p className="rounded-xl bg-warning-50 px-3 py-2 text-warning-800">
                     Only an Owner can override a blocking required form.
                   </p>
                 )}
@@ -413,7 +415,7 @@ function CaseloadEditor({
             {isOwner ? (
               <AlertDialogAction
                 disabled={!overrideReason.trim()}
-                className="bg-red-600 text-white hover:bg-red-700"
+                className="bg-danger-600 text-white hover:bg-danger-700"
                 onClick={() => {
                   const list = pendingBlock;
                   const reason = overrideReason.trim();
@@ -438,7 +440,7 @@ function CaseloadEditor({
 function MandateNotice({ items }: { items: UnmetStaffMandate[] }) {
   return (
     <div
-      className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
+      className="rounded-xl border border-warning-200 bg-warning-50 px-4 py-3 text-sm text-warning-800"
       data-testid="caseload-unmet-mandates"
     >
       <p className="font-medium">

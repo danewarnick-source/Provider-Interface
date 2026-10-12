@@ -136,13 +136,13 @@ export function CapThresholdModal() {
       role="alertdialog"
       aria-modal="true"
       aria-labelledby="cap-modal-title"
-      className="absolute inset-0 z-50 flex items-end justify-center bg-black/60 px-3 pb-3 pt-6 backdrop-blur-sm"
+      className="absolute inset-0 z-50 flex items-end justify-center bg-[var(--denim-overlay)] px-3 pb-3 pt-6 backdrop-blur-[4px]"
     >
-      <div className="w-full max-w-sm rounded-2xl border border-[var(--hive-gold)]/40 bg-white shadow-xl">
-        <div className="flex items-start gap-3 border-b border-border px-4 py-3">
+      <div className={`w-full max-w-sm rounded-[20px] border bg-paper shadow-[var(--denim-shadow)] ${isCap ? "border-danger-200" : "border-warning-200"}`}>
+        <div className="flex items-start gap-3 border-b border-line px-4 py-3">
           <span
             className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${
-              isCap ? "bg-[#fde2e2] text-[#991b1b]" : "bg-[#fde9c8] text-[#7a4308]"
+              isCap ? "bg-danger-50 text-danger-700" : "bg-warning-50 text-warning-700"
             }`}
             aria-hidden
           >
@@ -151,7 +151,7 @@ export function CapThresholdModal() {
           <div className="min-w-0">
             <p
               id="cap-modal-title"
-              className="text-sm font-semibold text-[color:var(--navy-900,var(--hive-text))]"
+              className="font-display text-sm font-semibold text-deep"
             >
               {isCap ? "Weekly cap reached" : "Approaching weekly cap"}
             </p>
@@ -161,16 +161,16 @@ export function CapThresholdModal() {
             </p>
           </div>
         </div>
-        <div className="px-4 py-3 text-sm text-[color:var(--navy-900,var(--hive-text))]">
+        <div className="px-4 py-3 text-sm text-body">
           {isCap
             ? "This client's authorized weekly hours for this service code are exhausted. Continuing may result in unpaid time. Tap Acknowledge to keep working, or finalize your shift now."
             : "You are nearing the client's authorized weekly hours for this service code. Tap Acknowledge to continue."}
         </div>
-        <div className="flex flex-col gap-2 border-t border-border px-4 py-3">
+        <div className="flex flex-col gap-2 border-t border-line px-4 py-3">
           <button
             type="button"
             onClick={onAck}
-            className="inline-flex h-11 items-center justify-center rounded-lg bg-[image:var(--gradient-amber)] px-4 text-sm font-bold text-[#412402] shadow-sm active:scale-[0.98]"
+            className="inline-flex h-11 items-center justify-center rounded-full bg-pri px-4 text-sm font-semibold text-white shadow-[var(--denim-btn-shadow)] hover:bg-deep active:scale-[0.98]"
           >
             Acknowledge
           </button>
@@ -178,7 +178,7 @@ export function CapThresholdModal() {
             <button
               type="button"
               onClick={onClockOutNow}
-              className="inline-flex h-11 items-center justify-center rounded-lg border border-border bg-background px-4 text-sm font-semibold text-foreground active:scale-[0.98]"
+              className="inline-flex h-11 items-center justify-center rounded-full border border-line bg-paper px-4 text-sm font-semibold text-pri hover:bg-pt active:scale-[0.98]"
             >
               Go to Clock-Out
             </button>

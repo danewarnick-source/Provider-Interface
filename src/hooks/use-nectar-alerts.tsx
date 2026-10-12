@@ -61,6 +61,7 @@ export function useNectarAlerts(settings: NectarAlertSettings = DEFAULT_NECTAR_A
       const { data, error } = await supabase
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", org!.organization_id);
       if (error) throw error;
       return (data ?? []) as Array<{ id: string; first_name: string; last_name: string }>;

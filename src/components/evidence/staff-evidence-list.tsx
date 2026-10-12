@@ -65,7 +65,7 @@ export function StaffEvidenceList() {
   if (isLoading) return <div className="p-4 text-sm text-muted-foreground">Loading…</div>;
   if (!org) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">
+      <div className="rounded-[var(--denim-r)] border border-line bg-paper p-5 shadow-[var(--denim-shadow-sm)] text-sm text-muted-foreground">
         Select an organization to see Evidence items sent to you.
       </div>
     );
@@ -84,7 +84,7 @@ export function StaffEvidenceList() {
       {q.isLoading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : items.length === 0 ? (
-        <p className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">
+        <p className="rounded-[var(--denim-r)] border border-line bg-paper p-5 shadow-[var(--denim-shadow-sm)] text-sm text-muted-foreground">
           Nothing sent to you yet.
         </p>
       ) : (
@@ -93,7 +93,7 @@ export function StaffEvidenceList() {
             const file = latestFileForItem(files, item.id);
             const status = cellStatus({ item, file, today });
             return (
-              <li key={item.id} className="rounded-2xl border border-border bg-card p-4">
+              <li key={item.id} className="rounded-[var(--denim-r)] border border-line bg-paper p-5 shadow-[var(--denim-shadow-sm)]">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-medium">{item.title}</p>
@@ -102,7 +102,7 @@ export function StaffEvidenceList() {
                       {dueSubtitleFromItem(item)}
                     </p>
                     {item.send_message?.trim() ? (
-                      <div className="mt-3 rounded-xl border border-border bg-muted/40 px-3 py-2">
+                      <div className="mt-3 rounded-xl border border-line bg-pt0 px-3 py-2">
                         <p className="text-xs font-semibold text-muted-foreground">
                           Message from your agency
                         </p>
@@ -113,8 +113,8 @@ export function StaffEvidenceList() {
                   <EvidenceStatusGlyph status={status} />
                 </div>
                 {status === "sent_back" && file?.review_note ? (
-                  <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
-                    <p className="text-xs font-semibold text-amber-900">Sent back — please fix</p>
+                  <div className="mt-3 rounded-xl border border-warning-200 bg-warning-50 px-3 py-2">
+                    <p className="text-xs font-semibold text-warning-700">Sent back — please fix</p>
                     <p className="mt-1 whitespace-pre-wrap text-sm">{file.review_note}</p>
                   </div>
                 ) : status === "awaiting_review" ? (

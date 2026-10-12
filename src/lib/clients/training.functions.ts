@@ -7,6 +7,9 @@ import { CLIENT_FORM_LABEL, clientFormKindForTitle } from "@/lib/clients/form-ob
 import { isAdminLevel } from "@/lib/access/levels";
 import { todayYmd } from "./dates";
 import { activeGoalViewsOn, type GoalView } from "./plans";
+import { agencySupports, buildStrategySections, carryForward, supportsToDraft, type StrategySupport } from "./support-strategies";
+import { formatBullets } from "./strategy-rules";
+import { STRATEGY_SYSTEM_PROMPT, parseStrategyReply, strategyUserPrompt, type StrategyReply } from "./strategy-prompt";
 import { loadPlanBundle } from "./plans-load";
 
 /** Active goals (with supports) of the client's plan in effect today. */
@@ -67,8 +70,23 @@ export type CSTSection = {
   /** Service/job code(s) this strategy section covers (support_strategies
    *  training only — SOW §1.24(5) coverage check reads this). */
   job_codes?: string[];
+  /** Support strategies: the client_goal_supports row this section is for. */
+  support_id?: string;
+  /** Support strategies: a person edited it, so a rebuild keeps it. */
+  edited?: boolean;
+  /** Support strategies: Nectar drafted it (cleared once a person edits it). */
+  nectar?: boolean;
 };
-export type CSTContent = { sections: CSTSection[] };
+export type CSTContent = {
+  sections: CSTSection[];
+  /** Support strategies: why they were approved with supports still lacking one. */
+  approval_note?: string;
+  /**
+   * Support strategies: the uploaded strategies document (client_documents
+   * id), the official copy. Kept when Nectar copies its strategies in.
+   */
+  source_document_id?: string;
+};
 
 // Applied-reasoning prompt shown to staff per tab.
 export type CSTReviewQuestion = {
@@ -98,8 +116,15 @@ const SectionSchema = z.object({
   title: z.string().min(1).max(200),
   items: z.array(ItemSchema).max(50),
   job_codes: z.array(z.string()).optional(),
+  support_id: z.string().max(64).optional(),
+  edited: z.boolean().optional(),
+  nectar: z.boolean().optional(),
 });
-const ContentSchema = z.object({ sections: z.array(SectionSchema).max(30) });
+const ContentSchema = z.object({
+  sections: z.array(SectionSchema).max(60),
+  approval_note: z.string().max(2000).optional(),
+  source_document_id: z.string().uuid().optional(),
+});
 const ReviewQuestionSchema = z.object({
   id: z.string(),
   tab: z.string(),
@@ -579,7 +604,11 @@ export const updateClientSpecificTraining = createServerFn({ method: "POST" })
 // ── APPROVE & PUBLISH (admin) ──────────────────────────────────────────────
 export const publishClientSpecificTraining = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .inputValidator((d: unknown) => z.object({
+    id: z.string().uuid(),
+    /** Support strategies approved with gaps: the person's reason. */
+    note: z.string().trim().min(1).max(2000).optional(),
+  }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { training: null };
@@ -587,17 +616,19 @@ export const publishClientSpecificTraining = createServerFn({ method: "POST" })
     adminGuard(m.access_level);
     const { data: row, error } = await supabase
       .from("client_specific_trainings")
-      .select("organization_id")
+      .select("organization_id, content")
       .eq("id", data.id)
       .maybeSingle();
     if (error || !row) throw new Error("Training not found.");
     if (row.organization_id !== m.organization_id) throw new Error("Forbidden.");
+    const content = (row.content ?? { sections: [] }) as CSTContent;
     const { data: updated, error: uErr } = await supabase
       .from("client_specific_trainings")
       .update({
         status: "published",
         approved_by: userId,
         approved_at: new Date().toISOString(),
+        content: { ...content, approval_note: data.note } as unknown,
       })
       .eq("id", data.id)
       .select("*")
@@ -672,71 +703,65 @@ export const checkAnswerRelevance = createServerFn({ method: "POST" })
 // One row per client (training_type='support_strategies'). Admin-authored:
 // stub from PCSP goals (NECTAR verbatim), blank, or uploaded provider doc.
 
-// NECTAR drafts "Instructions to staff" for each PCSP goal. This is an
-// AI-drafted starting point only — the agency admin MUST review, edit, and
-// attest before publishing. NECTAR never auto-publishes; status stays "draft".
-async function draftSupportStrategyInstructions(goals: string[], orgId?: string | null): Promise<string[]> {
-  if (!goals.length) return [];
+// NECTAR drafts 4–6 bullet points per PCSP support paid to the agency
+// (strategy-prompt.ts holds the prompt, contract rules and the check). An
+// AI-drafted starting point only — the agency admin MUST review, edit and
+// approve. NECTAR never auto-publishes; status stays "draft". Supports whose
+// bullets fail the check are retried once, then left blank and reported.
+async function askNectarForStrategies(supports: StrategySupport[], orgId?: string | null): Promise<StrategyReply> {
   try {
     const { gatewayFetch } = await import("@/lib/ai-bedrock.server");
-    const system = [
-      "You are NECTAR, drafting staff support strategies for a Utah DSPD direct-support worker.",
-      "For each PCSP goal, write clear, practical 'instructions to staff' — what the worker should DO on shift to help the client work toward that goal.",
-      "Ground every instruction in the goal as written; do not invent diagnoses, clinical interventions, behavioral protocols, or medical procedures.",
-      "Write in plain, natural language a support worker can follow. 2–5 sentences per goal.",
-      "This is a DRAFT the agency admin will review, edit, and attest to before it reaches staff.",
-      'Respond ONLY with JSON: { "strategies": [ { "goal": "...", "instructions": "..." } ] } preserving goal order.',
-      "No preamble, no markdown fences.",
-    ].join("\n");
-    const user = `PCSP GOALS (in order):\n${goals.map((g, i) => `${i + 1}. ${g}`).join("\n")}`;
     const res = await gatewayFetch({
       messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
+        { role: "system", content: STRATEGY_SYSTEM_PROMPT },
+        { role: "user", content: strategyUserPrompt(supports) },
       ],
       response_format: { type: "json_object" },
     }, { orgId });
-    if (!res.ok) return goals.map(() => "");
+    if (!res.ok) return parseStrategyReply("", supports);
     const body = await res.json();
-    const content: string = body?.choices?.[0]?.message?.content ?? "{}";
-    const clean = content.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
-    const parsed = JSON.parse(clean || "{}") as {
-      strategies?: Array<{ goal?: string; instructions?: string }>;
-    };
-    const rows = Array.isArray(parsed.strategies) ? parsed.strategies : [];
-    return goals.map((_, i) => String(rows[i]?.instructions ?? "").slice(0, 4000));
+    return parseStrategyReply(String(body?.choices?.[0]?.message?.content ?? ""), supports);
   } catch {
-    return goals.map(() => "");
+    return parseStrategyReply("", supports);
   }
 }
 
+async function draftStrategyBullets(
+  supports: StrategySupport[],
+  orgId?: string | null,
+): Promise<{ drafts: Map<string, string>; missed: string[] }> {
+  if (!supports.length) return { drafts: new Map(), missed: [] };
+  const first = await askNectarForStrategies(supports, orgId);
+  const retry = first.failed.length
+    ? await askNectarForStrategies(first.failed.map((f) => f.support), orgId)
+    : null;
+  const drafts = new Map<string, string>();
+  for (const [id, bullets] of [...first.drafts, ...(retry?.drafts ?? [])]) {
+    drafts.set(id, formatBullets(bullets));
+  }
+  const missed = (retry?.failed ?? []).map((f) => f.support.support || "Support");
+  return { drafts, missed };
+}
+
+/**
+ * One section per support paid to the agency (support-strategies.ts). Edited
+ * sections are kept (with `carry`, a new plan year: every written strategy
+ * whose support carried over); with `nectar`, the others needing a strategy
+ * get a fresh Nectar draft. `missed`: supports Nectar could not draft.
+ */
 async function assembleSupportStrategyStubs(
   supabase: AnySupabase,
   orgId: string,
   clientId: string,
-): Promise<CSTContent> {
-  const goals: string[] = (await planGoals(supabase, clientId)).map((g) => g.goal);
-  if (!goals.length) {
-    void orgId;
-    return { sections: [{ id: sid(), title: "Support strategy", items: [
-      { kind: "text" as const, label: "Goal this supports", value: "" },
-      { kind: "text" as const, label: "Instructions to staff", value: "" },
-    ] }] };
-  }
-  // AI-drafted starting point; admin reviews/edits/attests before publish.
-  const instructions = await draftSupportStrategyInstructions(goals, orgId);
-  const sections: CSTSection[] = goals.map((g, i) => ({
-    id: sid(),
-    title: "Support strategy",
-    items: [
-      { kind: "text" as const, label: "Goal this supports", value: String(g) },
-      { kind: "text" as const, label: "Instructions to staff", value: instructions[i] ?? "" },
-    ],
-  }));
-  void orgId;
-  return { sections };
+  existing: CSTSection[],
+  opts: { nectar: boolean; carry: boolean },
+): Promise<{ content: CSTContent; missed: string[] }> {
+  const supports = agencySupports(await planGoals(supabase, clientId));
+  const kept = opts.carry ? carryForward(supports, existing) : existing.filter((x) => x.edited);
+  const toDraft = opts.nectar ? supportsToDraft(supports, kept) : [];
+  const { drafts, missed } = await draftStrategyBullets(toDraft, orgId);
+  return { content: { sections: buildStrategySections(supports, kept, drafts) }, missed };
 }
-
 
 export const getSupportStrategiesTraining = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -754,33 +779,43 @@ export const getSupportStrategiesTraining = createServerFn({ method: "GET" })
       .eq("training_type", "support_strategies")
       .maybeSingle();
     if (error) throw new Error(error.message);
-    return { training: row };
+    let approverName: string | null = null;
+    if (row?.approved_by) {
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("first_name, last_name")
+        .eq("id", row.approved_by)
+        .maybeSingle();
+      approverName = [p?.first_name, p?.last_name].filter(Boolean).join(" ").trim() || null;
+    }
+    return { training: row, approverName };
   });
 
 export const draftSupportStrategies = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({
     clientId: z.string().uuid(),
-    mode: z.enum(["nectar", "blank", "rebuild"]),
+    /** "missing": a new plan year; carried-over strategies stay, the rest are drafted. */
+    mode: z.enum(["nectar", "blank", "rebuild", "missing"]),
   }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
-    if (!supabase || !userId) return { training: null };
+    if (!supabase || !userId) return { training: null, nectarMissed: [] as string[] };
     const m = await getMembership(supabase, userId);
     adminGuard(m.access_level);
     await assertClientInOrg(supabase, data.clientId, m.organization_id);
 
-    let content: CSTContent;
-    if (data.mode === "blank") {
-      content = { sections: [
-        { id: sid(), title: "Support strategy", items: [
-          { kind: "text", label: "Goal this supports", value: "" },
-          { kind: "text", label: "Instructions to staff", value: "" },
-        ] },
-      ] };
-    } else {
-      content = await assembleSupportStrategyStubs(supabase, m.organization_id, data.clientId);
-    }
+    const { data: current } = await supabase
+      .from("client_specific_trainings")
+      .select("content")
+      .eq("client_id", data.clientId)
+      .eq("training_type", "support_strategies")
+      .maybeSingle();
+    const sections = (current?.content as CSTContent | undefined)?.sections ?? [];
+    const { content, missed } = await assembleSupportStrategyStubs(
+      supabase, m.organization_id, data.clientId, sections,
+      { nectar: data.mode !== "blank", carry: data.mode === "missing" },
+    );
 
     const { data: existing } = await supabase
       .from("client_specific_trainings")
@@ -795,7 +830,7 @@ export const draftSupportStrategies = createServerFn({ method: "POST" })
         .update({
           content: content as unknown,
           status: "draft",
-          version: (existing.version ?? 1) + (data.mode === "rebuild" ? 1 : 0),
+          version: (existing.version ?? 1) + (data.mode === "rebuild" || data.mode === "missing" ? 1 : 0),
           approved_by: null,
           approved_at: null,
         })
@@ -803,7 +838,7 @@ export const draftSupportStrategies = createServerFn({ method: "POST" })
         .select("*")
         .maybeSingle();
       if (uErr) throw new Error(uErr.message);
-      return { training: updated };
+      return { training: updated, nectarMissed: missed };
     }
 
     const { data: inserted, error: iErr } = await supabase
@@ -821,7 +856,7 @@ export const draftSupportStrategies = createServerFn({ method: "POST" })
       .select("*")
       .maybeSingle();
     if (iErr) throw new Error(iErr.message);
-    return { training: inserted };
+    return { training: inserted, nectarMissed: missed };
   });
 
 export const attachSupportStrategyDocument = createServerFn({ method: "POST" })
@@ -857,7 +892,7 @@ export const attachSupportStrategyDocument = createServerFn({ method: "POST" })
       { id: sid(), title: "Uploaded support strategy", items: [
         { kind: "link", label: "Provider document", links: [{ label: data.fileName, href: null }] },
       ] },
-    ] };
+    ], ...(doc?.id ? { source_document_id: doc.id as string } : {}) };
 
     const { data: existing } = await supabase
       .from("client_specific_trainings")
@@ -922,7 +957,7 @@ async function assertStaffMayViewClient(
   if (direct && direct.length) return;
   // Group-home fallback via the SECURITY DEFINER RPC.
   const { data: scoped, error: rpcErr } = await supabase
-    .rpc("clients_for_staff", { _org: orgId, _staff: userId });
+    .rpc("clients_for_staff", { _org: orgId, _staff: userId }).is("deleted_at", null);
   if (rpcErr) throw new Error("Access check failed.");
   const list = (scoped as Array<{ id: string }> | null) ?? [];
   if (!list.some((c) => c.id === clientId)) {
@@ -1295,7 +1330,7 @@ export const getMyClientTrainingStatuses = createServerFn({ method: "GET" })
       clientIds = [...new Set((assigns ?? []).map((a: { client_id: string }) => a.client_id))] as string[];
       // Group-home fallback via RPC.
       try {
-        const { data: rpcClients } = await supabase.rpc("clients_for_staff", { _org: m.organization_id, _staff: userId });
+        const { data: rpcClients } = await supabase.rpc("clients_for_staff", { _org: m.organization_id, _staff: userId }).is("deleted_at", null);
         if (Array.isArray(rpcClients)) {
           const rpcIds = (rpcClients as Array<{ id: string }>).map((c) => c.id);
           clientIds = [...new Set([...clientIds, ...rpcIds])];
@@ -1308,6 +1343,7 @@ export const getMyClientTrainingStatuses = createServerFn({ method: "GET" })
     const { data: clients } = await supabase
       .from("clients")
       .select("id, first_name, last_name")
+      .is("deleted_at", null)
       .in("id", clientIds);
     const clientMap: Record<string, string> = {};
     for (const c of (clients ?? []) as Array<{ id: string; first_name: string | null; last_name: string | null }>) {

@@ -45,7 +45,7 @@ function GmailSettingsPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-1">
       <header className="space-y-1">
-        <h1 className="flex items-center gap-2 text-xl font-semibold">
+        <h1 className="font-display flex items-center gap-2 text-xl font-bold tracking-[-0.025em] text-deep">
           <Mail className="h-5 w-5 text-accent" /> Gmail referral ingestion
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -54,7 +54,7 @@ function GmailSettingsPage() {
         </p>
       </header>
       {search.connected === 1 && (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
+        <div className="rounded-md border border-success-200 bg-success-50 px-3 py-2 text-sm text-success-900">
           Gmail connected. Ingestion runs on a 5-minute schedule.
         </div>
       )}
@@ -112,7 +112,7 @@ function ConnectionCard({ organizationId }: { organizationId: string }) {
                 {conn.last_polled_at ? new Date(conn.last_polled_at).toLocaleString() : "never"}
               </div>
             ) : conn?.status === "error" ? (
-              <div className="text-xs text-amber-700">Error — {conn.last_error ?? "reconnect required"}</div>
+              <div className="text-xs text-danger-700">Error — {conn.last_error ?? "reconnect required"}</div>
             ) : (
               <div className="text-xs text-muted-foreground">Not connected</div>
             )}
@@ -129,7 +129,7 @@ function ConnectionCard({ organizationId }: { organizationId: string }) {
         )}
       </div>
       <div className="mt-3 flex items-start gap-2 rounded-md border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
-        <ShieldCheck className="mt-0.5 h-4 w-4 flex-none text-emerald-700" />
+        <ShieldCheck className="mt-0.5 h-4 w-4 flex-none text-success-700" />
         <div>
           Read-only access (Gmail readonly scope). Tokens are stored server-side only. Every fetched message is logged in
           the audit trail below. Disconnect at any time — revokes the refresh token at Google.

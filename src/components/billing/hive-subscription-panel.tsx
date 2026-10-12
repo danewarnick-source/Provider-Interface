@@ -191,7 +191,7 @@ export function HiveSubscriptionPanel() {
 
       {d.testMode && (
         <div
-          className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-950"
+          className="flex items-start gap-2 rounded-lg border border-warning-300 bg-warning-50 px-3 py-2 text-sm text-warning-950"
           data-testid="stripe-test-mode-hint"
         >
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
@@ -204,7 +204,7 @@ export function HiveSubscriptionPanel() {
 
       {complimentary && (
         <div
-          className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-950"
+          className="rounded-lg border border-success-200 bg-success-50 px-3 py-2 text-sm text-success-950"
           data-testid="comped-note"
         >
           {d.orgName ?? "This company"} is billing-exempt. Provider Interface never charges this company.
@@ -214,18 +214,18 @@ export function HiveSubscriptionPanel() {
       )}
 
       {!d.paymentsConfigured && !complimentary && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900">
+        <div className="rounded-lg border border-danger-200 bg-danger-50 px-3 py-2 text-sm text-danger-900">
           {d.paymentsMessage ?? "Payments are not set up yet. Ask an Exec to add the Stripe test keys."}
         </div>
       )}
 
-      <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-        <div className="text-xs uppercase tracking-wide text-muted-foreground">Current rate</div>
+      <div className="rounded-[var(--denim-r)] border border-line bg-card p-5 shadow-[var(--denim-shadow-sm)]">
+        <div className="denim-eyebrow">Current rate</div>
         <div className="mt-1 flex flex-wrap items-baseline justify-between gap-2">
-          <div className="font-display text-2xl font-semibold text-[var(--hive-text)]" data-testid="pricing-schedule">
+          <div className="font-display text-2xl font-bold tracking-[-0.025em] text-deep" data-testid="pricing-schedule">
             {rateKind}
           </div>
-          <div className="text-lg font-medium text-[#7a4a0a]">
+          <div className="text-lg font-medium text-accd">
             {complimentary
               ? "No charge"
               : quote
@@ -254,11 +254,11 @@ export function HiveSubscriptionPanel() {
       </div>
 
       {!complimentary && (
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-3">
+        <div className="rounded-[var(--denim-r)] border border-line bg-card p-5 shadow-[var(--denim-shadow-sm)] space-y-3">
           <div className="text-sm font-medium">Pay for Provider Interface</div>
           <div data-testid="billed-client-count">
             <div className="text-sm font-medium">Billable clients this period</div>
-            <p className="mt-1 text-2xl font-semibold tabular-nums">{clientCount}</p>
+            <p className="mt-1 font-display text-2xl font-bold tabular-nums text-deep">{clientCount}</p>
             <p className="mt-1 text-xs text-muted-foreground">
               High-water count from your roster — anyone active at any point this month. Staff does
               not change the price. Monthly amount is $69 × this count, or $350, whichever is higher.
@@ -276,7 +276,7 @@ export function HiveSubscriptionPanel() {
               data-testid="pay-with-stripe"
               disabled={busy || !d.paymentsConfigured}
               onClick={pay}
-              className="bg-[var(--hive-text)] text-white hover:bg-[#1a2a5a]"
+              className="bg-pri text-white hover:bg-deep"
             >
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
               {d.lockedAt || !d.hasStripeCustomer ? "Pay with Stripe" : "Update plan"}

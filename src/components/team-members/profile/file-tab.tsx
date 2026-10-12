@@ -239,7 +239,7 @@ export function StaffObligationsFilesTab({
     return (
       <div className="space-y-4">
         <section
-          className="rounded-2xl border border-dashed border-border bg-card p-6 text-center"
+          className="rounded-[var(--denim-r)] border border-dashed border-pt2 bg-paper p-6 text-center"
           data-testid="no-evidence-pack"
         >
           <p className="font-medium">No evidence pack yet</p>
@@ -260,7 +260,7 @@ export function StaffObligationsFilesTab({
   return (
     <div className="space-y-4" data-testid="team-member-file">
       {awaiting > 0 ? (
-        <p className="text-sm text-sky-800">
+        <p className="text-sm font-medium text-warning-700">
           {awaiting} upload{awaiting === 1 ? "" : "s"} awaiting review.
         </p>
       ) : null}
@@ -275,14 +275,14 @@ export function StaffObligationsFilesTab({
           ) : null}
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border">
+        <div className="overflow-x-auto rounded-[var(--denim-r)] border border-line bg-paper shadow-[var(--denim-shadow-sm)]">
           <table className="w-full text-sm">
-            <thead className="bg-muted/30 text-xs uppercase tracking-wide text-muted-foreground">
+            <thead className="bg-pt0 text-[12.5px] uppercase tracking-[0.06em] text-muted-foreground">
               <tr>
-                <th className="px-3 py-2 text-left">Item</th>
-                <th className="px-3 py-2 text-left">Status</th>
-                <th className="px-3 py-2 text-left">Due</th>
-                <th className="px-3 py-2 text-right"> </th>
+                <th className="px-3 py-2 text-left font-semibold">Item</th>
+                <th className="px-3 py-2 text-left font-semibold">Status</th>
+                <th className="px-3 py-2 text-left font-semibold">Due</th>
+                <th className="px-3 py-2 text-right font-semibold"> </th>
               </tr>
             </thead>
             <tbody>
@@ -294,7 +294,10 @@ export function StaffObligationsFilesTab({
                     : row.chip;
                 const isUpload = item.evidence_type === "upload";
                 return (
-                  <tr key={item.id} className="border-t align-top">
+                  <tr
+                    key={item.id}
+                    className="border-t border-line align-top transition-colors ease-denim hover:bg-pt0"
+                  >
                     <td className="px-3 py-2">
                       <p className="font-medium">{item.title}</p>
                       {file?.filename ? (
@@ -315,7 +318,7 @@ export function StaffObligationsFilesTab({
                         </p>
                       ) : null}
                       {status === "sent_back" && file ? (
-                        <p className="mt-1 max-w-xs text-xs text-amber-900">
+                        <p className="mt-1 max-w-xs text-xs text-warning-700">
                           Sent back by {nameOf(file.reviewed_by)}
                           {file.reviewed_at ? ` on ${formatStamp(file.reviewed_at)}` : ""}
                           {file.review_note ? `: ${file.review_note}` : ""}
@@ -394,7 +397,10 @@ export function StaffObligationsFilesTab({
       )}
 
       {skipped.length > 0 ? (
-        <section className="rounded-lg border border-border" data-testid="skipped-items">
+        <section
+          className="rounded-[var(--denim-r)] border border-line bg-paper"
+          data-testid="skipped-items"
+        >
           <button
             type="button"
             className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium"
@@ -493,7 +499,7 @@ export function StaffObligationsFilesTab({
                   : "")}
             </DialogDescription>
           </DialogHeader>
-          <div className="min-h-[40vh] rounded-md border border-border bg-muted/20">
+          <div className="min-h-[40vh] rounded-xl border border-line bg-pt0">
             {viewRow?.file && !viewRow.file.storage_path ? (
               <p className="whitespace-pre-wrap p-4 text-sm">
                 {viewRow.file.attestation_text_snapshot ?? "Attested."}

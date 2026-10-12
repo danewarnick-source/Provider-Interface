@@ -2,7 +2,7 @@
 
 import { PI_THEME } from "./pi-theme.ts";
 
-export { PI_THEME, PI_GRAIN_SVG } from "./pi-theme.ts";
+export { PI_THEME } from "./pi-theme.ts";
 export type { PiTheme } from "./pi-theme.ts";
 
 export const PI_PRODUCT_NAME = "Provider Interface";
@@ -15,12 +15,15 @@ export const PI_SUBHEAD =
 /** One supporting line under the headline. Not a feature list. */
 export const PI_HERO_SUPPORT = PI_SUBHEAD;
 
+/** Denim marketing colors (mirror PI_THEME). Use CSS tokens in components where possible. */
 export const PI_NAVY = PI_THEME.navy;
-export const PI_NAVY_RAISED = "#111827";
-export const PI_CREAM = PI_THEME.cream;
-export const PI_CREAM_MUTED = "rgba(243, 239, 230, 0.62)";
-export const PI_GOLD = PI_THEME.gold;
-export const PI_ACTION = "#1e3a5f";
+export const PI_NAVY_RAISED = PI_THEME.n1;
+/** Paper surface (name kept for importers). */
+export const PI_PAPER = PI_THEME.paper;
+export const PI_PAPER_MUTED = PI_THEME.c50;
+/** Denim green accent. */
+export const PI_ACCENT = PI_THEME.accent;
+export const PI_ACTION = PI_THEME.buttons.primaryBg;
 
 export const PI_PAGE_TITLE = "Provider Interface — Run the agency. Stop chasing it.";
 export const PI_PAGE_DESCRIPTION =

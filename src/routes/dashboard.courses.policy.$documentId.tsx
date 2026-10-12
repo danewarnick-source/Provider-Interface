@@ -176,7 +176,7 @@ export function PolicySignPage() {
         <Button asChild variant="ghost" size="sm" className="-ml-2 shrink-0">
           <Link to="/dashboard/my-obligations"><ArrowLeft className="mr-1 h-4 w-4" /> Staff file</Link>
         </Button>
-        <h1 className="mt-1 text-base font-semibold leading-snug tracking-tight">{doc.title}</h1>
+        <h1 className="font-display mt-1 text-base font-semibold leading-snug tracking-[-0.01em]">{doc.title}</h1>
         <p className="text-xs text-muted-foreground">Version {doc.version} · Scroll to the end, then sign below.</p>
       </header>
 
@@ -191,17 +191,17 @@ export function PolicySignPage() {
 
       <footer className="border-t border-border bg-card px-4 py-3 space-y-3">
         {!readToBottom && (
-          <p className="text-[11px] text-amber-700 dark:text-amber-300">
+          <p className="text-[11px] text-warning-700">
             Scroll to the end of the policy above to enable signing.
           </p>
         )}
         <p className="text-[11px] leading-relaxed text-muted-foreground">
           <span className="font-semibold text-foreground">Attestation:</span> {attestationStatement}
         </p>
-        <label className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-2 text-[11px] leading-relaxed dark:bg-amber-950/30 dark:border-amber-800">
+        <label className="flex items-start gap-2 rounded-xl border border-pt2 bg-pt p-2 text-[11px] leading-relaxed">
           <Checkbox checked={esignConsent} onCheckedChange={(v) => setEsignConsent(v === true)} className="mt-0.5" />
           <span>
-            <span className="block font-semibold text-amber-900 dark:text-amber-100">
+            <span className="block font-semibold text-pri">
               Electronic signature consent (ESIGN / Utah UETA)
             </span>
             {ESIGN_CONSENT_STATEMENT}
@@ -221,7 +221,6 @@ export function PolicySignPage() {
           <Button
             onClick={() => signMutation.mutate()}
             disabled={signMutation.isPending || !readToBottom || signature.trim().length < 2 || !esignConsent}
-            className="bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]"
           >
             <CheckCircle2 className="mr-1 h-4 w-4" />
             {signMutation.isPending ? "Saving…" : "Sign & acknowledge"}

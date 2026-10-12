@@ -60,29 +60,31 @@ export function maxRecommendedHours(code?: string | null): number | null {
 export const FAMILY_CLASSES: Record<CodeFamily, {
   bg: string; bgSoft: string; border: string; text: string; ring: string; bar: string;
 }> = {
+  // Chart order: residential → pri, supported_living → steel, day_supports →
+  // acc, employment → hi, respite → accd, other → haze.
   residential: {
-    bg: "bg-teal-500",   bgSoft: "bg-teal-50",   border: "border-teal-500",
-    text: "text-teal-700", ring: "ring-teal-500", bar: "bg-teal-500",
+    bg: "bg-denim-700",   bgSoft: "bg-denim-50",   border: "border-denim-700",
+    text: "text-denim-700", ring: "ring-denim-700", bar: "bg-denim-700",
   },
   supported_living: {
-    bg: "bg-sky-500",    bgSoft: "bg-sky-50",    border: "border-sky-500",
-    text: "text-sky-700",  ring: "ring-sky-500",  bar: "bg-sky-500",
+    bg: "bg-denim-400",    bgSoft: "bg-denim-100",    border: "border-denim-400",
+    text: "text-denim-600",  ring: "ring-denim-400",  bar: "bg-denim-400",
   },
   day_supports: {
-    bg: "bg-emerald-500", bgSoft: "bg-emerald-50", border: "border-emerald-500",
-    text: "text-emerald-700", ring: "ring-emerald-500", bar: "bg-emerald-500",
+    bg: "bg-success-500", bgSoft: "bg-success-50", border: "border-success-500",
+    text: "text-success-700", ring: "ring-success-500", bar: "bg-success-500",
   },
   employment: {
-    bg: "bg-violet-500", bgSoft: "bg-violet-50", border: "border-violet-500",
-    text: "text-violet-700", ring: "ring-violet-500", bar: "bg-violet-500",
+    bg: "bg-denim-500", bgSoft: "bg-denim-200", border: "border-denim-500",
+    text: "text-denim-800", ring: "ring-denim-500", bar: "bg-denim-500",
   },
   respite: {
-    bg: "bg-pink-500",   bgSoft: "bg-pink-50",   border: "border-pink-500",
-    text: "text-pink-700", ring: "ring-pink-500", bar: "bg-pink-500",
+    bg: "bg-success-600",   bgSoft: "bg-success-100",   border: "border-success-600",
+    text: "text-success-800", ring: "ring-success-600", bar: "bg-success-600",
   },
   other: {
-    bg: "bg-slate-500",  bgSoft: "bg-slate-50",  border: "border-slate-500",
-    text: "text-slate-700", ring: "ring-slate-500", bar: "bg-slate-500",
+    bg: "bg-haze-500",  bgSoft: "bg-haze-50",  border: "border-haze-500",
+    text: "text-haze-700", ring: "ring-haze-500", bar: "bg-haze-500",
   },
 };
 

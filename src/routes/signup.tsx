@@ -95,15 +95,15 @@ export const Route = createFileRoute("/signup")({
 
 /* ──────────────────────────── design tokens ──────────────────────────── */
 
-const JAKARTA = "var(--font-sans)";
-const AMBER = "var(--hive-text)";
-const STEP_FILL = "var(--hive-gold)";
+const BODY_FONT = "var(--font-sans)";
+const STEP_TEXT = "var(--denim-ink)";
+const STEP_FILL = "var(--denim-acc)";
 
 const inputStyle: React.CSSProperties = {
-  background: "var(--hive-surface)",
-  border: "1px solid var(--hive-border)",
-  color: "var(--hive-text)",
-  fontFamily: JAKARTA,
+  background: "var(--denim-paper)",
+  border: "1px solid var(--denim-line)",
+  color: "var(--denim-ink)",
+  fontFamily: BODY_FONT,
 };
 
 const STEPS = ["Account", "Your business", "Plan", "Training", "Payment"] as const;
@@ -149,7 +149,7 @@ function Stepper({ step }: { step: number }) {
     <div className="mb-8" data-testid="signup-stepper">
       <div
         className="mb-3 flex items-center justify-between text-sm"
-        style={{ fontFamily: JAKARTA, color: AMBER }}
+        style={{ fontFamily: BODY_FONT, color: STEP_TEXT }}
       >
         <span data-testid="signup-step-label">
           Step <span className="font-semibold">{step + 1}</span> of {STEPS.length}
@@ -163,7 +163,7 @@ function Stepper({ step }: { step: number }) {
           <div
             key={i}
             className="h-1.5 flex-1 rounded-full transition-colors"
-            style={{ background: i <= step ? STEP_FILL : "var(--hive-border)" }}
+            style={{ background: i <= step ? STEP_FILL : "var(--denim-pt2)" }}
           />
         ))}
       </div>
@@ -184,7 +184,7 @@ function Field({
 }) {
   return (
     <div className="grid gap-1.5">
-      <Label className="text-[var(--hive-text)]" style={{ fontFamily: JAKARTA }}>
+      <Label className="text-[var(--hive-text)]" style={{ fontFamily: BODY_FONT }}>
         {label}
       </Label>
       {children}
@@ -229,8 +229,8 @@ function NavButtons({
           onClick={onNext}
           disabled={nextDisabled || loading}
           data-testid={nextTestId}
-          className="group h-11 w-full border-0 bg-[var(--hive-sidebar)] text-[var(--hive-chrome-text)] hover:bg-[var(--hive-ink)] sm:w-auto sm:min-w-[160px]"
-          style={{ fontFamily: JAKARTA, fontWeight: 700 }}
+          className="group h-11 w-full rounded-full border-0 bg-pri text-white shadow-[var(--denim-btn-shadow)] hover:bg-deep sm:w-auto sm:min-w-[160px]"
+          style={{ fontFamily: BODY_FONT, fontWeight: 700 }}
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -247,9 +247,9 @@ function NavButtons({
             variant="outline"
             onClick={onSkip}
             disabled={loading}
-            className="h-11 w-full sm:w-auto"
+            className="h-11 w-full rounded-full sm:w-auto"
             data-testid="signup-training-skip"
-            style={{ fontFamily: JAKARTA }}
+            style={{ fontFamily: BODY_FONT }}
           >
             {skipLabel}
           </Button>
@@ -261,8 +261,8 @@ function NavButtons({
           variant="ghost"
           onClick={onBack}
           disabled={loading}
-          className="order-2 h-11 w-full sm:order-1 sm:w-auto"
-          style={{ fontFamily: JAKARTA }}
+          className="order-2 h-11 w-full rounded-full sm:order-1 sm:w-auto"
+          style={{ fontFamily: BODY_FONT }}
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
           Back
@@ -343,7 +343,7 @@ function SignupPage() {
         </p>
         <Stepper step={step} />
         <div
-          className="rounded-2xl border border-[var(--hive-border)] bg-[var(--hive-surface)] p-6 text-[var(--hive-text)] shadow-[var(--shadow-card)] sm:p-8"
+          className="rounded-[20px] bg-paper p-6 text-ink shadow-[var(--denim-shadow)] sm:p-8"
           data-testid="signup-new-agency"
         >
           {step === 0 && (
@@ -638,7 +638,7 @@ function Step1Account({
             emailErr ? (
               <>
                 {emailErr}{" "}
-                <Link to="/login" className="font-medium text-[var(--hive-gold)] hover:underline">
+                <Link to="/login" className="font-medium text-pri hover:underline">
                   Sign in →
                 </Link>
               </>
@@ -653,7 +653,7 @@ function Step1Account({
               setEmailErr(null);
               update("email", e.target.value);
             }}
-            className="flex h-12 w-full rounded-lg px-3 py-2 text-base outline-none focus:border-[var(--hive-gold)]/60 focus:ring-2 focus:ring-[var(--hive-gold)]/40"
+            className="flex h-12 w-full rounded-xl px-3 py-2 text-base outline-none focus:border-pri focus:ring-[3px] focus:ring-pri/15"
             style={inputStyle}
             placeholder="you+agency@gmail.com"
             data-testid="signup-email"
@@ -673,7 +673,7 @@ function Step1Account({
               aria-invalid={passwordWeakErr ? true : undefined}
               aria-describedby={passwordWeakErr ? "signup-password-weak" : undefined}
               data-testid="signup-password"
-              className="flex h-12 w-full rounded-lg px-3 py-2 pr-10 text-base outline-none focus:border-[var(--hive-gold)]/60 focus:ring-2 focus:ring-[var(--hive-gold)]/40"
+              className="flex h-12 w-full rounded-xl px-3 py-2 pr-10 text-base outline-none focus:border-pri focus:ring-[3px] focus:ring-pri/15"
               style={inputStyle}
             />
             <button
@@ -713,7 +713,7 @@ function Step1Account({
               value={form.confirm}
               onChange={(e) => update("confirm", e.target.value)}
               data-testid="signup-confirm"
-              className="flex h-12 w-full rounded-lg px-3 py-2 pr-10 text-base outline-none focus:border-[var(--hive-gold)]/60 focus:ring-2 focus:ring-[var(--hive-gold)]/40"
+              className="flex h-12 w-full rounded-xl px-3 py-2 pr-10 text-base outline-none focus:border-pri focus:ring-[3px] focus:ring-pri/15"
               style={inputStyle}
             />
             <button
@@ -738,7 +738,7 @@ function Step1Account({
           checked={form.acceptedTos}
           onChange={(e) => update("acceptedTos", e.target.checked)}
           data-testid="signup-tos-checkbox"
-          className="mt-1 h-4 w-4 shrink-0 rounded border-[var(--hive-border)] accent-[var(--hive-sidebar)]"
+          className="mt-1 h-4 w-4 shrink-0 rounded border-[var(--hive-border)] accent-pri"
         />
         <span>
           I agree to the{" "}
@@ -764,7 +764,7 @@ function Step1Account({
           checked={form.acceptedBaa}
           onChange={(e) => update("acceptedBaa", e.target.checked)}
           data-testid="signup-baa-checkbox"
-          className="mt-1 h-4 w-4 shrink-0 rounded border-[var(--hive-border)] accent-[var(--hive-sidebar)]"
+          className="mt-1 h-4 w-4 shrink-0 rounded border-[var(--hive-border)] accent-pri"
         />
         <span>
           I am authorized to bind this agency. I have read the{" "}
@@ -809,10 +809,13 @@ function Step1Account({
 
 function PwRule({ ok, children }: { ok: boolean; children: React.ReactNode }) {
   return (
-    <li className="flex items-center gap-2" style={{ color: ok ? "#1e3a30" : "#3a4553" }}>
+    <li
+      className="flex items-center gap-2"
+      style={{ color: ok ? "var(--denim-accd)" : "var(--denim-text)" }}
+    >
       <span
         className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px]"
-        style={{ background: ok ? "rgba(127, 209, 168, 0.28)" : "rgba(10, 15, 28, 0.08)" }}
+        style={{ background: ok ? "var(--denim-acct)" : "var(--denim-pt)" }}
       >
         {ok ? <Check className="h-3 w-3" /> : "•"}
       </span>
@@ -1029,11 +1032,11 @@ function Step3Business({
             type="tel"
           />
           {showPhoneError ? (
-            <div className="mt-1 text-xs" style={{ color: "#fda4af" }}>
+            <div className="mt-1 text-xs text-[var(--hive-danger-fg)]">
               Enter a valid 10-digit US mobile number.
             </div>
           ) : phoneOk ? (
-            <div className="mt-1 text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>
+            <div className="mt-1 text-xs text-[var(--hive-text-muted)]">
               We'll text this number: {normalizeUSPhoneToE164(form.phone)}
             </div>
           ) : null}
@@ -1085,7 +1088,7 @@ function TextInput({
       onBlur={onBlur}
       placeholder={placeholder}
       data-testid={testId}
-      className="flex h-12 w-full rounded-lg px-3 py-2 text-base outline-none focus:border-[var(--hive-gold)]/60 focus:ring-2 focus:ring-[var(--hive-gold)]/40 disabled:opacity-60"
+      className="flex h-12 w-full rounded-xl px-3 py-2 text-base outline-none focus:border-pri focus:ring-[3px] focus:ring-pri/15 disabled:opacity-60"
       style={inputStyle}
     />
   );
@@ -1269,7 +1272,7 @@ function Step5Training({
                 onChange={(e) => updatePerson(person.id, { name: e.target.value })}
                 placeholder="Name"
                 data-testid={`signup-training-name-${index}`}
-                className="flex h-11 w-full rounded-lg px-3 py-2 text-base outline-none focus:border-[var(--hive-gold)]/60 focus:ring-2 focus:ring-[var(--hive-gold)]/40"
+                className="flex h-11 w-full rounded-xl px-3 py-2 text-base outline-none focus:border-pri focus:ring-[3px] focus:ring-pri/15"
                 style={inputStyle}
               />
               <Button
@@ -1293,8 +1296,8 @@ function Step5Training({
                     key={addon.id}
                     className="flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm"
                     style={{
-                      borderColor: selected ? "var(--hive-sidebar)" : "var(--hive-border)",
-                      background: selected ? "rgba(11,18,32,0.06)" : "transparent",
+                      borderColor: selected ? "var(--denim-pri)" : "var(--denim-line)",
+                      background: selected ? "var(--denim-pt)" : "var(--denim-paper)",
                     }}
                   >
                     <input
@@ -1303,7 +1306,7 @@ function Step5Training({
                       checked={selected}
                       onChange={() => updatePerson(person.id, { sku: addon.id })}
                       data-testid={`signup-training-sku-${index}-${addon.id}`}
-                      className="accent-[var(--hive-sidebar)]"
+                      className="accent-pri"
                     />
                     <span className="font-medium text-[var(--hive-text)]">{addon.name}</span>
                   </label>
@@ -1322,7 +1325,7 @@ function Step5Training({
           onClick={addPerson}
           className="h-11 w-full"
           data-testid="signup-training-add"
-          style={{ fontFamily: JAKARTA }}
+          style={{ fontFamily: BODY_FONT }}
         >
           Add a person
         </Button>
@@ -1447,9 +1450,9 @@ function Step6Payment({
           className="mb-5 flex items-start gap-3 rounded-lg border p-3 text-sm"
           data-testid="stripe-live-blocked"
           style={{
-            background: "rgba(244,63,94,0.10)",
-            borderColor: "rgba(244,63,94,0.35)",
-            color: "#9f1239",
+            background: "var(--hive-danger-soft)",
+            borderColor: "var(--denim-danger-text)",
+            color: "var(--hive-danger-fg)",
           }}
         >
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
@@ -1464,9 +1467,9 @@ function Step6Payment({
           className="mb-5 flex items-start gap-3 rounded-lg border p-3 text-sm"
           data-testid="stripe-test-mode-hint"
           style={{
-            background: "rgba(244,169,58,0.12)",
-            borderColor: "rgba(180,120,20,0.45)",
-            color: "#7a4b00",
+            background: "var(--hive-warn-soft)",
+            borderColor: "var(--hive-warn-fg)",
+            color: "var(--hive-warn-fg)",
           }}
         >
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
@@ -1520,10 +1523,10 @@ function Step6Payment({
 function Header({ title, subtitle }: { title: string; subtitle: React.ReactNode }) {
   return (
     <div className="mb-6">
-      <h1 className="text-2xl font-semibold tracking-tight text-[var(--hive-text)] sm:text-3xl">
+      <h1 className="font-display text-2xl font-bold tracking-[-0.025em] text-deep sm:text-3xl">
         {title}
       </h1>
-      <p className="mt-1.5 text-sm text-[#3a4553]">{subtitle}</p>
+      <p className="mt-1.5 text-sm text-body">{subtitle}</p>
     </div>
   );
 }

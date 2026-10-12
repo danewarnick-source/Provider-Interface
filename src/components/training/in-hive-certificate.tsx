@@ -1,6 +1,5 @@
 import { CheckCircle2, Circle, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PI_THEME } from "@/lib/pi-theme";
 import type { ThirtyDayCertificateRecord } from "@/lib/in-hive-training";
 
 export function InHiveCertificate({
@@ -35,16 +34,16 @@ export function InHiveCertificate({
 
       <div
         id="in-hive-thirty-day-certificate"
-        className="rounded-xl border p-6 print:border-black"
+        className="rounded-[20px] border p-6 shadow-[var(--denim-shadow)] print:border-ink print:shadow-none"
         style={{
-          background: PI_THEME.cream,
-          borderColor: "rgba(10, 17, 32, 0.12)",
-          color: PI_THEME.navy,
+          background: "var(--denim-paper)",
+          borderColor: "var(--denim-line)",
+          color: "var(--denim-deep)",
         }}
       >
         <p
           className="text-[11px] font-semibold uppercase tracking-[0.22em]"
-          style={{ color: PI_THEME.gold }}
+          style={{ color: "var(--denim-accd)" }}
         >
           Provider Interface
         </p>
@@ -85,7 +84,7 @@ export function InHiveCertificate({
               {t.passed ? (
                 <CheckCircle2
                   className="mt-0.5 h-4 w-4 shrink-0"
-                  style={{ color: PI_THEME.ok }}
+                  style={{ color: "var(--denim-accd)" }}
                   aria-label="Success"
                 />
               ) : (

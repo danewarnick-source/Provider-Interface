@@ -70,8 +70,8 @@ export function UpgradeGate({ featureKey, open, onOpenChange }: Props) {
     >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#C8881E]/15">
-            <Lock className="h-5 w-5 text-[#C8881E]" />
+          <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-full bg-acct ring-1 ring-acctb">
+            <Lock className="h-5 w-5 text-accd" />
           </div>
           <DialogTitle className="flex items-center gap-2">
             {label}
@@ -85,7 +85,7 @@ export function UpgradeGate({ featureKey, open, onOpenChange }: Props) {
         </DialogHeader>
 
         {submitted ? (
-          <div className="flex items-start gap-2 rounded-md border border-[var(--hive-ok)]/30 bg-[var(--hive-ok-soft)] p-3 text-sm text-[var(--hive-ok-fg)]">
+          <div className="flex items-start gap-2 rounded-xl border border-acctb bg-acct p-3 text-sm text-accd">
             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
             <div>
               Request sent. The Provider Interface team will review and enable{" "}
@@ -93,7 +93,7 @@ export function UpgradeGate({ featureKey, open, onOpenChange }: Props) {
             </div>
           </div>
         ) : (
-          <div className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground">
+          <div className="rounded-xl border bg-pt0 p-3 text-xs text-muted-foreground">
             Requesting access notifies the Provider Interface team to enable this feature
             for your organization. Nothing changes until they approve.
           </div>
@@ -107,7 +107,6 @@ export function UpgradeGate({ featureKey, open, onOpenChange }: Props) {
             <Button
               onClick={() => mut.mutate()}
               disabled={mut.isPending || !organizationId}
-              className="bg-[#1A2B47] text-white hover:bg-[#1A2B47]/90"
             >
               {mut.isPending ? (
                 <>
@@ -137,15 +136,15 @@ export function FeatureLockedRoute({ featureKey }: { featureKey: string }) {
   const label = meta?.label ?? featureKey;
   return (
     <div className="mx-auto max-w-xl p-6">
-      <div className="rounded-xl border bg-white p-6 text-center">
-        <div className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#C8881E]/15">
-          <Lock className="h-5 w-5 text-[#C8881E]" />
+      <div className="rounded-[var(--denim-r)] border bg-card p-6 text-center shadow-[var(--denim-shadow)]">
+        <div className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-acct ring-1 ring-acctb">
+          <Lock className="h-5 w-5 text-accd" />
         </div>
-        <h1 className="text-lg font-semibold text-[#1A2B47]">{label} is locked</h1>
+        <h1 className="font-display text-lg font-semibold tracking-[-0.01em] text-deep">{label} is locked</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {meta?.upgrade_blurb ?? "This feature isn't turned on for your organization yet."}
         </p>
-        <Button className="mt-4 bg-[#1A2B47] text-white hover:bg-[#1A2B47]/90" onClick={() => setOpen(true)}>
+        <Button className="mt-4" onClick={() => setOpen(true)}>
           <Sparkles className="mr-2 h-4 w-4" /> Request Upgrade
         </Button>
       </div>

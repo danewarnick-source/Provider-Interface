@@ -136,7 +136,7 @@ function FieldRenderer({
                 {photos.map((p) => (
                   <li key={p} className="flex items-center justify-between gap-2 rounded border border-border bg-muted/40 px-2 py-1">
                     <span className="truncate font-mono">{p.split("/").pop()}</span>
-                    <button type="button" className="text-rose-600 hover:underline" onClick={() => onChange(photos.filter((x) => x !== p))}><X className="h-3 w-3" /></button>
+                    <button type="button" className="text-danger-600 hover:underline" onClick={() => onChange(photos.filter((x) => x !== p))}><X className="h-3 w-3" /></button>
                   </li>
                 ))}
               </ul>
@@ -150,7 +150,7 @@ function FieldRenderer({
 
 function ApsNotice() {
   return (
-    <div className="rounded-md border-2 border-rose-500 bg-rose-50 p-3 text-xs text-rose-900 dark:bg-rose-950/40 dark:text-rose-100">
+    <div className="rounded-md border-2 border-danger-500 bg-danger-50 p-3 text-xs text-danger-900 dark:bg-danger-950/40 dark:text-danger-100">
       <p className="flex items-start gap-2 font-semibold">
         <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
         APS reporting is non-delegable
@@ -1131,19 +1131,19 @@ export function IncidentReportDialog({
       : "Not applicable";
     return (
       <div className="space-y-3">
-        <div className="flex items-center gap-2 text-xs text-violet-700 dark:text-violet-300">
+        <div className="flex items-center gap-2 text-xs text-pri">
           <ShieldCheck className="h-3.5 w-3.5" />
           <span className="font-semibold">NECTAR follow-up {idx + 1} of {nectarIssues!.length}</span>
           <Badge variant={q.severity === "must_fix" ? "destructive" : "outline"} className="text-[10px]">
             {q.severity === "must_fix" ? "Must answer" : "Suggested"}
           </Badge>
-          {answered && <Badge variant="outline" className="border-emerald-400 text-[10px] text-emerald-700">Answered</Badge>}
+          {answered && <Badge variant="outline" className="border-success-400 text-[10px] text-success-700">Answered</Badge>}
         </div>
-        <div className="rounded-md border border-violet-300 bg-violet-50/50 p-3 text-sm dark:bg-violet-950/30 dark:border-violet-800">
-          <p className="text-[11px] uppercase tracking-wide text-violet-700 dark:text-violet-300">Nectar's question — generated from what you wrote</p>
+        <div className="rounded-md border border-pt2 bg-pt0 p-3 text-sm">
+          <p className="text-[11px] uppercase tracking-wide text-pri">Nectar's question — generated from what you wrote</p>
           <p className="mt-1 font-medium">{q.question}</p>
           {ownGuardianApplies && (
-            <p className="mt-2 text-[11px] text-violet-800 dark:text-violet-200">
+            <p className="mt-2 text-[11px] text-pri">
               {clientFirst} is their own guardian — no guardian notification is required.
             </p>
           )}
@@ -1193,7 +1193,7 @@ export function IncidentReportDialog({
       <DialogContent className="max-h-[92vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base">
-            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <AlertTriangle className="h-4 w-4 text-warning-600" />
             Incident Report
           </DialogTitle>
           <DialogDescription className="text-xs">
@@ -1215,7 +1215,7 @@ export function IncidentReportDialog({
           </div>
         ) : submitted ? (
           <div className="space-y-4 py-4 text-sm">
-            <div className="rounded-md border border-emerald-300 bg-emerald-50 p-4 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-100">
+            <div className="rounded-md border border-success-300 bg-success-50 p-4 text-success-800 dark:bg-success-950/40 dark:text-success-100">
               <p className="font-semibold">Incident submitted.</p>
               <p className="mt-1 text-xs">
                 Your supervisor has been notified. They will start the UPI entry (within
@@ -1332,7 +1332,7 @@ export function IncidentReportDialog({
                     </Select>
                   </div>
                   {isFatality && (
-                    <div className="flex items-start gap-2 rounded-md border-2 border-rose-500 bg-rose-50 px-3 py-2 text-xs text-rose-800 dark:bg-rose-950/40 dark:text-rose-100">
+                    <div className="flex items-start gap-2 rounded-md border-2 border-danger-500 bg-danger-50 px-3 py-2 text-xs text-danger-800 dark:bg-danger-950/40 dark:text-danger-100">
                       <Skull className="mt-0.5 h-4 w-4 shrink-0" />
                       <span>Fatality — immediate DHHS / §1.26 notifications are required. After you submit, contact the on-call administrator by phone now.</span>
                     </div>
@@ -1343,12 +1343,12 @@ export function IncidentReportDialog({
               {currentKey === "narrative" && (
                 <div className="space-y-3">
                   {aiEnabled && (
-                    <div className="rounded-md border-2 border-violet-300 bg-violet-50/60 p-3 dark:bg-violet-950/30 dark:border-violet-800">
-                      <div className="mb-2 flex items-center gap-2 text-violet-900 dark:text-violet-100">
+                    <div className="rounded-md border-2 border-pt2 bg-pt/60 p-3">
+                      <div className="mb-2 flex items-center gap-2 text-deep">
                         <Sparkles className="h-4 w-4" />
                         <span className="text-sm font-semibold">Draft with NECTAR</span>
                       </div>
-                      <p className="text-[11px] text-violet-900/80 dark:text-violet-100/80">
+                      <p className="text-[11px] text-deep/80">
                         Type rough shorthand — Nectar expands it into a UPI-grade narrative you edit before continuing.
                         Example: "client hit roommate, cops came, arrested".
                       </p>
@@ -1383,14 +1383,14 @@ export function IncidentReportDialog({
                         )}
                       </div>
                       {nectarDraft && (
-                        <div className="mt-2 rounded border border-violet-200 bg-background p-2 text-xs dark:border-violet-900">
-                          <p className="mb-1 text-[10px] uppercase tracking-wide text-violet-700 dark:text-violet-300">NECTAR draft — review then click "Use this draft"</p>
+                        <div className="mt-2 rounded border border-pt2 bg-background p-2 text-xs">
+                          <p className="mb-1 text-[10px] uppercase tracking-wide text-pri">NECTAR draft — review then click "Use this draft"</p>
                           <p className="whitespace-pre-wrap">{nectarDraft}</p>
                         </div>
                       )}
                       {nectarDraft && nectarDraftGaps.filter((g) => g.severity === "must_fix").length > 0 && (
-                        <div className="mt-2 space-y-2 rounded border border-amber-300 bg-amber-50/60 p-2 text-xs dark:bg-amber-950/30 dark:border-amber-800">
-                          <p className="text-[11px] font-semibold text-amber-900 dark:text-amber-100">
+                        <div className="mt-2 space-y-2 rounded border border-warning-300 bg-warning-50/60 p-2 text-xs dark:bg-warning-950/30 dark:border-warning-800">
+                          <p className="text-[11px] font-semibold text-warning-900 dark:text-warning-100">
                             NECTAR needs a few details before it can finalize this draft. Answer each question — NECTAR will NOT make up information for you.
                           </p>
                           {nectarDraftGaps.map((g, i) => {
@@ -1398,7 +1398,7 @@ export function IncidentReportDialog({
                             const answered = !!gapAnswers[i]?.trim();
                             const isYesNo = g.answer_type === "yes_no";
                             return (
-                              <div key={i} className="rounded border border-amber-200 bg-background p-2 dark:border-amber-900">
+                              <div key={i} className="rounded border border-warning-200 bg-background p-2 dark:border-warning-900">
                                 <div className="mb-2 flex items-start gap-2">
                                   <Badge variant="destructive" className="text-[10px]">Required</Badge>
                                   <p className="text-[11px] leading-snug">{g.question}</p>
@@ -1423,7 +1423,7 @@ export function IncidentReportDialog({
                                   />
                                 )}
                                 {!answered && (
-                                  <p className="mt-1 text-[10px] text-rose-700 dark:text-rose-300">
+                                  <p className="mt-1 text-[10px] text-danger-700 dark:text-danger-300">
                                     Required to use this draft.
                                   </p>
                                 )}
@@ -1444,12 +1444,12 @@ export function IncidentReportDialog({
                     </p>
                   </div>
                   {aiEnabled && (
-                    <div className="rounded-md border-2 border-violet-300 bg-violet-50/40 p-3 dark:bg-violet-950/30 dark:border-violet-800">
-                      <div className="mb-2 flex items-center gap-2 text-violet-900 dark:text-violet-100">
+                    <div className="rounded-md border-2 border-pt2 bg-pt0 p-3">
+                      <div className="mb-2 flex items-center gap-2 text-deep">
                         <ShieldCheck className="h-4 w-4" />
                         <span className="text-sm font-semibold">Review with NECTAR</span>
                       </div>
-                      <p className="text-[11px] text-violet-900/80 dark:text-violet-100/80">
+                      <p className="text-[11px] text-deep/80">
                         NECTAR reads your narrative and asks for anything a UPI reviewer would push back on.
                         You must run a review before continuing — NECTAR will NOT make up information for you.
                       </p>
@@ -1468,7 +1468,7 @@ export function IncidentReportDialog({
                               : <><Sparkles className="mr-1 h-3 w-3" />Re-run NECTAR review</>}
                         </Button>
                         {narrativeReviewStatus === "passed" && (
-                          <Badge variant="outline" className="border-emerald-400 text-[10px] text-emerald-700 dark:text-emerald-300">
+                          <Badge variant="outline" className="border-success-400 text-[10px] text-success-700 dark:text-success-300">
                             NECTAR has no follow-ups — you can continue.
                           </Badge>
                         )}
@@ -1482,8 +1482,8 @@ export function IncidentReportDialog({
                         )}
                       </div>
                       {narrativeReviewStatus === "needs_answers" && (nectarIssues ?? []).filter((g) => g.severity === "must_fix").length > 0 && (
-                        <div className="mt-2 space-y-2 rounded border border-amber-300 bg-amber-50/60 p-2 text-xs dark:bg-amber-950/30 dark:border-amber-800">
-                          <p className="text-[11px] font-semibold text-amber-900 dark:text-amber-100">
+                        <div className="mt-2 space-y-2 rounded border border-warning-300 bg-warning-50/60 p-2 text-xs dark:bg-warning-950/30 dark:border-warning-800">
+                          <p className="text-[11px] font-semibold text-warning-900 dark:text-warning-100">
                             NECTAR needs a few details. Answer each question before continuing — NECTAR will NOT make up information for you.
                           </p>
                           {(nectarIssues ?? []).map((g, i) => {
@@ -1501,7 +1501,7 @@ export function IncidentReportDialog({
                               ? "Client is their own guardian — no separate notification required."
                               : "Not applicable";
                             return (
-                              <div key={i} className="rounded border border-amber-200 bg-background p-2 dark:border-amber-900">
+                              <div key={i} className="rounded border border-warning-200 bg-background p-2 dark:border-warning-900">
                                 <div className="mb-2 flex items-start gap-2">
                                   <Badge variant="destructive" className="text-[10px]">Required</Badge>
                                   <p className="text-[11px] leading-snug">{g.question}</p>
@@ -1556,14 +1556,14 @@ export function IncidentReportDialog({
                                   </p>
                                 )}
                                 {!answered && (
-                                  <p className="mt-1 text-[10px] text-rose-700 dark:text-rose-300">
+                                  <p className="mt-1 text-[10px] text-danger-700 dark:text-danger-300">
                                     Required to continue.
                                   </p>
                                 )}
                               </div>
                             );
                           })}
-                          <p className="text-[10px] text-amber-800 dark:text-amber-200">
+                          <p className="text-[10px] text-warning-800 dark:text-warning-200">
                             Your answers will be appended to the narrative when you click Next.
                           </p>
                         </div>
@@ -1573,10 +1573,10 @@ export function IncidentReportDialog({
                   {liveNudges.length > 0 && (
                     <div className="space-y-2">
                       {liveNudges.map((n) => (
-                        <div key={n.term} className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 p-2 text-xs dark:bg-amber-950/30">
-                          <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
+                        <div key={n.term} className="flex items-start gap-2 rounded-[10px] border border-pt2 bg-pt p-2 text-xs">
+                          <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-pri" />
                           <div className="min-w-0 flex-1">
-                            <p className="text-amber-900 dark:text-amber-100">
+                            <p className="text-deep">
                               Nectar noticed you mentioned <span className="font-mono">"{n.term}"</span> —
                               {detailKey === n.categoryKey
                                 ? <> {n.categoryName} details will be required on the next step.</>
@@ -1601,7 +1601,7 @@ export function IncidentReportDialog({
               )}
 
               {currentKey === "details" && block && (
-                <div className="rounded-md border-2 border-amber-400 bg-amber-50/30 p-3 dark:bg-amber-950/20">
+                <div className="rounded-md border-2 border-warning-400 bg-warning-50/30 p-3 dark:bg-warning-950/20">
                   <div className="mb-2 flex items-center justify-between">
                     <p className="text-xs font-semibold">{block.title}</p>
                     <Badge variant="outline" className="text-[10px]">Required</Badge>
@@ -1658,11 +1658,11 @@ export function IncidentReportDialog({
                       placeholder="What did you do in the moment to keep the person safe?" />
                   </div>
                   {isAbuse && (
-                    <div className="rounded-md border-2 border-amber-500 bg-amber-50 p-3 dark:bg-amber-950/40">
-                      <Label className="text-xs font-semibold text-amber-800 dark:text-amber-100">
+                    <div className="rounded-md border-2 border-warning-500 bg-warning-50 p-3 dark:bg-warning-950/40">
+                      <Label className="text-xs font-semibold text-warning-800 dark:text-warning-100">
                         Prevention strategies developed or planned *
                       </Label>
-                      <p className="text-[10px] text-amber-700 dark:text-amber-200">
+                      <p className="text-[10px] text-warning-700 dark:text-warning-200">
                         Required by §1.27(3) for abuse / neglect / exploitation incidents.
                       </p>
                       <Textarea rows={3} value={preventionStrategies}
@@ -1673,28 +1673,28 @@ export function IncidentReportDialog({
               )}
 
               {currentKey === "nectar-interview" && (
-                <div className="space-y-3 rounded-md border border-violet-300 bg-violet-50/40 p-4 dark:bg-violet-950/30 dark:border-violet-800">
-                  <div className="flex items-center gap-2 text-violet-900 dark:text-violet-100">
+                <div className="space-y-3 rounded-md border border-pt2 bg-pt0 p-4">
+                  <div className="flex items-center gap-2 text-deep">
                     <ShieldCheck className="h-4 w-4" />
                     <span className="text-sm font-semibold">NECTAR is reviewing your narrative</span>
                   </div>
-                  <p className="text-[11px] text-violet-900/70 dark:text-violet-100/70">
+                  <p className="text-[11px] text-deep/70">
                     NECTAR reviews every narrative — whether you used its draft or wrote your own — and will ask follow-ups before you can submit. It never makes up information for you.
                   </p>
 
                   {nectarReviewing ? (
-                    <p className="flex items-center gap-2 text-xs text-violet-900/80 dark:text-violet-100/80">
+                    <p className="flex items-center gap-2 text-xs text-deep/80">
                       <Loader2 className="h-3 w-3 animate-spin" />
                       Generating follow-up questions specific to what you wrote…
                     </p>
                   ) : nectarStatus === "skipped" ? (
                     <>
-                      <p className="text-xs text-amber-800 dark:text-amber-200">
+                      <p className="text-xs text-warning-800 dark:text-warning-200">
                         Nectar review unavailable (timeout or error). The 24-hour clock matters more — you can continue and submit. An <em>AI review skipped</em> badge will be visible to admins.
                       </p>
                     </>
                   ) : nectarIssues && nectarIssues.length === 0 ? (
-                    <p className="text-xs text-emerald-800 dark:text-emerald-200">
+                    <p className="text-xs text-success-800 dark:text-success-200">
                       NECTAR has no follow-ups — the narrative covers what a UPI reviewer would ask. Continue to the final review.
                     </p>
                   ) : nectarIssues && nectarIssues.length > 0 ? (
@@ -1766,8 +1766,8 @@ export function IncidentReportDialog({
                   <div className="space-y-4">
                     <div className={
                       hasBlockers
-                        ? "rounded-md border-2 border-amber-400 bg-amber-50 p-3 text-xs dark:bg-amber-950/30"
-                        : "rounded-md border-2 border-emerald-400 bg-emerald-50 p-3 text-xs dark:bg-emerald-950/30"
+                        ? "rounded-md border-2 border-warning-400 bg-warning-50 p-3 text-xs dark:bg-warning-950/30"
+                        : "rounded-md border-2 border-success-400 bg-success-50 p-3 text-xs dark:bg-success-950/30"
                     }>
                       <p className="font-semibold">
                         {hasBlockers ? "Review before submitting" : "Ready to submit"}
@@ -1782,7 +1782,7 @@ export function IncidentReportDialog({
                     {contradictions.length > 0 && (
                       <div className="space-y-2">
                         {contradictions.map((msg, i) => (
-                          <div key={i} className="flex items-start gap-2 rounded-md border-2 border-rose-400 bg-rose-50 p-2 text-xs text-rose-900 dark:bg-rose-950/40 dark:text-rose-100">
+                          <div key={i} className="flex items-start gap-2 rounded-md border-2 border-danger-400 bg-danger-50 p-2 text-xs text-danger-900 dark:bg-danger-950/40 dark:text-danger-100">
                             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                             <div className="flex-1">
                               <p className="font-medium">{msg}</p>
@@ -1797,8 +1797,8 @@ export function IncidentReportDialog({
                     )}
 
                     {/* NECTAR Completeness Check */}
-                    <div className="rounded-md border border-violet-300 bg-violet-50/60 p-3 text-xs dark:bg-violet-950/30 dark:border-violet-800">
-                      <div className="mb-2 flex flex-wrap items-center gap-2 text-violet-900 dark:text-violet-100">
+                    <div className="rounded-md border border-pt2 bg-pt/60 p-3 text-xs">
+                      <div className="mb-2 flex flex-wrap items-center gap-2 text-deep">
                         <ShieldCheck className="h-3.5 w-3.5" />
                         <span className="font-semibold">NECTAR Completeness Check</span>
                         {nectarStatus === "skipped" && (
@@ -1814,7 +1814,7 @@ export function IncidentReportDialog({
                           <Badge variant="outline" className="text-[10px]">Follow-ups answered</Badge>
                         )}
                       </div>
-                      <p className="text-[11px] text-violet-900/80 dark:text-violet-100/80">
+                      <p className="text-[11px] text-deep/80">
                         Re-run NECTAR on the enriched draft (narrative + your answers) to surface any remaining gaps before submit.
                       </p>
                       <Button type="button" size="sm" variant="outline" className="mt-2" onClick={runCompletenessCheck} disabled={completenessBusy || !aiEnabled}>
@@ -1822,7 +1822,7 @@ export function IncidentReportDialog({
                       </Button>
 
                       {completenessIssues && completenessIssues.length === 0 && !completenessBusy && (
-                        <p className="mt-2 text-[11px] text-emerald-800 dark:text-emerald-200">No remaining gaps. You can submit.</p>
+                        <p className="mt-2 text-[11px] text-success-800 dark:text-success-200">No remaining gaps. You can submit.</p>
                       )}
                       {completenessIssues && completenessIssues.length > 0 && (
                         <ul className="mt-2 space-y-2 text-[11px]">
@@ -1834,7 +1834,7 @@ export function IncidentReportDialog({
                             return (
                               <li
                                 key={`${q.question}-${i}`}
-                                className={`rounded border p-2 ${q.severity === "must_fix" ? "border-rose-300 bg-rose-50" : "border-amber-300 bg-amber-50"}`}
+                                className={`rounded border p-2 ${q.severity === "must_fix" ? "border-danger-300 bg-danger-50" : "border-warning-300 bg-warning-50"}`}
                               >
                                 <div className="flex items-start gap-2">
                                   <Badge variant={q.severity === "must_fix" ? "destructive" : "outline"} className="text-[10px]">
@@ -1853,7 +1853,7 @@ export function IncidentReportDialog({
                                     disabled={checking}
                                   />
                                   {needsMore && itemStatus?.note && (
-                                    <p className="text-[11px] text-rose-800 dark:text-rose-200">
+                                    <p className="text-[11px] text-danger-800 dark:text-danger-200">
                                       Needs more detail: {itemStatus.note}
                                     </p>
                                   )}
@@ -1877,7 +1877,7 @@ export function IncidentReportDialog({
                         </ul>
                       )}
                       {completenessApproved.length > 0 && (
-                        <p className="mt-2 text-[11px] text-emerald-800 dark:text-emerald-200">
+                        <p className="mt-2 text-[11px] text-success-800 dark:text-success-200">
                           {completenessApproved.length} answer{completenessApproved.length === 1 ? "" : "s"} approved and added to the report.
                         </p>
                       )}
@@ -1886,7 +1886,7 @@ export function IncidentReportDialog({
                     {unresolvedMustFix.length > 0 && (
                       <div className="space-y-2">
                         {unresolvedMustFix.map(({ q, i }) => (
-                          <div key={i} className="flex items-start gap-2 rounded-md border-2 border-rose-400 bg-rose-50 p-2 text-xs text-rose-900 dark:bg-rose-950/40 dark:text-rose-100">
+                          <div key={i} className="flex items-start gap-2 rounded-md border-2 border-danger-400 bg-danger-50 p-2 text-xs text-danger-900 dark:bg-danger-950/40 dark:text-danger-100">
                             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                             <div className="flex-1">
                               <p className="font-medium">Nectar follow-up needs an answer: {q.question}</p>
@@ -1957,7 +1957,7 @@ export function IncidentReportDialog({
             </div>
 
             {stepError && (
-              <p className="rounded border border-rose-300 bg-rose-50 px-3 py-2 text-xs text-rose-700 dark:bg-rose-950/30 dark:text-rose-200">
+              <p className="rounded border border-danger-300 bg-danger-50 px-3 py-2 text-xs text-danger-700 dark:bg-danger-950/30 dark:text-danger-200">
                 {stepError}
               </p>
             )}

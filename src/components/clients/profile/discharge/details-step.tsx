@@ -86,7 +86,7 @@ export function DetailsStep({
       </div>
       {warning ? (
         <p
-          className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
+          className="flex items-start gap-2 rounded-xl border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-800"
           data-testid="discharge-notice-warning"
         >
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />

@@ -121,19 +121,6 @@ describe("readers never treat NULL / [] as all codes", () => {
     assert.match(s, /codes\.length > 0 && arraysOverlapCaseInsensitive/);
   });
 
-  it("smart-import commit writes explicit codes (client's authorized codes when the source has none)", () => {
-    const s = src("./smart-import-commit.functions.ts");
-    assert.match(s, /importAssignmentCodes\(\s*r\.service_codes,/);
-    assert.doesNotMatch(s, /NULL = all of the client's authorized/);
-    assert.doesNotMatch(s, /codes \?\? \[\]\)/);
-  });
-
-  it("smart-import review never stages [] as all codes", () => {
-    const s = src("./smart-import-review.functions.ts");
-    assert.match(s, /Pick at least one code, or remove this staff from the client\./);
-    assert.doesNotMatch(s, /serviceCodes\.length === 0 \? null/);
-  });
-
   it("financial HHP detection reads explicit CMP/CMS codes only", () => {
     for (const f of [
       "./financial-contractors.functions.ts",

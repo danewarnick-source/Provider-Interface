@@ -1,51 +1,111 @@
 /**
- * Provider Interface room — dusk navy chrome, pale canvas, cream π.
+ * Provider Interface — "Denim" design system. Single source of truth.
  *
- * Import this file from src/styles.css so every surface inherits the same room.
+ * Every page (public + signed-in) reads these tokens. Do not add one-off hex
+ * values in components: use the semantic Tailwind colors (primary, accent,
+ * success, warning, destructive, info), the Denim utilities (bg-pri, text-deep,
+ * bg-acct, ...), or the Denim ramps (denim-*, haze-*, success-*, warning-*,
+ * danger-*) defined in src/styles.css.
  *
  * Product name on screen: Provider Interface (never Hive Certify)
  * AI agent name: Nectar (never Ask Hive, never Compass)
  * Do not print hivecertify.com on marketing or login.
- * Mark: straight-bar π, equal verticals. Not a honeycomb.
+ * Mark: straight-bar π on a navy tile with a green bar. Not a honeycomb. No gold.
  */
 
 :root {
-  --hive-sidebar: #0a1120;
-  --hive-chrome-text: #f3efe6;
-  --hive-chrome-text-muted: rgba(243, 239, 230, 0.6);
-  --hive-chrome-border: rgba(243, 239, 230, 0.12);
-  --hive-chrome-hover: rgba(243, 239, 230, 0.1);
-  --hive-chrome-control: rgba(243, 239, 230, 0.06);
-  --hive-canvas: #f4f6f8;
-  --hive-bg: #f4f6f8;
-  --hive-surface: #ffffff;
-  --hive-border: #d5dbe1;
-  --hive-steel: #8a96a3;
-  --hive-gold: #c9a227;
-  --hive-gold-hover: #d4af37;
-  --hive-gold-soft: #f3ebd4;
-  --hive-on-gold: #243040;
-  /* Primary action fill. Gold is the brand/attention accent, never a button
-     fill, so "add", "save", and "confirm" read as one family platform-wide. */
-  --hive-primary: #243040;
-  --hive-primary-hover: #0a1120;
+  /* ── Denim tokens (exact values) ─────────────────────────────────────── */
+  /* denim blues */
+  --denim-deep: #1b3350; /* darkest navy: headings, sidebar background, footer */
+  --denim-pri: #274c77; /* primary: buttons, links, active nav, focus */
+  --denim-steel: #6096ba; /* secondary blue: charts, info, subtle highlights */
+  --denim-hi: #4f80ac; /* hover / lighter primary */
+  /* green accent */
+  --denim-acc: #4d9f3a; /* accent: success, highlights, checkmarks, key numbers */
+  --denim-accd: #3b7d2c; /* accent dark: accent text on light bg, eyebrow labels */
+  --denim-accl: #cdebc0; /* accent light: underlines, chips on dark */
+  --denim-acclh: #ddf2d3;
+  --denim-acct: #eef7e9; /* accent tint: success / badge backgrounds */
+  --denim-acctb: #d3ebc8; /* accent tint border */
+  /* surfaces */
+  --denim-pt0: #f4f7fa;
+  --denim-pt: #eaf0f6;
+  --denim-pt2: #d3dfeb; /* blue-tinted panels, hover rows, borders */
+  --denim-bg: #f6f8fa; /* app / page background */
+  --denim-paper: #ffffff; /* cards, tables, modals */
+  /* text */
+  --denim-ink: #17283d; /* primary text */
+  --denim-text: #3e4b5a; /* body text */
+  --denim-muted: #5f6b78; /* secondary / help text */
+  --denim-line: #e1e7ee; /* borders, dividers */
+  --denim-ondark: #e1eaf3;
+  --denim-ondarkp: #cbd8e6; /* text on navy */
+  /* effects */
+  --denim-r: 14px;
+  --denim-glass: rgba(255, 255, 255, 0.72);
+  --denim-glassd: rgba(27, 51, 80, 0.72);
+  --denim-shadow: 0 0 0 1px rgba(27, 51, 80, 0.08), 0 2px 4px rgba(27, 51, 80, 0.05),
+    0 24px 56px -20px rgba(27, 51, 80, 0.32);
+  --denim-shadow-sm: 0 0 0 1px rgba(27, 51, 80, 0.08), 0 1px 2px rgba(27, 51, 80, 0.05),
+    0 8px 20px -14px rgba(27, 51, 80, 0.28);
+  --denim-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --denim-sidebar-bg: linear-gradient(180deg, #1b3350, #142840);
+  --denim-band: linear-gradient(135deg, #274c77 0%, #1b3350 55%, #142840 100%);
+  --denim-btn-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 10px 24px -10px rgba(39, 76, 119, 0.55);
+  --denim-focus-ring: 0 0 0 3px rgba(39, 76, 119, 0.15);
+  --denim-overlay: rgba(23, 40, 61, 0.45);
+
+  /* status (meaning kept, Denim shape) */
+  --denim-danger-bg: #fdecec;
+  --denim-danger-text: #b42318;
+  --denim-danger: #d92d20;
+  --denim-warn-bg: #fff4e5;
+  --denim-warn-text: #b54708;
+  --denim-warn: #e9791f;
+
+  --font-body: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Manrope", ui-sans-serif, sans-serif;
+
+  /* ── App roles (names kept so existing components follow the tokens) ─── */
+  --hive-sidebar: var(--denim-deep);
+  --hive-chrome-text: var(--denim-ondark);
+  --hive-chrome-text-muted: var(--denim-ondarkp);
+  --hive-chrome-border: rgba(225, 234, 243, 0.14);
+  --hive-chrome-hover: rgba(255, 255, 255, 0.06);
+  --hive-chrome-control: rgba(255, 255, 255, 0.06);
+  --hive-canvas: var(--denim-bg);
+  --hive-bg: var(--denim-bg);
+  --hive-surface: var(--denim-paper);
+  --hive-border: var(--denim-line);
+  --hive-steel: var(--denim-steel);
+  /* Accent = Denim green. Fill with --hive-accent, write text with --hive-accent-text. */
+  --hive-accent: var(--denim-acc);
+  --hive-accent-hover: var(--denim-accd);
+  --hive-accent-soft: var(--denim-acct);
+  --hive-accent-text: var(--denim-accd);
+  --hive-on-accent: var(--denim-accd);
+  /* Primary action fill (buttons, "add", "save", "confirm"). */
+  --hive-primary: var(--denim-pri);
+  --hive-primary-hover: var(--denim-deep);
   --hive-primary-fg: #ffffff;
-  --hive-text: #243040;
-  --hive-text-muted: #5a6570;
-  --hive-ink: #243040;
-  --hive-danger: #c45c4a;
-  --hive-danger-fg: #6b2e24;
-  --hive-danger-soft: #f3e4df;
-  --hive-ok: #6b8f71;
-  --hive-ok-fg: #2f4a35;
-  --hive-ok-soft: #e4ede5;
-  --hive-info: #4a6d8c;
-  --hive-info-fg: #1e3a52;
-  --hive-info-soft: #e4ecf2;
-  --hive-muted-surface: #eef1f4;
-  /* Light control hover — the grey-blue used on outline/ghost buttons.
-     Never gold. Gold is the logo, not a hover fill. */
-  --hive-hover: var(--hive-muted-surface);
+  --hive-text: var(--denim-ink);
+  --hive-text-muted: var(--denim-muted);
+  --hive-ink: var(--denim-deep);
+  --hive-danger: var(--denim-danger);
+  --hive-danger-fg: var(--denim-danger-text);
+  --hive-danger-soft: var(--denim-danger-bg);
+  --hive-ok: var(--denim-acc);
+  --hive-ok-fg: var(--denim-accd);
+  --hive-ok-soft: var(--denim-acct);
+  --hive-info: var(--denim-pri);
+  --hive-info-fg: var(--denim-pri);
+  --hive-info-soft: var(--denim-pt);
+  --hive-warn: var(--denim-warn);
+  --hive-warn-fg: var(--denim-warn-text);
+  --hive-warn-soft: var(--denim-warn-bg);
+  --hive-muted-surface: var(--denim-pt0);
+  /* Light control hover — outline / ghost buttons. */
+  --hive-hover: var(--denim-pt);
 
   /* Typography scale */
   --text-xs: 0.75rem;
@@ -67,12 +127,12 @@
   --space-10: 2.5rem;
   --space-12: 3rem;
 
-  /* Component heights */
-  --height-input: 2.5rem;
+  /* Component heights — Denim buttons are 42px (36px compact). */
+  --height-input: 2.625rem;
   --height-input-sm: 2.25rem;
-  --height-button: 2.5rem;
+  --height-button: 2.625rem;
   --height-button-sm: 2.25rem;
-  --height-button-lg: 2.75rem;
+  --height-button-lg: 2.875rem;
   --height-row: 2.75rem;
 
   /* Page layout */
@@ -82,133 +142,127 @@
   --page-padding-x: 1rem;
   --page-padding-y: 1.5rem;
 
-  /* Semantic tokens — chrome is steel; canvas is pale stone-white. */
-  --background: var(--hive-canvas);
-  --foreground: var(--hive-text);
-  --surface-warm: var(--hive-canvas);
-  --card: var(--hive-surface);
-  --card-foreground: var(--hive-text);
-  --popover: var(--hive-surface);
-  --popover-foreground: var(--hive-text);
+  /* ── shadcn/ui semantic tokens ──────────────────────────────────────── */
+  --background: var(--denim-bg);
+  --foreground: var(--denim-ink);
+  --surface-warm: var(--denim-bg);
+  --card: var(--denim-paper);
+  --card-foreground: var(--denim-ink);
+  --popover: var(--denim-paper);
+  --popover-foreground: var(--denim-ink);
 
-  /* Primary = navy-steel for structural fills (toggles, selected chips). */
-  --primary: var(--hive-ink);
+  --primary: var(--denim-pri);
   --primary-foreground: #ffffff;
-  --accent: var(--hive-gold);
-  --accent-foreground: var(--hive-on-gold);
-  --accent-2: var(--hive-gold);
-  --accent-3: var(--hive-ok);
+  --secondary: var(--denim-pt);
+  --secondary-foreground: var(--denim-pri);
+  --muted: var(--denim-pt0);
+  --muted-foreground: var(--denim-muted);
+  --accent: var(--denim-acct);
+  --accent-foreground: var(--denim-accd);
+  --accent-2: var(--denim-acc);
+  --accent-3: var(--denim-acc);
 
-  --secondary: var(--hive-muted-surface);
-  --secondary-foreground: var(--hive-text);
-  --muted: var(--hive-muted-surface);
-  --muted-foreground: var(--hive-text-muted);
-
-  --destructive: var(--hive-danger);
+  --destructive: var(--denim-danger);
   --destructive-foreground: #ffffff;
-  --success: var(--hive-ok);
+  --success: var(--denim-acc);
   --success-foreground: #ffffff;
-  --warning: var(--hive-gold);
-  --warning-foreground: var(--hive-on-gold);
-  --info: var(--hive-info);
+  --warning: var(--denim-warn-text);
+  --warning-foreground: #ffffff;
+  --info: var(--denim-pri);
   --info-foreground: #ffffff;
 
-  --border: var(--hive-border);
-  --input: var(--hive-border);
-  --ring: var(--hive-gold);
+  --border: var(--denim-line);
+  --input: var(--denim-line);
+  --ring: var(--denim-pri);
 
-  --sidebar: var(--hive-sidebar);
-  --sidebar-foreground: var(--hive-chrome-text);
-  --sidebar-primary: var(--hive-gold);
-  --sidebar-primary-foreground: var(--hive-on-gold);
-  --sidebar-accent: color-mix(in srgb, white 10%, var(--hive-sidebar));
-  --sidebar-accent-foreground: var(--hive-chrome-text);
-  --sidebar-border: color-mix(in srgb, white 14%, var(--hive-sidebar));
-  --sidebar-ring: var(--hive-gold);
+  --sidebar: var(--denim-deep);
+  --sidebar-foreground: var(--denim-ondark);
+  --sidebar-primary: var(--denim-pri);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(255, 255, 255, 0.06);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(225, 234, 243, 0.12);
+  --sidebar-ring: var(--denim-acc);
 
-  --gradient-hero: var(--hive-canvas);
-  --gradient-brand: var(--hive-gold);
-  --gradient-life: var(--hive-gold);
-  --gradient-soft: color-mix(in srgb, var(--hive-gold) 6%, var(--hive-canvas));
-  --gradient-amber: var(--hive-gold);
-  --gradient-navy: var(--hive-sidebar);
+  --chart-1: var(--denim-pri);
+  --chart-2: var(--denim-steel);
+  --chart-3: var(--denim-acc);
+  --chart-4: var(--denim-hi);
+  --chart-5: var(--denim-accd);
 
-  --shadow-elegant: 0 18px 40px -24px rgba(36, 48, 64, 0.18);
-  --shadow-card: 0 1px 0 color-mix(in srgb, var(--hive-border) 80%, transparent);
-  --shadow-soft: 0 1px 2px rgba(36, 48, 64, 0.06);
-  --shadow-glow: 0 0 0 1px color-mix(in srgb, var(--hive-gold) 22%, transparent),
-    0 12px 32px -16px color-mix(in srgb, var(--hive-gold) 28%, transparent);
+  --gradient-hero: var(--denim-bg);
+  --gradient-brand: var(--denim-band);
+  --gradient-life: var(--denim-band);
+  --gradient-soft: linear-gradient(180deg, var(--denim-pt0), var(--denim-bg));
+  --gradient-amber: var(--denim-band);
+  --gradient-navy: var(--denim-sidebar-bg);
 
-  --ink: var(--hive-text);
-  --surface: var(--hive-surface);
-  --surface-2: var(--hive-canvas);
-  --surface-3: var(--hive-muted-surface);
-  --border-light: var(--hive-border);
-  --border-dark: var(--hive-border);
-  --navy-900: var(--hive-ink);
-  --navy-800: var(--hive-sidebar);
-  --navy-700: #35475a;
-  --amber-500: var(--hive-gold);
-  --amber-600: var(--hive-gold-hover);
-  --text-strong: var(--hive-text);
-  --text-soft: var(--hive-text-muted);
-  --btn-gold: var(--hive-gold);
-  --btn-gold-hover: var(--hive-gold-hover);
-  --btn-gold-active: var(--hive-gold);
-  --btn-primary: var(--hive-primary);
-  --btn-primary-hover: var(--hive-primary-hover);
-  --btn-primary-active: var(--hive-primary);
-}
+  --shadow-elegant: var(--denim-shadow);
+  --shadow-card: var(--denim-shadow-sm);
+  --shadow-soft: 0 1px 2px rgba(27, 51, 80, 0.06);
+  --shadow-glow: 0 0 0 1px rgba(77, 159, 58, 0.22), 0 12px 32px -16px rgba(77, 159, 58, 0.32);
 
-.dark {
-  --background: var(--hive-canvas);
-  --foreground: var(--hive-text);
-  --surface-warm: var(--hive-canvas);
-  --card: var(--hive-surface);
-  --card-foreground: var(--hive-text);
-  --popover: var(--hive-surface);
-  --popover-foreground: var(--hive-text);
-  --primary: var(--hive-ink);
-  --primary-foreground: #ffffff;
-  --secondary: var(--hive-muted-surface);
-  --secondary-foreground: var(--hive-text);
-  --muted: var(--hive-muted-surface);
-  --muted-foreground: var(--hive-text-muted);
-  --accent: var(--hive-gold);
-  --accent-foreground: var(--hive-on-gold);
-  --accent-2: var(--hive-gold);
-  --accent-3: var(--hive-ok);
-  --border: var(--hive-border);
-  --input: var(--hive-border);
-  --ring: var(--hive-gold);
+  /* Legacy aliases kept so older components resolve to Denim. */
+  --ink: var(--denim-ink);
+  --surface: var(--denim-paper);
+  --surface-2: var(--denim-bg);
+  --surface-3: var(--denim-pt0);
+  --border-light: var(--denim-line);
+  --border-dark: var(--denim-pt2);
+  --navy-900: var(--denim-deep);
+  --navy-800: var(--denim-deep);
+  --navy-700: var(--denim-pri);
+  --text-strong: var(--denim-ink);
+  --text-soft: var(--denim-muted);
+  --btn-primary: var(--denim-pri);
+  --btn-primary-hover: var(--denim-deep);
+  --btn-primary-active: var(--denim-deep);
+  --btn-accent: var(--denim-acc);
+  --btn-accent-hover: var(--denim-accd);
+  --btn-accent-active: var(--denim-accd);
+
+  /* HIVE Training storefront — same room as the rest of the product. */
+  --training-navy: var(--denim-deep);
+  --training-accent: var(--denim-acc);
+  --training-accent-soft: var(--denim-acct);
+  --training-bg: var(--denim-bg);
+  --training-glow: var(--shadow-glow);
+
+  /* Scheduler service-code families — Denim chart order. */
+  --sched-residential: var(--denim-pri);
+  --sched-supported-living: var(--denim-steel);
+  --sched-day-supports: var(--denim-acc);
+  --sched-employment: var(--denim-hi);
+  --sched-respite: var(--denim-accd);
+  --sched-other: var(--denim-muted);
 }
 
 @layer utilities {
-  /* Dark chrome (sidebar + top bar share this exact surface). */
+  /* Dark chrome (sidebar, dark sheets): solid Denim navy. */
   .hive-chrome {
-    background-color: var(--hive-sidebar);
+    background: var(--denim-sidebar-bg);
     color: var(--hive-chrome-text);
   }
 
-  /* Ghost control that lives on the dark chrome (menu, search, Nectar, bell). */
+  /* Ghost control that lives on the dark chrome. */
   .hive-chrome-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.375rem;
-    border-radius: 0.5rem;
+    border-radius: 999px;
     border: 1px solid var(--hive-chrome-border);
     background-color: var(--hive-chrome-control);
     color: var(--hive-chrome-text);
-    transition: background-color 150ms ease, border-color 150ms ease;
+    transition: background-color 0.2s var(--denim-ease), border-color 0.2s var(--denim-ease);
   }
   .hive-chrome-btn:hover {
-    background-color: var(--hive-chrome-hover);
-    border-color: color-mix(in srgb, var(--hive-chrome-text) 22%, transparent);
-    color: var(--hive-chrome-text);
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(225, 234, 243, 0.24);
+    color: #ffffff;
   }
   .hive-chrome-btn:focus-visible {
-    outline: 2px solid var(--hive-gold);
+    outline: 2px solid var(--denim-acc);
     outline-offset: 2px;
   }
 
@@ -219,7 +273,7 @@
     justify-content: center;
     width: 2rem;
     height: 2rem;
-    border-radius: 0.5rem;
+    border-radius: 999px;
     border: 1px solid var(--hive-chrome-border);
     background-color: var(--hive-chrome-control);
     color: var(--hive-chrome-text);
@@ -227,28 +281,33 @@
     box-shadow: none;
   }
   .hive-chrome-sheet > button[data-state]:hover {
-    background-color: var(--hive-chrome-hover);
+    background-color: rgba(255, 255, 255, 0.1);
   }
   .hive-chrome-sheet > button[data-state]:focus-visible {
-    outline: 2px solid var(--hive-gold);
+    outline: 2px solid var(--denim-acc);
     outline-offset: 2px;
   }
 
-  .hive-gold-btn {
+  .hive-primary-btn {
     background-color: var(--hive-primary);
     color: var(--hive-primary-fg);
+    border-radius: 999px;
+    box-shadow: var(--denim-btn-shadow);
+    transition: background-color 0.2s var(--denim-ease), transform 0.2s var(--denim-ease);
   }
-  .hive-gold-btn:hover {
+  .hive-primary-btn:hover {
     background-color: var(--hive-primary-hover);
+    transform: translateY(-1px);
   }
 
   .hive-ghost-btn {
-    background-color: transparent;
-    color: var(--hive-text);
-    border: 1px solid var(--hive-border);
+    background-color: rgba(255, 255, 255, 0.55);
+    color: var(--denim-pri);
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--denim-pt2);
   }
   .hive-ghost-btn:hover {
-    background-color: var(--hive-muted-surface);
+    background-color: #ffffff;
   }
 
   .hive-status-info {
@@ -256,33 +315,147 @@
     color: var(--hive-info-fg);
   }
 
-  /* Thin gold left bar — active nav. Never a gold fill box. */
+  /* Active nav item on the navy sidebar: --pri pill, white text, small green indicator. */
   .hive-nav-active {
     position: relative;
-    color: var(--hive-chrome-text);
-    background: color-mix(in srgb, white 8%, var(--hive-sidebar));
+    color: #ffffff;
+    background: var(--denim-pri);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
   .hive-nav-active::before {
     content: "";
     position: absolute;
-    left: 0;
-    top: 6px;
-    bottom: 6px;
-    width: 2px;
-    border-radius: 1px;
-    background: #c9a227;
+    left: 7px;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    margin-top: -3px;
+    border-radius: 999px;
+    background: var(--denim-acc);
+    box-shadow: 0 0 0 3px rgba(77, 159, 58, 0.25);
   }
 
   .hive-status-active {
     background: var(--hive-ok-soft);
     color: var(--hive-ok-fg);
+    box-shadow: inset 0 0 0 1px var(--denim-acctb);
   }
   .hive-status-danger {
     background: var(--hive-danger-soft);
     color: var(--hive-danger-fg);
   }
   .hive-role-pill {
-    background: var(--hive-gold-soft);
-    color: var(--hive-on-gold);
+    background: var(--denim-pt);
+    color: var(--denim-pri);
   }
+
+  /* Glass surfaces */
+  .denim-glass {
+    background: var(--denim-glass);
+    -webkit-backdrop-filter: saturate(1.6) blur(18px);
+    backdrop-filter: saturate(1.6) blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 8px 32px -12px rgba(27, 51, 80, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+  .denim-glass-card {
+    background: var(--denim-glass);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    border-radius: 20px;
+    box-shadow: 0 12px 40px -20px rgba(27, 51, 80, 0.25);
+  }
+  .denim-band {
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px;
+    background: var(--denim-band);
+    color: #ffffff;
+    box-shadow: 0 30px 60px -28px rgba(27, 51, 80, 0.5);
+  }
+  .denim-band::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(40% 80% at 90% 20%, rgba(96, 150, 186, 0.35), transparent 60%),
+      radial-gradient(30% 50% at 10% 90%, rgba(77, 159, 58, 0.2), transparent 60%);
+  }
+  .denim-band > * {
+    position: relative;
+  }
+
+  /* Eyebrow / kicker labels above headings. */
+  .denim-eyebrow {
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--denim-accd);
+  }
+  .denim-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--denim-accd);
+    background: var(--denim-acct);
+    padding: 7px 12px 7px 10px;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--denim-acctb);
+  }
+  .denim-kicker::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--denim-acc);
+    box-shadow: 0 0 0 3px rgba(77, 159, 58, 0.2);
+  }
+}
+
+/* Ambient field behind public pages (pointer-events none, sits under content). */
+.denim-field {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.denim-field::before,
+.denim-field::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.55;
+}
+.denim-field::before {
+  width: 52vw;
+  height: 52vw;
+  left: -12vw;
+  top: -18vw;
+  background: radial-gradient(circle, #d3dfeb 0%, transparent 70%);
+}
+.denim-field::after {
+  width: 44vw;
+  height: 44vw;
+  right: -10vw;
+  top: 20vh;
+  background: radial-gradient(circle, #ddefd3 0%, transparent 70%);
+}
+.denim-field > .denim-orb {
+  position: absolute;
+  width: 36vw;
+  height: 36vw;
+  left: 40vw;
+  bottom: -10vw;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(96, 150, 186, 0.35), transparent 70%);
+  filter: blur(60px);
 }

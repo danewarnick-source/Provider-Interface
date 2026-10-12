@@ -42,16 +42,10 @@ function ProgressChip({ done, label }: { done: boolean; label: string }) {
       data-testid={`welcome-chip-${label}`}
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium",
-        done
-          ? "hive-status-active border-[var(--hive-ok)]/40"
-          : "border-[var(--hive-border)] bg-[var(--hive-muted-surface)] text-[var(--hive-text-muted)]",
+        done ? "border-acctb bg-acct text-accd" : "border-pt2 bg-pt text-pri",
       )}
     >
-      {done ? (
-        <CheckMark />
-      ) : (
-        <span className="h-2 w-2 rounded-full bg-[var(--hive-steel)]" aria-hidden />
-      )}
+      {done ? <CheckMark /> : <span className="h-2 w-2 rounded-full bg-steel" aria-hidden />}
       {label}
     </span>
   );
@@ -99,33 +93,31 @@ export function AdminHomeWelcome({ welcomeFlag = false }: { welcomeFlag?: boolea
     <section
       data-testid="admin-home-welcome"
       aria-label="Welcome"
-      className="relative isolate overflow-hidden rounded-2xl border border-[var(--hive-border)] bg-[var(--hive-surface)] text-[var(--hive-text)] shadow-[var(--shadow-card)] lg:max-h-[280px]"
+      className="relative isolate overflow-hidden rounded-[20px] border border-line bg-paper text-body shadow-[var(--denim-shadow)] lg:max-h-[280px]"
     >
       <div
         aria-hidden
         className="pointer-events-none absolute inset-y-0 right-0 w-1/2"
         style={{
           background:
-            "radial-gradient(closest-side at 80% 20%, color-mix(in srgb, var(--hive-gold) 14%, transparent), transparent 75%)",
+            "radial-gradient(closest-side at 80% 20%, color-mix(in srgb, var(--denim-steel) 16%, transparent), transparent 75%)",
         }}
       />
       <div className="relative z-10 flex h-full flex-col justify-between gap-3 px-5 py-4 sm:px-6">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--hive-text-muted)]">
-              {ADMIN_HOME_EYEBROW}
-            </p>
-            <h2 className="mt-1 text-2xl font-semibold leading-tight tracking-tight text-[var(--hive-text)]">
+            <p className="denim-eyebrow">{ADMIN_HOME_EYEBROW}</p>
+            <h2 className="mt-1 font-display text-2xl font-bold leading-tight tracking-[-0.025em] text-deep">
               {ADMIN_HOME_HEADLINE}
             </h2>
-            <p className="mt-1 max-w-xl text-[13px] leading-relaxed text-[var(--hive-text-muted)]">
+            <p className="mt-1 max-w-xl text-[13px] leading-relaxed text-muted-foreground">
               {ADMIN_HOME_SUBHEAD}
             </p>
           </div>
           <button
             type="button"
             onClick={() => void hideBanner()}
-            className="shrink-0 text-right text-[12px] text-[var(--hive-text-muted)] underline-offset-2 hover:text-[var(--hive-text)] hover:underline"
+            className="shrink-0 text-right text-[12px] text-muted-foreground underline-offset-2 hover:text-pri hover:underline"
           >
             Skip — take me to my dashboard
           </button>
@@ -133,7 +125,7 @@ export function AdminHomeWelcome({ welcomeFlag = false }: { welcomeFlag?: boolea
 
         {progress.allDone ? (
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-[13px] text-[var(--hive-text)]">
+            <p className="text-[13px] text-body">
               You&apos;re set up. This banner will close itself.
             </p>
             <Button type="button" onClick={() => void hideBanner()}>
@@ -153,12 +145,12 @@ export function AdminHomeWelcome({ welcomeFlag = false }: { welcomeFlag?: boolea
                   key={card.key}
                   to={card.to}
                   aria-label={`${card.title} — ${card.cta}`}
-                  className="rounded-xl border border-[var(--hive-border)] bg-[var(--hive-canvas)] px-3 py-2.5 transition-colors hover:bg-[var(--hive-muted-surface)]"
+                  className="rounded-[var(--denim-r)] border border-line bg-pt0 px-3 py-2.5 transition-colors hover:border-pt2 hover:bg-pt"
                 >
-                  <div className="text-[13px] font-medium text-[var(--hive-text)]">
+                  <div className="font-display text-[13px] font-semibold text-deep">
                     {card.title}
                   </div>
-                  <div className="mt-0.5 text-[12px] text-[var(--hive-text-muted)]">{card.cta}</div>
+                  <div className="mt-0.5 text-[12px] text-pri">{card.cta}</div>
                 </Link>
               ))}
             </div>
@@ -166,13 +158,13 @@ export function AdminHomeWelcome({ welcomeFlag = false }: { welcomeFlag?: boolea
               {ADMIN_HOME_CARDS.map((card, i) => (
                 <span key={card.key} className="inline-flex items-center gap-2">
                   {i > 0 ? (
-                    <span aria-hidden className="text-[var(--hive-steel)]">
+                    <span aria-hidden className="text-steel">
                       ·
                     </span>
                   ) : null}
                   <Link
                     to={card.to}
-                    className="inline-flex rounded-full border border-[var(--hive-border)] bg-[var(--hive-canvas)] px-3 py-1 text-[12px] font-medium text-[var(--hive-text)] hover:bg-[var(--hive-muted-surface)]"
+                    className="inline-flex rounded-full border border-pt2 bg-paper px-3 py-1 text-[12px] font-medium text-pri hover:bg-pt"
                   >
                     {card.cta}
                   </Link>

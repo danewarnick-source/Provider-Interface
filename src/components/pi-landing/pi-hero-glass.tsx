@@ -36,12 +36,12 @@ function GlassCheck({ done }: { done: boolean }) {
 function HeroGeometry() {
   return (
     <svg className="hero-geo" viewBox="0 0 520 480" fill="none" aria-hidden>
-      <circle cx="268" cy="228" r="172" stroke="#c9a227" strokeWidth="0.75" opacity="0.42" />
+      <circle cx="268" cy="228" r="172" stroke="currentColor" strokeWidth="0.75" opacity="0.42" />
       <circle
         cx="268"
         cy="228"
         r="128"
-        stroke="#c9a227"
+        stroke="currentColor"
         strokeWidth="0.6"
         opacity="0.22"
         strokeDasharray="1.6 5.5"
@@ -52,7 +52,7 @@ function HeroGeometry() {
         width="248"
         height="308"
         rx="3"
-        stroke="#c9a227"
+        stroke="currentColor"
         strokeWidth="0.7"
         opacity="0.32"
         transform="rotate(-9 272 232)"
@@ -63,23 +63,23 @@ function HeroGeometry() {
         width="214"
         height="268"
         rx="3"
-        stroke="#c9a227"
+        stroke="currentColor"
         strokeWidth="0.55"
         opacity="0.2"
         transform="rotate(14 293 188)"
       />
       <path
         d="M62 318 A214 214 0 0 1 438 118"
-        stroke="#c9a227"
+        stroke="currentColor"
         strokeWidth="0.65"
         opacity="0.28"
         strokeDasharray="1.4 5"
       />
-      <rect x="48" y="86" width="52" height="52" stroke="#c9a227" strokeWidth="0.75" opacity="0.38" />
-      <rect x="412" y="336" width="36" height="36" stroke="#c9a227" strokeWidth="0.65" opacity="0.28" />
-      <line x1="28" y1="428" x2="498" y2="36" stroke="#c9a227" strokeWidth="0.45" opacity="0.16" />
-      <line x1="390" y1="40" x2="390" y2="160" stroke="#c9a227" strokeWidth="0.5" opacity="0.2" />
-      <line x1="390" y1="40" x2="486" y2="40" stroke="#c9a227" strokeWidth="0.5" opacity="0.2" />
+      <rect x="48" y="86" width="52" height="52" stroke="currentColor" strokeWidth="0.75" opacity="0.38" />
+      <rect x="412" y="336" width="36" height="36" stroke="currentColor" strokeWidth="0.65" opacity="0.28" />
+      <line x1="28" y1="428" x2="498" y2="36" stroke="currentColor" strokeWidth="0.45" opacity="0.16" />
+      <line x1="390" y1="40" x2="390" y2="160" stroke="currentColor" strokeWidth="0.5" opacity="0.2" />
+      <line x1="390" y1="40" x2="486" y2="40" stroke="currentColor" strokeWidth="0.5" opacity="0.2" />
     </svg>
   );
 }

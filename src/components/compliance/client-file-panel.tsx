@@ -13,7 +13,7 @@ export function ClientFilePanel() {
   }
   if (!org) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
+      <div className="rounded-[var(--denim-r)] border border-line bg-paper p-6 text-sm text-muted-foreground shadow-[var(--denim-shadow-sm)]">
         Select an organization to open the client file.
       </div>
     );
@@ -22,7 +22,7 @@ export function ClientFilePanel() {
   const canAccess = isAdminLevel(org.access.level);
   if (!canAccess) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
+      <div className="rounded-[var(--denim-r)] border border-line bg-paper p-6 text-sm text-muted-foreground shadow-[var(--denim-shadow-sm)]">
         You do not have permission to view the organization client file.
       </div>
     );
@@ -30,8 +30,8 @@ export function ClientFilePanel() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-[var(--hive-gold)]/30 bg-gradient-to-br from-[#fff7ed] via-white to-white p-5 shadow-[var(--shadow-card)]">
-        <h1 className="font-display text-xl font-bold tracking-tight text-[var(--hive-text)]">
+      <div className="rounded-[var(--denim-r)] border border-line bg-paper p-6 shadow-[var(--denim-shadow)]">
+        <h1 className="font-display text-2xl font-bold tracking-[-0.025em] text-deep">
           Client file
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">

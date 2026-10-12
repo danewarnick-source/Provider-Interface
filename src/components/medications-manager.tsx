@@ -408,13 +408,13 @@ export function MedicationsManager({
 
       {/* Choking risk system alert */}
       {hasChokingRisk && (
-        <div className="flex items-start gap-2 rounded-lg border-2 border-rose-500 bg-rose-50 px-3 py-2.5 dark:bg-rose-950/20">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600" />
+        <div className="flex items-start gap-2 rounded-lg border-2 border-danger-500 bg-danger-50 px-3 py-2.5 dark:bg-danger-950/20">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-danger-600" />
           <div>
-            <p className="text-xs font-bold text-rose-800 dark:text-rose-200">
+            <p className="text-xs font-bold text-danger-800 dark:text-danger-200">
               Choking / Swallowing Risk on File
             </p>
-            <p className="text-[11px] text-rose-700 dark:text-rose-300">
+            <p className="text-[11px] text-danger-700 dark:text-danger-300">
               One or more medications are flagged for choking or swallowing risk. Confirm upright posture and
               crushed-med policy per care plan before every medication pass.
             </p>
@@ -424,13 +424,13 @@ export function MedicationsManager({
 
       {/* Pending-proposal banner — visible to everyone so the list state is honest */}
       {pendingCount > 0 && (
-        <div className="flex items-start gap-2 rounded-lg border-2 border-amber-500 bg-amber-50 px-3 py-2.5 dark:bg-amber-950/20">
-          <Clock className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+        <div className="flex items-start gap-2 rounded-lg border-2 border-warning-500 bg-warning-50 px-3 py-2.5 dark:bg-warning-950/20">
+          <Clock className="mt-0.5 h-4 w-4 shrink-0 text-warning-600" />
           <div className="flex-1">
-            <p className="text-xs font-bold text-amber-800 dark:text-amber-200">
+            <p className="text-xs font-bold text-warning-800 dark:text-warning-200">
               {pendingCount} pending medication change{pendingCount === 1 ? "" : "s"} awaiting admin approval
             </p>
-            <p className="text-[11px] text-amber-700 dark:text-amber-300">
+            <p className="text-[11px] text-warning-700 dark:text-warning-300">
               Proposed changes are NOT live on the medication list until an organization admin approves them.
             </p>
           </div>
@@ -454,7 +454,7 @@ export function MedicationsManager({
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2">
             <Pill className="h-4 w-4 text-primary" />
-            <h3 className="font-semibold text-sm">Active prescriptions</h3>
+            <h3 className="font-display font-semibold text-sm text-deep">Active prescriptions</h3>
             <Badge variant="outline">{visible.length}</Badge>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
@@ -547,7 +547,7 @@ export function MedicationsManager({
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-1.5">
                       {m.choking_risk && (
-                        <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-rose-500" />
+                        <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-danger-500" />
                       )}
                       {m.medication_name}
                     </div>
@@ -571,19 +571,19 @@ export function MedicationsManager({
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {m.is_controlled && (
-                        <Badge className="bg-purple-100 text-purple-800 text-[10px] dark:bg-purple-950/40 dark:text-purple-200">Controlled</Badge>
+                        <Badge className="bg-pt text-pri text-[10px]">Controlled</Badge>
                       )}
                       {m.is_prn && (
-                        <Badge className="bg-amber-100 text-amber-800 text-[10px] dark:bg-amber-950/40 dark:text-amber-200">PRN</Badge>
+                        <Badge className="bg-acct text-accd ring-1 ring-acctb text-[10px]">PRN</Badge>
                       )}
                       {m.choking_risk && (
-                        <Badge className="bg-rose-100 text-rose-800 text-[10px] dark:bg-rose-950/40 dark:text-rose-200">Choking Risk</Badge>
+                        <Badge className="bg-danger-50 text-danger-700 text-[10px]">Choking Risk</Badge>
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
                     {m.is_active
-                      ? <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-200">Active</Badge>
+                      ? <Badge className="bg-acct text-accd ring-1 ring-acctb hover:bg-acct">Active</Badge>
                       : <Badge variant="outline">Discontinued</Badge>}
                   </TableCell>
                   {!readOnly && (
@@ -612,7 +612,7 @@ export function MedicationsManager({
                                 });
                               }
                             }}
-                            className="h-7 px-2 text-muted-foreground hover:text-rose-600"
+                            className="h-7 px-2 text-muted-foreground hover:text-danger-600"
                             title={canApprove ? "Discontinue" : "Propose discontinue"}
                           >
                             <X className="h-3 w-3" />
@@ -901,13 +901,13 @@ function MedFormDialog({
 
 
             {/* Choking risk — Contract Req. 3 specifically calls this out */}
-            <div className={`rounded-lg border-2 p-3 space-y-2 ${v.choking_risk ? "border-rose-500 bg-rose-50 dark:bg-rose-950/20" : "border-border bg-muted/20"}`}>
+            <div className={`rounded-lg border-2 p-3 space-y-2 ${v.choking_risk ? "border-danger-500 bg-danger-50 dark:bg-danger-950/20" : "border-border bg-muted/20"}`}>
               <label className="flex cursor-pointer items-center gap-2">
                 <Checkbox
                   checked={v.choking_risk}
                   onCheckedChange={(c) => setV({ ...v, choking_risk: !!c })}
                 />
-                <span className={`text-sm font-semibold ${v.choking_risk ? "text-rose-800 dark:text-rose-200" : "text-foreground"}`}>
+                <span className={`text-sm font-semibold ${v.choking_risk ? "text-danger-800 dark:text-danger-200" : "text-foreground"}`}>
                   This medication may contribute to swallowing difficulties or enhance the prospects of choking
                 </span>
               </label>
@@ -920,7 +920,7 @@ function MedFormDialog({
                   value={v.choking_risk_details}
                   onChange={(e) => setV({ ...v, choking_risk_details: e.target.value })}
                   placeholder="Describe the choking or swallowing risk and any required precautions (e.g., crush medication, upright position required)..."
-                  className="ml-6 text-sm bg-white dark:bg-slate-900"
+                  className="ml-6 text-sm bg-paper"
                 />
               )}
             </div>
@@ -929,7 +929,7 @@ function MedFormDialog({
             <div className="grid grid-cols-2 gap-3">
               <label className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 transition ${
                 v.is_controlled
-                  ? "border-purple-500 bg-purple-50 dark:bg-purple-950/20"
+                  ? "border-pri bg-pt"
                   : "border-border hover:bg-muted/40"
               }`}>
                 <Checkbox
@@ -937,7 +937,7 @@ function MedFormDialog({
                   onCheckedChange={(c) => setV({ ...v, is_controlled: !!c })}
                 />
                 <div>
-                  <p className={`text-sm font-medium ${v.is_controlled ? "text-purple-800 dark:text-purple-200" : ""}`}>
+                  <p className={`text-sm font-medium ${v.is_controlled ? "text-pri" : ""}`}>
                     Controlled Substance
                   </p>
                   <p className="text-[10px] text-muted-foreground">Requires pill count verification</p>
@@ -945,7 +945,7 @@ function MedFormDialog({
               </label>
               <label className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 transition ${
                 v.is_prn
-                  ? "border-amber-500 bg-amber-50 dark:bg-amber-950/20"
+                  ? "border-acc bg-acct"
                   : "border-border hover:bg-muted/40"
               }`}>
                 <Checkbox
@@ -953,7 +953,7 @@ function MedFormDialog({
                   onCheckedChange={(c) => setV({ ...v, is_prn: !!c })}
                 />
                 <div>
-                  <p className={`text-sm font-medium ${v.is_prn ? "text-amber-800 dark:text-amber-200" : ""}`}>
+                  <p className={`text-sm font-medium ${v.is_prn ? "text-accd" : ""}`}>
                     PRN / As Needed
                   </p>
                   <p className="text-[10px] text-muted-foreground">Reason required at each administration</p>
@@ -981,7 +981,7 @@ function MedFormDialog({
           <Button
             type="button" variant="outline"
             onClick={onDiscontinue}
-            className="border-rose-500/50 text-rose-700 hover:bg-rose-50 dark:text-rose-300 sm:mr-auto"
+            className="border-danger-500/50 text-danger-700 hover:bg-danger-50 dark:text-danger-300 sm:mr-auto"
           >
             <X className="mr-1.5 h-3.5 w-3.5" /> Discontinue
           </Button>
@@ -1098,7 +1098,7 @@ function AIImportDialog({
                   <TableRow key={i}>
                     <TableCell>
                       <Input value={r.medication_name}
-                        className={!r.medication_name ? "border-rose-400" : ""}
+                        className={!r.medication_name ? "border-danger-400" : ""}
                         onChange={(e) => setRows(rows.map((x, j) => j === i ? { ...x, medication_name: e.target.value } : x))} />
                     </TableCell>
                     <TableCell>
@@ -1165,15 +1165,15 @@ function PendingProposalsPanel({
   }, [meds]);
 
   return (
-    <div className="rounded-lg border-2 border-amber-500/60 bg-amber-50/40 p-4 space-y-3 dark:bg-amber-950/10">
+    <div className="rounded-lg border-2 border-warning-500/60 bg-warning-50/40 p-4 space-y-3 dark:bg-warning-950/10">
       <div className="flex items-center gap-2">
-        <ClipboardCheck className="h-4 w-4 text-amber-700 dark:text-amber-300" />
-        <h3 className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+        <ClipboardCheck className="h-4 w-4 text-warning-700 dark:text-warning-300" />
+        <h3 className="font-display text-sm font-semibold text-warning-900 dark:text-warning-100">
           Pending medication change proposals
         </h3>
-        <Badge className="bg-amber-200 text-amber-900 dark:bg-amber-900/50 dark:text-amber-100">{proposals.length}</Badge>
+        <Badge className="bg-warning-200 text-warning-900 dark:bg-warning-900/50 dark:text-warning-100">{proposals.length}</Badge>
       </div>
-      <p className="text-[11px] text-amber-800 dark:text-amber-200">
+      <p className="text-[11px] text-warning-800 dark:text-warning-200">
         Nothing here is live on the medication list yet. Approve to apply the change; reject to discard it.
       </p>
 
@@ -1245,7 +1245,7 @@ function PendingProposalsPanel({
                     size="sm"
                     disabled={approving}
                     onClick={() => onApprove(p.id)}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                    className="bg-success-600 hover:bg-success-700 text-white"
                   >
                     <Check className="mr-1 h-3.5 w-3.5" /> Approve &amp; apply
                   </Button>
@@ -1305,11 +1305,11 @@ function EditDiff({ before, after }: { before: Medication; after: Record<string,
   return (
     <div className="rounded-md border border-border overflow-hidden">
       <table className="w-full text-xs">
-        <thead className="bg-muted/40">
+        <thead className="bg-pt0">
           <tr>
             <th className="px-2 py-1 text-left font-medium">Field</th>
             <th className="px-2 py-1 text-left font-medium text-muted-foreground">Current</th>
-            <th className="px-2 py-1 text-left font-medium text-emerald-700 dark:text-emerald-300">Proposed</th>
+            <th className="px-2 py-1 text-left font-medium text-success-700 dark:text-success-300">Proposed</th>
           </tr>
         </thead>
         <tbody>
@@ -1317,7 +1317,7 @@ function EditDiff({ before, after }: { before: Medication; after: Record<string,
             <tr key={r.k} className="border-t border-border">
               <td className="px-2 py-1 font-mono text-[10px] text-muted-foreground">{r.k}</td>
               <td className="px-2 py-1 line-through opacity-70">{r.b}</td>
-              <td className="px-2 py-1 font-medium text-emerald-700 dark:text-emerald-300">{r.a}</td>
+              <td className="px-2 py-1 font-medium text-success-700 dark:text-success-300">{r.a}</td>
             </tr>
           ))}
         </tbody>

@@ -66,7 +66,7 @@ export function DeleteFormDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
-            {hasTies ? <AlertTriangle className="h-5 w-5 text-rose-600" /> : <Trash2 className="h-5 w-5" />}
+            {hasTies ? <AlertTriangle className="h-5 w-5 text-danger-600" /> : <Trash2 className="h-5 w-5" />}
             {hasTies ? "Permanently delete form and attached records?" : "Delete this form permanently?"}
           </AlertDialogTitle>
           <AlertDialogDescription asChild>

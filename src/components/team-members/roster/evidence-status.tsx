@@ -9,29 +9,29 @@ import {
 
 const TONE: Record<EvidenceLabelKind, { bar: string; text: string; pill: string }> = {
   no_pack: {
-    bar: "bg-muted-foreground/30",
+    bar: "bg-pt2",
     text: "text-muted-foreground",
-    pill: "border-border bg-muted text-muted-foreground",
+    pill: "border-line bg-pt0 text-muted-foreground",
   },
   missing: {
-    bar: "bg-destructive",
-    text: "text-destructive",
-    pill: "border-destructive/30 bg-destructive/10 text-destructive",
+    bar: "bg-danger-600",
+    text: "text-danger-700",
+    pill: "border-danger-200 bg-danger-50 text-danger-700",
   },
   review: {
-    bar: "bg-sky-500",
-    text: "text-sky-700 dark:text-sky-300",
-    pill: "border-sky-500/30 bg-sky-500/10 text-sky-700 dark:text-sky-300",
+    bar: "bg-pri",
+    text: "text-pri",
+    pill: "border-pt2 bg-pt text-pri",
   },
   due_soon: {
-    bar: "bg-amber-500",
-    text: "text-amber-700 dark:text-amber-300",
-    pill: "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+    bar: "bg-warning-500",
+    text: "text-warning-700",
+    pill: "border-warning-200 bg-warning-50 text-warning-700",
   },
   current: {
-    bar: "bg-emerald-500",
-    text: "text-emerald-700 dark:text-emerald-300",
-    pill: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+    bar: "bg-acc",
+    text: "text-accd",
+    pill: "border-acctb bg-acct text-accd",
   },
 };
 
@@ -58,7 +58,7 @@ export function EvidenceBar({ row }: { row: RosterRow }) {
   return (
     <div className="min-w-[120px]" data-testid="roster-evidence" data-kind={label.kind}>
       <div
-        className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
+        className="h-1.5 w-full overflow-hidden rounded-full bg-pt"
         role="progressbar"
         aria-valuenow={pct}
         aria-valuemin={0}

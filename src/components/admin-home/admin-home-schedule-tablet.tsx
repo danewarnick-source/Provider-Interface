@@ -26,20 +26,20 @@ function blocksFor(staff: (typeof STAFF)[number], row: number) {
 export function AdminHomeScheduleTablet() {
   return (
     <div className="relative mx-auto w-full max-w-[420px] lg:max-w-[460px]" aria-hidden>
-      <div className="rounded-[28px] bg-[#12161f] p-[10px] shadow-[0_28px_70px_-18px_rgba(0,0,0,0.72)] ring-1 ring-white/10">
-        <div className="relative overflow-hidden rounded-[20px] bg-[#0b1220]">
-          <div className="absolute left-1/2 top-1.5 z-10 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-white/25" />
-          <div className="border-b border-white/[0.06] px-3 pb-2 pt-3.5">
-            <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-white/45">
+      <div className="rounded-[28px] bg-deep p-[10px] shadow-[0_28px_70px_-18px_rgba(27,51,80,0.55)] ring-1 ring-white/10">
+        <div className="relative overflow-hidden rounded-[20px] bg-paper">
+          <div className="absolute left-1/2 top-1.5 z-10 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-pt2" />
+          <div className="border-b border-line px-3 pb-2 pt-3.5">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-accd">
               Schedule
             </div>
           </div>
-          <div className="grid grid-cols-[44px_repeat(4,minmax(0,1fr))] border-b border-white/[0.06] px-1.5 py-1.5">
+          <div className="grid grid-cols-[44px_repeat(4,minmax(0,1fr))] border-b border-line bg-pt0 px-1.5 py-1.5">
             <div />
             {STAFF.map((name) => (
               <div
                 key={name}
-                className="truncate px-0.5 text-center text-[9px] font-medium text-white/70"
+                className="truncate px-0.5 text-center text-[9px] font-semibold text-muted-foreground"
               >
                 {name}
               </div>
@@ -49,10 +49,10 @@ export function AdminHomeScheduleTablet() {
             {HOURS.map((hour, row) => (
               <div
                 key={hour}
-                className="grid grid-cols-[44px_repeat(4,minmax(0,1fr))] border-t border-white/[0.04]"
+                className="grid grid-cols-[44px_repeat(4,minmax(0,1fr))] border-t border-line/70"
                 style={{ minHeight: 28 }}
               >
-                <div className="pr-1 pt-0.5 text-right text-[8px] tabular-nums text-white/35">
+                <div className="pr-1 pt-0.5 text-right text-[8px] tabular-nums text-muted-foreground/80">
                   {hour}
                 </div>
                 {STAFF.map((staff) => {
@@ -61,7 +61,7 @@ export function AdminHomeScheduleTablet() {
                     <div key={staff} className="relative px-0.5 py-0.5">
                       {block ? (
                         <div
-                          className="absolute inset-x-0.5 top-0.5 overflow-hidden rounded-[5px] bg-[#1c2a44] px-1 py-0.5 text-[7px] leading-tight text-white/90"
+                          className="absolute inset-x-0.5 top-0.5 overflow-hidden rounded-[5px] border-l-2 border-pri bg-pt px-1 py-0.5 text-[7px] font-medium leading-tight text-pri"
                           style={{ height: `calc(${block.span * 28}px - 4px)` }}
                         >
                           {block.label}
@@ -74,7 +74,7 @@ export function AdminHomeScheduleTablet() {
             ))}
           </div>
         </div>
-        <div className="mx-auto mt-1.5 h-1 w-12 rounded-full bg-white/10" />
+        <div className="mx-auto mt-1.5 h-1 w-12 rounded-full bg-white/15" />
       </div>
     </div>
   );

@@ -107,27 +107,30 @@ function SetPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[var(--hive-text)] via-[#1a2a5a] to-[var(--hive-text)] px-4">
-      <div className="w-full max-w-md rounded-xl border border-[#fed7aa]/30 bg-white p-8 shadow-2xl">
+    <div className="relative flex min-h-screen items-center justify-center overflow-x-clip bg-[var(--denim-bg)] px-4">
+      <div className="denim-field opacity-60" aria-hidden>
+        <div className="denim-orb" />
+      </div>
+      <div className="relative z-[1] w-full max-w-md rounded-[20px] bg-paper p-8 shadow-[var(--denim-shadow)]">
         <div className="mb-6 flex items-center gap-3">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hive-text)] text-white">
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-pri text-white">
             <ShieldCheck className="h-6 w-6" />
           </span>
           <div>
-            <div className="text-xs uppercase tracking-wider text-muted-foreground">PI</div>
-            <h1 className="font-display text-lg font-bold text-[var(--hive-text)]">State Audit Portal</h1>
+            <div className="denim-eyebrow">PI</div>
+            <h1 className="font-display text-lg font-bold tracking-[-0.01em] text-deep">State Audit Portal</h1>
           </div>
         </div>
 
         {status === "verifying" && (
-          <div className="rounded-md border border-slate-200 bg-slate-50 p-4 text-sm text-muted-foreground">
+          <div className="rounded-xl border border-line bg-pt0 p-4 text-sm text-muted-foreground">
             Verifying your invite link…
           </div>
         )}
 
         {status === "error" && (
           <div className="space-y-3">
-            <div className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+            <div className="flex items-start gap-2 rounded-xl bg-danger-50 p-3 text-sm text-danger-700">
               <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
               <div>{errorMsg || "This invite link is invalid or has expired."}</div>
             </div>
@@ -139,7 +142,7 @@ function SetPasswordPage() {
 
         {status === "ready" && (
           <form onSubmit={onSubmit} className="space-y-3">
-            <p className="text-sm text-slate-700">
+            <p className="text-sm text-haze-700">
               Set a password for your auditor account. You'll be taken directly to your
               granted audit package.
             </p>
@@ -149,7 +152,7 @@ function SetPasswordPage() {
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password" required minLength={12} autoComplete="new-password"
-                  className="min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-3 py-2 pr-10 text-sm focus:border-[var(--hive-text)] focus:outline-none"
+                  className="min-h-[44px] w-full rounded-xl border border-line bg-paper px-3 py-2 pr-10 text-sm text-ink focus:border-pri focus:outline-none focus:ring-[3px] focus:ring-pri/15"
                 />
                 <button
                   type="button"
@@ -168,7 +171,7 @@ function SetPasswordPage() {
                 <input
                   type={showConfirm ? "text" : "password"}
                   name="confirm" required minLength={12} autoComplete="new-password"
-                  className="min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-3 py-2 pr-10 text-sm focus:border-[var(--hive-text)] focus:outline-none"
+                  className="min-h-[44px] w-full rounded-xl border border-line bg-paper px-3 py-2 pr-10 text-sm text-ink focus:border-pri focus:outline-none focus:ring-[3px] focus:ring-pri/15"
                 />
                 <button
                   type="button"
@@ -183,7 +186,7 @@ function SetPasswordPage() {
             </label>
             <button
               type="submit" disabled={busy}
-              className="inline-flex w-full min-h-[44px] items-center justify-center rounded-md bg-[var(--hive-text)] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1a2a5a] disabled:opacity-50"
+              className="inline-flex w-full min-h-[44px] items-center justify-center rounded-full bg-pri px-4 py-2 text-sm font-semibold text-white shadow-[var(--denim-btn-shadow)] transition-colors duration-200 ease-denim hover:bg-deep disabled:opacity-50"
             >
               {busy ? "Saving…" : "Set password & open audit package"}
             </button>

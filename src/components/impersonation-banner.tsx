@@ -16,7 +16,7 @@ export function ImpersonationBanner() {
 
   return (
     <div
-      className="sticky top-0 z-50 flex h-10 w-full items-center justify-between gap-3 bg-[oklch(0.55_0.22_25)] px-4 text-white shadow-md"
+      className="sticky top-0 z-50 flex h-10 w-full items-center justify-between gap-3 bg-danger-600 px-4 text-white shadow-[var(--denim-shadow-sm)]"
       role="alert"
     >
       <div className="flex-1 text-center text-sm font-medium">
@@ -31,7 +31,7 @@ export function ImpersonationBanner() {
       </div>
       <button
         onClick={exit}
-        className="shrink-0 rounded-md bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-white/25"
+        className="shrink-0 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-white/25"
       >
         🛑 Exit Impersonation Mode
       </button>

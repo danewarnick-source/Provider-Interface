@@ -178,19 +178,19 @@ function TourOverlay({
             )}
           </mask>
         </defs>
-        <rect x="0" y="0" width="100%" height="100%" fill="rgba(15,27,61,0.62)" mask="url(#nectar-tour-mask)" />
+        <rect x="0" y="0" width="100%" height="100%" fill="rgba(23,40,61,0.45)" mask="url(#nectar-tour-mask)" />
       </svg>
       {/* Amber spotlight ring */}
       {rect && (
         <div
-          className="pointer-events-none absolute rounded-[10px] ring-2 ring-[var(--hive-gold)] shadow-[0_0_0_4px_rgba(217,122,28,0.25)] transition-all duration-200"
+          className="pointer-events-none absolute rounded-[10px] ring-2 ring-[var(--hive-accent)] shadow-[0_0_0_4px_color-mix(in_srgb,var(--denim-acc)_25%,transparent)] transition-all duration-200"
           style={{ top: rect.top - 8, left: rect.left - 8, width: rect.width + 16, height: rect.height + 16 }}
         />
       )}
       {/* Tooltip — frosted card */}
       <div
         ref={tooltipRef}
-        className="pointer-events-auto absolute max-w-sm rounded-xl border border-[#fed7aa] bg-white/95 p-4 shadow-2xl backdrop-blur-md"
+        className="pointer-events-auto absolute max-w-sm rounded-[var(--denim-r)] border border-pt2 bg-white/95 p-4 shadow-[var(--denim-shadow)] backdrop-blur-md"
         style={
           tooltipPos
             ? { top: tooltipPos.top, left: tooltipPos.left }
@@ -205,14 +205,14 @@ function TourOverlay({
             <X className="h-3.5 w-3.5" />
           </button>
         </div>
-        <div className="font-display text-sm font-semibold text-[var(--hive-text)]">
+        <div className="font-display text-sm font-semibold text-deep">
           {tour.task.title}
         </div>
         <p className="mt-1 text-sm text-[var(--hive-text)]">
           {step?.instruction ?? "—"}
         </p>
         {looking && (
-          <p className="mt-2 text-[11px] italic text-[#9a3412]">
+          <p className="mt-2 text-[11px] italic text-pri">
             Looking for the element… if this persists, the control may not be on this page.
           </p>
         )}
@@ -221,26 +221,26 @@ function TourOverlay({
             <button
               onClick={onBack}
               disabled={tour.stepIndex === 0}
-              className="inline-flex min-h-[36px] items-center gap-1 rounded-md border border-border px-2 py-1 text-xs disabled:opacity-50 hover:bg-muted"
+              className="inline-flex min-h-[36px] items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs disabled:opacity-50 hover:bg-muted"
             >
               <ChevronLeft className="h-3 w-3" /> Back
             </button>
             <button
               onClick={onSkip}
-              className="inline-flex min-h-[36px] items-center gap-1 rounded-md border border-border px-2 py-1 text-xs hover:bg-muted"
+              className="inline-flex min-h-[36px] items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs hover:bg-muted"
             >
               <SkipForward className="h-3 w-3" /> Skip
             </button>
             <button
               onClick={onClose}
-              className="inline-flex min-h-[36px] items-center gap-1 rounded-md border border-border px-2 py-1 text-xs hover:bg-muted"
+              className="inline-flex min-h-[36px] items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs hover:bg-muted"
             >
               <Pause className="h-3 w-3" /> Pause
             </button>
           </div>
           <button
             onClick={onAdvance}
-            className="inline-flex min-h-[36px] items-center gap-1 rounded-md bg-[var(--hive-gold)] px-3 py-1 text-xs font-semibold text-white shadow hover:bg-[#b8651a]"
+            className="inline-flex min-h-[36px] items-center gap-1 rounded-full bg-pri px-3 py-1 text-xs font-semibold text-white shadow-[var(--denim-shadow-sm)] hover:bg-deep"
           >
             {tour.stepIndex + 1 === total ? "Finish" : "Next"} <ChevronRight className="h-3 w-3" />
           </button>
