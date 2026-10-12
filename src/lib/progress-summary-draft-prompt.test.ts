@@ -33,8 +33,9 @@ const plan = () =>
 describe("planDraft", () => {
   it("asks for a summary of the period; records go in without staff names or report numbers", () => {
     const p = plan();
-    assert.deepEqual(p.boxes, ["goal:ils", "incidentNotes"], "general has no text and no records");
-    assert.equal(p.skipped, 1);
+    assert.deepEqual(p.boxes, ["goal:ils", "general", "incidentNotes"], "general is drafted from every note");
+    assert.equal(p.skipped, 0);
+    assert.match(p.user, /BOX "general" — general notes\n  Text: \(empty\)\n  All notes this period:\n  - \[2026-10-03\]/);
     assert.match(p.system, /WRITE A SUMMARY OF THE WHOLE PERIOD, NOT A LOG/);
     assert.match(p.user, /\[2026-10-03\] Daily log: Laundry with 3 prompts\./);
     assert.doesNotMatch(p.user, /Sam Lee|IR-7/);
@@ -58,6 +59,7 @@ describe("planDraft", () => {
     assert.deepEqual(bad.drafts, []);
     assert.deepEqual(bad.failed, [
       { field: "goal:ils", reason: "unsupported", facts: ["14"] },
+      { field: "general", reason: "unchanged", facts: [] },
       { field: "incidentNotes", reason: "unchanged", facts: [] },
     ]);
   });

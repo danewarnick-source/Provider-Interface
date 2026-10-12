@@ -115,10 +115,12 @@ export function planDraft(req: DraftRequest): DraftPlan {
   const reportLines = grouped.incidents.map(line);
   const addedIncidents = filledIncidents(editor.incidents).map(manualIncidentLine);
   // What a box is drafted from besides its text: a goal's records, the
-  // period's incident reports and added incidents, or records not tied to a goal.
+  // period's incident reports and added incidents, or (general notes, which
+  // cover the services and how the person did overall) every note.
+  const notes = req.evidence.filter((e) => e.kind !== "incident");
   const recordsFor = (f: FieldKey): string[] => {
     if (f === "incidentNotes") return [...reportLines, ...addedIncidents];
-    if (f === "general") return grouped.general.map(line);
+    if (f === "general") return notes.map(line);
     const id = fieldGoalId(f);
     return id === null ? [] : (grouped.byGoal[id] ?? []).map(line);
   };
@@ -149,8 +151,8 @@ ${indent(addedIncidents.length ? addedIncidents.map((l) => `- ${l}`).join("\n") 
       }
       return `BOX "${f}" — general notes
   Text: ${text}
-  Records not tied to a goal:
-${indent(evidenceBlock(grouped.general))}`;
+  All notes this period:
+${indent(evidenceBlock(notes))}`;
     })
     .join("\n\n");
 
@@ -159,7 +161,7 @@ ${indent(evidenceBlock(grouped.general))}`;
 ${SUMMARY_STYLE}
 
 RULES:
-- Write EACH box on its own, using only what is in that box's text and the records listed under it (a goal's records; the incident reports and added incidents; records not tied to a goal). A box with no text is written from its records. Text the admin typed is the most important source: keep its meaning, and keep any plans for next period it states.
+- Write EACH box on its own, using only what is in that box's text and the records listed under it (a goal's records; the incident reports and added incidents; all notes for the general notes). A box with no text is written from its records. Text the admin typed is the most important source: keep its meaning, and keep any plans for next period it states.
 - Do NOT move text from one box to another. Do not write about other boxes.
 - Never write the same sentence twice.
 ${NEVER_INVENT}

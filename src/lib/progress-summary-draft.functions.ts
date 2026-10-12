@@ -28,7 +28,7 @@ import { loadSummarySource } from "@/lib/progress-summary-source.server";
  *    (by theme and trend; no dates, names or note-by-note retelling) using
  *    only what is in that box plus its records: a goal's shift notes and
  *    daily logs, the period's incident reports and admin-added incidents
- *    for the incident box, records not tied to a goal for the general
+ *    for the incident box, every note in the period for the general
  *    notes. The prompt and the fact checks are planDraft
  *    (progress-summary-draft-prompt.ts). The drafts go back to the editor,
  *    which writes each into its box with an Undo (the autosave saves it).

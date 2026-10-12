@@ -19,7 +19,7 @@ describe("Nectar helper (progress-summary-draft.functions.ts)", () => {
     assert.match(prompt, /buildDrafts\(/);
     assert.match(prompt, /extra: recordsFor/, "only that box's records");
     assert.match(prompt, /if \(f === "incidentNotes"\) return \[\.\.\.reportLines, \.\.\.addedIncidents\]/);
-    assert.match(prompt, /if \(f === "general"\) return grouped\.general\.map\(line\)/);
+    assert.match(prompt, /if \(f === "general"\) return notes\.map\(line\)/, "general notes cover the whole period");
     assert.match(prompt, /hasIncidents: reportLines\.length \+ addedIncidents\.length > 0/);
     assert.match(prompt, /NEVER write that there were no incidents/);
     assert.doesNotMatch(src, /draft_content/, "Nectar never writes draft_content (autosave does)");
