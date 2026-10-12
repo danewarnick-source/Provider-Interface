@@ -92,13 +92,13 @@ export function RestrictionDialog({
             {record.restriction_title} — {clientName}
           </DialogTitle>
         </DialogHeader>
-        <div className="flex items-center justify-between rounded-md border border-border bg-muted/30 px-3 py-2">
+        <div className="flex items-center justify-between rounded-xl border border-line bg-pt0 px-3 py-2">
           <span className="text-sm font-medium">
             {completion.isComplete ? "Fully documented" : "Incomplete documentation"}
           </span>
           <Badge
             variant={completion.isComplete ? "default" : "outline"}
-            className={completion.isComplete ? "bg-success-600 hover:bg-success-600" : "border-warning-400 text-warning-800"}
+            className={completion.isComplete ? "bg-acc hover:bg-acc" : "border-warning-200 bg-warning-50 text-warning-700"}
           >
             {completion.completedCount}/{completion.total}
           </Badge>
@@ -110,7 +110,7 @@ export function RestrictionDialog({
               <div key={def.key} className="space-y-2 rounded-md border border-border p-3">
                 <div className="flex items-start gap-2">
                   {isComplete ? (
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success-600" />
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-acc" />
                   ) : (
                     <Circle className="mt-0.5 h-4 w-4 shrink-0 text-warning-500" />
                   )}

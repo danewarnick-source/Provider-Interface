@@ -19,6 +19,9 @@ import { EmptyCell, SectionLink } from "./list-shortcut";
 
 type CellProps = { row: ClientListRow; viewer: ListViewer };
 
+/** Due-soon / ended pills: warning (amber status), not the green "profile" tone. */
+const DUE_SOON = "border-warning-200 bg-warning-50 text-warning-700";
+
 export function ClientAvatar({ row, size = "sm" }: { row: ClientListRow; size?: "sm" | "md" }) {
   const box = size === "md" ? "h-10 w-10 text-xs" : "h-8 w-8 text-[11px]";
   if (row.photo_url) {
@@ -99,12 +102,14 @@ export function CodesCell({ row, viewer, max = 4 }: CellProps & { max?: number }
         <SectionLink
           clientId={row.id}
           section={cell.section}
-          className="rounded-full border border-hive-accent bg-hive-accent-soft px-2 text-hive-ink"
+          className="rounded-full border border-warning-200 bg-warning-50 px-2 text-warning-700"
         >
           {cell.status} · Renew
         </SectionLink>
       ) : (
-        <StatusTag tone="profile">{cell.status}</StatusTag>
+        <StatusTag tone="profile" className={DUE_SOON}>
+          {cell.status}
+        </StatusTag>
       )}
     </div>
   );
@@ -139,7 +144,12 @@ export function NextDueCell({ row }: { row: ClientListRow }) {
   const tone = dueTone(d);
   if (tone === "normal")
     return <span className="text-xs text-muted-foreground">{nextDueText(d)}</span>;
-  return <StatusTag tone={tone === "overdue" ? "danger" : "profile"}>{nextDueText(d)}</StatusTag>;
+  if (tone === "overdue") return <StatusTag tone="danger">{nextDueText(d)}</StatusTag>;
+  return (
+    <StatusTag tone="profile" className={DUE_SOON}>
+      {nextDueText(d)}
+    </StatusTag>
+  );
 }
 
 export function StaffCell({ row, viewer }: CellProps) {

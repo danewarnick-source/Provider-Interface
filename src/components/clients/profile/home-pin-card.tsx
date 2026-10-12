@@ -330,7 +330,7 @@ export function HomePinCard({
 
         {dirty ? (
           <div
-            className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-hive-accent bg-hive-accent-soft px-3 py-2"
+            className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-warning-200 bg-warning-50 px-3 py-2"
             data-testid="home-pin-moved-banner"
           >
             <p className="text-sm font-medium text-hive-ink">

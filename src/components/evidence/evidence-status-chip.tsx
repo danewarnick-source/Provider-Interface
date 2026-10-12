@@ -2,29 +2,29 @@ import { cn } from "@/lib/utils";
 import type { EvidenceMatrixChip, EvidenceMatrixChipKind } from "@/lib/evidence/status.ts";
 
 const CHIP: Record<EvidenceMatrixChipKind, string> = {
-  complete: "bg-[var(--hive-ok-soft)] text-[var(--hive-ok-fg)]",
-  due: "bg-[var(--hive-accent-soft)] text-[#6b5420]",
-  missing: "bg-[var(--hive-danger-soft)] text-[var(--hive-danger-fg)]",
-  review: "bg-[var(--hive-info-soft)] text-[var(--hive-info-fg)]",
+  complete: "bg-acct text-accd ring-1 ring-acctb",
+  due: "bg-warning-50 text-warning-700 ring-1 ring-warning-200",
+  missing: "bg-danger-50 text-danger-700 ring-1 ring-danger-200",
+  review: "bg-pt text-pri",
   add: "border border-dashed border-[var(--hive-border)] bg-[var(--hive-muted-surface)] text-[var(--hive-steel)]",
   open: "bg-[var(--hive-muted-surface)] text-[var(--hive-text)]",
   na: "border border-dashed border-[var(--hive-border)] bg-[var(--hive-muted-surface)] text-[var(--hive-steel)]",
-  awaiting_review: "bg-[var(--hive-info-soft)] text-[var(--hive-info-fg)]",
-  sent_back: "bg-[var(--hive-accent-soft)] text-[#6b5420]",
+  awaiting_review: "bg-pt text-pri",
+  sent_back: "bg-warning-50 text-warning-700 ring-1 ring-warning-200",
   skipped:
     "border border-dashed border-[var(--hive-border)] bg-[var(--hive-muted-surface)] text-[var(--hive-steel)]",
 };
 
 const ICO: Record<EvidenceMatrixChipKind, { mark: string; fill: string }> = {
   complete: { mark: "✓", fill: "bg-[var(--hive-ok)]" },
-  due: { mark: "·", fill: "bg-[var(--hive-accent)]" },
+  due: { mark: "·", fill: "bg-warning-500" },
   missing: { mark: "·", fill: "bg-[var(--hive-danger)]" },
   review: { mark: "o", fill: "bg-[var(--hive-info)]" },
   add: { mark: "+", fill: "bg-[var(--hive-steel)]" },
   open: { mark: "·", fill: "bg-[var(--hive-steel)]" },
   na: { mark: "–", fill: "bg-[var(--hive-steel)]" },
   awaiting_review: { mark: "o", fill: "bg-[var(--hive-info)]" },
-  sent_back: { mark: "!", fill: "bg-[var(--hive-accent)]" },
+  sent_back: { mark: "!", fill: "bg-warning-500" },
   skipped: { mark: "–", fill: "bg-[var(--hive-steel)]" },
 };
 
@@ -41,7 +41,7 @@ export function EvidenceStatusChip({
 }) {
   const ico = ICO[chip.kind];
   const className = cn(
-    "inline-flex h-[30px] items-center gap-1.5 whitespace-nowrap rounded-[9px] px-2.5 text-xs font-semibold",
+    "inline-flex h-[30px] items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-xs font-semibold",
     CHIP[chip.kind],
     interactive && "cursor-pointer hover:brightness-[0.98]",
   );
@@ -50,7 +50,7 @@ export function EvidenceStatusChip({
       <span
         aria-hidden
         className={cn(
-          "grid h-3.5 w-3.5 shrink-0 place-items-center rounded-full text-[9px] font-extrabold leading-none text-white",
+          "grid h-3.5 w-3.5 shrink-0 place-items-center rounded-full text-[9px] font-bold leading-none text-white",
           ico.fill,
         )}
       >

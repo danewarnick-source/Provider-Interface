@@ -69,7 +69,7 @@ export function EvidenceRoster({
         </div>
       ) : null}
 
-      <div className="overflow-hidden rounded-[14px] border border-[var(--hive-border)] bg-[var(--hive-surface)] shadow-[0_1px_2px_rgba(36,48,64,0.04)]">
+      <div className="overflow-hidden rounded-[var(--denim-r)] border border-line bg-paper shadow-[var(--denim-shadow-sm)]">
         {loading ? (
           <div className="p-8 text-sm text-muted-foreground">Loading Evidence…</div>
         ) : !people.length ? (
@@ -133,8 +133,8 @@ function PersonAccordion({
   });
 
   return (
-    <li className="border-b border-[var(--hive-border)] last:border-b-0">
-      <div className="flex items-center gap-3 px-4 py-3">
+    <li className="border-b border-line last:border-b-0">
+      <div className="flex items-center gap-3 px-4 py-3 transition-colors ease-denim hover:bg-pt0">
         <button
           type="button"
           aria-expanded={expanded}
@@ -143,9 +143,7 @@ function PersonAccordion({
         >
           <span
             className={`grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full border bg-[var(--hive-muted-surface)] text-[11px] font-bold text-[var(--hive-text)] ${
-              expanded
-                ? "border-[var(--hive-accent)] shadow-[0_0_0_1px_var(--hive-accent)]"
-                : "border-[var(--hive-border)]"
+              expanded ? "border-pri ring-1 ring-pri" : "border-line"
             }`}
           >
             {person.initials}
@@ -176,7 +174,7 @@ function PersonAccordion({
         </button>
       </div>
       {expanded ? (
-        <div className="space-y-2 border-t border-[var(--hive-border)] bg-[var(--hive-canvas)] px-4 py-3">
+        <div className="space-y-2 border-t border-line bg-pt0 px-4 py-3">
           {rows.length === 0 ? (
             <p className="text-sm text-[var(--hive-text-muted)]">No selected records yet.</p>
           ) : (
@@ -188,7 +186,7 @@ function PersonAccordion({
               return (
                 <div
                   key={row.id}
-                  className="flex flex-wrap items-center gap-3 rounded-[10px] border border-[var(--hive-border)] bg-[var(--hive-surface)] px-3 py-2.5"
+                  className="flex flex-wrap items-center gap-3 rounded-xl border border-line bg-paper px-3 py-2.5"
                 >
                   <button
                     type="button"

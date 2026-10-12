@@ -52,7 +52,7 @@ export function PcspReviewChecks({ issues }: { issues: readonly Issue[] }) {
         issues={fix}
         tone="border-[var(--hive-danger)]/30 bg-[var(--hive-danger-soft)]"
       />
-      <Group title="Check these" issues={check} tone="border-hive-accent/50 bg-hive-accent-soft" />
+      <Group title="Check these" issues={check} tone="border-warning-200 bg-warning-50" />
     </section>
   );
 }

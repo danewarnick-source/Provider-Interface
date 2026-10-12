@@ -15,11 +15,11 @@ const OPEN_KEY = "client-overview-attention-open";
 
 const ITEM_TONE: Record<AttentionItem["tone"], string> = {
   bad: "border-[var(--hive-danger)]/30 bg-[var(--hive-danger-soft)]",
-  warn: "border-hive-accent/50 bg-hive-accent-soft",
+  warn: "border-warning-200 bg-warning-50",
 };
 const ICON: Record<AttentionItem["tone"], string> = {
   bad: "text-[var(--hive-danger-fg)]",
-  warn: "text-hive-ink",
+  warn: "text-warning-700",
 };
 
 function readOpen(): boolean {
@@ -64,7 +64,9 @@ export function AttentionCards({
         aria-controls="client-attention-list"
         className={cn(
           "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-semibold",
-          TONE_TAG[summary.tone],
+          summary.tone === "danger"
+            ? TONE_TAG.danger
+            : "border-warning-200 bg-warning-50 text-warning-700",
         )}
         data-testid="client-attention-toggle"
       >

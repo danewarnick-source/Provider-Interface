@@ -14,14 +14,21 @@ const CARDS: readonly CardDef[] = [
 ];
 
 const ART: Record<CardDef["tone"], string> = {
-  emp: "bg-[linear-gradient(145deg,#e8eef6,#c5d3e8)]",
-  cli: "bg-[linear-gradient(145deg,#e8f4ef,#c5e4d6)]",
-  com: "bg-[linear-gradient(145deg,#f6f0e4,#e8d7b0)]",
+  emp: "bg-gradient-to-br from-pt to-pt2 text-pri",
+  cli: "bg-gradient-to-br from-acct to-accl text-accd",
+  com: "bg-gradient-to-br from-pt0 to-pt2 text-steel",
 };
 
 function EmployeesGlyph() {
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#3d4a5c" strokeWidth="1.6">
+    <svg
+      width="26"
+      height="26"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    >
       <circle cx="9" cy="8" r="3" />
       <circle cx="16" cy="9" r="2.5" />
       <path d="M3 19c0-3 2.5-5 6-5s6 2 6 5" />
@@ -32,7 +39,14 @@ function EmployeesGlyph() {
 
 function ClientsGlyph() {
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#3d6b55" strokeWidth="1.6">
+    <svg
+      width="26"
+      height="26"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    >
       <path d="M4 20V10l8-6 8 6v10" />
       <path d="M9 20v-6h6v6" />
     </svg>
@@ -41,7 +55,14 @@ function ClientsGlyph() {
 
 function CompanyGlyph() {
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8a6d2e" strokeWidth="1.6">
+    <svg
+      width="26"
+      height="26"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    >
       <rect x="4" y="4" width="16" height="16" rx="2" />
       <path d="M8 8h8M8 12h8M8 16h5" />
     </svg>
@@ -92,10 +113,8 @@ export function EvidenceSubjectCards({
             aria-pressed={active}
             onClick={() => onSelect(card.subject)}
             className={cn(
-              "rounded-[14px] border bg-[var(--hive-surface)] px-4 py-3.5 text-left shadow-[0_1px_2px_rgba(36,48,64,0.04)]",
-              active
-                ? "border-[var(--hive-accent)] shadow-[0_0_0_1px_var(--hive-accent)]"
-                : "border-[var(--hive-border)]",
+              "rounded-[var(--denim-r)] border bg-paper px-4 py-3.5 text-left shadow-[var(--denim-shadow-sm)] transition-colors ease-denim hover:border-pt2",
+              active ? "border-pri ring-1 ring-pri" : "border-line",
             )}
           >
             <div className="flex items-center gap-3">
@@ -108,8 +127,8 @@ export function EvidenceSubjectCards({
                 <Glyph tone={card.tone} />
               </div>
               <div className="min-w-0">
-                <h3 className="text-sm font-semibold text-[var(--hive-text)]">{card.title}</h3>
-                <p className="mt-0.5 text-xl font-semibold leading-none text-[var(--hive-text)]">
+                <h3 className="text-sm font-semibold text-ink">{card.title}</h3>
+                <p className="mt-0.5 font-display text-xl font-bold leading-none tracking-[-0.01em] text-deep">
                   {stat.value}
                   {stat.unit ? (
                     <span className="ml-1 text-xs font-medium text-[var(--hive-text-muted)]">

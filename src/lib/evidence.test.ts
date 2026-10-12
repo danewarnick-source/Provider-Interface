@@ -991,7 +991,7 @@ describe("Evidence nav + product lock", () => {
     assert.doesNotMatch(quiz, /Each item has a short plain-English explanation/);
     assert.doesNotMatch(quiz, /Client: person-file packs/);
     assert.doesNotMatch(quiz, /Client setup — services on this person/);
-    assert.doesNotMatch(quiz, /amber-50|Not called compliance/);
+    assert.doesNotMatch(quiz, /amber-50|warning-50|Not called compliance/);
     assert.ok(STAFF_QUIZ_CODES.includes("SLH"));
     assert.ok(STAFF_QUIZ_CODES.includes("DSG"));
     assert.ok(STAFF_QUIZ_CODES.includes("DSP"));

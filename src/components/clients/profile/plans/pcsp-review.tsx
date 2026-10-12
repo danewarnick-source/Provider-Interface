@@ -95,7 +95,7 @@ export function PcspReview({
         </section>
 
         {read.nectarSections.length > 0 && (
-          <p className="rounded-xl border border-hive-accent/50 bg-hive-accent-soft p-2 text-xs text-hive-ink">
+          <p className="rounded-xl border border-pt2 bg-pt p-2 text-xs text-pri">
             Nectar read {read.nectarSections.join(", ")} because the layout was unusual. Every value it read quotes the PDF — check them.
           </p>
         )}

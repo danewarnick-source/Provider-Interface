@@ -45,10 +45,10 @@ import { isReadyAlone, readyAloneLabel } from "@/lib/team-members/readiness";
 const profileRoute = getRouteApi("/dashboard/team-members/$staffId");
 
 const TONE: Record<BadgeTone, string> = {
-  ok: "border-success-300 bg-success-50 text-success-800 dark:border-success-500/40 dark:bg-success-500/10 dark:text-success-300",
-  warn: "border-warning-300 bg-warning-50 text-warning-800 dark:border-warning-500/40 dark:bg-warning-500/10 dark:text-warning-300",
-  bad: "border-destructive/30 bg-destructive/10 text-destructive",
-  muted: "border-border bg-muted text-muted-foreground",
+  ok: "border-acctb bg-acct text-accd",
+  warn: "border-warning-200 bg-warning-50 text-warning-700",
+  bad: "border-danger-200 bg-danger-50 text-danger-700",
+  muted: "border-pt2 bg-pt text-pri",
 };
 
 const STATUS_TONE: Record<MemberStatus, string> = {
@@ -232,7 +232,7 @@ export function ProfileHeader({
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h1
-                className="text-xl font-semibold leading-tight"
+                className="font-display text-2xl font-bold leading-tight tracking-[-0.025em] text-deep"
                 data-testid="staff-profile-heading"
               >
                 {p.displayName}
@@ -252,7 +252,7 @@ export function ProfileHeader({
               ))}
               {m.presetName ? (
                 <Chip
-                  className="border-primary/30 bg-primary/5 text-foreground"
+                  className="border-pt2 bg-paper text-pri"
                   title="Access preset"
                   testId="profile-preset"
                 >

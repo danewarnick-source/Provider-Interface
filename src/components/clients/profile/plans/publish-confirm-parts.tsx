@@ -13,7 +13,7 @@ export function GapsReason({
   onReason: (v: string) => void;
 }) {
   return (
-    <div className="space-y-2 rounded-xl border border-hive-accent/50 bg-hive-accent-soft p-3 text-sm text-hive-ink">
+    <div className="space-y-2 rounded-xl border border-warning-200 bg-warning-50 p-3 text-sm text-warning-800">
       <p className="font-medium">
         {gaps.length} support{gaps.length === 1 ? " has" : "s have"} no strategy yet:
       </p>
@@ -42,7 +42,7 @@ export function StaffQuestions({
 }) {
   return (
     <div className="rounded-md border border-border/60 bg-muted/30 p-4">
-      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+      <p className="denim-eyebrow mb-3">
         Questions staff will complete with the client ({questions.length})
       </p>
       <ol className="list-decimal pl-5 space-y-2.5 text-sm leading-relaxed marker:text-muted-foreground">

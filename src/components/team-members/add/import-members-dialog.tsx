@@ -320,7 +320,7 @@ export function ImportTeamMembersDialog({
               </div>
             )}
             {notInvited.length > 0 && (
-              <ul className="list-disc pl-5 text-xs text-warning-700 dark:text-warning-300">
+              <ul className="list-disc pl-5 text-xs text-warning-700">
                 {notInvited.map((r) => (
                   <li key={r.email}>
                     {r.email}: {r.reason}

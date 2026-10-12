@@ -12,8 +12,7 @@ import { strategyStatusText, type StrategyStatus } from "@/lib/clients/support-s
 import { StatusTag } from "@/components/clients/profile/cards/card-parts";
 import { StrategiesDocumentButton } from "./strategies-document-dialog";
 
-const PCSP_NOTE =
-  "rounded-xl border border-hive-accent/50 bg-hive-accent-soft px-3 py-2 text-xs text-hive-ink";
+const PCSP_NOTE = "rounded-xl border border-pt2 bg-pt px-3 py-2 text-xs text-pri";
 
 function Spin({ on, icon }: { on: boolean; icon: ReactNode }) {
   return on ? <Loader2 className="h-4 w-4 animate-spin" /> : <>{icon}</>;

@@ -30,7 +30,7 @@ export function LevelTag({ level }: { level: RosterRow["accessLevel"] }) {
   return (
     <span
       data-testid="level-badge"
-      className="shrink-0 rounded border border-border px-1 py-px text-[10px] font-medium uppercase text-muted-foreground"
+      className="shrink-0 rounded-full border border-line bg-pt px-1.5 py-px text-[10px] font-medium uppercase text-pri"
     >
       {level === "owner" ? "Owner" : "Admin"}
     </span>
@@ -49,7 +49,7 @@ export function MissingInfoChip({ row }: { row: RosterRow }) {
           data-testid="missing-info-chip"
           aria-label={`Missing info: ${text}`}
           onClick={(e) => e.stopPropagation()}
-          className="shrink-0 cursor-help rounded-full border border-warning-500/30 bg-warning-500/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-warning-700 dark:text-warning-300"
+          className="shrink-0 cursor-help rounded-full border border-warning-200 bg-warning-50 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-warning-700"
         >
           Missing info
         </span>
@@ -92,7 +92,7 @@ function SortHeader({
       <button
         type="button"
         onClick={() => onSort(sortKey)}
-        className="inline-flex items-center gap-1 uppercase tracking-wider hover:text-foreground"
+        className="inline-flex items-center gap-1 uppercase tracking-[0.06em] hover:text-ink"
       >
         {label} <Icon className="h-3 w-3" />
       </button>
@@ -119,7 +119,7 @@ export function RosterTable({
     <TooltipProvider delayDuration={150}>
       <div className="hidden max-h-[calc(100vh-16rem)] overflow-auto md:block">
         <table className="w-full text-sm">
-          <thead className="sticky top-0 z-10 bg-muted/80 text-xs uppercase tracking-wider text-muted-foreground backdrop-blur supports-[backdrop-filter]:bg-muted/60">
+          <thead className="sticky top-0 z-10 border-b border-line bg-pt0 text-[12.5px] uppercase tracking-[0.06em] text-muted-foreground">
             <tr>
               <SortHeader label="Name" sortKey="name" sort={sort} onSort={onSort} />
               <th className="px-4 py-3 text-left font-semibold">Position</th>
@@ -138,7 +138,7 @@ export function RosterTable({
               return (
                 <tr
                   key={r.memberId}
-                  className="h-14 cursor-pointer border-b border-border/50 transition-colors hover:bg-muted/50"
+                  className="h-14 cursor-pointer border-b border-line transition-colors ease-denim hover:bg-pt0"
                   onClick={() =>
                     void navigate({
                       to: "/dashboard/team-members/$staffId",

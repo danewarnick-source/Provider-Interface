@@ -101,7 +101,7 @@ export function DeletePersonDialog({
           <p className="text-sm text-destructive">{(check.error as Error).message}</p>
         ) : check.data && !check.data.canDelete ? (
           <div
-            className="space-y-1 rounded-md border border-hive-border bg-muted p-3 text-sm"
+            className="space-y-1 rounded-xl border border-hive-border bg-pt0 p-3 text-sm"
             data-testid="delete-person-blocked"
           >
             <p>{check.data.blockedMessage}</p>
@@ -121,7 +121,7 @@ export function DeletePersonDialog({
                     className={cn(
                       "min-h-11 rounded-full border px-4 text-sm",
                       choice === c
-                        ? "border-hive-ink bg-hive-accent-soft font-medium text-hive-ink"
+                        ? "border-pri bg-pt font-medium text-hive-ink"
                         : "border-hive-border bg-hive-surface text-muted-foreground",
                     )}
                   >

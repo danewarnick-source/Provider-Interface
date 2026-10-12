@@ -110,18 +110,12 @@ export function PbaAuditRow({
           ) : null}
         </>
       ) : sample.status === "verified" ? (
-        <Badge
-          variant="outline"
-          className="border-success-500/40 text-success-700 dark:text-success-300"
-        >
+        <Badge variant="outline" className="border-acctb bg-acct text-accd">
           Verified {sample.verified_at ? new Date(sample.verified_at).toLocaleDateString() : ""}
         </Badge>
       ) : (
         <>
-          <Badge
-            variant="outline"
-            className="border-warning-500/40 text-warning-700 dark:text-warning-300"
-          >
+          <Badge variant="outline" className="border-warning-200 bg-warning-50 text-warning-700">
             Picked — needs independent verification
           </Badge>
           {canEdit && user && canVerifyPbaSample(account.created_by, user.id) ? (

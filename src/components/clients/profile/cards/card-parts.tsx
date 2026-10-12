@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { TONE_TAG } from "@/components/profile-shell/tones";
 import type { CardTone } from "./section-card";
 
-/** White tile: small muted label, bold value, optional link. `warn` turns it amber. */
+/** White tile: small muted label, bold value, optional link. `warn` turns it warning (amber status). */
 export function InfoTile({
   label,
   value,
@@ -28,7 +28,7 @@ export function InfoTile({
     <div
       className={cn(
         "min-w-0 rounded-xl border p-4",
-        warn ? "border-hive-accent bg-hive-accent-soft" : "border-hive-border bg-hive-surface",
+        warn ? "border-warning-200 bg-warning-50" : "border-hive-border bg-hive-surface",
       )}
       data-testid={testId}
     >

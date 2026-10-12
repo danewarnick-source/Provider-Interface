@@ -61,7 +61,7 @@ export function EvidenceDueFields({
               onClick={() => onChange({ ...value, firstDueRule: opt.value })}
               className={`rounded-full border px-2.5 py-1 text-xs ${
                 value.firstDueRule === opt.value
-                  ? "border-[var(--hive-accent)] bg-[var(--hive-accent)]/10 font-semibold"
+                  ? "border-pri bg-pt font-semibold text-pri"
                   : "border-border bg-background"
               }`}
             >
@@ -112,7 +112,7 @@ export function EvidenceDueFields({
               }}
               className={`rounded-full border px-2.5 py-1 text-xs ${
                 nextValue === opt.value
-                  ? "border-[var(--hive-accent)] bg-[var(--hive-accent)]/10 font-semibold"
+                  ? "border-pri bg-pt font-semibold text-pri"
                   : "border-border bg-background"
               }`}
             >

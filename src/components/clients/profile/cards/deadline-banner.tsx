@@ -5,13 +5,13 @@ import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/clients/dates";
 import type { DocRow } from "./code-document-cards";
 
-/** Banner colors: satisfied (ok), overdue (danger) or due (gold). */
+/** Banner colors: satisfied (ok), overdue (danger) or due (warning). */
 export function deadlineToneClass(satisfied: boolean, overdue: boolean): string {
   return satisfied
     ? "border-[var(--hive-ok)]/30 bg-[var(--hive-ok-soft)] text-[var(--hive-ok-fg)]"
     : overdue
       ? "border-[var(--hive-danger)]/30 bg-[var(--hive-danger-soft)] text-[var(--hive-danger-fg)]"
-      : "border-hive-accent/50 bg-hive-accent-soft text-hive-ink";
+      : "border-warning-200 bg-warning-50 text-warning-800";
 }
 
 /** Due / overdue / satisfied line for a document with a deadline. */

@@ -7,7 +7,7 @@ import "./decision-card.css";
 
 function urgencyBar(urgency: Decision["urgency"]): string {
   if (urgency === "critical") return "var(--hive-danger)";
-  if (urgency === "high") return "var(--hive-accent)";
+  if (urgency === "high") return "var(--hive-warn)";
   return "var(--hive-ok)";
 }
 

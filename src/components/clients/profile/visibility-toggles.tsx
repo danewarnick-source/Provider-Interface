@@ -129,7 +129,7 @@ export function FieldVisibilityToggle({
             {visible ? (
               <Eye className="h-4 w-4 text-muted-foreground" />
             ) : (
-              <EyeOff className="h-4 w-4 text-warning-600" />
+              <EyeOff className="h-4 w-4 text-warning-700" />
             )}
           </Button>
         </TooltipTrigger>

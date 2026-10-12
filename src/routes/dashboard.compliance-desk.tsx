@@ -56,7 +56,7 @@ function GeofenceBadge({ row }: { row: Pick<Row, "outside_geofence_reason" | "ma
       <TooltipProvider delayDuration={150}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span data-testid="geofence-badge" data-geofence="match" className="inline-flex cursor-help items-center gap-1 whitespace-nowrap rounded-md bg-success/12 px-2 py-0.5 text-[13px] font-medium leading-none text-success">
+            <span data-testid="geofence-badge" data-geofence="match" className="inline-flex cursor-help items-center gap-1 whitespace-nowrap rounded-full bg-acct px-2 py-0.5 ring-1 ring-acctb text-[13px] font-medium leading-none text-accd">
               <ShieldCheck className="h-3.5 w-3.5" /> MATCH
             </span>
           </TooltipTrigger>
@@ -67,7 +67,7 @@ function GeofenceBadge({ row }: { row: Pick<Row, "outside_geofence_reason" | "ma
   }
   if (!hasReason) {
     return (
-      <span data-testid="geofence-badge" data-geofence="match" className="inline-flex items-center gap-1 whitespace-nowrap rounded-md bg-success/12 px-2 py-0.5 text-[13px] font-medium leading-none text-success">
+      <span data-testid="geofence-badge" data-geofence="match" className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-acct px-2 py-0.5 ring-1 ring-acctb text-[13px] font-medium leading-none text-accd">
         <ShieldCheck className="h-3.5 w-3.5" /> MATCH
       </span>
     );
@@ -78,7 +78,7 @@ function GeofenceBadge({ row }: { row: Pick<Row, "outside_geofence_reason" | "ma
       <TooltipProvider delayDuration={150}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span data-testid="geofence-badge" data-geofence="reconciled" className="inline-flex cursor-help items-center gap-1 whitespace-nowrap rounded-md bg-success/12 px-2 py-0.5 text-[13px] font-medium leading-none text-success">
+            <span data-testid="geofence-badge" data-geofence="reconciled" className="inline-flex cursor-help items-center gap-1 whitespace-nowrap rounded-full bg-acct px-2 py-0.5 ring-1 ring-acctb text-[13px] font-medium leading-none text-accd">
               <CheckCircle2 className="h-3.5 w-3.5" /> RECONCILED
             </span>
           </TooltipTrigger>
@@ -92,7 +92,7 @@ function GeofenceBadge({ row }: { row: Pick<Row, "outside_geofence_reason" | "ma
       <TooltipProvider delayDuration={150}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span data-testid="geofence-badge" data-geofence="corrected" className="inline-flex cursor-help items-center gap-1 whitespace-nowrap rounded-md bg-[var(--hive-ink)]/12 px-2 py-0.5 text-[13px] font-medium leading-none text-[var(--hive-ink)]">
+            <span data-testid="geofence-badge" data-geofence="corrected" className="inline-flex cursor-help items-center gap-1 whitespace-nowrap rounded-full bg-pt px-2 py-0.5 text-[13px] font-medium leading-none text-pri">
               <CheckCircle2 className="h-3.5 w-3.5" /> CORRECTED
             </span>
           </TooltipTrigger>
@@ -106,7 +106,7 @@ function GeofenceBadge({ row }: { row: Pick<Row, "outside_geofence_reason" | "ma
       <TooltipProvider delayDuration={150}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span data-testid="geofence-badge" data-geofence="flagged" className="inline-flex cursor-help items-center gap-1 whitespace-nowrap rounded-md bg-destructive/12 px-2 py-0.5 text-[13px] font-medium leading-none text-destructive">
+            <span data-testid="geofence-badge" data-geofence="flagged" className="inline-flex cursor-help items-center gap-1 whitespace-nowrap rounded-full bg-danger-50 px-2 py-0.5 text-[13px] font-medium leading-none text-danger-700 ring-1 ring-danger-200">
               <Flag className="h-3.5 w-3.5" /> FLAGGED
             </span>
           </TooltipTrigger>
@@ -120,7 +120,7 @@ function GeofenceBadge({ row }: { row: Pick<Row, "outside_geofence_reason" | "ma
     <TooltipProvider delayDuration={150}>
       <Tooltip>
         <TooltipTrigger asChild>
-            <span data-testid="geofence-badge" data-geofence="needs-reconciliation" className="inline-flex cursor-help items-center gap-1 whitespace-nowrap rounded-md bg-warning/15 px-2 py-0.5 text-[13px] font-medium leading-none text-warning-foreground">
+            <span data-testid="geofence-badge" data-geofence="needs-reconciliation" className="inline-flex cursor-help items-center gap-1 whitespace-nowrap rounded-full bg-warning-50 px-2 py-0.5 ring-1 ring-warning-200 text-[13px] font-medium leading-none text-warning-700">
               <AlertCircle className="h-3.5 w-3.5" /> NEEDS RECONCILIATION
             </span>
         </TooltipTrigger>
@@ -144,7 +144,7 @@ function GpsBypassBadge({ row }: { row: Pick<Row, "gps_in_bypassed" | "gps_in_by
     <TooltipProvider delayDuration={150}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <span data-testid="gps-bypass-badge" className="inline-flex cursor-help items-center gap-1 whitespace-nowrap rounded-md bg-[var(--hive-ink)]/12 px-2 py-0.5 text-[13px] font-medium leading-none text-[var(--hive-ink)]">
+          <span data-testid="gps-bypass-badge" className="inline-flex cursor-help items-center gap-1 whitespace-nowrap rounded-full bg-pt px-2 py-0.5 text-[13px] font-medium leading-none text-pri">
             <Zap className="h-3.5 w-3.5" /> GPS BYPASSED — ADDRESS USED
           </span>
         </TooltipTrigger>
@@ -254,7 +254,7 @@ function EditedByAdminBadge({ row }: { row: Row }) {
     <TooltipProvider delayDuration={120}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className="ml-2 inline-flex cursor-help items-center gap-1 whitespace-nowrap rounded-md bg-warning/15 px-2 py-0.5 text-[13px] font-medium leading-none text-warning-foreground">
+          <span className="ml-2 inline-flex cursor-help items-center gap-1 whitespace-nowrap rounded-full bg-warning-50 px-2 py-0.5 ring-1 ring-warning-200 text-[13px] font-medium leading-none text-warning-700">
             <AlertTriangle className="h-3.5 w-3.5" /> Edited by admin
           </span>
         </TooltipTrigger>
@@ -398,7 +398,7 @@ function InlineNotesRow({ row, colSpan }: { row: Row; colSpan: number }) {
   const accent = isFlag
     ? "border-l-destructive/70"
     : isCleared
-    ? "border-l-success/60"
+    ? "border-l-acc/60"
     : "border-l-primary/30";
   return (
     <TableRow className="border-t-0 hover:bg-transparent">
@@ -407,10 +407,10 @@ function InlineNotesRow({ row, colSpan }: { row: Row; colSpan: number }) {
           {(isFlag || isCleared) && (
             <div
               className={
-                "flex items-start gap-2 rounded-md px-2.5 py-1.5 text-[13px] leading-snug " +
+                "flex items-start gap-2 rounded-xl px-2.5 py-1.5 text-[13px] leading-snug " +
                 (isFlag
-                  ? "bg-destructive/10 text-destructive"
-                  : "bg-success/10 text-success")
+                  ? "bg-danger-50 text-danger-700"
+                  : "bg-acct text-accd")
               }
             >
               {isFlag ? (
@@ -450,10 +450,10 @@ function InlineNotesRow({ row, colSpan }: { row: Row; colSpan: number }) {
                   variant="secondary"
                   className={
                     row.ai_compliance_status === "Verified"
-                      ? "bg-success/15 text-success"
+                      ? "bg-acct text-accd"
                       : row.ai_compliance_status === "skipped_service_unavailable"
-                      ? "bg-muted text-muted-foreground"
-                      : "bg-destructive/15 text-destructive"
+                      ? "bg-pt0 text-muted-foreground"
+                      : "bg-danger-50 text-danger-700"
                   }
                 >
                   {row.ai_compliance_status === "Verified"
@@ -478,12 +478,12 @@ function InlineNotesRow({ row, colSpan }: { row: Row; colSpan: number }) {
               Staff Attestation
             </div>
             {row.attested_at ? (
-              <p className="mt-1 flex items-center gap-1.5 text-sm text-success">
+              <p className="mt-1 flex items-center gap-1.5 text-sm text-accd">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 Attested at {new Date(row.attested_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
               </p>
             ) : (
-              <p className="mt-1 flex items-center gap-1.5 text-sm text-warning-700 dark:text-warning-300">
+              <p className="mt-1 flex items-center gap-1.5 text-sm text-warning-700">
                 <AlertTriangle className="h-3.5 w-3.5" />
                 Not recorded
               </p>
@@ -790,7 +790,7 @@ export function ComplianceDeskPage() {
 
       <header className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Records review</h1>
+          <h1 className="font-display text-2xl font-bold tracking-[-0.025em] text-deep">Records review</h1>
           <p className="text-sm text-muted-foreground">
             Ask, Approve, Trim, Accept, or Flag exceptions. Approve EVV shifts and export Utah DHHS CSV.
           </p>
@@ -814,11 +814,11 @@ export function ComplianceDeskPage() {
           className="group relative rounded-xl p-[1.5px] transition"
           style={{
             background: isSearching
-              ? "linear-gradient(135deg, hsl(var(--primary)/0.9), hsl(280 90% 60% / 0.9), hsl(190 95% 55% / 0.9))"
-              : "linear-gradient(135deg, hsl(var(--primary)/0.5), hsl(280 90% 60% / 0.4), hsl(190 95% 55% / 0.5))",
+              ? "linear-gradient(135deg, var(--denim-pri), var(--denim-steel), var(--denim-acc))"
+              : "linear-gradient(135deg, var(--denim-pt2), var(--denim-pt), var(--denim-acctb))",
           }}
         >
-          <div className="flex items-center gap-2 rounded-[10px] bg-background px-3 py-2 shadow-sm focus-within:shadow-md">
+          <div className="flex items-center gap-2 rounded-[10px] bg-paper px-3 py-2 shadow-[var(--denim-shadow-sm)] focus-within:shadow-[var(--denim-shadow)]">
             <Sparkles className="h-4 w-4 shrink-0 text-primary" />
             <Input
               value={aiInput}
@@ -854,7 +854,7 @@ export function ComplianceDeskPage() {
               type="button"
               onClick={submitAiSearch}
               disabled={vectorQ.isFetching || aiInput.trim().length === 0}
-              className="h-8 shrink-0 bg-gradient-to-r from-primary to-denim-600 text-primary-foreground hover:opacity-90"
+              className="h-8 shrink-0"
             >
               {vectorQ.isFetching ? (
                 <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
@@ -895,7 +895,7 @@ export function ComplianceDeskPage() {
       </div>
 
       {!isSearching && (
-        <nav className="inline-flex flex-wrap rounded-lg border border-border bg-card p-1 shadow-soft">
+        <nav className="inline-flex flex-wrap rounded-full border border-line bg-paper p-1 shadow-[var(--denim-shadow-sm)]">
           {[
             { id: "pending" as const, label: "Pending Review", Icon: Inbox, count: undefined as number | undefined },
             { id: "needs-review" as const, label: "Needs Review", Icon: AlertTriangle, count: needsReviewCount },
@@ -910,12 +910,12 @@ export function ComplianceDeskPage() {
               type="button"
               data-testid={`compliance-tab-${id}`}
               onClick={() => setSub(id)}
-              className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition ${sub === id ? "bg-primary text-primary-foreground shadow-soft" : "text-muted-foreground hover:bg-[var(--hive-hover)] hover:text-foreground"}`}
+              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ease-denim ${sub === id ? "bg-pri text-white shadow-soft" : "text-muted-foreground hover:bg-pt hover:text-pri"}`}
             >
               <Icon className="h-4 w-4" />
               {label}
               {count !== undefined && count > 0 && (
-                <span className="ml-1 rounded-full bg-warning/20 px-1.5 py-0.5 text-[10px] font-bold text-warning-foreground">{count}</span>
+                <span className="ml-1 rounded-full bg-warning-50 px-1.5 py-0.5 text-[10px] font-bold text-warning-700">{count}</span>
               )}
             </button>
           ))}
@@ -1090,9 +1090,9 @@ function UnifiedSearchResults({
   const allIds = useMemo(() => ranked.map((r) => r.row.id), [ranked]);
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
+    <section className="rounded-[var(--denim-r)] border border-line bg-paper p-5 shadow-[var(--denim-shadow)]">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <h2 className="inline-flex items-center gap-2 font-display text-base font-semibold tracking-[-0.01em] text-deep">
           <Bot className="h-4 w-4" /> Vector NECTAR Cross-Tab Results
         </h2>
         <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
@@ -1125,7 +1125,7 @@ function UnifiedSearchResults({
 
 
       {error && (
-        <div className="mb-3 flex items-center gap-2 rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive">
+        <div className="mb-3 flex items-center gap-2 rounded-xl bg-danger-50 px-3 py-2 text-xs text-danger-700">
           <AlertTriangle className="h-3.5 w-3.5" /> {error.message}
         </div>
       )}
@@ -1134,7 +1134,7 @@ function UnifiedSearchResults({
         <ExpandControls exp={exp} ids={allIds} />
       </div>
 
-      <div className="overflow-x-auto [&_thead_th]:h-10 [&_thead_th]:whitespace-nowrap [&_thead_th]:text-[13px] [&_thead_th]:uppercase [&_thead_th]:tracking-wider [&_thead_th]:font-semibold [&_thead_th]:text-muted-foreground [&_tbody_td]:text-sm [&_tbody_td]:align-middle">
+      <div className="overflow-x-auto [&_thead_th]:h-10 [&_thead_th]:whitespace-nowrap [&_thead_th]:bg-pt0 [&_thead_th]:text-[12.5px] [&_thead_th]:uppercase [&_thead_th]:tracking-[0.06em] [&_thead_th]:font-semibold [&_thead_th]:text-muted-foreground [&_tbody_td]:text-sm [&_tbody_td]:align-middle">
         <Table>
           <TableHeader>
                   <TableRow className="[&>td]:border-b-0">
@@ -1157,7 +1157,7 @@ function UnifiedSearchResults({
               Array.from({ length: 4 }).map((_, i) => (
                 <TableRow key={`sk-${i}`}>
                   <TableCell colSpan={12} className="py-3">
-                    <div className="h-12 w-full animate-pulse rounded-md bg-muted/60" />
+                    <div className="h-12 w-full animate-pulse rounded-xl bg-pt/60" />
                   </TableCell>
                 </TableRow>
               ))
@@ -1178,7 +1178,7 @@ function UnifiedSearchResults({
                     onClick={() => toggleWithAudit(exp, r)}
                     role="button"
                     aria-expanded={open}
-                    className="cursor-pointer hover:bg-muted/40 [&>td]:border-b-0 [&>td]:py-1.5"
+                    className="cursor-pointer hover:bg-pt0 [&>td]:border-b-0 [&>td]:py-1.5"
                   >
                     <ChevronCell open={open} />
                     <TableCell>
@@ -1264,10 +1264,10 @@ function PendingTable({
   const { toggleWithAudit } = useEvvTimesheetPhiAudit();
   const allIds = useMemo(() => rows.map((r) => r.id), [rows]);
   return (
-    <section className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
+    <section className="rounded-[var(--denim-r)] border border-line bg-paper p-5 shadow-[var(--denim-shadow)]">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">{title}</h2>
+          <h2 className="font-display text-base font-semibold tracking-[-0.01em] text-deep">{title}</h2>
           {description && <p className="mt-0.5 text-[11px] text-muted-foreground/80">{description}</p>}
         </div>
         <div className="flex items-center gap-2">
@@ -1275,7 +1275,7 @@ function PendingTable({
           <Badge variant="outline" className="font-mono text-[10px]">{rows.length} pending</Badge>
         </div>
       </div>
-      <div className="overflow-x-auto [&_thead_th]:h-10 [&_thead_th]:whitespace-nowrap [&_thead_th]:text-[13px] [&_thead_th]:uppercase [&_thead_th]:tracking-wider [&_thead_th]:font-semibold [&_thead_th]:text-muted-foreground [&_tbody_td]:text-sm [&_tbody_td]:align-middle">
+      <div className="overflow-x-auto [&_thead_th]:h-10 [&_thead_th]:whitespace-nowrap [&_thead_th]:bg-pt0 [&_thead_th]:text-[12.5px] [&_thead_th]:uppercase [&_thead_th]:tracking-[0.06em] [&_thead_th]:font-semibold [&_thead_th]:text-muted-foreground [&_tbody_td]:text-sm [&_tbody_td]:align-middle">
         <Table>
           <TableHeader>
               <TableRow>
@@ -1304,7 +1304,7 @@ function PendingTable({
                 onClick={() => toggleWithAudit(exp, r)}
                 role="button"
                 aria-expanded={open}
-                className="cursor-pointer hover:bg-muted/40 [&>td]:border-b-0 [&>td]:py-1.5"
+                className="cursor-pointer hover:bg-pt0 [&>td]:border-b-0 [&>td]:py-1.5"
               >
                 <ChevronCell open={open} />
                 <TableCell className="whitespace-nowrap font-medium">
@@ -1312,7 +1312,7 @@ function PendingTable({
                   <EditedByAdminBadge row={r} />
                   <FlagDot row={r} />
                   {r.edit_reason && (
-                    <div className="mt-0.5 max-w-[260px] truncate text-[11px] font-normal italic text-warning-700 dark:text-warning-300" title={r.edit_reason}>
+                    <div className="mt-0.5 max-w-[260px] truncate text-[11px] font-normal italic text-warning-700" title={r.edit_reason}>
                       ✎ {r.edit_reason}
                     </div>
                   )}
@@ -1565,7 +1565,7 @@ function NeedsReviewRow({
   const [showReject, setShowReject] = useState(false);
   const variance = varianceMinutes(row);
   return (
-    <div className="space-y-3 rounded-lg border border-l-4 border-l-warning-500 bg-card p-4 shadow-sm">
+    <div className="space-y-3 rounded-[var(--denim-r)] border border-line border-l-4 border-l-warning-500 bg-paper p-4 shadow-[var(--denim-shadow-sm)]">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-semibold text-sm">
@@ -1582,12 +1582,12 @@ function NeedsReviewRow({
         </div>
         <div className="flex flex-wrap gap-1.5">
           {row.incident_flag && (
-            <Badge className="bg-danger-100 text-danger-800 text-[10px] dark:bg-danger-500/15 dark:text-danger-200">
+            <Badge className="bg-danger-50 text-danger-700 text-[10px] hover:bg-danger-50">
               <Flag className="mr-1 h-3 w-3" /> Incident flagged
             </Badge>
           )}
           {row.corrected_clock_in && (
-            <Badge className="bg-warning-100 text-warning-800 text-[10px] dark:bg-warning-500/15 dark:text-warning-200">
+            <Badge className="bg-warning-50 text-warning-700 text-[10px] hover:bg-warning-50">
               Correction submitted
             </Badge>
           )}
@@ -1595,17 +1595,17 @@ function NeedsReviewRow({
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div className="rounded-lg border border-border bg-muted/30 p-2.5">
+        <div className="rounded-xl border border-line bg-pt0 p-2.5">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Original (raw)</p>
           <p className="mt-1 font-mono text-xs">In: {fmtTs(row.clock_in_timestamp)}</p>
           <p className="font-mono text-xs">Out: {fmtTs(row.clock_out_timestamp)}</p>
         </div>
-        <div className="rounded-lg border border-warning-400/50 bg-warning-50/40 p-2.5 dark:bg-warning-500/5">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-warning-700 dark:text-warning-300">Corrected</p>
+        <div className="rounded-xl border border-warning-200 bg-warning-50 p-2.5">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-warning-700">Corrected</p>
           <p className="mt-1 font-mono text-xs">In: {fmtTs(row.corrected_clock_in)}</p>
           <p className="font-mono text-xs">Out: {fmtTs(row.corrected_clock_out)}</p>
           {variance !== null && (
-            <p className="mt-1 text-[11px] font-medium text-warning-700 dark:text-warning-300">
+            <p className="mt-1 text-[11px] font-medium text-warning-700">
               Variance: {variance >= 0 ? "+" : ""}{variance} min
             </p>
           )}
@@ -1613,7 +1613,7 @@ function NeedsReviewRow({
       </div>
 
       {row.edit_reason && (
-        <div className="rounded-lg border border-border bg-card p-2.5">
+        <div className="rounded-xl border border-line bg-paper p-2.5">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Caregiver reason</p>
           <p className="mt-1 text-xs leading-relaxed">{row.edit_reason}</p>
         </div>
@@ -1690,10 +1690,10 @@ function NeedsReviewTable({
   rejecting: boolean;
 }) {
   return (
-    <section className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
+    <section className="rounded-[var(--denim-r)] border border-line bg-paper p-5 shadow-[var(--denim-shadow)]">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Needs Review</h2>
+          <h2 className="font-display text-base font-semibold tracking-[-0.01em] text-deep">Needs Review</h2>
           <p className="mt-0.5 text-[11px] text-muted-foreground/80">
             Caregiver corrections, ≥16h shifts, and incident-flagged punches. Approve to make corrected times bill; reject to return for resubmission.
           </p>
@@ -1738,18 +1738,18 @@ function deriveBillingStatus(r: Row, billedSet: Set<string> | null): BillingStat
 function BillingStatusBadge({ status }: { status: BillingStatus }) {
   if (status === "billed")
     return (
-      <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-md bg-success/12 px-2 py-0.5 text-[12px] font-medium leading-none text-success">
+      <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-acct px-2 py-0.5 ring-1 ring-acctb text-[12px] font-medium leading-none text-accd">
         <CheckCircle2 className="h-3.5 w-3.5" /> BILLED
       </span>
     );
   if (status === "held")
     return (
-      <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-md bg-warning/15 px-2 py-0.5 text-[12px] font-medium leading-none text-warning-foreground">
+      <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-warning-50 px-2 py-0.5 ring-1 ring-warning-200 text-[12px] font-medium leading-none text-warning-700">
         <AlertCircle className="h-3.5 w-3.5" /> HELD
       </span>
     );
   return (
-    <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-md bg-muted px-2 py-0.5 text-[12px] font-medium leading-none text-muted-foreground">
+    <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-pt0 px-2 py-0.5 text-[12px] font-medium leading-none text-muted-foreground ring-1 ring-line">
       UNBILLED
     </span>
   );
@@ -1879,9 +1879,9 @@ function ArchiveTable({
   const colSpan = showBillingCol ? 12 : 11;
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
+    <section className="rounded-[var(--denim-r)] border border-line bg-paper p-5 shadow-[var(--denim-shadow)]">
       <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">{heading}</h2>
+        <h2 className="font-display text-base font-semibold tracking-[-0.01em] text-deep">{heading}</h2>
         <div className="flex items-center gap-2">
           <span className="text-[11px] text-muted-foreground tabular-nums">
             {filtered.length.toLocaleString()} of {rows.length.toLocaleString()} approved shifts
@@ -1955,7 +1955,7 @@ function ArchiveTable({
         </div>
       )}
 
-      <div className="overflow-x-auto [&_thead_th]:h-10 [&_thead_th]:whitespace-nowrap [&_thead_th]:text-[13px] [&_thead_th]:uppercase [&_thead_th]:tracking-wider [&_thead_th]:font-semibold [&_thead_th]:text-muted-foreground [&_tbody_td]:text-sm [&_tbody_td]:align-middle">
+      <div className="overflow-x-auto [&_thead_th]:h-10 [&_thead_th]:whitespace-nowrap [&_thead_th]:bg-pt0 [&_thead_th]:text-[12.5px] [&_thead_th]:uppercase [&_thead_th]:tracking-[0.06em] [&_thead_th]:font-semibold [&_thead_th]:text-muted-foreground [&_tbody_td]:text-sm [&_tbody_td]:align-middle">
         <Table>
           <TableHeader>
             <TableRow>
@@ -1988,7 +1988,7 @@ function ArchiveTable({
                   onClick={() => toggleWithAudit(exp, r)}
                   role="button"
                   aria-expanded={open}
-                  className="cursor-pointer hover:bg-muted/40 [&>td]:border-b-0 [&>td]:py-1.5"
+                  className="cursor-pointer hover:bg-pt0 [&>td]:border-b-0 [&>td]:py-1.5"
                 >
                   <ChevronCell open={open} />
                   <TableCell className="whitespace-nowrap font-mono">{fmtDateMDY(inIso)}</TableCell>
@@ -2043,7 +2043,7 @@ function ReasonDialog({ row, onClose }: { row: Row | null; onClose: () => void }
           <DialogTitle>Geofence Variance Justification</DialogTitle>
           <DialogDescription>Caregiver-submitted reason for an out-of-bounds punch.</DialogDescription>
         </DialogHeader>
-        <p className="whitespace-pre-wrap rounded-lg border border-border bg-muted/30 p-3 text-sm">
+        <p className="whitespace-pre-wrap rounded-xl border border-line bg-pt0 p-3 text-sm">
           {row?.outside_geofence_reason || "—"}
         </p>
         <DialogFooter><Button variant="ghost" onClick={onClose}>Close</Button></DialogFooter>
@@ -2071,8 +2071,8 @@ function GpsMatchDialog({ row, onClose }: { row: Row | null; onClose: () => void
         </DialogHeader>
         {row && (
           <div className="space-y-3 text-sm">
-            <div className="rounded-lg border border-border p-3">
-              <div className="font-semibold text-success-600">Clock-In</div>
+            <div className="rounded-xl border border-line p-3">
+              <div className="font-semibold text-accd">Clock-In</div>
               {row.gps_in_coordinates?.latitude != null && row.gps_in_coordinates?.longitude != null ? (
                 <>
                   <div className="font-mono text-xs">
@@ -2090,8 +2090,8 @@ function GpsMatchDialog({ row, onClose }: { row: Row | null; onClose: () => void
                 <div className="text-xs text-muted-foreground">Not captured{row.gps_in_bypassed ? " (GPS bypassed — address used)" : ""}</div>
               )}
             </div>
-            <div className="rounded-lg border border-border p-3">
-              <div className="font-semibold text-danger-600">Clock-Out</div>
+            <div className="rounded-xl border border-line p-3">
+              <div className="font-semibold text-pri">Clock-Out</div>
               {row.gps_out_coordinates?.latitude != null && row.gps_out_coordinates?.longitude != null ? (
                 <>
                   <div className="font-mono text-xs">
@@ -2281,13 +2281,13 @@ function EditShiftDialog({ row, onClose }: { row: Row | null; onClose: () => voi
         </div>
 
         {history.length > 0 && (
-          <div className="rounded-lg border border-warning-500/40 bg-warning-50/40 p-3 text-xs">
-            <div className="mb-1 flex items-center gap-1 font-semibold text-warning-900">
+          <div className="rounded-xl border border-warning-200 bg-warning-50 p-3 text-xs">
+            <div className="mb-1 flex items-center gap-1 font-semibold text-warning-700">
               <AlertTriangle className="h-3 w-3" /> Prior Audit Trail ({history.length})
             </div>
             <ul className="max-h-32 space-y-1 overflow-auto">
               {history.slice().reverse().map((h, i) => (
-                <li key={i} className="font-mono text-[11px] text-warning-950">
+                <li key={i} className="font-mono text-[11px] text-warning-800">
                   {new Date(h.timestamp).toLocaleString()} · {h.admin} · {h.field_changed}: {h.old_value} → {h.new_value}
                 </li>
               ))}
@@ -2357,11 +2357,11 @@ function ReconcileTable({
   const allIds = useMemo(() => filtered.map((r) => r.id), [filtered]);
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
+    <section className="rounded-[var(--denim-r)] border border-line bg-paper p-5 shadow-[var(--denim-shadow)]">
       <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            <AlertCircle className="h-4 w-4 text-warning-foreground" /> EVV Reconciliation Queue
+          <h2 className="inline-flex items-center gap-2 font-display text-base font-semibold tracking-[-0.01em] text-deep">
+            <AlertCircle className="h-4 w-4 text-warning-700" /> EVV Reconciliation Queue
           </h2>
           <p className="mt-1 text-xs text-muted-foreground">
             Shifts that punched outside all approved client locations. Review the staff explanation and either accept with attestation or flag for follow-up. Actual GPS is always captured.
@@ -2385,7 +2385,7 @@ function ReconcileTable({
         </div>
       </div>
 
-      <div className="overflow-x-auto [&_thead_th]:h-10 [&_thead_th]:whitespace-nowrap [&_thead_th]:text-[13px] [&_thead_th]:uppercase [&_thead_th]:tracking-wider [&_thead_th]:font-semibold [&_thead_th]:text-muted-foreground [&_tbody_td]:text-sm [&_tbody_td]:align-middle">
+      <div className="overflow-x-auto [&_thead_th]:h-10 [&_thead_th]:whitespace-nowrap [&_thead_th]:bg-pt0 [&_thead_th]:text-[12.5px] [&_thead_th]:uppercase [&_thead_th]:tracking-[0.06em] [&_thead_th]:font-semibold [&_thead_th]:text-muted-foreground [&_tbody_td]:text-sm [&_tbody_td]:align-middle">
         <Table>
           <TableHeader>
             <TableRow>
@@ -2416,7 +2416,7 @@ function ReconcileTable({
                   onClick={() => toggleWithAudit(exp, r)}
                   role="button"
                   aria-expanded={open}
-                  className="cursor-pointer hover:bg-muted/40 [&>td]:border-b-0 [&>td]:py-1.5"
+                  className="cursor-pointer hover:bg-pt0 [&>td]:border-b-0 [&>td]:py-1.5"
                 >
                   <ChevronCell open={open} />
                   <TableCell className="whitespace-nowrap font-mono">{fmtDateMDY(inIso)}</TableCell>
@@ -2578,43 +2578,43 @@ function ReviewReconciliationDialog({ row, onClose }: { row: Row | null; onClose
         {row && (
           <div className="space-y-3 text-sm">
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-md border border-border bg-muted/30 p-2">
+              <div className="rounded-xl border border-line bg-pt0 p-2">
                 <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Caregiver</div>
                 <div className="font-medium">{row.staff?.full_name ?? row.staff?.email ?? "—"}</div>
               </div>
-              <div className="rounded-md border border-border bg-muted/30 p-2">
+              <div className="rounded-xl border border-line bg-pt0 p-2">
                 <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Client</div>
                 <div className="font-medium">{row.clients?.first_name} {row.clients?.last_name}</div>
                 {row.clients?.physical_address && (
                   <div className="mt-0.5 text-[11px] text-muted-foreground">{row.clients.physical_address}</div>
                 )}
               </div>
-              <div className="rounded-md border border-border bg-muted/30 p-2">
+              <div className="rounded-xl border border-line bg-pt0 p-2">
                 <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Service</div>
                 <div className="font-mono">{row.service_type_code}</div>
               </div>
-              <div className="rounded-md border border-border bg-muted/30 p-2">
+              <div className="rounded-xl border border-line bg-pt0 p-2">
                 <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Shift</div>
                 <div className="font-mono text-xs">{fmtDateMDY(effectiveIn(row))} · {fmtTimeAmPm(effectiveIn(row))} → {effectiveOut(row) ? fmtTimeAmPm(effectiveOut(row)!) : "—"}</div>
               </div>
             </div>
 
-            <div className="rounded-lg border border-warning/40 bg-warning/10 p-3">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-warning-foreground">Staff Reconciliation Explanation</div>
+            <div className="rounded-xl border border-warning-200 bg-warning-50 p-3">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-warning-700">Staff Reconciliation Explanation</div>
               <p className="mt-1 whitespace-pre-wrap text-sm text-foreground/90">{row.outside_geofence_reason || "(none captured)"}</p>
             </div>
 
             {row.shift_note_text && (
-              <div className="rounded-lg border border-border p-3">
+              <div className="rounded-xl border border-line p-3">
                 <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Shift Note</div>
                 <p className="mt-1 whitespace-pre-wrap text-sm">{row.shift_note_text}</p>
               </div>
             )}
 
-            <div className="rounded-lg border border-border p-3 text-xs">
+            <div className="rounded-xl border border-line p-3 text-xs">
               <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Captured GPS</div>
               {gpsBad ? (
-                <div className="mt-1 rounded border border-destructive/40 bg-destructive/10 p-2 text-destructive">
+                <div className="mt-1 rounded-xl border border-danger-200 bg-danger-50 p-2 text-danger-700">
                   Captured GPS appears invalid (lat {String(row.gps_in_coordinates?.latitude ?? "—")}, lng {String(row.gps_in_coordinates?.longitude ?? "—")}). Treat the staff explanation as the primary evidence.
                 </div>
               ) : (
@@ -2639,8 +2639,8 @@ function ReviewReconciliationDialog({ row, onClose }: { row: Row | null; onClose
             </div>
 
             {(row.gps_in_bypassed || row.gps_out_bypassed) && (
-              <div className="rounded-lg border border-[var(--hive-ink)]/40 bg-[var(--hive-ink)]/10 p-3 text-xs">
-                <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--hive-ink)]">
+              <div className="rounded-xl border border-pt2 bg-pt p-3 text-xs">
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-pri">
                   <Zap className="h-3.5 w-3.5" /> GPS bypassed — address used
                 </div>
                 {row.gps_in_bypassed && (
@@ -2654,7 +2654,7 @@ function ReviewReconciliationDialog({ row, onClose }: { row: Row | null; onClose
             )}
 
             {isReadOnly ? (
-              <div className="rounded-lg border border-border bg-muted/20 p-3 text-xs">
+              <div className="rounded-xl border border-line bg-pt0 p-3 text-xs">
                 <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Resolution</div>
                 <div className="mt-1">
                   <Badge variant="outline" className="uppercase">{row.reconciliation_status}</Badge>{" "}
@@ -2703,10 +2703,10 @@ function ReviewReconciliationDialog({ row, onClose }: { row: Row | null; onClose
                 </div>
 
                 {decision === "accepted" && (
-                  <div className="rounded-md border border-warning-300 bg-warning-50 p-3 text-xs dark:border-warning-800 dark:bg-warning-950/30">
-                    <p className="font-semibold text-warning-900 dark:text-warning-100">Attestation (required)</p>
-                    <p className="mt-1 whitespace-pre-wrap text-warning-950 dark:text-warning-50">{ACCEPT_ATTESTATION_TEXT}</p>
-                    <label className="mt-2 flex items-start gap-2 text-warning-950 dark:text-warning-50">
+                  <div className="rounded-xl border border-warning-200 bg-warning-50 p-3 text-xs">
+                    <p className="font-semibold text-warning-700">Attestation (required)</p>
+                    <p className="mt-1 whitespace-pre-wrap text-warning-800">{ACCEPT_ATTESTATION_TEXT}</p>
+                    <label className="mt-2 flex items-start gap-2 text-warning-800">
                       <input
                         type="checkbox"
                         checked={attestChecked}

@@ -136,9 +136,7 @@ export function PublishConfirmDialog({
           {needReason ? <GapsReason gaps={gaps!} reason={reason} onReason={setReason} /> : null}
           {questions?.length ? <StaffQuestions questions={questions} /> : null}
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-              Currently assigned
-            </p>
+            <p className="denim-eyebrow mb-1.5">Currently assigned</p>
 
             {loading ? (
               <p className="text-sm text-muted-foreground">
@@ -165,9 +163,7 @@ export function PublishConfirmDialog({
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-              Add more staff (assigns them to this client)
-            </p>
+            <p className="denim-eyebrow mb-1.5">Add more staff (assigns them to this client)</p>
             {loading ? null : clientCodes.length === 0 ? (
               <p className="text-sm text-muted-foreground italic">
                 This client has no authorized codes yet. Add a code before assigning staff.
@@ -211,7 +207,7 @@ export function PublishConfirmDialog({
           </div>
 
           {zeroWarn && !loading && (
-            <div className="rounded-xl border border-hive-accent/50 bg-hive-accent-soft px-3 py-2 text-xs text-hive-ink">
+            <div className="rounded-xl border border-warning-200 bg-warning-50 px-3 py-2 text-xs text-warning-800">
               No staff are assigned to this client yet. You can publish now — staff will receive
               this {kindLabel} automatically once you assign them. Publish anyway?
             </div>
