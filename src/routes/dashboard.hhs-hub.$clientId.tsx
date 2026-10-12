@@ -50,6 +50,7 @@ import {
 import { ClientAccessGate } from "@/components/clients/shared/client-access-gate";
 import { useSupportsForCode } from "@/components/clients/shared/hooks/use-plan-goals";
 import { ShiftFocus } from "@/components/clients/shared/shift-focus";
+import { DENIM } from "@/lib/design-tokens";
 
 const hhsSearch = z.object({
   tab: z.string().optional(),
@@ -162,8 +163,8 @@ export function HhsClientHub({ clientId }: { clientId: string }) {
       </Link>
 
       <div className="flex flex-wrap items-center gap-2">
-        <h1 className="text-base font-semibold">{fullName}</h1>
-        <Badge className="bg-warning-500 text-[10px]">HHS</Badge>
+        <h1 className="font-display text-base font-bold tracking-[-0.01em] text-deep">{fullName}</h1>
+        <Badge className="bg-pt text-pri text-[10px] hover:bg-pt">HHS</Badge>
       </div>
 
       {client.special_directions && (
@@ -282,8 +283,8 @@ function DailyNoteTab({
   function clearCanvas() {
     const c = canvasRef.current; const ctx = getCtx();
     if (!c || !ctx) return;
-    ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, c.width, c.height);
-    ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2; ctx.lineCap = "round";
+    ctx.fillStyle = DENIM.paper; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.strokeStyle = DENIM.ink; ctx.lineWidth = 2; ctx.lineCap = "round";
     hasSigRef.current = false;
   }
   function pointerPos(e: React.PointerEvent<HTMLCanvasElement>) {
@@ -500,7 +501,7 @@ function DailyNoteTab({
             className="mt-1"
           />
           <div className="mt-1.5 flex items-center justify-between text-xs">
-            <span className={narrativeOk ? "text-success-600" : "text-warning-600"}>
+            <span className={narrativeOk ? "text-accd" : "text-warning-700"}>
               {narrativeOk ? `✓ Minimum met` : `${Math.max(0, MIN_WORDS - words)} more words required`}
             </span>
             <span className="font-mono text-muted-foreground">{words} / {MIN_WORDS} words</span>
@@ -562,7 +563,7 @@ function DailyNoteTab({
         </div>
 
         {nectarUsed && (
-          <label className="flex items-start gap-2 rounded-md border border-warning-500/40 bg-warning-500/10 p-2 text-xs">
+          <label className="flex items-start gap-2 rounded-xl border border-pt2 bg-pt p-2 text-xs text-pri">
             <Checkbox checked={nectarAssistChecked} onCheckedChange={(c) => setNectarAssistChecked(!!c)} />
             <span>I used NECTAR to help draft this note. I reviewed the draft and confirm it is accurate.</span>
           </label>

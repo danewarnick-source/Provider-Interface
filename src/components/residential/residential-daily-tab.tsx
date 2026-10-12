@@ -506,7 +506,7 @@ export function ResidentialDailyTab({
                 : rangeClosed && pct < 100
                   ? "red"
                   : pct < 75 && daysLeft < 7
-                    ? "amber"
+                    ? "warning"
                     : pct >= 100
                       ? "emerald"
                       : "muted";
@@ -535,7 +535,7 @@ export function ResidentialDailyTab({
                         <button
                           type="button"
                           onClick={() => onOpenIncidents?.(row.id)}
-                          className="rounded-md focus:outline-none focus:ring-2 focus:ring-warning-400"
+                          className="rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                           aria-label="Open this client's incidents in the log"
                           title="Open in Incidents log"
                         >
@@ -570,7 +570,7 @@ export function ResidentialDailyTab({
                     </div>
                   )}
                   {row.historicalDocumented > 0 && (
-                    <div className="text-xs text-denim-700 dark:text-denim-300">
+                    <div className="text-xs text-pri">
                       {row.historicalDocumented} historical day{row.historicalDocumented === 1 ? "" : "s"} on file from before go-live (attested — not flagged as missing; see Historical daily notes below).
                     </div>
                   )}
@@ -590,7 +590,7 @@ export function ResidentialDailyTab({
                             className={`h-full transition-all ${
                               supportTone === "red"
                                 ? "bg-danger-500"
-                                : supportTone === "amber"
+                                : supportTone === "warning"
                                   ? "bg-warning-500"
                                   : supportTone === "emerald"
                                     ? "bg-success-500"

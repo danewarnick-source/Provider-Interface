@@ -23,6 +23,7 @@ import { logMedicationPass } from "@/lib/emar-pass.functions";
 import { type EmarStatus, normalizeEmarStatus } from "@/lib/emar-status";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
 import { isAdminLevel } from "@/lib/access/levels";
+import { DENIM } from "@/lib/design-tokens";
 
 export const Route = createFileRoute("/dashboard/emar")({
   head: () => ({ meta: [{ title: "Today's Pass — Provider Interface eMAR" }] }),
@@ -240,7 +241,7 @@ function EmarPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+        <h2 className="font-display text-2xl font-bold tracking-[-0.025em] flex items-center gap-2 text-deep">
           <Pill className="h-5 w-5 text-primary" /> Today's Pass
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -277,7 +278,7 @@ function EmarPage() {
                     <div className="text-sm font-semibold">{h?.name ?? "Person"}</div>
                     <div className="flex flex-wrap items-center gap-1.5">
                       {(h?.allergies ?? []).length === 0 ? (
-                        <Badge className="bg-success-100 text-success-800 text-[10px] hover:bg-success-100">No known allergies</Badge>
+                        <Badge className="bg-acct text-accd text-[10px] hover:bg-success-100">No known allergies</Badge>
                       ) : (
                         (h?.allergies ?? []).map((a) => (
                           <span key={a} className="inline-flex items-center gap-1 rounded-md border border-danger-300 bg-danger-50 px-2 py-0.5 text-[11px] font-medium text-danger-900">
@@ -317,7 +318,7 @@ function EmarPage() {
                           </div>
                         </div>
                         {done ? (
-                          <Badge className="bg-success-100 text-success-800 hover:bg-success-100">
+                          <Badge className="bg-acct text-accd hover:bg-success-100">
                             <CheckCircle2 className="mr-1 h-3 w-3" /> Logged
                           </Badge>
                         ) : (
@@ -371,8 +372,8 @@ function PassDialog({
   function clearSig() {
     const c = sigRef.current; const ctx = c?.getContext("2d");
     if (!c || !ctx) return;
-    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
-    ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2; ctx.lineCap = "round";
+    ctx.fillStyle = DENIM.paper; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.strokeStyle = DENIM.ink; ctx.lineWidth = 2; ctx.lineCap = "round";
     hasSig.current = false;
   }
   function pos(e: React.PointerEvent<HTMLCanvasElement>) {
@@ -449,7 +450,7 @@ function PassDialog({
                 onChange={(e) => setActualTime(e.target.value)}
               />
               {lateEntry && (
-                <p className="text-[11px] text-warning-700 dark:text-warning-400">
+                <p className="text-[11px] text-warning-700">
                   ⚠️ Late entry — {gapMinutes} min gap will be flagged on the audit trail.
                 </p>
               )}

@@ -147,7 +147,7 @@ function BankMappingPage() {
           <Button asChild variant="ghost" size="sm" className="-ml-2 mb-1 h-7 text-xs text-muted-foreground">
             <Link to="/dashboard/settings"><ArrowLeft className="mr-1 h-3 w-3" /> Back to Settings</Link>
           </Button>
-          <h2 className="text-2xl font-semibold tracking-tight">🏦 Institutional Client Banking Registry</h2>
+          <h2 className="font-display text-2xl font-bold tracking-[-0.025em] text-deep">🏦 Institutional Client Banking Registry</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Map agency sub-accounts to client trust profiles and let the SSI/SSDI feed auto-reconcile into the PBA ledger once bank connection is live.
           </p>
@@ -158,12 +158,12 @@ function BankMappingPage() {
       </div>
 
       {/* Mapping grid */}
-      <div className="rounded-lg border border-warning-500/30 bg-warning-500/5 p-3 text-xs text-muted-foreground">
+      <div className="rounded-xl border border-pt2 bg-pt p-3 text-xs text-pri">
         Bank connection and deposit sync are coming soon. This area is not yet
         connected to a live bank feed — no transactions will be imported.
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
+      <div className="rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--shadow-card)]">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Landmark className="h-4 w-4 text-muted-foreground" />
@@ -213,12 +213,12 @@ function BankMappingPage() {
                       </SelectContent>
                     </Select>
                     {committed && committed === current && (
-                      <Badge variant="outline" className="gap-1 border-success-500/40 text-success-600">
+                      <Badge variant="outline" className="gap-1 border-acctb bg-acct text-accd">
                         <CheckCircle2 className="h-3 w-3" /> Committed
                       </Badge>
                     )}
                     {draft && draft !== committed && (
-                      <Badge variant="outline" className="border-warning-500/40 text-warning-600">Pending</Badge>
+                      <Badge variant="outline" className="border-warning-200 bg-warning-50 text-warning-700">Pending</Badge>
                     )}
                     {client && !draft && !committed && null}
                   </div>
@@ -247,11 +247,11 @@ function BankMappingPage() {
 
 function Pipeline() {
   return (
-    <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
+    <div className="rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--shadow-card)]">
       <div className="mb-3 flex items-center gap-2">
-        <Zap className="h-4 w-4 text-warning-500" />
+        <Zap className="h-4 w-4 text-acc" />
         <h3 className="text-base font-semibold">Auto-Ledger Pipeline (Coming Soon)</h3>
-        <Badge variant="outline" className="border-warning-500/40 text-warning-600">Pending</Badge>
+        <Badge variant="outline" className="border-pt2 bg-pt text-pri">Pending</Badge>
       </div>
       <ol className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-3">
         <li className="rounded-lg border border-border/70 bg-muted/20 p-3">
@@ -260,7 +260,7 @@ function Pipeline() {
         </li>
         <li className="rounded-lg border border-border/70 bg-muted/20 p-3">
           <div className="mb-1 text-xs font-medium uppercase tracking-wider text-foreground">2 · Reconcile</div>
-          Matched deposits write a verified <Badge variant="outline" className="px-1.5 py-0 text-[10px]">deposit</Badge> row into the client&apos;s PBA trust ledger with a <span className="font-medium text-warning-600">⚡ Auto-Reconciled via Bank Feed Sync</span> badge.
+          Matched deposits write a verified <Badge variant="outline" className="px-1.5 py-0 text-[10px]">deposit</Badge> row into the client&apos;s PBA trust ledger with a <span className="font-medium text-accd">⚡ Auto-Reconciled via Bank Feed Sync</span> badge.
         </li>
         <li className="rounded-lg border border-border/70 bg-muted/20 p-3">
           <div className="mb-1 flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-foreground"><BookOpen className="h-3 w-3" /> 3 · QBO Bridge</div>

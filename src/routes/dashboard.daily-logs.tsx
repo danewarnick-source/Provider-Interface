@@ -47,6 +47,7 @@ import { NectarFocusBanner } from "@/components/nectar/nectar-focus-banner";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
 import { dailyLogProgram } from "@/lib/daily-log-missing";
 import { listMyMissingDailyNotes } from "@/lib/daily-log-missing.functions";
+import { DENIM } from "@/lib/design-tokens";
 
 export const Route = createFileRoute("/dashboard/daily-logs")({
   head: () => ({ meta: [{ title: "Daily Logs — Provider Interface" }] }),
@@ -211,7 +212,7 @@ function StaffDailyJournal() {
                 : "Unknown client";
               const client = hhsClients.find((c) => c.id === r.client_id) ?? null;
               return (
-                <div key={r.id} className="rounded-lg border border-danger-500/30 bg-white p-3 dark:bg-danger-950/30">
+                <div key={r.id} className="rounded-lg border border-danger-500/30 bg-card p-3">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
                       <p className="text-sm font-medium">{cn} — {fmtDate(r.log_date)}</p>
@@ -278,7 +279,7 @@ function StaffDailyJournal() {
                           <button
                             type="button"
                             onClick={() => setBackdateFor({ client, date })}
-                            className="flex w-full min-w-0 items-center justify-between gap-3 rounded-lg border border-warning-500/30 bg-white px-3 py-3 text-left transition hover:border-warning-500/60 hover:bg-warning-50 active:scale-[0.99] dark:bg-warning-950/30"
+                            className="flex w-full min-w-0 items-center justify-between gap-3 rounded-lg border border-warning-500/30 bg-card px-3 py-3 text-left transition hover:border-warning-500/60 hover:bg-warning-50 active:scale-[0.99] dark:bg-warning-950/30"
                           >
                             <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
                               {fmtDate(date)}
@@ -331,7 +332,7 @@ function StaffDailyJournal() {
                     {dailyLogProgram(c) ?? "HHS"} daily log
                   </p>
                   {todaySubmitted ? (
-                    <p className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-success-600">
+                    <p className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-accd">
                       <CheckCircle2 className="h-3 w-3" /> Today's log submitted
                     </p>
                   ) : (
@@ -522,8 +523,8 @@ function DailyLogDialog({
   function clearCanvas() {
     const c = canvasRef.current; const ctx = getCtx();
     if (!c || !ctx) return;
-    ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, c.width, c.height);
-    ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2; ctx.lineCap = "round";
+    ctx.fillStyle = DENIM.paper; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.strokeStyle = DENIM.ink; ctx.lineWidth = 2; ctx.lineCap = "round";
     hasSigRef.current = false;
   }
   function pointerPos(e: React.PointerEvent<HTMLCanvasElement>) {
@@ -727,9 +728,9 @@ function DailyLogDialog({
           {/* Success state */}
           {success ? (
             <div className="space-y-4 py-4">
-              <div className={`rounded-xl p-5 text-center ${success.backdated ? "bg-denim-50 dark:bg-denim-950/30" : "bg-success-50 dark:bg-success-950/30"}`}>
-                <CheckCircle2 className={`mx-auto mb-3 h-12 w-12 ${success.backdated ? "text-denim-500" : "text-success-500"}`} />
-                <p className={`text-lg font-bold ${success.backdated ? "text-denim-700 dark:text-denim-300" : "text-success-700 dark:text-success-300"}`}>
+              <div className={`rounded-xl p-5 text-center ${success.backdated ? "bg-pt" : "bg-acct"}`}>
+                <CheckCircle2 className={`mx-auto mb-3 h-12 w-12 ${success.backdated ? "text-pri" : "text-acc"}`} />
+                <p className={`text-lg font-bold ${success.backdated ? "text-pri" : "text-accd"}`}>
                   {success.backdated ? "📅 Backdated Log Submitted" : "✅ Daily Log Submitted"}
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -750,7 +751,7 @@ function DailyLogDialog({
 
               {/* Backdated notice */}
               {isBackdated && (
-                <div className="rounded-lg border border-denim-500/30 bg-denim-50 p-3 text-xs dark:bg-denim-950/30">
+                <div className="rounded-lg border border-pt2 bg-pt p-3 text-xs text-pri">
                   📅 <strong>Backdated entry</strong> — you are submitting a log for a past service date.
                   This will be transparently disclosed to your administrator with a "Backdated" label.
                   A late, complete note is always better than a missing one.
@@ -773,8 +774,8 @@ function DailyLogDialog({
                               <button key={s.id} type="button" onClick={() => toggleGoal(s.id)}
                                 className={`rounded-full border px-4 py-2 text-left text-sm font-medium transition-all active:scale-[0.97] ${
                                   on
-                                    ? "border-denim-600 bg-denim-600 text-white shadow-sm hover:bg-denim-700"
-                                    : "border-haze-200 bg-white text-haze-700 hover:border-denim-400 hover:bg-denim-50 dark:border-haze-700 dark:bg-haze-900 dark:text-haze-200 dark:hover:bg-denim-950/40"
+                                    ? "border-pri bg-pri text-white shadow-[var(--denim-shadow-sm)] hover:bg-deep"
+                                    : "border-line bg-card text-body hover:border-pri/40 hover:bg-pt"
                                 }`}>
                                 {on ? "✓ " : ""}{s.support_text.trim() || "Worked on this goal"}
                               </button>
@@ -813,7 +814,7 @@ function DailyLogDialog({
                   className="resize-none"
                 />
                 <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-xs">
-                  <span className={narrativeOk ? "text-success-600 dark:text-success-400" : "text-muted-foreground"}>
+                  <span className={narrativeOk ? "text-accd dark:text-success-400" : "text-muted-foreground"}>
                     {narrativeOk ? "✓ Minimum met" : `${Math.max(0, MIN_WORDS - words)} more words required`}
                   </span>
                   <div className="flex items-center gap-2">
@@ -843,8 +844,8 @@ function DailyLogDialog({
               {(aiBusy || aiCoach) && (
                 <div className={`rounded-lg border-2 px-4 py-3 ${
                   aiCoach?.status === "Verified"
-                    ? "border-success-500/40 bg-success-500/10"
-                    : "border-warning-500/40 bg-warning-500/10"
+                    ? "border-acctb bg-acct"
+                    : "border-warning-200 bg-warning-50"
                 }`}>
                   <div className="mb-1 flex items-center gap-2 text-sm font-bold">
                     💡 NECTAR Documentation Coach
@@ -853,8 +854,8 @@ function DailyLogDialog({
                   {aiCoach && (
                     <p className={`text-xs leading-relaxed ${
                       aiCoach.status === "Verified"
-                        ? "text-success-800 dark:text-success-200"
-                        : "text-warning-900 dark:text-warning-100"
+                        ? "text-accd"
+                        : "text-warning-700"
                     }`}>
                       {aiCoach.status === "Verified" ? "🟢 NECTAR CLEARED — " : "⚠️ "}
                       {aiCoach.feedback}
@@ -940,7 +941,7 @@ function DailyLogDialog({
           {scanResult?.triggerTypes && scanResult.triggerTypes.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {scanResult.triggerTypes.map((t) => (
-                <Badge key={t} className="bg-danger-100 text-danger-800 dark:bg-danger-500/15 dark:text-danger-200">{t}</Badge>
+                <Badge key={t} className="bg-danger-50 text-danger-700 dark:bg-danger-500/15 dark:text-danger-200">{t}</Badge>
               ))}
             </div>
           )}
@@ -1104,17 +1105,17 @@ function AdminAuditQueue() {
 
   const statusBadge = (l: AdminLog) => {
     if (l.status === "approved")
-      return <Badge className="bg-success-100 text-success-900 hover:bg-success-100 dark:bg-success-500/15 dark:text-success-200">Approved</Badge>;
+      return <Badge className="bg-acct text-accd ring-1 ring-acctb hover:bg-acct">Approved</Badge>;
     if (l.status === "rejected")
-      return <Badge className="bg-danger-100 text-danger-900 hover:bg-danger-100 dark:bg-danger-500/15 dark:text-danger-200">Returned</Badge>;
-    return <Badge className="bg-warning-100 text-warning-900 hover:bg-warning-100 dark:bg-warning-500/15 dark:text-warning-200">Pending</Badge>;
+      return <Badge className="bg-danger-50 text-danger-700 hover:bg-danger-50">Returned</Badge>;
+    return <Badge className="bg-warning-50 text-warning-700 hover:bg-warning-50">Pending</Badge>;
   };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
+          <h2 className="font-display flex items-center gap-2 text-2xl font-bold tracking-[-0.025em] text-deep">
             <FileSignature className="h-6 w-6 text-muted-foreground" /> Host Home Daily Log Audit Queue
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -1181,9 +1182,9 @@ function AdminAuditQueue() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          {r.backdated && <Badge className="bg-denim-100 text-denim-800 text-[10px] dark:bg-denim-500/15 dark:text-denim-200">Backdated</Badge>}
-                          {r.submitted_late && !r.backdated && <Badge className="bg-denim-100 text-denim-800 text-[10px] dark:bg-denim-500/15 dark:text-denim-200">Late</Badge>}
-                          {r.ai_compliance_status === "Exception" && <Badge className="bg-warning-100 text-warning-800 text-[10px]">NECTAR Exception</Badge>}
+                          {r.backdated && <Badge className="bg-pt text-pri text-[10px]">Backdated</Badge>}
+                          {r.submitted_late && !r.backdated && <Badge className="bg-pt text-pri text-[10px]">Late</Badge>}
+                          {r.ai_compliance_status === "Exception" && <Badge className="bg-warning-50 text-warning-700 text-[10px]">NECTAR Exception</Badge>}
                         </div>
                       </TableCell>
                       <TableCell>{statusBadge(r)}</TableCell>
@@ -1222,12 +1223,12 @@ function AdminAuditQueue() {
               {(active.backdated || active.submitted_late || active.ai_compliance_status === "Exception") && (
                 <div className="space-y-2">
                   {active.backdated && (
-                    <div className="rounded-lg border border-denim-500/30 bg-denim-50 p-3 text-xs dark:bg-denim-950/30">
+                    <div className="rounded-lg border border-pt2 bg-pt p-3 text-xs text-pri">
                       📅 <strong>Backdated entry</strong> — submitted after the service date. Disclosed transparently.
                     </div>
                   )}
                   {active.submitted_late && !active.backdated && (
-                    <div className="rounded-lg border border-denim-500/30 bg-denim-50 p-3 text-xs dark:bg-denim-950/30">
+                    <div className="rounded-lg border border-pt2 bg-pt p-3 text-xs text-pri">
                       🕐 <strong>Late submission</strong> — submitted after the expected due date.
                     </div>
                   )}

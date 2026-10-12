@@ -142,16 +142,16 @@ function FinancesHub() {
                   value={String(snap?.blockers ?? 0)}
                   icon={
                     (snap?.blockers ?? 0) > 0 ? (
-                      <AlertTriangle className="h-3.5 w-3.5 text-warning-600" />
+                      <AlertTriangle className="h-3.5 w-3.5 text-warning-700" />
                     ) : (
-                      <CheckCircle2 className="h-3.5 w-3.5 text-success-600" />
+                      <CheckCircle2 className="h-3.5 w-3.5 text-acc" />
                     )
                   }
                   variant={(snap?.blockers ?? 0) > 0 ? "warning" : "success"}
                 />
                 {(snap?.expiringSoon ?? 0) > 0 && (
                   <div className="col-span-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-md border border-warning-300/40 bg-warning-500/10 px-2 py-1 text-[11px] font-medium text-warning-700">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-warning-200 bg-warning-50 px-2.5 py-1 text-[11px] font-medium text-warning-700">
                       <CalendarClock className="h-3 w-3" />
                       {snap!.expiringSoon} authorization{snap!.expiringSoon === 1 ? "" : "s"} expiring within 30 days
                     </span>
@@ -164,7 +164,7 @@ function FinancesHub() {
           {canSeeBilling && (
             <Link
               to="/dashboard/billing"
-              className="mt-5 inline-flex w-fit items-center gap-1.5 rounded-lg bg-[var(--hive-ink)] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0f5d6b]"
+              className="mt-5 inline-flex w-fit items-center gap-1.5 rounded-full bg-pri px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-deep"
             >
               Open Billing <ArrowRight className="h-4 w-4" />
             </Link>
@@ -225,7 +225,7 @@ function FinancesHub() {
 
           <Link
             to="/dashboard/financial"
-            className="mt-5 inline-flex w-fit items-center gap-1.5 rounded-lg bg-[var(--hive-ink)] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0f5d6b]"
+            className="mt-5 inline-flex w-fit items-center gap-1.5 rounded-full bg-pri px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-deep"
           >
             Open Financial <ArrowRight className="h-4 w-4" />
           </Link>
@@ -252,9 +252,9 @@ function Stat({
 }) {
   const borderClass =
     variant === "warning"
-      ? "border-warning-300/40 bg-warning-500/[0.04]"
+      ? "border-warning-200 bg-warning-50/60"
       : variant === "success"
-        ? "border-success-300/40 bg-success-500/[0.04]"
+        ? "border-acctb bg-acct/60"
         : "border-border/60 bg-background/40";
 
   return (
@@ -278,7 +278,7 @@ function TrendBadge({ pct }: { pct: number }) {
   return (
     <span
       className={`inline-flex items-center gap-0.5 text-[11px] font-medium ${
-        up ? "text-success-600" : "text-danger-600"
+        up ? "text-accd" : "text-danger-600"
       }`}
       title="vs last month"
     >

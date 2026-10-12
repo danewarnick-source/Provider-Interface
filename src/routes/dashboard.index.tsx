@@ -92,19 +92,19 @@ function ComplianceInbox() {
   if (totalItems === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-warning-300/40 bg-warning-500/5 p-4 shadow-[var(--shadow-card)]">
+    <div className="rounded-[var(--denim-r)] border border-warning-200 bg-warning-50 p-5 shadow-[var(--denim-shadow-sm)]">
       <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
-        <AlertTriangle className="h-4 w-4 text-warning-600" />
+        <AlertTriangle className="h-4 w-4 text-warning-700" />
         Needs Your Attention ({totalItems})
       </h2>
       <ul className="space-y-2">
         {orphanOpenShifts.map((s) => (
           <li
             key={s.id}
-            className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background px-3 py-2.5"
+            className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-3 py-2.5"
           >
             <div className="min-w-0 flex items-start gap-2">
-              <Clock className="h-4 w-4 mt-0.5 shrink-0 text-warning-foreground" />
+              <Clock className="h-4 w-4 mt-0.5 shrink-0 text-warning-700" />
               <div className="min-w-0">
                 <p className="text-sm font-medium">
                   Open shift —{" "}
@@ -137,7 +137,7 @@ function ComplianceInbox() {
         {rejectedLogs.map((l) => (
           <li
             key={l.id}
-            className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background px-3 py-2.5"
+            className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-3 py-2.5"
           >
             <div className="min-w-0 flex items-start gap-2">
               <FileText className="h-4 w-4 mt-0.5 shrink-0 text-destructive" />
@@ -188,15 +188,15 @@ function PoliciesToAcknowledgeCard() {
   if (pending.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-warning-400/50 bg-warning-500/5 p-4 shadow-[var(--shadow-card)]">
-      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-warning-900 dark:text-warning-200">
+    <div className="rounded-[var(--denim-r)] border border-warning-200 bg-warning-50 p-5 shadow-[var(--denim-shadow-sm)]">
+      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-warning-700">
         <FileSignature className="h-4 w-4" /> Policies to read &amp; acknowledge
       </h2>
       <ul className="space-y-2">
         {pending.map((p) => (
           <li
             key={p.id}
-            className="flex items-center justify-between gap-3 rounded-lg border border-warning-300/60 bg-background/60 px-3 py-2.5"
+            className="flex items-center justify-between gap-3 rounded-xl border border-warning-200 bg-card px-3 py-2.5"
           >
             <div className="min-w-0">
               <p className="truncate text-sm font-medium">{p.title}</p>
@@ -207,7 +207,7 @@ function PoliciesToAcknowledgeCard() {
             <Link
               to="/dashboard/courses/policy/$documentId"
               params={{ documentId: p.id }}
-              className="flex shrink-0 items-center gap-1 text-xs font-medium text-warning-700 hover:underline dark:text-warning-300"
+              className="flex shrink-0 items-center gap-1 text-xs font-medium text-warning-700 hover:underline"
             >
               Read and sign <ArrowRight className="h-3.5 w-3.5" />
             </Link>

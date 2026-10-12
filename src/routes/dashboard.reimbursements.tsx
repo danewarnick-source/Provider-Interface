@@ -70,11 +70,11 @@ function ApprovalsBody() {
   return (
     <div className="space-y-5 p-4 md:p-6">
       <header className="flex items-center gap-3">
-        <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-warning-100 text-warning-800">
+        <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-pt text-pri">
           <Receipt className="h-5 w-5" />
         </span>
         <div>
-          <h1 className="text-xl font-semibold">Activity Reimbursements</h1>
+          <h1 className="font-display text-xl font-bold tracking-[-0.025em] text-deep">Activity Reimbursements</h1>
           <p className="text-sm text-muted-foreground">
             Review in-shift reimbursement requests submitted by staff.
           </p>
@@ -128,10 +128,10 @@ function RequestRow({
 }: { row: Row; onDecide: () => void; onChange: () => void }) {
   const tone =
     row.status === "approved"
-      ? "border-success-300 bg-success-50/60"
+      ? "border-acctb bg-acct/60"
       : row.status === "denied"
-      ? "border-danger-300 bg-danger-50/60"
-      : "border-warning-300 bg-warning-50/60";
+      ? "border-danger-200 bg-danger-50/60"
+      : "border-warning-200 bg-warning-50/60";
 
   return (
     <Card className={`border ${tone} p-4`}>
@@ -165,7 +165,6 @@ function RequestRow({
         {row.status === "pending" && (
           <Button
             onClick={onDecide}
-            className="bg-warning-500 text-white hover:bg-warning-600"
           >
             Review
           </Button>
@@ -295,7 +294,7 @@ function DecisionDialog({
           <Button
             onClick={() => decide("approved")}
             disabled={busy}
-            className="bg-warning-500 text-white hover:bg-warning-600"
+            className="bg-acc text-white hover:bg-accd"
           >
             {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Approve

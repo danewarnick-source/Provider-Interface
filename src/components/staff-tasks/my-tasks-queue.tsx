@@ -31,8 +31,8 @@ export function MyTasksQueue({
         <h2
           className={
             variant === "home"
-              ? "text-base font-semibold text-foreground"
-              : "text-xl font-semibold tracking-tight text-foreground sm:text-2xl md:hidden"
+              ? "font-display text-base font-semibold tracking-[-0.01em] text-deep"
+              : "font-display text-xl font-bold tracking-[-0.025em] text-deep sm:text-2xl md:hidden"
           }
         >
           My tasks
@@ -51,7 +51,7 @@ export function MyTasksQueue({
               <li
                 key={task.instanceId}
                 data-testid="my-task-row"
-                className="rounded-xl border border-border bg-card p-4 shadow-[var(--shadow-card)]"
+                className="rounded-[var(--denim-r)] border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]"
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0 flex-1 space-y-1">
@@ -59,7 +59,7 @@ export function MyTasksQueue({
                     {reviewLabel ? (
                       <p
                         data-testid="my-task-review"
-                        className="text-sm font-medium text-warning-800 dark:text-warning-200"
+                        className="text-sm font-medium text-warning-700"
                       >
                         {reviewLabel}
                       </p>
@@ -67,7 +67,7 @@ export function MyTasksQueue({
                     {task.overridden ? (
                       <p
                         data-testid="override-state"
-                        className="text-sm font-medium text-warning-800 dark:text-warning-200"
+                        className="text-sm font-medium text-warning-700"
                       >
                         {OVERRIDE_STATE_LABEL}
                         {task.overrideUntil ? ` until ${task.overrideUntil}` : ""}.{" "}

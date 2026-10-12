@@ -68,14 +68,14 @@ export function SummaryDocument({ doc, edit }: { doc: SummaryDoc; edit?: DocEdit
     }));
   return (
     <div
-      className="space-y-4 rounded-xl border border-hive-border bg-hive-surface p-4 text-sm"
+      className="space-y-4 rounded-[var(--denim-r)] border border-hive-border bg-hive-surface p-5 text-sm shadow-[var(--denim-shadow-sm)]"
       data-testid="summary-document"
     >
       <div className="border-b border-hive-ink pb-2">
         <p className="text-xs font-medium text-muted-foreground">{doc.provider}</p>
-        <p className="text-lg font-semibold text-hive-ink">{doc.title}</p>
+        <p className="font-display text-lg font-semibold tracking-[-0.01em] text-hive-ink">{doc.title}</p>
         {doc.draftMark ? (
-          <p className="mt-1 inline-flex items-center gap-1 rounded bg-warning-100 px-2 py-0.5 text-xs font-medium text-warning-900">
+          <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-pt px-2 py-0.5 text-xs font-medium text-pri ring-1 ring-pt2">
             <Sparkles className="size-3" /> {doc.draftMark}
           </p>
         ) : null}

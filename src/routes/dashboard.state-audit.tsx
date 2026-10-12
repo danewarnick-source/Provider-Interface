@@ -47,16 +47,16 @@ function StateAuditPage() {
 
   return (
     <div className="space-y-4">
-      <header className="rounded-xl border border-[#fed7aa] bg-gradient-to-r from-[#fff7ed] to-[#ffedd5] p-4 shadow-sm">
+      <header className="rounded-[var(--denim-r)] border border-line bg-card p-5 shadow-[var(--denim-shadow)]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hive-text)] text-white">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-deep text-white">
               <ShieldCheck className="h-5 w-5" />
             </span>
             <div>
-              <div className="text-xs uppercase tracking-wider text-[#9a3412]">State Audit</div>
-              <h1 className="font-display text-xl font-bold text-[var(--hive-text)]">Audit Packages</h1>
-              <p className="text-xs text-[#9a3412]">
+              <div className="denim-eyebrow">State Audit</div>
+              <h1 className="font-display text-xl font-bold tracking-[-0.025em] text-deep">Audit Packages</h1>
+              <p className="text-xs text-muted-foreground">
                 Assemble packets of subject-level records, provision auditors, and preview
                 exactly what they see at{" "}
                 <a href="/audit-portal" target="_blank" rel="noopener" className="inline-flex items-center gap-1 font-medium underline">
@@ -66,7 +66,7 @@ function StateAuditPage() {
             </div>
           </div>
         </div>
-        <div className="mt-3 flex items-start gap-2 rounded-md border border-warning-300 bg-white/60 p-2 text-xs text-warning-900">
+        <div className="mt-3 flex items-start gap-2 rounded-xl border border-warning-200 bg-warning-50 p-2 text-xs text-warning-700">
           <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
           Auditor views currently render synthetic seed data. Real subject records
           will flow through this same interface once PI's compliant host + BAA are
@@ -75,7 +75,7 @@ function StateAuditPage() {
       </header>
 
       {/* Sub-tabs: Admin View / Auditor View */}
-      <div className="flex flex-wrap gap-1 rounded-lg border border-haze-200 bg-white p-1 shadow-sm">
+      <div className="flex flex-wrap gap-1 rounded-lg border border-line bg-card p-1 shadow-sm">
         <SubTabButton active={tab === "admin"} onClick={() => setTab("admin")} icon={<Settings className="h-3.5 w-3.5" />}>
           Admin View
         </SubTabButton>
@@ -94,7 +94,7 @@ function StateAuditPage() {
                 <ProvisionedAuditorsSection orgId={org.organization_id} auditPackageId={selectedId} />
               </>
             ) : (
-              <div className="rounded-xl border border-dashed border-haze-300 bg-white p-8 text-center text-sm text-muted-foreground">
+              <div className="rounded-xl border border-dashed border-line bg-card p-8 text-center text-sm text-muted-foreground">
                 Select or create an audit package to begin. Auditor invitations
                 are always scoped to a specific package — the invite email names
                 that package and the accept link opens it directly.
@@ -103,7 +103,7 @@ function StateAuditPage() {
           ) : selectedId ? (
             <AuditorPackagePreview packageId={selectedId} mode="org" />
           ) : (
-            <div className="rounded-xl border border-dashed border-haze-300 bg-white p-8 text-center text-sm text-muted-foreground">
+            <div className="rounded-xl border border-dashed border-line bg-card p-8 text-center text-sm text-muted-foreground">
               Select a package to preview the auditor view.
             </div>
           )}
@@ -120,8 +120,8 @@ function SubTabButton({ active, onClick, icon, children }: {
   return (
     <button
       onClick={onClick}
-      className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs font-semibold transition-colors ${
-        active ? "bg-[var(--hive-text)] text-white" : "text-haze-600 hover:bg-haze-100"
+      className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold transition-colors ${
+        active ? "bg-pri text-white" : "text-muted-foreground hover:bg-pt hover:text-pri"
       }`}
     >
       {icon} {children}
@@ -165,7 +165,7 @@ function PackageList({ orgId, selectedId, onSelect }: {
     <div className="space-y-3">
       <button
         onClick={() => setShowForm((s) => !s)}
-        className="inline-flex w-full min-h-[44px] items-center justify-center gap-1.5 rounded-md bg-[var(--hive-text)] px-3 py-2 text-sm font-semibold text-white hover:bg-[#1a2a5a]"
+        className="inline-flex w-full min-h-[44px] items-center justify-center gap-1.5 rounded-full bg-pri px-4 py-2 text-sm font-semibold text-white hover:bg-deep"
       >
         <Plus className="h-4 w-4" /> New audit package
       </button>
@@ -174,9 +174,9 @@ function PackageList({ orgId, selectedId, onSelect }: {
 
       <ul className="space-y-2">
         {listQ.isLoading ? (
-          <li className="rounded-lg border border-haze-200 bg-white p-4 text-center text-sm text-muted-foreground">Loading…</li>
+          <li className="rounded-lg border border-line bg-card p-4 text-center text-sm text-muted-foreground">Loading…</li>
         ) : (listQ.data ?? []).length === 0 ? (
-          <li className="rounded-lg border border-dashed border-haze-300 bg-white p-4 text-center text-xs text-muted-foreground">
+          <li className="rounded-lg border border-dashed border-line bg-card p-4 text-center text-xs text-muted-foreground">
             No packages yet.
           </li>
         ) : (
@@ -186,13 +186,13 @@ function PackageList({ orgId, selectedId, onSelect }: {
                 onClick={() => onSelect(p.id)}
                 className={`w-full rounded-lg border p-3 text-left transition-colors ${
                   selectedId === p.id
-                    ? "border-[var(--hive-text)] bg-[var(--hive-text)]/5"
-                    : "border-haze-200 bg-white hover:border-haze-300"
+                    ? "border-pri bg-pt"
+                    : "border-line bg-card hover:border-pt2 hover:bg-pt0"
                 }`}
               >
                 <div className="flex items-center gap-2">
                   <StatusPill status={p.status} />
-                  <span className="truncate text-sm font-medium text-[var(--hive-text)]">
+                  <span className="truncate text-sm font-medium text-ink">
                     {p.title ?? p.state_agency}
                   </span>
                 </div>
@@ -225,28 +225,28 @@ function CreateForm({ onSubmit, busy }: {
         e.preventDefault();
         onSubmit({ stateAgency, title, dateRangeStart: start, dateRangeEnd: end });
       }}
-      className="space-y-2 rounded-lg border border-haze-200 bg-white p-3"
+      className="space-y-2 rounded-lg border border-line bg-card p-3"
     >
       <label className="block text-xs font-medium text-muted-foreground">
         State agency
         <input value={stateAgency} onChange={(e) => setStateAgency(e.target.value)} required
-          className="mt-1 min-h-[40px] w-full rounded-md border border-haze-300 px-2 text-sm" />
+          className="mt-1 min-h-[40px] w-full rounded-xl border border-input bg-card px-2 text-sm" />
       </label>
       <label className="block text-xs font-medium text-muted-foreground">
         Title (optional)
         <input value={title} onChange={(e) => setTitle(e.target.value)}
-          className="mt-1 min-h-[40px] w-full rounded-md border border-haze-300 px-2 text-sm" />
+          className="mt-1 min-h-[40px] w-full rounded-xl border border-input bg-card px-2 text-sm" />
       </label>
       <div className="grid grid-cols-2 gap-2">
         <label className="block text-xs font-medium text-muted-foreground">
           Start date
           <input type="date" value={start} onChange={(e) => setStart(e.target.value)} required
-            className="mt-1 min-h-[40px] w-full rounded-md border border-haze-300 px-2 text-sm" />
+            className="mt-1 min-h-[40px] w-full rounded-xl border border-input bg-card px-2 text-sm" />
         </label>
         <label className="block text-xs font-medium text-muted-foreground">
           End date
           <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} required
-            className="mt-1 min-h-[40px] w-full rounded-md border border-haze-300 px-2 text-sm" />
+            className="mt-1 min-h-[40px] w-full rounded-xl border border-input bg-card px-2 text-sm" />
         </label>
       </div>
       <button type="submit" disabled={busy}
@@ -260,10 +260,10 @@ function CreateForm({ onSubmit, busy }: {
 function StatusPill({ status }: { status: AuditPackageRow["status"] }) {
   const map = {
     draft: "bg-haze-100 text-haze-700",
-    released: "bg-success-100 text-success-700",
+    released: "bg-acct text-accd",
     closed: "bg-haze-200 text-haze-600",
   }[status];
-  return <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium uppercase ${map}`}>{status}</span>;
+  return <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase ${map}`}>{status}</span>;
 }
 
 // ============================================================
@@ -324,7 +324,7 @@ function PackageDetail({ packageId, orgId }: { packageId: string; orgId: string 
     onSuccess: () => { toast.success("Access revoked"); invalidate(); },
   });
 
-  if (detailQ.isLoading) return <div className="rounded-xl border border-haze-200 bg-white p-6 text-sm text-muted-foreground">Loading package…</div>;
+  if (detailQ.isLoading) return <div className="rounded-xl border border-line bg-card p-6 text-sm text-muted-foreground">Loading package…</div>;
   if (!detailQ.data) return <div className="rounded-xl border border-danger-200 bg-danger-50 p-6 text-sm text-danger-800">Package not found.</div>;
 
   const { package: pkg, subjects, access, availableAuditors } = detailQ.data;
@@ -336,12 +336,12 @@ function PackageDetail({ packageId, orgId }: { packageId: string; orgId: string 
 
   return (
     <div className="space-y-4">
-      <section className="rounded-xl border border-haze-200 bg-white p-4 shadow-sm">
+      <section className="rounded-xl border border-line bg-card p-4 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
               <StatusPill status={pkg.status} />
-              <h3 className="font-display text-lg font-semibold text-[var(--hive-text)]">
+              <h3 className="font-display text-lg font-semibold text-deep">
                 {pkg.title ?? pkg.state_agency}
               </h3>
             </div>
@@ -365,8 +365,8 @@ function PackageDetail({ packageId, orgId }: { packageId: string; orgId: string 
       </section>
 
       {/* Subjects */}
-      <section className="rounded-xl border border-haze-200 bg-white p-4 shadow-sm">
-        <h4 className="mb-3 font-display text-sm font-semibold text-[var(--hive-text)]">Subjects in scope</h4>
+      <section className="rounded-xl border border-line bg-card p-4 shadow-sm">
+        <h4 className="mb-3 font-display text-sm font-semibold text-deep">Subjects in scope</h4>
         {subjects.length === 0 ? (
           <div className="rounded-md border border-dashed border-haze-300 p-3 text-center text-xs text-muted-foreground">
             No subjects added yet.
@@ -376,7 +376,7 @@ function PackageDetail({ packageId, orgId }: { packageId: string; orgId: string 
             {subjects.map((s) => {
               const Icon = s.subject_type === "staff" ? User : Contact2;
               return (
-                <li key={s.id} className="flex items-center justify-between rounded-md border border-haze-100 bg-haze-50 px-2 py-1.5 text-sm">
+                <li key={s.id} className="flex items-center justify-between rounded-xl border border-line bg-pt0 px-2 py-1.5 text-sm">
                   <span className="inline-flex items-center gap-2">
                     <Icon className="h-3.5 w-3.5 text-haze-500" />
                     <span className="text-xs uppercase text-muted-foreground">{s.subject_type}</span>
@@ -410,8 +410,8 @@ function PackageDetail({ packageId, orgId }: { packageId: string; orgId: string 
       </section>
 
       {/* Auditors */}
-      <section className="rounded-xl border border-haze-200 bg-white p-4 shadow-sm">
-        <h4 className="mb-3 font-display text-sm font-semibold text-[var(--hive-text)]">Auditors with access</h4>
+      <section className="rounded-xl border border-line bg-card p-4 shadow-sm">
+        <h4 className="mb-3 font-display text-sm font-semibold text-deep">Auditors with access</h4>
         {access.length === 0 ? (
           <div className="rounded-md border border-dashed border-haze-300 p-3 text-center text-xs text-muted-foreground">
             No auditors granted access yet.
@@ -419,9 +419,9 @@ function PackageDetail({ packageId, orgId }: { packageId: string; orgId: string 
         ) : (
           <ul className="mb-3 space-y-1">
             {access.map((a) => (
-              <li key={a.id} className="flex items-center justify-between rounded-md border border-haze-100 bg-haze-50 px-2 py-1.5 text-sm">
+              <li key={a.id} className="flex items-center justify-between rounded-xl border border-line bg-pt0 px-2 py-1.5 text-sm">
                 <div>
-                  <div className="font-medium text-[var(--hive-text)]">{a.auditor_name}</div>
+                  <div className="font-medium text-ink">{a.auditor_name}</div>
                   <div className="text-xs text-muted-foreground">{a.auditor_email} · {a.auditor_agency}</div>
                 </div>
                 {a.revoked_at ? (
@@ -447,7 +447,7 @@ function PackageDetail({ packageId, orgId }: { packageId: string; orgId: string 
 
       <div className="text-center">
         <Link to="/audit-portal" target="_blank" rel="noopener"
-          className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-[var(--hive-text)]">
+          className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-ink">
           Preview auditor portal <ExternalLink className="h-3 w-3" />
         </Link>
       </div>
@@ -466,14 +466,14 @@ function SubjectPicker({ title, items, onAdd }: {
     <div className="rounded-md border border-haze-200 p-2">
       <div className="mb-1 text-xs font-semibold text-muted-foreground">{title}</div>
       <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search…"
-        className="mb-2 min-h-[36px] w-full rounded border border-haze-300 px-2 text-xs" />
+        className="mb-2 min-h-[36px] w-full rounded-lg border border-input bg-card px-2 text-xs" />
       <ul className="max-h-40 space-y-0.5 overflow-y-auto">
         {filtered.map((i) => (
           <li key={i.id}>
             <button onClick={() => onAdd(i)}
               className="flex w-full items-center justify-between rounded px-2 py-1 text-left text-xs hover:bg-haze-100">
               <span className="truncate">{i.label}</span>
-              <Plus className="h-3 w-3 text-success-600" />
+              <Plus className="h-3 w-3 text-accd" />
             </button>
           </li>
         ))}
@@ -491,7 +491,7 @@ function AuditorGrantPicker({ available, onGrant }: {
   return (
     <div className="flex gap-2">
       <select value={selected} onChange={(e) => setSelected(e.target.value)}
-        className="min-h-[40px] flex-1 rounded-md border border-haze-300 px-2 text-sm">
+        className="min-h-[40px] flex-1 rounded-xl border border-input bg-card px-2 text-sm">
         <option value="">Select auditor to grant access…</option>
         {available.map((a) => (
           <option key={a.id} value={a.id}>
@@ -502,7 +502,7 @@ function AuditorGrantPicker({ available, onGrant }: {
       <button
         onClick={() => { if (selected) { onGrant(selected); setSelected(""); } }}
         disabled={!selected}
-        className="inline-flex min-h-[40px] items-center gap-1 rounded-md bg-[var(--hive-text)] px-3 text-sm font-semibold text-white hover:bg-[#1a2a5a] disabled:opacity-50"
+        className="inline-flex min-h-[40px] items-center gap-1 rounded-full bg-pri px-4 text-sm font-semibold text-white hover:bg-deep disabled:opacity-50"
       >
         <Plus className="h-4 w-4" /> Grant
       </button>
@@ -554,10 +554,10 @@ function ProvisionedAuditorsSection({ orgId, auditPackageId }: { orgId: string; 
   const rows = listQ.data ?? [];
 
   return (
-    <section className="rounded-xl border border-haze-200 bg-white p-4 shadow-sm">
+    <section className="rounded-xl border border-line bg-card p-4 shadow-sm">
       <div className="mb-3 flex items-center gap-2">
-        <UserPlus className="h-4 w-4 text-[var(--hive-text)]" />
-        <h4 className="font-display text-sm font-semibold text-[var(--hive-text)]">Invite a new auditor to this package</h4>
+        <UserPlus className="h-4 w-4 text-ink" />
+        <h4 className="font-display text-sm font-semibold text-deep">Invite a new auditor to this package</h4>
       </div>
       <p className="mb-3 text-xs text-muted-foreground">
         Creates a separate auditor account (not an org member). The invite email
@@ -597,14 +597,14 @@ function ProvisionForm({ onSubmit, busy }: {
         onSubmit({ email: email.trim(), fullName: fullName.trim(), agencyName: agencyName.trim() });
         setEmail(""); setFullName("");
       }}
-      className="grid gap-2 rounded-md border border-haze-200 bg-haze-50 p-3 md:grid-cols-[1fr_1fr_1fr_auto]"
+      className="grid gap-2 rounded-xl border border-line bg-pt0 p-3 md:grid-cols-[1fr_1fr_1fr_auto]"
     >
       <input value={fullName} onChange={(e) => setFullName(e.target.value)} required placeholder="Full name"
-        className="min-h-[40px] rounded-md border border-haze-300 px-2 text-sm" />
+        className="min-h-[40px] rounded-xl border border-input bg-card px-2 text-sm" />
       <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="Email"
-        className="min-h-[40px] rounded-md border border-haze-300 px-2 text-sm" />
+        className="min-h-[40px] rounded-xl border border-input bg-card px-2 text-sm" />
       <input value={agencyName} onChange={(e) => setAgencyName(e.target.value)} required placeholder="Agency name"
-        className="min-h-[40px] rounded-md border border-haze-300 px-2 text-sm" />
+        className="min-h-[40px] rounded-xl border border-input bg-card px-2 text-sm" />
       <button type="submit" disabled={busy}
         className="inline-flex min-h-[40px] items-center justify-center gap-1 rounded-md bg-success-600 px-3 text-sm font-semibold text-white hover:bg-success-700 disabled:opacity-50">
         <Mail className="h-4 w-4" /> {busy ? "Inviting…" : "Create access"}
@@ -615,12 +615,12 @@ function ProvisionForm({ onSubmit, busy }: {
 
 function AuditorRow({ auditor, onRevoke }: { auditor: OrgAuditorRow; onRevoke: () => void }) {
   return (
-    <li className="flex items-center justify-between rounded-md border border-haze-100 bg-haze-50 px-3 py-2 text-sm">
+    <li className="flex items-center justify-between rounded-xl border border-line bg-pt0 px-3 py-2 text-sm">
       <div>
-        <div className="font-medium text-[var(--hive-text)]">
+        <div className="font-medium text-ink">
           {auditor.full_name}{" "}
           <span className={`ml-1 rounded px-1.5 py-0.5 text-[10px] font-medium uppercase ${
-            auditor.status === "active" ? "bg-success-100 text-success-700" : "bg-haze-200 text-haze-600"
+            auditor.status === "active" ? "bg-acct text-accd" : "bg-haze-200 text-haze-600"
           }`}>{auditor.status}</span>
         </div>
         <div className="text-xs text-muted-foreground">

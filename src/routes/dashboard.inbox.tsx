@@ -172,7 +172,7 @@ function InboxPage() {
           <ArrowLeft className="h-4 w-4" /> Back to Inbox
         </button>
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-          <h1 className="font-display text-2xl font-bold tracking-tight">{openMsg.subject}</h1>
+          <h1 className="font-display text-2xl font-bold tracking-[-0.025em] text-deep">{openMsg.subject}</h1>
           <div className="mt-1 text-xs text-muted-foreground">
             From <span className="font-medium text-foreground">{openMsg.sender_name}</span>
             <span className="mx-1.5">·</span>
@@ -250,7 +250,7 @@ function InboxPage() {
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="sticky top-0 bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
+            <thead className="sticky top-0 bg-pt0 text-left text-[12.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
               <tr>
                 <th className="px-4 py-2 font-semibold">Subject</th>
                 <th className="px-4 py-2 font-semibold">From</th>
@@ -331,7 +331,7 @@ function BillingApprovalsInboxSection({ orgId }: { orgId: string }) {
     <div className="rounded-xl border border-border bg-card shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="h-4 w-4 text-success-600" />
+          <ShieldCheck className="h-4 w-4 text-accd" />
           <h2 className="text-sm font-semibold">Billing code approvals — conversations with PI Admin</h2>
           {unread > 0 && <Badge variant="destructive" className="text-[10px]">{unread} new reply{unread === 1 ? "" : "s"}</Badge>}
         </div>

@@ -187,10 +187,10 @@ function RevenuePage() {
                   key={g}
                   type="button"
                   onClick={() => setGranularity(g)}
-                  className={`rounded-md px-3 py-1.5 text-xs font-medium uppercase tracking-wide transition-colors ${
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium uppercase tracking-wide transition-colors ${
                     granularity === g
-                      ? "bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      ? "bg-pri text-white"
+                      : "text-muted-foreground hover:bg-pt hover:text-pri"
                   }`}
                 >
                   {g === "ytd" ? "YTD" : g.charAt(0).toUpperCase() + g.slice(1)}
@@ -223,7 +223,7 @@ function RevenuePage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
+                  <tr className="border-b border-border bg-pt0 text-left text-[12.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
                     <th className="px-3 py-2 font-medium">Period</th>
                     <th className="px-3 py-2 text-right font-medium">Billed</th>
                     <th className="px-3 py-2 text-right font-medium">Received</th>
@@ -397,7 +397,7 @@ function SubtotalBand({
         <p className="text-xs text-muted-foreground">{note}</p>
       </div>
       <p
-        className={`tabular-nums ${big ? "text-2xl font-bold" : "text-lg font-semibold"}`}
+        className={`tabular-nums ${big ? "font-display text-2xl font-bold" : "text-lg font-semibold"}`}
       >
         {display}
       </p>
@@ -409,24 +409,24 @@ function SubtotalBand({
 
 function NectarBilledUpsell() {
   return (
-    <div className="relative overflow-hidden rounded-xl border border-[color:var(--color-warning-400)] bg-gradient-to-br from-[color:var(--color-warning-50)] to-white p-4">
+    <div className="relative overflow-hidden rounded-[var(--denim-r)] border border-acctb bg-gradient-to-br from-acct to-paper p-5 shadow-[var(--denim-shadow-sm)]">
       <div className="flex items-start gap-3">
         <span
-          className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center text-[color:var(--color-warning-600)]"
+          className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center text-accd"
           style={{
             clipPath:
               "polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)",
             background:
-              "linear-gradient(135deg, var(--color-warning-100), var(--color-warning-200))",
+              "linear-gradient(135deg, var(--denim-acclh), var(--denim-accl))",
           }}
         >
           <Sparkles className="h-4 w-4" />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--color-warning-700)]">
+          <div className="denim-eyebrow flex items-center gap-2">
             <Lock className="h-3 w-3" /> NECTAR Infusion
           </div>
-          <p className="mt-1 text-sm font-semibold text-[color:var(--navy-900)]">
+          <p className="mt-1 font-display text-sm font-semibold text-deep">
             Let NECTAR fill your billed revenue automatically from your 520 billing.
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
@@ -535,7 +535,7 @@ function ManualBilledEditor({
                       {label} {year}
                     </span>
                     {entry?.is_estimate && (
-                      <span className="rounded-full border border-warning-400/40 bg-warning-500/10 px-1.5 py-0.5 text-[10px] font-medium text-warning-700 dark:text-warning-300">
+                      <span className="rounded-full border border-pt2 bg-pt px-1.5 py-0.5 text-[10px] font-medium text-pri">
                         Estimate
                       </span>
                     )}
@@ -760,7 +760,7 @@ function RevenueRow({
           {receivedAvailable ? (
             <span className="tabular-nums text-muted-foreground">—</span>
           ) : (
-            <span className="inline-flex items-center rounded-full border border-warning-400/40 bg-warning-500/10 px-2 py-0.5 text-[11px] font-medium text-warning-700 dark:text-warning-300">
+            <span className="inline-flex items-center rounded-full border border-warning-200 bg-warning-50 px-2 py-0.5 text-[11px] font-medium text-warning-700">
               Pending — not yet imported
             </span>
           )}

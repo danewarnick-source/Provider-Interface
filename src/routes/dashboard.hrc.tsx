@@ -26,7 +26,7 @@ export const Route = createFileRoute("/dashboard/hrc")({
 
 function ScaffoldNotice() {
   return (
-    <div className="rounded-md border border-dashed border-warning-300 bg-warning-50 px-3 py-2 text-[11px] font-medium uppercase tracking-wider text-warning-800">
+    <div className="rounded-md border border-dashed border-warning-200 bg-warning-50 px-3 py-2 text-[11px] font-medium uppercase tracking-wider text-warning-700">
       Scaffold — workflow to be built
     </div>
   );
@@ -39,13 +39,13 @@ export function HrcPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <div className="rounded-lg border border-border bg-background p-5">
+      <div className="rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--denim-shadow)]">
         <div className="flex items-start gap-3">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-warning-500/15 text-warning-700">
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-pt text-pri">
             <Scale className="h-5 w-5" />
           </span>
           <div className="min-w-0">
-            <h2 className="text-xl font-semibold tracking-tight">
+            <h2 className="font-display text-xl font-bold tracking-[-0.025em] text-deep">
               Human Rights Committee (HRC)
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -54,7 +54,7 @@ export function HrcPage() {
               Human Resources / staff HR.
             </p>
             {isCommittee && (
-              <p className="mt-2 text-xs text-warning-800">
+              <p className="mt-2 text-xs text-pri">
                 You are signed in as a Committee Member. You can only view this page —
                 nothing else in the app is accessible with your preset.
               </p>
@@ -68,7 +68,7 @@ export function HrcPage() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <CardTitle className="flex items-center gap-2 text-base">
-                <ShieldAlert className="h-4 w-4 text-warning-700" /> Clients with rights restrictions
+                <ShieldAlert className="h-4 w-4 text-pri" /> Clients with rights restrictions
               </CardTitle>
               <CardDescription>
                 Each active restriction must document all 8 required elements (SOW §1.20 / HCBS
@@ -87,7 +87,7 @@ export function HrcPage() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <CardTitle className="flex items-center gap-2 text-base">
-                <CalendarDays className="h-4 w-4 text-warning-700" /> Committee meetings
+                <CalendarDays className="h-4 w-4 text-pri" /> Committee meetings
               </CardTitle>
               <CardDescription>
                 Meeting records: date, attendees, minutes, decisions.
@@ -105,7 +105,7 @@ export function HrcPage() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <CardTitle className="flex items-center gap-2 text-base">
-                <ClipboardList className="h-4 w-4 text-warning-700" /> Reviews &amp; approvals
+                <ClipboardList className="h-4 w-4 text-pri" /> Reviews &amp; approvals
               </CardTitle>
               <CardDescription>
                 The committee reviews and updates a client's rights restriction
@@ -125,7 +125,7 @@ export function HrcPage() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <CardTitle className="flex items-center gap-2 text-base">
-                <Users className="h-4 w-4 text-warning-700" /> Committee members
+                <Users className="h-4 w-4 text-pri" /> Committee members
               </CardTitle>
               <CardDescription>
                 Everyone on the HRC Committee preset.
@@ -214,7 +214,7 @@ function RestrictionsPanel({ canManage, orgId }: { canManage: boolean; orgId: st
                 <div className="flex shrink-0 items-center gap-2">
                   <Badge
                     variant={completion.isComplete ? "default" : "outline"}
-                    className={completion.isComplete ? "bg-success-600 hover:bg-success-600" : "border-warning-400 text-warning-800"}
+                    className={completion.isComplete ? "bg-acc hover:bg-acc" : "border-warning-200 bg-warning-50 text-warning-700"}
                   >
                     {completion.completedCount}/{completion.total} documented
                   </Badge>

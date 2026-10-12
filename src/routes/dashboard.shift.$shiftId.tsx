@@ -139,8 +139,8 @@ function HhsSupportHoursNote({
   const monthly = monthlySupportHoursTarget(data);
 
   return (
-    <section className="flex items-start gap-2 rounded-xl border border-denim-200 bg-denim-50 p-3 text-denim-900 dark:border-denim-800 dark:bg-denim-950/30 dark:text-denim-100">
-      <Home className="mt-0.5 h-4 w-4 shrink-0 text-denim-600" />
+    <section className="flex items-start gap-2 rounded-xl border border-pt2 bg-pt p-3 text-pri">
+      <Home className="mt-0.5 h-4 w-4 shrink-0 text-pri" />
       <div className="min-w-0 text-xs leading-snug">
         {monthly != null ? (
           <p>
@@ -176,7 +176,7 @@ function ClientProfileCard({ shift, clientName }: { shift: Shift; clientName: st
           />
         </div>
         <div className="min-w-0 flex-1">
-          <h1 className="text-lg font-semibold leading-tight text-foreground">{clientName}</h1>
+          <h1 className="font-display text-lg font-semibold leading-tight text-foreground tracking-[-0.01em]">{clientName}</h1>
           <p className="text-xs text-muted-foreground">
             <Clock className="inline h-3 w-3 mr-1" />
             {new Date(shift.starts_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })} →{" "}
@@ -192,7 +192,7 @@ function ClientProfileCard({ shift, clientName }: { shift: Shift; clientName: st
       {(c?.special_directions || emergency) && (
         <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
           {c?.special_directions && (
-            <div className="rounded-md bg-warning-50 p-2 text-warning-900">
+            <div className="rounded-md bg-warning-50 p-2 text-warning-700">
               <p className="font-semibold mb-0.5">Special directions</p>
               <p className="whitespace-pre-wrap">{c.special_directions}</p>
             </div>
@@ -309,7 +309,7 @@ function ActiveClockPanel({ shift, userId }: { shift: Shift; userId?: string }) 
           </p>
         </div>
         {activePunch ? (
-          <Badge className="bg-success-600 text-white">On the clock</Badge>
+          <Badge className="bg-acc text-white">On the clock</Badge>
         ) : (
           <Badge variant="outline">Not clocked in</Badge>
         )}
@@ -378,7 +378,7 @@ function RhsOverviewPanel({ shift }: { shift: Shift }) {
 
 function Stat({ label, value, unit, tone = "ok" }: { label: string; value: string; unit?: string; tone?: "ok" | "warn" }) {
   return (
-    <div className={`rounded-lg p-2 ${tone === "warn" ? "bg-warning-50 text-warning-900" : "bg-muted/40"}`}>
+    <div className={`rounded-lg p-2 ${tone === "warn" ? "bg-warning-50 text-warning-700" : "bg-muted/40"}`}>
       <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</p>
       <p className="text-lg font-bold tabular-nums">{value}<span className="text-xs font-normal ml-1">{unit}</span></p>
     </div>
@@ -436,7 +436,7 @@ function ShiftReportPanel({ shift, userId }: { shift: Shift; userId?: string }) 
       <div className="mt-2 flex gap-2">
         <Button size="sm" variant="outline" onClick={() => save.mutate(false)} disabled={save.isPending}>Save draft</Button>
         <Button size="sm" onClick={() => save.mutate(true)} disabled={save.isPending}>Submit with shift</Button>
-        {existing?.submitted_at && <span className="ml-auto text-[11px] text-success-700 inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Submitted {new Date(existing.submitted_at).toLocaleString()}</span>}
+        {existing?.submitted_at && <span className="ml-auto text-[11px] text-accd inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Submitted {new Date(existing.submitted_at).toLocaleString()}</span>}
       </div>
     </section>
   );
@@ -530,10 +530,10 @@ function MarPanel({ shift, userId }: { shift: Shift; userId?: string }) {
                         <span className="text-[11px] font-mono w-12 shrink-0 text-muted-foreground">{t}</span>
                         {e ? (
                           <Badge className={
-                            e.status === "administered" || e.status === "self_administered" ? "bg-success-600 text-white" :
+                            e.status === "administered" || e.status === "self_administered" ? "bg-acc text-white" :
                             e.status === "refused" ? "bg-warning-600 text-white" :
                             e.status === "missed" || e.status === "omitted" ? "bg-danger-600 text-white" :
-                            e.status === "loa" ? "bg-denim-600 text-white" : "bg-muted"
+                            e.status === "loa" ? "bg-pri text-white" : "bg-muted"
                           }>
                             {e.status}
                             {stampAt ? ` · ${new Date(stampAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : ""}
@@ -683,12 +683,12 @@ function CalloutPanel({ shift, userId }: { shift: Shift; userId?: string }) {
 
   if (existing && existing.status !== "cancelled") {
     return (
-      <section className="rounded-xl border border-warning-300 bg-warning-50 p-4">
-        <h2 className="text-sm font-semibold flex items-center gap-2 text-warning-900">
+      <section className="rounded-[var(--denim-r)] border border-warning-200 bg-warning-50 p-5">
+        <h2 className="text-sm font-semibold flex items-center gap-2 text-warning-700">
           <PhoneOff className="h-4 w-4" /> Call-out in progress
           <Badge className="ml-auto" variant={existing.status === "coverage_locked" ? "default" : "secondary"}>{existing.status}</Badge>
         </h2>
-        <p className="text-xs text-warning-900 mt-1">Urgency: <strong>{existing.urgency}</strong>{existing.reason ? ` · ${existing.reason}` : ""}</p>
+        <p className="text-xs text-warning-700 mt-1">Urgency: <strong>{existing.urgency}</strong>{existing.reason ? ` · ${existing.reason}` : ""}</p>
         <ol className="mt-3 space-y-1 text-xs">
           {(events ?? []).map((e) => (
             <li key={e.id} className="flex gap-2">
@@ -704,14 +704,14 @@ function CalloutPanel({ shift, userId }: { shift: Shift; userId?: string }) {
           {existing.status === "open" && <Button size="sm" onClick={() => acknowledge.mutate()}>Manager acknowledge</Button>}
           {existing.status === "manager_acknowledged" && <Button size="sm" onClick={() => lockCoverage.mutate()}>Lock coverage & close</Button>}
         </div>
-        <p className="mt-2 text-[10px] text-warning-900">Closes only when a manager acknowledges AND coverage is locked. Channels are simulated; real SMS/voice wires in when the messaging provider is connected.</p>
+        <p className="mt-2 text-[10px] text-warning-700">Closes only when a manager acknowledges AND coverage is locked. Channels are simulated; real SMS/voice wires in when the messaging provider is connected.</p>
       </section>
     );
   }
 
   return (
     <section className="rounded-xl border border-border bg-card p-4">
-      <h2 className="text-sm font-semibold flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-warning-600" /> Can't make this shift?</h2>
+      <h2 className="text-sm font-semibold flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-warning-700" /> Can't make this shift?</h2>
       <p className="text-xs text-muted-foreground mt-1">Calling out opens the shift to qualified staff in parallel and pings managers with an acknowledgment-required escalation ladder. Urgency scales by shift proximity (currently <strong>{urgency}</strong>).</p>
       <Textarea rows={2} placeholder="Reason (optional)" value={reason} onChange={(e) => setReason(e.target.value)} className="mt-2 text-sm" />
       <Button variant="destructive" size="sm" className="mt-2" onClick={() => callOut.mutate()} disabled={callOut.isPending || !userId}>

@@ -31,11 +31,11 @@ type Row = {
 };
 
 const STATUS_COLOR: Record<EmarStatus, string> = {
-  self_administered: "bg-success-100 text-success-800",
-  refused: "bg-danger-100 text-danger-800",
-  omitted: "bg-danger-100 text-danger-800",
-  missed: "bg-warning-100 text-warning-800",
-  loa: "bg-denim-100 text-denim-800",
+  self_administered: "bg-acct text-accd",
+  refused: "bg-danger-50 text-danger-700",
+  omitted: "bg-danger-50 text-danger-700",
+  missed: "bg-warning-50 text-warning-700",
+  loa: "bg-pt text-pri",
 };
 
 function AuditPage() {
@@ -112,7 +112,7 @@ function AuditPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+          <h2 className="font-display text-2xl font-bold tracking-[-0.025em] flex items-center gap-2 text-deep">
             <ShieldAlert className="h-5 w-5 text-primary" /> Master eMAR Audit Desk
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -125,9 +125,9 @@ function AuditPage() {
       </div>
 
       <div className="grid grid-cols-3 gap-3">
-        <Card className="p-3"><div className="text-xs text-muted-foreground">Total entries</div><div className="text-2xl font-bold">{counts.total}</div></Card>
-        <Card className="p-3"><div className="text-xs text-muted-foreground">Refusals / Omitted</div><div className="text-2xl font-bold text-danger-600">{counts.refused}</div></Card>
-        <Card className="p-3"><div className="text-xs text-muted-foreground">Missed</div><div className="text-2xl font-bold text-warning-600">{counts.missed}</div></Card>
+        <Card className="p-3"><div className="text-xs text-muted-foreground">Total entries</div><div className="font-display text-2xl font-bold">{counts.total}</div></Card>
+        <Card className="p-3"><div className="text-xs text-muted-foreground">Refusals / Omitted</div><div className="font-display text-2xl font-bold text-danger-600">{counts.refused}</div></Card>
+        <Card className="p-3"><div className="text-xs text-muted-foreground">Missed</div><div className="font-display text-2xl font-bold text-warning-600">{counts.missed}</div></Card>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -142,7 +142,7 @@ function AuditPage() {
         />
       </div>
 
-      <div className="rounded-2xl border border-border bg-card overflow-hidden">
+      <div className="rounded-[var(--denim-r)] border border-border bg-card overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-sm text-muted-foreground">Loading…</div>
         ) : !filtered.length ? (

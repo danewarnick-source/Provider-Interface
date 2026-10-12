@@ -143,10 +143,10 @@ function ClientDetail({
                 className={[
                   "min-h-[44px] rounded-lg border px-3 py-1.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   active
-                    ? "border-[color:var(--color-warning-600,var(--hive-accent))] bg-[image:var(--gradient-amber)] text-[color:var(--navy-900,var(--hive-text))] shadow-sm"
+                    ? "border-pri bg-pt text-deep shadow-[var(--denim-shadow-sm)]"
                     : locked
                       ? "border-border bg-muted/40 text-muted-foreground opacity-60"
-                      : "border-border bg-background text-foreground hover:border-[color:var(--color-warning-600,var(--hive-accent))]/60",
+                      : "border-border bg-background text-foreground hover:border-pri/60",
                 ].join(" ")}
               >
                 <span className="block font-mono text-sm font-semibold leading-tight">{code}</span>
@@ -154,7 +154,7 @@ function ClientDetail({
                   className={[
                     "block text-[10px] font-medium uppercase tracking-wide leading-tight",
                     active
-                      ? "text-[color:var(--navy-900,var(--hive-text))]/70"
+                      ? "text-deep/70"
                       : "text-muted-foreground",
                   ].join(" ")}
                 >
@@ -164,9 +164,9 @@ function ClientDetail({
                   className={[
                     "mt-1 inline-block rounded-full px-1.5 py-[1px] text-[9px] font-semibold uppercase tracking-wide",
                     isEvvLockedCode(code)
-                      ? "bg-success-500/15 text-success-700 dark:text-success-300"
+                      ? "bg-acct text-accd"
                       : isDailyServiceCode(code)
-                        ? "bg-warning-500/15 text-warning-700 dark:text-warning-300"
+                        ? "bg-pt text-pri"
                         : "bg-haze-500/15 text-haze-600 dark:text-haze-300",
                   ].join(" ")}
                   title={
@@ -209,7 +209,7 @@ function ClientDetail({
                 <Link
                   key={t.type}
                   to="/dashboard/my-obligations"
-                  className="flex items-center gap-2 rounded-md border border-warning-300/60 bg-warning-500/5 px-2 py-1.5 text-xs font-semibold text-warning-800 transition hover:border-warning-400"
+                  className="flex items-center gap-2 rounded-md border border-warning-200 bg-warning-50 px-2 py-1.5 text-xs font-semibold text-warning-700 transition hover:border-warning-300"
                 >
                   <GraduationCap className="h-3.5 w-3.5" />
                   <span>Review required · {t.label}</span>
@@ -325,11 +325,11 @@ function ClientRow({
   return (
     <article
       className={[
-        "overflow-hidden rounded-xl border bg-card shadow-sm transition",
+        "overflow-hidden rounded-[var(--denim-r)] border bg-card shadow-[var(--denim-shadow-sm)] transition",
         isOnTheClock
-          ? "border-[#15a06a] ring-1 ring-[#15a06a]/40"
+          ? "border-acc ring-1 ring-acc/40"
           : todayShift
-            ? "border-[color:var(--color-warning-600,var(--hive-accent))]/70 ring-1 ring-[color:var(--color-warning-600,var(--hive-accent))]/30"
+            ? "border-pri/50 ring-1 ring-pri/20"
             : "border-border",
       ].join(" ")}
     >
@@ -347,7 +347,7 @@ function ClientRow({
       >
         <span
           aria-hidden
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[color:var(--navy-900,var(--hive-text))] text-sm font-semibold text-white"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-deep text-sm font-semibold text-white"
         >
           {initials || <User className="h-5 w-5" />}
         </span>
@@ -355,15 +355,15 @@ function ClientRow({
           <div className="flex items-center gap-2">
             <h3 className="truncate text-sm font-semibold text-foreground">{fullName}</h3>
             {isOnTheClock ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-[#117a52]/10 px-2 py-0.5 text-[10px] font-semibold text-[#0d5c3d]">
+              <span className="inline-flex items-center gap-1 rounded-full bg-acct px-2 py-0.5 text-[10px] font-semibold text-accd ring-1 ring-acctb">
                 <span className="relative inline-flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#15a06a] opacity-75" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#15a06a]" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-acc opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-acc" />
                 </span>
                 On clock · {elapsed}
               </span>
             ) : todayShift ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-[color:var(--color-warning-600,var(--hive-accent))]/15 px-2 py-0.5 text-[10px] font-semibold text-[color:var(--color-warning-700,var(--hive-accent))]">
+              <span className="inline-flex items-center gap-1 rounded-full bg-pt px-2 py-0.5 text-[10px] font-semibold text-pri">
                 <CalendarCheck2 className="h-3 w-3" />
                 Scheduled · {fmtTime(todayShift.starts_at)}–{fmtTime(todayShift.ends_at)}
                 {todayShift.job_code ? ` · ${todayShift.job_code}` : ""}
@@ -374,7 +374,7 @@ function ClientRow({
               </span>
             )}
             {hasTrainingDue && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-warning-500/15 px-2 py-0.5 text-[10px] font-semibold text-warning-800">
+              <span className="inline-flex items-center gap-1 rounded-full bg-warning-50 px-2 py-0.5 text-[10px] font-semibold text-warning-700">
                 <GraduationCap className="h-3 w-3" />
                 Training due
               </span>
@@ -383,7 +383,7 @@ function ClientRow({
           <p className="mt-0.5 truncate text-xs text-muted-foreground">{address}</p>
         </div>
         <div className="hidden shrink-0 items-center gap-2 sm:flex">
-          <span className="rounded-full bg-[color:var(--navy-900,var(--hive-text))]/5 px-2 py-0.5 font-mono text-[10px] font-semibold tabular-nums text-[color:var(--navy-900,var(--hive-text))]">
+          <span className="rounded-full bg-pt px-2 py-0.5 font-mono text-[10px] font-semibold tabular-nums text-deep">
             {periodHours.toFixed(1)}h
           </span>
         </div>
@@ -394,7 +394,7 @@ function ClientRow({
               role="button"
               aria-label={`Quick info for ${fullName}`}
               onClick={(e) => e.stopPropagation()}
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:border-[color:var(--color-warning-600,var(--hive-accent))]/60 hover:text-[color:var(--color-warning-700,var(--hive-accent))]"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:border-pri/60 hover:text-pri"
             >
               <Info className="h-4 w-4" />
             </span>
@@ -510,7 +510,7 @@ export function StaffClientGrid() {
     <section aria-label="My Caseload" data-tour="staff.caseload" className="space-y-3">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <h2 className="text-base font-semibold tracking-tight">
+          <h2 className="font-display text-base font-semibold tracking-[-0.01em]">
             My caseload · {source.length} {source.length === 1 ? "person" : "people"}
           </h2>
           <p className="text-xs text-muted-foreground">

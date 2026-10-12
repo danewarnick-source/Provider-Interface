@@ -89,7 +89,7 @@ function ObligationBanner({ instanceId }: { instanceId: string }) {
   });
   if (!data?.obligation || !data.instance) return null;
   return (
-    <div className="flex items-start gap-2 rounded-lg border border-warning-300/60 bg-warning-500/10 p-3 text-sm text-warning-900 dark:text-warning-200">
+    <div className="flex items-start gap-2 rounded-xl border border-pt2 bg-pt p-3 text-sm text-pri">
       <ClipboardList className="mt-0.5 h-4 w-4 shrink-0" />
       <span>
         Completing this form satisfies your obligation: <strong>{data.obligation.title}</strong> — {data.instance.period_key}.
@@ -318,7 +318,7 @@ function FillForm() {
           <Button variant="ghost" size="icon" onClick={backToClient}><ChevronLeft className="h-4 w-4" /></Button>
         )}
         <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-semibold tracking-tight">{data.form.name}</h1>
+          <h1 className="font-display text-xl font-bold tracking-[-0.025em] text-deep">{data.form.name}</h1>
           {data.form.description && <p className="text-xs text-muted-foreground">{data.form.description}</p>}
         </div>
       </div>

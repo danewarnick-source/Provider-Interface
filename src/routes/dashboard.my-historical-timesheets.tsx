@@ -57,8 +57,8 @@ export function MyHistoricalTimesheetsPage() {
     <div className="mx-auto max-w-4xl space-y-4 p-4 md:p-6">
       <header className="space-y-2">
         <div className="flex items-center gap-2">
-          <Archive className="h-5 w-5 text-warning-700" />
-          <h1 className="text-xl font-semibold">Historical timesheets to confirm</h1>
+          <Archive className="h-5 w-5 text-pri" />
+          <h1 className="font-display text-xl font-bold tracking-[-0.025em] text-deep">Historical timesheets to confirm</h1>
         </div>
         <p className="text-sm text-muted-foreground">
           These are past clock-in/clock-out entries an admin brought over from another platform and submitted to you for
@@ -88,7 +88,7 @@ export function MyHistoricalTimesheetsPage() {
 
       {!q.isLoading && !q.isError && rows.length === 0 && (
         <div className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
-          <CheckCircle2 className="mx-auto mb-2 h-6 w-6 text-success-600" />
+          <CheckCircle2 className="mx-auto mb-2 h-6 w-6 text-accd" />
           You're all caught up — nothing waiting on your confirmation.
         </div>
       )}
@@ -222,7 +222,7 @@ function EntryCard({ row, onChanged }: { row: Row; onChanged: () => void }) {
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+    <div className="rounded-[var(--denim-r)] border border-border bg-card p-4 space-y-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -246,11 +246,11 @@ function EntryCard({ row, onChanged }: { row: Row; onChanged: () => void }) {
           featureName="Draft with NECTAR"
           benefit="Turn quick shorthand (or a voice memo) into a compliant progress-note draft in seconds. You always review and confirm before it's saved."
         >
-          <div className="rounded-lg border-2 border-dashed border-warning-400 bg-warning-50/60 px-3 py-3">
+          <div className="rounded-xl border-2 border-dashed border-pt2 bg-pt0 px-3 py-3">
             <div className="mb-2 flex items-center gap-2">
               <PiMark variant="brand" className="h-4 w-4" />
               <div className="flex-1">
-                <div className="text-[11px] font-semibold uppercase tracking-wide text-warning-700">NECTAR Infusion</div>
+                <div className="denim-eyebrow text-[11px]">NECTAR Infusion</div>
                 <div className="text-sm font-semibold">Draft with NECTAR</div>
               </div>
             </div>
@@ -263,7 +263,7 @@ function EntryCard({ row, onChanged }: { row: Row; onChanged: () => void }) {
               onChange={(e) => setShorthand(e.target.value)}
               placeholder="e.g. went to park, Blake talked to two people, bought a soda $2, calm all shift"
               maxLength={4000}
-              className="min-h-[72px] w-full resize-y bg-white text-sm"
+              className="min-h-[72px] w-full resize-y bg-card text-sm"
             />
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <Button
@@ -271,7 +271,7 @@ function EntryCard({ row, onChanged }: { row: Row; onChanged: () => void }) {
                 size="sm"
                 onClick={runDraftWithNectar}
                 disabled={draftBusy || shorthand.trim().length < 3}
-                className="min-h-[44px] bg-warning-600 text-white hover:bg-warning-700"
+                className="min-h-[44px] bg-acc text-white hover:bg-accd"
               >
                 {draftBusy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                 Draft with NECTAR
@@ -290,10 +290,10 @@ function EntryCard({ row, onChanged }: { row: Row; onChanged: () => void }) {
               )}
             </div>
             {nectarDraft && (
-              <div className="mt-3 rounded-md border-2 border-warning-500 bg-white px-3 py-2.5 shadow-sm">
+              <div className="mt-3 rounded-xl border-2 border-pt2 bg-card px-3 py-2.5 shadow-[var(--denim-shadow-sm)]">
                 <div className="mb-1.5 flex items-center gap-2">
                   <PiMark variant="brand" className="h-3.5 w-3.5" />
-                  <span className="text-[11px] font-semibold uppercase tracking-wide text-warning-700">
+                  <span className="text-[11px] font-semibold uppercase tracking-wide text-pri">
                     NECTAR draft — review before confirming
                   </span>
                 </div>
@@ -322,7 +322,7 @@ function EntryCard({ row, onChanged }: { row: Row; onChanged: () => void }) {
         <label className="mb-1 block text-xs font-medium text-muted-foreground">
           Shift note
           {nectarUsed && (
-            <span className="ml-2 inline-flex items-center gap-1 rounded-full border border-warning-400 bg-warning-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-warning-700">
+            <span className="ml-2 inline-flex items-center gap-1 rounded-full border border-pt2 bg-pt px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-pri">
               <PiMark className="h-2.5 w-2.5" /> AI-drafted — your review required
             </span>
           )}

@@ -57,8 +57,8 @@ export function MyHistoricalDailyNotesPage() {
   if (rows.length === 0) {
     return (
       <div className="mx-auto max-w-2xl p-6">
-        <div className="rounded-2xl border border-success-500/40 bg-success-500/5 p-6 text-center">
-          <CheckCircle2 className="mx-auto h-8 w-8 text-success-600" />
+        <div className="rounded-[var(--denim-r)] border border-acctb bg-acct p-6 text-center">
+          <CheckCircle2 className="mx-auto h-8 w-8 text-accd" />
           <div className="mt-2 font-semibold">You're all caught up</div>
           <p className="mt-1 text-sm text-muted-foreground">
             You have no historical daily notes waiting for your attestation. When an admin submits historical
@@ -73,14 +73,14 @@ export function MyHistoricalDailyNotesPage() {
     <div className="mx-auto max-w-3xl space-y-4 p-6">
       <header className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold">Historical daily notes to attest</h1>
+          <h1 className="font-display text-lg font-semibold tracking-[-0.01em]">Historical daily notes to attest</h1>
           <p className="text-sm text-muted-foreground">
             These notes were imported from another platform and submitted to you for review. Scroll through
             all {rows.length} note{rows.length === 1 ? "" : "s"} and sign each one individually — signing one
             does not sign the rest.
           </p>
         </div>
-        <Badge variant="outline" className="border-warning-500/40 text-warning-700">
+        <Badge variant="outline" className="border-pt2 bg-pt text-pri">
           <Archive className="mr-1 h-3 w-3" />
           Historical import
         </Badge>
@@ -151,7 +151,7 @@ function HistoricalDailyNoteCard({ row }: { row: Row }) {
   });
 
   return (
-    <article className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+    <article className="rounded-[var(--denim-r)] border border-border bg-card p-5 shadow-sm">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
           <div className="text-sm font-semibold">{clientName}</div>

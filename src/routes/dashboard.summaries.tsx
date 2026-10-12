@@ -37,10 +37,10 @@ export const Route = createFileRoute("/dashboard/summaries")({
 function statusBadge(s: ProgressSummaryRow["status"]) {
   const map: Record<ProgressSummaryRow["status"], { label: string; cls: string }> = {
     pending: { label: "Pending", cls: "bg-haze-200 text-haze-800" },
-    draft: { label: "Drafted by Nectar", cls: "bg-denim-100 text-denim-800" },
-    in_review: { label: "In review", cls: "bg-warning-100 text-warning-800" },
-    finalized: { label: "Finalized", cls: "bg-success-100 text-success-800" },
-    no_source: { label: "No documentation", cls: "bg-danger-100 text-danger-800" },
+    draft: { label: "Drafted by Nectar", cls: "bg-pt text-pri" },
+    in_review: { label: "In review", cls: "bg-warning-50 text-warning-700" },
+    finalized: { label: "Finalized", cls: "bg-acct text-accd" },
+    no_source: { label: "No documentation", cls: "bg-danger-50 text-danger-700" },
   };
   const { label, cls } = map[s];
   return <Badge className={cls}>{label}</Badge>;
@@ -295,11 +295,11 @@ function ClientList({
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {c.overdueCount > 0 ? (
-              <Badge className="bg-danger-100 text-danger-800">{c.overdueCount} overdue</Badge>
+              <Badge className="bg-danger-50 text-danger-700">{c.overdueCount} overdue</Badge>
             ) : c.openCount > 0 ? (
-              <Badge className="bg-warning-100 text-warning-900">{c.openCount} open</Badge>
+              <Badge className="bg-warning-50 text-warning-700">{c.openCount} open</Badge>
             ) : c.nextDue ? (
-              <Badge className="bg-success-100 text-success-800">On track</Badge>
+              <Badge className="bg-acct text-accd">On track</Badge>
             ) : (
               <Badge variant="outline" className="text-muted-foreground">No active codes</Badge>
             )}
@@ -341,7 +341,7 @@ function ClientWorkspace({
         </Button>
       </div>
       <div>
-        <h2 className="text-xl font-semibold">{clientName}</h2>
+        <h2 className="font-display text-xl font-bold tracking-[-0.025em] text-deep">{clientName}</h2>
         <p className="text-sm text-muted-foreground">
           Support Coordinator: {scName?.trim() || "Not on file"}
         </p>
@@ -419,12 +419,12 @@ function PeriodSection({
                       Not yet due — draft anytime
                     </Badge>
                   )}
-                  {tone === "overdue" && <Badge className="bg-danger-100 text-danger-800">Overdue</Badge>}
+                  {tone === "overdue" && <Badge className="bg-danger-50 text-danger-700">Overdue</Badge>}
                   {r.status === "finalized" && filing === "upi" && !r.upi_entered_at && (
-                    <Badge className="bg-warning-100 text-warning-900">Awaiting UPI</Badge>
+                    <Badge className="bg-warning-50 text-warning-700">Awaiting UPI</Badge>
                   )}
                   {r.status === "finalized" && filing === "support_coordinator" && !r.sc_sent_at && (
-                    <Badge className="bg-warning-100 text-warning-900">Awaiting SC send</Badge>
+                    <Badge className="bg-warning-50 text-warning-700">Awaiting SC send</Badge>
                   )}
                 </div>
                 <div className="text-xs text-muted-foreground mt-0.5">

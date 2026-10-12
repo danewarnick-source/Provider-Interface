@@ -366,9 +366,9 @@ function MonthlyGridPage() {
 
   return (
     <div className="space-y-4">
-      <header className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm">
+      <header className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--denim-r)] border border-border bg-card p-4 shadow-sm">
         <div>
-          <h2 className="font-display text-lg font-bold">Monthly Billables Grid</h2>
+          <h2 className="font-display text-lg font-bold tracking-[-0.01em]">Monthly Billables Grid</h2>
           <p className="text-xs text-muted-foreground">
             Tab A · Client × billing code for the month · units × rate = To Bill.
             Units + staff hours auto-filled from EVV (read-only).
@@ -391,7 +391,7 @@ function MonthlyGridPage() {
       </header>
 
       {/* Horizontal totals pill */}
-      <div className="rounded-2xl border border-border bg-card p-3 shadow-sm">
+      <div className="rounded-[var(--denim-r)] border border-border bg-card p-3 shadow-sm">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <span className="text-xs font-semibold text-muted-foreground shrink-0">Total by code · {monthLabel}</span>
           {rollup.length === 0 ? (
@@ -461,7 +461,7 @@ function MonthlyGridPage() {
           <header className="mb-3 flex items-center gap-2">
             <Briefcase className="h-4 w-4 text-muted-foreground" />
             <h3 className="font-display text-base font-semibold">Admin / Training hours</h3>
-            <span className="rounded-full bg-warning-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-warning-800">
+            <span className="rounded-full bg-pt px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-pri">
               Non-billable
             </span>
           </header>
@@ -473,7 +473,7 @@ function MonthlyGridPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
-                <thead className="bg-muted/40 text-left uppercase text-muted-foreground">
+                <thead className="bg-pt0 text-left font-semibold uppercase tracking-[0.06em] text-muted-foreground">
                   <tr>
                     <th className="px-2 py-1.5">Staff</th>
                     <th className="px-2 py-1.5 text-right">Total</th>
@@ -529,7 +529,7 @@ function GridSection({
   const [active, setActive] = useState<{ clientId: string; clientName: string; code: string } | null>(null);
   return (
     <>
-    <section className="rounded-2xl border border-border bg-card shadow-sm">
+    <section className="rounded-[var(--denim-r)] border border-border bg-card shadow-sm">
       <header className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
         <div>
           <h3 className="font-display text-base font-semibold">{title}</h3>
@@ -541,7 +541,7 @@ function GridSection({
       </header>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1000px] text-sm">
-          <thead className="bg-muted/40 text-left text-xs uppercase text-muted-foreground">
+          <thead className="bg-pt0 text-left text-[12.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
             <tr>
               <th className={`${cellBase}`}>Client</th>
               <th className={`${cellBase}`}>Code</th>
@@ -574,7 +574,7 @@ function GridSection({
                   <td className={`${cellBase} font-medium`}>{r.client.last_name}, {r.client.first_name}</td>
                   <td className={`${cellBase} font-mono font-semibold`}>
                     {r.code.service_code}
-                    <span className={`ml-1 rounded px-1 py-0.5 text-[10px] font-bold ${r.isDaily ? "bg-[#fde9c8] text-[#7a4308]" : "bg-[#e1efff] text-[#11498e]"}`}>
+                    <span className={`ml-1 rounded px-1 py-0.5 text-[10px] font-bold ${r.isDaily ? "bg-acct text-accd" : "bg-pt text-pri"}`}>
                       {r.isDaily ? "DAILY" : "Q"}
                     </span>
                   </td>
@@ -594,7 +594,7 @@ function GridSection({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <span className={`inline-flex items-center gap-1 rounded-md border border-dashed border-border bg-muted/30 px-2 py-1 font-mono tabular-nums text-sm ${overMax ? "text-[#b45309] font-bold" : ""}`}>
+                          <span className={`inline-flex items-center gap-1 rounded-md border border-dashed border-border bg-muted/30 px-2 py-1 font-mono tabular-nums text-sm ${overMax ? "text-warning-700 font-bold" : ""}`}>
                             {fmtUnits(u)}
                             {!r.isDaily && u > 0 && (
                               <span className="text-[10px] text-muted-foreground">· {fmtHours(u / UNITS_PER_HOUR)}h</span>
@@ -614,7 +614,7 @@ function GridSection({
                     {r.monthly_max != null ? fmtUnits(r.monthly_max) : "—"}
                   </td>
                   <td className={`${cellBase} text-right tabular-nums`}>
-                    <span className={r.annual > 0 && r.used_units / r.annual >= 0.9 ? "font-semibold text-[#b45309]" : ""}>
+                    <span className={r.annual > 0 && r.used_units / r.annual >= 0.9 ? "font-semibold text-warning-700" : ""}>
                       {fmtUnits(r.remaining_units)} u
                       {!r.isDaily && <span className="ml-1 text-xs text-muted-foreground">· {fmtHours(unitsToHours(r.remaining_units))} h</span>}
                     </span>

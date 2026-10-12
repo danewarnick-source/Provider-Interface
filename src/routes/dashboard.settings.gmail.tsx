@@ -45,7 +45,7 @@ function GmailSettingsPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-1">
       <header className="space-y-1">
-        <h1 className="flex items-center gap-2 text-xl font-semibold">
+        <h1 className="font-display flex items-center gap-2 text-xl font-bold tracking-[-0.025em] text-deep">
           <Mail className="h-5 w-5 text-accent" /> Gmail referral ingestion
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -112,7 +112,7 @@ function ConnectionCard({ organizationId }: { organizationId: string }) {
                 {conn.last_polled_at ? new Date(conn.last_polled_at).toLocaleString() : "never"}
               </div>
             ) : conn?.status === "error" ? (
-              <div className="text-xs text-warning-700">Error — {conn.last_error ?? "reconnect required"}</div>
+              <div className="text-xs text-danger-700">Error — {conn.last_error ?? "reconnect required"}</div>
             ) : (
               <div className="text-xs text-muted-foreground">Not connected</div>
             )}

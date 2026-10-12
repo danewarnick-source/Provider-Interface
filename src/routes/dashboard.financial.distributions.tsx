@@ -397,7 +397,7 @@ function DistributionsPage() {
     <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="font-display text-xl font-bold tracking-tight">Distribution Engine</h2>
+          <h2 className="font-display text-xl font-bold tracking-[-0.025em] text-deep">Distribution Engine</h2>
           <p className="text-sm text-muted-foreground">
             Profit-share / investor / ownership waterfalls. Reads real net from Totals — the math is yours to define.
           </p>
@@ -497,8 +497,8 @@ function DistributionsPage() {
             </div>
 
             {(selectedPlan.plan_type === "investor" || selectedPlan.plan_type === "ownership") && (
-              <div className="flex items-start gap-2 rounded-md border border-warning-300/40 bg-warning-50 dark:bg-warning-950/30 p-3 text-xs">
-                <Info className="mt-0.5 h-4 w-4 text-warning-600" />
+              <div className="flex items-start gap-2 rounded-xl border border-pt2 bg-pt p-3 text-xs text-pri">
+                <Info className="mt-0.5 h-4 w-4 text-pri" />
                 <p>
                   Distribution structures with tax or legal implications are worth confirming with your accountant or attorney.
                   PI organizes the math; you own its accuracy.
@@ -563,7 +563,7 @@ function DistributionsPage() {
               </div>
               <div className="overflow-x-auto rounded-md border">
                 <table className="w-full text-sm">
-                  <thead className="bg-muted/50 text-xs uppercase">
+                  <thead className="bg-pt0 text-[12.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
                     <tr>
                       <th className="px-3 py-2 text-left">Name</th>
                       <th className="px-3 py-2 text-left">Role / label</th>
@@ -626,12 +626,12 @@ function DistributionsPage() {
                   <tfoot className="bg-muted/30">
                     <tr>
                       <td colSpan={2} className="px-3 py-2 text-right font-semibold">Total allocation</td>
-                      <td className={`px-3 py-2 text-right font-mono font-semibold ${allocValid ? "text-success-600" : "text-destructive"}`}>
+                      <td className={`px-3 py-2 text-right font-mono font-semibold ${allocValid ? "text-accd" : "text-destructive"}`}>
                         {allocSum.toFixed(2)}%
                       </td>
                       <td colSpan={2} className="px-3 py-2 text-xs">
                         {allocValid
-                          ? <span className="text-success-600 inline-flex items-center gap-1"><ShieldCheck className="h-3 w-3" /> 100%</span>
+                          ? <span className="text-accd inline-flex items-center gap-1"><ShieldCheck className="h-3 w-3" /> 100%</span>
                           : <span className="text-destructive inline-flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> {allocDelta > 0 ? `under by ${allocDelta.toFixed(2)}%` : `over by ${Math.abs(allocDelta).toFixed(2)}%`}</span>}
                       </td>
                     </tr>
@@ -690,12 +690,12 @@ function DistributionsPage() {
             <section className="flex flex-wrap items-center justify-between gap-2 rounded-md border bg-muted/30 p-3">
               <div className="text-xs">
                 {selectedPlan.status === "approved" ? (
-                  <span className="inline-flex items-center gap-1 text-success-600">
+                  <span className="inline-flex items-center gap-1 text-accd">
                     <ShieldCheck className="h-4 w-4" /> Approved
                     {selectedPlan.approved_at && ` · ${new Date(selectedPlan.approved_at).toLocaleString()}`}
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-warning-600">
+                  <span className="inline-flex items-center gap-1 text-warning-700">
                     <AlertTriangle className="h-4 w-4" /> Draft — payouts will not compute until you approve.
                   </span>
                 )}
@@ -778,7 +778,7 @@ function DistributionsPage() {
                 />
               </div>
               {selectedPlan.status !== "approved" && (
-                <p className="text-xs italic text-warning-600">
+                <p className="text-xs italic text-warning-700">
                   Payouts in the participants table will appear after you approve this plan.
                 </p>
               )}

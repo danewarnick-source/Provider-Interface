@@ -126,7 +126,7 @@ function AdminList() {
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Forms</h1>
+          <h1 className="font-display text-2xl font-bold tracking-[-0.025em] text-deep">Forms</h1>
           <p className="text-sm text-muted-foreground">Build custom intake forms for your staff. Submissions land in Records → Forms.</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -174,7 +174,7 @@ function AdminList() {
           ))}
           {(data?.forms ?? []).length === 0 && (
             <div className="col-span-full rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-              <Sparkles className="mx-auto mb-2 h-5 w-5 text-warning-500" />
+              <Sparkles className="mx-auto mb-2 h-5 w-5 text-acc" />
               No forms yet. Click <strong>New form</strong> to build one — or use <strong>Build with Nectar</strong> inside the editor.
             </div>
           )}
@@ -275,7 +275,7 @@ function StaffList() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Forms</h1>
+        <h1 className="font-display text-2xl font-bold tracking-[-0.025em] text-deep">Forms</h1>
         <p className="text-sm text-muted-foreground">Forms your agency has assigned to you.</p>
       </div>
 
@@ -379,7 +379,7 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
   return (
     <section className="space-y-2">
       <div>
-        <h2 className="text-base font-semibold tracking-tight">{title}</h2>
+        <h2 className="font-display text-base font-semibold tracking-[-0.01em]">{title}</h2>
         {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
       </div>
       {children}

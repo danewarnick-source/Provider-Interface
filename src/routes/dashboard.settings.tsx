@@ -113,9 +113,9 @@ function SettingsPage() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <section className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] lg:col-span-2">
+      <section className="rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--shadow-card)] lg:col-span-2">
         <header className="mb-2">
-          <h2 className="text-base font-semibold">Profile &amp; organization</h2>
+          <h2 className="font-display text-base font-semibold tracking-[-0.01em]">Profile &amp; organization</h2>
           <p className="text-sm text-muted-foreground">
             All identity-related information in one place — your profile, your
             organization, and who we contact about billing.
@@ -199,11 +199,11 @@ function SettingsPage() {
 
       {isOwner(org?.access.level) && (
         <Link to="/dashboard/settings/team-access" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
+          <div className="flex items-center justify-between gap-4 rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><ShieldCheck className="h-5 w-5" /></div>
               <div>
-                <h2 className="text-base font-semibold">Access &amp; presets</h2>
+                <h2 className="font-display text-base font-semibold tracking-[-0.01em]">Access &amp; presets</h2>
                 <p className="mt-1 text-sm text-muted-foreground">Set each person to Owner, Admin, or Team member, edit presets (what each area allows), assign homes, team members, and clients, and review the change history.</p>
               </div>
             </div>
@@ -214,11 +214,11 @@ function SettingsPage() {
 
       {isOwner(org?.access.level) && (
         <Link to="/dashboard/settings/recently-deleted" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
+          <div className="flex items-center justify-between gap-4 rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><Trash2 className="h-5 w-5" /></div>
               <div>
-                <h2 className="text-base font-semibold">Recently deleted</h2>
+                <h2 className="font-display text-base font-semibold tracking-[-0.01em]">Recently deleted</h2>
                 <p className="mt-1 text-sm text-muted-foreground">Clients and team members deleted because they were added by mistake: who deleted them, when and why. Restore brings them back.</p>
               </div>
             </div>
@@ -229,11 +229,11 @@ function SettingsPage() {
 
       {isAdminLevel(org?.access.level) && (
         <Link to="/dashboard/settings/phi-access-audit" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
+          <div className="flex items-center justify-between gap-4 rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><ScrollText className="h-5 w-5" /></div>
               <div>
-                <h2 className="text-base font-semibold">PHI access log</h2>
+                <h2 className="font-display text-base font-semibold tracking-[-0.01em]">PHI access log</h2>
                 <p className="mt-1 text-sm text-muted-foreground">Review who accessed protected client charts, documents, eMAR, and EVV records — including break-glass platform access.</p>
               </div>
             </div>
@@ -244,11 +244,11 @@ function SettingsPage() {
 
       {isOwner(org?.access.level) && (
         <Link to="/dashboard/settings/bank-mapping" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
+          <div className="flex items-center justify-between gap-4 rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><Landmark className="h-5 w-5" /></div>
               <div>
-                <h2 className="text-base font-semibold">🏦 Institutional Client Banking Registry</h2>
+                <h2 className="font-display text-base font-semibold tracking-[-0.01em]">🏦 Institutional Client Banking Registry</h2>
                 <p className="mt-1 text-sm text-muted-foreground">Link your corporate Plaid bank streams, map sub-accounts to client trust profiles, and auto-reconcile SSI/SSDI deposits into the PBA ledger.</p>
               </div>
             </div>
@@ -259,11 +259,11 @@ function SettingsPage() {
 
       {isOwner(org?.access.level) && (
         <Link to="/dashboard/settings/automation-rules" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
+          <div className="flex items-center justify-between gap-4 rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><Wand2 className="h-5 w-5" /></div>
               <div>
-                <h2 className="text-base font-semibold">Automation Rules</h2>
+                <h2 className="font-display text-base font-semibold tracking-[-0.01em]">Automation Rules</h2>
                 <p className="mt-1 text-sm text-muted-foreground">Control what NECTAR sets up automatically when it imports a document. Toggle, edit, or add rules — nothing is created without your review.</p>
               </div>
             </div>
@@ -274,11 +274,11 @@ function SettingsPage() {
 
       {isAdminLevel(org?.access.level) && (
         <Link to="/dashboard/settings/service-codes" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
+          <div className="flex items-center justify-between gap-4 rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><BookOpenCheck className="h-5 w-5" /></div>
               <div>
-                <h2 className="text-base font-semibold">Service codes</h2>
+                <h2 className="font-display text-base font-semibold tracking-[-0.01em]">Service codes</h2>
                 <p className="mt-1 text-sm text-muted-foreground">One place for every code. <strong>Reference</strong> shows read-only regulatory data (EVV, rates, cadence, caps). <strong>Configuration</strong> is the editable scheduling/billing catalog the scheduler and billing engine read from.</p>
               </div>
             </div>
@@ -290,11 +290,11 @@ function SettingsPage() {
 
       {isOwner(org?.access.level) && (
         <Link to="/dashboard/billing/subscription" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
+          <div className="flex items-center justify-between gap-4 rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><CreditCard className="h-5 w-5" /></div>
               <div>
-                <h2 className="text-base font-semibold">Subscription</h2>
+                <h2 className="font-display text-base font-semibold tracking-[-0.01em]">Subscription</h2>
                 <p className="mt-1 text-sm text-muted-foreground">See your plan, pay, or manage the card on file.</p>
               </div>
             </div>
@@ -305,11 +305,11 @@ function SettingsPage() {
 
       {isAdminLevel(org?.access.level) && (
         <Link to="/dashboard/settings/email" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
+          <div className="flex items-center justify-between gap-4 rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><Mail className="h-5 w-5" /></div>
               <div>
-                <h2 className="text-base font-semibold">Email Sender (Resend)</h2>
+                <h2 className="font-display text-base font-semibold tracking-[-0.01em]">Email Sender (Resend)</h2>
                 <p className="mt-1 text-sm text-muted-foreground">Configure the From name / address used for every email PI sends — referral follow-ups, notifications. Refuses to send until you've verified a sending domain in Resend.</p>
               </div>
             </div>
@@ -320,11 +320,11 @@ function SettingsPage() {
 
       {isAdminLevel(org?.access.level) && (
         <Link to="/dashboard/settings/retention" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
+          <div className="flex items-center justify-between gap-4 rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><ListChecks className="h-5 w-5" /></div>
               <div>
-                <h2 className="text-base font-semibold">Referral retention</h2>
+                <h2 className="font-display text-base font-semibold tracking-[-0.01em]">Referral retention</h2>
                 <p className="mt-1 text-sm text-muted-foreground">Configure how long referrals stay active after their due date before being archived, and the grace period before purge. Archive is recoverable; a tombstone is kept after purge for audit.</p>
               </div>
             </div>
@@ -335,11 +335,11 @@ function SettingsPage() {
 
       {isAdminLevel(org?.access.level) && (
         <Link to="/dashboard/settings/compliance-setup" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
+          <div className="flex items-center justify-between gap-4 rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><ClipboardList className="h-5 w-5" /></div>
               <div>
-                <h2 className="text-base font-semibold">Compliance setup</h2>
+                <h2 className="font-display text-base font-semibold tracking-[-0.01em]">Compliance setup</h2>
                 <p className="mt-1 text-sm text-muted-foreground">Answer awarded service codes and operational facts (OL site, volunteers, governing board). Unknowns stay unanswered — never a yes/no on whether a SOW article applies.</p>
               </div>
             </div>
@@ -350,11 +350,11 @@ function SettingsPage() {
 
       {isAdminLevel(org?.access.level) && (
         <Link to="/dashboard/settings/draft-rules" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
+          <div className="flex items-center justify-between gap-4 rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><FlaskConical className="h-5 w-5" /></div>
               <div>
-                <h2 className="text-base font-semibold">Draft rules (simulation)</h2>
+                <h2 className="font-display text-base font-semibold tracking-[-0.01em]">Draft rules (simulation)</h2>
                 <p className="mt-1 text-sm text-muted-foreground">Imported DHHS91172 catalog connected to the live obligation engine. Publication is per verified rule. Unrelated Release_Gaps do not lock the catalog. Simulation does not mint a second checklist.</p>
               </div>
             </div>
@@ -365,11 +365,11 @@ function SettingsPage() {
 
       {isAdminLevel(org?.access.level) && (
         <Link to="/dashboard/settings/licensing" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
+          <div className="flex items-center justify-between gap-4 rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><BadgeCheck className="h-5 w-5" /></div>
               <div>
-                <h2 className="text-base font-semibold">Licenses & Certifications</h2>
+                <h2 className="font-display text-base font-semibold tracking-[-0.01em]">Licenses & Certifications</h2>
                 <p className="mt-1 text-sm text-muted-foreground">Office of Licensing credentials required by your active service codes.</p>
               </div>
             </div>
@@ -380,11 +380,11 @@ function SettingsPage() {
 
       {isAdminLevel(org?.access.level) && (
         <Link to="/dashboard/settings/gmail" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
+          <div className="flex items-center justify-between gap-4 rounded-[var(--denim-r)] border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><Inbox className="h-5 w-5" /></div>
               <div>
-                <h2 className="text-base font-semibold">Gmail referral ingestion</h2>
+                <h2 className="font-display text-base font-semibold tracking-[-0.01em]">Gmail referral ingestion</h2>
                 <p className="mt-1 text-sm text-muted-foreground">Connect a provider Gmail inbox (read-only) so matching referral emails auto-parse into reviewable drafts every 5 minutes. Configure sender / subject rules and review the PHI ingestion audit log.</p>
               </div>
             </div>

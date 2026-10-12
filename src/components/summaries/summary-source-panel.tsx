@@ -17,7 +17,7 @@ export function PbaPanel({
 }) {
   return (
     <div className="space-y-3">
-      <div className="rounded border bg-warning-50 px-3 py-2 text-sm text-warning-900 flex gap-2">
+      <div className="rounded-xl border border-pt2 bg-pt px-3 py-2 text-sm text-pri flex gap-2">
         <Receipt className="size-4 mt-0.5" />
         <div>
           <div className="font-semibold">Monthly financial statement (PBA)</div>
@@ -105,7 +105,7 @@ export function SourcePanel({ bundle }: { bundle: SummarySourceBundle }) {
           {summaryCadenceLabel(summary.period_kind, summary.service_codes)}
         </div>
         {general > 0 && (
-          <div className={cn("mt-1 rounded px-2 py-1", "bg-warning-50 text-warning-900")}>
+          <div className={cn("mt-1 rounded px-2 py-1", "bg-warning-50 text-warning-700")}>
             {general} log(s) or shift note(s) not tied to a goal — listed under General.
           </div>
         )}
@@ -127,11 +127,11 @@ export function SourcePanel({ bundle }: { bundle: SummarySourceBundle }) {
         )}
       </div>
 
-      <EvidenceCard title="Approved daily logs" items={of("daily_log")} tone="border-denim-300" />
+      <EvidenceCard title="Approved daily logs" items={of("daily_log")} tone="border-pt2" />
       <EvidenceCard
         title="Submitted shift notes"
         items={of("shift_note", "shift_report")}
-        tone="border-denim-300"
+        tone="border-pt2"
       />
       <EvidenceCard title="Incidents" items={of("incident")} tone="border-danger-300" />
     </div>

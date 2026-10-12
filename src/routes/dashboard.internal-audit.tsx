@@ -113,7 +113,7 @@ const SEVERITY_BADGE: Record<Severity, { label: string; cls: string; Icon: typeo
   },
   attention: {
     label: "Needs attention",
-    cls: "bg-warning-50 text-warning-800 border-warning-200",
+    cls: "bg-warning-50 text-warning-700 border-warning-200",
     Icon: AlertTriangle,
   },
   minor: {
@@ -285,16 +285,16 @@ export function InternalAuditPage() {
   const body = (
     <div className="space-y-6">
       {/* Header / posture */}
-      <div className="rounded-2xl border border-[var(--hive-accent)]/30 bg-gradient-to-br from-[#fff7ed] via-white to-white p-5 shadow-[var(--shadow-card)]">
+      <div className="rounded-[var(--denim-r)] border border-pt2 bg-gradient-to-br from-pt0 via-paper to-paper p-6 shadow-[var(--denim-shadow)]">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--hive-accent)]/15 ring-1 ring-[var(--hive-accent)]/30">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-pt ring-1 ring-pt2">
               <PiMark variant="brand" className="h-5 w-5" />
             </span>
             <div>
-              <h2 className="font-display text-xl font-bold tracking-tight text-[var(--hive-text)]">
+              <h2 className="font-display text-xl font-bold tracking-[-0.025em] text-deep">
                 Internal Audit
-                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-[var(--hive-accent)]/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#9a3412]">
+                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-acct px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accd ring-1 ring-acctb">
                   <Sparkles className="h-3 w-3" /> NECTAR
                 </span>
               </h2>
@@ -327,10 +327,10 @@ export function InternalAuditPage() {
       </div>
 
       {/* DSPD-style sample builder */}
-      <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
+      <div className="rounded-[var(--denim-r)] border border-border bg-card p-4 shadow-[var(--shadow-card)]">
         <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h3 className="text-sm font-semibold text-[var(--hive-text)]">DSPD-style sample</h3>
+            <h3 className="text-sm font-semibold text-ink">DSPD-style sample</h3>
             <p className="text-xs text-muted-foreground">
               Hand-pick the specific clients and staff to audit (e.g. a DSPD sample request of
               8 clients + 5 staff). Leave both empty to use the standard scope below.
@@ -404,11 +404,11 @@ export function InternalAuditPage() {
       </div>
 
       {/* Scope filters (whole company / single client / area / date) */}
-      <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
+      <div className="rounded-[var(--denim-r)] border border-border bg-card p-4 shadow-[var(--shadow-card)]">
         <div className="mb-2 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-[var(--hive-text)]">Other scope filters</h3>
+          <h3 className="text-sm font-semibold text-ink">Other scope filters</h3>
           {usingSample && (
-            <span className="rounded-full bg-warning-50 px-2 py-0.5 text-[11px] font-medium text-warning-800">
+            <span className="rounded-full bg-warning-50 px-2 py-0.5 text-[11px] font-medium text-warning-700">
               Sample active — single-client filter ignored
             </span>
           )}
@@ -488,7 +488,7 @@ export function InternalAuditPage() {
 
       {/* By-area breakdown */}
       {summary && (
-        <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
+        <div className="rounded-[var(--denim-r)] border border-border bg-card p-4 shadow-[var(--shadow-card)]">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-sm font-semibold">Findings by area</h3>
             <div className="flex items-center gap-2 text-xs">
@@ -521,7 +521,7 @@ export function InternalAuditPage() {
       )}
 
       {/* Findings list */}
-      <div className="rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
+      <div className="rounded-[var(--denim-r)] border border-border bg-card shadow-[var(--shadow-card)]">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <h3 className="text-sm font-semibold">
             Findings {summary ? `· ${findings.length} shown` : ""}
@@ -538,7 +538,7 @@ export function InternalAuditPage() {
           </div>
         ) : findings.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-2 py-12 text-sm text-muted-foreground">
-            <CheckCircle2 className="h-6 w-6 text-success-600" />
+            <CheckCircle2 className="h-6 w-6 text-accd" />
             <span>No findings in this scope. Nice work.</span>
           </div>
         ) : (
@@ -572,7 +572,7 @@ function ReadinessCard({ score, loading }: { score?: number; loading: boolean })
   const s = score ?? 0;
   const tone =
     s >= 90
-      ? "text-success-700 bg-success-50 border-success-200"
+      ? "text-accd bg-acct border-acctb"
       : s >= 70
       ? "text-warning-700 bg-warning-50 border-warning-200"
       : "text-danger-700 bg-danger-50 border-danger-200";
@@ -604,7 +604,7 @@ function SummaryStat({
   const b = SEVERITY_BADGE[tone];
   const Icon = b.Icon;
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
+    <div className="rounded-[var(--denim-r)] border border-border bg-card p-4 shadow-[var(--shadow-card)]">
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           {label}
@@ -638,7 +638,7 @@ function FindingRow({ f }: { f: AuditFinding }) {
         <p className="mt-1 text-sm font-medium text-foreground">{f.title}</p>
         <p className="text-sm text-muted-foreground">{f.detail}</p>
         {f.sourceCitation && (
-          <p className="mt-1 text-[11px] italic text-[#9a3412]">per {f.sourceCitation}</p>
+          <p className="mt-1 text-[11px] italic text-pri">per {f.sourceCitation}</p>
         )}
       </div>
       {f.fixHref && (

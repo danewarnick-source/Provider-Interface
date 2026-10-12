@@ -82,17 +82,17 @@ type Item = {
 const statusMeta: Record<Item["status"], { label: string; cls: string; icon: typeof CheckCircle2 }> = {
   auto_filled: {
     label: "Auto-filled",
-    cls: "bg-[color:var(--color-warning-100)] text-[color:var(--navy-900)]",
+    cls: "bg-pt text-pri border border-pt2",
     icon: Sparkles,
   },
   confirmed: {
     label: "Confirmed",
-    cls: "bg-[color:var(--navy-900)] text-white",
+    cls: "bg-acct text-accd border border-acctb",
     icon: CheckCircle2,
   },
   needs_review: {
     label: "Needs review",
-    cls: "bg-[color:var(--surface-2)] text-foreground border border-[color:var(--border-light)]",
+    cls: "bg-pt0 text-foreground border border-line",
     icon: Eye,
   },
   missing: {
@@ -135,9 +135,9 @@ export function AuditPage() {
     <div className="space-y-6" data-tour="audit.body">
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <FolderArchive className="h-6 w-6 text-[color:var(--color-warning-600)]" />
+          <FolderArchive className="h-6 w-6 text-accd" />
           <div>
-            <h1 className="text-2xl font-semibold">Audit</h1>
+            <h1 className="font-display text-2xl font-bold tracking-[-0.025em] text-deep">Audit</h1>
             <p className="text-sm text-muted-foreground">
               Audit folders organized by timeline. Upload a state audit letter and PI auto-produces the checklist, grounded in your uploaded SOW and contracts.
             </p>
@@ -169,11 +169,11 @@ export function AuditPage() {
           <button
             key={p.id}
             onClick={() => setOpenId(p.id)}
-            className="text-left rounded-lg border border-[color:var(--border-light)] bg-card/60 backdrop-blur p-4 hover:border-[color:var(--navy-700)] hover:bg-white transition"
+            className="text-left rounded-[var(--denim-r)] border border-line bg-card p-5 shadow-[var(--denim-shadow-sm)] hover:border-pri/40 hover:bg-pt0 transition"
           >
             <div className="flex items-center justify-between gap-2">
-              <FolderArchive className="h-5 w-5 text-[color:var(--navy-700)]" />
-              <Badge className="bg-[color:var(--surface-2)] text-foreground border-0">{p.status}</Badge>
+              <FolderArchive className="h-5 w-5 text-pri" />
+              <Badge className="bg-pt text-pri border-0">{p.status}</Badge>
             </div>
             <div className="mt-3 font-semibold">{p.name}</div>
             <div className="text-xs text-muted-foreground mt-1">
@@ -184,7 +184,7 @@ export function AuditPage() {
           </button>
         ))}
         {(packets ?? []).length === 0 && !isLoading && (
-          <Card className="bg-card/60 backdrop-blur border-dashed col-span-full">
+          <Card className="border-dashed col-span-full">
             <CardContent className="py-10 text-center text-sm text-muted-foreground">
               No audit folders yet. Click <strong>New audit folder</strong> to start one.
             </CardContent>
@@ -484,27 +484,27 @@ function PacketDetail({
       </div>
 
       {disclosureItem && (
-        <div className="flex items-start gap-3 rounded-lg border-2 border-warning-400 bg-warning-50 p-4 dark:border-warning-700 dark:bg-warning-950/40">
-          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-warning-600 dark:text-warning-400" />
+        <div className="flex items-start gap-3 rounded-[var(--denim-r)] border border-warning-200 bg-warning-50 p-4">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-warning-700" />
           <div className="min-w-0">
-            <div className="text-sm font-semibold text-warning-900 dark:text-warning-200">
+            <div className="text-sm font-semibold text-warning-700">
               {disclosureItem.title}
             </div>
-            <p className="mt-1 text-sm text-warning-900/90 dark:text-warning-200/90">
+            <p className="mt-1 text-sm text-warning-700/90">
               {disclosureItem.description}
             </p>
           </div>
         </div>
       )}
 
-      <Card className="bg-card/60 backdrop-blur border-[color:var(--border-light)]">
+      <Card className="border-line">
         <CardHeader>
           <CardTitle className="text-base">Audit Overview</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-sm">
             <Stat label="Items" value={counts.total} />
-            <Stat label="Auto-filled" value={counts.auto_filled} accent="amber" />
+            <Stat label="Auto-filled" value={counts.auto_filled} accent="info" />
             <Stat label="Confirmed" value={counts.confirmed} accent="navy" />
             <Stat label="Needs review" value={counts.needs_review} />
             <Stat label="Missing" value={counts.missing} accent={counts.missing > 0 ? "red" : undefined} />
@@ -519,10 +519,10 @@ function PacketDetail({
       </Card>
 
       {(["staff", "client", "admin", "other"] as const).map((folder) => (
-        <Card key={folder} className="bg-card/60 backdrop-blur border-[color:var(--border-light)]">
+        <Card key={folder} className="border-line">
           <CardHeader>
             <CardTitle className="text-sm capitalize flex items-center gap-2">
-              <FolderArchive className="h-4 w-4 text-[color:var(--navy-700)]" />
+              <FolderArchive className="h-4 w-4 text-pri" />
               {folder} <span className="text-muted-foreground font-normal">({grouped[folder].length})</span>
             </CardTitle>
           </CardHeader>
@@ -536,7 +536,7 @@ function PacketDetail({
               return (
                 <div
                   key={it.id}
-                  className="rounded-md border border-[color:var(--border-light)] bg-white/70 p-3 flex items-start justify-between gap-3"
+                  className="rounded-xl border border-line bg-pt0 p-3 flex items-start justify-between gap-3"
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
@@ -579,7 +579,7 @@ function PacketDetail({
         </Card>
       ))}
 
-      <Card className="bg-card/60 backdrop-blur border-[color:var(--border-light)]">
+      <Card className="border-line">
         <CardHeader>
           <CardTitle className="text-sm">Linked Records-Desk audit files</CardTitle>
         </CardHeader>
@@ -592,14 +592,14 @@ function PacketDetail({
           {(linkedFiles ?? []).map((f: any) => (
             <div
               key={f.id}
-              className="flex items-center justify-between gap-3 rounded-md border border-[color:var(--border-light)] bg-white/70 px-3 py-2"
+              className="flex items-center justify-between gap-3 rounded-xl border border-line bg-pt0 px-3 py-2"
             >
               <div className="text-sm">
                 <span className="font-medium">{format(new Date(f.period_month), "MMMM yyyy")}</span>
                 <span className="text-xs text-muted-foreground ml-2">({f.status.replace("_", " ")})</span>
               </div>
               {f.audit_packet_id === packetId ? (
-                <Badge className="bg-[color:var(--navy-900)] text-white border-0">Linked</Badge>
+                <Badge className="bg-pt text-pri border-0">Linked</Badge>
               ) : (
                 <Button size="sm" variant="secondary" onClick={() => linkFile.mutate(f.id)}>
                   Attach
@@ -611,7 +611,7 @@ function PacketDetail({
       </Card>
 
       {packet && (
-        <Card className="bg-card/60 backdrop-blur border-[color:var(--border-light)]">
+        <Card className="border-line">
           <CardHeader>
             <CardTitle className="text-sm">Auditor Access Portal</CardTitle>
           </CardHeader>
@@ -635,19 +635,19 @@ function Stat({
 }: {
   label: string;
   value: number;
-  accent?: "amber" | "navy" | "red";
+  accent?: "info" | "navy" | "red";
 }) {
   const accentCls =
-    accent === "amber"
-      ? "text-[color:var(--color-warning-600)]"
+    accent === "info"
+      ? "text-pri"
       : accent === "navy"
-      ? "text-[color:var(--navy-900)]"
+      ? "text-deep"
       : accent === "red"
       ? "text-destructive"
       : "text-foreground";
   return (
-    <div className="rounded-md border border-[color:var(--border-light)] bg-white/70 px-3 py-2">
-      <div className={`text-xl font-semibold ${accentCls}`}>{value}</div>
+    <div className="rounded-xl border border-line bg-pt0 px-3 py-2">
+      <div className={`font-display text-xl font-bold tracking-[-0.01em] ${accentCls}`}>{value}</div>
       <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
     </div>
   );

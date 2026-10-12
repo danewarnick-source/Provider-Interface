@@ -74,7 +74,7 @@ function FormerStaffAttestPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-4 p-6">
       <header>
-        <h1 className="flex items-center gap-2 text-lg font-semibold">
+        <h1 className="font-display flex items-center gap-2 text-lg font-semibold tracking-[-0.01em]">
           <ShieldCheck className="h-5 w-5" /> Attest on behalf of former staff
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -85,7 +85,7 @@ function FormerStaffAttestPage() {
         </p>
       </header>
 
-      <div className="rounded-md border border-warning-500/40 bg-warning-500/5 p-3 text-xs text-muted-foreground">
+      <div className="rounded-xl border border-warning-200 bg-warning-50 p-3 text-xs text-warning-700">
         <Info className="mr-1 inline h-3 w-3" />
         Nothing here creates or edits note content on behalf of a staff member. You are signing off on the
         record as it was imported. If the narrative is empty or wrong and no one remembers what happened,
@@ -93,8 +93,8 @@ function FormerStaffAttestPage() {
       </div>
 
       {rows.length === 0 && (
-        <div className="rounded-2xl border border-success-500/40 bg-success-500/5 p-6 text-center text-sm">
-          <CheckCircle2 className="mx-auto h-6 w-6 text-success-600" />
+        <div className="rounded-[var(--denim-r)] border border-acctb bg-acct p-6 text-accd text-center text-sm">
+          <CheckCircle2 className="mx-auto h-6 w-6 text-acc" />
           <div className="mt-2 font-medium">No former-staff notes waiting for admin attestation.</div>
         </div>
       )}
@@ -104,7 +104,7 @@ function FormerStaffAttestPage() {
           const clientName =
             [r.clients?.first_name, r.clients?.last_name].filter(Boolean).join(" ").trim() || "Client";
           return (
-            <article key={r.id} className="rounded-2xl border border-border bg-card p-4 text-sm">
+            <article key={r.id} className="rounded-[var(--denim-r)] border border-border bg-card p-4 text-sm">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <div>
                   <div className="font-medium">{clientName} · {r.log_date}</div>
@@ -112,7 +112,7 @@ function FormerStaffAttestPage() {
                     Former staff id {r.user_id.slice(0, 8)}… (no active platform access)
                   </div>
                 </div>
-                <Badge variant="outline" className="border-warning-500/40 text-warning-700">
+                <Badge variant="outline" className="border-pt2 bg-pt text-pri">
                   <Archive className="mr-1 h-3 w-3" />
                   Historical import
                 </Badge>

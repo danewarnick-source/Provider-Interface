@@ -31,6 +31,7 @@ import { isDailyServiceCode } from "@/lib/service-billing";
 import { aggregateHourlyUnits, aggregateDailyDays } from "@/lib/accrual";
 import { RequireLevel } from "@/components/rbac-guard";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
+import { DENIM, DENIM_FONTS } from "@/lib/design-tokens";
 
 export const Route = createFileRoute("/dashboard/billing/form520")({
   head: () => ({ meta: [{ title: "520 Billing — Provider Interface" }] }),
@@ -723,11 +724,11 @@ function Billing520Page() {
       .join("");
     win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>520 ${rangeLabel}</title>
 <style>
-  body{font-family:ui-sans-serif,system-ui,sans-serif;color:var(--hive-text);padding:24px;}
-  h1{font-size:18px;margin:0 0 4px;} p{margin:0 0 16px;color:#555;font-size:12px;}
+  body{font-family:${DENIM_FONTS.body};color:${DENIM.ink};padding:24px;}
+  h1{font-family:${DENIM_FONTS.heading};font-weight:700;letter-spacing:-0.01em;color:${DENIM.deep};font-size:18px;margin:0 0 4px;} p{margin:0 0 16px;color:${DENIM.muted};font-size:12px;}
   table{width:100%;border-collapse:collapse;font-size:11px;}
-  th,td{border:1px solid #d4d4d8;padding:6px 8px;text-align:left;}
-  th{background:#f5f3ee;text-transform:uppercase;font-size:10px;letter-spacing:.04em;}
+  th,td{border:1px solid ${DENIM.line};padding:6px 8px;text-align:left;}
+  th{background:${DENIM.pt0};color:${DENIM.muted};text-transform:uppercase;font-size:10px;letter-spacing:.06em;}
   @media print{body{padding:0;}}
 </style></head><body>
 <h1>520 Submission — ${rangeLabel}</h1>
@@ -769,7 +770,7 @@ function Billing520Page() {
 
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-2xl font-bold tracking-[-0.025em] text-deep">
             520 Billing — {rangeStartStr} to {rangeEndStr}
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -849,7 +850,7 @@ function Billing520Page() {
 
       <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
         <table className="w-full min-w-[1100px] text-sm max-md:[&_th:first-child]:sticky max-md:[&_th:first-child]:left-0 max-md:[&_th:first-child]:z-10 max-md:[&_th:first-child]:bg-card max-md:[&_td:first-child]:sticky max-md:[&_td:first-child]:left-0 max-md:[&_td:first-child]:bg-card">
-          <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
+          <thead className="bg-pt0 text-left text-[12.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
             <tr>{HEADERS.map((h) => <th key={h} className="px-3 py-2 whitespace-nowrap">{h}</th>)}</tr>
           </thead>
           <tbody>
@@ -886,12 +887,12 @@ function Billing520Page() {
       </p>
 
       {/* ── Review & Submit ────────────────────────────────────────────── */}
-      <Card className="border-warning-500/20 bg-card/60 backdrop-blur">
+      <Card>
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <CardTitle className="flex items-center gap-2 text-base">
-                <ShieldCheck className="h-4 w-4 text-warning-600" />
+                <ShieldCheck className="h-4 w-4 text-pri" />
                 Review & Attest — Provider Confirmation Required
               </CardTitle>
               <p className="mt-1 text-xs text-muted-foreground">
@@ -908,7 +909,7 @@ function Billing520Page() {
 
         <CardContent className="space-y-4">
           {!ATTESTATION_COPY_APPROVED && (
-            <div className="rounded-md border border-warning-500/30 bg-warning-500/10 p-3 text-sm text-warning-800 dark:text-warning-200">
+            <div className="rounded-xl border border-warning-200 bg-warning-50 p-3 text-sm text-warning-700">
               Submission to the State is currently disabled — the provider attestation language is pending
               legal review and must be finalized before any 520 can be signed and submitted. Review and
               export (CSV / Excel / PDF) remain available.
@@ -939,7 +940,7 @@ function Billing520Page() {
                 </div>
                 {warnings.length === 0 ? (
                   <Alert className="border-success-500/30 bg-success-500/5">
-                    <CheckCircle2 className="h-4 w-4 text-success-600" />
+                    <CheckCircle2 className="h-4 w-4 text-accd" />
                     <AlertTitle>Clean</AlertTitle>
                     <AlertDescription>PI did not surface any audit warnings for this submission.</AlertDescription>
                   </Alert>
@@ -950,10 +951,10 @@ function Billing520Page() {
                       className={
                         w.severity === "blocker"
                           ? "border-destructive/40 bg-destructive/5"
-                          : "border-warning-500/40 bg-warning-500/5"
+                          : "border-warning-200 bg-warning-50"
                       }
                     >
-                      <AlertTriangle className={w.severity === "blocker" ? "h-4 w-4 text-destructive" : "h-4 w-4 text-warning-600"} />
+                      <AlertTriangle className={w.severity === "blocker" ? "h-4 w-4 text-destructive" : "h-4 w-4 text-warning-700"} />
                       <AlertTitle className="font-mono text-xs uppercase">{w.warning_type.replaceAll("_", " ")}</AlertTitle>
                       <AlertDescription className="space-y-2">
                         <p>{w.message}</p>
@@ -999,8 +1000,8 @@ function Billing520Page() {
               </div>
 
               {/* Attestation */}
-              <div className="rounded-xl border border-warning-500/30 bg-warning-500/5 p-4 space-y-3">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-warning-700 dark:text-warning-300">
+              <div className="rounded-xl border border-pt2 bg-pt p-4 space-y-3">
+                <h3 className="denim-eyebrow">
                   Provider Attestation
                 </h3>
                 <p className="text-[11px] italic text-muted-foreground">

@@ -204,15 +204,15 @@ export function OrgComplianceDocCard({
 
 function FlagBadge({ flag }: { flag: OrgComplianceDocFlagState }) {
   if (flag === "ok") {
-    return <Badge className="bg-success-100 text-success-800 hover:bg-success-100"><CheckCircle2 className="mr-1 h-3 w-3" />On file</Badge>;
+    return <Badge className="bg-acct text-accd hover:bg-success-100"><CheckCircle2 className="mr-1 h-3 w-3" />On file</Badge>;
   }
   if (flag === "missing") {
-    return <Badge className="bg-danger-100 text-danger-800 hover:bg-danger-100"><AlertTriangle className="mr-1 h-3 w-3" />Missing</Badge>;
+    return <Badge className="bg-danger-50 text-danger-700 hover:bg-danger-100"><AlertTriangle className="mr-1 h-3 w-3" />Missing</Badge>;
   }
   if (flag === "expired") {
-    return <Badge className="bg-danger-100 text-danger-800 hover:bg-danger-100"><AlertTriangle className="mr-1 h-3 w-3" />Expired</Badge>;
+    return <Badge className="bg-danger-50 text-danger-700 hover:bg-danger-100"><AlertTriangle className="mr-1 h-3 w-3" />Expired</Badge>;
   }
-  return <Badge className="bg-warning-100 text-warning-800 hover:bg-warning-100"><AlertTriangle className="mr-1 h-3 w-3" />Expiring soon</Badge>;
+  return <Badge className="bg-warning-50 text-warning-700 hover:bg-warning-50"><AlertTriangle className="mr-1 h-3 w-3" />Expiring soon</Badge>;
 }
 
 function UploadDialog({

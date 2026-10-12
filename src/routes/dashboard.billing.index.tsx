@@ -181,7 +181,7 @@ function BillingOverviewPage() {
       )}
       <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
         <table className="w-full min-w-[820px] text-sm max-md:[&_th:first-child]:sticky max-md:[&_th:first-child]:left-0 max-md:[&_th:first-child]:z-10 max-md:[&_th:first-child]:bg-card max-md:[&_td:first-child]:sticky max-md:[&_td:first-child]:left-0 max-md:[&_td:first-child]:bg-card">
-          <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
+          <thead className="bg-pt0 text-left text-[12.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
             <tr>
               <th className="px-3 py-2">Client</th>
               <th className="px-3 py-2">Medicaid ID</th>
@@ -201,7 +201,7 @@ function BillingOverviewPage() {
                 </td>
               </tr>
             ) : summary.map((s) => (
-              <tr key={s.client.id} className="border-t border-border hover:bg-muted/30">
+              <tr key={s.client.id} className="border-t border-line hover:bg-pt0">
                 <td className="px-3 py-2 font-medium">
                   {s.client.last_name}, {s.client.first_name}
                 </td>
@@ -209,7 +209,7 @@ function BillingOverviewPage() {
                 <td className="px-3 py-2 tabular-nums">{s.code_count}</td>
                 <td className="px-3 py-2 text-right tabular-nums">{fmtUnits(s.total_annual_units)}</td>
                 <td className="px-3 py-2 text-right tabular-nums">
-                  <span className={s.pct >= 100 ? "font-semibold text-[#dc2626]" : s.pct >= 90 ? "font-semibold text-[#b45309]" : ""}>
+                  <span className={s.pct >= 100 ? "font-semibold text-danger-700" : s.pct >= 90 ? "font-semibold text-warning-700" : ""}>
                     {fmtUnits(s.total_used_units)}
                   </span>
                   <span className="ml-1 text-xs text-muted-foreground">({s.pct.toFixed(0)}%)</span>
@@ -222,9 +222,9 @@ function BillingOverviewPage() {
                     <span className="inline-flex items-center gap-1">
                       {s.renewal.toLocaleDateString()}
                       {s.flagged_codes > 0 ? (
-                        <AlertTriangle className="h-3.5 w-3.5 text-[#b45309]" aria-label="Codes near cap" />
+                        <AlertTriangle className="h-3.5 w-3.5 text-warning-700" aria-label="Codes near cap" />
                       ) : (
-                        <CheckCircle2 className="h-3.5 w-3.5 text-[#15a06a]" />
+                        <CheckCircle2 className="h-3.5 w-3.5 text-acc" />
                       )}
                     </span>
                   ) : (
@@ -235,7 +235,7 @@ function BillingOverviewPage() {
                   <Link
                     to="/dashboard/billing/$clientId"
                     params={{ clientId: s.client.id }}
-                    className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-[var(--hive-accent-text)] hover:bg-[#fde9c8]"
+                    className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-medium text-pri hover:bg-pt"
                   >
                     Open <ChevronRight className="h-4 w-4" />
                   </Link>
