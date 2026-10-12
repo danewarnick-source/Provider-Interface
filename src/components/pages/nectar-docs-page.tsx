@@ -336,14 +336,14 @@ export function NectarDocsPage() {
 function ParseStatusBadge({ status }: { status: string }) {
   if (status === "parsed") {
     return (
-      <Badge className="bg-success-500/15 text-success-700 hover:bg-success-500/15 dark:text-success-300">
+      <Badge className="bg-acct text-accd ring-1 ring-acctb hover:bg-acct">
         <Sparkles className="mr-1 h-3 w-3" /> Parsed
       </Badge>
     );
   }
   if (status === "parsing" || status === "pending") {
     return (
-      <Badge className="bg-warning-500/15 text-warning-700 hover:bg-warning-500/15 dark:text-warning-300">
+      <Badge className="bg-pt text-pri hover:bg-pt">
         <Loader2 className="mr-1 h-3 w-3 animate-spin" /> {status}
       </Badge>
     );
@@ -412,7 +412,7 @@ function UploadButton({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button className="gap-2 bg-warning-500 text-warning-950 hover:bg-warning-400">
+        <Button className="gap-2">
           <Upload className="h-4 w-4" /> Upload document
         </Button>
       </DialogTrigger>
@@ -493,7 +493,6 @@ function UploadButton({
           <Button
             disabled={!file || mut.isPending}
             onClick={() => mut.mutate()}
-            className="bg-warning-500 text-warning-950 hover:bg-warning-400"
           >
             {mut.isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -674,7 +673,7 @@ function DocumentDetailDialog({
                           <div className="flex gap-1">
                             <Button
                               size="sm"
-                              className="h-7 bg-warning-500 text-warning-950 hover:bg-warning-400"
+                              className="h-7"
                               onClick={() => review.mutate({ fieldId: f.id, action: "confirm" })}
                             >
                               <ShieldCheck className="mr-1 h-3 w-3" /> Confirm
@@ -743,7 +742,7 @@ function DocumentDetailDialog({
 function FieldStatusBadge({ status }: { status: string }) {
   if (status === "confirmed")
     return (
-      <Badge className="bg-success-500/15 text-success-700 hover:bg-success-500/15 dark:text-success-300">
+      <Badge className="bg-acct text-accd ring-1 ring-acctb hover:bg-acct">
         confirmed
       </Badge>
     );

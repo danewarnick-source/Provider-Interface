@@ -76,19 +76,19 @@ function ApprovalsPage() {
   return (
     <div className="space-y-4">
       {/* Liability banner — critical to keep visible */}
-      <section className="rounded-xl border border-[#fed7aa] bg-gradient-to-r from-[#fff7ed] to-[#ffedd5] p-4 shadow-sm">
+      <section className="rounded-xl border border-pt2 bg-pt p-4 shadow-[var(--denim-shadow-sm)]">
         <div className="flex items-start gap-3">
           <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--hive-accent)] text-white">
             <ShieldCheck className="h-5 w-5" />
           </span>
           <div>
-            <div className="text-xs font-semibold uppercase tracking-wider text-[#9a3412]">
+            <div className="text-xs font-semibold uppercase tracking-wider text-pri">
               PI Executive · Extraction approval queue
             </div>
-            <h1 className="font-display text-lg font-semibold text-[#7c2d12]">
+            <h1 className="font-display text-lg font-semibold text-deep">
               Verify NECTAR read the source accurately
             </h1>
-            <p className="mt-1 max-w-3xl text-sm text-[#7c2d12]/85">
+            <p className="mt-1 max-w-3xl text-sm text-deep/85">
               You are confirming that NECTAR extracted and structured this
               requirement <strong>faithfully from the source document</strong>.
               You are <strong>not</strong> confirming whether the provider must
@@ -143,7 +143,7 @@ function ApprovalCard({
   const [note, setNote] = useState("");
 
   return (
-    <article className="rounded-xl border border-border bg-card p-4 shadow-sm">
+    <article className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">

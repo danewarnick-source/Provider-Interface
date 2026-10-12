@@ -175,11 +175,10 @@ export function NectarBar({
 
   return (
     <div
-      className="rounded-xl border bg-card p-2.5 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center"
-      style={{ borderColor: "#e6e7ee" }}
+      className="rounded-[var(--denim-r)] border border-pt2 bg-pt/60 p-2.5 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center"
     >
-      <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">
-        <Sparkles className="h-3.5 w-3.5 text-warning-500" />
+      <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.1em] text-accd px-1">
+        <Sparkles className="h-3.5 w-3.5 text-acc" />
         Ask Nectar
       </div>
       <Input

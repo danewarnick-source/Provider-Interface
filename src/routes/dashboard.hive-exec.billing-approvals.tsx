@@ -46,7 +46,7 @@ function BillingApprovalsPage() {
 
   return (
     <div className="space-y-4">
-      <header className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+      <header className="rounded-2xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
         <div className="flex flex-wrap items-center gap-3">
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-success-100 text-success-700">
             <ShieldCheck className="h-4 w-4" />
@@ -66,7 +66,7 @@ function BillingApprovalsPage() {
         </div>
       </header>
 
-      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
         <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <TabsList>

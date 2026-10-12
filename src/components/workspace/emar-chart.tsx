@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import { isAdminLevel } from "@/lib/access/levels";
 
 /** Permanent legal/scope banner shown at the top of every eMAR surface.
- *  Deep-navy band with amber warning icon — matches the self-administration
+ *  Deep-navy band with warning icon — matches the self-administration
  *  disclaimer in the eMAR design spec. */
 export function EmarLegalBanner({ compact = false }: { compact?: boolean }) {
   return (
@@ -392,7 +392,7 @@ export function MedicationProfileCard({
             <h4 className="text-base font-semibold leading-tight">{med.medication_name}</h4>
             {med.dosage && <span className="text-sm text-muted-foreground">{med.dosage}</span>}
             {med.is_prn && (
-              <Badge className="bg-warning-100 text-warning-800 hover:bg-warning-100 text-[10px]">PRN</Badge>
+              <Badge className="bg-pt text-pri hover:bg-pt text-[10px]">PRN</Badge>
             )}
             {med.is_controlled && (
               <Badge className="bg-denim-100 text-denim-800 hover:bg-denim-100 text-[10px]">Controlled</Badge>

@@ -353,7 +353,7 @@ export function PunchPad({
   const [dismissReasonDraft, setDismissReasonDraft] = useState("");
   const navigate = useNavigate();
 
-  // ── Pre-submit medication check (reads real emar_logs, no shadow store) ───
+  // ── Pre-submit medication check (reads real emar_logs, no shadow-[var(--denim-shadow-sm)] store) ───
   const [medDosesResolved, setMedDosesResolved] = useState(true);
   const [pendingMedDoses, setPendingMedDoses] = useState<PendingMedDose[]>([]);
 
@@ -1661,7 +1661,7 @@ export function PunchPad({
     }
 
     // Medication compliance is now recorded in the real MAR (`emar_logs`) via
-    // the eMAR tab — no shadow attestation write here.
+    // the eMAR tab — no shadow-[var(--denim-shadow-sm)] attestation write here.
 
 
 
@@ -2092,23 +2092,23 @@ export function PunchPad({
             className="mb-4 rounded-lg border border-warning-400/60 bg-warning-50 px-3 py-3"
             role="alert"
           >
-            <p className="flex items-center gap-2 text-sm font-semibold text-[#1A2B47]">
+            <p className="flex items-center gap-2 text-sm font-semibold text-deep">
               <Lock className="h-4 w-4 text-warning-700" />
               Launchpad required before clock-in
             </p>
-            <p className="mt-1 text-[12px] leading-snug text-[#1A2B47]/90">
+            <p className="mt-1 text-[12px] leading-snug text-deep/90">
               {LAUNCHPAD_CLOCK_IN_BLOCKED_MESSAGE}
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
               <Link
                 to="/dashboard/hive-training"
-                className="inline-flex items-center rounded-md bg-[#1A2B47] px-2.5 py-1 text-xs font-semibold text-white hover:bg-[#1A2B47]/90"
+                className="inline-flex items-center rounded-full bg-pri px-3 py-1 text-xs font-semibold text-white hover:bg-deep"
               >
                 Open Training
               </Link>
               <Link
                 to="/dashboard/my-obligations"
-                className="inline-flex items-center rounded-md border border-[#1A2B47]/30 px-2.5 py-1 text-xs font-semibold text-[#1A2B47] hover:bg-white"
+                className="inline-flex items-center rounded-full border border-pt2 bg-paper px-3 py-1 text-xs font-semibold text-pri hover:bg-pt"
               >
                 Staff file
               </Link>
@@ -2128,17 +2128,17 @@ export function PunchPad({
             benefit="NECTAR tells you up front what this shift will need at clock-out — so end-of-shift isn't a surprise."
             className="mb-4"
           >
-            <div className="rounded-lg border border-[color:var(--color-warning-300)] bg-[color:var(--color-warning-50)]/70 px-3 py-2.5">
-              <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--color-warning-700)]">
-                <PiMark className="h-3.5 w-3.5" /> NECTAR · Pre-flight
+            <div className="rounded-[var(--denim-r)] border border-pt2 bg-pt px-3 py-2.5">
+              <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-accd">
+                <PiMark variant="brand" className="h-3.5 w-3.5" /> NECTAR · Pre-flight
               </p>
-              <p className="mt-1 text-[12px] leading-snug text-[color:var(--navy-900)]">
+              <p className="mt-1 text-[12px] leading-snug text-deep">
                 <span className="font-semibold">
                   {serviceCode} shift with {clientForPunch.name.split(" ")[0]}
                 </span>{" "}
                 — at clock-out you'll need:
               </p>
-              <ul className="mt-1 space-y-0.5 text-[12px] leading-snug text-[color:var(--navy-900)]/90">
+              <ul className="mt-1 space-y-0.5 text-[12px] leading-snug text-deep/90">
                 <li>• A progress note (50-word minimum, objective)</li>
                 <li>• At least one goal support checked
                   {supportOptions.length
@@ -2150,7 +2150,7 @@ export function PunchPad({
                 )}
                 <li>• Any spending or reimbursement entries logged before submitting</li>
               </ul>
-              <p className="mt-1.5 text-[11px] text-[color:var(--navy-900)]/70">
+              <p className="mt-1.5 text-[11px] text-deep/70">
                 Tip: you can dictate the note by voice at clock-out.
               </p>
             </div>
@@ -2265,7 +2265,7 @@ export function PunchPad({
               type="button"
               onClick={openCompliance}
               disabled={busy}
-              className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-danger-600 text-base font-bold uppercase tracking-wider text-white shadow-lg shadow-danger-600/30 transition hover:bg-danger-700 disabled:opacity-60"
+              className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-danger-600 text-base font-bold uppercase tracking-wider text-white shadow-[var(--denim-shadow)] shadow-danger-600/30 transition hover:bg-danger-700 disabled:opacity-60"
               aria-label={endIsEvv ? "End EVV Shift" : "Clock Out"}
             >
               {busy
@@ -2280,7 +2280,7 @@ export function PunchPad({
                 type="button"
                 onClick={handleClockIn}
                 disabled={busy || !inReady || launchpadBlocked}
-                className="flex h-32 w-32 items-center justify-center rounded-full bg-success-600 text-white shadow-lg shadow-success-600/30 transition hover:scale-[1.02] hover:bg-success-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex h-32 w-32 items-center justify-center rounded-full bg-success-600 text-white shadow-[var(--denim-shadow)] shadow-success-600/30 transition hover:scale-[1.02] hover:bg-success-700 disabled:cursor-not-allowed disabled:opacity-60"
                 aria-label={startIsEvv ? "Start EVV Shift" : "Clock In"}
                 data-testid="clock-in-button"
               >
@@ -2302,14 +2302,14 @@ export function PunchPad({
           benefit="Plain-language answers to 'am I allowed to…?' questions, grounded in this client's plan and your company policy."
           className="mt-4"
         >
-          <div className="rounded-lg border border-[color:var(--border-light)] bg-background/60 p-3">
+          <div className="rounded-[var(--denim-r)] border border-pt2 bg-pt/60 p-3">
             <button
               type="button"
               onClick={() => setAskOpen((o) => !o)}
               className="flex w-full items-center justify-between gap-2 text-left"
               aria-expanded={askOpen}
             >
-              <span className="flex items-center gap-2 text-xs font-semibold text-[color:var(--navy-900)]">
+              <span className="flex items-center gap-2 text-xs font-semibold text-deep">
                 <PiMark variant="brand" className="h-3.5 w-3.5" />
                 Ask NECTAR — "am I allowed to…?"
               </span>
@@ -2334,7 +2334,7 @@ export function PunchPad({
                     size="sm"
                     onClick={handleAskNectar}
                     disabled={askBusy || askQuestion.trim().length < 4}
-                    className="bg-[color:var(--color-warning-500)] text-[color:var(--navy-900)] hover:bg-[color:var(--color-warning-600)]"
+                    className="rounded-full"
                   >
                     {askBusy ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-1 h-3.5 w-3.5" />}
                     Ask
@@ -2346,14 +2346,14 @@ export function PunchPad({
                     className={`rounded-md border p-3 text-[13px] leading-snug ${
                       askResult.escalate
                         ? "border-danger-300 bg-danger-50 text-danger-900"
-                        : "border-[color:var(--color-warning-300)] bg-[color:var(--color-warning-50)] text-[color:var(--navy-900)]"
+                        : "border-pt2 bg-pt text-deep"
                     }`}
                   >
                     <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide">
                       {askResult.escalate ? (
                         <><AlertTriangle className="h-3.5 w-3.5" /> Escalate now</>
                       ) : (
-                        <><PiMark className="h-3.5 w-3.5" /> NECTAR · Confidence: {askResult.confidence}</>
+                        <><PiMark variant="brand" className="h-3.5 w-3.5" /> NECTAR · Confidence: {askResult.confidence}</>
                       )}
                     </p>
                     <p className="mt-1">{askResult.answer}</p>
@@ -2857,10 +2857,10 @@ export function PunchPad({
                   featureName="Pre-submit completeness check"
                   benefit="NECTAR cross-checks your shift before submit — purchases mentioned vs spending log, approved reimbursements vs receipts, EVV consistency — so issues get fixed before they become audit flags."
                 >
-                  <div className="rounded-lg border-2 border-[color:var(--color-warning-400)]/50 bg-white/60 px-3 py-3 shadow-sm backdrop-blur sm:px-4">
+                  <div className="rounded-[var(--denim-r)] border border-pt2 bg-white/70 px-3 py-3 shadow-[var(--denim-shadow-sm)] backdrop-blur sm:px-4">
                     <div className="mb-2 flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 text-sm font-bold text-[color:var(--navy-900)]">
-                        <ShieldCheck className="h-4 w-4 text-[color:var(--color-warning-600)]" />
+                      <div className="flex items-center gap-2 text-sm font-bold text-deep">
+                        <ShieldCheck className="h-4 w-4 text-acc" />
                         NECTAR Completeness Check
                       </div>
                       <Button
@@ -2869,7 +2869,7 @@ export function PunchPad({
                         variant="outline"
                         onClick={() => { void runCompletenessCheck(); }}
                         disabled={completenessBusy}
-                        className="border-[color:var(--color-warning-600)]/60 text-[color:var(--color-warning-700)] hover:bg-[color:var(--color-warning-50)]"
+                        className="border-pt2 text-pri hover:bg-pt0"
                       >
                         {completenessBusy && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
                         {completenessRan ? "Re-check" : "Run check"}
@@ -2902,7 +2902,7 @@ export function PunchPad({
                                   ? "border-muted bg-muted/40"
                                   : isHard
                                   ? "border-danger-500/50 bg-danger-500/10"
-                                  : "border-[color:var(--color-warning-500)]/50 bg-[color:var(--color-warning-50)]/70"
+                                  : "border-warning-500/50 bg-warning-50/70"
                               }`}
                             >
                               <div className="flex items-start gap-2">
@@ -2910,13 +2910,13 @@ export function PunchPad({
                                   className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
                                     isHard
                                       ? "bg-danger-600 text-white"
-                                      : "bg-[color:var(--color-warning-600)] text-white"
+                                      : "bg-warning-600 text-white"
                                   }`}
                                 >
                                   {isHard ? "!" : "?"}
                                 </span>
                                 <div className="min-w-0 flex-1">
-                                  <p className={`text-xs font-medium leading-snug ${dismissed ? "text-muted-foreground line-through" : "text-[color:var(--navy-900)]"}`}>
+                                  <p className={`text-xs font-medium leading-snug ${dismissed ? "text-muted-foreground line-through" : "text-deep"}`}>
                                     {f.message}
                                   </p>
                                   {dismissed && (
@@ -2993,7 +2993,7 @@ export function PunchPad({
                           >
                             <input
                               type="checkbox"
-                              className="h-4 w-4 cursor-pointer accent-[color:var(--color-warning-600)]"
+                              className="h-4 w-4 cursor-pointer accent-warning-600"
                               checked={longShiftAck}
                               onChange={(e) => setLongShiftAck(e.target.checked)}
                             />
@@ -3004,7 +3004,7 @@ export function PunchPad({
                             size="sm"
                             variant="outline"
                             onClick={() => active && openCorrectionPanel(active)}
-                            className="h-8 border-[color:var(--color-warning-600)]/60 text-[color:var(--color-warning-700)] hover:bg-[color:var(--color-warning-50)]"
+                            className="h-8 border-warning-600/60 text-warning-700 hover:bg-warning-50"
                           >
                             <Pencil className="mr-1.5 h-3.5 w-3.5" /> Request time correction
                           </Button>
@@ -3021,7 +3021,7 @@ export function PunchPad({
                       size="sm"
                       variant="outline"
                       onClick={() => openCorrectionPanel(active)}
-                      className="h-8 border-[color:var(--color-warning-600)]/60 text-[color:var(--color-warning-700)] hover:bg-[color:var(--color-warning-50)]"
+                      className="h-8 border-warning-600/60 text-warning-700 hover:bg-warning-50"
                     >
                       <Pencil className="mr-1.5 h-3.5 w-3.5" /> Request time correction
                     </Button>
@@ -3103,7 +3103,7 @@ export function PunchPad({
                     <label className="flex cursor-pointer items-start gap-2.5 text-sm">
                       <input
                         type="checkbox"
-                        className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[color:var(--color-warning-600)]"
+                        className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-warning-600"
                         checked={nectarAssistChecked}
                         onChange={(e) => setNectarAssistChecked(e.target.checked)}
                       />
@@ -3119,7 +3119,7 @@ export function PunchPad({
                   <label className="flex cursor-pointer items-start gap-2.5 text-sm">
                     <input
                       type="checkbox"
-                      className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[color:var(--color-warning-600)]"
+                      className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-warning-600"
                       checked={attestationChecked}
                       onChange={(e) => {
                         const checked = e.target.checked;
@@ -3197,8 +3197,8 @@ export function PunchPad({
                     disabled={!canSubmitCompliance || aiBusy}
                     className={
                       correctionOpen && correctionHasChange
-                        ? "w-full bg-warning-600 text-white hover:bg-warning-700 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
-                        : "w-full bg-warning-500 text-white hover:bg-warning-600 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
+                        ? "w-full bg-warning-700 text-white hover:bg-warning-800 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
+                        : "w-full bg-pri text-white hover:bg-deep disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
                     }
                   >
                     {(busy || aiBusy) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

@@ -42,7 +42,7 @@ function AgreementsMatrixPage() {
     <div className="space-y-4">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-display text-lg font-semibold text-[var(--hive-text)]">Agreements Matrix</h1>
+          <h1 className="font-display text-lg font-semibold text-deep">Agreements Matrix</h1>
           <p className="text-sm text-muted-foreground">Per-organization compliance paperwork. Contracts &amp; status only — no client data.</p>
         </div>
         <div className="flex gap-2">
@@ -59,7 +59,7 @@ function AgreementsMatrixPage() {
       {q.isLoading && <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">Loading…</div>}
 
       {q.data && (
-        <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
+        <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-[var(--denim-shadow-sm)]">
           <table className="w-full min-w-[720px] border-collapse text-sm">
             <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
@@ -106,10 +106,10 @@ function AgreementsMatrixPage() {
 function StatusChip({ status, attention }: { status: AgreementStatus | "missing"; attention: MatrixCell["attention"] }) {
   const label = status === "missing" ? "Not started" : status.replace("_", " ");
   let cls = "bg-muted text-muted-foreground";
-  if (attention === "overdue") cls = "bg-[#fecaca] text-[#7f1d1d]";
-  else if (attention === "expiring_soon") cls = "bg-[#fef3c7] text-[#78350f]";
-  else if (status === "signed") cls = "bg-[#dcfce7] text-[#166534]";
-  else if (status === "sent") cls = "bg-[#dbeafe] text-[#1e40af]";
-  else if (status === "expired") cls = "bg-[#fecaca] text-[#7f1d1d]";
+  if (attention === "overdue") cls = "bg-danger-200 text-danger-900";
+  else if (attention === "expiring_soon") cls = "bg-warning-50 text-warning-700";
+  else if (status === "signed") cls = "bg-acct text-accd";
+  else if (status === "sent") cls = "bg-pt text-pri";
+  else if (status === "expired") cls = "bg-danger-200 text-danger-900";
   return <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] capitalize ${cls}`}>{label}</span>;
 }

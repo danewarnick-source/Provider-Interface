@@ -86,8 +86,8 @@ export function NectarDocumentActionsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--color-warning-700,#b45309)]">
-            <Sparkles className="h-3.5 w-3.5" /> NECTAR
+          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-accd">
+            <Sparkles className="h-3.5 w-3.5 text-acc" /> NECTAR
           </div>
           <DialogTitle className="text-base">
             {offer.isLoading ? "Reading your document…" : "What I can do with this"}
@@ -136,13 +136,13 @@ export function NectarDocumentActionsDialog({
                         type="button"
                         disabled={run.isPending}
                         onClick={() => run.mutate(a.handler)}
-                        className="flex w-full flex-col items-start gap-1 rounded-xl border border-border/60 bg-card p-3 text-left text-sm transition hover:border-[color:var(--color-warning-400,var(--hive-accent))] hover:bg-[color:var(--color-warning-50,#fffbeb)] disabled:cursor-not-allowed disabled:opacity-60"
+                        className="flex w-full flex-col items-start gap-1 rounded-xl border border-border/60 bg-card p-3 text-left text-sm transition hover:border-pt2 hover:bg-pt0 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         <span className="flex items-center gap-2 font-medium">
                           {busyKey === a.handler && run.isPending ? (
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
                           ) : (
-                            <Sparkles className="h-3.5 w-3.5 text-[color:var(--color-warning-600,#d97706)]" />
+                            <Sparkles className="h-3.5 w-3.5 text-acc" />
                           )}
                           {a.label}
                         </span>

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import type { ShiftRow } from "@/hooks/use-schedule-preview";
+import { DENIM } from "@/lib/design-tokens";
 
 // ── Design tokens ported from PI-Schedule-Demo-v6.html ──────────────
 export const SCHED = {
   navy: "var(--hive-sidebar)",
-  gold: "var(--hive-accent)",
+  accent: "var(--hive-accent)",
   teal: "var(--hive-ok)",
   ink: "var(--hive-ink)",
   paper: "var(--hive-canvas)",
@@ -15,12 +16,12 @@ export const SCHED = {
   gapBg: "var(--hive-danger-soft)",
   ok: "var(--hive-ok)",
   okBg: "var(--hive-ok-soft)",
-  warn: "var(--hive-accent)",
-  warnBg: "var(--hive-accent-soft)",
+  warn: "var(--hive-warn-fg)",
+  warnBg: "var(--hive-warn-soft)",
   tealBg: "var(--hive-ok-soft)",
   purple: "var(--hive-sidebar)",
-  purpleBg: "#eef1f4",
-  shadow: "0 1px 2px rgba(36,48,64,.06),0 8px 24px rgba(36,48,64,.06)",
+  purpleBg: "var(--denim-pt)",
+  shadow: "var(--denim-shadow)",
 } as const;
 
 export const font: React.CSSProperties = {
@@ -45,17 +46,17 @@ export type ShiftType = {
   label: string;      // display name
   start: string;      // 24h "HH:MM"
   end: string;        // 24h "HH:MM"
-  color: string;      // hex
+  color: string;      // hex (DENIM constants: persisted per-device as data)
 };
 
 export const DEFAULT_SHIFT_TYPES: ShiftType[] = [
-  { key: "morning",   label: "Morning",     start: "06:00", end: "14:00", color: "#3E5368" },
-  { key: "swing",     label: "Swing",       start: "14:00", end: "22:00", color: "#5b4b9e" },
-  { key: "overnight", label: "Overnight",   start: "22:00", end: "06:00", color: "#3a3f78" },
-  { key: "day",       label: "Day",         start: "09:00", end: "15:00", color: "#b8791a" },
-  { key: "support",   label: "1:1 Support", start: "09:00", end: "15:00", color: "#8a5a12" },
-  { key: "dsi",       label: "DSI",         start: "09:00", end: "15:00", color: "#1f9d6b" },
-  { key: "respite",   label: "Respite",     start: "16:00", end: "20:00", color: "#a14a8a" },
+  { key: "morning",   label: "Morning",     start: "06:00", end: "14:00", color: DENIM.pri },
+  { key: "swing",     label: "Swing",       start: "14:00", end: "22:00", color: DENIM.steel },
+  { key: "overnight", label: "Overnight",   start: "22:00", end: "06:00", color: DENIM.deep },
+  { key: "day",       label: "Day",         start: "09:00", end: "15:00", color: DENIM.acc },
+  { key: "support",   label: "1:1 Support", start: "09:00", end: "15:00", color: DENIM.hi },
+  { key: "dsi",       label: "DSI",         start: "09:00", end: "15:00", color: DENIM.accd },
+  { key: "respite",   label: "Respite",     start: "16:00", end: "20:00", color: DENIM.muted },
 ];
 
 /** Read the user's customized shift-type list (or defaults) from localStorage. */

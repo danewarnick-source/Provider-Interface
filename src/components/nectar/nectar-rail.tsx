@@ -42,7 +42,7 @@ export function NectarRail({
     <aside
       aria-label="Nectar"
       className={cn(
-        "flex h-full min-h-0 w-full flex-col border-l border-[var(--hive-border)] bg-[var(--hive-sidebar)]",
+        "flex h-full min-h-0 w-full flex-col border-l border-[var(--hive-border)] bg-[var(--hive-canvas)]",
         className,
       )}
     >

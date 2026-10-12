@@ -32,14 +32,14 @@ function ExecCommandCenterLayout() {
 
   return (
     <div className="space-y-4">
-      <header className="rounded-xl border border-[#fed7aa] bg-gradient-to-r from-[var(--hive-text)] to-[#1a2a5a] p-4 text-white shadow-sm">
+      <header className="denim-band rounded-[24px] p-4 text-white">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hive-accent)] text-white">
               <Shield className="h-5 w-5" />
             </span>
             <div>
-              <div className="text-xs uppercase tracking-wider text-[#fed7aa]">
+              <div className="text-xs font-semibold uppercase tracking-[0.1em] text-accl">
                 PI Platform · Executive Command Center
               </div>
               <h1 className="font-display text-xl font-bold tracking-tight">Platform operations</h1>
@@ -50,13 +50,13 @@ function ExecCommandCenterLayout() {
               <Button
                 size="sm"
                 variant="secondary"
-                className="bg-[var(--hive-accent)] text-white hover:bg-[#b8641a]"
+                className="rounded-full bg-acc text-white hover:bg-accd"
                 onClick={() => setGuideOpen(true)}
               >
                 <HelpCircle className="mr-1 h-3.5 w-3.5" /> Guide me
               </Button>
             )}
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#fed7aa] bg-[var(--hive-text)] px-3 py-1.5 text-xs font-medium text-[#fed7aa]">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-ondark">
               <ShieldAlert className="h-3.5 w-3.5" />
               Account &amp; billing only — no client records or PHI
             </div>

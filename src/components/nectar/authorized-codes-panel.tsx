@@ -94,7 +94,7 @@ export function AuthorizedCodesPanel({ orgId }: { orgId: string }) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-warning-300/40 bg-warning-50/40 dark:bg-warning-500/5 p-4">
+      <div className="rounded-[20px] border border-pt2 bg-pt/60 p-4">
         <div className="flex items-start gap-3">
           <PiMark variant="brand" className="h-5 w-5 mt-0.5" />
           <div className="text-sm">

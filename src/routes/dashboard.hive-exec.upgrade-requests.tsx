@@ -38,10 +38,10 @@ function UpgradeRequestsPage() {
 
   return (
     <div className="space-y-4">
-      <header className="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <header className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[#fff7ed] text-[#9a3412]">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-pt text-pri">
               <Sparkles className="h-5 w-5" />
             </span>
             <div>
@@ -58,7 +58,7 @@ function UpgradeRequestsPage() {
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`min-h-[36px] rounded px-3 py-1 text-xs font-medium capitalize transition-colors ${
-                  filter === f ? "bg-[var(--hive-text)] text-white" : "text-muted-foreground hover:bg-muted"
+                  filter === f ? "bg-pri text-white" : "text-muted-foreground hover:bg-muted"
                 }`}
               >
                 {f}
@@ -68,7 +68,7 @@ function UpgradeRequestsPage() {
         </div>
       </header>
 
-      <section className="rounded-xl border border-border bg-card shadow-sm">
+      <section className="rounded-xl border border-border bg-card shadow-[var(--denim-shadow-sm)]">
         {listQ.isLoading ? (
           <div className="p-6 text-center text-sm text-muted-foreground">Loading…</div>
         ) : rows.length === 0 ? (
@@ -113,7 +113,7 @@ function RequestRow({
           <span className="font-medium text-[var(--hive-text)]">{row.organization_name}</span>
           <StatusPill status={row.status} />
           {row.required_tier && (
-            <span className="rounded bg-[#fff7ed] px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-[#9a3412]">
+            <span className="rounded bg-pt px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-pri">
               {row.required_tier}
             </span>
           )}
@@ -148,7 +148,7 @@ function RequestRow({
           <button
             onClick={onGrant}
             disabled={busy}
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md bg-success-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-success-700 disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md bg-success-600 px-3 py-2 text-sm font-semibold text-white shadow-[var(--denim-shadow-sm)] hover:bg-success-700 disabled:opacity-50"
           >
             <Check className="h-4 w-4" /> Grant access
           </button>

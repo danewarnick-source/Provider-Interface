@@ -64,9 +64,9 @@ export function OpenShiftsPanel({
   if (!rows.length) return null;
 
   return (
-    <div className="rounded-xl border bg-card p-3">
+    <div className="rounded-[var(--denim-r)] border bg-card p-3 shadow-[var(--denim-shadow-sm)]">
       <div className="mb-2 flex items-center gap-2">
-        <Sparkles className="h-4 w-4 text-warning-500" />
+        <Sparkles className="h-4 w-4 text-acc" />
         <h3 className="text-sm font-semibold">
           {mode === "staff" ? "Open shifts you're qualified for" : "Open shifts"} ({rows.length})
         </h3>

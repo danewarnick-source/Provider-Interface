@@ -171,7 +171,7 @@ export function ClassRosterDialog({
       }}
     >
       <DialogTrigger asChild>
-        <Button className="w-full bg-[#1A2B47] text-white hover:bg-[#1A2B47]/90" data-testid={testId}>
+        <Button className="w-full bg-pri text-white hover:bg-deep" data-testid={testId}>
           {triggerLabel}
         </Button>
       </DialogTrigger>
@@ -185,7 +185,7 @@ export function ClassRosterDialog({
             : "Buying a 30-day seat assigns the in-platform 30-day course on the staff file. This is not an external class."}
         </p>
         {billingExempt && (
-          <p className="rounded-md border border-[#C8881E]/30 bg-[#FFF9EE] px-3 py-2 text-xs text-[#1A2B47]">
+          <p className="rounded-[var(--denim-r)] border border-pt2 bg-pt px-3 py-2 text-xs text-deep">
             True North Supports is never charged. List price stays {formatUsdFromCents(listUnitCents)} / seat.
             This roster still opens the obligations.
           </p>
@@ -223,7 +223,7 @@ export function ClassRosterDialog({
               <Button
                 type="button"
                 size="sm"
-                className="bg-[#1A2B47] text-white hover:bg-[#1A2B47]/90"
+                className="bg-pri text-white hover:bg-deep"
                 onClick={addSelected}
                 disabled={pickedIds.size === 0}
                 data-testid="training-roster-add-selected"
@@ -252,7 +252,7 @@ export function ClassRosterDialog({
                         data-testid={`training-roster-staff-${m.id}`}
                       />
                       <span className="min-w-0 flex-1">
-                        <span className="block font-medium text-[#1A2B47]">{m.label}</span>
+                        <span className="block font-medium text-deep">{m.label}</span>
                         <span className="block truncate text-xs text-muted-foreground">
                           {m.email || "No email on file"}
                           {m.phone ? ` · ${m.phone}` : ""}
@@ -326,7 +326,7 @@ export function ClassRosterDialog({
           <span className="text-muted-foreground" data-testid="training-roster-list-price">
             {filledCount || 1} {seatLabel} × {formatUsdFromCents(listUnitCents)}
           </span>
-          <span className="text-base font-semibold text-[#1A2B47]" data-testid="training-roster-total">
+          <span className="text-base font-semibold text-deep" data-testid="training-roster-total">
             {billingExempt ? "True North $0" : formatUsdFromCents(liveQuote.totalCents)}
           </span>
         </div>
@@ -341,7 +341,7 @@ export function ClassRosterDialog({
             onClick={submit}
             disabled={busy || !organizationId}
             data-testid="training-roster-submit"
-            className="bg-[#C8881E] text-white hover:bg-[#C8881E]/90"
+            className="bg-acc text-white hover:bg-accd"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : billingExempt ? "Submit roster" : "Continue to payment"}
           </Button>

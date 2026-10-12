@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { DENIM } from "@/lib/design-tokens";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -258,7 +259,7 @@ function SigPad({ onSigned, label = "Electronic Signature" }: {
     if (!c || !ctx) return;
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, c.width, c.height);
-    ctx.strokeStyle = "#1e293b";
+    ctx.strokeStyle = DENIM.ink;
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
   }
@@ -853,7 +854,7 @@ function AdminLogDialog({
             className={
               isMedError
                 ? "bg-danger-600 hover:bg-danger-700 text-white"
-                : "bg-gradient-amber text-primary-foreground shadow-sm hover:opacity-95"
+                : "bg-pri text-white shadow-[var(--denim-shadow-sm)] hover:bg-deep"
             }
           >
             {busy ? (
@@ -915,7 +916,7 @@ function ComplianceHistory({ logs, meds }: { logs: EmarLog[]; meds: Medication[]
     const c = sigCanvasRef.current; const ctx = c?.getContext("2d");
     if (!c || !ctx) return;
     ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
-    ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2; ctx.lineCap = "round";
+    ctx.strokeStyle = DENIM.ink; ctx.lineWidth = 2; ctx.lineCap = "round";
     sigHas.current = false;
   }
   function sigPos(e: React.PointerEvent<HTMLCanvasElement>) {
@@ -1003,7 +1004,7 @@ function ComplianceHistory({ logs, meds }: { logs: EmarLog[]; meds: Medication[]
                 </td>
                 <td className="px-3 py-2">
                   {medMap.get(l.medication_id) ?? "—"}
-                  {l.is_prn && <Badge className="ml-1 bg-warning-100 text-warning-800 text-[9px] dark:bg-warning-950/40 dark:text-warning-200">PRN</Badge>}
+                  {l.is_prn && <Badge className="ml-1 bg-pt text-pri text-[9px]">PRN</Badge>}
                 </td>
                 <td className="px-3 py-2">
                   <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${
@@ -1216,7 +1217,7 @@ function MarCalendarView({
                         {med.dosage && <span>{med.dosage}</span>}
                         {time !== "PRN" && <span className="ml-1 font-mono">{time}</span>}
                         {med.is_controlled && <span className="ml-1 font-bold text-denim-600">C</span>}
-                        {med.is_prn && <span className="ml-1 font-bold text-warning-600">PRN</span>}
+                        {med.is_prn && <span className="ml-1 font-bold text-pri">PRN</span>}
                         {!med.is_active && <span className="ml-1 text-danger-500">D/C</span>}
                       </div>
                     </td>
@@ -1614,8 +1615,7 @@ export function MarEmarTab({
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
         <div className="flex items-center gap-3">
           <div
-            className="flex h-8 w-8 items-center justify-center rounded-md text-primary-foreground"
-            style={{ background: "var(--gradient-amber)" }}
+            className="flex h-8 w-8 items-center justify-center rounded-md bg-deep text-acc"
             aria-hidden
           >
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor"><path d="M12 2 3 7v10l9 5 9-5V7z"/></svg>
@@ -1855,11 +1855,11 @@ export function MarEmarTab({
                             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
                               isPrnControlled
                                 ? "bg-danger-100 dark:bg-danger-950/30"
-                                : "bg-warning-100 dark:bg-warning-950/30"
+                                : "bg-pt"
                             }`}
                           >
                             <Pill className={`h-5 w-5 ${
-                              isPrnControlled ? "text-danger-600" : "text-warning-600"
+                              isPrnControlled ? "text-danger-600" : "text-pri"
                             }`} />
                           </div>
 
@@ -1978,8 +1978,7 @@ export function MarEmarTab({
                             <Button
                               size="sm"
                               onClick={() => setActivePass({ med: p.med, time: p.time, iso: p.iso })}
-                              className="h-10 shrink-0 gap-1.5 text-primary-foreground"
-                              style={{ background: "var(--gradient-amber)" }}
+                              className="h-10 shrink-0 gap-1.5 bg-pri text-white hover:bg-deep"
                             >
                               <Pencil className="h-3.5 w-3.5" />
                               {p.time === "PRN" ? "Log PRN" : hasHistory ? "Add update" : "Observe & Confirm"}
@@ -2032,7 +2031,7 @@ export function MarEmarTab({
                     <Pill className="h-4 w-4 text-primary" />
                     <span className="font-semibold text-sm">{med.medication_name}</span>
                     {med.is_controlled && <Badge className="bg-denim-100 text-denim-800 text-[10px]">Controlled</Badge>}
-                    {med.is_prn && <Badge className="bg-warning-100 text-warning-800 text-[10px]">PRN</Badge>}
+                    {med.is_prn && <Badge className="bg-pt text-pri text-[10px]">PRN</Badge>}
                     {!med.is_active && <Badge variant="outline" className="text-[10px]">Discontinued</Badge>}
                   </div>
                   {med.choking_risk && (

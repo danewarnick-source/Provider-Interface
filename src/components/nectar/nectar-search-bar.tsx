@@ -217,7 +217,7 @@ export function NectarSearchBar({
           aria-autocomplete="list"
           className={
             isDesktop
-              ? "h-9 w-full rounded-md border border-[var(--hive-border)] bg-[var(--hive-surface)] pl-8 pr-9 text-sm text-[var(--hive-text)] placeholder:text-[var(--hive-text-muted)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--hive-accent)]/40"
+              ? "h-9 w-full rounded-md border border-[var(--hive-border)] bg-[var(--hive-surface)] pl-8 pr-9 text-sm text-[var(--hive-text)] placeholder:text-[var(--hive-text-muted)] shadow-[var(--denim-shadow-sm)] focus:outline-none focus:ring-2 focus:ring-[var(--hive-accent)]/40"
               : "h-11 w-full rounded-md border border-[var(--hive-border)] bg-[var(--hive-surface)] pl-8 pr-9 text-sm text-[var(--hive-text)] placeholder:text-[var(--hive-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--hive-accent)]/40"
           }
         />
@@ -230,8 +230,8 @@ export function NectarSearchBar({
           role="listbox"
           className={
             isDesktop
-              ? "absolute left-0 right-0 top-[calc(100%+6px)] z-50 max-h-[60vh] overflow-y-auto rounded-lg border border-[var(--hive-border)] bg-[var(--hive-surface)] p-1 shadow-lg"
-              : "absolute left-0 right-0 top-[calc(100%+6px)] z-50 max-h-[55vh] overflow-y-auto rounded-lg border border-[var(--hive-border)] bg-[var(--hive-surface)] p-1 shadow-lg"
+              ? "absolute left-0 right-0 top-[calc(100%+6px)] z-50 max-h-[60vh] overflow-y-auto rounded-lg border border-[var(--hive-border)] bg-[var(--hive-surface)] p-1 shadow-[var(--denim-shadow)]"
+              : "absolute left-0 right-0 top-[calc(100%+6px)] z-50 max-h-[55vh] overflow-y-auto rounded-lg border border-[var(--hive-border)] bg-[var(--hive-surface)] p-1 shadow-[var(--denim-shadow)]"
           }
         >
           {results.length === 0 && (

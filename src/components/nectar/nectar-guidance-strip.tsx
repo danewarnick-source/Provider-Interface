@@ -18,7 +18,7 @@ export function NectarGuidanceStrip({
 }: {
   title: string;
   message: ReactNode;
-  /** Short amber-accented call-out (e.g. "3 unassigned shifts"). */
+  /** Short info call-out (e.g. "3 unassigned shifts"). */
   highlight?: string;
   actionLabel?: string;
   onAction?: () => void;
@@ -27,7 +27,7 @@ export function NectarGuidanceStrip({
   return (
     <div
       className={cn(
-        "relative flex flex-col gap-2 rounded-xl border border-border/60 bg-card/40 px-4 py-3 backdrop-blur-md supports-[backdrop-filter]:bg-card/30",
+        "relative flex flex-col gap-2 rounded-[var(--denim-r)] border border-pt2 bg-pt/60 px-4 py-3 backdrop-blur-md supports-[backdrop-filter]:bg-pt/50",
         "sm:flex-row sm:items-center sm:gap-4",
         className,
       )}
@@ -35,10 +35,10 @@ export function NectarGuidanceStrip({
       <div className="flex shrink-0 items-center gap-2">
         <span className="relative grid h-9 w-9 place-items-center">
           <PiMark className="absolute inset-0 h-9 w-9 text-primary/30" />
-          <Sparkles className="relative h-4 w-4 text-primary" />
+          <Sparkles className="relative h-4 w-4 text-acc" />
         </span>
         <div className="flex flex-col leading-tight">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-accd">
             NECTAR
           </span>
           <span className="text-sm font-semibold text-foreground">{title}</span>
@@ -51,9 +51,9 @@ export function NectarGuidanceStrip({
 
       {highlight && (
         <span
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-warning-500/40 bg-warning-500/10 px-2.5 py-1 text-[11px] font-semibold text-warning-700 dark:text-warning-300"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-pt2 bg-paper px-2.5 py-1 text-[11px] font-semibold text-pri"
         >
-          <span className="h-1.5 w-1.5 rounded-full bg-warning-500" />
+          <span className="h-1.5 w-1.5 rounded-full bg-acc" />
           {highlight}
         </span>
       )}
@@ -62,7 +62,7 @@ export function NectarGuidanceStrip({
         <button
           type="button"
           onClick={onAction}
-          className="inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-lg border border-warning-500/40 bg-warning-500/10 px-3 py-1.5 text-xs font-semibold text-warning-700 transition hover:bg-warning-500/20 dark:text-warning-300"
+          className="inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-full border border-pt2 bg-paper px-3 py-1.5 text-xs font-semibold text-pri transition hover:bg-pt"
         >
           <Sparkles className="h-3.5 w-3.5" />
           {actionLabel}

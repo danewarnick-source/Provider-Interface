@@ -17,10 +17,10 @@ export function HhsExplainerBanner({ className }: { className?: string }) {
 
   return (
     <div
-      className={`flex items-start gap-3 rounded-xl border border-warning-300 bg-warning-50 p-3 text-warning-900 dark:border-warning-700 dark:bg-warning-950/30 dark:text-warning-100 ${className ?? ""}`}
+      className={`flex items-start gap-3 rounded-[var(--denim-r)] border border-pt2 bg-pt p-3 text-pri ${className ?? ""}`}
       role="note"
     >
-      <Home className="mt-0.5 h-4 w-4 shrink-0 text-warning-600" />
+      <Home className="mt-0.5 h-4 w-4 shrink-0 text-pri" />
       <div className="min-w-0 flex-1">
         <p className="text-xs font-semibold">How host homes (HHS) work</p>
         <p className="mt-0.5 text-xs leading-snug">{HHS_EXPLAINER_BANNER}</p>
@@ -29,7 +29,7 @@ export function HhsExplainerBanner({ className }: { className?: string }) {
         type="button"
         aria-label="Dismiss"
         onClick={dismiss}
-        className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-warning-700 hover:bg-warning-100 dark:hover:bg-warning-900/40"
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-pri hover:bg-pt2"
       >
         <X className="h-4 w-4" />
       </button>

@@ -37,7 +37,7 @@ function TicketsPage() {
   });
 
   return (
-    <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+    <section className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
       <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <h2 className="flex items-center gap-2 font-display text-lg font-semibold">
           <LifeBuoy className="h-4 w-4 text-[var(--hive-accent-text)]" /> Support queue

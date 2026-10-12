@@ -23,24 +23,24 @@ import { SCHED } from "./sched-ui";
 const wcard: React.CSSProperties = { background: "#fff", border: `1px solid ${SCHED.line}`, borderRadius: 14, boxShadow: SCHED.shadow, overflow: "hidden" };
 const wh: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", borderBottom: `1px solid ${SCHED.line}` };
 const wbody: React.CSSProperties = { padding: "6px 14px 10px", maxHeight: 260, overflow: "auto" };
-const wrow: React.CSSProperties = { display: "flex", alignItems: "center", gap: 10, padding: "10px 0", borderTop: `1px solid #f0f1f6` };
+const wrow: React.CSSProperties = { display: "flex", alignItems: "center", gap: 10, padding: "10px 0", borderTop: `1px solid ${SCHED.line}` };
 const av: React.CSSProperties = { width: 28, height: 28, borderRadius: "50%", background: SCHED.teal, color: "#fff", display: "grid", placeItems: "center", fontWeight: 700, fontSize: 11, flex: "none" };
 const info: React.CSSProperties = { flex: 1, minWidth: 0 };
 const infoB: React.CSSProperties = { fontSize: 13, fontWeight: 700, display: "block" };
 const infoS: React.CSSProperties = { display: "block", color: SCHED.muted, fontSize: 12 };
 const acts: React.CSSProperties = { display: "flex", gap: 6, flex: "none" };
-const wbtn: React.CSSProperties = { border: `1px solid ${SCHED.line}`, background: "#fff", borderRadius: 8, padding: "6px 9px", fontWeight: 700, fontSize: 11.5, cursor: "pointer" };
+const wbtn: React.CSSProperties = { border: `1px solid ${SCHED.line}`, background: "#fff", borderRadius: 999, padding: "6px 11px", fontWeight: 700, fontSize: 11.5, cursor: "pointer" };
 const wbtnOk: React.CSSProperties = { ...wbtn, background: SCHED.ok, borderColor: SCHED.ok, color: "#fff" };
 const wempty: React.CSSProperties = { color: SCHED.muted, textAlign: "center", padding: "22px 8px", fontWeight: 500, fontSize: 12.5 };
 
 function cnt(calm: boolean): React.CSSProperties {
-  return { fontSize: 11, fontWeight: 800, borderRadius: 99, padding: "2px 9px", ...(calm ? { background: SCHED.tealBg, color: "#0c5562" } : { background: SCHED.gapBg, color: SCHED.gap }) };
+  return { fontSize: 11, fontWeight: 700, borderRadius: 99, padding: "2px 9px", ...(calm ? { background: SCHED.tealBg, color: "var(--denim-accd)" } : { background: SCHED.gapBg, color: SCHED.gap }) };
 }
 function tagStyle(kind: "pto" | "sick" | "swap"): React.CSSProperties {
   const base: React.CSSProperties = { fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 99, flex: "none" };
   if (kind === "sick") return { ...base, background: SCHED.warnBg, color: SCHED.warn };
-  if (kind === "swap") return { ...base, background: SCHED.purpleBg, color: "#463b7e" };
-  return { ...base, background: SCHED.tealBg, color: "#0c5562" };
+  if (kind === "swap") return { ...base, background: SCHED.purpleBg, color: "var(--denim-pri)" };
+  return { ...base, background: SCHED.tealBg, color: "var(--denim-accd)" };
 }
 
 function fmtDate(d: string) {
@@ -114,11 +114,11 @@ export function RequestsPanel({ weekStart, staff }: { weekStart: Date; staff: St
         <div
           style={smallCard}
           onClick={() => setExpanded(expanded === "approval" ? null : "approval")}
-          onMouseEnter={(e) => e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,.08)"}
+          onMouseEnter={(e) => e.currentTarget.style.boxShadow = "0 4px 12px rgba(27,51,80,.08)"}
           onMouseLeave={(e) => e.currentTarget.style.boxShadow = SCHED.shadow}
         >
           <div>
-            <b style={{ fontSize: 12.5, fontWeight: 800, display: "block" }}>Needs approval</b>
+            <b style={{ fontSize: 12.5, fontWeight: 700, display: "block" }}>Needs approval</b>
             <span style={{ fontSize: 11, color: SCHED.muted }}>{pendingCount === 0 ? "All caught up" : `${pendingCount} pending`}</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -133,11 +133,11 @@ export function RequestsPanel({ weekStart, staff }: { weekStart: Date; staff: St
         <div
           style={smallCard}
           onClick={() => setExpanded(expanded === "out" ? null : "out")}
-          onMouseEnter={(e) => e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,.08)"}
+          onMouseEnter={(e) => e.currentTarget.style.boxShadow = "0 4px 12px rgba(27,51,80,.08)"}
           onMouseLeave={(e) => e.currentTarget.style.boxShadow = SCHED.shadow}
         >
           <div>
-            <b style={{ fontSize: 12.5, fontWeight: 800, display: "block" }}>Out this week</b>
+            <b style={{ fontSize: 12.5, fontWeight: 700, display: "block" }}>Out this week</b>
             <span style={{ fontSize: 11, color: SCHED.muted }}>{outThisWeek.length === 0 ? "Everyone available" : `${outThisWeek.length} away`}</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -153,7 +153,7 @@ export function RequestsPanel({ weekStart, staff }: { weekStart: Date; staff: St
       {expanded === "approval" && (
         <div style={detailCard}>
           <div style={detailHeader}>
-            <b style={{ fontSize: 13.5, fontWeight: 800 }}>Needs your approval</b>
+            <b style={{ fontSize: 13.5, fontWeight: 700 }}>Needs your approval</b>
             <button style={{ ...wbtn, padding: 4 }} onClick={() => setExpanded(null)}><X className="h-3.5 w-3.5" /></button>
           </div>
           <div style={detailBody}>
@@ -172,7 +172,7 @@ export function RequestsPanel({ weekStart, staff }: { weekStart: Date; staff: St
       {expanded === "out" && (
         <div style={detailCard}>
           <div style={detailHeader}>
-            <b style={{ fontSize: 13.5, fontWeight: 800 }}>Out this week</b>
+            <b style={{ fontSize: 13.5, fontWeight: 700 }}>Out this week</b>
             <button style={{ ...wbtn, padding: 4 }} onClick={() => setExpanded(null)}><X className="h-3.5 w-3.5" /></button>
           </div>
           <div style={detailBody}>

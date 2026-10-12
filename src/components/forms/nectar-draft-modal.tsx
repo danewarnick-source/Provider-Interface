@@ -104,7 +104,7 @@ export function NectarDraftModal({
     <Dialog open={open} onOpenChange={(b) => { onOpenChange(b); if (!b) reset(); }}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-warning-500" /> Build with Nectar</DialogTitle>
+          <DialogTitle className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-acc" /> Build with Nectar</DialogTitle>
           <DialogDescription>
             Describe the form OR upload a PDF of an existing form. Nectar generates a draft you can review and edit — it is never auto-published.
           </DialogDescription>

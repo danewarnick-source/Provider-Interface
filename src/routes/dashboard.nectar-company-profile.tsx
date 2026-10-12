@@ -166,7 +166,7 @@ function NectarCompanyProfilePage() {
       <OnboardingGuidanceBanner step={1} />
 
       <header className="flex items-start gap-3">
-        <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[color:var(--color-warning-500,var(--hive-accent))]/15 text-[color:var(--color-warning-600,#d97706)]">
+        <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-acct text-accd">
           <Building2 className="h-5 w-5" />
         </span>
         <div>
@@ -195,8 +195,8 @@ function NectarCompanyProfilePage() {
                   className={cn(
                     "rounded-full border px-3 py-1 text-xs font-medium transition",
                     active
-                      ? "border-[color:var(--color-warning-500,var(--hive-accent))] bg-[color:var(--color-warning-500,var(--hive-accent))] text-[#0b1733]"
-                      : "border-border bg-background hover:border-[color:var(--color-warning-500,var(--hive-accent))]/40",
+                      ? "border-pri bg-pri text-white"
+                      : "border-border bg-background hover:border-pt2",
                   )}
                 >
                   {s}

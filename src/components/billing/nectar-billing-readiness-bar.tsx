@@ -304,7 +304,7 @@ function ReadinessBarInner() {
     : holdCount > 0
     ? {
         label: `${holdCount} billing hold${holdCount === 1 ? "" : "s"}`,
-        cls: "bg-[#7a1d1d]/40 text-danger-100 border-danger-300/40",
+        cls: "bg-danger-900/40 text-danger-100 border-danger-300/40",
       }
     : coverageCount > 0
     ? {
@@ -353,12 +353,12 @@ function ReadinessBarInner() {
               variant="outline"
               onClick={() => setOpen(true)}
               disabled={loading || reviewCount === 0}
-              className="h-8 border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+              className="h-8 rounded-full border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
             >
               <ListChecks className="mr-1.5 h-3.5 w-3.5" />
               Review {reviewCount || ""} item{reviewCount === 1 ? "" : "s"}
             </Button>
-            <Button asChild size="sm" className="h-8 gap-1.5 bg-[image:var(--gradient-amber)] text-[#412402] hover:brightness-105">
+            <Button asChild size="sm" className="h-8 gap-1.5 rounded-full bg-acc text-white hover:bg-accd">
               <Link to="/dashboard/billing/form520">
                 <FileSpreadsheet className="h-3.5 w-3.5" /> Run billing · 520
               </Link>

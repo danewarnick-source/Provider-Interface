@@ -34,9 +34,9 @@ function AccountHealth() {
 
   return (
     <div className="space-y-4">
-      <header className="rounded-xl border border-border bg-card p-5 shadow-sm">
+      <header className="rounded-xl border border-border bg-card p-5 shadow-[var(--denim-shadow-sm)]">
         <div className="flex items-center gap-3">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hive-text)] text-white">
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-pri text-white">
             <Activity className="h-5 w-5" />
           </span>
           <div>
@@ -75,18 +75,18 @@ function HealthKpi({
 }) {
   const toneClass =
     tone === "risk"
-      ? "border-[#fecaca] bg-[#fef2f2]"
+      ? "border-danger-200 bg-danger-50"
       : tone === "warn"
-        ? "border-[#fed7aa] bg-[#fffdf7]"
+        ? "border-warning-200 bg-warning-50"
         : tone === "good"
           ? "border-success-200 bg-success-50/60"
           : "border-border bg-card";
   return (
-    <div className={`rounded-xl border p-4 shadow-sm ${toneClass}`}>
+    <div className={`rounded-xl border p-4 shadow-[var(--denim-shadow-sm)] ${toneClass}`}>
       <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
         <Icon className="h-3.5 w-3.5" /> {label}
       </div>
-      <div className="mt-1 font-display text-2xl font-bold tabular-nums text-[var(--hive-text)]">
+      <div className="mt-1 font-display text-2xl font-bold tabular-nums text-deep">
         {value}
       </div>
     </div>
@@ -106,7 +106,7 @@ function HealthBucket({
   const dot =
     tone === "risk" ? "bg-danger-500" : tone === "warn" ? "bg-warning-500" : "bg-success-500";
   return (
-    <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+    <section className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
       <h3 className="mb-3 flex items-center gap-2 font-display text-base font-semibold">
         <span className={`h-2 w-2 rounded-full ${dot}`} /> {title}
         <span className="text-xs text-muted-foreground">({rows.length})</span>

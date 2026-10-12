@@ -100,7 +100,7 @@ const SEVERITY_STYLE: Record<Severity, string> = {
 };
 
 const STATUS_STYLE: Record<Status, string> = {
-  new: "bg-[#fff7ed] text-[#9a3412] border-[#fed7aa]",
+  new: "bg-pt text-pri border-pt2",
   in_progress: "bg-denim-50 text-denim-800 border-denim-200",
   resolved: "bg-success-50 text-success-800 border-success-200",
 };
@@ -112,7 +112,7 @@ const RISK_STYLE: Record<Risk, string> = {
 };
 
 const RES_STATE_STYLE: Record<ResolutionState, string> = {
-  drafted: "bg-[#fff7ed] text-[#9a3412] border-[#fed7aa]",
+  drafted: "bg-warning-50 text-warning-700 border-warning-200",
   approved: "bg-denim-50 text-denim-800 border-denim-200",
   rejected: "bg-haze-100 text-haze-700 border-haze-200",
   applied: "bg-success-50 text-success-800 border-success-200",
@@ -311,20 +311,20 @@ function HiveNectarPage() {
   return (
     <div className="space-y-4">
       {/* NECTAR header */}
-      <section className="rounded-xl border border-[#fed7aa] bg-gradient-to-r from-[#fff7ed] to-[#ffedd5] p-4 shadow-sm">
+      <section className="rounded-xl border border-pt2 bg-pt p-4 shadow-[var(--denim-shadow-sm)]">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
             <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hive-accent)] text-white">
               <PiMark className="h-5 w-5" />
             </span>
             <div>
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#9a3412]">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-pri">
                 <Sparkles className="h-3.5 w-3.5" /> NECTAR · Platform observations
               </div>
-              <h2 className="font-display text-lg font-semibold text-[#7c2d12]">
+              <h2 className="font-display text-lg font-semibold text-deep">
                 AI-assisted resolution — propose, you confirm
               </h2>
-              <p className="mt-1 max-w-3xl text-sm text-[#7c2d12]/80">
+              <p className="mt-1 max-w-3xl text-sm text-deep/80">
                 Tickets are filed live: NECTAR auto-creates them from detected
                 platform events (parsing failures, missing extractions), and PI
                 executives can file ones it can't detect yet.
@@ -332,13 +332,13 @@ function HiveNectarPage() {
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#fed7aa] bg-white/70 px-3 py-1.5 text-xs font-medium text-[#9a3412]">
+            <div className="inline-flex items-center gap-2 rounded-full border border-pt2 bg-white/70 px-3 py-1.5 text-xs font-medium text-pri">
               <ShieldAlert className="h-3.5 w-3.5" />
               Account &amp; structural metadata only — no client PHI
             </div>
             <button
               onClick={() => setCreateOpen(true)}
-              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md bg-[var(--hive-text)] px-3 text-xs font-semibold text-white hover:bg-[#1a2a5a]"
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full bg-pri px-3 text-xs font-semibold text-white hover:bg-deep"
             >
               <Plus className="h-3.5 w-3.5" /> File ticket manually
             </button>
@@ -346,11 +346,11 @@ function HiveNectarPage() {
         </div>
 
         <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs sm:max-w-md">
-          <div className="rounded-lg border border-[#fed7aa] bg-white/70 p-2">
-            <div className="font-display text-lg font-bold text-[#9a3412]">
+          <div className="rounded-lg border border-pt2 bg-white/70 p-2">
+            <div className="font-display text-lg font-bold text-pri">
               {counts.new}
             </div>
-            <div className="text-[#9a3412]/80">New</div>
+            <div className="text-pri/80">New</div>
           </div>
           <div className="rounded-lg border border-denim-200 bg-white/70 p-2">
             <div className="font-display text-lg font-bold text-denim-800">
@@ -368,7 +368,7 @@ function HiveNectarPage() {
       </section>
 
       {/* Filters */}
-      <section className="rounded-xl border border-border bg-card p-3 shadow-sm">
+      <section className="rounded-xl border border-border bg-card p-3 shadow-[var(--denim-shadow-sm)]">
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-2 text-sm font-medium text-foreground">
             <Filter className="h-4 w-4 text-muted-foreground" /> Queue
@@ -495,8 +495,8 @@ function ManualTicketDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-lg rounded-xl border border-border bg-background p-4 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--denim-overlay)] backdrop-blur-[4px] p-4">
+      <div className="w-full max-w-lg rounded-xl border border-border bg-background p-4 shadow-[var(--denim-shadow)]">
         <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Plus className="h-4 w-4" /> File a PI Executive NECTAR ticket
         </div>
@@ -582,7 +582,7 @@ function ManualTicketDialog({
           <button
             onClick={submit}
             disabled={submitting}
-            className="inline-flex min-h-[40px] items-center gap-1 rounded-md bg-[var(--hive-text)] px-3 text-xs font-semibold text-white hover:bg-[#1a2a5a] disabled:opacity-60"
+            className="inline-flex min-h-[40px] items-center gap-1 rounded-full bg-pri px-3 text-xs font-semibold text-white hover:bg-deep disabled:opacity-60"
           >
             <Check className="h-3.5 w-3.5" />
             {submitting ? "Filing…" : "File ticket"}
@@ -615,15 +615,15 @@ function TicketCard({
   const state: ResolutionState = (o.resolution.state ?? "drafted") as ResolutionState;
 
   const cardClass = isArch
-    ? "rounded-xl border-2 border-denim-200 bg-gradient-to-br from-denim-50/40 to-white p-4 shadow-sm transition-colors hover:border-denim-300"
-    : "rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-[#fed7aa]";
+    ? "rounded-xl border-2 border-denim-200 bg-gradient-to-br from-denim-50/40 to-white p-4 shadow-[var(--denim-shadow-sm)] transition-colors hover:border-denim-300"
+    : "rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)] transition-colors hover:border-pt2";
 
   return (
     <article className={cardClass}>
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1 rounded-md border border-[#fed7aa] bg-[#fff7ed] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-[#9a3412]">
+            <span className="inline-flex items-center gap-1 rounded-md border border-pt2 bg-pt px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-pri">
               <PiMark className="h-3 w-3" /> {o.source === "auto" ? "NECTAR auto" : "Manual"}
             </span>
             <span className="inline-flex items-center rounded-md border border-border bg-muted/40 px-2 py-0.5 text-[11px] font-medium text-foreground">
@@ -675,11 +675,11 @@ function TicketCard({
           className={`mt-3 rounded-lg border p-3 ${
             isArch
               ? "border-denim-200 bg-denim-50/60"
-              : "border-[#fed7aa] bg-[#fff7ed]/70"
+              : "border-pt2 bg-pt/70"
           }`}
         >
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1 rounded-md border border-[#fed7aa] bg-white px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-[#9a3412]">
+            <span className="inline-flex items-center gap-1 rounded-md border border-pt2 bg-white px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-pri">
               <Sparkles className="h-3 w-3" /> NECTAR proposal
             </span>
             <span
@@ -720,7 +720,7 @@ function TicketCard({
                     onModify(draft);
                     setEditing(false);
                   }}
-                  className="inline-flex min-h-[36px] items-center gap-1 rounded-md bg-[var(--hive-text)] px-3 text-xs font-semibold text-white hover:bg-[#1a2a5a]"
+                  className="inline-flex min-h-[36px] items-center gap-1 rounded-full bg-pri px-3 text-xs font-semibold text-white hover:bg-deep"
                 >
                   <Check className="h-3.5 w-3.5" /> Save edits
                 </button>
@@ -801,7 +801,7 @@ function TicketCard({
               {state === "approved" && !isArch && (
                 <button
                   onClick={onApply}
-                  className="inline-flex min-h-[40px] items-center gap-1 rounded-md bg-[var(--hive-text)] px-3 text-xs font-semibold text-white hover:bg-[#1a2a5a]"
+                  className="inline-flex min-h-[40px] items-center gap-1 rounded-full bg-pri px-3 text-xs font-semibold text-white hover:bg-deep"
                 >
                   <PlayCircle className="h-3.5 w-3.5" /> Apply fix &amp; re-run affected documents
                 </button>

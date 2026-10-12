@@ -35,7 +35,7 @@ export function EmarNectarPanel({ clientId }: { clientId: string }) {
   return (
     <Card className="p-4">
       <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
-        <Sparkles className="h-4 w-4 text-warning-500" /> Nectar — eMAR helper
+        <Sparkles className="h-4 w-4 text-acc" /> Nectar — eMAR helper
         <Badge variant="outline" className="ml-auto text-[10px]">Advisory draft</Badge>
       </div>
       <p className="mb-3 text-[11px] text-muted-foreground">

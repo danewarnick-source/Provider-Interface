@@ -327,18 +327,18 @@ export function AuthoritativeSourceDrop({
 
       {/* Drag overlay */}
       {dragging && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-[color:var(--navy-900,#0b1733)]/40 backdrop-blur-sm">
-          <div className="m-4 flex max-w-lg flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-[color:var(--color-warning-400,var(--hive-accent))] bg-white/85 p-8 text-center shadow-xl">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-deep/40 backdrop-blur-sm">
+          <div className="m-4 flex max-w-lg flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-steel bg-white/85 p-8 text-center shadow-[var(--denim-shadow)]">
             <span
               className="inline-flex h-14 w-14 items-center justify-center rounded-full"
               style={{
                 background:
-                  "linear-gradient(135deg, var(--color-warning-100, #fef3c7), var(--color-warning-200, #fde68a))",
+                  "linear-gradient(135deg, var(--denim-pt), var(--denim-pt2))",
               }}
             >
               <PiMark variant="brand" className="h-7 w-7" />
             </span>
-            <div className="text-lg font-semibold text-[color:var(--navy-900,#0b1733)]">
+            <div className="text-lg font-semibold text-deep">
               Drop to add to Authoritative Sources
             </div>
             <p className="max-w-sm text-sm text-muted-foreground">
@@ -361,9 +361,9 @@ export function AuthoritativeSourceDrop({
         }}
       >
         <DialogContent className="flex max-h-[90vh] w-[calc(100vw-1.5rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-xl">
-          <DialogHeader className="border-b border-border/60 bg-gradient-to-br from-[color:var(--color-warning-50,#fffbeb)] to-white px-5 py-4">
-            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--color-warning-700,#b45309)]">
-              <Sparkles className="h-3.5 w-3.5" /> NECTAR · Label authoritative source
+          <DialogHeader className="border-b border-border/60 bg-gradient-to-br from-pt to-white px-5 py-4">
+            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-accd">
+              <Sparkles className="h-3.5 w-3.5 text-acc" /> NECTAR · Label authoritative source
             </div>
             <DialogTitle className="text-base">
               {current ? current.file.name : "Label source"}
@@ -466,7 +466,7 @@ export function AuthoritativeSourceDrop({
                     </SelectContent>
                   </Select>
                   <p className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                    <Sparkles className="h-3 w-3 text-[color:var(--color-warning-600,#d97706)]" />
+                    <Sparkles className="h-3 w-3 text-acc" />
                     NECTAR proposed from filename — confirm or change.
                   </p>
                 </div>
@@ -553,7 +553,7 @@ export function AuthoritativeSourceDrop({
               type="button"
               onClick={handleSaveAndNext}
               disabled={saveOne.isPending || !current?.title.trim() || !!current?.routeBlock}
-              className="gap-1 bg-[color:var(--color-warning-500,var(--hive-accent))] text-warning-950 hover:bg-[color:var(--color-warning-400,#f6b94d)]"
+              className="gap-1"
             >
               {saveOne.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

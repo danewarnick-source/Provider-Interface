@@ -267,7 +267,7 @@ function ClientTrainingViewer() {
             className="flex-1 min-h-0 overflow-y-auto bg-card px-4 py-4 space-y-6"
           >
             {trainingType === "person_centered" && (
-              <div className="rounded-md border-2 border-warning-400 bg-warning-50 px-3 py-3 text-sm text-warning-900 flex gap-2 shadow-sm">
+              <div className="rounded-md border-2 border-warning-400 bg-warning-50 px-3 py-3 text-sm text-warning-900 flex gap-2 shadow-[var(--denim-shadow-sm)]">
                 <Users className="h-5 w-5 shrink-0 mt-0.5" />
                 <span>
                   <strong>Complete this profile WITH the person.</strong> These questions should be answered from the individual's own perspective and in their own words wherever possible — like an interview where you ask and they respond. If the person communicates differently or with support, include the perspectives of those who know them best. This is about understanding who they are and how they want to be supported.

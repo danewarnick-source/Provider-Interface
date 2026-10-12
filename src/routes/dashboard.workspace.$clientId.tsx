@@ -231,7 +231,7 @@ function ClientWorkspace() {
                       <button
                         type="button"
                         aria-label="Open quick info"
-                        className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full border border-border bg-background px-3 text-xs font-semibold text-foreground transition hover:border-[color:var(--color-warning-600,var(--hive-accent))]/60 hover:text-[color:var(--color-warning-700,var(--hive-accent))] active:scale-[0.97]"
+                        className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full border border-border bg-background px-3 text-xs font-semibold text-foreground transition hover:border-steel hover:text-pri active:scale-[0.97]"
                       >
                         <Info className="h-3.5 w-3.5" /> Info
                       </button>
@@ -279,7 +279,7 @@ function ClientWorkspace() {
           }}
           className="w-full"
         >
-          {/* Touch-friendly tab bar — amber active w/ 2px underline, navy inactive (tappable, never dimmed) */}
+          {/* Touch-friendly tab bar — green active w/ 2px underline, navy inactive (tappable, never dimmed) */}
           {(() => {
             const tabDefs = [
               { v: "about", label: "About", Icon: User, show: true },
@@ -303,7 +303,7 @@ function ClientWorkspace() {
                   <TabsTrigger
                     key={v}
                     value={v}
-                    className="h-12 min-w-[44px] gap-1.5 rounded-none px-1 text-xs font-semibold text-[color:var(--navy-900,var(--hive-text))] hover:text-[color:var(--color-warning-700,var(--hive-accent))] data-[state=active]:text-[color:var(--color-warning-700,var(--hive-accent))] sm:text-sm"
+                    className="h-12 min-w-[44px] gap-1.5 rounded-none px-1 text-xs font-semibold text-deep hover:text-pri data-[state=active]:text-accd sm:text-sm"
                   >
                     <Icon className="h-4 w-4" />
                     <span>{label}</span>

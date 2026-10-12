@@ -53,7 +53,7 @@ function HiveExecsSection() {
   });
 
   return (
-    <section className="rounded-xl border border-[#fed7aa] bg-card p-4 shadow-sm">
+    <section className="rounded-xl border border-pt2 bg-card p-4 shadow-[var(--denim-shadow-sm)]">
       <div className="mb-3 flex items-center gap-2">
         <ShieldCheck className="h-4 w-4 text-[var(--hive-accent-text)]" />
         <h2 className="font-display text-lg font-semibold">PI Executive Role</h2>
@@ -69,7 +69,7 @@ function HiveExecsSection() {
           if (!email.trim()) return;
           grant.mutate({ email: email.trim(), grant: true, notes: notes || null });
         }}
-        className="mb-4 flex flex-col gap-2 rounded-lg border border-border bg-[#fff7ed]/40 p-3 md:flex-row md:items-end"
+        className="mb-4 flex flex-col gap-2 rounded-lg border border-border bg-pt/40 p-3 md:flex-row md:items-end"
       >
         <label className="flex-1">
           <span className="mb-1 block text-xs font-medium text-muted-foreground">Account email</span>
@@ -94,7 +94,7 @@ function HiveExecsSection() {
         <button
           type="submit"
           disabled={grant.isPending || !email.trim()}
-          className="inline-flex min-h-[44px] items-center justify-center gap-1 rounded-md bg-[var(--hive-accent)] px-4 text-sm font-semibold text-white shadow-sm hover:bg-[#b8631a] disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center justify-center gap-1 rounded-full bg-[var(--hive-accent)] px-4 text-sm font-semibold text-white shadow-[var(--denim-shadow-sm)] hover:bg-accd disabled:opacity-50"
         >
           <Plus className="h-4 w-4" /> Grant
         </button>
@@ -200,7 +200,7 @@ function MembersSection() {
   }, [q.data, search, orgFilter]);
 
   return (
-    <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+    <section className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
       <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-2">
           <UserCog className="h-4 w-4 text-[var(--hive-text)]" />
@@ -304,7 +304,7 @@ function AuditSection() {
   const q = useQuery({ queryKey: ["hive-exec-audit"], queryFn: () => listFn() });
 
   return (
-    <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+    <section className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
       <div className="mb-3 flex items-center gap-2">
         <ScrollText className="h-4 w-4 text-[var(--hive-text)]" />
         <h2 className="font-display text-lg font-semibold">PI Executive Audit Trail</h2>
@@ -333,7 +333,7 @@ function AuditSection() {
                 </td>
                 <td className="px-3 py-2 text-xs">{r.actor_name ?? r.actor_user_id.slice(0, 8)}</td>
                 <td className="px-3 py-2">
-                  <span className="rounded bg-[#fff7ed] px-2 py-0.5 text-xs font-medium text-[#9a3412]">
+                  <span className="rounded bg-pt px-2 py-0.5 text-xs font-medium text-pri">
                     {r.action}
                   </span>
                 </td>

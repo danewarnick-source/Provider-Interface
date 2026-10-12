@@ -70,14 +70,14 @@ function ExecClassesPage() {
         <div className="inline-flex rounded-lg border bg-card p-1 text-sm">
           <button
             type="button"
-            className={`rounded-md px-3 py-1.5 ${bucket === "upcoming" ? "bg-[var(--hive-text)] text-white" : "text-muted-foreground"}`}
+            className={`rounded-md px-3 py-1.5 ${bucket === "upcoming" ? "bg-pri text-white" : "text-muted-foreground"}`}
             onClick={() => setBucket("upcoming")}
           >
             Upcoming ({upcoming.length})
           </button>
           <button
             type="button"
-            className={`rounded-md px-3 py-1.5 ${bucket === "past" ? "bg-[var(--hive-text)] text-white" : "text-muted-foreground"}`}
+            className={`rounded-md px-3 py-1.5 ${bucket === "past" ? "bg-pri text-white" : "text-muted-foreground"}`}
             onClick={() => setBucket("past")}
           >
             Past ({past.length})

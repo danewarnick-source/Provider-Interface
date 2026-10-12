@@ -60,25 +60,27 @@ export function maxRecommendedHours(code?: string | null): number | null {
 export const FAMILY_CLASSES: Record<CodeFamily, {
   bg: string; bgSoft: string; border: string; text: string; ring: string; bar: string;
 }> = {
+  // Chart order: residential → pri, supported_living → steel, day_supports →
+  // acc, employment → hi, respite → accd, other → haze.
   residential: {
-    bg: "bg-denim-500",   bgSoft: "bg-denim-50",   border: "border-denim-500",
-    text: "text-denim-700", ring: "ring-denim-500", bar: "bg-denim-500",
+    bg: "bg-denim-700",   bgSoft: "bg-denim-50",   border: "border-denim-700",
+    text: "text-denim-700", ring: "ring-denim-700", bar: "bg-denim-700",
   },
   supported_living: {
-    bg: "bg-denim-500",    bgSoft: "bg-denim-50",    border: "border-denim-500",
-    text: "text-denim-700",  ring: "ring-denim-500",  bar: "bg-denim-500",
+    bg: "bg-denim-400",    bgSoft: "bg-denim-100",    border: "border-denim-400",
+    text: "text-denim-600",  ring: "ring-denim-400",  bar: "bg-denim-400",
   },
   day_supports: {
     bg: "bg-success-500", bgSoft: "bg-success-50", border: "border-success-500",
     text: "text-success-700", ring: "ring-success-500", bar: "bg-success-500",
   },
   employment: {
-    bg: "bg-denim-500", bgSoft: "bg-denim-50", border: "border-denim-500",
-    text: "text-denim-700", ring: "ring-denim-500", bar: "bg-denim-500",
+    bg: "bg-denim-500", bgSoft: "bg-denim-200", border: "border-denim-500",
+    text: "text-denim-800", ring: "ring-denim-500", bar: "bg-denim-500",
   },
   respite: {
-    bg: "bg-denim-500",   bgSoft: "bg-denim-50",   border: "border-denim-500",
-    text: "text-denim-700", ring: "ring-denim-500", bar: "bg-denim-500",
+    bg: "bg-success-600",   bgSoft: "bg-success-100",   border: "border-success-600",
+    text: "text-success-800", ring: "ring-success-600", bar: "bg-success-600",
   },
   other: {
     bg: "bg-haze-500",  bgSoft: "bg-haze-50",  border: "border-haze-500",

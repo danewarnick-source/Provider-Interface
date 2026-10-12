@@ -112,12 +112,12 @@ function HiveTrainingHub() {
   return (
     <div className="mx-auto max-w-6xl p-4 md:p-6 space-y-6" data-testid="hive-training-hub">
       <header className="flex items-center gap-3">
-        <div className="rounded-lg p-2 bg-[#1A2B47] text-white">
+        <div className="rounded-lg p-2 bg-pri text-white">
           <GraduationCap className="h-6 w-6" />
         </div>
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-xl md:text-2xl font-semibold text-[#1A2B47]">Training</h1>
+            <h1 className="text-xl md:text-2xl font-semibold text-deep">Training</h1>
             {realIsAdmin && !isAdmin && (
               <span className="inline-flex items-center rounded-full bg-muted text-muted-foreground text-xs px-2 py-0.5">
                 Previewing as team member
@@ -156,7 +156,7 @@ function StaffView() {
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {
     not_started: { label: "Not started", cls: "bg-muted text-muted-foreground" },
-    in_progress: { label: "In progress", cls: "bg-[#C8881E]/15 text-[#C8881E]" },
+    in_progress: { label: "In progress", cls: "bg-pt text-pri" },
     completed: { label: "Completed", cls: "bg-success-100 text-success-700" },
     expired: { label: "Expired", cls: "bg-danger-100 text-danger-700" },
   };
@@ -323,7 +323,7 @@ function ReadinessBanner({
     items.push(
       <BannerLine
         key="unassigned"
-        icon={<AlertTriangle className="h-4 w-4 text-[#C8881E]" />}
+        icon={<AlertTriangle className="h-4 w-4 text-warning-700" />}
         text={
           <>
             <b>{unassignedCount} staff</b> have no training assigned yet.
@@ -339,7 +339,7 @@ function ReadinessBanner({
     items.push(
       <BannerLine
         key="in-progress"
-        icon={<Clock className="h-4 w-4 text-[#1A2B47]" />}
+        icon={<Clock className="h-4 w-4 text-deep" />}
         text={
           <>
             <b>{inProgressCount} trainings</b> started but not completed.
@@ -353,12 +353,12 @@ function ReadinessBanner({
 
   if (items.length === 0) {
     return (
-      <div className="rounded-xl border border-[#1A2B47]/15 bg-gradient-to-br from-[#1A2B47] to-[#243b62] text-white p-5 md:p-6">
+      <div className="denim-band rounded-[24px] text-white p-5 md:p-6">
         <div className="flex items-start gap-3">
-          <Sparkles className="h-5 w-5 text-[#C8881E] mt-0.5" />
+          <Sparkles className="h-5 w-5 text-accl mt-0.5" />
           <div>
             <div className="text-base font-semibold">Your team is current. Keep it that way.</div>
-            <p className="text-sm text-white/80 mt-1 max-w-2xl">
+            <p className="text-sm text-ondark mt-1 max-w-2xl">
               CPR/First Aid, Mandt, and the 30-day orientation live here — with sign-off and a
               certificate when each one is done. We track expirations so nothing lapses on your
               watch.
@@ -370,9 +370,9 @@ function ReadinessBanner({
   }
 
   return (
-    <div className="rounded-xl border border-[#C8881E]/30 bg-[#FFF9EE] p-4 md:p-5 space-y-2">
-      <div className="text-sm font-semibold text-[#1A2B47] flex items-center gap-2">
-        <AlertTriangle className="h-4 w-4 text-[#C8881E]" />
+    <div className="rounded-[var(--denim-r)] border border-warning-200 bg-warning-50 p-4 md:p-5 space-y-2">
+      <div className="text-sm font-semibold text-deep flex items-center gap-2">
+        <AlertTriangle className="h-4 w-4 text-warning-700" />
         Your team, right now
       </div>
       <div className="space-y-1.5">{items}</div>
@@ -397,13 +397,13 @@ function LaunchpadRoster({
       className="rounded-xl border border-border bg-white p-4 md:p-5 space-y-3"
     >
       <div>
-        <h2 className="text-lg font-semibold text-[#1A2B47]">Launchpad clock-in gate</h2>
+        <h2 className="text-lg font-semibold text-deep">Launchpad clock-in gate</h2>
         <p className="text-sm text-muted-foreground">
           Staff must pass Launchpad before the punch pad will clock them in. This list reads the
           live pass flag — it is not a test override.
         </p>
       </div>
-      <p className="text-sm text-[#1A2B47]">
+      <p className="text-sm text-deep">
         <b>{passed.length}</b> passed · <b>{notPassed.length}</b> have not passed
       </p>
       <div className="grid gap-3 md:grid-cols-2">
@@ -461,7 +461,7 @@ function BannerLine({
         <Button
           size="sm"
           onClick={onClick}
-          className="bg-[#C8881E] hover:bg-[#C8881E]/90 text-white self-start md:self-auto"
+          className="rounded-full bg-acc hover:bg-accd text-white self-start md:self-auto"
         >
           {cta}
         </Button>
@@ -490,9 +490,9 @@ function scrollToTrainingTarget(ids: string[]) {
     el.focus({ preventScroll: true });
     el.animate(
       [
-        { boxShadow: "0 0 0 0 rgba(200, 136, 30, 0)" },
-        { boxShadow: "0 0 0 4px rgba(200, 136, 30, 0.35)" },
-        { boxShadow: "0 0 0 0 rgba(200, 136, 30, 0)" },
+        { boxShadow: "0 0 0 0 rgba(39, 76, 119, 0)" },
+        { boxShadow: "0 0 0 4px rgba(39, 76, 119, 0.35)" },
+        { boxShadow: "0 0 0 0 rgba(39, 76, 119, 0)" },
       ],
       { duration: 900, easing: "ease-out" },
     );
@@ -584,7 +584,7 @@ function Storefront({
   return (
     <section id="ht-storefront" className="space-y-3">
       <div>
-        <h2 className="text-lg font-semibold text-[#1A2B47]">Submit a class roster</h2>
+        <h2 className="text-lg font-semibold text-deep">Submit a class roster</h2>
         <p className="text-sm text-muted-foreground">
           Only an admin submits. One submit is one class. Staff never buy seats.
           {billingExempt ? " True North Supports is always $0." : ""}
@@ -597,27 +597,27 @@ function Storefront({
             key={card.type}
             className={
               card.featured
-                ? "relative border-2 border-[#C8881E] shadow-[0_0_0_4px_rgba(200,136,30,0.15)]"
+                ? "relative border-2 border-acc shadow-[0_0_0_4px_var(--denim-acct)]"
                 : undefined
             }
           >
             {card.featured && (
-              <div className="absolute -top-3 left-4 rounded bg-[#C8881E] px-2 py-0.5 text-xs font-semibold text-white">
+              <div className="absolute -top-3 left-4 rounded-full bg-acc px-2.5 py-0.5 text-xs font-semibold text-white">
                 Best value · save $75
               </div>
             )}
             <CardHeader className="pb-2">
-              <CardTitle className="text-base text-[#1A2B47]">{card.title}</CardTitle>
+              <CardTitle className="text-base text-deep">{card.title}</CardTitle>
               <CardDescription className="text-xs">{card.blurb}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div data-testid={`training-price-${card.sku}`}>
-                <div className="text-2xl font-bold text-[#1A2B47]">
+                <div className="text-2xl font-bold text-deep">
                   {formatUsdFromCents(card.priceCents)}
                   <span className="text-sm font-normal text-muted-foreground"> / seat</span>
                 </div>
                 {billingExempt ? (
-                  <p className="text-sm text-[#1A2B47]">True North $0 — never charged</p>
+                  <p className="text-sm text-deep">True North $0 — never charged</p>
                 ) : null}
               </div>
               {orgId ? (
@@ -655,12 +655,12 @@ function SubmittedClasses({ orgId }: { orgId: string }) {
   if (!classes?.length) return null;
   return (
     <section className="space-y-2">
-      <h2 className="text-lg font-semibold text-[#1A2B47]">Submitted classes</h2>
+      <h2 className="text-lg font-semibold text-deep">Submitted classes</h2>
       <div className="space-y-2">
         {classes.map((c) => (
           <Card key={c.id}>
             <CardContent className="p-4 text-sm">
-              <div className="font-medium text-[#1A2B47]">
+              <div className="font-medium text-deep">
                 {trainingClassLabel(c.trainingType)} · {c.seatCount} staff ·{" "}
                 {formatUsdFromCents(
                   c.unitPriceCents || trainingPriceCentsForSku(trainingClassSku(c.trainingType)),
@@ -775,14 +775,14 @@ function RosterSection({
   return (
     <section id="ht-roster" className="space-y-4">
       <div>
-        <h2 className="text-lg font-semibold text-[#1A2B47]">Your team</h2>
+        <h2 className="text-lg font-semibold text-deep">Your team</h2>
         <p className="text-sm text-muted-foreground">
           Available seats, current assignments, and expirations.
         </p>
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold mb-2 text-[#1A2B47]">
+        <h3 className="text-sm font-semibold mb-2 text-deep">
           Available seats ({seats.length})
         </h3>
         {seats.length > 0 ? (
@@ -804,7 +804,7 @@ function RosterSection({
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold mb-2 text-[#1A2B47]">
+        <h3 className="text-sm font-semibold mb-2 text-deep">
           Team assignments ({assignments.length})
         </h3>
         <div className="overflow-x-auto rounded-md border">

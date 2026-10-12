@@ -32,9 +32,9 @@ function BaseTemplatePage() {
         </Link>
       </div>
 
-      <header className="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <header className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
         <div className="flex items-center gap-3">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hive-text)] text-white">
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-pri text-white">
             <Sparkles className="h-5 w-5" />
           </span>
           <div>
@@ -48,7 +48,7 @@ function BaseTemplatePage() {
 
       <PublishNewVersion current={current} />
 
-      <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <section className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
         <h3 className="mb-2 font-display text-sm font-semibold">Version history</h3>
         {q.isLoading ? (
           <p className="text-xs text-muted-foreground">Loading…</p>
@@ -59,7 +59,7 @@ function BaseTemplatePage() {
             {versions.map((v) => (
               <li key={v.id} className="py-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-[var(--hive-text)] px-2 py-0.5 font-mono text-[11px] font-semibold text-white">
+                  <span className="rounded-full bg-pri px-2 py-0.5 font-mono text-[11px] font-semibold text-white">
                     v{v.version}
                   </span>
                   <span className="font-medium text-sm">{v.title}</span>
@@ -145,7 +145,7 @@ function PublishNewVersion({ current }: { current: BaseTemplateVersion | null })
     setSections((s) => s.map((sec, idx) => idx === i ? { ...sec, fields } : sec));
 
   return (
-    <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+    <section className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
       <h3 className="mb-2 font-display text-sm font-semibold">Publish new base version</h3>
       <p className="mb-3 text-xs text-muted-foreground">
         Edits to the structure (sections / fields) get versioned. Each state's filled-in values are preserved when they upgrade. Until the build is finalized, expect frequent versions — versioning keeps it manageable.
@@ -232,7 +232,7 @@ function PublishNewVersion({ current }: { current: BaseTemplateVersion | null })
         <button
           onClick={() => publish.mutate()}
           disabled={publish.isPending || !title.trim() || sections.length === 0}
-          className="inline-flex min-h-[36px] items-center gap-2 rounded-md bg-[var(--hive-accent)] px-3 text-xs font-semibold text-white hover:bg-[#b8651a] disabled:opacity-50"
+          className="inline-flex min-h-[36px] items-center gap-2 rounded-full bg-[var(--hive-accent)] px-3 text-xs font-semibold text-white hover:bg-accd disabled:opacity-50"
         >
           <Save className="h-3.5 w-3.5" /> {publish.isPending ? "Publishing…" : `Publish v${(current?.version ?? 0) + 1}`}
         </button>

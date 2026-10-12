@@ -51,7 +51,7 @@ function MessageCenterPage() {
         description="Compose and send announcements or directives, and review what you've sent."
         right={<NectarBadge size="sm" label="EXEC ONLY" />}
       />
-      <div className="flex gap-1 rounded-xl border border-border bg-card p-1 shadow-sm w-fit">
+      <div className="flex gap-1 rounded-xl border border-border bg-card p-1 shadow-[var(--denim-shadow-sm)] w-fit">
         {([
           { id: "compose", label: "Compose", icon: Send },
           { id: "sent", label: "Sent", icon: Inbox },
@@ -65,7 +65,7 @@ function MessageCenterPage() {
               onClick={() => setTab(t.id)}
               className={`inline-flex min-h-[44px] items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
                 active
-                  ? "bg-[var(--hive-text)] text-white"
+                  ? "bg-pri text-white"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
@@ -297,8 +297,8 @@ function MessageCenter() {
 
       <NectarCard className="p-5">
         <div className="mb-4 flex items-center gap-2">
-          <Mail className="h-4 w-4 text-[#7a4a0a]" />
-          <h3 className="font-display text-base font-semibold text-[var(--hive-text)]">
+          <Mail className="h-4 w-4 text-deep" />
+          <h3 className="font-display text-base font-semibold text-deep">
             Compose
           </h3>
         </div>
@@ -332,7 +332,7 @@ function MessageCenter() {
 
       <NectarCard className="p-5">
         <div className="mb-3 flex items-center justify-between gap-2">
-          <h3 className="font-display text-base font-semibold text-[var(--hive-text)]">
+          <h3 className="font-display text-base font-semibold text-deep">
             Recipients
           </h3>
           <div className="text-xs font-medium text-muted-foreground">
@@ -349,7 +349,7 @@ function MessageCenter() {
             disabled={sending}
             className={`min-h-[44px] flex-1 rounded-md border px-3 py-2 text-left text-sm transition ${
               scope === "selected"
-                ? "border-[var(--hive-text)] bg-[var(--hive-text)] text-white"
+                ? "border-pri bg-pri text-white"
                 : "border-border bg-card hover:bg-muted"
             }`}
           >
@@ -368,7 +368,7 @@ function MessageCenter() {
             disabled={sending}
             className={`min-h-[44px] flex-1 rounded-md border px-3 py-2 text-left text-sm transition ${
               scope === "all"
-                ? "border-[var(--hive-text)] bg-[var(--hive-text)] text-white"
+                ? "border-pri bg-pri text-white"
                 : "border-border bg-card hover:bg-muted"
             }`}
           >
@@ -422,7 +422,7 @@ function MessageCenter() {
                       <li key={o.id}>
                         <label
                           className={`flex min-h-[44px] cursor-pointer items-center gap-3 px-3 py-2 text-sm transition hover:bg-muted ${
-                            checked ? "bg-[var(--hive-text)]/5" : ""
+                            checked ? "bg-pt" : ""
                           }`}
                         >
                           <input
@@ -436,7 +436,7 @@ function MessageCenter() {
                             {o.name}
                           </span>
                           {o.is_demo && (
-                            <span className="inline-flex items-center rounded-full border border-warning-400 bg-warning-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-warning-800">
+                            <span className="inline-flex items-center rounded-full border border-pt2 bg-pt px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-pri">
                               Demo
                             </span>
                           )}
@@ -453,8 +453,8 @@ function MessageCenter() {
 
       <NectarCard className="p-5">
         <div className="mb-3 flex items-center gap-2">
-          <Paperclip className="h-4 w-4 text-[#7a4a0a]" />
-          <h3 className="font-display text-base font-semibold text-[var(--hive-text)]">
+          <Paperclip className="h-4 w-4 text-deep" />
+          <h3 className="font-display text-base font-semibold text-deep">
             Attachments
           </h3>
         </div>
@@ -465,7 +465,7 @@ function MessageCenter() {
             multiple
             onChange={onPickFiles}
             disabled={sending}
-            className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-[var(--hive-text)] file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-[#1a2a5a]"
+            className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-pri file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-deep"
           />
           <div className="text-xs text-muted-foreground">
             Up to 25 MB per file. Most file types accepted.
@@ -579,7 +579,7 @@ function SentMessagesView() {
           ← Back to Sent
         </button>
         <NectarCard className="p-6">
-          <h2 className="font-display text-xl font-bold text-[var(--hive-text)]">{open.subject}</h2>
+          <h2 className="font-display text-xl font-bold text-deep">{open.subject}</h2>
           <div className="mt-1 text-xs text-muted-foreground">
             Sent {formatSentDate(open.created_at)}
             <span className="mx-1.5">·</span>
@@ -611,7 +611,7 @@ function SentMessagesView() {
                       <td className="px-3 py-2">
                         <span className="font-medium text-[var(--hive-text)]">{r.organization_name}</span>
                         {r.is_demo && (
-                          <span className="ml-2 inline-flex items-center rounded-full border border-warning-400 bg-warning-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-warning-800">
+                          <span className="ml-2 inline-flex items-center rounded-full border border-pt2 bg-pt px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-pri">
                             Demo
                           </span>
                         )}

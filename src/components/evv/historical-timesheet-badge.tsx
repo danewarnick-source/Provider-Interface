@@ -17,7 +17,7 @@ export function HistoricalTimesheetBadge({
   return (
     <span
       title="Imported from a historical spreadsheet — this did not happen live in PI."
-      className={`inline-flex items-center gap-1 rounded-full border border-warning-500/40 bg-warning-500/10 font-medium uppercase tracking-wider text-warning-700 ${cls} ${className}`}
+      className={`inline-flex items-center gap-1 rounded-full border border-pt2 bg-pt font-medium uppercase tracking-wider text-pri ${cls} ${className}`}
     >
       <Archive className="h-3 w-3" />
       Historical import

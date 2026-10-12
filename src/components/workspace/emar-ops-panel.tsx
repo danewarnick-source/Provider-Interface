@@ -5,6 +5,7 @@
  * the server functions in src/lib/emar-pass.functions.ts so the training gate,
  * org scoping, and append-only history are enforced server-side.
  */
+import { DENIM } from "@/lib/design-tokens";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -47,7 +48,7 @@ function SigPad({ value, onChange }: { value: string | null; onChange: (d: strin
   function init() {
     const c = ref.current; const ctx = c?.getContext("2d"); if (!c || !ctx) return;
     ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
-    ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2; ctx.lineCap = "round";
+    ctx.strokeStyle = DENIM.ink; ctx.lineWidth = 2; ctx.lineCap = "round";
   }
   useEffect(() => { init(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
   useEffect(() => { if (!value) { init(); dirty.current = false; } }, [value]);

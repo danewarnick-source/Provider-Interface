@@ -48,10 +48,10 @@ function StatesIndexPage() {
 
   return (
     <div className="space-y-4">
-      <header className="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <header className="rounded-xl border border-border bg-card p-4 shadow-[var(--denim-shadow-sm)]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hive-text)] text-white">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-pri text-white">
               <MapPin className="h-5 w-5" />
             </span>
             <div>
@@ -71,7 +71,7 @@ function StatesIndexPage() {
       </header>
 
 
-      <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
+      <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-[var(--denim-shadow-sm)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground">
             <tr>
@@ -143,14 +143,14 @@ function StatesIndexPage() {
                         <Link
                           to="/dashboard/hive-exec/states/$stateCode/onboarding"
                           params={{ stateCode: r.code }}
-                          className="inline-flex min-h-[36px] items-center rounded-md bg-[var(--hive-accent)] px-3 text-xs font-semibold text-white hover:bg-[#b8651a]"
+                          className="inline-flex min-h-[36px] items-center rounded-full bg-[var(--hive-accent)] px-3 text-xs font-semibold text-white hover:bg-accd"
                         >
                           Resume onboarding
                         </Link>
                       ) : (
                         <button
                           onClick={() => setChooser(r)}
-                          className="inline-flex min-h-[36px] items-center rounded-md bg-[var(--hive-accent)] px-3 text-xs font-semibold text-white hover:bg-[#b8651a]"
+                          className="inline-flex min-h-[36px] items-center rounded-full bg-[var(--hive-accent)] px-3 text-xs font-semibold text-white hover:bg-accd"
                         >
                           Build {r.code} template
                         </button>
@@ -203,8 +203,8 @@ function StartingPointChooser({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
-      <div className="w-full max-w-lg rounded-xl border border-border bg-card p-5 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--denim-overlay)] backdrop-blur-[4px] p-4" role="dialog" aria-modal="true">
+      <div className="w-full max-w-lg rounded-xl border border-border bg-card p-5 shadow-[var(--denim-shadow)]">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
             <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Starting point</div>
@@ -225,7 +225,7 @@ function StartingPointChooser({
         <div className="space-y-2">
           <label
             className={`flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors ${
-              mode === "blank" ? "border-[var(--hive-accent)] bg-warning-50" : "border-border bg-background hover:bg-muted/40"
+              mode === "blank" ? "border-[var(--hive-accent)] bg-acct" : "border-border bg-background hover:bg-muted/40"
             }`}
           >
             <input
@@ -247,7 +247,7 @@ function StartingPointChooser({
 
           <label
             className={`flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors ${
-              mode === "copy" ? "border-[var(--hive-accent)] bg-warning-50" : "border-border bg-background hover:bg-muted/40"
+              mode === "copy" ? "border-[var(--hive-accent)] bg-acct" : "border-border bg-background hover:bg-muted/40"
             } ${sources.length === 0 ? "opacity-50" : ""}`}
           >
             <input
@@ -299,7 +299,7 @@ function StartingPointChooser({
           </button>
           <button
             onClick={start}
-            className="inline-flex min-h-[36px] items-center rounded-md bg-[var(--hive-accent)] px-4 text-xs font-semibold text-white hover:bg-[#b8651a]"
+            className="inline-flex min-h-[36px] items-center rounded-full bg-[var(--hive-accent)] px-4 text-xs font-semibold text-white hover:bg-accd"
           >
             Start building
           </button>
