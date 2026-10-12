@@ -224,8 +224,8 @@ function BillingLockedPage() {
 
   if (state.loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0F1A2E] px-4 text-white">
-        <p className="text-sm text-white/60">Loading account status…</p>
+      <div className="flex min-h-screen items-center justify-center bg-[var(--denim-bg)] px-4 text-ink">
+        <p className="text-sm text-muted-foreground">Loading account status…</p>
       </div>
     );
   }
@@ -233,16 +233,22 @@ function BillingLockedPage() {
   const unpaid = /payment required/i.test(state.lockReason ?? "");
 
   return (
-    <div className="min-h-screen bg-[#0F1A2E] px-4 py-12 text-white" data-testid="billing-paywall">
-      <div className="mx-auto flex max-w-xl flex-col items-center text-center">
+    <div
+      className="relative min-h-screen overflow-x-clip bg-[var(--denim-bg)] px-4 py-12 text-ink"
+      data-testid="billing-paywall"
+    >
+      <div className="denim-field" aria-hidden>
+        <div className="denim-orb" />
+      </div>
+      <div className="relative z-[1] mx-auto flex max-w-xl flex-col items-center rounded-[20px] bg-paper px-6 py-10 text-center shadow-[var(--denim-shadow)] sm:px-10">
         <div className="mb-6">
-          <PiBrand tone="canvas" size="lg" />
+          <PiBrand tone="on-light" size="lg" />
         </div>
 
-        <h1 className="text-2xl font-bold sm:text-3xl">
+        <h1 className="font-display text-2xl font-bold tracking-[-0.025em] text-deep sm:text-3xl">
           {unpaid ? "Finish payment to use Provider Interface" : "Your agency's account is currently locked"}
         </h1>
-        <p className="mt-3 text-white/70">
+        <p className="mt-3 text-body">
           {unpaid
             ? `${state.agencyName} needs an active Provider Interface subscription before anyone can use the dashboard.`
             : `${state.agencyName}'s account is locked until billing is current.`}
@@ -252,7 +258,7 @@ function BillingLockedPage() {
           <div
             role="alert"
             data-testid="checkout-confirm-error"
-            className="mt-6 w-full rounded-lg border border-danger-400/30 bg-danger-500/10 px-4 py-3 text-left text-sm text-danger-200"
+            className="mt-6 w-full rounded-xl border border-danger-600/25 bg-danger-50 px-4 py-3 text-left text-sm text-danger-700"
           >
             {state.confirmError}
           </div>
@@ -260,7 +266,7 @@ function BillingLockedPage() {
 
         {unpaid && state.testMode && (
           <div
-            className="mt-6 w-full rounded-lg border border-[#F5A524]/40 bg-[#F5A524]/10 px-4 py-3 text-left text-sm text-[#F5A524]"
+            className="mt-6 w-full rounded-xl border border-warning-700/25 bg-warning-50 px-4 py-3 text-left text-sm text-warning-700"
             data-testid="stripe-test-mode-hint"
           >
             <strong>TEST MODE</strong> — no real charge. Use card 4242 4242 4242 4242, any future
@@ -269,36 +275,36 @@ function BillingLockedPage() {
         )}
 
         {!unpaid ? (
-          <div className="mt-8 w-full rounded-xl border border-white/10 bg-white/5 px-6 py-5 text-left text-sm text-white/80">
+          <div className="mt-8 w-full rounded-[var(--denim-r)] border border-line bg-pt0 px-6 py-5 text-left text-sm text-body">
             Contact us to reactivate.
           </div>
         ) : state.isAdmin ? (
           <div className="mt-8 w-full space-y-3 text-left">
             {!state.paymentsConfigured && (
-              <div className="rounded-lg border border-danger-400/30 bg-danger-500/10 px-4 py-3 text-sm text-danger-200">
+              <div className="rounded-xl border border-danger-600/25 bg-danger-50 px-4 py-3 text-sm text-danger-700">
                 {state.paymentsMessage ??
                   "Payments are not set up yet. An Exec needs to add the Stripe test keys."}
               </div>
             )}
             <div
-              className="rounded-lg border border-white/10 bg-white/5 px-4 py-3"
+              className="rounded-[var(--denim-r)] border border-line bg-pt0 px-4 py-3"
               data-testid="pricing-schedule"
             >
-              <div className="text-xs uppercase tracking-wider text-[#F5A524]">List rate</div>
-              <div className="mt-1 text-2xl font-bold">
+              <div className="denim-eyebrow">List rate</div>
+              <div className="mt-1 font-display text-2xl font-bold text-deep">
                 {PI_LIST_PRICE_DISPLAY}
-                <span className="text-base font-normal text-white/60"> {PI_LIST_PRICE_UNIT}</span>
+                <span className="font-sans text-base font-normal text-muted-foreground"> {PI_LIST_PRICE_UNIT}</span>
               </div>
-              <p className="mt-1 text-sm text-white/70">{PI_LIST_MINIMUM_LINE}</p>
-              <p className="mt-1 text-sm text-white/70">{quote.summaryLine}</p>
-              <p className="mt-1 text-xs text-white/50">{PI_SIGNUP_PRICE_LINE}</p>
+              <p className="mt-1 text-sm text-body">{PI_LIST_MINIMUM_LINE}</p>
+              <p className="mt-1 text-sm text-body">{quote.summaryLine}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{PI_SIGNUP_PRICE_LINE}</p>
             </div>
-            <label className="text-xs text-white/60">
+            <label className="text-xs font-medium text-muted-foreground">
               Clients
               <input
                 type="number"
                 min={0}
-                className="mt-1 w-full rounded-md border border-white/15 bg-white/5 px-2 py-2 text-sm text-white"
+                className="mt-1 w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-pri focus:ring-[3px] focus:ring-pri/15"
                 value={clientCount}
                 onChange={(e) => setClientCount(Number(e.target.value) || 0)}
               />
@@ -308,24 +314,24 @@ function BillingLockedPage() {
               data-testid="pay-with-stripe"
               disabled={busy || !state.paymentsConfigured}
               onClick={pay}
-              className="w-full bg-[#F5A524] text-[#0F1A2E] hover:bg-[#F5A524]/90"
+              className="w-full rounded-full bg-pri text-white shadow-[var(--denim-btn-shadow)] hover:bg-deep"
             >
               {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
               Pay with Stripe
             </Button>
-            <Button asChild variant="ghost" className="w-full text-white/80 hover:text-white">
+            <Button asChild variant="ghost" className="w-full rounded-full text-pri hover:bg-pt hover:text-pri">
               <Link to="/dashboard/billing/subscription">Open subscription page</Link>
             </Button>
           </div>
         ) : (
-          <div className="mt-8 w-full rounded-xl border border-white/10 bg-white/5 px-6 py-5 text-left text-sm text-white/80">
+          <div className="mt-8 w-full rounded-[var(--denim-r)] border border-line bg-pt0 px-6 py-5 text-left text-sm text-body">
             Please contact your agency administrator to restore access.
           </div>
         )}
 
         {state.workspaces.length > 1 && (
           <div className="mt-8 w-full space-y-2 text-left" data-testid="billing-lock-org-switcher">
-            <p className="text-xs uppercase tracking-wider text-white/50">Switch agency</p>
+            <p className="denim-eyebrow">Switch agency</p>
             {state.workspaces.map((w) => {
               const isCurrent = w.organization_id === state.orgId;
               return (
@@ -335,11 +341,11 @@ function BillingLockedPage() {
                   variant="outline"
                   disabled={isCurrent}
                   onClick={() => switchWorkspace(w.organization_id)}
-                  className="w-full justify-start border-white/15 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+                  className="w-full justify-start rounded-full border-pt2 bg-paper text-ink hover:bg-pt0 hover:text-ink"
                 >
                   <Building2 className="mr-2 h-4 w-4 opacity-70" />
                   <span className="truncate">{w.organization_name}</span>
-                  {isCurrent ? <span className="ml-auto text-xs text-white/50">Current</span> : null}
+                  {isCurrent ? <span className="ml-auto text-xs text-muted-foreground">Current</span> : null}
                 </Button>
               );
             })}
@@ -351,15 +357,15 @@ function BillingLockedPage() {
           variant="ghost"
           data-testid="billing-lock-sign-out"
           onClick={() => void signOut()}
-          className="mt-6 w-full text-white/80 hover:text-white"
+          className="mt-6 w-full rounded-full text-pri hover:bg-pt hover:text-pri"
         >
           <LogOut className="mr-2 h-4 w-4" />
           Sign out
         </Button>
 
-        <div className="mt-10 flex items-center gap-2 text-sm text-white/50">
+        <div className="mt-10 flex items-center gap-2 text-sm text-muted-foreground">
           <Mail className="h-4 w-4" />
-          <a href="mailto:support@hive.app" className="hover:text-white">
+          <a href="mailto:support@hive.app" className="hover:text-pri">
             support@hive.app
           </a>
         </div>

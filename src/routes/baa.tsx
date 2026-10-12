@@ -42,8 +42,7 @@ function BaaPage() {
         ))}
 
         <label
-          className="mt-12 flex items-start gap-3 rounded-xl border p-4 text-sm"
-          style={{ borderColor: "var(--line)", background: "var(--panel)", color: "var(--ink)" }}
+          className="mt-12 flex items-start gap-3 rounded-[var(--denim-r)] bg-paper p-5 text-sm text-ink shadow-[var(--denim-shadow-sm)]"
           data-testid="baa-agree"
         >
           <input
@@ -51,7 +50,7 @@ function BaaPage() {
             checked={agreed}
             onChange={(e) => setAgreed(e.target.checked)}
             data-testid="baa-agree-checkbox"
-            className="mt-1 h-4 w-4 shrink-0"
+            className="mt-1 h-4 w-4 shrink-0 accent-pri"
           />
           <span data-testid="baa-agree-copy">{PI_BAA_AGREE_COPY}</span>
         </label>

@@ -1,38 +1,49 @@
 /**
  * Public marketing homepage tokens and copy.
- * Isolated from in-app PI_THEME (cream canvas). Do not import this into Admin chrome.
+ * Colors are the Denim design system (light): the same numbers as the
+ * --denim-* CSS variables, read from DENIM so they cannot drift. The CSS in
+ * pi-homepage.css uses the variables; these mirror them for tests / JS.
  */
 
-export const PI_HOME_NAVY = "#0a0f1c";
-export const PI_HOME_NAVY2 = "#0d1526";
-export const PI_HOME_PANEL = "#0f182b";
-export const PI_HOME_LINE = "#1f2b44";
-export const PI_HOME_INK = "#f4efe3";
-export const PI_HOME_INK2 = "#aeb7c9";
-export const PI_HOME_INK3 = "#7a8599";
-export const PI_HOME_GOLD = "#c4a35a";
-export const PI_HOME_GOLD2 = "#d9c284";
-export const PI_HOME_OK = "#7fd1a8";
-export const PI_HOME_WARN = "#f0b35a";
-export const PI_HOME_BAD = "#e88a8a";
-export const PI_HOME_PILL_OK = "#1e3a30";
-export const PI_HOME_PILL_WARN = "#3a2e1a";
-export const PI_HOME_PILL_BAD = "#3a2020";
-export const PI_HOME_PILL_MUTE = "#1b2740";
-export const PI_HOME_SIGN_IN_BTN = "#f1ecdf";
-export const PI_HOME_NAV_BG = "rgba(10,15,28,0.78)";
+import { DENIM, DENIM_FONTS, DENIM_STATUS } from "./design-tokens.ts";
 
-export const PI_HOME_SERIF =
-  '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif';
-export const PI_HOME_SANS = '"Inter", "Segoe UI", system-ui, sans-serif';
+/** Footer + dark band navy. */
+export const PI_HOME_NAVY = DENIM.deep;
+export const PI_HOME_NAVY2 = DENIM.pri;
+export const PI_HOME_PANEL = DENIM.paper;
+export const PI_HOME_LINE = DENIM.line;
+export const PI_HOME_INK = DENIM.deep;
+export const PI_HOME_INK2 = DENIM.text;
+export const PI_HOME_INK3 = DENIM.muted;
+/** Denim green accent (eyebrows, checks, key numbers). */
+export const PI_HOME_ACCENT = DENIM.acc;
+export const PI_HOME_ACCENT_TEXT = DENIM.accd;
+export const PI_HOME_ACCENT_SOFT = DENIM.acct;
+export const PI_HOME_OK = DENIM.accd;
+export const PI_HOME_WARN = DENIM_STATUS.warnText;
+export const PI_HOME_BAD = DENIM_STATUS.dangerText;
+export const PI_HOME_PILL_OK = DENIM.acct;
+export const PI_HOME_PILL_WARN = DENIM_STATUS.warnBg;
+export const PI_HOME_PILL_BAD = DENIM_STATUS.dangerBg;
+export const PI_HOME_PILL_MUTE = DENIM.pt;
+/** Primary pill (Get started / Sign in on paper). */
+export const PI_HOME_PRIMARY_BTN = DENIM.pri;
+/** Floating glass nav pill background. */
+export const PI_HOME_NAV_BG = "rgba(255, 255, 255, 0.72)";
 
-export const PI_HOME_BODY_BG = "radial-gradient(900px 600px at 50% 0%, #132038 0%, #0a0f1c 60%)";
+/** Headings (Manrope). */
+export const PI_HOME_DISPLAY = DENIM_FONTS.heading;
+/** Body / UI (Figtree). */
+export const PI_HOME_SANS = DENIM_FONTS.body;
 
-export const PI_HOME_MAX_WIDTH = 1120;
-export const PI_HOME_BTN_RADIUS = 14;
+export const PI_HOME_BODY_BG = DENIM.bg;
+
+export const PI_HOME_MAX_WIDTH = 1240;
+/** Pills: buttons, nav, badges are fully rounded. */
+export const PI_HOME_BTN_RADIUS = 999;
 export const PI_HOME_NAV_BREAKPOINT = 820;
-/** Mobile / hero side inset. Shared landing `section { padding: 0 }` must not win. */
-export const PI_HOME_GUTTER_PX = 24;
+/** Desktop side inset. Shared landing `section { padding: 0 }` must not win. */
+export const PI_HOME_GUTTER_PX = 32;
 
 export const PI_HOME_EYEBROW = "Already standing the day you sign in.";
 export const PI_HOME_H1_LEAD = "You focus on what's important";

@@ -239,10 +239,10 @@ function SignPolicyGate() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="border-b border-border bg-card px-4 py-3">
-        <div className="mx-auto flex max-w-3xl items-center gap-2 text-sm font-semibold">
-          <ShieldCheck className="h-4 w-4 text-accent" /> Policy acknowledgment required
+    <div className="flex min-h-screen flex-col bg-[var(--denim-bg)]">
+      <header className="border-b border-line bg-paper px-4 py-3 shadow-[var(--denim-shadow-sm)]">
+        <div className="mx-auto flex max-w-3xl items-center gap-2 font-display text-sm font-bold text-deep">
+          <ShieldCheck className="h-4 w-4 text-pri" /> Policy acknowledgment required
         </div>
         <p className="mx-auto mt-1 max-w-3xl text-xs text-muted-foreground">
           Your organization requires you to read and sign "{doc.title}" before continuing. Scroll to
@@ -259,20 +259,20 @@ function SignPolicyGate() {
         <div className="h-1" />
       </div>
 
-      <footer className="border-t border-border bg-card px-4 py-4">
+      <footer className="border-t border-line bg-paper px-4 py-4">
         <div className="mx-auto max-w-3xl space-y-3">
           {!readToBottom && (
-            <p className="text-[11px] text-warning-700 dark:text-warning-300">
+            <p className="text-[11px] text-warning-700">
               Scroll to the end of the policy above to enable signing.
             </p>
           )}
           <p className="text-[11px] leading-relaxed text-muted-foreground">
             <span className="font-semibold text-foreground">Attestation:</span> {attestationStatement}
           </p>
-          <label className="flex items-start gap-2 rounded-lg border border-warning-300 bg-warning-50 p-2 text-[11px] leading-relaxed dark:bg-warning-950/30 dark:border-warning-800">
+          <label className="flex items-start gap-2 rounded-xl border border-pt2 bg-pt p-2 text-[11px] leading-relaxed text-ink">
             <Checkbox checked={esignConsent} onCheckedChange={(v) => setEsignConsent(v === true)} className="mt-0.5" />
             <span>
-              <span className="block font-semibold text-warning-900 dark:text-warning-100">
+              <span className="block font-semibold text-deep">
                 Electronic signature consent (ESIGN / Utah UETA)
               </span>
               {ESIGN_CONSENT_STATEMENT}
@@ -290,6 +290,7 @@ function SignPolicyGate() {
               />
             </div>
             <Button
+              className="rounded-full"
               onClick={() => signMutation.mutate()}
               disabled={signMutation.isPending || !readToBottom || signature.trim().length < 2 || !esignConsent}
             >

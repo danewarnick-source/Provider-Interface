@@ -52,11 +52,11 @@ export function AuditorPackagePreview({ packageId, mode }: { packageId: string; 
         </div>
       )}
 
-      <header className="rounded-xl border border-haze-200 bg-white p-5 shadow-sm">
+      <header className="rounded-[var(--denim-r)] bg-paper p-5 shadow-[var(--denim-shadow-sm)]">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="text-xs uppercase tracking-wider text-muted-foreground">{pkg.state_agency}</div>
-            <h2 className="font-display text-xl font-bold text-[var(--hive-text)]">
+            <h2 className="font-display text-xl font-bold tracking-[-0.01em] text-deep">
               {pkg.title ?? `${pkg.state_agency} audit`}
             </h2>
             <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
@@ -64,7 +64,7 @@ export function AuditorPackagePreview({ packageId, mode }: { packageId: string; 
                 <Calendar className="h-3 w-3" /> {pkg.date_range_start} → {pkg.date_range_end}
               </span>
               <span>Provider: {pkg.organization_name}</span>
-              <span className="rounded bg-success-100 px-2 py-0.5 font-medium uppercase text-success-700">
+              <span className="rounded-full bg-acct px-2 py-0.5 font-medium uppercase text-accd ring-1 ring-acctb">
                 {pkg.status}
               </span>
             </div>
@@ -82,9 +82,9 @@ export function AuditorPackagePreview({ packageId, mode }: { packageId: string; 
       </header>
 
       {/* NECTAR + subject records */}
-      <section className="rounded-xl border border-haze-200 bg-white p-5 shadow-sm">
-        <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--hive-text)]">
-          <Sparkles className="h-4 w-4 text-[var(--hive-accent-text)]" /> NECTAR summary
+      <section className="rounded-[var(--denim-r)] bg-paper p-5 shadow-[var(--denim-shadow-sm)]">
+        <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-deep">
+          <Sparkles className="h-4 w-4 text-pri" /> NECTAR summary
         </div>
         <p className="text-sm text-haze-700">{payload.nectar_summary.overall}</p>
         {payload.nectar_summary.flags.length > 0 && (
@@ -114,19 +114,19 @@ export function AuditorPackagePreview({ packageId, mode }: { packageId: string; 
 function SubjectCard({ subject, nectarNote }: { subject: AuditPackageSubjectSummary; nectarNote?: string }) {
   const Icon = subject.subject_type === "staff" ? User : Contact2;
   return (
-    <section className="rounded-xl border border-haze-200 bg-white p-5 shadow-sm">
+    <section className="rounded-[var(--denim-r)] bg-paper p-5 shadow-[var(--denim-shadow-sm)]">
       <header className="mb-3 flex items-center gap-2">
         <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-haze-100 text-haze-700">
           <Icon className="h-4 w-4" />
         </span>
         <div>
           <div className="text-xs uppercase tracking-wider text-muted-foreground">{subject.subject_type}</div>
-          <div className="font-semibold text-[var(--hive-text)]">{subject.subject_label}</div>
+          <div className="font-semibold text-deep">{subject.subject_label}</div>
         </div>
       </header>
 
       {nectarNote && (
-        <div className="mb-3 rounded-md border border-[#fed7aa]/50 bg-[#fff7ed] p-2 text-xs text-[#9a3412]">
+        <div className="mb-3 rounded-xl border border-pt2 bg-pt p-2 text-xs text-pri">
           <Sparkles className="mr-1 inline h-3 w-3" /> {nectarNote}
         </div>
       )}
@@ -305,21 +305,21 @@ function PackageFilesSection({ packageId, mode }: { packageId: string; mode: "or
   }
 
   return (
-    <section className="rounded-xl border border-haze-200 bg-white p-5 shadow-sm">
+    <section className="rounded-[var(--denim-r)] bg-paper p-5 shadow-[var(--denim-shadow-sm)]">
       <div className="mb-3 flex items-center justify-between gap-2">
-        <div className="text-sm font-semibold text-[var(--hive-text)]">Provider-uploaded files</div>
+        <div className="text-sm font-semibold text-deep">Provider-uploaded files</div>
         {canEdit && (
           <div className="flex items-center gap-2">
             <input
               value={newFolder}
               onChange={(e) => setNewFolder(e.target.value)}
               placeholder="New folder name"
-              className="min-h-[36px] rounded-md border border-haze-300 px-2 text-xs"
+              className="min-h-[36px] rounded-xl border border-line bg-paper px-2 text-xs focus:border-pri focus:outline-none"
             />
             <button
               onClick={() => { if (newFolder.trim()) { createFolderMut.mutate(newFolder.trim()); setNewFolder(""); } }}
               disabled={createFolderMut.isPending}
-              className="inline-flex min-h-[36px] items-center gap-1 rounded-md bg-[var(--hive-text)] px-3 text-xs font-semibold text-white hover:bg-[#1a2a5a] disabled:opacity-50"
+              className="inline-flex min-h-[36px] items-center gap-1 rounded-full bg-pri px-3 text-xs font-semibold text-white shadow-[var(--denim-btn-shadow)] transition-colors duration-200 ease-denim hover:bg-deep disabled:opacity-50"
             >
               <FolderPlus className="h-3 w-3" /> New folder
             </button>
@@ -401,12 +401,12 @@ function FolderBlock({
       onClick={onActivate}
       className={`mt-2 rounded-lg border p-3 transition-colors ${
         dragOver ? "border-success-400 bg-success-50" :
-        active ? "border-[var(--hive-text)]/40 bg-haze-50" : "border-haze-200 bg-white"
+        active ? "border-pri/40 bg-pt0" : "border-haze-200 bg-white"
       }`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm font-medium text-[var(--hive-text)]">
-          <Folder className="h-4 w-4 text-warning-500" /> {label}
+          <Folder className="h-4 w-4 text-steel" /> {label}
           <span className="text-xs text-muted-foreground">({files.length})</span>
         </div>
         {canEdit && (

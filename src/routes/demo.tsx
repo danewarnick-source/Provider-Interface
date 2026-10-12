@@ -24,11 +24,10 @@ export const Route = createFileRoute("/demo")({
   component: DemoPage,
 });
 
-const NAVY_BG =
-  "radial-gradient(1000px 600px at 80% 110%, rgba(244,169,58,0.18), transparent 60%), linear-gradient(140deg, #141a3d 0%, var(--hive-text) 100%)";
-const JAKARTA = '"Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif';
-const AMBER = "var(--hive-accent)";
-const AMBER_GRAD = "linear-gradient(135deg, var(--hive-accent) 0%, var(--hive-accent) 100%)";
+const INPUT_CLASS =
+  "w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm text-ink outline-none transition-[border-color,box-shadow] duration-200 ease-denim focus:border-pri focus:ring-[3px] focus:ring-pri/15";
+const PRIMARY_PILL =
+  "w-full rounded-full bg-pri text-white shadow-[var(--denim-btn-shadow)] transition-[background-color,transform] duration-200 ease-denim hover:-translate-y-px hover:bg-deep";
 
 function DemoPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -51,22 +50,20 @@ function DemoPage() {
   };
 
   return (
-    <div
-      className="min-h-screen w-full text-white"
-      style={{ background: NAVY_BG, fontFamily: JAKARTA }}
-    >
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
-        <PiBrand to="/" tone="canvas" size="sm" />
-        <nav className="flex items-center gap-3 text-sm">
-          <Link to="/pricing" className="text-white/70 hover:text-white">
+    <div className="relative min-h-screen w-full overflow-x-clip bg-[var(--denim-bg)] font-sans text-ink">
+      <div className="denim-field" aria-hidden>
+        <div className="denim-orb" />
+      </div>
+      <header className="denim-glass sticky top-[14px] z-50 mx-auto mt-[14px] flex h-[58px] max-w-[1180px] items-center justify-between rounded-full px-4 max-[1219px]:mx-3 sm:max-[1219px]:mx-5">
+        <PiBrand to="/" tone="on-light" size="sm" />
+        <nav className="flex items-center gap-4 text-sm font-medium">
+          <Link to="/pricing" className="text-muted-foreground transition-colors hover:text-pri">
             Pricing
           </Link>
           <Link to="/signup">
             <Button
               size="sm"
-              variant="outline"
-              className="border-white/25 bg-transparent text-white hover:bg-white/10 hover:text-white"
-              style={{ minHeight: 44 }}
+              className="h-9 rounded-full bg-pri px-4 text-white shadow-[var(--denim-btn-shadow)] hover:bg-deep"
             >
               Get started
             </Button>
@@ -74,43 +71,32 @@ function DemoPage() {
         </nav>
       </header>
 
-      <main className="mx-auto max-w-2xl px-5 pb-24 pt-10">
-        <div
-          className="rounded-2xl p-7 sm:p-10"
-          style={{
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.10)",
-            boxShadow: "0 30px 80px -20px rgba(0,0,0,0.55)",
-          }}
-        >
+      <main className="relative z-[1] mx-auto max-w-2xl px-5 pb-24 pt-14">
+        <div className="rounded-[20px] bg-paper p-7 shadow-[var(--denim-shadow)] sm:p-10">
           {submitted ? (
             <div className="text-center">
               <div
-                className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full"
-                style={{ background: "rgba(244,169,58,0.16)" }}
+                className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-acct ring-1 ring-acctb"
               >
-                <CheckCircle2 className="h-7 w-7" style={{ color: AMBER }} />
+                <CheckCircle2 className="h-7 w-7 text-acc" />
               </div>
-              <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              <h1 className="font-display text-2xl font-bold tracking-[-0.025em] text-deep sm:text-3xl">
                 Demo request received
               </h1>
-              <p className="mt-3 text-white/70">
+              <p className="mt-3 text-body">
                 We&apos;ll be in touch within one business day to schedule your 30-minute walkthrough.
                 Check your email for a confirmation.
               </p>
               <div className="mt-7 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
                 <Link to="/signup" className="w-full sm:w-auto">
-                  <Button
-                    className="w-full text-[var(--hive-text)] hover:opacity-90 sm:w-auto"
-                    style={{ background: AMBER_GRAD, minHeight: 44 }}
-                  >
+                  <Button className={`${PRIMARY_PILL} sm:w-auto`} style={{ minHeight: 44 }}>
                     Get started now <ArrowRight className="ml-1 h-4 w-4" />
                   </Button>
                 </Link>
                 <Link to="/" className="w-full sm:w-auto">
                   <Button
                     variant="outline"
-                    className="w-full border-white/25 bg-transparent text-white hover:bg-white/10 hover:text-white sm:w-auto"
+                    className="w-full rounded-full border-pt2 bg-paper text-pri hover:bg-pt0 hover:text-pri sm:w-auto"
                     style={{ minHeight: 44 }}
                   >
                     Back to home
@@ -120,14 +106,14 @@ function DemoPage() {
             </div>
           ) : (
             <>
-              <div className="mb-6 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-white/60">
-                <Calendar className="h-3.5 w-3.5" style={{ color: AMBER }} />
+              <div className="denim-eyebrow mb-5 flex items-center gap-2">
+                <Calendar className="h-3.5 w-3.5" />
                 Book a demo
               </div>
-              <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              <h1 className="font-display text-2xl font-bold tracking-[-0.025em] text-deep sm:text-3xl">
                 Talk to someone who has actually billed a Medicaid waiver.
               </h1>
-              <p className="mt-3 text-white/70">
+              <p className="mt-3 text-body">
                 Tell us a little about your agency and we&apos;ll set up a 30-minute walkthrough — no
                 sales script, just the parts of Provider Interface that matter for your services.
               </p>
@@ -138,8 +124,7 @@ function DemoPage() {
                     required
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full rounded-md px-3 py-2 text-sm outline-none"
-                    style={inputStyle}
+                    className={INPUT_CLASS}
                   />
                 </Field>
                 <Field label="Work email">
@@ -148,8 +133,7 @@ function DemoPage() {
                     type="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className="w-full rounded-md px-3 py-2 text-sm outline-none"
-                    style={inputStyle}
+                    className={INPUT_CLASS}
                   />
                 </Field>
                 <Field label="Agency name">
@@ -157,8 +141,7 @@ function DemoPage() {
                     required
                     value={form.agency}
                     onChange={(e) => setForm({ ...form, agency: e.target.value })}
-                    className="w-full rounded-md px-3 py-2 text-sm outline-none"
-                    style={inputStyle}
+                    className={INPUT_CLASS}
                   />
                 </Field>
                 <Field label="What do you want to see? (optional)">
@@ -166,22 +149,21 @@ function DemoPage() {
                     rows={3}
                     value={form.notes}
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                    className="w-full rounded-md px-3 py-2 text-sm outline-none"
-                    style={inputStyle}
+                    className={INPUT_CLASS}
                   />
                 </Field>
 
                 <Button
                   type="submit"
                   disabled={!valid || busy}
-                  className="mt-2 w-full text-[var(--hive-text)] hover:opacity-90"
-                  style={{ background: AMBER_GRAD, minHeight: 44 }}
+                  className={`mt-2 ${PRIMARY_PILL}`}
+                  style={{ minHeight: 44 }}
                 >
                   {busy ? "Sending…" : "Request demo"}
                   {!busy && <ArrowRight className="ml-1 h-4 w-4" />}
                 </Button>
-                <p className="text-center text-xs text-white/50">
-                  Prefer to dive in? <Link to="/signup" className="underline hover:text-white">Get started now</Link>.
+                <p className="text-center text-xs text-muted-foreground">
+                  Prefer to dive in? <Link to="/signup" className="font-medium text-pri underline hover:text-deep">Get started now</Link>.
                 </p>
               </form>
             </>
@@ -192,17 +174,10 @@ function DemoPage() {
   );
 }
 
-const inputStyle: React.CSSProperties = {
-  background: "rgba(255,255,255,0.05)",
-  border: "1px solid rgba(255,255,255,0.14)",
-  color: "white",
-  fontFamily: JAKARTA,
-};
-
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <Label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-white/60">
+      <Label className="mb-1.5 block text-[13px] font-semibold text-ink">
         {label}
       </Label>
       {children}

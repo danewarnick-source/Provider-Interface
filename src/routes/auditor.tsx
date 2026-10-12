@@ -54,19 +54,14 @@ function AuditorPortal() {
   }
 
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background:
-          "radial-gradient(1000px 600px at 80% 110%, rgba(244,169,58,0.10), transparent 60%), linear-gradient(140deg, #f5f6fb 0%, #eef0f7 100%)",
-      }}
-    >
-      <header className="border-b border-[color:var(--border-light)] bg-white/80 backdrop-blur">
+    <div className="relative min-h-screen overflow-x-clip bg-[var(--denim-bg)]">
+      <div className="denim-field" aria-hidden>
+        <div className="denim-orb" />
+      </div>
+      <header className="denim-glass sticky top-0 z-50 border-x-0 border-t-0">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <Link to="/" className="flex items-center gap-3">
-            <span className="inline-flex items-center rounded-lg bg-[var(--hive-sidebar)] px-2 py-1.5">
-              <PiBrand tone="chrome" size="sm" showText />
-            </span>
+            <PiBrand tone="on-light" size="sm" showText />
             <span className="text-xs font-normal text-muted-foreground border-l border-border pl-3">
               Auditor Portal
             </span>
@@ -89,7 +84,7 @@ function AuditorPortal() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-8">
+      <main className="relative z-[1] mx-auto max-w-5xl px-4 py-8">
         {!session ? (
           <AuditorSignIn />
         ) : search.share ? (
@@ -132,10 +127,10 @@ function AuditorSignIn() {
 
   return (
     <div className="mx-auto max-w-md">
-      <Card className="bg-card/80 backdrop-blur border-[color:var(--border-light)]">
+      <Card className="bg-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <ShieldCheck className="h-5 w-5 text-[color:var(--color-warning-600)]" /> Auditor sign-in
+            <ShieldCheck className="h-5 w-5 text-pri" /> Auditor sign-in
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -144,7 +139,7 @@ function AuditorSignIn() {
             — you verify yourself, no account creation needed.
           </p>
           {sent ? (
-            <div className="rounded-md border border-[color:var(--color-warning-300)] bg-[color:var(--color-warning-50)] px-3 py-3 text-sm">
+            <div className="rounded-xl border border-pt2 bg-pt px-3 py-3 text-sm text-pri">
               <div className="flex items-center gap-2 font-medium">
                 <Mail className="h-4 w-4" /> Check your inbox
               </div>
@@ -189,7 +184,7 @@ function AuditorShareList({ onOpen }: { onOpen: (id: string) => void }) {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Shared with you</h1>
+        <h1 className="font-display text-2xl font-bold tracking-[-0.025em] text-deep">Shared with you</h1>
         <p className="text-sm text-muted-foreground">
           Audit folders that providers have granted you access to. Only files explicitly shared are
           visible.
@@ -207,21 +202,21 @@ function AuditorShareList({ onOpen }: { onOpen: (id: string) => void }) {
         {(data?.shares ?? []).map((s: any) => {
           const cls =
             s.live_status === "active"
-              ? "border-[color:var(--color-warning-300)]"
-              : "border-[color:var(--border-light)] opacity-80";
+              ? "border-acctb"
+              : "border-line opacity-80";
           return (
             <button
               key={s.id}
               onClick={() => onOpen(s.id)}
-              className={`text-left rounded-lg border ${cls} bg-card/70 backdrop-blur p-4 hover:bg-white transition`}
+              className={`text-left rounded-[var(--denim-r)] border ${cls} bg-card p-4 shadow-[var(--denim-shadow-sm)] transition duration-200 ease-denim hover:-translate-y-px hover:shadow-[var(--denim-shadow)]`}
             >
               <div className="flex items-center justify-between gap-2">
-                <Folder className="h-5 w-5 text-[color:var(--navy-700)]" />
+                <Folder className="h-5 w-5 text-pri" />
                 <Badge
                   className={
                     s.live_status === "active"
-                      ? "bg-[color:var(--color-warning-100)] text-[color:var(--navy-900)] border-0"
-                      : "bg-[color:var(--surface-2)] text-foreground border-0"
+                      ? "bg-acct text-accd ring-1 ring-acctb border-0"
+                      : "bg-pt text-pri border-0"
                   }
                 >
                   {s.live_status}
@@ -296,7 +291,7 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
         <ArrowLeft className="h-4 w-4" /> Back to shared folders
       </Button>
 
-      <Card className="bg-card/70 backdrop-blur border-[color:var(--border-light)]">
+      <Card className="bg-card">
         <CardHeader>
           <CardTitle className="text-lg">{data.packet?.name}</CardTitle>
         </CardHeader>
@@ -313,7 +308,7 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
           )}
           <div className="grid grid-cols-3 gap-2 text-sm pt-1">
             <Stat label="Items needed" value={counts.total} />
-            <Stat label="Provided" value={counts.provided} tone="amber" />
+            <Stat label="Provided" value={counts.provided} tone="ok" />
             <Stat
               label="Missing"
               value={counts.missing}
@@ -324,10 +319,10 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
       </Card>
 
       {(["staff", "client", "admin", "other"] as const).map((folder) => (
-        <Card key={folder} className="bg-card/70 backdrop-blur border-[color:var(--border-light)]">
+        <Card key={folder} className="bg-card">
           <CardHeader>
             <CardTitle className="text-sm capitalize flex items-center gap-2">
-              <Folder className="h-4 w-4 text-[color:var(--navy-700)]" />
+              <Folder className="h-4 w-4 text-pri" />
               {folder}{" "}
               <span className="text-muted-foreground font-normal">({grouped[folder].length})</span>
             </CardTitle>
@@ -342,7 +337,7 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
               return (
                 <div
                   key={it.id}
-                  className="rounded-md border border-[color:var(--border-light)] bg-white/70 p-3"
+                  className="rounded-md border border-line bg-pt0 p-3"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -354,7 +349,7 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
                         <div className="text-xs text-muted-foreground mt-1">{it.description}</div>
                       )}
                       {it.source_hint && (
-                        <div className="text-[11px] mt-1.5 inline-flex items-center gap-1 rounded-full border border-[color:var(--border-light)] bg-[color:var(--surface-2)] px-2 py-0.5 text-muted-foreground">
+                        <div className="text-[11px] mt-1.5 inline-flex items-center gap-1 rounded-full border border-line bg-pt0 px-2 py-0.5 text-muted-foreground">
                           Source: {it.source_hint}
                         </div>
                       )}
@@ -362,10 +357,10 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
                     <Badge
                       className={
                         provided
-                          ? "bg-[color:var(--color-warning-100)] text-[color:var(--navy-900)] border-0"
+                          ? "bg-acct text-accd ring-1 ring-acctb border-0"
                           : missing
-                            ? "bg-destructive/10 text-destructive border border-destructive/30"
-                            : "bg-[color:var(--surface-2)] text-foreground border-0"
+                            ? "bg-danger-50 text-danger-700 border-0"
+                            : "bg-pt text-pri border-0"
                       }
                     >
                       {provided ? (
@@ -390,7 +385,7 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
       ))}
 
       {(data.linked_files ?? []).length > 0 && (
-        <Card className="bg-card/70 backdrop-blur border-[color:var(--border-light)]">
+        <Card className="bg-card">
           <CardHeader>
             <CardTitle className="text-sm">Monthly billing-support files</CardTitle>
           </CardHeader>
@@ -398,7 +393,7 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
             {data.linked_files.map((f: any) => (
               <div
                 key={f.id}
-                className="flex items-center justify-between rounded-md border border-[color:var(--border-light)] bg-white/70 px-3 py-2 text-sm"
+                className="flex items-center justify-between rounded-md border border-line bg-pt0 px-3 py-2 text-sm"
               >
                 <span className="font-medium">{format(new Date(f.period_month), "MMMM yyyy")}</span>
                 <span className="text-xs text-muted-foreground">{f.status?.replace("_", " ")}</span>
@@ -408,10 +403,10 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
         </Card>
       )}
 
-      <Card className="bg-card/70 backdrop-blur border-[color:var(--color-warning-300)]">
+      <Card className="bg-card border-pt2">
         <CardHeader>
           <CardTitle className="text-sm flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[color:var(--color-warning-600)]" />
+            <Sparkles className="h-4 w-4 text-pri" />
             NECTAR — Training standard vs evidence
           </CardTitle>
         </CardHeader>
@@ -422,7 +417,7 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
             evidence directly.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="rounded-md border border-[color:var(--border-light)] bg-white/70 p-3">
+            <div className="rounded-md border border-line bg-pt0 p-3">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
                 Standard (from authoritative sources)
               </div>
@@ -431,7 +426,7 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
               )}
               {data.nectar.authoritative_sources.map((s: any) => (
                 <div key={s.id} className="text-xs flex items-center gap-2 py-0.5">
-                  <BookOpen className="h-3 w-3 text-[color:var(--navy-700)]" />
+                  <BookOpen className="h-3 w-3 text-pri" />
                   <span className="font-medium">{s.title}</span>
                   {s.authoritative_kind && (
                     <span className="text-muted-foreground">· {s.authoritative_kind}</span>
@@ -439,14 +434,14 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
                 </div>
               ))}
             </div>
-            <div className="rounded-md border border-[color:var(--border-light)] bg-white/70 p-3">
+            <div className="rounded-md border border-line bg-pt0 p-3">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
                 PI training evidence
               </div>
               <div className="space-y-1">
                 {(data.nectar.evidence ?? []).slice(0, 8).map((c: any) => (
                   <div key={c.id} className="text-xs flex items-center gap-2">
-                    <CheckCircle2 className="h-3 w-3 text-[color:var(--color-warning-600)]" />
+                    <CheckCircle2 className="h-3 w-3 text-acc" />
                     {c.title}
                   </div>
                 ))}
@@ -462,16 +457,16 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
   );
 }
 
-function Stat({ label, value, tone }: { label: string; value: number; tone?: "amber" | "red" }) {
+function Stat({ label, value, tone }: { label: string; value: number; tone?: "ok" | "red" }) {
   const cls =
-    tone === "amber"
-      ? "text-[color:var(--color-warning-600)]"
+    tone === "ok"
+      ? "text-accd"
       : tone === "red"
         ? "text-destructive"
         : "text-foreground";
   return (
-    <div className="rounded-md border border-[color:var(--border-light)] bg-white/70 px-3 py-2">
-      <div className={`text-xl font-semibold ${cls}`}>{value}</div>
+    <div className="rounded-md border border-line bg-pt0 px-3 py-2">
+      <div className={`font-display text-xl font-bold ${cls}`}>{value}</div>
       <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
     </div>
   );

@@ -28,7 +28,7 @@ export function PiPublicHeader({ home = false }: { home?: boolean }) {
           )}
         </div>
         <div className="nav-end">
-          <Link className="pi-home-btn cream sm" to="/login" hash="">
+          <Link className="pi-home-btn primary sm" to="/login" hash="">
             {PI_SIGN_IN}
           </Link>
           <PublicMobileMenuButton

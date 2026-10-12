@@ -48,7 +48,7 @@ export function Contact() {
           </div>
         </dl>
       </div>
-      <form onSubmit={onSubmit} className="pi-home-cream-card">
+      <form onSubmit={onSubmit} className="pi-home-card">
         <div className="grid gap-4">
           <div className="pi-home-field">
             <label htmlFor="name">Full name</label>
@@ -66,7 +66,7 @@ export function Contact() {
             <label htmlFor="message">Message</label>
             <textarea id="message" name="message" rows={5} required />
           </div>
-          <button type="submit" disabled={busy} className="pi-home-btn gold">
+          <button type="submit" disabled={busy} className="pi-home-btn primary">
             {busy ? "Sending…" : "Send message"}
           </button>
         </div>

@@ -21,9 +21,9 @@ export function usePiPublicPageScroll() {
 }
 
 /**
- * `surface="paper"` keeps the identical navy header/footer but places the page
- * body on the app's pale canvas, so sign-in / sign-up already look like the
- * dashboard the user is about to enter (navy chrome, paper canvas, one font).
+ * Denim public shell: floating glass nav, light canvas with the ambient
+ * field, solid navy footer. `surface="paper"` (sign in / sign up) uses the
+ * same chrome with a fainter ambient glow so the form card reads first.
  */
 export function PiPublicPage({
   children,
@@ -38,6 +38,9 @@ export function PiPublicPage({
   usePiPublicPageScroll();
   return (
     <div className={surface === "paper" ? "pi-landing-root pi-home pi-home-paper" : "pi-landing-root pi-home"}>
+      <div className="denim-field" aria-hidden>
+        <div className="denim-orb" />
+      </div>
       <PiPublicHeader home={home} />
       {children}
       <PiPublicFooter />

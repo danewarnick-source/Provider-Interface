@@ -1,16 +1,17 @@
 import { useId } from "react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
+import { DENIM } from "@/lib/design-tokens";
 import { PI_PRODUCT_NAME, PI_PRODUCT_SHORT, PI_WORDMARK } from "@/lib/pi-landing";
 
 export type PiMarkVariant = "inherit" | "brand";
 
-/** Denim brand mark: navy tile (#274C77 → #1B3350) with green π bars. Same on every surface. */
+/** Denim brand mark: navy tile (pri → deep) with green π bars. Same on every surface. */
 export const PI_MARK_COLORS = {
-  tileFrom: "#274C77",
-  tileTo: "#1B3350",
-  barFrom: "#CDEBC0",
-  barTo: "#4D9F3A",
+  tileFrom: DENIM.pri,
+  tileTo: DENIM.deep,
+  barFrom: DENIM.accl,
+  barTo: DENIM.acc,
 } as const;
 
 /**

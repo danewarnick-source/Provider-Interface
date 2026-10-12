@@ -124,9 +124,9 @@ describe("Provider Interface marketing homepage", () => {
     const shots = read(new URL("../components/pi-landing/pi-product-shots.tsx", import.meta.url));
     const header = read(new URL("../components/pi-landing/pi-public-header.tsx", import.meta.url));
     const root = read(new URL("../routes/__root.tsx", import.meta.url));
-    assert.match(root, /family=Newsreader/);
-    assert.match(root, /0,6\.\.72,300/);
-    assert.match(page, /family=Inter/);
+    assert.match(root, /family=Figtree/);
+    assert.match(root, /family=Manrope/);
+    assert.doesNotMatch(page, /family=Inter/);
     assert.doesNotMatch(page, /family=Newsreader/);
     assert.match(page, /PiMarketingPage/);
     assert.doesNotMatch(landing, /what-you-get/);
@@ -272,18 +272,13 @@ describe("Provider Interface marketing homepage", () => {
     assert.match(mark, /x="9"/);
     assert.match(mark, /height="23"/);
     assert.match(mark, /x="22"/);
-    assert.match(mark, /variant === "hero"/);
+    assert.match(mark, /variant === "brand"/);
     assert.doesNotMatch(mark, /M6 10H42/);
     assert.doesNotMatch(mark, /polygon|hexagon|Hexagon/i);
-    assert.match(mark, /viewBox="0 0 30 30"/);
-    assert.match(mark, /x="2"/);
-    assert.match(mark, /y="3"/);
-    assert.match(mark, /width="26"/);
-    assert.match(mark, /height="5.5"/);
-    assert.match(mark, /x="6.5"/);
-    assert.match(mark, /x="18"/);
-    assert.match(mark, /#e8d5a0/);
-    assert.match(mark, /#b8985a/);
+    // Denim tile + green bars, read from DENIM (no gold).
+    assert.match(mark, /tileFrom: DENIM\.pri/);
+    assert.match(mark, /barTo: DENIM\.acc/);
+    assert.doesNotMatch(mark, /#e8d5a0|#b8985a|#c9a227/i);
     const homeMark = mark.slice(mark.indexOf("export function PiHomepageMark"));
     assert.doesNotMatch(homeMark, /\\u03c0/);
   });
@@ -349,7 +344,7 @@ describe("Provider Interface marketing homepage", () => {
     assert.match(section, /pi-pricing-close/);
     assert.match(css, /\.wrap\.pi-pricing-page/);
     assert.match(css, /max-width:\s*800px/);
-    assert.match(css, /\.pi-landing-root a\.btn\.p \{\n {2}color: var\(--navy\);\n\}/);
+    assert.match(css, /\.pi-landing-root a\.btn\.p \{\n {2}color: #fff;\n\}/);
     assert.equal(PI_PRICING_HERO_LEDE, "The list price is the price. Sign in when you are ready.");
   });
 });

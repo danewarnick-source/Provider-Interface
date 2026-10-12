@@ -1,43 +1,19 @@
-/* Dane's PI landing — scoped port of pi-landing-page.html. Do not reuse these
-   class names outside .pi-landing-root / .pi-pub-nav / .pi-pub-foot. */
+/* Provider Interface public pages — Denim (light). Scoped to .pi-landing-root /
+   .pi-pub-nav / .pi-pub-foot. Colors come from the --denim-* tokens in
+   src/styles/hive-theme.css; do not add hex values here. */
 
 html.pi-html-landing,
 html.pi-html-landing body {
-  background: #0a1120 !important;
+  background: var(--denim-bg) !important;
   background-image: none !important;
-  color: #f3efe6;
-}
-
-.pi-landing-root,
-.pi-pub-nav,
-.pi-pub-foot {
-  --navy: #0a1120;
-  --n1: #0e1729;
-  --n2: #121d33;
-  --n3: #17243d;
-  --cream: #f3efe6;
-  --c70: rgba(243, 239, 230, 0.72);
-  --c50: rgba(243, 239, 230, 0.5);
-  --c30: rgba(243, 239, 230, 0.3);
-  --c14: rgba(243, 239, 230, 0.14);
-  --c08: rgba(243, 239, 230, 0.08);
-  --c04: rgba(243, 239, 230, 0.04);
-  --gold: #c4a35a;
-  --gold-s: rgba(196, 163, 90, 0.16);
-  --ok: #5fae7f;
-  --red: #e08a80;
-  --nr: "Newsreader", Georgia, serif;
-  --ui: "Inter", system-ui, sans-serif;
-  --sh-1:
-    0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -8px rgba(0, 0, 0, 0.6);
-  --sh-2:
-    0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 2px 4px rgba(0, 0, 0, 0.45), 0 24px 48px -16px rgba(0, 0, 0, 0.7);
+  color: var(--denim-ink);
 }
 
 .pi-landing-root {
-  background: var(--navy);
-  color: var(--cream);
-  font-family: var(--ui);
+  background: var(--denim-bg);
+  color: var(--denim-ink);
+  font-family: var(--font-sans);
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   position: relative;
   overflow-x: clip;
@@ -45,34 +21,18 @@ html.pi-html-landing body {
   min-height: 100vh;
 }
 
-.pi-landing-root::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background:
-    radial-gradient(900px 520px at 18% -8%, rgba(201, 162, 39, 0.1), transparent 60%),
-    radial-gradient(1100px 700px at 88% 8%, rgba(60, 90, 150, 0.22), transparent 62%),
-    radial-gradient(800px 600px at 50% 110%, rgba(30, 58, 95, 0.35), transparent 60%);
-}
-
-.pi-landing-root .grain {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.045;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+/* Ambient field (rendered by PiPublicPage) sits under everything else. */
+.pi-landing-root > :where(:not(.denim-field, .pi-pub-nav)) {
+  position: relative;
+  z-index: 1;
 }
 
 .pi-landing-root .wrap,
 .pi-pub-nav .wrap,
 .pi-pub-foot .wrap {
-  max-width: 1040px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 32px;
   position: relative;
   z-index: 1;
 }
@@ -96,29 +56,37 @@ html.pi-html-landing body {
   border: 0;
 }
 
+/* ── Nav: floating command glass ─────────────────────────────────────── */
 .pi-pub-nav {
   position: sticky;
-  top: 0;
+  top: max(14px, env(safe-area-inset-top, 0px));
   z-index: 50;
   isolation: isolate;
-  pointer-events: auto;
-  padding-top: max(10px, env(safe-area-inset-top, 0px));
-  padding-left: env(safe-area-inset-left, 0px);
-  padding-right: env(safe-area-inset-right, 0px);
-  background: linear-gradient(to bottom, rgba(10, 17, 32, 0.92), rgba(10, 17, 32, 0.78));
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--c08);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
-  color: var(--cream);
-  font-family: var(--ui);
+  pointer-events: none;
+  margin-top: 14px;
+  padding: 0 max(20px, env(safe-area-inset-right, 0px)) 0 max(20px, env(safe-area-inset-left, 0px));
+  background: transparent;
+  color: var(--denim-pri);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
-.pi-pub-nav .nav {
+.pi-pub-nav .wrap.nav {
+  pointer-events: auto;
+  max-width: 1180px;
+  height: 58px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  height: 64px;
+  gap: 28px;
+  padding: 0 14px 0 18px;
+  background: var(--denim-glass);
+  -webkit-backdrop-filter: saturate(1.6) blur(18px);
+  backdrop-filter: saturate(1.6) blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+  box-shadow:
+    0 8px 32px -12px rgba(27, 51, 80, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .pi-landing-root .logo,
@@ -126,60 +94,75 @@ html.pi-html-landing body {
 .pi-pub-foot .logo {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 10px;
   white-space: nowrap;
 }
 
 .pi-landing-root .mark,
 .pi-pub-nav .mark,
 .pi-pub-foot .mark {
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
   flex-shrink: 0;
 }
 
 .pi-landing-root .logo .name,
 .pi-pub-nav .logo .name,
 .pi-pub-foot .logo .name {
-  font-size: 13px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-family: var(--font-display);
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: 1.1;
-  font-weight: 600;
+  color: var(--denim-pri);
 }
 
 .pi-landing-root .logo .name small,
 .pi-pub-nav .logo .name small,
 .pi-pub-foot .logo .name small {
   display: block;
+  font-family: var(--font-sans);
   font-size: 10px;
+  font-weight: 600;
   letter-spacing: 0.14em;
-  color: var(--c50);
-  margin-top: 3px;
-  font-weight: 400;
-}
-
-.pi-pub-foot .logo .name {
-  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--denim-muted);
+  margin-top: 2px;
 }
 
 .pi-pub-nav .nlinks {
   display: flex;
-  gap: 26px;
-  font-size: 13px;
-  color: var(--c50);
+  gap: 22px;
+  font-size: 14px;
   font-weight: 500;
+  color: var(--denim-muted);
+}
+
+.pi-pub-nav .nlinks a {
+  transition: color 0.2s var(--denim-ease);
+}
+
+.pi-pub-nav .nlinks a:hover {
+  color: var(--denim-pri);
 }
 
 .pi-pub-nav .nav-end {
+  margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
+/* Mobile menu: a paper/glass panel under the floating bar. */
 .pi-pub-nav .pi-mobile-menu {
-  border-top: 1px solid var(--c08);
-  background: var(--navy);
-  padding: 8px 24px 16px;
+  pointer-events: auto;
+  max-width: 1180px;
+  margin: 8px auto 0;
+  padding: 6px 18px 10px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.92);
+  -webkit-backdrop-filter: saturate(1.6) blur(18px);
+  backdrop-filter: saturate(1.6) blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 16px 40px -16px rgba(27, 51, 80, 0.32);
 }
 
 .pi-pub-nav .pi-mobile-menu a {
@@ -187,73 +170,93 @@ html.pi-html-landing body {
   padding: 12px 4px;
   font-size: 15px;
   font-weight: 500;
-  color: var(--cream);
+  color: var(--denim-ink);
+  border-bottom: 1px solid var(--denim-line);
 }
 
+.pi-pub-nav .pi-mobile-menu a:last-child {
+  border-bottom: 0;
+}
+
+.pi-pub-nav .pi-mobile-menu a:hover {
+  color: var(--denim-pri);
+}
+
+/* ── Buttons: Denim pills ────────────────────────────────────────────── */
 .pi-landing-root .btn,
 .pi-pub-nav .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 22px;
-  border-radius: 9px;
-  font-size: 14px;
+  gap: 8px;
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-size: 14.5px;
   font-weight: 600;
-  font-family: var(--ui);
+  font-family: var(--font-sans);
+  white-space: nowrap;
   cursor: pointer;
-  border: 1px solid transparent;
+  border: 0;
   transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
+    transform 0.2s var(--denim-ease),
+    background-color 0.2s var(--denim-ease),
+    box-shadow 0.2s var(--denim-ease);
 }
 
 .pi-landing-root .btn.p,
 .pi-pub-nav .btn.p {
-  background: linear-gradient(180deg, #fbf8f1, #e9e3d6);
-  color: var(--navy);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.7) inset,
-    0 -1px 0 rgba(0, 0, 0, 0.08) inset,
-    0 6px 16px -6px rgba(243, 239, 230, 0.35);
+  background: var(--denim-pri);
+  color: #fff;
+  box-shadow: var(--denim-btn-shadow);
 }
 
 .pi-landing-root .btn.p:hover,
 .pi-pub-nav .btn.p:hover {
+  background: var(--denim-deep);
   transform: translateY(-1px);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.7) inset,
-    0 10px 24px -8px rgba(243, 239, 230, 0.45);
 }
 
 .pi-landing-root .btn.s,
 .pi-pub-nav .btn.s {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-  color: var(--cream);
-  border-color: var(--c14);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset;
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--denim-pri);
+  box-shadow: inset 0 0 0 1px var(--denim-pt2);
 }
 
 .pi-landing-root .btn.s:hover,
 .pi-pub-nav .btn.s:hover {
-  border-color: var(--c30);
-  transform: translateY(-1px);
+  background: #fff;
 }
 
 .pi-landing-root .btn.sm,
 .pi-pub-nav .btn.sm {
-  padding: 9px 16px;
-  font-size: 13px;
+  height: 36px;
+  padding: 0 14px;
+  font-size: 13.5px;
 }
 
+.pi-landing-root .btn:focus-visible,
+.pi-pub-nav .btn:focus-visible {
+  outline: none;
+  box-shadow: var(--denim-focus-ring);
+}
+
+/* Primary fill keeps white type — .pi-landing-root a { color: inherit } would blank it. */
+.pi-landing-root a.btn.p {
+  color: #fff;
+}
+
+/* ── Hero (glass panels variant, PiHeroGlass) ────────────────────────── */
 .pi-landing-root .hero {
-  padding: calc(68px + env(safe-area-inset-top, 0px)) 0 52px;
+  padding: calc(56px + env(safe-area-inset-top, 0px)) 0 52px;
   text-align: center;
   overflow: visible;
   display: grid;
   grid-template-columns: 1fr;
   gap: 28px;
   align-items: start;
-  max-width: 1140px;
+  max-width: 1240px;
 }
 
 .pi-landing-root .hero-copy {
@@ -264,9 +267,6 @@ html.pi-html-landing body {
   margin: 12px auto 28px;
   display: block;
   overflow: visible;
-  padding: 16px;
-  box-sizing: content-box;
-  filter: drop-shadow(0 6px 18px rgba(201, 162, 39, 0.25));
 }
 
 .pi-landing-root .hero-art {
@@ -287,7 +287,10 @@ html.pi-html-landing body {
   height: 74%;
   pointer-events: none;
   z-index: 0;
-  background: radial-gradient(circle, rgba(201, 162, 39, 0.18), transparent 68%);
+  border-radius: 50%;
+  filter: blur(40px);
+  background: radial-gradient(circle, var(--denim-acclh), transparent 68%);
+  opacity: 0.6;
 }
 
 .pi-landing-root .hero-geo {
@@ -297,22 +300,21 @@ html.pi-html-landing body {
   height: 112%;
   pointer-events: none;
   z-index: 0;
+  color: var(--denim-steel);
 }
 
 .pi-landing-root .hero-glass {
   position: relative;
   z-index: 1;
   width: 100%;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 16px 18px;
-  background: linear-gradient(180deg, rgba(18, 29, 51, 0.58), rgba(14, 23, 41, 0.4));
-  border: 1px solid rgba(243, 239, 230, 0.16);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.08) inset,
-    0 18px 40px -16px rgba(0, 0, 0, 0.7),
-    0 4px 12px rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(18px) saturate(1.15);
-  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 12px 32px -12px rgba(27, 51, 80, 0.3);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  text-align: left;
 }
 
 .pi-landing-root .hero-glass-price {
@@ -322,12 +324,12 @@ html.pi-html-landing body {
 }
 
 .pi-landing-root .hero-glass-kicker {
-  font-size: 10px;
-  letter-spacing: 0.16em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--denim-accd);
   margin-bottom: 12px;
-  font-weight: 500;
 }
 
 .pi-landing-root .hero-day-list {
@@ -343,55 +345,54 @@ html.pi-html-landing body {
   align-items: center;
   gap: 10px;
   font-size: 13px;
-  color: var(--c70);
+  font-weight: 500;
+  color: var(--denim-ink);
   line-height: 1.35;
 }
 
 .pi-landing-root .hero-check {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  border: 1px solid rgba(201, 162, 39, 0.45);
+  border: 1px solid var(--denim-acctb);
+  background: var(--denim-paper);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--navy);
+  color: var(--denim-acc);
 }
 
 .pi-landing-root .hero-check.on {
-  background: var(--gold);
-  border-color: var(--gold);
-  box-shadow: 0 0 8px rgba(201, 162, 39, 0.35);
+  background: var(--denim-acct);
+  border-color: var(--denim-acctb);
 }
 
 .pi-landing-root .hero-ba + .hero-ba {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid var(--c08);
+  border-top: 1px solid var(--denim-line);
 }
 
 .pi-landing-root .hero-ba-tag {
   display: inline-block;
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--red);
+  color: var(--hive-danger-fg);
   margin-bottom: 6px;
 }
 
 .pi-landing-root .hero-ba-tag.yes {
-  color: var(--ok);
+  color: var(--denim-accd);
 }
 
 .pi-landing-root .hero-ba p {
   margin: 0;
-  font-family: var(--nr);
-  font-weight: 300;
-  font-style: italic;
   font-size: 13px;
   line-height: 1.45;
-  color: var(--c70);
+  color: var(--denim-text);
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -401,95 +402,89 @@ html.pi-html-landing body {
 
 .pi-landing-root .hero-glass-price strong {
   display: block;
-  font-family: var(--nr);
-  font-weight: 300;
+  font-family: var(--font-display);
+  font-weight: 700;
   font-size: 42px;
   line-height: 0.95;
   letter-spacing: -0.03em;
-  color: var(--gold);
-  text-shadow: 0 0 24px rgba(201, 162, 39, 0.2);
+  color: var(--denim-deep);
 }
 
 .pi-landing-root .hero-glass-price span {
   display: block;
   margin-top: 6px;
   font-size: 12px;
-  color: var(--c50);
+  color: var(--denim-muted);
 }
 
+/* ── Type ────────────────────────────────────────────────────────────── */
 .pi-landing-root .kick {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
-  letter-spacing: 0.18em;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--c50);
-  margin-bottom: 26px;
-  padding: 7px 14px;
+  color: var(--denim-accd);
+  background: var(--denim-acct);
+  padding: 7px 12px 7px 10px;
   border-radius: 999px;
-  border: 1px solid var(--c08);
-  background: linear-gradient(180deg, var(--c04), transparent);
-  box-shadow: var(--sh-1);
+  box-shadow: inset 0 0 0 1px var(--denim-acctb);
+  margin-bottom: 26px;
 }
 
 .pi-landing-root .kick i {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: var(--gold);
-  box-shadow: 0 0 10px var(--gold);
+  background: var(--denim-acc);
+  box-shadow: 0 0 0 3px rgba(77, 159, 58, 0.2);
   font-style: normal;
 }
 
 .pi-landing-root h1,
 .pi-landing-root h2,
 .pi-landing-root h3 {
-  font-family: var(--nr);
+  font-family: var(--font-display);
   font-synthesis: none;
+  color: var(--denim-deep);
+  text-wrap: balance;
 }
 
 .pi-landing-root h1 {
-  font-family: var(--nr);
-  font-weight: 300;
-  font-size: clamp(42px, 7.2vw, 74px);
-  line-height: 0.98;
+  font-weight: 700;
+  font-size: clamp(40px, 5vw, 64px);
+  line-height: 1.08;
   letter-spacing: -0.025em;
   margin: 0 auto 22px;
-  max-width: 13ch;
-  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+  max-width: 16ch;
 }
 
 .pi-landing-root h1 em {
-  font-style: italic;
-  font-weight: 300;
-  background: linear-gradient(90deg, #f3efe6, #d9c284 60%, #c4a35a);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  font-style: normal;
+  color: var(--denim-acc);
 }
 
 .pi-landing-root .lede {
-  font-family: var(--nr);
-  font-weight: 300;
-  font-size: clamp(17px, 2.2vw, 21px);
+  font-size: 17.5px;
   line-height: 1.55;
-  color: var(--c70);
-  max-width: 34em;
+  color: var(--denim-text);
+  max-width: 36em;
   margin: 0 auto 34px;
 }
 
 .pi-landing-root .ctas {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   justify-content: center;
   flex-wrap: wrap;
   margin-bottom: 24px;
 }
 
 .pi-landing-root .fine {
-  font-size: 12px;
-  color: var(--c50);
+  font-size: 13.5px;
+  color: var(--denim-muted);
 }
 
 .pi-landing-root .strip {
@@ -500,39 +495,28 @@ html.pi-html-landing body {
 }
 
 .pi-landing-root .st {
-  padding: 26px 18px;
+  padding: 24px 18px;
   text-align: center;
-  border-radius: 14px;
-  background: linear-gradient(180deg, var(--n2), var(--n1));
-  border: 1px solid var(--c08);
-  box-shadow: var(--sh-1);
+  border-radius: var(--denim-r);
+  background: var(--denim-paper);
+  box-shadow: var(--denim-shadow-sm);
   position: relative;
-}
-
-.pi-landing-root .st::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--c30), transparent);
 }
 
 .pi-landing-root .st b {
   display: block;
-  font-family: var(--nr);
-  font-weight: 300;
-  font-size: 44px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 40px;
   line-height: 1;
   margin-bottom: 8px;
   letter-spacing: -0.03em;
-  text-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.06),
-    0 -1px 0 rgba(0, 0, 0, 0.6);
+  color: var(--denim-deep);
 }
 
 .pi-landing-root .st span {
-  font-size: 12px;
-  color: var(--c50);
+  font-size: 13px;
+  color: var(--denim-muted);
   line-height: 1.45;
   display: block;
   max-width: 20ch;
@@ -540,39 +524,32 @@ html.pi-html-landing body {
 }
 
 .pi-landing-root:not(.pi-home) section {
-  padding: 80px 0;
+  padding: 50px 0;
   position: relative;
   z-index: 1;
 }
 
 .pi-landing-root section.alt {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0) 30%, rgba(0, 0, 0, 0.18));
-  border-top: 1px solid var(--c08);
-  border-bottom: 1px solid var(--c08);
+  background: var(--denim-pt);
 }
 
+/* Section eyebrow (denim-eyebrow). */
 .pi-landing-root .sk {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 11px;
-  letter-spacing: 0.18em;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--c50);
-  margin-bottom: 16px;
-}
-
-.pi-landing-root .sk::before {
-  content: "";
-  width: 18px;
-  height: 1px;
-  background: var(--gold);
+  color: var(--denim-accd);
+  margin-bottom: 14px;
 }
 
 .pi-landing-root h2 {
-  font-family: var(--nr);
-  font-weight: 300;
-  font-size: clamp(32px, 4.6vw, 46px);
+  font-weight: 700;
+  font-size: clamp(36px, 4.5vw, 56px);
   line-height: 1.06;
   letter-spacing: -0.025em;
   max-width: 18ch;
@@ -580,24 +557,23 @@ html.pi-html-landing body {
 }
 
 .pi-landing-root .sub {
-  font-family: var(--nr);
-  font-weight: 300;
-  font-size: 17px;
-  line-height: 1.6;
-  color: var(--c70);
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--denim-text);
   max-width: 36em;
 }
 
+/* About: the "what PI is" band (Denim band). */
 .pi-landing-root .pi {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 44px;
   align-items: center;
-  padding: 52px 36px 40px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, var(--n2), var(--n1) 60%, #0c1425);
-  border: 1px solid var(--c08);
-  box-shadow: var(--sh-2);
+  padding: 48px 40px 40px;
+  border-radius: 28px;
+  background: var(--denim-band);
+  color: #fff;
+  box-shadow: 0 30px 60px -28px rgba(27, 51, 80, 0.5);
   position: relative;
   overflow: hidden;
 }
@@ -605,13 +581,11 @@ html.pi-html-landing body {
 .pi-landing-root .pi::after {
   content: "";
   position: absolute;
-  right: -120px;
-  top: -120px;
-  width: 360px;
-  height: 360px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(201, 162, 39, 0.14), transparent 65%);
+  inset: 0;
   pointer-events: none;
+  background:
+    radial-gradient(40% 80% at 90% 20%, rgba(96, 150, 186, 0.35), transparent 60%),
+    radial-gradient(30% 50% at 10% 90%, rgba(77, 159, 58, 0.2), transparent 60%);
 }
 
 .pi-landing-root .pi-mark-well {
@@ -629,97 +603,86 @@ html.pi-html-landing body {
   display: block;
   overflow: visible;
   flex-shrink: 0;
+  filter: drop-shadow(0 12px 24px rgba(27, 51, 80, 0.45));
 }
 
 .pi-landing-root .pi-big {
-  font-family: var(--nr);
-  font-weight: 300;
-  font-size: 132px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 120px;
   line-height: 1.08;
-  letter-spacing: -0.06em;
+  letter-spacing: -0.05em;
   padding-top: 0.16em;
   padding-bottom: 0.08em;
   overflow: visible;
-  background: linear-gradient(180deg, #f3efe6 30%, rgba(243, 239, 230, 0.35));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: #fff;
 }
 
 .pi-landing-root .pi p {
-  font-family: var(--nr);
-  font-weight: 300;
   font-size: 18px;
   line-height: 1.6;
-  color: var(--c70);
+  color: var(--denim-ondarkp);
   max-width: 32em;
   position: relative;
 }
 
 .pi-landing-root .pi p b {
-  font-weight: 400;
-  color: var(--cream);
+  font-weight: 600;
+  color: #fff;
 }
 
+.pi-landing-root .pi .page-copy p {
+  color: var(--denim-ondark);
+}
+
+/* ── Cards ───────────────────────────────────────────────────────────── */
 .pi-landing-root .three {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 14px;
   margin-top: 44px;
 }
 
 .pi-landing-root .cell {
-  padding: 30px 26px;
-  border-radius: 16px;
-  background: linear-gradient(180deg, var(--n2), var(--n1));
-  border: 1px solid var(--c08);
-  box-shadow: var(--sh-1);
+  padding: 24px;
+  border-radius: var(--denim-r);
+  background: var(--denim-paper);
+  box-shadow: var(--denim-shadow);
   position: relative;
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.pi-landing-root .cell::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 1px;
-  border-radius: 16px 16px 0 0;
-  background: linear-gradient(90deg, transparent, var(--c30), transparent);
+    transform 0.35s var(--denim-ease),
+    box-shadow 0.35s var(--denim-ease);
 }
 
 .pi-landing-root .cell:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--sh-2);
+  transform: translateY(-1px);
 }
 
 .pi-landing-root .cell .ico {
   width: 40px;
   height: 40px;
-  border-radius: 8px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 18px;
-  background: rgba(201, 162, 39, 0.05);
-  border: 1px solid rgba(201, 162, 39, 0.42);
-  color: var(--gold);
+  background: var(--denim-acct);
+  box-shadow: inset 0 0 0 1px var(--denim-acctb);
+  color: var(--denim-accd);
   font-size: 17px;
 }
 
 .pi-landing-root .cell h3 {
-  font-family: var(--nr);
-  font-weight: 400;
-  font-size: 23px;
+  font-weight: 700;
+  font-size: 22px;
   margin-bottom: 8px;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
 .pi-landing-root .cell p {
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--c70);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--denim-text);
   margin-bottom: 18px;
 }
 
@@ -732,8 +695,9 @@ html.pi-html-landing body {
 }
 
 .pi-landing-root .cell li {
-  font-size: 13px;
-  color: var(--c70);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--denim-ink);
   line-height: 1.5;
   padding-left: 20px;
   position: relative;
@@ -743,64 +707,62 @@ html.pi-html-landing body {
   content: "";
   position: absolute;
   left: 0;
-  top: 8px;
-  width: 7px;
-  height: 7px;
+  top: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: var(--ok);
-  box-shadow: 0 0 8px rgba(95, 174, 127, 0.6);
+  background: var(--denim-acc);
+  box-shadow: 0 0 0 3px rgba(77, 159, 58, 0.2);
 }
 
 .pi-landing-root .ex {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18px;
+  gap: 14px;
   margin-top: 44px;
 }
 
 .pi-landing-root .card {
-  border-radius: 16px;
+  border-radius: var(--denim-r);
   padding: 24px;
-  background: linear-gradient(180deg, var(--n2), var(--n1));
-  border: 1px solid var(--c08);
-  box-shadow: var(--sh-1);
+  background: var(--denim-paper);
+  box-shadow: var(--denim-shadow);
   position: relative;
 }
 
 .pi-landing-root .card.yes {
-  border-color: rgba(95, 174, 127, 0.25);
+  background: linear-gradient(165deg, var(--denim-paper) 0%, var(--denim-acct) 100%);
 }
 
 .pi-landing-root .card .tag {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 11px;
-  letter-spacing: 0.14em;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   margin-bottom: 14px;
   padding: 5px 10px;
   border-radius: 999px;
-  border: 1px solid var(--c08);
 }
 
 .pi-landing-root .card .tag.no {
-  color: var(--red);
-  background: rgba(224, 138, 128, 0.08);
+  color: var(--hive-danger-fg);
+  background: var(--hive-danger-soft);
 }
 
 .pi-landing-root .card .tag.yes {
-  color: var(--ok);
-  background: rgba(95, 174, 127, 0.1);
+  color: var(--denim-accd);
+  background: var(--denim-acct);
+  box-shadow: inset 0 0 0 1px var(--denim-acctb);
 }
 
 .pi-landing-root .card q {
   display: block;
-  font-family: var(--nr);
-  font-style: italic;
   font-size: 17px;
   line-height: 1.55;
-  color: var(--c70);
+  color: var(--denim-ink);
   margin-bottom: 16px;
 }
 
@@ -810,35 +772,36 @@ html.pi-html-landing body {
 }
 
 .pi-landing-root .note {
-  font-size: 13px;
+  font-size: 13.5px;
   line-height: 1.55;
+  color: var(--denim-text);
   padding: 13px 15px;
-  border-radius: 10px;
-  border: 1px solid var(--c08);
-  background: linear-gradient(180deg, var(--c04), transparent);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  border-radius: 12px;
+  background: var(--denim-pt0);
+  box-shadow: inset 0 0 0 1px var(--denim-line);
 }
 
 .pi-landing-root .note b {
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 11px;
-  letter-spacing: 0.12em;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   margin-bottom: 6px;
-  color: var(--gold);
+  color: var(--denim-pri);
 }
 
 .pi-landing-root .note b::before {
   content: "";
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: var(--gold);
-  box-shadow: 0 0 8px var(--gold);
+  background: var(--denim-steel);
 }
 
+/* ── Price box ───────────────────────────────────────────────────────── */
 .pi-landing-root .pricebox {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -846,9 +809,8 @@ html.pi-html-landing body {
   align-items: start;
   padding: 44px 40px;
   border-radius: 20px;
-  background: linear-gradient(135deg, var(--n3), var(--n1) 70%);
-  border: 1px solid var(--c08);
-  box-shadow: var(--sh-2);
+  background: var(--denim-paper);
+  box-shadow: var(--denim-shadow);
   position: relative;
   overflow: hidden;
   margin-top: 36px;
@@ -857,47 +819,24 @@ html.pi-html-landing body {
   transform: none;
 }
 
-.pi-landing-root .pricebox::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(201, 162, 39, 0.6), transparent);
-}
-
-.pi-landing-root .pricebox::after {
-  content: "";
-  position: absolute;
-  right: -40px;
-  top: -50px;
-  width: 220px;
-  height: 220px;
-  pointer-events: none;
-  border: 1px solid rgba(201, 162, 39, 0.18);
-  border-radius: 50%;
-  box-shadow: 0 0 0 28px rgba(201, 162, 39, 0.05);
-}
-
 .pi-landing-root .big {
-  font-family: var(--nr);
-  font-weight: 300;
-  font-size: 104px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 96px;
   line-height: 0.9;
   letter-spacing: -0.05em;
-  text-shadow:
-    0 2px 0 rgba(255, 255, 255, 0.05),
-    0 -2px 0 rgba(0, 0, 0, 0.5);
+  color: var(--denim-deep);
 }
 
 .pi-landing-root .per {
   font-size: 15px;
-  color: var(--c70);
+  color: var(--denim-text);
   margin: 10px 0 2px;
 }
 
 .pi-landing-root .min {
-  font-size: 13px;
-  color: var(--c50);
+  font-size: 13.5px;
+  color: var(--denim-muted);
   margin-bottom: 24px;
 }
 
@@ -909,7 +848,7 @@ html.pi-html-landing body {
 .pi-landing-root .incl {
   list-style: none;
   display: grid;
-  gap: 13px;
+  gap: 10px;
   padding-top: 10px;
   margin: 0;
   padding-left: 0;
@@ -920,11 +859,11 @@ html.pi-html-landing body {
   gap: 12px;
   font-size: 15px;
   line-height: 1.45;
-  color: var(--cream);
+  color: var(--denim-ink);
   padding: 12px 14px;
-  border-radius: 10px;
-  border: 1px solid var(--c08);
-  background: linear-gradient(180deg, var(--c04), transparent);
+  border-radius: 12px;
+  background: var(--denim-pt0);
+  box-shadow: inset 0 0 0 1px var(--denim-line);
 }
 
 .pi-landing-root .incl .pi-check {
@@ -932,13 +871,13 @@ html.pi-html-landing body {
   width: 14px;
   height: 14px;
   margin-top: 3px;
-  color: var(--ok);
+  color: var(--denim-acc);
 }
 
 .pi-landing-root .incl small {
   display: block;
-  font-size: 12px;
-  color: var(--c50);
+  font-size: 12.5px;
+  color: var(--denim-muted);
   margin-top: 2px;
 }
 
@@ -959,16 +898,17 @@ html.pi-html-landing body {
   display: inline-flex;
   align-items: center;
   margin-top: 18px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--gold);
-  letter-spacing: 0.04em;
+  color: var(--denim-pri);
+  transition: color 0.2s var(--denim-ease);
 }
 
 .pi-landing-root .learn:hover {
-  color: var(--cream);
+  color: var(--denim-deep);
 }
 
+/* ── Feature highlights (horizontal snap rail) ───────────────────────── */
 .pi-landing-root .pi-highlights-sec {
   padding: 72px 0 40px;
   overflow: visible;
@@ -1008,12 +948,10 @@ html.pi-html-landing body {
   scroll-snap-align: center;
   scroll-snap-stop: always;
   margin: 0;
-  padding: 26px 24px 22px;
-  border-radius: 16px;
-  border: 1px solid rgba(201, 162, 39, 0.35);
-  background: linear-gradient(180deg, rgba(18, 29, 51, 0.78), rgba(14, 23, 41, 0.58));
-  box-shadow: var(--sh-1);
-  backdrop-filter: blur(16px);
+  padding: 24px;
+  border-radius: var(--denim-r);
+  background: var(--denim-paper);
+  box-shadow: var(--denim-shadow);
   position: relative;
   transform: none;
   left: auto;
@@ -1023,38 +961,37 @@ html.pi-html-landing body {
 
 .pi-landing-root .pi-hl-card.price {
   text-align: center;
+  background: linear-gradient(165deg, var(--denim-pt0) 0%, var(--denim-pt) 100%);
 }
 
 .pi-landing-root .pi-hl-kicker {
-  font-size: 11px;
-  letter-spacing: 0.18em;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 12px;
+  color: var(--denim-accd);
+  margin-bottom: 10px;
 }
 
 .pi-landing-root .pi-hl-card h3 {
-  font-family: var(--nr);
-  font-weight: 300;
-  font-size: 28px;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: -0.03em;
   line-height: 1.15;
   margin: 0 0 10px;
 }
 
 .pi-landing-root .pi-hl-card.price h3 {
-  font-size: 64px;
+  font-size: 56px;
   line-height: 1;
   letter-spacing: -0.04em;
   margin: 8px 0 6px;
 }
 
 .pi-landing-root .pi-hl-card p {
-  font-family: var(--nr);
-  font-weight: 300;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.5;
-  color: var(--c70);
+  color: var(--denim-text);
   margin: 0;
 }
 
@@ -1063,47 +1000,52 @@ html.pi-html-landing body {
   margin: 16px 0 0;
   padding: 0;
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .pi-landing-root .pi-hl-checks li {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   font-size: 14px;
-  color: var(--cream);
+  font-weight: 500;
+  color: var(--denim-ink);
 }
 
 .pi-landing-root .pi-hl-dot {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  border: 1.5px solid var(--gold);
+  background: var(--denim-pt);
   flex-shrink: 0;
   position: relative;
+}
+
+.pi-landing-root .pi-hl-dot.done {
+  background: var(--denim-acct);
 }
 
 .pi-landing-root .pi-hl-dot.done::after {
   content: "";
   position: absolute;
-  left: 3px;
-  top: 1px;
+  left: 6px;
+  top: 3px;
   width: 5px;
-  height: 8px;
-  border: solid var(--gold);
-  border-width: 0 1.5px 1.5px 0;
+  height: 9px;
+  border: solid var(--denim-acc);
+  border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
 
+/* ── Content pages (About / Nectar / legal) ──────────────────────────── */
 .pi-landing-root .page {
-  padding: 56px 0 96px;
+  padding: 72px 32px 100px;
   text-align: left;
 }
 
 .pi-landing-root .page h1 {
   max-width: 16ch;
   margin-left: 0;
-  font-size: clamp(36px, 6vw, 64px);
 }
 
 .pi-landing-root .page .lede {
@@ -1114,16 +1056,14 @@ html.pi-html-landing body {
 .pi-landing-root .page-copy {
   display: grid;
   gap: 16px;
-  max-width: 36em;
+  max-width: 40em;
   margin-top: 28px;
 }
 
 .pi-landing-root .page-copy p {
-  font-family: var(--nr);
-  font-weight: 300;
-  font-size: 18px;
+  font-size: 17px;
   line-height: 1.6;
-  color: var(--c70);
+  color: var(--denim-text);
   margin: 0;
 }
 
@@ -1131,8 +1071,8 @@ html.pi-html-landing body {
 .pi-landing-root .wrap.pi-pricing-page {
   max-width: 800px;
   text-align: center;
-  padding-top: 56px;
-  padding-bottom: 96px;
+  padding-top: 72px;
+  padding-bottom: 100px;
 }
 
 .pi-landing-root .pi-pricing-page .sk,
@@ -1171,9 +1111,8 @@ html.pi-html-landing body {
   padding: 40px 36px 36px;
   border-radius: 20px;
   text-align: center;
-  background: linear-gradient(135deg, var(--n3), var(--n1) 70%);
-  border: 1px solid var(--c08);
-  box-shadow: var(--sh-2);
+  background: var(--denim-paper);
+  box-shadow: var(--denim-shadow);
   position: relative;
   overflow: hidden;
 }
@@ -1181,28 +1120,34 @@ html.pi-html-landing body {
 .pi-landing-root .pi-price-card::before {
   content: "";
   position: absolute;
-  inset: 0 0 auto;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(201, 162, 39, 0.6), transparent);
+  right: -60px;
+  top: -80px;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(closest-side, var(--denim-acclh), transparent);
+  opacity: 0.8;
+}
+
+.pi-landing-root .pi-price-card > * {
+  position: relative;
 }
 
 .pi-landing-root .pi-price-card h2 {
   max-width: none;
   margin: 0 auto 18px;
-  font-size: clamp(26px, 3.4vw, 34px);
+  font-size: clamp(24px, 3vw, 30px);
 }
 
 .pi-landing-root .pi-price-amount {
   margin: 0;
-  font-family: var(--nr);
-  font-weight: 300;
-  font-size: clamp(72px, 12vw, 104px);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(72px, 12vw, 96px);
   line-height: 0.9;
   letter-spacing: -0.05em;
-  color: var(--cream);
-  text-shadow:
-    0 2px 0 rgba(255, 255, 255, 0.05),
-    0 -2px 0 rgba(0, 0, 0, 0.5);
+  color: var(--denim-deep);
 }
 
 .pi-landing-root .pi-price-card .per {
@@ -1211,33 +1156,32 @@ html.pi-html-landing body {
 
 .pi-landing-root .pi-price-card .min {
   margin: 0 0 22px;
-  color: var(--gold);
+  color: var(--denim-accd);
+  font-weight: 600;
 }
 
 .pi-landing-root .pi-price-contrast {
   margin: 0 0 12px;
-  font-family: var(--nr);
-  font-weight: 400;
-  font-size: 18px;
+  font-size: 17px;
+  font-weight: 500;
   line-height: 1.45;
-  color: var(--cream);
+  color: var(--denim-ink);
 }
 
 .pi-landing-root .pi-price-included {
   margin: 0 auto;
   max-width: 36em;
-  font-family: var(--nr);
-  font-weight: 300;
-  font-size: 16px;
+  font-size: 15.5px;
   line-height: 1.55;
-  color: var(--c70);
+  color: var(--denim-text);
 }
 
 .pi-landing-root .pi-price-included a {
-  color: var(--cream);
+  color: var(--denim-pri);
+  font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 4px;
-  text-decoration-color: var(--c30);
+  text-decoration-color: var(--denim-pt2);
 }
 
 .pi-landing-root .pi-pricing-block {
@@ -1250,29 +1194,27 @@ html.pi-html-landing body {
 }
 
 .pi-landing-root .pi-pricing-block h3 {
-  font-family: var(--nr);
-  font-weight: 300;
-  font-size: clamp(26px, 3.2vw, 34px);
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  font-size: clamp(24px, 3vw, 32px);
+  letter-spacing: -0.025em;
   margin: 0 0 10px;
 }
 
 .pi-landing-root .pi-pricing-body {
   margin: 0 0 8px;
-  font-family: var(--nr);
-  font-weight: 300;
   font-size: 16px;
   line-height: 1.55;
-  color: var(--c70);
+  color: var(--denim-text);
   max-width: 36em;
 }
 
 .pi-landing-root .pi-pricing-rows {
   margin: 28px 0 0;
-  padding: 0;
+  padding: 4px 24px;
   list-style: none;
-  border-top: 1px solid var(--c08);
-  border-bottom: 1px solid var(--c08);
+  border-radius: var(--denim-r);
+  background: var(--denim-paper);
+  box-shadow: var(--denim-shadow-sm);
   text-align: left;
 }
 
@@ -1281,8 +1223,8 @@ html.pi-html-landing body {
   grid-template-columns: minmax(8rem, 12rem) 1fr;
   gap: 16px 32px;
   align-items: baseline;
-  padding: 18px 0;
-  border-bottom: 1px solid var(--c08);
+  padding: 16px 0;
+  border-bottom: 1px solid var(--denim-line);
 }
 
 .pi-landing-root .pi-pricing-row:last-child {
@@ -1291,16 +1233,16 @@ html.pi-html-landing body {
 
 .pi-landing-root .pi-pricing-row dt,
 .pi-landing-root .pi-pricing-train span:first-child {
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 600;
-  color: var(--cream);
+  color: var(--denim-ink);
 }
 
 .pi-landing-root .pi-pricing-row dd {
   margin: 0;
-  font-size: 14px;
+  font-size: 14.5px;
   line-height: 1.55;
-  color: var(--c70);
+  color: var(--denim-text);
 }
 
 .pi-landing-root .pi-pricing-train {
@@ -1308,13 +1250,15 @@ html.pi-html-landing body {
 }
 
 .pi-landing-root .pi-pricing-figure {
+  font-family: var(--font-display);
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--c70);
+  color: var(--denim-pri);
 }
 
 .pi-landing-root .pi-pricing-enterprise {
   padding-top: 40px;
-  border-top: 1px solid var(--c08);
+  border-top: 1px solid var(--denim-line);
 }
 
 .pi-landing-root .pi-pricing-enterprise .btn {
@@ -1324,7 +1268,7 @@ html.pi-html-landing body {
 .pi-landing-root .pi-pricing-quiet {
   margin: 48px 0 0;
   font-size: 14px;
-  color: var(--c50);
+  color: var(--denim-muted);
 }
 
 .pi-landing-root .pi-pricing-close {
@@ -1332,19 +1276,15 @@ html.pi-html-landing body {
   margin-bottom: 0;
 }
 
-/* Cream fill must keep navy type — .pi-landing-root a { color: inherit } would blank it. */
-.pi-landing-root a.btn.p {
-  color: var(--navy);
-}
-
+/* ── Footer: solid deep navy ─────────────────────────────────────────── */
 .pi-pub-foot {
-  border-top: 1px solid var(--c08);
-  padding: 28px 0;
-  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.25));
+  margin-top: 80px;
+  padding: 56px 0 48px;
+  background: var(--denim-deep);
   position: relative;
   z-index: 1;
-  color: var(--c50);
-  font-family: var(--ui);
+  color: var(--denim-ondarkp);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -1354,21 +1294,21 @@ html.pi-html-landing body {
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  font-size: 12px;
-  color: var(--c50);
+  font-size: 13.5px;
+  color: var(--denim-ondarkp);
 }
 
 .pi-pub-foot .links {
   display: flex;
-  gap: 18px;
+  gap: 20px;
   flex-wrap: wrap;
 }
 
 @media (min-width: 900px) {
   .pi-landing-root .hero {
-    padding: 88px 0 72px;
+    padding: 72px 0 72px;
     text-align: left;
-    grid-template-columns: minmax(0, 1.05fr) minmax(300px, 1fr);
+    grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr);
     gap: 28px 40px;
     align-items: center;
   }
@@ -1426,12 +1366,38 @@ html.pi-html-landing body {
 }
 
 @media (max-width: 760px) {
+  .pi-landing-root .wrap,
+  .pi-pub-nav .wrap,
+  .pi-pub-foot .wrap {
+    padding: 0 20px;
+  }
+
+  .pi-pub-nav {
+    top: max(8px, env(safe-area-inset-top, 0px));
+    margin-top: 8px;
+    padding: 0 10px;
+  }
+
+  .pi-pub-nav .wrap.nav {
+    height: 52px;
+    gap: 10px;
+    padding: 0 4px 0 12px;
+  }
+
   .pi-pub-nav .nlinks {
     display: none;
   }
 
   .pi-landing-root .hero {
-    padding: calc(72px + env(safe-area-inset-top, 0px)) 0 52px;
+    padding: calc(36px + env(safe-area-inset-top, 0px)) 0 52px;
+  }
+
+  .pi-landing-root h1 {
+    font-size: 40px;
+  }
+
+  .pi-landing-root h2 {
+    font-size: 34px;
   }
 
   .pi-landing-root .strip {
@@ -1449,7 +1415,8 @@ html.pi-html-landing body {
   .pi-landing-root .pi {
     grid-template-columns: 1fr;
     gap: 16px;
-    padding: 36px 22px 28px;
+    padding: 32px 22px 28px;
+    border-radius: 22px;
   }
 
   .pi-landing-root .pi-mark-well {
@@ -1459,7 +1426,7 @@ html.pi-html-landing body {
   }
 
   .pi-landing-root .pi-big {
-    font-size: 92px;
+    font-size: 88px;
     line-height: 1.1;
     padding-top: 0.2em;
   }
@@ -1502,15 +1469,19 @@ html.pi-html-landing body {
   }
 
   .pi-landing-root .big {
-    font-size: 80px;
+    font-size: 76px;
   }
 
   .pi-landing-root:not(.pi-home) section {
-    padding: 60px 0;
+    padding: 32px 0;
+  }
+
+  .pi-landing-root .page {
+    padding: 44px 20px 72px;
   }
 
   .pi-landing-root .st b {
-    font-size: 36px;
+    font-size: 34px;
   }
 
   .pi-landing-root .ctas .btn {
@@ -1519,6 +1490,10 @@ html.pi-html-landing body {
 
   .pi-landing-root .pi-price-card {
     padding: 30px 22px;
+  }
+
+  .pi-landing-root .pi-pricing-rows {
+    padding: 4px 18px;
   }
 
   .pi-landing-root .pi-pricing-row {
@@ -1535,8 +1510,21 @@ html.pi-html-landing body {
     flex-basis: min(82vw, 320px);
   }
 
+  .pi-pub-foot {
+    margin-top: 64px;
+  }
+
   .pi-pub-foot .foot {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pi-landing-root .btn,
+  .pi-pub-nav .btn,
+  .pi-landing-root .cell {
+    transition: none !important;
+    transform: none !important;
   }
 }

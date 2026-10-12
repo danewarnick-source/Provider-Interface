@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { PiMark } from "@/components/pi-landing/pi-mark";
-import { PI_ACTION, PI_CREAM, PI_NAVY, PI_PRODUCT_SHOTS } from "@/lib/pi-landing";
+import { PI_PRODUCT_SHOTS } from "@/lib/pi-landing";
 import { DuskPeopleScreen } from "@/components/pi-landing/dusk-people-screen";
 
 function NavGlyph({ d }: { d: string }) {
@@ -14,27 +14,23 @@ function NavGlyph({ d }: { d: string }) {
 function ShotChrome({ title, action, children }: { title: string; action?: string; children: ReactNode }) {
   return (
     <div
-      className="flex h-full min-h-[220px] overflow-hidden rounded-[12px] ring-1 ring-white/[0.08]"
-      style={{ background: PI_NAVY, color: PI_CREAM }}
+      className="flex h-full min-h-[220px] overflow-hidden rounded-[16px] bg-[var(--denim-bg)] text-ink shadow-[var(--denim-shadow),0_40px_80px_-30px_rgba(27,51,80,0.45)]"
       aria-hidden
     >
-      <aside className="flex w-10 shrink-0 flex-col items-center gap-3 border-r border-white/[0.06] py-3 sm:w-11">
+      <aside className="flex w-10 shrink-0 flex-col items-center gap-3 bg-[image:var(--denim-sidebar-bg)] py-3 text-ondarkp sm:w-11">
         <PiMark variant="brand" className="h-5 w-5" />
-        <span className="grid h-7 w-7 place-items-center rounded-md bg-white/[0.07]">
+        <span className="grid h-7 w-7 place-items-center rounded-lg bg-white/10 text-white shadow-[inset_2px_0_0_var(--denim-acc)]">
           <NavGlyph d="M5 7h14M5 12h14M5 17h10" />
         </span>
-        <span className="grid h-7 w-7 place-items-center rounded-md text-[#f3efe6]/45">
+        <span className="grid h-7 w-7 place-items-center rounded-lg">
           <NavGlyph d="M7 6h10v12H7zM9 10h6M9 14h4" />
         </span>
       </aside>
       <div className="min-w-0 flex-1 px-3 py-2.5 sm:px-4 sm:py-3">
         <div className="flex items-center justify-between gap-2">
-          <h3 className="font-sans text-base font-semibold tracking-tight sm:text-lg">{title}</h3>
+          <h3 className="font-display text-base font-bold tracking-[-0.01em] text-deep sm:text-lg">{title}</h3>
           {action ? (
-            <span
-              className="rounded-md px-2 py-0.5 text-[10px] font-medium"
-              style={{ background: PI_ACTION, color: PI_CREAM }}
-            >
+            <span className="rounded-full bg-pri px-2.5 py-0.5 text-[10px] font-semibold text-white">
               {action}
             </span>
           ) : null}
@@ -48,16 +44,16 @@ function ShotChrome({ title, action, children }: { title: string; action?: strin
 function NectarShot() {
   return (
     <ShotChrome title="Nectar">
-      <p className="mt-2 text-[11px] text-[#f3efe6]/50">With you while the day is happening</p>
+      <p className="mt-2 text-[11px] text-muted-foreground">With you while the day is happening</p>
       <div className="mt-3 space-y-2">
         {[
           { who: "You", text: "Does this note already cover the afternoon?" },
           { who: "Nectar", text: "The afternoon is already on the record. One sentence still needs your eye." },
           { who: "You", text: "Keep it as a draft." },
         ].map((row) => (
-          <div key={row.text} className="rounded-md border border-white/[0.07] bg-black/20 px-2.5 py-2">
-            <div className="text-[9px] uppercase tracking-[0.14em] text-[#f3efe6]/40">{row.who}</div>
-            <div className="mt-0.5 text-[11px] text-[#f3efe6]/80">{row.text}</div>
+          <div key={row.text} className="rounded-lg bg-paper px-2.5 py-2 shadow-[var(--denim-shadow-sm)]">
+            <div className="text-[9px] font-semibold uppercase tracking-[0.1em] text-pri">{row.who}</div>
+            <div className="mt-0.5 text-[11px] text-ink">{row.text}</div>
           </div>
         ))}
       </div>
@@ -72,20 +68,20 @@ function ScheduleShot() {
     <ShotChrome title="Schedule" action="This week">
       <div className="mt-3 grid grid-cols-5 gap-1.5">
         {days.map((d) => (
-          <div key={d} className="text-center text-[9px] uppercase tracking-[0.12em] text-[#f3efe6]/40">
+          <div key={d} className="text-center text-[9px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
             {d}
           </div>
         ))}
         {cells.map((c) => (
           <div
             key={c}
-            className="rounded-md border border-white/[0.08] bg-white/[0.04] px-1 py-2 text-center text-[10px] text-[#f3efe6]/75"
+            className="rounded-lg bg-acct px-1 py-2 text-center text-[10px] font-medium text-accd ring-1 ring-acctb"
           >
             {c}
           </div>
         ))}
       </div>
-      <p className="mt-3 text-[11px] text-[#f3efe6]/45">Coverage holds. Close the laptop.</p>
+      <p className="mt-3 text-[11px] text-muted-foreground">Coverage holds. Close the laptop.</p>
     </ShotChrome>
   );
 }
@@ -99,9 +95,9 @@ function NotesShot() {
           { name: "Jordan Lee", note: "Morning note signed. Nothing left to reconstruct." },
           { name: "Taylor Kim", note: "Draft waiting for your eye — Nectar left one sentence." },
         ].map((row) => (
-          <div key={row.name} className="rounded-md border border-white/[0.07] bg-black/20 px-2.5 py-2">
-            <div className="text-[11px] font-medium">{row.name}</div>
-            <div className="mt-0.5 text-[10px] text-[#f3efe6]/60">{row.note}</div>
+          <div key={row.name} className="rounded-lg bg-paper px-2.5 py-2 shadow-[var(--denim-shadow-sm)]">
+            <div className="text-[11px] font-medium text-ink">{row.name}</div>
+            <div className="mt-0.5 text-[10px] text-body">{row.note}</div>
           </div>
         ))}
       </div>
@@ -120,10 +116,10 @@ function TrainingsShot() {
         ].map((row) => (
           <div
             key={row.name}
-            className="flex items-center justify-between rounded-md border border-white/[0.07] bg-black/20 px-2.5 py-2"
+            className="flex items-center justify-between rounded-lg bg-paper px-2.5 py-2 shadow-[var(--denim-shadow-sm)]"
           >
-            <span className="text-[11px]">{row.name}</span>
-            <span className="text-[10px] text-[#8fbf98]">{row.state}</span>
+            <span className="text-[11px] text-ink">{row.name}</span>
+            <span className="rounded-full bg-acct px-2 py-px text-[10px] font-semibold text-accd">{row.state}</span>
           </div>
         ))}
       </div>
@@ -141,9 +137,9 @@ function ShopShot() {
           { name: "Mandt", price: "$200" },
           { name: "Package", price: "$300" },
         ].map((row) => (
-          <div key={row.name} className="rounded-md border border-white/[0.07] bg-black/20 px-2.5 py-2">
-            <div className="text-[11px]">{row.name}</div>
-            <div className="mt-1 text-sm font-medium">{row.price}</div>
+          <div key={row.name} className="rounded-lg bg-paper px-2.5 py-2 shadow-[var(--denim-shadow-sm)]">
+            <div className="text-[11px] text-body">{row.name}</div>
+            <div className="mt-1 font-display text-sm font-bold text-deep">{row.price}</div>
           </div>
         ))}
       </div>
@@ -154,7 +150,7 @@ function ShopShot() {
 const SHOTS: Record<string, ReactNode> = {
   nectar: <NectarShot />,
   people: (
-    <div className="overflow-hidden rounded-[12px] ring-1 ring-white/[0.08]">
+    <div className="overflow-hidden rounded-[16px] shadow-[var(--denim-shadow),0_40px_80px_-30px_rgba(27,51,80,0.45)]">
       <div className="aspect-[16/10] min-h-[220px]">
         <DuskPeopleScreen />
       </div>
@@ -168,16 +164,15 @@ const SHOTS: Record<string, ReactNode> = {
 
 export function PiProductShots() {
   return (
-    <section id="product" className="scroll-mt-24 px-5 py-20 sm:px-8 md:py-28">
-      <div className="mx-auto max-w-6xl">
-        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[#f3efe6]/45">The office</p>
+    <section id="product" className="scroll-mt-24 px-5 py-20 sm:px-8 md:py-[100px]">
+      <div className="mx-auto max-w-[1240px]">
+        <p className="denim-eyebrow">The office</p>
         <h2
-          className="mt-3 max-w-3xl text-3xl font-medium leading-[1.12] tracking-[-0.02em] text-[#f3efe6] sm:text-5xl"
-          style={{ fontFamily: '"Newsreader", "Times New Roman", serif' }}
+          className="mt-3 max-w-3xl font-display text-[clamp(36px,4.5vw,56px)] font-bold leading-[1.04] tracking-[-0.025em] text-deep [text-wrap:balance]"
         >
           Admin-first. The work you already do, in one room.
         </h2>
-        <p className="mt-4 max-w-2xl text-base text-[#f3efe6]/62 sm:text-lg">
+        <p className="mt-4 max-w-2xl text-base text-body sm:text-lg">
           Nectar, people, the schedule, notes already written, trainings, the shop. Not a caregiver app.
         </p>
 
@@ -185,11 +180,11 @@ export function PiProductShots() {
           {PI_PRODUCT_SHOTS.map((shot) => (
             <article key={shot.id} className="min-w-0">
               {SHOTS[shot.id]}
-              <p className="mt-4 text-[11px] font-medium uppercase tracking-[0.18em] text-[#f3efe6]/45">
+              <p className="denim-eyebrow mt-5">
                 {shot.kicker}
               </p>
-              <h3 className="mt-1 font-sans text-xl font-semibold tracking-tight">{shot.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-[#f3efe6]/62">{shot.body}</p>
+              <h3 className="mt-1 font-display text-xl font-bold tracking-[-0.02em] text-deep">{shot.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-body">{shot.body}</p>
             </article>
           ))}
         </div>

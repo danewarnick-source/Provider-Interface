@@ -53,7 +53,7 @@ export const Route = createFileRoute("/join")({
 });
 
 const fieldClass =
-  "flex h-12 w-full rounded-md border border-[#0a0f1c]/15 bg-white px-3 py-2 text-base text-[#0a0f1c] outline-none placeholder:text-[#0a0f1c]/40 focus:ring-2 focus:ring-[#c4a35a]/35";
+  "flex h-12 w-full rounded-xl border border-line bg-paper px-3 py-2 text-base text-ink outline-none transition-[border-color,box-shadow] duration-200 ease-denim placeholder:text-muted-foreground focus:border-pri focus:ring-[3px] focus:ring-pri/15";
 
 function JoinPage() {
   const search = Route.useSearch();
@@ -166,7 +166,7 @@ function JoinPage() {
     return (
       <AuthShell title="Checking your invitation…" subtitle="Hang tight for a moment.">
         <div className="flex justify-center py-6" data-testid="join-loading">
-          <Loader2 className="h-6 w-6 animate-spin text-[#0a0f1c]/45" />
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       </AuthShell>
     );
@@ -179,13 +179,13 @@ function JoinPage() {
         subtitle="You were not sent to start a new company."
       >
         <div
-          className="rounded-lg border border-[#0a0f1c]/15 bg-white p-4 text-sm text-[#0a0f1c]"
+          className="rounded-[var(--denim-r)] border border-line bg-pt0 p-4 text-sm text-ink"
           data-testid="join-error"
         >
           <p>{preview.message}</p>
-          <p className="mt-3 text-[#0a0f1c]/55">
+          <p className="mt-3 text-muted-foreground">
             If you already have a login, you can{" "}
-            <Link to="/login" className="font-medium text-[#8a6d32] hover:underline">
+            <Link to="/login" className="font-medium text-pri hover:underline">
               sign in
             </Link>
             . Don't create a new agency from this link.
@@ -226,7 +226,7 @@ function JoinPage() {
     >
       <form onSubmit={onSubmit} className="grid gap-4" data-testid="join-form">
         <div className="grid gap-2">
-          <Label htmlFor="join-email" className="text-[#0a0f1c]">
+          <Label htmlFor="join-email" className="text-ink">
             Email
           </Label>
           <input
@@ -236,12 +236,12 @@ function JoinPage() {
             value={preview.email}
             readOnly
             autoComplete="email"
-            className={`${fieldClass} bg-[#0a0f1c]/[0.04]`}
+            className={`${fieldClass} bg-pt0`}
           />
         </div>
         {preview.needs_name && (
           <div className="grid gap-2">
-            <Label htmlFor="join-name" className="text-[#0a0f1c]">
+            <Label htmlFor="join-name" className="text-ink">
               Your name
             </Label>
             <input
@@ -257,7 +257,7 @@ function JoinPage() {
         )}
         {!preview.has_username && (
           <div className="grid gap-2">
-            <Label htmlFor="join-username" className="text-[#0a0f1c]">
+            <Label htmlFor="join-username" className="text-ink">
               Username
             </Label>
             <input
@@ -278,7 +278,7 @@ function JoinPage() {
             />
             <p
               id="join-username-hint"
-              className="text-xs text-[#0a0f1c]/55"
+              className="text-xs text-muted-foreground"
               data-testid="join-username-hint"
             >
               {JOIN_USERNAME_HINT}
@@ -291,7 +291,7 @@ function JoinPage() {
                   setUsernameTouched(true);
                   setUsername(suggestedUsername);
                 }}
-                className="text-left text-xs font-medium text-[#8a6d32] hover:text-[#0a0f1c] hover:underline"
+                className="text-left text-xs font-medium text-pri hover:text-deep hover:underline"
               >
                 Use email as username: {suggestedUsername}
               </button>
@@ -300,7 +300,7 @@ function JoinPage() {
           </div>
         )}
         <div className="grid gap-2">
-          <Label htmlFor="join-password" className="text-[#0a0f1c]">
+          <Label htmlFor="join-password" className="text-ink">
             {setsNewPassword ? "Password" : "Password you already use"}
           </Label>
           <PasswordInput
@@ -317,7 +317,7 @@ function JoinPage() {
           {setsNewPassword ? (
             <p
               id="join-password-hint"
-              className="text-xs text-[#0a0f1c]/55"
+              className="text-xs text-muted-foreground"
               data-testid="join-password-hint"
             >
               {JOIN_PASSWORD_HINT}
@@ -325,7 +325,7 @@ function JoinPage() {
           ) : (
             <p
               id="join-password-hint"
-              className="text-xs text-[#0a0f1c]/55"
+              className="text-xs text-muted-foreground"
               data-testid="join-password-hint"
             >
               This does not change your password. Use the same one you use on the sign-in page.
@@ -345,7 +345,7 @@ function JoinPage() {
           <LiveLine id="join-password-live" testId="join-password-live" status={passwordLive} />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="join-confirm" className="text-[#0a0f1c]">
+          <Label htmlFor="join-confirm" className="text-ink">
             Confirm password
           </Label>
           <PasswordInput
@@ -358,7 +358,7 @@ function JoinPage() {
             className={fieldClass}
             aria-describedby="join-confirm-live"
           />
-          <p className="text-xs text-[#0a0f1c]/55" data-testid="join-confirm-hint">
+          <p className="text-xs text-muted-foreground" data-testid="join-confirm-hint">
             Re-enter the same password so we can check they match.
           </p>
           <LiveLine id="join-confirm-live" testId="join-confirm-live" status={confirmLive} />
@@ -367,13 +367,13 @@ function JoinPage() {
         <Button
           type="submit"
           disabled={!canJoin}
-          className="h-11 bg-[linear-gradient(135deg,var(--hive-accent)_0%,var(--hive-accent)_100%)] text-[#141a3d] hover:opacity-95 disabled:opacity-50"
+          className="h-11 rounded-full bg-pri text-white shadow-[var(--denim-btn-shadow)] hover:bg-deep disabled:opacity-50"
         >
           {busy ? "Joining…" : `Join ${preview.org_name}`}
         </Button>
-        <p className="text-center text-xs text-[#0a0f1c]/45">
+        <p className="text-center text-xs text-muted-foreground">
           Already on this team?{" "}
-          <Link to="/login" className="text-[#8a6d32] hover:underline">
+          <Link to="/login" className="text-pri hover:underline">
             Sign in
           </Link>
         </p>
@@ -398,7 +398,7 @@ function LiveLine({
       data-testid={testId}
       role="status"
       aria-live="polite"
-      className={`text-xs font-medium ${status.ok ? "text-[#1e3a30]" : "text-[#8a3228]"}`}
+      className={`text-xs font-medium ${status.ok ? "text-accd" : "text-danger-700"}`}
     >
       {status.text}
     </div>
@@ -406,12 +406,16 @@ function LiveLine({
 }
 
 function JoinRule({ ok, idle, children }: { ok: boolean; idle: boolean; children: ReactNode }) {
-  const color = idle ? "#3a4553" : ok ? "#1e3a30" : "#8a3228";
+  const color = idle
+    ? "var(--denim-text)"
+    : ok
+      ? "var(--denim-accd)"
+      : "var(--hive-danger-fg)";
   return (
     <li className="flex items-center gap-2 text-xs" style={{ color }}>
       <span
         className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px]"
-        style={{ background: ok && !idle ? "rgba(127, 209, 168, 0.28)" : "rgba(10, 15, 28, 0.08)" }}
+        style={{ background: ok && !idle ? "var(--denim-acct)" : "var(--denim-pt)" }}
       >
         {ok && !idle ? <Check className="h-3 w-3" /> : "•"}
       </span>

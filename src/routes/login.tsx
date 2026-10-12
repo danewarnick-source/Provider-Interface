@@ -290,11 +290,11 @@ function LoginPage() {
   };
 
   const fieldClass =
-    "flex h-12 w-full rounded-md border border-[var(--hive-border)] bg-[var(--hive-surface)] px-3 py-2 text-base text-[var(--hive-text)] outline-none placeholder:text-[var(--hive-text-muted)] focus:border-[var(--hive-accent)] focus:ring-2 focus:ring-[var(--hive-accent)]/30";
+    "flex h-12 w-full rounded-xl border border-line bg-paper px-3 py-2 text-base text-ink outline-none transition-[border-color,box-shadow] duration-200 ease-denim placeholder:text-muted-foreground focus:border-pri focus:ring-[3px] focus:ring-pri/15";
 
   return (
     <AuthFrame>
-      <div className="pi-home-cream-card pi-home-auth-card">
+      <div className="pi-home-card pi-home-auth-card">
         <div className="mb-7 text-center">
           <h1>Welcome back</h1>
           <p className="mt-1.5 text-sm text-[var(--hive-text-muted)]">
@@ -388,7 +388,7 @@ function LoginPage() {
         <Button
           asChild
           variant="outline"
-          className="h-11 w-full border-[var(--hive-border)] bg-white text-[var(--hive-text)] hover:bg-white hover:text-[var(--hive-text)]"
+          className="h-11 w-full rounded-full border-pt2 bg-paper text-pri hover:bg-pt0 hover:text-pri"
         >
           <Link to="/signup">Get started</Link>
         </Button>
@@ -406,7 +406,7 @@ function LoginPage() {
 }
 
 /**
- * Shared dusk auth shell used by forgot-password / reset-password.
+ * Shared Denim auth shell used by forgot-password / reset-password.
  * Matches the Provider Interface login visual language.
  */
 export function AuthShell({
@@ -420,7 +420,7 @@ export function AuthShell({
 }) {
   return (
     <AuthFrame>
-      <div className="pi-home-cream-card pi-home-auth-card">
+      <div className="pi-home-card pi-home-auth-card">
         <div className="mb-7 text-center">
           <h1>{title}</h1>
           <p className="mt-1.5 text-sm text-[var(--hive-text-muted)]">{subtitle}</p>
