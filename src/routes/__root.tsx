@@ -52,7 +52,9 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <div className="max-w-md text-center">
-          <h1 className="font-display text-xl font-bold tracking-[-0.025em] text-deep">A new version is available</h1>
+          <h1 className="font-display text-xl font-bold tracking-[-0.025em] text-deep">
+            A new version is available
+          </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Please refresh to load the latest version of the app.
           </p>
@@ -73,7 +75,9 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="font-display text-xl font-bold tracking-[-0.025em] text-deep">Something went wrong</h1>
+        <h1 className="font-display text-xl font-bold tracking-[-0.025em] text-deep">
+          Something went wrong
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
         <button
           onClick={() => {

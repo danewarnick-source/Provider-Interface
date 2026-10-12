@@ -245,9 +245,7 @@ function Kpi({
       <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
         <Icon className="h-3.5 w-3.5" /> {label}
       </div>
-      <div className="mt-1 font-display text-2xl font-bold tabular-nums text-deep">
-        {value}
-      </div>
+      <div className="mt-1 font-display text-2xl font-bold tabular-nums text-deep">{value}</div>
     </div>
   );
 }

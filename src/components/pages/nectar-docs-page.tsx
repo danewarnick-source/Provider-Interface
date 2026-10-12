@@ -490,10 +490,7 @@ function UploadButton({
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button
-            disabled={!file || mut.isPending}
-            onClick={() => mut.mutate()}
-          >
+          <Button disabled={!file || mut.isPending} onClick={() => mut.mutate()}>
             {mut.isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
@@ -741,11 +738,7 @@ function DocumentDetailDialog({
 
 function FieldStatusBadge({ status }: { status: string }) {
   if (status === "confirmed")
-    return (
-      <Badge className="bg-acct text-accd ring-1 ring-acctb hover:bg-acct">
-        confirmed
-      </Badge>
-    );
+    return <Badge className="bg-acct text-accd ring-1 ring-acctb hover:bg-acct">confirmed</Badge>;
   if (status === "overridden")
     return (
       <Badge className="bg-warning-500/15 text-warning-700 hover:bg-warning-500/15 dark:text-warning-300">

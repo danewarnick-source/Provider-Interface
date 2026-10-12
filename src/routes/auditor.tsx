@@ -184,7 +184,9 @@ function AuditorShareList({ onOpen }: { onOpen: (id: string) => void }) {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="font-display text-2xl font-bold tracking-[-0.025em] text-deep">Shared with you</h1>
+        <h1 className="font-display text-2xl font-bold tracking-[-0.025em] text-deep">
+          Shared with you
+        </h1>
         <p className="text-sm text-muted-foreground">
           Audit folders that providers have granted you access to. Only files explicitly shared are
           visible.
@@ -200,10 +202,7 @@ function AuditorShareList({ onOpen }: { onOpen: (id: string) => void }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {(data?.shares ?? []).map((s: any) => {
-          const cls =
-            s.live_status === "active"
-              ? "border-acctb"
-              : "border-line opacity-80";
+          const cls = s.live_status === "active" ? "border-acctb" : "border-line opacity-80";
           return (
             <button
               key={s.id}
@@ -335,10 +334,7 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
               const provided = ["auto_filled", "confirmed"].includes(it.status);
               const missing = it.status === "missing";
               return (
-                <div
-                  key={it.id}
-                  className="rounded-md border border-line bg-pt0 p-3"
-                >
+                <div key={it.id} className="rounded-md border border-line bg-pt0 p-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
@@ -458,12 +454,7 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
 }
 
 function Stat({ label, value, tone }: { label: string; value: number; tone?: "ok" | "red" }) {
-  const cls =
-    tone === "ok"
-      ? "text-accd"
-      : tone === "red"
-        ? "text-destructive"
-        : "text-foreground";
+  const cls = tone === "ok" ? "text-accd" : tone === "red" ? "text-destructive" : "text-foreground";
   return (
     <div className="rounded-md border border-line bg-pt0 px-3 py-2">
       <div className={`font-display text-xl font-bold ${cls}`}>{value}</div>

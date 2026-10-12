@@ -809,7 +809,10 @@ function Step1Account({
 
 function PwRule({ ok, children }: { ok: boolean; children: React.ReactNode }) {
   return (
-    <li className="flex items-center gap-2" style={{ color: ok ? "var(--denim-accd)" : "var(--denim-text)" }}>
+    <li
+      className="flex items-center gap-2"
+      style={{ color: ok ? "var(--denim-accd)" : "var(--denim-text)" }}
+    >
       <span
         className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px]"
         style={{ background: ok ? "var(--denim-acct)" : "var(--denim-pt)" }}

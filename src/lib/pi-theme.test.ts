@@ -3,13 +3,7 @@ import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { DENIM, DENIM_FONTS } from "./design-tokens.ts";
 import { PI_THEME } from "./pi-theme.ts";
-import {
-  PI_ACCENT,
-  PI_ACTION,
-  PI_CREAM,
-  PI_NAVY,
-  PI_THEME as FROM_LANDING,
-} from "./pi-landing.ts";
+import { PI_ACCENT, PI_ACTION, PI_CREAM, PI_NAVY, PI_THEME as FROM_LANDING } from "./pi-landing.ts";
 
 function read(rel: string) {
   return readFileSync(new URL(rel, import.meta.url), "utf8");

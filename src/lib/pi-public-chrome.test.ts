@@ -99,6 +99,9 @@ describe("public pages share homepage marketing chrome", () => {
     assert.match(forgot, /pi-home-btn primary/);
     assert.match(homeCss, /\.pi-home-btn\.primary \{/);
     assert.match(homeCss, /background: var\(--denim-pri\)/);
-    assert.match(homeCss, /\.pi-home-card \{[\s\S]*border-radius: 20px[\s\S]*box-shadow: var\(--denim-shadow\)/);
+    assert.match(
+      homeCss,
+      /\.pi-home-card \{[\s\S]*border-radius: 20px[\s\S]*box-shadow: var\(--denim-shadow\)/,
+    );
   });
 });

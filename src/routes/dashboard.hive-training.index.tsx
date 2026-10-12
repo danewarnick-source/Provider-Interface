@@ -782,9 +782,7 @@ function RosterSection({
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold mb-2 text-deep">
-          Available seats ({seats.length})
-        </h3>
+        <h3 className="text-sm font-semibold mb-2 text-deep">Available seats ({seats.length})</h3>
         {seats.length > 0 ? (
           <div className="grid gap-2">
             {(seats as SeatLite[]).map((s) => (

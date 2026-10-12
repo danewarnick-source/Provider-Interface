@@ -153,9 +153,7 @@ function ClientDetail({
                 <span
                   className={[
                     "block text-[10px] font-medium uppercase tracking-wide leading-tight",
-                    active
-                      ? "text-deep/70"
-                      : "text-muted-foreground",
+                    active ? "text-deep/70" : "text-muted-foreground",
                   ].join(" ")}
                 >
                   {billingLabel(code)}
