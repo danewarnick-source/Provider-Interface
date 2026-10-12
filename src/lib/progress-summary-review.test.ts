@@ -8,11 +8,12 @@ import {
   JOBY_TALENT_GOAL,
 } from "./progress-summary-joby.fixture.ts";
 import {
-  acceptSuggestion,
+  applyDraft,
   blankGoals,
-  buildSuggestions,
+  buildDrafts,
   dedupeFields,
   dismissKey,
+  draftFailureMessage,
   droppedFacts,
   emptyReviewState,
   findDates,
@@ -20,14 +21,12 @@ import {
   goalsNeedingAreaCheck,
   pushUndo,
   readReviewState,
-  suggestionKey,
+  saysNoIncidents,
   summaryReminders,
-  takeSuggestion,
-  undoAccept,
+  undoDraft,
   unsupportedFacts,
-  visibleSuggestion,
+  type BoxDraft,
   type FieldKey,
-  type FieldSuggestion,
   type SummaryReviewState,
   type UndoStacks,
 } from "./progress-summary-review.ts";
@@ -85,10 +84,10 @@ describe("Joby Austin, SLN, 2026-Q4 (the fixed fixture)", () => {
     assert.equal(goalCovered("She joined the club and made a friendship.", g), true);
     assert.equal(goalCovered("Cooked pasta.", g), false);
   });
-  it("no off-goal, misplaced or vague reminders exist; only the four fixed kinds", () => {
+  it("no off-goal, misplaced or vague reminders exist; only the two fixed goal kinds", () => {
     const blank = summaryReminders(JOBY, editorWith({ general: "x" }), empty);
     const kinds = new Set(blank.map((r) => r.kind));
-    for (const k of kinds) assert.ok(["no_progress", "off_area", "response", "events"].includes(k));
+    for (const k of kinds) assert.ok(["no_progress", "off_area"].includes(k));
     assert.ok(blank.every((r) => !/vague|list of tasks|tone|reads like/i.test(r.text)));
   });
   it("zero overlap only is put to Nectar", () => {
@@ -135,22 +134,11 @@ describe("reminders (fixed wording, never required)", () => {
       ],
     );
   });
-  it("general notes: at most two (response, notable events), only once something is typed", () => {
-    assert.deepEqual(summaryReminders(JOBY, emptyEditorState(), empty).filter((r) => r.field === "general"), []);
-    const rem = summaryReminders(JOBY, editorWith({ goals: JOBY_EDITOR.goals, general: "Services continued as planned." }), empty);
-    assert.deepEqual(
-      rem.map((r) => r.kind),
-      ["response", "events"],
-    );
-    assert.ok(rem.length <= 2);
-  });
-  it("an incident note counts as notable events", () => {
-    const rem = summaryReminders(
-      JOBY,
-      editorWith({ goals: JOBY_EDITOR.goals, general: "Joby is happy.", incidentNotes: "No incidents." }),
-      empty,
-    );
-    assert.deepEqual(rem, []);
+  it("general notes are optional: never a reminder, typed or blank", () => {
+    for (const general of ["", "Services continued as planned."]) {
+      const rem = summaryReminders(JOBY, editorWith({ goals: JOBY_EDITOR.goals, general }), empty);
+      assert.deepEqual(rem, []);
+    }
   });
   it("Nectar's 'no' on a goal shows a fixed reminder only while that text stands", () => {
     const e = editorWith({ ...JOBY_EDITOR, goals: { ...JOBY_EDITOR.goals, talent: "Joby went to the dentist." } });
@@ -170,7 +158,7 @@ describe("reminders (fixed wording, never required)", () => {
   it("(a) dismissed reminders stay hidden after a reload", () => {
     const e = editorWith({ general: "Services continued as planned." });
     const before = summaryReminders(JOBY, e, empty);
-    assert.ok(before.length >= 3);
+    assert.equal(before.length, 2);
     let review = empty;
     for (const r of before) review = dismissKey(review, r.key);
     const reloaded = readReviewState(JSON.parse(JSON.stringify(review)));
@@ -213,8 +201,8 @@ describe("rewrite validation", () => {
     ["general", JOBY_EDITOR.general],
     ["incidentNotes", "Joby fell on 11/2."],
   ]);
-  it("buildSuggestions: a made-up date is rejected, a lossy rewrite is flagged, each box on its own", () => {
-    const res = buildSuggestions({
+  it("buildDrafts: a made-up date or a lost typed date leaves the box unchanged; each box on its own", () => {
+    const res = buildDrafts({
       current,
       proposed: new Map<FieldKey, string>([
         ["goal:ils", "Joby planned and cooked meals with staff and did her own laundry every week."],
@@ -224,86 +212,99 @@ describe("rewrite validation", () => {
       extra: () => [],
       order,
     });
-    assert.deepEqual(res.rejected, [{ field: "goal:talent", facts: ["9/21"] }]);
-    const ils = res.suggestions.find((s) => s.field === "goal:ils");
-    assert.deepEqual(ils?.drops, ["8/5", "September"], "the typed dates are lost");
-    const inc = res.suggestions.find((s) => s.field === "incidentNotes");
-    assert.deepEqual(inc?.drops, []);
-    assert.ok(res.suggestions.every((s) => !("linked" in s)));
+    assert.deepEqual(res.failed, [
+      { field: "goal:talent", reason: "unsupported", facts: ["9/21"] },
+      { field: "goal:ils", reason: "dropped", facts: ["8/5", "September"] },
+    ]);
+    assert.deepEqual(res.drafts, [{ field: "incidentNotes", text: "Joby fell on 11/2 and was checked by staff." }]);
   });
-  it("a goal's records can supply dates and numbers for that goal's box", () => {
-    const res = buildSuggestions({
-      current: new Map<FieldKey, string>([["goal:talent", "She painted."]]),
+  it("a box's records can supply dates and numbers, and an empty box is drafted from them", () => {
+    const res = buildDrafts({
+      current: new Map<FieldKey, string>([["goal:talent", ""]]),
       proposed: new Map<FieldKey, string>([["goal:talent", "She painted on 2026-10-04."]]),
       extra: () => ["2026-10-04 Painted at the art center."],
       order: ["goal:talent"],
     });
-    assert.equal(res.suggestions.length, 1);
-    assert.deepEqual(res.rejected, []);
+    assert.deepEqual(res.drafts, [{ field: "goal:talent", text: "She painted on 2026-10-04." }]);
+    assert.deepEqual(res.failed, []);
   });
-  it("a rewrite equal to the box is not offered", () => {
-    const res = buildSuggestions({
+  it("a draft equal to the box changes nothing", () => {
+    const res = buildDrafts({
       current: new Map<FieldKey, string>([["general", "Joby is well."]]),
       proposed: new Map<FieldKey, string>([["general", "Joby  is well."]]),
       extra: () => [],
       order: ["general"],
     });
-    assert.deepEqual(res.suggestions, []);
+    assert.deepEqual(res.drafts, []);
+    assert.deepEqual(res.failed, [{ field: "general", reason: "unchanged", facts: [] }]);
+  });
+  it("the incident box never says 'no incidents' when there are reports", () => {
+    const input = {
+      current: new Map<FieldKey, string>([["incidentNotes", ""]]),
+      proposed: new Map<FieldKey, string>([["incidentNotes", "There were no incidents this quarter."]]),
+      extra: () => ["2026-11-02 Fell in the kitchen."],
+      order: ["incidentNotes"] as FieldKey[],
+    };
+    assert.deepEqual(buildDrafts({ ...input, hasIncidents: true }).failed, [
+      { field: "incidentNotes", reason: "no_incidents", facts: [] },
+    ]);
+    assert.equal(buildDrafts({ ...input, hasIncidents: false }).drafts.length, 1);
+    assert.equal(saysNoIncidents("No reportable incidents occurred."), true);
+    assert.equal(saysNoIncidents("Joby was incident-free."), true);
+    assert.equal(saysNoIncidents("After the fall there were no further incidents."), false);
+  });
+  it("each failure has a one-line message", () => {
+    for (const reason of ["unsupported", "dropped", "no_incidents", "unchanged"] as const) {
+      const m = draftFailureMessage({ reason, facts: ["9/21"] });
+      assert.ok(m && !m.includes("\n"), reason);
+    }
+    assert.match(draftFailureMessage({ reason: "dropped", facts: ["8/5"] }), /\(8\/5\)/);
   });
 });
 
-describe("Accept and Undo", () => {
-  const sug = (field: FieldKey, text: string, drops: string[] = []): FieldSuggestion => ({ field, text, drops });
-  it("Accept writes the box and marks it Nectar's; a rewrite that drops something is refused", () => {
+describe("Draft and Undo", () => {
+  const draft = (field: FieldKey, text: string): BoxDraft => ({ field, text });
+  it("a draft replaces the box and marks it Nectar's", () => {
     const e = editorWith({ general: "typed" });
-    const { editor } = acceptSuggestion(e, sug("general", "Nectar text"));
+    const { editor, undo } = applyDraft(e, draft("general", "Nectar text"));
     assert.equal(editor.general, "Nectar text");
     assert.equal(editor.nectar.general, "Nectar text");
-    assert.throws(() => acceptSuggestion(e, sug("general", "x", ["8/5"])), /drops something/);
+    assert.deepEqual(undo, { text: "typed", nectar: "" });
   });
-  it("(b) Undo restores the exact pre-Accept text, and a second Accept undoes step by step", () => {
+  it("(b) Undo restores the exact pre-draft text, step by step", () => {
     const typed = "  Joby painted on 8/5,\n  and played ukulele.  ";
     let editor = editorWith({ goals: { talent: typed }, nectar: { general: "", incidentNotes: "", goals: {} } });
     let stacks: UndoStacks = {};
-    const a1 = acceptSuggestion(editor, sug("goal:talent", "First rewrite."));
+    const a1 = applyDraft(editor, draft("goal:talent", "First draft."));
     editor = a1.editor;
     stacks = pushUndo(stacks, "goal:talent", a1.undo);
-    const a2 = acceptSuggestion(editor, sug("goal:talent", "Second rewrite."));
+    const a2 = applyDraft(editor, draft("goal:talent", "Second draft."));
     editor = a2.editor;
     stacks = pushUndo(stacks, "goal:talent", a2.undo);
-    assert.equal(editor.goals.talent, "Second rewrite.");
+    assert.equal(editor.goals.talent, "Second draft.");
 
-    const u1 = undoAccept(editor, stacks, "goal:talent");
-    assert.equal(u1.editor.goals.talent, "First rewrite.");
-    assert.equal(u1.editor.nectar.goals.talent, "First rewrite.");
-    const u2 = undoAccept(u1.editor, u1.stacks, "goal:talent");
+    const u1 = undoDraft(editor, stacks, "goal:talent");
+    assert.equal(u1.editor.goals.talent, "First draft.");
+    assert.equal(u1.editor.nectar.goals.talent, "First draft.");
+    const u2 = undoDraft(u1.editor, u1.stacks, "goal:talent");
     assert.equal(u2.editor.goals.talent, typed, "exactly what was typed");
     assert.equal(u2.editor.nectar.goals.talent ?? "", "", "no longer marked as a Nectar draft");
-    const u3 = undoAccept(u2.editor, u2.stacks, "goal:talent");
+    const u3 = undoDraft(u2.editor, u2.stacks, "goal:talent");
     assert.equal(u3.editor, u2.editor, "nothing left to undo");
   });
-  it("Undo restores a box edited after Accept to the pre-Accept text", () => {
-    const e0 = editorWith({ general: "before" });
-    const a = acceptSuggestion(e0, sug("general", "after"));
-    const edited = { ...a.editor, general: "after, plus my edit" };
-    const u = undoAccept(edited, pushUndo({}, "general", a.undo), "general");
-    assert.equal(u.editor.general, "before");
+  it("each box has its own Undo", () => {
+    const e0 = editorWith({ general: "g", incidentNotes: "i" });
+    const a = applyDraft(e0, draft("general", "G"));
+    const b2 = applyDraft(a.editor, draft("incidentNotes", "I"));
+    const stacks = pushUndo(pushUndo({}, "general", a.undo), "incidentNotes", b2.undo);
+    const u = undoDraft(b2.editor, stacks, "general");
+    assert.equal(u.editor.general, "g");
+    assert.equal(u.editor.incidentNotes, "I", "the other box keeps its draft");
   });
 });
 
 describe("review state", () => {
-  it("dismissing a suggestion card hides it for good; a new draft shows again", () => {
-    const s1: FieldSuggestion = { field: "general", text: "One.", drops: [] };
-    let review: SummaryReviewState = { ...empty, suggestions: [s1] };
-    assert.equal(visibleSuggestion(review, "general")?.text, "One.");
-    review = dismissKey(review, suggestionKey(s1));
-    const reloaded = readReviewState(JSON.parse(JSON.stringify(review)));
-    assert.equal(visibleSuggestion(reloaded, "general"), null);
-    const s2 = { ...s1, text: "Two." };
-    assert.equal(visibleSuggestion({ ...reloaded, suggestions: [s2] }, "general")?.text, "Two.");
-    assert.deepEqual(takeSuggestion(review, "general").suggestions, []);
-  });
-  it("older saves (findings, Keep as is records, linked suggestions) load without errors", () => {
+  it("older saves (findings, Keep as is records, suggestion cards) load without errors", () => {
     const r = readReviewState({
       mode: "draft",
       reviewedAt: "2026-10-01T00:00:00Z",
@@ -312,7 +313,7 @@ describe("review state", () => {
       dismissals: { k: { by: "u", at: "2026-10-01", reason: "because" } },
     });
     assert.equal(r.reviewedAt, "2026-10-01T00:00:00Z");
-    assert.deepEqual(r.suggestions, [{ field: "general", text: "T", drops: ["8/5"] }]);
+    assert.equal("suggestions" in r, false, "old suggestion cards are ignored");
     assert.deepEqual(r.dismissed, []);
     assert.deepEqual(r.offArea, {});
     assert.deepEqual(readReviewState(null), emptyReviewState());

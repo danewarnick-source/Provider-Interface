@@ -19,6 +19,7 @@ import {
   Loader2,
   RotateCcw,
   Save,
+  SearchCheck,
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,7 @@ import {
   summaryCadenceLabel,
 } from "@/lib/progress-summaries";
 import type { SummaryDoc } from "@/lib/progress-summary-doc";
-import { fieldText, visibleSuggestion, type FieldKey } from "@/lib/progress-summary-review";
+import type { FieldKey } from "@/lib/progress-summary-review";
 import { EmploymentAttestation } from "./employment-attestation";
 import { EditorShell } from "./editor-shell";
 import { FinalizeDialog } from "./finalize-dialog";
@@ -114,7 +115,6 @@ export function SummaryEditor({
   panel?: boolean;
 }) {
   const {
-    accept,
     aiAttested,
     blank,
     bundleQ,
@@ -123,14 +123,13 @@ export function SummaryEditor({
     draftAll,
     draftBox,
     draftMut,
+    draftNotes,
     editor,
     hasRecords,
     hideKey,
-    hideSuggestion,
     nectarMut,
     reminders,
     reopenMut,
-    review,
     reviewOp,
     undo,
     undoStacks,
@@ -164,16 +163,13 @@ export function SummaryEditor({
   const renderReview = (field: FieldKey) => (
     <BoxTools
       field={field}
-      current={editor ? fieldText(editor, field) : ""}
-      suggestion={visibleSuggestion(review, field)}
       canUndo={(undoStacks[field]?.length ?? 0) > 0}
       canDraft={canDraft(field)}
       drafting={draftMut.isPending && !!draftMut.variables?.includes(field)}
       busy={busy}
+      note={draftNotes[field]}
       onDraft={(f) => void flush().then(() => draftBox(f))}
-      onAccept={accept}
       onUndo={undo}
-      onHideSuggestion={hideSuggestion}
     />
   );
 
@@ -239,13 +235,13 @@ export function SummaryEditor({
                   <Sparkles className="size-4 mr-1" /> Draft all boxes
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={() => void flush().then(() => nectarMut.mutate())}
                   disabled={busy}
                   data-testid="summary-draft-nectar"
                 >
-                  Review with Nectar
+                  <SearchCheck className="size-4 mr-1" /> Review with Nectar
                 </Button>
               </div>
             ) : null}

@@ -1,25 +1,26 @@
 // Nectar as a helper on a progress summary, never a gate.
 //
 // This module is the pure part:
-//   - the guards on Nectar's per-box rewrites: every date and number in a
-//     rewrite must come from that box's text (or its goal's records)
+//   - the guards on Nectar's per-box drafts (buildDrafts): every date and
+//     number in a draft must come from that box's text or its records
 //     (unsupportedFacts), the person's own dates and numbers must survive
-//     (droppedFacts), sentences are never repeated (dedupeFields);
+//     (droppedFacts), sentences are never repeated (dedupeFields), and the
+//     incident box never says "no incidents" when there are reports. A draft
+//     that fails leaves the box unchanged (draftFailureMessage says why);
 //   - the goal check, decided in code (goalCovered): a goal is covered when
 //     its progress shares a meaningful word, stem or synonym with the goal
 //     or its supports. Only zero overlap is ever put to Nectar, as a yes/no;
 //   - reminders (summaryReminders): fixed wording written here, never by
-//     the AI, max one per goal and two for the general notes;
-//   - Accept / Undo of a rewrite and the review state saved in
-//     client_progress_summaries.draft_source.review.
+//     the AI, max one per goal. General notes are optional: no reminders;
+//   - a draft written into its box with an Undo (applyDraft / undoDraft) and
+//     the review state saved in client_progress_summaries.draft_source.review.
 // Nothing here blocks Finalize. Node --test.
 
 import type { SummaryEditorState } from "./progress-summary-doc.ts";
-import { summaryRequirements } from "./progress-summary-requirements.ts";
 
 // ─── Fields ────────────────────────────────────────────────────────────────
 
-/** A place in the editor a reminder or a suggestion is about. */
+/** A place in the editor a reminder or a draft is about. */
 export type FieldKey = "general" | "incidentNotes" | `goal:${string}` | `incident:${string}`;
 
 export const goalField = (id: string): FieldKey => `goal:${id}`;
@@ -281,48 +282,63 @@ export function dedupeFields(fields: ReadonlyArray<[FieldKey, string]>): Map<Fie
   return out;
 }
 
-// ─── Suggestions ───────────────────────────────────────────────────────────
+// ─── Drafts ────────────────────────────────────────────────────────────────
 
-/** Nectar's rewrite of one box, offered as Accept / x. */
-export interface FieldSuggestion {
+/** Nectar's draft for one box, written straight into it (with an Undo). */
+export interface BoxDraft {
   field: FieldKey;
   text: string;
-  /** Dates / numbers the person typed that this rewrite loses. No one-click accept when set. */
-  drops: string[];
 }
 
-export interface SuggestionInput {
+export type DraftFailureReason = "unsupported" | "dropped" | "no_incidents" | "unchanged";
+
+export interface DraftFailure {
+  field: FieldKey;
+  reason: DraftFailureReason;
+  /** The dates / numbers it made up or lost. */
+  facts: string[];
+}
+
+export interface DraftInput {
   /** The text each box holds now. */
   current: ReadonlyMap<FieldKey, string>;
-  /** Nectar's text per box (only the boxes it rewrote). */
+  /** Nectar's text per box (only the boxes it drafted). */
   proposed: ReadonlyMap<FieldKey, string>;
-  /** Extra text a box's rewrite may take dates and numbers from (a goal's records and supports). */
+  /** The records a box's draft may take dates and numbers from. */
   extra: (field: FieldKey) => readonly string[];
   /** Box order for dedupe (goals first). */
   order: readonly FieldKey[];
+  /** The period has incident reports (or admin-added incidents). */
+  hasIncidents?: boolean;
 }
 
-export interface SuggestionResult {
-  suggestions: FieldSuggestion[];
-  /** Boxes whose rewrite was dropped, with the dates / numbers it made up. */
-  rejected: { field: FieldKey; facts: string[] }[];
+export interface DraftResult {
+  drafts: BoxDraft[];
+  failed: DraftFailure[];
 }
+
+const NO_INCIDENTS_RE =
+  /\b(?:no|zero|not any)\s+(?:reportable\s+|notable\s+|reported\s+|recorded\s+)?incidents?\b|\bincident[- ]free\b|\bwithout\s+(?:any\s+)?incidents?\b|\bnothing\s+to\s+report\b/i;
+
+/** The text says there were no incidents. */
+export const saysNoIncidents = (text: string) => NO_INCIDENTS_RE.test(text);
 
 /**
- * Nectar's rewrites made safe to offer: a rewrite with a date or number
- * that is in neither its own box nor that box's records is dropped;
- * repeated sentences are removed; a rewrite equal to the box is not
- * offered; each suggestion lists what the person typed that it would lose.
+ * Nectar's drafts made safe to write into their boxes: a draft with a date
+ * or number in neither its box nor its records, one that loses a date or
+ * number the person typed, or an incident draft that says "no incidents"
+ * while there are reports is not used; repeated sentences are removed; a
+ * draft equal to the box changes nothing.
  */
-export function buildSuggestions(input: SuggestionInput): SuggestionResult {
-  const rejected: SuggestionResult["rejected"] = [];
+export function buildDrafts(input: DraftInput): DraftResult {
+  const failed: DraftFailure[] = [];
   const valid = new Map<FieldKey, string>();
   for (const [field, raw] of input.proposed) {
     const text = String(raw ?? "").trim();
     if (!text || !input.current.has(field)) continue;
     const facts = unsupportedFacts(text, [input.current.get(field) ?? "", ...input.extra(field)]);
     if (facts.length) {
-      rejected.push({ field, facts });
+      failed.push({ field, reason: "unsupported", facts });
       continue;
     }
     valid.set(field, text);
@@ -332,14 +348,48 @@ export function buildSuggestions(input: SuggestionInput): SuggestionResult {
   const deduped = dedupeFields(
     input.order.filter((f) => merged.has(f)).map((f) => [f, merged.get(f) ?? ""]),
   );
-  const suggestions: FieldSuggestion[] = [];
+  const drafts: BoxDraft[] = [];
   for (const field of valid.keys()) {
     const text = deduped.get(field) ?? "";
     const typed = input.current.get(field) ?? "";
-    if (!text || text.replace(/\s+/g, " ").trim() === typed.replace(/\s+/g, " ").trim()) continue;
-    suggestions.push({ field, text, drops: droppedFacts(typed, [text]) });
+    if (!text || text.replace(/\s+/g, " ").trim() === typed.replace(/\s+/g, " ").trim()) {
+      failed.push({ field, reason: "unchanged", facts: [] });
+      continue;
+    }
+    const drops = droppedFacts(typed, [text]);
+    if (drops.length) {
+      failed.push({ field, reason: "dropped", facts: drops });
+      continue;
+    }
+    if (field === "incidentNotes" && input.hasIncidents && saysNoIncidents(text)) {
+      failed.push({ field, reason: "no_incidents", facts: [] });
+      continue;
+    }
+    drafts.push({ field, text });
   }
-  return { suggestions, rejected };
+  return { drafts, failed };
+}
+
+/** A box Nectar sent nothing back for: left as it is. */
+export const nothingChanged = (field: FieldKey): DraftFailure => ({
+  field,
+  reason: "unchanged",
+  facts: [],
+});
+
+/** The one line shown under a box whose draft wasn't used. */
+export function draftFailureMessage(f: Pick<DraftFailure, "reason" | "facts">): string {
+  const list = f.facts.length ? ` (${f.facts.join(", ")})` : "";
+  switch (f.reason) {
+    case "unsupported":
+      return `Nectar's draft wasn't used: it had dates or numbers that aren't in this box or its records${list}.`;
+    case "dropped":
+      return `Nectar's draft wasn't used: it left out dates or numbers you wrote${list}.`;
+    case "no_incidents":
+      return "Nectar's draft wasn't used: it said there were no incidents, but this period has incident reports.";
+    case "unchanged":
+      return "Nectar had nothing to change in this box.";
+  }
 }
 
 // ─── Goal check (in code) ──────────────────────────────────────────────────
@@ -502,7 +552,7 @@ export interface ReviewContext {
   firstName?: string;
 }
 
-export type ReminderKind = "no_progress" | "off_area" | "response" | "events";
+export type ReminderKind = "no_progress" | "off_area";
 
 export interface Reminder {
   /** Stable, so a dismissed reminder stays hidden. */
@@ -511,14 +561,6 @@ export interface Reminder {
   field: FieldKey;
   text: string;
 }
-
-const RESPONSE_RE =
-  /\b(respon\w*|react\w*|enjoy\w*|engag\w*|mood|participat\w*|receptive|happy|happier|excited|upset|anxious|calm|proud|motivat\w*|comfortable|positive|interest\w*|tolerat\w*|welcom\w*|resist\w*|refus\w*|eager|willing|cooperat\w*|smil\w*|laugh\w*|did well|doing well|does well|thriv\w*|stable|status)\b/i;
-const EVENTS_RE =
-  /\b(incident\w*|event\w*|trip\w*|vacation|holiday\w*|moved|moving|hospital\w*|appointment\w*|birthday|party|graduat\w*|celebrat\w*|concert|visit\w*|outing\w*|attended|went|fair|show|injur\w*|illness|sick|surgery|new job|hired|started|began|completed|sold|won|met|family|camp|fell|emergency|nothing notable|no notable|none)\b/i;
-
-export const mentionsResponse = (text: string) => RESPONSE_RE.test(text);
-export const mentionsEvents = (text: string) => EVENTS_RE.test(text);
 
 const narrativeGoals = (ctx: ReviewContext) =>
   ctx.summaryKind === "narrative" && ctx.includeGoalProgress ? ctx.goals : [];
@@ -537,8 +579,8 @@ export function goalsNeedingAreaCheck(ctx: ReviewContext, editor: SummaryEditorS
 }
 
 /**
- * The reminders to show: max one per goal, max two for the general notes,
- * minus the ones dismissed. Never required, never recorded as who / when.
+ * The reminders to show: max one per goal, minus the ones dismissed. General
+ * notes are optional and get none. Never required, never recorded as who / when.
  */
 export function summaryReminders(
   ctx: ReviewContext,
@@ -566,30 +608,6 @@ export function summaryReminders(
       });
     }
   }
-  const reqs = summaryRequirements(ctx.serviceCodes);
-  const wants = (id: string) => reqs.items.some((r) => r.id === id);
-  const anyTyped =
-    !!(editor.general.trim() || editor.incidentNotes.trim()) ||
-    Object.values(editor.goals).some((t) => t.trim());
-  if (anyTyped) {
-    if (wants("status_response") && !mentionsResponse(editor.general)) {
-      out.push({
-        key: "rem:response",
-        kind: "response",
-        field: "general",
-        text: "General notes say nothing yet about how the person responded to services.",
-      });
-    }
-    const hasIncidents = !!editor.incidentNotes.trim() || editor.incidents.length > 0;
-    if (wants("notable_events") && !mentionsEvents(editor.general) && !hasIncidents) {
-      out.push({
-        key: "rem:events",
-        kind: "events",
-        field: "general",
-        text: "General notes say nothing yet about notable events.",
-      });
-    }
-  }
   return out.filter((r) => !review.dismissed.includes(r.key));
 }
 
@@ -597,16 +615,14 @@ export function summaryReminders(
 
 export interface SummaryReviewState {
   reviewedAt: string | null;
-  /** Nectar's rewrites waiting for Accept or x, one per box. */
-  suggestions: FieldSuggestion[];
-  /** Reminder and suggestion keys hidden with the x. Hides only; blocks nothing. */
+  /** Reminder keys hidden with the x. Hides only; blocks nothing. */
   dismissed: string[];
   /** Goals Nectar answered "no" to (goal id -> the progress text it was asked about). */
   offArea: Record<string, string>;
 }
 
 export function emptyReviewState(): SummaryReviewState {
-  return { reviewedAt: null, suggestions: [], dismissed: [], offArea: {} };
+  return { reviewedAt: null, dismissed: [], offArea: {} };
 }
 
 const obj = (v: unknown): Record<string, unknown> =>
@@ -615,24 +631,15 @@ const strOrNull = (v: unknown) => (typeof v === "string" && v ? v : null);
 
 /**
  * The saved review state, normalized; empty when there is none. Older
- * saves (findings, "Keep as is" records, linked suggestions) load fine:
- * what no longer applies is ignored.
+ * saves (findings, "Keep as is" records, suggestion cards) load fine: what
+ * no longer applies is ignored.
  */
 export function readReviewState(raw: unknown): SummaryReviewState {
   const r = obj(raw);
-  const suggestions = (Array.isArray(r.suggestions) ? r.suggestions : [])
-    .map(obj)
-    .filter((s) => typeof s.field === "string" && typeof s.text === "string")
-    .map((s) => ({
-      field: s.field as FieldKey,
-      text: s.text as string,
-      drops: Array.isArray(s.drops) ? s.drops.map(String) : [],
-    }));
   const offArea: Record<string, string> = {};
   for (const [k, v] of Object.entries(obj(r.offArea))) if (typeof v === "string") offArea[k] = v;
   return {
     reviewedAt: strOrNull(r.reviewedAt),
-    suggestions,
     dismissed: [
       ...new Set((Array.isArray(r.dismissed) ? r.dismissed : []).filter((k) => typeof k === "string")),
     ] as string[],
@@ -640,37 +647,16 @@ export function readReviewState(raw: unknown): SummaryReviewState {
   };
 }
 
-/** A key for one suggestion card: the box plus a short hash of the text, so a new draft shows again. */
-export function suggestionKey(s: Pick<FieldSuggestion, "field" | "text">): string {
-  let h = 5381;
-  for (let i = 0; i < s.text.length; i++) h = ((h * 33) ^ s.text.charCodeAt(i)) >>> 0;
-  return `sug:${s.field}:${h.toString(36)}`;
-}
-
-/** The suggestion to show on a box: not dismissed with the x. */
-export function visibleSuggestion(
-  review: SummaryReviewState,
-  field: FieldKey,
-): FieldSuggestion | null {
-  const s = review.suggestions.find((x) => x.field === field);
-  return s && !review.dismissed.includes(suggestionKey(s)) ? s : null;
-}
-
-/** The review with one reminder or suggestion key hidden for this summary. */
+/** The review with one reminder key hidden for this summary. */
 export function dismissKey(review: SummaryReviewState, key: string): SummaryReviewState {
   return review.dismissed.includes(key)
     ? review
     : { ...review, dismissed: [...review.dismissed, key] };
 }
 
-/** The review without the suggestion for `field` (after Accept). */
-export function takeSuggestion(review: SummaryReviewState, field: FieldKey): SummaryReviewState {
-  return { ...review, suggestions: review.suggestions.filter((s) => s.field !== field) };
-}
+// ─── Draft and Undo ────────────────────────────────────────────────────────
 
-// ─── Accept and Undo ───────────────────────────────────────────────────────
-
-/** What a box held before Accept: its text and the Nectar mark it carried. */
+/** What a box held before a draft: its text and the Nectar mark it carried. */
 export interface UndoEntry {
   text: string;
   nectar: string;
@@ -705,27 +691,23 @@ function writeField(
 }
 
 /**
- * Accept a suggestion: the box takes Nectar's text (marked as Nectar's
- * until Finalize). Returns what to put on the box's undo stack. Refused
- * when the rewrite drops something the person wrote.
+ * Write Nectar's draft into its box (marked as Nectar's until Finalize).
+ * Returns what to put on the box's undo stack.
  */
-export function acceptSuggestion(
+export function applyDraft(
   editor: SummaryEditorState,
-  suggestion: FieldSuggestion,
+  draft: BoxDraft,
 ): { editor: SummaryEditorState; undo: UndoEntry } {
-  if (suggestion.drops.length) {
-    throw new Error("This rewrite drops something you wrote. Copy what you want instead.");
-  }
-  const undo = { text: fieldText(editor, suggestion.field), nectar: nectarMark(editor, suggestion.field) };
-  return { editor: writeField(editor, suggestion.field, suggestion.text, suggestion.text), undo };
+  const undo = { text: fieldText(editor, draft.field), nectar: nectarMark(editor, draft.field) };
+  return { editor: writeField(editor, draft.field, draft.text, draft.text), undo };
 }
 
 export function pushUndo(stacks: UndoStacks, field: FieldKey, entry: UndoEntry): UndoStacks {
   return { ...stacks, [field]: [...(stacks[field] ?? []), entry] };
 }
 
-/** Undo the last Accept on a box: exactly the text it had before. */
-export function undoAccept(
+/** Undo the last draft on a box: exactly the text it had before. */
+export function undoDraft(
   editor: SummaryEditorState,
   stacks: UndoStacks,
   field: FieldKey,

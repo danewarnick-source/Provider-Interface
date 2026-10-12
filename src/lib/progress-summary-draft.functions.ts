@@ -5,21 +5,25 @@ import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
 import {
   emptyEditorState,
+  filledIncidents,
   groupEvidence,
+  manualIncidentLine,
   readEditorState,
   type SummaryEditorState,
   type SummaryEvidence,
 } from "@/lib/progress-summary-doc";
 import { summaryRequirements } from "@/lib/progress-summary-requirements";
 import {
-  buildSuggestions,
+  buildDrafts,
   dismissKey,
   fieldGoalId,
   fieldText,
   goalsNeedingAreaCheck,
+  nothingChanged,
   readReviewState,
-  takeSuggestion,
   textFields,
+  type BoxDraft,
+  type DraftFailure,
   type FieldKey,
   type SummaryReviewState,
 } from "@/lib/progress-summary-review";
@@ -30,18 +34,19 @@ import { loadSummarySource } from "@/lib/progress-summary-source.server";
  * advises, the person decides, and nothing here blocks Finalize.
  *
  *  - draftSummaryBoxes: "Draft with Nectar" on one box, or "Draft all
- *    boxes". Each box is rewritten alone into clean prose using only what
- *    is in that box (plus that goal's records). Rewrites are suggestions
- *    (Accept / x), never written into the editor; a rewrite with a date or
- *    number that is not in its box or its goal's records is dropped, one
- *    that loses a typed date or number cannot be accepted in one click, and
- *    repeated sentences are removed (buildSuggestions).
+ *    boxes". Each box is drafted alone into clean prose using only what is
+ *    in that box plus its records: a goal's shift notes and daily logs, the
+ *    period's incident reports and admin-added incidents for the incident
+ *    box, records not tied to a goal for the general notes. The drafts go
+ *    back to the editor, which writes each into its box with an Undo (the
+ *    autosave saves it). A draft that fails the fact checks (buildDrafts)
+ *    comes back as a failure and the box is left unchanged.
  *  - runSummaryNectar: the optional "Review with Nectar". Goal progress is
  *    checked in code (goalCovered); only a goal with zero overlap is put to
  *    Nectar, as one yes/no question, and only a "no" shows a reminder.
  *    The reminder wording is fixed in code.
- *  - updateSummaryReview: Accept a suggestion, or hide a reminder / card
- *    with the x. The hidden keys are saved with the review.
+ *  - updateSummaryReview: hide a reminder with the x. The hidden keys are
+ *    saved with the review.
  */
 
 async function callAI(system: string, user: string, orgId?: string | null): Promise<string> {
@@ -153,7 +158,7 @@ async function saveReview(
   if (error) throw new Error(error.message);
 }
 
-/** Draft one box, or every box listed: a suggestion per box, shown with Accept and an x. */
+/** Draft one box, or every box listed: each draft, or why it wasn't used. */
 export const draftSummaryBoxes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) =>
@@ -167,7 +172,12 @@ export const draftSummaryBoxes = createServerFn({ method: "POST" })
       })
       .parse(i),
   )
-  .handler(async ({ data, context }): Promise<{ review: SummaryReviewState; rejected: number; skipped: number }> => {
+  .handler(async ({ data, context }): Promise<{
+    review: SummaryReviewState;
+    drafts: BoxDraft[];
+    failed: DraftFailure[];
+    skipped: number;
+  }> => {
     const { supabase, userId } = context;
     if (!supabase || !userId) throw new Error("Sign in again.");
     await requireOrgMembership(supabase, userId, data.organizationId, "admin");
@@ -189,19 +199,26 @@ export const draftSummaryBoxes = createServerFn({ method: "POST" })
     const goals = row.include_goal_progress ? source.goals : [];
     const grouped = groupEvidence(goals, source.evidence);
     const known = new Set<FieldKey>(textFields(goals.map((g) => g.id)));
+    const line = (e: SummaryEvidence) => `${e.date} ${e.text}`;
+    const reportLines = grouped.incidents.map(line);
+    const addedIncidents = filledIncidents(editor.incidents).map(manualIncidentLine);
+    // What a box is drafted from besides its text: a goal's records, the
+    // period's incident reports and added incidents, or records not tied to a goal.
     const recordsFor = (f: FieldKey): string[] => {
+      if (f === "incidentNotes") return [...reportLines, ...addedIncidents];
+      if (f === "general") return grouped.general.map(line);
       const id = fieldGoalId(f);
-      return id === null ? [] : (grouped.byGoal[id] ?? []).map((e) => `${e.date} ${e.text}`);
+      return id === null ? [] : (grouped.byGoal[id] ?? []).map(line);
     };
-    // A box is drafted when it has text (a goal box with only records is drafted from them).
+    // A box is drafted when it has text or records.
     const wanted = [...new Set(data.fields)].filter((f) => known.has(f));
     const boxes = wanted.filter((f) => fieldText(editor, f).trim() || recordsFor(f).length > 0);
     const skipped = data.fields.length - boxes.length;
 
     const prior = readReviewState((row.draft_source ?? {}).review);
     const now = new Date().toISOString();
-    let suggestions = prior.suggestions;
-    let rejected = 0;
+    let drafts: BoxDraft[] = [];
+    let failed: DraftFailure[] = [];
 
     if (boxes.length) {
       const reqs = summaryRequirements(services);
@@ -217,14 +234,25 @@ export const draftSummaryBoxes = createServerFn({ method: "POST" })
   Records for this goal:
 ${evidenceBlock(grouped.byGoal[g.id] ?? []).replace(/^/gm, "  ")}`;
           }
-          return `BOX "${f}" — ${f === "general" ? "general notes" : "incident notes"}
-  Text: ${text}`;
+          if (f === "incidentNotes") {
+            return `BOX "${f}" — incident notes
+  Text: ${text}
+  Incident reports this period:
+${evidenceBlock(grouped.incidents).replace(/^/gm, "  ")}
+  Incidents the admin added:
+${(addedIncidents.length ? addedIncidents.map((l) => `- ${l}`).join("\n") : "(none)").replace(/^/gm, "  ")}`;
+          }
+          return `BOX "${f}" — general notes
+  Text: ${text}
+  Records not tied to a goal:
+${evidenceBlock(grouped.general).replace(/^/gm, "  ")}`;
         })
         .join("\n\n");
       const system = `You are NECTAR, helping an admin tidy boxes of a Utah DSPD ${reqs.cadence ?? "quarterly"} progress summary. You advise; the admin decides.
 
 RULES:
-- Rewrite EACH box on its own into clean, professional, organized prose, using only what is in that box (and, for a goal box, that goal's records listed under it).
+- Write EACH box on its own into clean, professional, organized prose, using only what is in that box and the records listed under it (a goal's records; the incident reports and added incidents; records not tied to a goal). A box with no text is written from its records.
+- Incident notes: when any incident report or added incident is listed, summarize them. NEVER write that there were no incidents.
 - You may make reasonable inferences the way shift-note coaching does: group related items, connect cause and effect that the text already implies, use clearer wording. Keep EVERY fact written (same dates, numbers and names), including plans for next period.
 - Do NOT move text from one box to another. Do not write about other boxes.
 - Never write the same sentence twice.
@@ -234,21 +262,31 @@ ${STYLE} Use ${firstName}'s first name naturally.
       const user = `PERSON: ${client.first_name} ${client.last_name}\nSERVICES: ${services.join(", ") || "(none)"}\n\n${boxBlock}`;
       const proposed = proposedFields(parseJson(await callAI(system, user, data.organizationId)), boxes);
       const current = new Map<FieldKey, string>([...known].map((f) => [f, fieldText(editor, f)]));
-      const built = buildSuggestions({
+      const built = buildDrafts({
         current,
         proposed,
         extra: recordsFor,
         order: textFields(goals.map((g) => g.id)),
+        hasIncidents: reportLines.length + addedIncidents.length > 0,
       });
-      rejected = built.rejected.length;
-      const redone = new Set(boxes);
-      suggestions = [...prior.suggestions.filter((s) => !redone.has(s.field)), ...built.suggestions];
+      drafts = built.drafts;
+      // A box Nectar returned nothing for is left as it is, and says so.
+      const answered = new Set([...drafts, ...built.failed].map((d) => d.field));
+      failed = [
+        ...built.failed,
+        ...boxes.filter((f) => !answered.has(f)).map(nothingChanged),
+      ];
     }
 
-    const review: SummaryReviewState = { ...prior, reviewedAt: now, suggestions };
+    const review: SummaryReviewState = { ...prior, reviewedAt: now };
     const typedAny = [...known].some((f) => fieldText(editor, f).trim());
-    const status = suggestions.length ? "draft" : typedAny ? "in_review" : row.status;
-    await saveReview(sb, row, { status, plan_id: source.planId }, editor, review, {
+    const status = drafts.length ? "draft" : typedAny ? "in_review" : row.status;
+    const patch: Record<string, unknown> = { status, plan_id: source.planId };
+    if (drafts.length) {
+      patch.drafted_at = now;
+      patch.drafted_by = userId;
+    }
+    await saveReview(sb, row, patch, editor, review, {
       checked_at: now,
       evidence_count: source.evidence.length,
       incident_ids: grouped.incidents.map((i) => i.id),
@@ -256,7 +294,7 @@ ${STYLE} Use ${firstName}'s first name naturally.
       services,
       sources_checked: ["daily_logs(approved)", "evv_timesheets(shift notes)", "shift_reports(submitted)", "incident_reports"],
     });
-    return { review, rejected, skipped };
+    return { review, drafts, failed, skipped };
   });
 
 /**
@@ -315,7 +353,7 @@ export const runSummaryNectar = createServerFn({ method: "POST" })
     return { review, asked: check.length, flagged: Object.keys(offArea).length };
   });
 
-/** Accept a suggestion, or hide a reminder or suggestion card with the x. Neither blocks anything. */
+/** Hide a reminder with the x. Blocks nothing. */
 export const updateSummaryReview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) =>
@@ -323,10 +361,7 @@ export const updateSummaryReview = createServerFn({ method: "POST" })
       .object({
         organizationId: z.string().uuid(),
         summaryId: z.string().uuid(),
-        op: z.discriminatedUnion("op", [
-          z.object({ op: z.literal("accept"), field: fieldKey }),
-          z.object({ op: z.literal("dismiss"), key: z.string().min(1).max(400) }),
-        ]),
+        op: z.object({ op: z.literal("dismiss"), key: z.string().min(1).max(400) }),
       })
       .parse(i),
   )
@@ -338,15 +373,7 @@ export const updateSummaryReview = createServerFn({ method: "POST" })
     const sb = supabase as any;
     const row = await loadRow(sb, data.organizationId, data.summaryId);
     const prior = readReviewState((row.draft_source ?? {}).review);
-    const patch: Record<string, unknown> = {};
-    let review: SummaryReviewState;
-    if (data.op.op === "accept") {
-      review = takeSuggestion(prior, data.op.field);
-      patch.drafted_at = new Date().toISOString();
-      patch.drafted_by = userId;
-    } else {
-      review = dismissKey(prior, data.op.key);
-    }
-    await saveReview(sb, row, patch, null, review);
+    const review = dismissKey(prior, data.op.key);
+    await saveReview(sb, row, {}, null, review);
     return { review };
   });

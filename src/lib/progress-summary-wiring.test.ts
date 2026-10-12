@@ -11,13 +11,18 @@ const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8"
 
 describe("Nectar helper (progress-summary-draft.functions.ts)", () => {
   const src = read("./progress-summary-draft.functions.ts");
-  it("drafts per box as validated suggestions, never written into the editor", () => {
+  it("drafts per box, checked by buildDrafts, from that box's text and records", () => {
     assert.match(src, /export const draftSummaryBoxes/);
-    assert.match(src, /buildSuggestions\(/);
-    assert.match(src, /extra: recordsFor/, "only that goal's records");
+    assert.match(src, /buildDrafts\(/);
+    assert.match(src, /extra: recordsFor/, "only that box's records");
+    assert.match(src, /if \(f === "incidentNotes"\) return \[\.\.\.reportLines, \.\.\.addedIncidents\]/);
+    assert.match(src, /if \(f === "general"\) return grouped\.general\.map\(line\)/);
+    assert.match(src, /hasIncidents: reportLines\.length \+ addedIncidents\.length > 0/);
+    assert.match(src, /NEVER write that there were no incidents/);
     assert.doesNotMatch(src, /draft_content/, "Nectar never writes draft_content (autosave does)");
     const run = src.slice(src.indexOf("export const draftSummaryBoxes"), src.indexOf("export const runSummaryNectar"));
-    assert.match(run, /saveReview\(sb, row, \{ status, plan_id: source\.planId \}, editor, review/);
+    assert.match(run, /const patch: Record<string, unknown> = \{ status, plan_id: source\.planId \}/);
+    assert.match(run, /saveReview\(sb, row, patch, editor, review/);
   });
   it("Review with Nectar only asks yes/no for goals with zero overlap, and only a 'no' counts", () => {
     assert.match(src, /goalsNeedingAreaCheck\(/);
@@ -45,9 +50,21 @@ describe("the editor never blocks (summary-editor.tsx, use-summary-editor.ts)", 
     assert.match(editor, /blank\.length \? setConfirmBlank\(true\) : setShowFinalize\(true\)/);
     assert.match(editor, /BlankGoalsDialog/);
   });
-  it("Draft all boxes and per-box drafting are in the editor", () => {
+  it("Draft all boxes and per-box drafting are in the editor; drafts go into the box with Undo", () => {
+    const panel = read("../components/summaries/summary-review-panel.tsx");
     assert.match(editor, /Draft all boxes/);
-    assert.match(read("../components/summaries/summary-review-panel.tsx"), /Draft with Nectar/);
+    assert.match(panel, /Draft with Nectar/);
+    assert.match(panel, /Undo/);
+    assert.doesNotMatch(panel, /Accept|Show original|Hide original|wordDiff|SuggestionCard/);
+    assert.doesNotMatch(editor, /Undo all/);
+    assert.match(hook, /applyDraft\(next, d\)/);
+    assert.match(hook, /textFields\(goalIds\)\.filter\(canDraft\)/, "every box with text or records");
+  });
+  it("Review with Nectar is an outlined button next to Draft all boxes", () => {
+    const all = editor.indexOf('data-testid="summary-draft-all"');
+    const rev = editor.indexOf('data-testid="summary-draft-nectar"');
+    assert.ok(all > 0 && rev > all);
+    assert.match(editor.slice(editor.lastIndexOf("<Button", rev), rev), /variant="outline"/);
   });
   it("the finalize dialog attests the summary, not the Nectar draft", () => {
     const d = read("../components/summaries/finalize-dialog.tsx");

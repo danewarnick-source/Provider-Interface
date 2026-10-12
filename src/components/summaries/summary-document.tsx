@@ -6,13 +6,14 @@
 // summary). Built from buildSummaryDoc.
 
 import type { ReactNode } from "react";
-import { Plus, Sparkles } from "lucide-react";
+import { Plus, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
   NO_PROGRESS_TEXT,
   evidenceHeading,
+  filledIncidents,
   manualIncidentLine,
   type ManualIncident,
   type SummaryDoc,
@@ -26,7 +27,7 @@ export interface DocEditing {
   /** Goal ids in the same order as doc.goals. */
   goalIds: string[];
   disabled: boolean;
-  /** Draft with Nectar, Undo and the suggestion for one box, shown under it. */
+  /** Draft with Nectar, Undo and its note for one box, shown under it. */
   review?: (field: FieldKey) => ReactNode;
 }
 
@@ -143,7 +144,7 @@ export function SummaryDocument({ doc, edit }: { doc: SummaryDoc; edit?: DocEdit
         <p className="font-semibold text-hive-ink">
           Incidents (
           {doc.incidents.records.length +
-            (edit ? edit.editor.incidents.length : doc.incidents.manual.length)}
+            (edit ? filledIncidents(edit.editor.incidents).length : doc.incidents.manual.length)}
           )
         </p>
         {doc.incidents.records.length ? (
@@ -158,8 +159,20 @@ export function SummaryDocument({ doc, edit }: { doc: SummaryDoc; edit?: DocEdit
             {edit.editor.incidents.map((m) => (
               <div
                 key={m.id}
-                className="grid gap-1.5 rounded-lg border border-dashed p-2 sm:grid-cols-[9rem_1fr]"
+                className="relative grid gap-1.5 rounded-lg border border-dashed p-2 pr-9 sm:grid-cols-[9rem_1fr]"
+                data-testid="summary-incident-row"
               >
+                <button
+                  type="button"
+                  className="absolute right-1 top-1 inline-flex size-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
+                  aria-label="Remove this incident report"
+                  disabled={edit.disabled}
+                  onClick={() =>
+                    set?.((p) => ({ ...p, incidents: p.incidents.filter((i) => i.id !== m.id) }))
+                  }
+                >
+                  <X className="size-3.5" />
+                </button>
                 <Input
                   type="date"
                   value={m.date}
@@ -197,7 +210,7 @@ export function SummaryDocument({ doc, edit }: { doc: SummaryDoc; edit?: DocEdit
                 }))
               }
             >
-              <Plus className="size-3.5 mr-1" /> Add incident
+              <Plus className="size-3.5 mr-1" /> Add incident report
             </Button>
             <Textarea
               value={edit.editor.incidentNotes}

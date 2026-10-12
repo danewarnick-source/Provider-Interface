@@ -1,10 +1,11 @@
 // State and actions behind the progress summary editor (summary-editor.tsx):
 // load the summary with its evidence, keep the editor's fields (autosaved,
-// debounced and on blur / close), Nectar as a helper (draft one box or all
-// boxes into suggestions to Accept or hide, Undo after Accept, an optional
-// review, reminders hidden with an x), finalize (a soft confirm when a goal
-// is blank; nothing blocks), then download the PDF, and the UPI / support
-// coordinator attestations.
+// debounced and on blur / close; blank incident rows are never saved),
+// Nectar as a helper (draft one box or all boxes straight into the boxes,
+// each with its own Undo; a draft that fails the fact checks leaves its box
+// unchanged with a one-line note; an optional review; reminders hidden with
+// an x), finalize (a soft confirm when a goal is blank; nothing blocks), then
+// download the PDF, and the UPI / support coordinator attestations.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -27,26 +28,24 @@ import {
   updateSummaryReview,
 } from "@/lib/progress-summary-draft.functions";
 import {
-  acceptSuggestion,
+  applyDraft,
   blankGoals,
   dismissKey,
+  draftFailureMessage,
   emptyReviewState,
   fieldText,
   pushUndo,
   summaryReminders,
-  suggestionKey,
-  takeSuggestion,
   textFields,
-  undoAccept,
-  visibleSuggestion,
+  undoDraft,
   type FieldKey,
-  type FieldSuggestion,
   type ReviewContext,
   type SummaryReviewState,
   type UndoStacks,
 } from "@/lib/progress-summary-review";
 import {
   buildSummaryDoc,
+  filledIncidents,
   groupEvidence,
   summaryDocText,
   type SummaryDoc,
@@ -58,6 +57,13 @@ import { downloadSummaryPdf } from "./download-summary";
 export type SaveState = "idle" | "saving" | "saved" | "error";
 
 const AUTOSAVE_MS = 1200;
+
+/** The editor as saved: incident rows with no date and no text are left out. */
+const savable = (ed: SummaryEditorState): SummaryEditorState => ({
+  ...ed,
+  incidents: filledIncidents(ed.incidents),
+});
+const savedJson = (ed: SummaryEditorState) => JSON.stringify(savable(ed));
 
 const FILING_NOTE = {
   upi: "Filing: enter the narrative in the state UPI portal, then attest in Provider Interface.",
@@ -129,8 +135,10 @@ export function useSummaryEditor({
 
   const [editor, setEditor] = useState<SummaryEditorState | null>(null);
   const [review, setReview] = useState<SummaryReviewState>(emptyReviewState());
-  // What each box held before an Accept, for Undo (this session only).
+  // What each box held before a Nectar draft, for Undo (this session only).
   const [undoStacks, setUndoStacks] = useState<UndoStacks>({});
+  // The one-line note under a box whose draft wasn't used.
+  const [draftNotes, setDraftNotes] = useState<Partial<Record<FieldKey, string>>>({});
   const [finalizerName, setFinalizerName] = useState("");
   const [aiAttested, setAiAttested] = useState(false);
   const [showFinalize, setShowFinalize] = useState(false);
@@ -145,7 +153,7 @@ export function useSummaryEditor({
     if (!b || !fresh || editor) return;
     setEditor(b.editor);
     setReview(b.review);
-    lastSaved.current = JSON.stringify(b.editor);
+    lastSaved.current = savedJson(b.editor);
     setAiAttested(!!b.summary.ai_review_attested_at);
   }, [b, fresh, editor]);
 
@@ -177,7 +185,7 @@ export function useSummaryEditor({
     chain.current = chain.current.then(async () => {
       const { b: cur, editor: ed, locked: isLocked } = latest.current;
       if (!cur || !ed || isLocked) return;
-      const json = JSON.stringify(ed);
+      const json = savedJson(ed);
       if (json === lastSaved.current) return;
       setSaveState("saving");
       try {
@@ -186,7 +194,7 @@ export function useSummaryEditor({
             organizationId,
             summaryId,
             content: summaryDocText(docFor(cur, ed, clientName, orgName)),
-            editor: ed as unknown as Record<string, unknown>,
+            editor: savable(ed) as unknown as Record<string, unknown>,
           },
         });
         lastSaved.current = json;
@@ -200,7 +208,7 @@ export function useSummaryEditor({
   }, [saveFn, organizationId, summaryId, clientName, orgName]);
 
   useEffect(() => {
-    if (!editor || locked || JSON.stringify(editor) === lastSaved.current) return;
+    if (!editor || locked || savedJson(editor) === lastSaved.current) return;
     const t = setTimeout(() => void flush(), AUTOSAVE_MS);
     return () => clearTimeout(t);
   }, [editor, locked, flush]);
@@ -208,14 +216,15 @@ export function useSummaryEditor({
   /** The Save button: save now and say so (a failed save already shows its error). */
   const save = useCallback(async () => {
     await flush();
-    if (JSON.stringify(latest.current.editor) === lastSaved.current) toast.success("Summary saved");
+    const ed = latest.current.editor;
+    if (ed && savedJson(ed) === lastSaved.current) toast.success("Summary saved");
   }, [flush]);
 
   // Warn before leaving the page with unsaved changes.
   useEffect(() => {
     const warn = (e: BeforeUnloadEvent) => {
       const { editor: ed, locked: isLocked } = latest.current;
-      if (!ed || isLocked || JSON.stringify(ed) === lastSaved.current) return;
+      if (!ed || isLocked || savedJson(ed) === lastSaved.current) return;
       void flush();
       e.preventDefault();
     };
@@ -242,29 +251,65 @@ export function useSummaryEditor({
     () => (b?.summary.include_goal_progress ? b.goals.map((g) => g.id) : []),
     [b],
   );
-  const byGoal = useMemo(() => (b ? groupEvidence(b.goals, b.evidence).byGoal : {}), [b]);
-  const evidenceFor = (field: FieldKey) =>
-    field.startsWith("goal:") ? (byGoal[field.slice(5)]?.length ?? 0) > 0 : false;
+  // Evidence a box can be drafted from: the server uses the same goals
+  // (none when goal progress is off) to split goal records from general ones.
+  const grouped = useMemo(
+    () => (b ? groupEvidence(b.summary.include_goal_progress ? b.goals : [], b.evidence) : null),
+    [b],
+  );
+  const recordsFor = (field: FieldKey): boolean => {
+    if (!grouped) return false;
+    if (field === "general") return grouped.general.length > 0;
+    if (field === "incidentNotes") {
+      return grouped.incidents.length > 0 || filledIncidents(editor?.incidents ?? []).length > 0;
+    }
+    return field.startsWith("goal:") && (grouped.byGoal[field.slice(5)]?.length ?? 0) > 0;
+  };
 
-  /** Draft one box, or several in one request. */
+  /** Draft one box, or several in one request; each draft goes straight into its box. */
   const draftMut = useMutation({
     mutationFn: (fields: FieldKey[]) => {
       const ed = latest.current.editor;
       if (!ed) throw new Error("Still loading.");
       return draftFn({
-        data: { organizationId, summaryId, editor: ed as unknown as Record<string, unknown>, fields },
+        data: {
+          organizationId,
+          summaryId,
+          editor: savable(ed) as unknown as Record<string, unknown>,
+          fields,
+        },
       });
     },
+    onMutate: (fields) =>
+      setDraftNotes((n) => {
+        const next = { ...n };
+        for (const f of fields) delete next[f];
+        return next;
+      }),
     onSuccess: (res) => {
       setReview(res.review);
-      toast.success(
-        res.review.suggestions.length
-          ? "Nectar has a draft for you to look at."
-          : "Nectar found nothing to change.",
-      );
-      if (res.rejected) {
-        toast.info(
-          `Nectar's draft for ${res.rejected} box${res.rejected === 1 ? "" : "es"} was dropped: it had dates or numbers that were not in that box.`,
+      const ed = latest.current.editor;
+      if (ed && res.drafts.length) {
+        let next = ed;
+        const undos: [FieldKey, ReturnType<typeof applyDraft>["undo"]][] = [];
+        for (const d of res.drafts) {
+          const r = applyDraft(next, d);
+          next = r.editor;
+          undos.push([d.field, r.undo]);
+        }
+        setEditor(next);
+        setUndoStacks((u) => undos.reduce((acc, [f, entry]) => pushUndo(acc, f, entry), u));
+      }
+      setDraftNotes((n) => {
+        const next = { ...n };
+        for (const f of res.failed) next[f.field] = draftFailureMessage(f);
+        return next;
+      });
+      if (res.drafts.length) {
+        toast.success(
+          res.drafts.length === 1
+            ? "Nectar drafted the box. Undo puts back what was there."
+            : `Nectar drafted ${res.drafts.length} boxes. Undo on each puts back what was there.`,
         );
       }
       qc.invalidateQueries({ queryKey: ["summaries"] });
@@ -295,52 +340,38 @@ export function useSummaryEditor({
   });
 
   const reviewOp = useMutation({
-    mutationFn: (op: { op: "accept"; field: FieldKey } | { op: "dismiss"; key: string }) =>
+    mutationFn: (op: { op: "dismiss"; key: string }) =>
       reviewFn({ data: { organizationId, summaryId, op } }),
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const accept = (field: FieldKey) => {
-    if (!editor) return;
-    const suggestion = visibleSuggestion(review, field);
-    if (!suggestion) return;
-    try {
-      const res = acceptSuggestion(editor, suggestion);
-      setEditor(res.editor);
-      setUndoStacks((u) => pushUndo(u, field, res.undo));
-      setReview((r) => takeSuggestion(r, field));
-      reviewOp.mutate({ op: "accept", field });
-    } catch (e) {
-      toast.error((e as Error).message);
-    }
-  };
-  /** Undo the last Accept on a box; the autosave saves it like any edit. */
+  /** Undo the last draft on a box: exactly what it held before. The autosave saves it like any edit. */
   const undo = (field: FieldKey) => {
     if (!editor) return;
-    const res = undoAccept(editor, undoStacks, field);
+    const res = undoDraft(editor, undoStacks, field);
     setEditor(res.editor);
     setUndoStacks(res.stacks);
   };
-  /** The x on a reminder or a suggestion card: hidden for this summary, saved with the review. */
+  /** The x on a reminder: hidden for this summary, saved with the review. */
   const hideKey = (key: string) => {
     setReview((r) => dismissKey(r, key));
     reviewOp.mutate({ op: "dismiss", key });
   };
-  const hideSuggestion = (s: FieldSuggestion) => hideKey(suggestionKey(s));
 
+  /** A box can be drafted when it has text or records (a goal's notes, incident reports, general records). */
+  const canDraft = (field: FieldKey) =>
+    !!editor && (!!fieldText(editor, field).trim() || recordsFor(field));
   const draftBox = (field: FieldKey) => draftMut.mutate([field]);
-  /** Draft all boxes: every box with text, in one request. */
+  /** Draft all boxes: every box with text or records, in one request. */
   const draftAll = () => {
     if (!editor) return;
-    const fields = textFields(goalIds).filter((f) => fieldText(editor, f).trim());
+    const fields = textFields(goalIds).filter(canDraft);
     if (!fields.length) {
-      toast.info("Nothing typed yet to draft.");
+      toast.info("Nothing to draft yet: no text and no records.");
       return;
     }
     draftMut.mutate(fields);
   };
-  const canDraft = (field: FieldKey) =>
-    !!editor && (!!fieldText(editor, field).trim() || evidenceFor(field));
 
   const reviewCtx = useMemo<ReviewContext | null>(
     () =>
@@ -388,13 +419,13 @@ export function useSummaryEditor({
           organizationId,
           summaryId,
           content: summaryDocText(finalDoc),
-          editor: editor as unknown as Record<string, unknown>,
+          editor: savable(editor) as unknown as Record<string, unknown>,
           doc: finalDoc as unknown as Record<string, unknown>,
           finalizedByName: finalizerName.trim(),
           aiReviewAttested: aiAttested,
         },
       });
-      lastSaved.current = JSON.stringify(editor);
+      lastSaved.current = savedJson(editor);
       return finalDoc;
     },
     onSuccess: async (finalDoc) => {
@@ -441,7 +472,6 @@ export function useSummaryEditor({
     : "none";
 
   return {
-    accept,
     aiAttested,
     blank,
     bundleQ,
@@ -450,10 +480,10 @@ export function useSummaryEditor({
     draftAll,
     draftBox,
     draftMut,
+    draftNotes,
     editor,
     hasRecords,
     hideKey,
-    hideSuggestion,
     nectarMut,
     reminders,
     reopenMut,
