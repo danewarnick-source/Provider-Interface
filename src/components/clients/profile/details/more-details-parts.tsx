@@ -23,8 +23,10 @@ import {
 import type { CustomFieldWithValue } from "@/lib/clients/care-data.functions";
 import {
   createCustomFieldDefinition,
+  ensureBuiltInClientField,
   setCustomFieldValue,
 } from "@/lib/clients/custom-fields.functions";
+import { isBuiltInField, isPlaceholderField } from "@/lib/clients/custom-fields-builtin";
 import { SECTION_LABEL, SECTION_NAMES, type SectionName } from "@/lib/clients/staff-visibility";
 import { RowMenu } from "@/components/clients/profile/cards/row-menu";
 
@@ -49,16 +51,21 @@ export function CustomFieldRow({
 }) {
   const qc = useQueryClient();
   const saveFn = useServerFn(setCustomFieldValue);
+  const ensureFn = useServerFn(ensureBuiltInClientField);
+  const builtIn = isBuiltInField(field);
 
   const initial = coerceInitial(field);
   const [value, setValue] = useState<string | boolean | null>(initial);
 
   const saveMut = useMutation({
-    mutationFn: (v: string | boolean | null) => {
+    mutationFn: async (v: string | boolean | null) => {
       if (!orgId) throw new Error("Missing organization");
+      const definitionId = isPlaceholderField(field)
+        ? (await ensureFn({ data: { organizationId: orgId, fieldKey: field.field_key } })).id
+        : field.id;
       const payload = {
         organizationId: orgId,
-        definitionId: field.id,
+        definitionId,
         entityKind: "client" as const,
         entityId: clientId,
         value_text: null as string | null,
@@ -83,11 +90,15 @@ export function CustomFieldRow({
 
   return (
     <li className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-background px-3 py-2">
-      <Checkbox
-        checked={selected}
-        onCheckedChange={(v) => onSelectedChange(v === true)}
-        aria-label={`Select ${field.field_label}`}
-      />
+      {builtIn ? (
+        <span aria-hidden className="w-4" />
+      ) : (
+        <Checkbox
+          checked={selected}
+          onCheckedChange={(v) => onSelectedChange(v === true)}
+          aria-label={`Select ${field.field_label}`}
+        />
+      )}
       <Label className="min-w-[140px] text-sm font-medium">{field.field_label}</Label>
 
       <div className="flex-1 min-w-[180px]">
@@ -114,6 +125,7 @@ export function CustomFieldRow({
       >
         {saveMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
       </Button>
+      {builtIn ? null : (
       <RowMenu
         label={`More actions for ${field.field_label}`}
         items={[
@@ -125,6 +137,7 @@ export function CustomFieldRow({
           },
         ]}
       />
+      )}
     </li>
   );
 }

@@ -24,7 +24,6 @@ export type AboutSummary = {
   items: AboutItem[];
   draftedByNectar: boolean;
   approvedAt: string;
-  approverName: string;
   basedOn: string[];
 };
 
@@ -177,20 +176,6 @@ export function sourceLabel(
   const kind = doc ? docKindLabel(doc.type) : "Document";
   const label = kind.charAt(0).toUpperCase() + kind.slice(1);
   return item.source_page ? `${label} p. ${item.source_page}` : label;
-}
-
-/** "Summary from PCSP, BSP, face sheet" for the card footer. */
-export function summarySources(
-  items: readonly AboutItem[],
-  docs: readonly { id: string; type: string | null }[],
-): string {
-  const kinds: string[] = [];
-  for (const i of items) {
-    const doc = docs.find((d) => d.id === i.source_doc_id);
-    const k = doc ? docKindLabel(doc.type) : null;
-    if (k && !kinds.includes(k)) kinds.push(k);
-  }
-  return kinds.length ? `Summary from ${kinds.join(", ")}` : "Summary";
 }
 
 /** A PCSP, BSP or face sheet uploaded after approval that the summary wasn't drafted from. */

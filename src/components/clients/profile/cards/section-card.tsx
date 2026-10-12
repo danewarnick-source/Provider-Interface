@@ -26,7 +26,7 @@ export function SectionCard({
   tone?: CardTone;
   title: ReactNode;
   /** One line: what this card is for. */
-  description: ReactNode;
+  description?: ReactNode;
   actions?: ReactNode;
   children?: ReactNode;
   /** Scroll target. */
@@ -52,7 +52,9 @@ export function SectionCard({
         </span>
         <div className="min-w-0 flex-1 basis-40">
           <h3 className="text-lg font-semibold leading-tight text-hive-ink">{title}</h3>
-          <p className="mt-0.5 text-[13px] text-muted-foreground">{description}</p>
+          {description ? (
+            <p className="mt-0.5 text-[13px] text-muted-foreground">{description}</p>
+          ) : null}
         </div>
         {actions ? (
           <div className="flex flex-wrap items-center gap-2 max-md:[&_a]:min-h-11 max-md:[&_button]:min-h-11">

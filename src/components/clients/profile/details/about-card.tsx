@@ -6,8 +6,7 @@
 import { Loader2, Smile, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAccess } from "@/hooks/use-access";
-import { boldLead, summarySources } from "@/lib/clients/about-me";
-import { formatDate, todayYmd } from "@/lib/clients/dates";
+import { boldLead } from "@/lib/clients/about-me";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { EmptyState } from "@/components/clients/profile/cards/card-parts";
 import { AboutEditor } from "./about-editor";
@@ -50,7 +49,6 @@ export function AboutCard({
       icon={Smile}
       tone="profile"
       title={`About ${firstName || "this client"}`}
-      description="Who they are, in plain words. Read this before your first shift."
       actions={canEdit && !draft && summary ? nectarButton("default") : null}
       testId="client-about"
     >
@@ -89,10 +87,6 @@ export function AboutCard({
               );
             })}
           </ul>
-          <p className="mt-4 text-xs text-muted-foreground" data-testid="client-about-footer">
-            {summarySources(summary.items, docs)} · Approved{" "}
-            {formatDate(todayYmd(new Date(summary.approvedAt)))} by {summary.approverName}
-          </p>
         </>
       ) : (
         <EmptyState action={canEdit ? nectarButton("default") : null}>

@@ -1,5 +1,5 @@
 // Identity on the Profile section: date of birth and age, Medicaid ID
-// (masked), DSPD PID, own guardian, language, start date, phone and insurance.
+// (masked), DSPD PID, own guardian, start date, phone and insurance.
 // Name and home are in the header; editing covers them too. Insurance is
 // medical info, so changing it needs Client medical: Edit (on the server).
 
@@ -12,7 +12,6 @@ import { IdCard } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { useAccess } from "@/hooks/use-access";
 import { ageOn, formatDate } from "@/lib/clients/dates";
-import { useClientCareData } from "@/hooks/use-client-care-data";
 import { maskId } from "@/lib/clients/profile-header";
 import { updateClient } from "@/lib/clients/writes.functions";
 import { EditButton, SaveBar, SectionCard } from "@/components/clients/profile/cards/section-card";
@@ -102,11 +101,6 @@ export function IdentityCard({
   });
 
   const age = ageOn(c.date_of_birth);
-  const care = useClientCareData(c.id);
-  const language =
-    care.data?.custom_fields
-      .find((f) => f.field_key === "primary_language")
-      ?.value?.value_text?.trim() || null;
 
   return (
     <SectionCard
@@ -139,7 +133,6 @@ export function IdentityCard({
             <Field label="Own guardian">
               {c.is_own_guardian == null ? null : c.is_own_guardian ? "Yes" : "No"}
             </Field>
-            <Field label="Language">{language}</Field>
             <Field label="Start date">{c.admission_date ? formatDate(c.admission_date) : null}</Field>
             <Field label="Phone">{c.phone_number || null}</Field>
             <Field label="Insurance">{c.insurance || null}</Field>

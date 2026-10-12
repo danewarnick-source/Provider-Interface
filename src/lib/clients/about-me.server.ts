@@ -6,7 +6,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { rows } from "./list-queries";
 import { askNectarJson, clientDocInfos, readClientDocs } from "./client-doc-texts.server";
-import { loadPeopleNames } from "./overview-team";
 import { assertRowsChanged } from "./writes";
 import {
   ABOUT_SYSTEM,
@@ -28,13 +27,12 @@ export async function loadAboutView(sb: Sb, orgId: string, clientId: string): Pr
     rows<{
       items: unknown;
       drafted_by_nectar: boolean;
-      approved_by: string;
       approved_at: string;
       based_on_doc_ids: string[] | null;
     }>(
       sb
         .from("client_about_me")
-        .select("items, drafted_by_nectar, approved_by, approved_at, based_on_doc_ids")
+        .select("items, drafted_by_nectar, approved_at, based_on_doc_ids")
         .eq("organization_id", orgId)
         .eq("client_id", clientId),
     ),
@@ -42,12 +40,10 @@ export async function loadAboutView(sb: Sb, orgId: string, clientId: string): Pr
   ]);
   const row = found[0];
   if (!row) return { summary: null, docs, newDocs: false };
-  const names = await loadPeopleNames(sb, [row.approved_by]);
   const summary: AboutSummary = {
     items: Array.isArray(row.items) ? (row.items as AboutItem[]) : [],
     draftedByNectar: row.drafted_by_nectar,
     approvedAt: row.approved_at,
-    approverName: names.get(row.approved_by) ?? "Team member",
     basedOn: row.based_on_doc_ids ?? [],
   };
   return { summary, docs, newDocs: hasNewKeyDocs(summary, docs) };

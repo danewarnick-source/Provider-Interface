@@ -10,7 +10,6 @@ import {
   hasNewKeyDocs,
   parseAboutReply,
   sourceLabel,
-  summarySources,
   unreadableDocs,
   type AboutDoc,
 } from "./about-me.ts";
@@ -104,7 +103,7 @@ describe("wording", () => {
     assert.deepEqual(boldLead("Doesn't like crowds."), { lead: "Doesn't like", rest: " crowds." });
     assert.deepEqual(boldLead("His sister visits."), { lead: "", rest: "His sister visits." });
   });
-  it("shows each bullet's source and the footer's documents", () => {
+  it("shows each bullet's source", () => {
     const items = [
       { text: "a", source_doc_id: "pcsp-1", source_page: 2 },
       { text: "b", source_doc_id: "bsp-1", source_page: null },
@@ -112,7 +111,6 @@ describe("wording", () => {
     ];
     assert.equal(sourceLabel(items[0], DOCS), "PCSP p. 2");
     assert.equal(sourceLabel(items[1], DOCS), "BSP");
-    assert.equal(summarySources(items, DOCS), "Summary from PCSP, BSP");
   });
 });
 
