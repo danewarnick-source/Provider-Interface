@@ -9,8 +9,8 @@ import { askNectarHelp, escalateHelpToHive, getHelpTicketStatus, type NectarHelp
 import { NectarBadge, NectarMark, NectarButton } from "@/components/nectar/nectar-brand";
 import { NectarTaskCenter } from "@/components/nectar/nectar-task-center";
 import { NectarAnswer } from "@/components/nectar/nectar-answer";
+import { RequireLevel } from "@/components/rbac-guard";
 import { FeatureGate } from "@/components/upgrade-gate";
-import { isAdminLevel } from "@/lib/access/levels";
 
 export const Route = createFileRoute("/dashboard/help")({
   head: () => ({ meta: [{ title: "Need help? — NECTAR" }] }),
@@ -19,8 +19,17 @@ export const Route = createFileRoute("/dashboard/help")({
       ? search.q.slice(0, 1000)
       : undefined,
   }),
-  component: HelpPage,
+  component: HelpRoute,
 });
+
+/** Admins only; a team member opening the URL is sent to Ask Nectar. */
+function HelpRoute() {
+  return (
+    <RequireLevel min="admin" redirectTo="/dashboard/ask-nectar">
+      <HelpPage />
+    </RequireLevel>
+  );
+}
 
 
 interface ChatMsg {
@@ -30,19 +39,13 @@ interface ChatMsg {
   reply?: NectarHelpReply;
 }
 
-const STARTERS_ADMIN = [
+const STARTERS = [
   "Where do I set a client's monthly unit cap?",
   "How do I add a staff member?",
   "Where do I assign a caseload?",
   "How does clock-out paperwork work?",
   "Where can I see remaining units for a client?",
   "How do I pull a 520?",
-];
-const STARTERS_STAFF = [
-  "Where do I clock in?",
-  "How do I write a daily log?",
-  "Where can I see my hours this period?",
-  "What is NECTAR pay?",
 ];
 
 const HISTORY_KEY = "hive.nectar.helpHistory";
@@ -58,8 +61,6 @@ function loadRecent(): string[] {
 function HelpPage() {
   const { data: org } = useCurrentOrg();
   const role = org?.access.level ?? "staff";
-  const isAdmin = isAdminLevel(role);
-  const starters = isAdmin ? STARTERS_ADMIN : STARTERS_STAFF;
   const navigate = useNavigate();
 
   const [messages, setMessages] = useState<ChatMsg[]>([]);
@@ -232,7 +233,7 @@ function HelpPage() {
       >
         {messages.length === 0 && (
           <EmptyState
-            starters={starters}
+            starters={STARTERS}
             recent={recent}
             onPick={send}
           />
