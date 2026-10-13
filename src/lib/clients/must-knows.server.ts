@@ -1,5 +1,6 @@
-// Server side of Must-knows: Nectar's draft from the client's documents and
-// the must-knows already written, and saving what a person approves.
+// Server side of Must-knows: the client's documents (the review names each
+// bullet's source), Nectar's draft from them and the must-knows already
+// written, and saving what a person approves.
 // Approval writes clients.special_directions (the one text every reader
 // uses) and keeps each bullet's source in client_must_knows.
 
@@ -7,7 +8,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { parseAboutReply, type AboutDocInfo } from "./about-me";
 import { askNectarJson, clientDocInfos, readClientDocs } from "./client-doc-texts.server";
 import { rows } from "./list-queries";
-import { loadPeopleNames } from "./overview-team";
 import { assertRowsChanged } from "./writes";
 import {
   MUST_KNOWS_SYSTEM,
@@ -15,14 +15,13 @@ import {
   formatMustKnows,
   mustKnowsPrompt,
   type MustKnowItem,
-  type MustKnowsApproval,
   type MustKnowsDraft,
 } from "./must-knows";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = SupabaseClient<any>;
 
-export type MustKnowsView = { approval: MustKnowsApproval | null; docs: AboutDocInfo[] };
+export type MustKnowsView = { docs: AboutDocInfo[] };
 
 async function loadClient(sb: Sb, orgId: string, clientId: string) {
   const [client] = await rows<{ first_name: string | null; special_directions: string | null }>(
@@ -42,28 +41,7 @@ export async function loadMustKnowsView(
   orgId: string,
   clientId: string,
 ): Promise<MustKnowsView> {
-  const [found, docs] = await Promise.all([
-    rows<{ items: unknown; approved_by: string; approved_at: string; approved_text: string }>(
-      sb
-        .from("client_must_knows")
-        .select("items, approved_by, approved_at, approved_text")
-        .eq("organization_id", orgId)
-        .eq("client_id", clientId),
-    ),
-    clientDocInfos(sb, orgId, clientId),
-  ]);
-  const row = found[0];
-  if (!row) return { approval: null, docs };
-  const names = await loadPeopleNames(sb, [row.approved_by]);
-  return {
-    approval: {
-      approvedAt: row.approved_at,
-      approverName: names.get(row.approved_by) ?? "Team member",
-      approvedText: row.approved_text,
-      items: Array.isArray(row.items) ? (row.items as MustKnowItem[]) : [],
-    },
-    docs,
-  };
+  return { docs: await clientDocInfos(sb, orgId, clientId) };
 }
 
 const FAILED = "Nectar couldn't draft the must-knows right now. Try again in a minute.";

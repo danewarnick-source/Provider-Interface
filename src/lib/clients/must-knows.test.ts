@@ -3,7 +3,6 @@ import { describe, it } from "node:test";
 import type { AboutDoc } from "./about-me.ts";
 import {
   MUST_KNOWS_MAX_ITEMS,
-  approvalLine,
   checkMustKnowItems,
   formatMustKnows,
   isMustKnowSection,
@@ -134,20 +133,5 @@ describe("wording", () => {
       "Existing must-knows",
     );
     assert.equal(mustKnowSource({ source_doc_id: "gone", source_page: null }, DOCS), "Document");
-  });
-
-  it("says who approved, and when the text changed since", () => {
-    const a = {
-      approvedAt: "2026-10-08T15:00:00Z",
-      approverName: "Pat Lee",
-      approvedText: "Health:\n- A",
-    };
-    const when = () => "Oct 8, 2026";
-    assert.equal(approvalLine(a, "Health:\n- A\n", when), "Approved Oct 8, 2026 by Pat Lee");
-    assert.equal(
-      approvalLine(a, "Health:\n- B", when),
-      "Approved Oct 8, 2026 by Pat Lee, edited since",
-    );
-    assert.equal(approvalLine(null, "x", when), null);
   });
 });

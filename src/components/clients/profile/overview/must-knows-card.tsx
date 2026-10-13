@@ -8,8 +8,6 @@ import { AlertTriangle, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAccess } from "@/hooks/use-access";
-import { approvalLine } from "@/lib/clients/must-knows";
-import { formatDate, todayYmd } from "@/lib/clients/dates";
 import { EditButton, SaveBar, SectionCard } from "@/components/clients/profile/cards/section-card";
 import { EmptyState } from "@/components/clients/profile/cards/card-parts";
 import { MustKnowsReview } from "./must-knows-review";
@@ -28,9 +26,6 @@ export function MustKnowsCard({
   const canEdit = useAccess().canCategory("clients", "edit");
   const { view, draft, setDraft, startDraft, approve, save } = useMustKnows(orgId, clientId);
   const [typing, setTyping] = useState<string | null>(null);
-  const approved = approvalLine(view.data?.approval ?? null, text, (iso) =>
-    formatDate(todayYmd(new Date(iso))),
-  );
   const idle = canEdit && !draft && typing === null;
   const nectarButton = (
     <Button
@@ -87,17 +82,7 @@ export function MustKnowsCard({
           />
         </>
       ) : text ? (
-        <>
-          <MustKnowsText text={text} />
-          {approved ? (
-            <p
-              className="mt-4 text-xs text-muted-foreground"
-              data-testid="client-must-knows-approved"
-            >
-              {approved}
-            </p>
-          ) : null}
-        </>
+        <MustKnowsText text={text} />
       ) : (
         <EmptyState
           action={

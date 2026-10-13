@@ -26,13 +26,6 @@ export type MustKnowItem = {
 
 export type MustKnowsDraft = { items: MustKnowItem[]; basedOn: string[]; skipped: string[] };
 
-export type MustKnowsApproval = {
-  approvedAt: string;
-  approverName: string;
-  approvedText: string;
-  items: MustKnowItem[];
-};
-
 export const MUST_KNOWS_MAX_ITEMS = 25;
 const MAX_TEXT = 220;
 const SECTION_KEYS = new Set<unknown>(MUST_KNOW_SECTIONS.map((s) => s.key));
@@ -153,15 +146,4 @@ export function parseMustKnows(text: string | null | undefined): MustKnowBlock[]
     }
   }
   return blocks;
-}
-
-/** "Approved Oct 8, 2026 by Pat Lee", plus ", edited since" when the text changed after. */
-export function approvalLine(
-  approval: Pick<MustKnowsApproval, "approvedAt" | "approverName" | "approvedText"> | null,
-  current: string | null,
-  formatWhen: (iso: string) => string,
-): string | null {
-  if (!approval) return null;
-  const line = `Approved ${formatWhen(approval.approvedAt)} by ${approval.approverName}`;
-  return (current ?? "").trim() === approval.approvedText.trim() ? line : `${line}, edited since`;
 }

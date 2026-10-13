@@ -1,4 +1,4 @@
-// Must-knows server functions: read who approved them, let Nectar draft,
+// Must-knows server functions: read the client's documents, let Nectar draft,
 // and save what a person approves. Reading needs Clients: View for this
 // client; drafting and approving need Clients: Edit (assertCanManageClient).
 
