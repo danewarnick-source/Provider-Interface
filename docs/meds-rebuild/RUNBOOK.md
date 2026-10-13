@@ -11,7 +11,7 @@ Result when done: the client's Health → Medications card has two tabs, **Medic
 ## HOW TO RUN THIS (Claude Code, read first)
 
 1. Read `CLAUDE.md` and obey it. Read this whole file once.
-2. Work on branch `meds-rebuild` (it is cut from `clients-rebuild` because the new client profile lives there). `git fetch` and check it out.
+2. Work on branch `meds-rebuild` (it is cut from `clients-rebuild` because the new client profile lives there). `git fetch` and check it out, then merge the latest `origin/clients-rebuild` into it so it starts from the newest client profile.
 3. Run **M1 → M5 in order**. **Do not run M6** until Jeff says M1–M5 are on production `main` (M6 drops columns and tables).
 4. For each prompt: start a fresh subagent with the Standard Rules + that prompt only. It works on `meds-rebuild/mN-<name>` cut from the tip of `meds-rebuild`, and must pass before finishing:
    - `npm run build` (commit the regenerated `src/routeTree.gen.ts`)
