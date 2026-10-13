@@ -9,8 +9,9 @@ import { askNectarHelp, escalateHelpToHive, getHelpTicketStatus, type NectarHelp
 import { NectarBadge, NectarMark, NectarButton } from "@/components/nectar/nectar-brand";
 import { NectarTaskCenter } from "@/components/nectar/nectar-task-center";
 import { NectarAnswer } from "@/components/nectar/nectar-answer";
+import { RequireLevel } from "@/components/rbac-guard";
 import { FeatureGate } from "@/components/upgrade-gate";
-import { isAdminLevel } from "@/lib/access/levels";
+import { clearLegacyNectarStorage } from "@/lib/nectar/browser-storage";
 
 export const Route = createFileRoute("/dashboard/help")({
   head: () => ({ meta: [{ title: "Need help? — NECTAR" }] }),
@@ -19,8 +20,19 @@ export const Route = createFileRoute("/dashboard/help")({
       ? search.q.slice(0, 1000)
       : undefined,
   }),
-  component: HelpPage,
+  component: HelpRoute,
 });
+
+/** Admins only; a team member opening the URL is sent to Ask Nectar. */
+function HelpRoute() {
+  // One-time cleanup of the question history older builds kept in the browser.
+  useEffect(() => clearLegacyNectarStorage(), []);
+  return (
+    <RequireLevel min="admin" redirectTo="/dashboard/ask-nectar">
+      <HelpPage />
+    </RequireLevel>
+  );
+}
 
 
 interface ChatMsg {
@@ -30,7 +42,7 @@ interface ChatMsg {
   reply?: NectarHelpReply;
 }
 
-const STARTERS_ADMIN = [
+const STARTERS = [
   "Where do I set a client's monthly unit cap?",
   "How do I add a staff member?",
   "Where do I assign a caseload?",
@@ -38,32 +50,15 @@ const STARTERS_ADMIN = [
   "Where can I see remaining units for a client?",
   "How do I pull a 520?",
 ];
-const STARTERS_STAFF = [
-  "Where do I clock in?",
-  "How do I write a daily log?",
-  "Where can I see my hours this period?",
-  "What is NECTAR pay?",
-];
-
-const HISTORY_KEY = "hive.nectar.helpHistory";
-
-function loadRecent(): string[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(HISTORY_KEY);
-    return raw ? (JSON.parse(raw) as string[]) : [];
-  } catch { return []; }
-}
 
 function HelpPage() {
   const { data: org } = useCurrentOrg();
   const role = org?.access.level ?? "staff";
-  const isAdmin = isAdminLevel(role);
-  const starters = isAdmin ? STARTERS_ADMIN : STARTERS_STAFF;
   const navigate = useNavigate();
 
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
+  // Recent questions live in memory for this visit only — never in browser storage.
   const [recent, setRecent] = useState<string[]>([]);
   const [ticketId, setTicketId] = useState<string | null>(null);
   const [taskCenterOpen, setTaskCenterOpen] = useState(false);
@@ -74,7 +69,6 @@ function HelpPage() {
   const escalate = useServerFn(escalateHelpToHive);
   const getStatus = useServerFn(getHelpTicketStatus);
 
-  useEffect(() => { setRecent(loadRecent()); }, []);
   useEffect(() => { inputRef.current?.focus(); }, []);
 
   // Auto-send a question routed in from the global NECTAR search bar
@@ -108,11 +102,7 @@ function HelpPage() {
         ...prev,
         { id: `n-${Date.now()}`, role: "nectar", text: reply.answer, reply },
       ]);
-      const next = [q, ...recent.filter((x) => x !== q)].slice(0, 8);
-      setRecent(next);
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
-      }
+      setRecent((prev) => [q, ...prev.filter((x) => x !== q)].slice(0, 8));
       setTimeout(() => inputRef.current?.focus(), 50);
     },
     onError: (e) => {
@@ -232,7 +222,7 @@ function HelpPage() {
       >
         {messages.length === 0 && (
           <EmptyState
-            starters={starters}
+            starters={STARTERS}
             recent={recent}
             onPick={send}
           />
@@ -248,14 +238,8 @@ function HelpPage() {
                   text={msg.text}
                   reply={msg.reply}
                   onFollowUp={send}
-                  onNavigate={(path) => {
-                    // Use raw navigation since paths come from AI with literal $clientId etc.
-                    if (path.includes("$clientId")) {
-                      navigate({ to: "/dashboard/billing" });
-                    } else {
-                      window.location.assign(path);
-                    }
-                  }}
+                  // The server keeps a deep link only when it is a real screen (lib/nectar/help-links.ts).
+                  onNavigate={(path) => window.location.assign(path)}
                 />
               )}
             </li>

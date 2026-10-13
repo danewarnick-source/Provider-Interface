@@ -192,11 +192,10 @@ export const listAuthoritativeSources = createServerFn({ method: "POST" })
     z.object({ organizationId: z.string().uuid() }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { supabase } = context;
-    if (!supabase) return { sources: [] };
-    // Sources tab shows every company-owned doc — the authoritative flag /
-    // authoritative_kind just controls whether NECTAR can draft from it yet.
-    // Client/staff docs stay filtered out so PHI-scoped files don't leak in.
+    const { supabase, userId } = context;
+    if (!supabase || !userId) return { sources: [] };
+    // Membership check is a second layer to RLS. Company/state docs only, so client/staff PHI never lists here.
+    await requireOrgMembership(supabase, userId, data.organizationId);
     const { data: rows, error } = await supabase
       .from("nectar_documents")
       .select(

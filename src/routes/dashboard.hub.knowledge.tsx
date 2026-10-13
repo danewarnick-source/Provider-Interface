@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { KnowledgePage } from "@/components/pages/knowledge-page";
+import { RequireLevel } from "@/components/rbac-guard";
 import { FeatureGate } from "@/components/upgrade-gate";
 
 const search = z.object({
@@ -20,9 +21,12 @@ export const Route = createFileRoute("/dashboard/hub/knowledge")({
     ],
   }),
   validateSearch: (s) => search.parse(s),
+  // Admins only; a team member opening the URL is sent to Ask Nectar.
   component: () => (
-    <FeatureGate featureKey="nectar">
-      <KnowledgePage />
-    </FeatureGate>
+    <RequireLevel min="admin" redirectTo="/dashboard/ask-nectar">
+      <FeatureGate featureKey="nectar">
+        <KnowledgePage />
+      </FeatureGate>
+    </RequireLevel>
   ),
 });
