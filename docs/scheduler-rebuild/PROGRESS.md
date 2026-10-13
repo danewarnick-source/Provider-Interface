@@ -13,3 +13,8 @@ One short report per prompt, newest last.
 - Checks: build passed (local xlsx shim); tsc 219 → 219 (identical set); test:unit 1542 pass / 6 fail (same 6 pre-existing as base); GitHub checks: none failed.
 - NOT VERIFIED: scheduler e2e. All 9 tests fail identically before and after in this sandbox (Playwright wants Chromium build 1248, 1194 installed; with dummy env the app hangs on "Loading workspace…" or redirects to /login). Needs a run in CI/locally before production.
 - Small extras: removed dead `rhs-board.functions` line from src/lib/clinical/index.ts; dropped `?tab=schedule` from the homes-teams "View schedule" link; e2e test 8 reduced to the `?focus=` banner case since the redirect routes are gone.
+
+## S3 — The rule engine — PR open
+- Branch `scheduler-rebuild-a-s3-rule-engine`. Pure logic, not wired into callers: `rules.ts` (+ `rules-*.ts` splits), `ratios.ts`, `billing-mode.ts`, each with tests in the `test:unit` list. `conflicts.ts` deleted (it had no importers).
+- `qualificationsOnDate` is the one Evidence-only answer (reviewed, unexpired on the shift date, "waiting for review" as its own state, 90-day CPR and 180-day behavior hire grace). Old qualification paths are marked `S4-REPOINT`, not deleted.
+- No migrations.
