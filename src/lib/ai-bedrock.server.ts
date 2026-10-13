@@ -554,6 +554,8 @@ export async function gatewayFetch(
 // ─────────────────────────────────────────────────────────────────────────────
 // OpenAI-compatible embeddings shim backed by Amazon Titan Text Embeddings v2.
 // Keeps the `{ data: [{ embedding: number[] }] }` shape that callers expect.
+// Each input takes a slot from the embeddings rate buckets (kind "embed"),
+// not the Claude minute, and still counts against the caller's agency.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface OpenAIEmbedBody {
@@ -584,13 +586,13 @@ export async function gatewayEmbeddingsFetch(
         accept: "application/json",
         body: JSON.stringify({ inputText: input, dimensions, normalize: true }),
       });
-      await acquireBedrockSlot(opts?.orgId);
+      await acquireBedrockSlot(opts?.orgId, "embed");
       const out = await client.send(cmd);
       const raw = new TextDecoder().decode(out.body);
       const parsed = JSON.parse(raw) as { embedding?: number[]; inputTextTokenCount?: number };
       const vec = parsed.embedding ?? [];
       if (typeof parsed.inputTextTokenCount === "number" && parsed.inputTextTokenCount > 0) {
-        void recordBedrockTokens(parsed.inputTextTokenCount, opts?.orgId);
+        void recordBedrockTokens(parsed.inputTextTokenCount, opts?.orgId, "embed");
       }
       data.push({ object: "embedding", index: i, embedding: vec });
     }

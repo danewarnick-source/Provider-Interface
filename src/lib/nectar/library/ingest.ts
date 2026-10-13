@@ -206,9 +206,10 @@ export async function runIngest<Doc extends { id: string }>(
     const text = await deps.readText(source, data.fileBase64);
 
     // Knowledge base: keep the text for Nectar; no client-field extraction.
+    // A file with no readable text (a scan) says so instead of "parsed" (N3).
     if (isKnowledgeUpload(data.ownerKind)) {
       await deps.updateDocument(doc.id, {
-        parse_status: "parsed",
+        parse_status: text.trim() ? "parsed" : "no_text",
         parsed_at: deps.now(),
         raw_text: text,
         parse_error: null,

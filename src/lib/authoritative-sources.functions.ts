@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
+import { libraryGroupForKind } from "@/lib/nectar/library/library";
 import { AUTH_KINDS, stripHtmlToText } from "./authoritative-sources.server";
 
 // =============================================================
@@ -125,9 +126,10 @@ export const ingestWebSource = createServerFn({ method: "POST" })
         source: "web",
         parse_status: "parsed",
         parsed_at: capturedAt,
-        raw_text: text.slice(0, 50000),
+        raw_text: text,
         is_authoritative_source: true,
         authoritative_kind: data.authoritativeKind,
+        library_group: libraryGroupForKind(data.authoritativeKind),
         assisted_setup_requested: data.assistedSetup ?? false,
         uploaded_by: userId,
         uploaded_by_name:
@@ -189,7 +191,7 @@ export const markAsAuthoritativeSource = createServerFn({ method: "POST" })
     if (!supabase || !userId) return { ok: true };
     const { data: docRow } = await supabase
       .from("nectar_documents")
-      .select("organization_id")
+      .select("organization_id, owner_kind")
       .eq("id", data.documentId)
       .maybeSingle();
     if (!docRow?.organization_id) throw new Error("Document not found");
@@ -197,11 +199,17 @@ export const markAsAuthoritativeSource = createServerFn({ method: "POST" })
     const update: {
       is_authoritative_source: boolean;
       authoritative_kind: string | null;
+      library_group?: string;
       assisted_setup_requested?: boolean;
     } = {
       is_authoritative_source: data.isAuthoritative,
       authoritative_kind: data.isAuthoritative ? data.authoritativeKind : null,
     };
+    // Knowledge base uploads join the library in the group their kind belongs
+    // to: a "Policy / procedure" upload is an agency policy (N3).
+    if (data.isAuthoritative && docRow.owner_kind === "company") {
+      update.library_group = libraryGroupForKind(data.authoritativeKind);
+    }
     if (typeof data.assistedSetup === "boolean") {
       update.assisted_setup_requested = data.assistedSetup;
     }

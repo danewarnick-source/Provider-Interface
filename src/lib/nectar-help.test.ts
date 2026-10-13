@@ -44,10 +44,15 @@ describe("admin help facts (N1)", () => {
     assert.equal(scope("staff", "agency"), "self");
   });
 
-  it("checks the nectar feature for the agency on the server", () => {
+  it("checks the nectar feature and the Ask setting for the agency on the server (N3)", () => {
     const ask = HELP_FNS.slice(HELP_FNS.indexOf("export const askNectarHelp"));
-    const guard = ask.indexOf("await requireNectarOrg(context, { orgId: data.organizationId });");
-    assert.ok(guard > 0 && guard < ask.indexOf("gatherFacts("), "feature check runs before any read");
+    const guard = ask.indexOf(
+      'await requireNectarOrg(context, { orgId: data.organizationId, feature: "ask" });',
+    );
+    assert.ok(
+      guard > 0 && guard < ask.indexOf("gatherFacts("),
+      "feature check runs before any read",
+    );
   });
 });
 

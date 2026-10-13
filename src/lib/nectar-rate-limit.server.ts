@@ -12,7 +12,12 @@
 // the whole account quota. The global key stays the hard ceiling.
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { decideBedrockSlot } from "@/lib/nectar-rate-decision";
+import {
+  decideBedrockSlot,
+  EMBED_RATE_LIMITS,
+  orgRateKey,
+  type BedrockRateLimits,
+} from "@/lib/nectar-rate-decision";
 
 // Public knobs — kept as consts so callers can share the exact same key.
 export const BEDROCK_RATE_KEY = "bedrock:sonnet";
@@ -24,8 +29,19 @@ const ACQUIRE_MAX_WAIT_MS = 60_000;                   // give up if bucket stays
 const ACQUIRE_POLL_CAP_MS = 8_000;                    // never sleep longer than this at once
 const ORG_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export function bedrockOrgRateKey(orgId: string): string {
-  return `${BEDROCK_RATE_KEY}:org:${orgId}`;
+/** chat = Claude (Sonnet) calls; embed = Titan v2 embeddings, which have their own quota. */
+export type BedrockRateKind = "chat" | "embed";
+
+const CHAT_RATE_LIMITS: BedrockRateLimits = {
+  key: BEDROCK_RATE_KEY,
+  maxPerMin: BEDROCK_MAX_PER_MIN,
+  dailyTokenCap: BEDROCK_DAILY_TOKEN_CAP,
+  orgMaxPerMin: BEDROCK_ORG_MAX_PER_MIN,
+  orgDailyTokenCap: BEDROCK_ORG_DAILY_TOKEN_CAP,
+};
+
+function limitsFor(kind: BedrockRateKind): BedrockRateLimits {
+  return kind === "embed" ? EMBED_RATE_LIMITS : CHAT_RATE_LIMITS;
 }
 
 export function normalizeBedrockOrgId(orgId?: string | null): string | null {
@@ -75,15 +91,20 @@ async function probeRate(key: string, maxPerMin: number, dailyCap: number): Prom
  * caller would have to wait longer than ACQUIRE_MAX_WAIT_MS. Safe to call from
  * multiple parallel workers — Postgres row lock in the RPC serializes access.
  *
- * When orgId is a uuid, also acquire `bedrock:sonnet:org:<orgId>` (4/min,
- * 1.5M tokens/day). A missing or invalid orgId checks the global key only.
- * nectar_check_rate increments on grant, so a bucket that already granted
- * during this wait is not probed again.
+ * When orgId is a uuid, also acquire the agency's bucket
+ * (`bedrock:sonnet:org:<orgId>`, 4/min and 1.5M tokens/day for chat). A
+ * missing or invalid orgId checks the global key only. nectar_check_rate
+ * increments on grant, so a bucket that already granted during this wait is
+ * not probed again. kind "embed" uses the embeddings buckets instead.
  */
-export async function acquireBedrockSlot(orgId?: string | null): Promise<{ dayTokensUsed: number }> {
+export async function acquireBedrockSlot(
+  orgId?: string | null,
+  kind: BedrockRateKind = "chat",
+): Promise<{ dayTokensUsed: number }> {
+  const limits = limitsFor(kind);
   const started = Date.now();
   const scoped = normalizeBedrockOrgId(orgId);
-  const orgKey = scoped ? bedrockOrgRateKey(scoped) : null;
+  const orgKey = scoped ? orgRateKey(limits.key, scoped) : null;
   let heldOrg = false;
   let heldGlobal = false;
   let lastGlobalDay = 0;
@@ -91,7 +112,7 @@ export async function acquireBedrockSlot(orgId?: string | null): Promise<{ dayTo
   while (true) {
     const elapsed = Date.now() - started;
     if (orgKey && !heldOrg) {
-      const org = await probeRate(orgKey, BEDROCK_ORG_MAX_PER_MIN, BEDROCK_ORG_DAILY_TOKEN_CAP);
+      const org = await probeRate(orgKey, limits.orgMaxPerMin, limits.orgDailyTokenCap);
       const orgDecision = decideBedrockSlot({
         limiterError: org.error,
         waitMs: org.waitMs,
@@ -112,7 +133,7 @@ export async function acquireBedrockSlot(orgId?: string | null): Promise<{ dayTo
     }
 
     if (!heldGlobal) {
-      const global = await probeRate(BEDROCK_RATE_KEY, BEDROCK_MAX_PER_MIN, BEDROCK_DAILY_TOKEN_CAP);
+      const global = await probeRate(limits.key, limits.maxPerMin, limits.dailyTokenCap);
       if (!global.error) lastGlobalDay = global.dayTokensUsed;
       const decision = decideBedrockSlot({
         limiterError: global.error,
@@ -138,11 +159,16 @@ export async function acquireBedrockSlot(orgId?: string | null): Promise<{ dayTo
 }
 
 /** Best-effort: add tokens consumed by a completed Bedrock call to the daily bucket. */
-export async function recordBedrockTokens(tokens: number, orgId?: string | null): Promise<void> {
+export async function recordBedrockTokens(
+  tokens: number,
+  orgId?: string | null,
+  kind: BedrockRateKind = "chat",
+): Promise<void> {
   if (!Number.isFinite(tokens) || tokens <= 0) return;
   const rounded = Math.round(tokens);
+  const { key } = limitsFor(kind);
   const scoped = normalizeBedrockOrgId(orgId);
-  const keys = scoped ? [BEDROCK_RATE_KEY, bedrockOrgRateKey(scoped)] : [BEDROCK_RATE_KEY];
+  const keys = scoped ? [key, orgRateKey(key, scoped)] : [key];
   for (const key of keys) {
     const { error } = await supabaseAdmin.rpc("nectar_record_tokens", {
       p_key: key,

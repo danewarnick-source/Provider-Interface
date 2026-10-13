@@ -37,7 +37,32 @@ describe("authoritative-sources.functions.ts (N2)", () => {
       "zod",
       "@/integrations/supabase/auth-middleware",
       "@/integrations/supabase/require-org",
+      "@/lib/nectar/library/library",
       "./authoritative-sources.server",
     ]);
+  });
+});
+
+describe("Knowledge base uploads land in the library (N3)", () => {
+  function fn(name: string): string {
+    const start = SRC.indexOf(`export const ${name} = createServerFn`);
+    assert.ok(start >= 0, name);
+    return SRC.slice(start, SRC.indexOf("export const ", start + 1));
+  }
+
+  it("a marked company upload gets the library group for its kind (Policy / procedure -> agency)", () => {
+    const mark = fn("markAsAuthoritativeSource");
+    assert.match(mark, /\.select\("organization_id, owner_kind"\)/);
+    assert.match(
+      mark,
+      /if \(data\.isAuthoritative && docRow\.owner_kind === "company"\) \{\s*update\.library_group = libraryGroupForKind\(data\.authoritativeKind\);/,
+    );
+  });
+
+  it("a captured web page keeps all its text and joins the library too", () => {
+    const capture = fn("ingestWebSource");
+    assert.match(capture, /raw_text: text,/);
+    assert.doesNotMatch(capture, /slice\(0, 50000\)/);
+    assert.match(capture, /library_group: libraryGroupForKind\(data\.authoritativeKind\),/);
   });
 });
