@@ -4718,6 +4718,73 @@ export type Database = {
           },
         ]
       }
+      client_unit_alerts: {
+        Row: {
+          billing_code_id: string
+          client_id: string
+          id: string
+          organization_id: string
+          recorded_at: string
+          recorded_by: string
+          runout_on: string | null
+          service_code: string
+          units_total: number
+          units_used: number
+          voided_at: string | null
+          voided_by: string | null
+        }
+        Insert: {
+          billing_code_id: string
+          client_id: string
+          id?: string
+          organization_id: string
+          recorded_at?: string
+          recorded_by: string
+          runout_on?: string | null
+          service_code: string
+          units_total: number
+          units_used: number
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Update: {
+          billing_code_id?: string
+          client_id?: string
+          id?: string
+          organization_id?: string
+          recorded_at?: string
+          recorded_by?: string
+          runout_on?: string | null
+          service_code?: string
+          units_total?: number
+          units_used?: number
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_unit_alerts_billing_code_id_fkey"
+            columns: ["billing_code_id"]
+            isOneToOne: false
+            referencedRelation: "client_billing_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_unit_alerts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_unit_alerts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_weekly_targets: {
         Row: {
           client_id: string
@@ -10931,6 +10998,83 @@ export type Database = {
           },
         ]
       }
+      knowledge_sections: {
+        Row: {
+          body: string
+          client_id: string | null
+          created_at: string
+          document_id: string | null
+          embedding: string | null
+          heading: string | null
+          id: string
+          organization_id: string | null
+          position: number
+          retired_at: string | null
+          state_document_id: string | null
+          tsv: unknown
+          version: number
+        }
+        Insert: {
+          body: string
+          client_id?: string | null
+          created_at?: string
+          document_id?: string | null
+          embedding?: string | null
+          heading?: string | null
+          id?: string
+          organization_id?: string | null
+          position: number
+          retired_at?: string | null
+          state_document_id?: string | null
+          tsv?: unknown
+          version: number
+        }
+        Update: {
+          body?: string
+          client_id?: string | null
+          created_at?: string
+          document_id?: string | null
+          embedding?: string | null
+          heading?: string | null
+          id?: string
+          organization_id?: string | null
+          position?: number
+          retired_at?: string | null
+          state_document_id?: string | null
+          tsv?: unknown
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_sections_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_sections_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "nectar_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_sections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_sections_state_document_id_fkey"
+            columns: ["state_document_id"]
+            isOneToOne: false
+            referencedRelation: "state_rule_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       location_coverage_requirements: {
         Row: {
           awake_required: boolean
@@ -11490,6 +11634,7 @@ export type Database = {
           archived_at: string | null
           archived_by: string | null
           assisted_setup_requested: boolean
+          audience_all: boolean
           authoritative_kind: string | null
           category: string | null
           client_id: string | null
@@ -11512,11 +11657,14 @@ export type Database = {
           is_authoritative_source: boolean
           is_current: boolean
           jurisdiction: string | null
+          library_group: string | null
+          library_status: string
           medicaid_id: string | null
           metadata: Json
           mime_type: string | null
           organization_id: string
           owner_kind: string
+          owner_name: string | null
           parent_document_id: string | null
           parse_error: string | null
           parse_status: string
@@ -11525,7 +11673,9 @@ export type Database = {
           policy_assigned_groups: string[]
           policy_assigned_users: string[]
           raw_text: string | null
+          required_slot: string | null
           requires_acknowledgment: boolean
+          review_due: string | null
           source: string | null
           staff_id: string | null
           status: Database["public"]["Enums"]["doc_status"]
@@ -11544,6 +11694,7 @@ export type Database = {
           archived_at?: string | null
           archived_by?: string | null
           assisted_setup_requested?: boolean
+          audience_all?: boolean
           authoritative_kind?: string | null
           category?: string | null
           client_id?: string | null
@@ -11566,11 +11717,14 @@ export type Database = {
           is_authoritative_source?: boolean
           is_current?: boolean
           jurisdiction?: string | null
+          library_group?: string | null
+          library_status?: string
           medicaid_id?: string | null
           metadata?: Json
           mime_type?: string | null
           organization_id: string
           owner_kind: string
+          owner_name?: string | null
           parent_document_id?: string | null
           parse_error?: string | null
           parse_status?: string
@@ -11579,7 +11733,9 @@ export type Database = {
           policy_assigned_groups?: string[]
           policy_assigned_users?: string[]
           raw_text?: string | null
+          required_slot?: string | null
           requires_acknowledgment?: boolean
+          review_due?: string | null
           source?: string | null
           staff_id?: string | null
           status?: Database["public"]["Enums"]["doc_status"]
@@ -11598,6 +11754,7 @@ export type Database = {
           archived_at?: string | null
           archived_by?: string | null
           assisted_setup_requested?: boolean
+          audience_all?: boolean
           authoritative_kind?: string | null
           category?: string | null
           client_id?: string | null
@@ -11620,11 +11777,14 @@ export type Database = {
           is_authoritative_source?: boolean
           is_current?: boolean
           jurisdiction?: string | null
+          library_group?: string | null
+          library_status?: string
           medicaid_id?: string | null
           metadata?: Json
           mime_type?: string | null
           organization_id?: string
           owner_kind?: string
+          owner_name?: string | null
           parent_document_id?: string | null
           parse_error?: string | null
           parse_status?: string
@@ -11633,7 +11793,9 @@ export type Database = {
           policy_assigned_groups?: string[]
           policy_assigned_users?: string[]
           raw_text?: string | null
+          required_slot?: string | null
           requires_acknowledgment?: boolean
+          review_due?: string | null
           source?: string | null
           staff_id?: string | null
           status?: Database["public"]["Enums"]["doc_status"]
@@ -11668,6 +11830,13 @@ export type Database = {
             columns: ["parent_document_id"]
             isOneToOne: false
             referencedRelation: "nectar_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nectar_documents_required_slot_fkey"
+            columns: ["required_slot"]
+            isOneToOne: false
+            referencedRelation: "required_policy_slots"
             referencedColumns: ["id"]
           },
           {
@@ -11913,6 +12082,68 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      nectar_questions: {
+        Row: {
+          answer: string | null
+          asked_by: string
+          asker_name: string | null
+          cited_section_ids: string[]
+          client_ids: string[]
+          created_at: string
+          feedback: string | null
+          found: boolean
+          id: string
+          organization_id: string
+          question: string
+          resolved_at: string | null
+          resolved_by: string | null
+          scope: string
+          status: string | null
+        }
+        Insert: {
+          answer?: string | null
+          asked_by: string
+          asker_name?: string | null
+          cited_section_ids?: string[]
+          client_ids?: string[]
+          created_at?: string
+          feedback?: string | null
+          found?: boolean
+          id?: string
+          organization_id: string
+          question: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          scope: string
+          status?: string | null
+        }
+        Update: {
+          answer?: string | null
+          asked_by?: string
+          asker_name?: string | null
+          cited_section_ids?: string[]
+          client_ids?: string[]
+          created_at?: string
+          feedback?: string | null
+          found?: boolean
+          id?: string
+          organization_id?: string
+          question?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          scope?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nectar_questions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       nectar_rate_state: {
         Row: {
@@ -13094,9 +13325,12 @@ export type Database = {
           is_demo: boolean
           legal_name: string | null
           logo_url: string | null
+          manages_client_money: boolean
           name: string
           nectar_profile_saved_at: string | null
+          nectar_settings: Json
           predates_go_live_note: string | null
+          provides_transportation: boolean
           service_area: string | null
           services_offered: string[] | null
           setup_create_gate_exempt: boolean | null
@@ -13133,9 +13367,12 @@ export type Database = {
           is_demo?: boolean
           legal_name?: string | null
           logo_url?: string | null
+          manages_client_money?: boolean
           name: string
           nectar_profile_saved_at?: string | null
+          nectar_settings?: Json
           predates_go_live_note?: string | null
+          provides_transportation?: boolean
           service_area?: string | null
           services_offered?: string[] | null
           setup_create_gate_exempt?: boolean | null
@@ -13172,9 +13409,12 @@ export type Database = {
           is_demo?: boolean
           legal_name?: string | null
           logo_url?: string | null
+          manages_client_money?: boolean
           name?: string
           nectar_profile_saved_at?: string | null
+          nectar_settings?: Json
           predates_go_live_note?: string | null
+          provides_transportation?: boolean
           service_area?: string | null
           services_offered?: string[] | null
           setup_create_gate_exempt?: boolean | null
@@ -13571,7 +13811,7 @@ export type Database = {
           signer_email: string | null
           signer_full_name: string | null
           time_zone: string | null
-          typed_signature: string
+          typed_signature: string | null
           user_agent: string | null
           user_id: string
         }
@@ -13593,7 +13833,7 @@ export type Database = {
           signer_email?: string | null
           signer_full_name?: string | null
           time_zone?: string | null
-          typed_signature: string
+          typed_signature?: string | null
           user_agent?: string | null
           user_id: string
         }
@@ -13615,7 +13855,7 @@ export type Database = {
           signer_email?: string | null
           signer_full_name?: string | null
           time_zone?: string | null
-          typed_signature?: string
+          typed_signature?: string | null
           user_agent?: string | null
           user_id?: string
         }
@@ -14573,6 +14813,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      required_policy_slots: {
+        Row: {
+          applies_when: string | null
+          code: string
+          created_at: string
+          id: string
+          label: string
+          position: number
+        }
+        Insert: {
+          applies_when?: string | null
+          code: string
+          created_at?: string
+          id: string
+          label: string
+          position: number
+        }
+        Update: {
+          applies_when?: string | null
+          code?: string
+          created_at?: string
+          id?: string
+          label?: string
+          position?: number
+        }
+        Relationships: []
       }
       scheduled_shifts: {
         Row: {
@@ -15778,6 +16045,68 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "platform_states"
             referencedColumns: ["code"]
+          },
+        ]
+      }
+      state_rule_documents: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          created_by: string | null
+          effective_from: string | null
+          file_name: string | null
+          id: string
+          published_at: string | null
+          raw_text: string
+          rule_key: string
+          source_document_id: string | null
+          storage_bucket: string | null
+          storage_path: string | null
+          title: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string | null
+          file_name?: string | null
+          id?: string
+          published_at?: string | null
+          raw_text?: string
+          rule_key: string
+          source_document_id?: string | null
+          storage_bucket?: string | null
+          storage_path?: string | null
+          title: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string | null
+          file_name?: string | null
+          id?: string
+          published_at?: string | null
+          raw_text?: string
+          rule_key?: string
+          source_document_id?: string | null
+          storage_bucket?: string | null
+          storage_path?: string | null
+          title?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "state_rule_documents_source_document_id_fkey"
+            columns: ["source_document_id"]
+            isOneToOne: false
+            referencedRelation: "nectar_documents"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -17281,6 +17610,7 @@ export type Database = {
       }
       is_active_auditor: { Args: { _uid: string }; Returns: boolean }
       is_admin_anywhere: { Args: { _user: string }; Returns: boolean }
+      is_any_org_member: { Args: { _user: string }; Returns: boolean }
       is_company_executive: {
         Args: { _org: string; _user: string }
         Returns: boolean
