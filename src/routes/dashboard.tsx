@@ -100,8 +100,6 @@ import { parseCheckoutReturnSearch } from "@/lib/billing-access";
 import { persistActiveOrgId } from "@/lib/current-org";
 import { completeClientSignOut } from "@/lib/client-sign-out";
 import { confirmCheckoutSessionFn } from "@/lib/stripe-checkout.functions";
-import { DraftJobsProvider } from "@/components/nectar/draft-jobs-driver";
-import { DraftJobsHeaderPill } from "@/components/nectar/draft-jobs-header-pill";
 import { GuidedTourProvider } from "@/components/nectar/guided-tour-provider";
 import {
   OPEN_DASHBOARD_MENU_EVENT,
@@ -707,7 +705,6 @@ function DashboardLayout() {
 
   return (
     <GuidedTourProvider>
-      <DraftJobsProvider>
         <div className="flex h-screen h-[100dvh] flex-col overflow-hidden">
           <ImpersonationBanner />
           {isCognitoAuth() && (orgError || awsDbFailed) && (
@@ -848,7 +845,6 @@ function DashboardLayout() {
                     <PiMark variant="gold" className="h-3.5 w-3.5" />
                     <span className="hidden md:inline">Nectar</span>
                   </button>
-                  {isAdminCapable && effectiveView === "admin" && <DraftJobsHeaderPill />}
                   {isAdminCapable && effectiveView === "admin" && <NotificationBell />}
                   <button
                     type="button"
@@ -954,7 +950,6 @@ function DashboardLayout() {
             </div>
           </div>
         </div>
-      </DraftJobsProvider>
     </GuidedTourProvider>
   );
 }

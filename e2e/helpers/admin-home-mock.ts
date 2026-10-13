@@ -835,7 +835,6 @@ function serverFnName(url: string, postText: string): string | null {
     "listStaffGroups",
     "getInboxUnreadCount",
     "getPendingUpgradeRequestCount",
-    "getActiveDraftJobs",
     "listMyPendingPolicies",
     "dismissAdminWelcome",
     "ensureCurrentSummaryPeriods",
@@ -1084,8 +1083,6 @@ function serverFnResult(
     case "getInboxUnreadCount":
     case "getPendingUpgradeRequestCount":
       return { count: 0 };
-    case "getActiveDraftJobs":
-      return [];
     case "listMyPendingPolicies":
       return { pending: [], gating: [] };
     case "dismissAdminWelcome":

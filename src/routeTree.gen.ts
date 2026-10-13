@@ -184,7 +184,6 @@ import { Route as DashboardWorkspaceClientIdRouteImport } from './routes/dashboa
 import { Route as E2eHhsHubClientIdRouteImport } from './routes/e2e.hhs-hub.$clientId'
 import { Route as ApiPublicHooksBillingDailyCheckRouteImport } from './routes/api/public/hooks/billing-daily-check'
 import { Route as ApiPublicHooksGmailIngestRouteImport } from './routes/api/public/hooks/gmail-ingest'
-import { Route as ApiPublicHooksNectarDraftTickRouteImport } from './routes/api/public/hooks/nectar-draft-tick'
 import { Route as ApiPublicHooksNectarSchedulesRouteImport } from './routes/api/public/hooks/nectar-schedules'
 import { Route as ApiPublicHooksSmartImportRemindersRouteImport } from './routes/api/public/hooks/smart-import-reminders'
 import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
@@ -1142,12 +1141,6 @@ const ApiPublicHooksGmailIngestRoute =
     path: '/api/public/hooks/gmail-ingest',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicHooksNectarDraftTickRoute =
-  ApiPublicHooksNectarDraftTickRouteImport.update({
-    id: '/api/public/hooks/nectar-draft-tick',
-    path: '/api/public/hooks/nectar-draft-tick',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicHooksNectarSchedulesRoute =
   ApiPublicHooksNectarSchedulesRouteImport.update({
     id: '/api/public/hooks/nectar-schedules',
@@ -1426,7 +1419,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/team-members/': typeof DashboardTeamMembersIndexRoute
   '/api/public/hooks/billing-daily-check': typeof ApiPublicHooksBillingDailyCheckRoute
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
-  '/api/public/hooks/nectar-draft-tick': typeof ApiPublicHooksNectarDraftTickRoute
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
   '/api/public/hooks/smart-import-reminders': typeof ApiPublicHooksSmartImportRemindersRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
@@ -1612,7 +1604,6 @@ export interface FileRoutesByTo {
   '/dashboard/team-members': typeof DashboardTeamMembersIndexRoute
   '/api/public/hooks/billing-daily-check': typeof ApiPublicHooksBillingDailyCheckRoute
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
-  '/api/public/hooks/nectar-draft-tick': typeof ApiPublicHooksNectarDraftTickRoute
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
   '/api/public/hooks/smart-import-reminders': typeof ApiPublicHooksSmartImportRemindersRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
@@ -1808,7 +1799,6 @@ export interface FileRoutesById {
   '/dashboard/team-members/': typeof DashboardTeamMembersIndexRoute
   '/api/public/hooks/billing-daily-check': typeof ApiPublicHooksBillingDailyCheckRoute
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
-  '/api/public/hooks/nectar-draft-tick': typeof ApiPublicHooksNectarDraftTickRoute
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
   '/api/public/hooks/smart-import-reminders': typeof ApiPublicHooksSmartImportRemindersRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
@@ -2005,7 +1995,6 @@ export interface FileRouteTypes {
     | '/dashboard/team-members/'
     | '/api/public/hooks/billing-daily-check'
     | '/api/public/hooks/gmail-ingest'
-    | '/api/public/hooks/nectar-draft-tick'
     | '/api/public/hooks/nectar-schedules'
     | '/api/public/hooks/smart-import-reminders'
     | '/api/public/webhooks/stripe'
@@ -2191,7 +2180,6 @@ export interface FileRouteTypes {
     | '/dashboard/team-members'
     | '/api/public/hooks/billing-daily-check'
     | '/api/public/hooks/gmail-ingest'
-    | '/api/public/hooks/nectar-draft-tick'
     | '/api/public/hooks/nectar-schedules'
     | '/api/public/hooks/smart-import-reminders'
     | '/api/public/webhooks/stripe'
@@ -2386,7 +2374,6 @@ export interface FileRouteTypes {
     | '/dashboard/team-members/'
     | '/api/public/hooks/billing-daily-check'
     | '/api/public/hooks/gmail-ingest'
-    | '/api/public/hooks/nectar-draft-tick'
     | '/api/public/hooks/nectar-schedules'
     | '/api/public/hooks/smart-import-reminders'
     | '/api/public/webhooks/stripe'
@@ -2443,7 +2430,6 @@ export interface RootRouteChildren {
   E2eHhsHubClientIdRoute: typeof E2eHhsHubClientIdRoute
   ApiPublicHooksBillingDailyCheckRoute: typeof ApiPublicHooksBillingDailyCheckRoute
   ApiPublicHooksGmailIngestRoute: typeof ApiPublicHooksGmailIngestRoute
-  ApiPublicHooksNectarDraftTickRoute: typeof ApiPublicHooksNectarDraftTickRoute
   ApiPublicHooksNectarSchedulesRoute: typeof ApiPublicHooksNectarSchedulesRoute
   ApiPublicHooksSmartImportRemindersRoute: typeof ApiPublicHooksSmartImportRemindersRoute
   ApiPublicWebhooksStripeRoute: typeof ApiPublicWebhooksStripeRoute
@@ -3677,13 +3663,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksGmailIngestRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/hooks/nectar-draft-tick': {
-      id: '/api/public/hooks/nectar-draft-tick'
-      path: '/api/public/hooks/nectar-draft-tick'
-      fullPath: '/api/public/hooks/nectar-draft-tick'
-      preLoaderRoute: typeof ApiPublicHooksNectarDraftTickRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/hooks/nectar-schedules': {
       id: '/api/public/hooks/nectar-schedules'
       path: '/api/public/hooks/nectar-schedules'
@@ -4306,7 +4285,6 @@ const rootRouteChildren: RootRouteChildren = {
   E2eHhsHubClientIdRoute: E2eHhsHubClientIdRoute,
   ApiPublicHooksBillingDailyCheckRoute: ApiPublicHooksBillingDailyCheckRoute,
   ApiPublicHooksGmailIngestRoute: ApiPublicHooksGmailIngestRoute,
-  ApiPublicHooksNectarDraftTickRoute: ApiPublicHooksNectarDraftTickRoute,
   ApiPublicHooksNectarSchedulesRoute: ApiPublicHooksNectarSchedulesRoute,
   ApiPublicHooksSmartImportRemindersRoute:
     ApiPublicHooksSmartImportRemindersRoute,

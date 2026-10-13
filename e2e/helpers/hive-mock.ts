@@ -405,7 +405,6 @@ function serverFnResult(exportName: string): unknown {
       registry: featureRegistry(),
     };
   }
-  if (/getActiveDraftJobs/i.test(exportName)) return { jobs: [] };
   if (/ensureCurrentSummaryPeriods/i.test(exportName)) return { ensured: 0 };
   if (/getInboxUnreadCount|getPendingUpgradeRequestCount/i.test(exportName)) {
     return { count: 0 };
@@ -415,9 +414,6 @@ function serverFnResult(exportName: string): unknown {
   }
   if (/nectarDraftShifts|autoFillOpenShifts/i.test(exportName)) {
     return { drafts: [], proposals: [] };
-  }
-  if (/nudgeDraftJob|processDraftChunk|finalizeRequirementsDraft/i.test(exportName)) {
-    return { ok: true };
   }
   // List-shaped server fns (obligations, open summaries, etc.)
   if (/^list|^fetch/i.test(exportName)) return [];
@@ -528,7 +524,7 @@ export async function installHiveMocks(page: Page, role: HiveRole = "admin"): Pr
   });
 
   // TanStack Start server functions. Per-fn shapes match production
-  // handlers (a generic [] crashed DraftJobsProvider via jobs.map).
+  // handlers (a generic [] crashes callers that read a field off the reply).
   // Calendar mutations are stubbed so Publish / Save never hit production.
   await page.route(/_serverFn/, async (route) => {
     const req = route.request();

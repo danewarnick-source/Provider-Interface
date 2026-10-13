@@ -15,3 +15,29 @@ describe("listAuthoritativeSources (N1)", () => {
     assert.match(fn, /\.in\("owner_kind", \["company", "state"\]\)/);
   });
 });
+
+describe("authoritative-sources.functions.ts (N2)", () => {
+  it("keeps only the exports live screens import", () => {
+    const exported = [...SRC.matchAll(/^export const (\w+)/gm)].map((m) => m[1]);
+    assert.deepEqual(exported, [
+      "ingestWebSource",
+      "listAuthoritativeSources",
+      "markAsAuthoritativeSource",
+      "recordAttestation",
+      "REDUCED_LIABILITY_NOTICE",
+    ]);
+    assert.ok(SRC.split("\n").length <= 300);
+  });
+
+  it("no longer drafts, approves or explains requirements", () => {
+    assert.doesNotMatch(SRC, /from\("nectar_requirements"\)|from\("nectar_draft_jobs"\)/);
+    const imports = [...SRC.matchAll(/(?:from|import\() "([^"]+)"/g)].map((m) => m[1]);
+    assert.deepEqual(imports, [
+      "@tanstack/react-start",
+      "zod",
+      "@/integrations/supabase/auth-middleware",
+      "@/integrations/supabase/require-org",
+      "./authoritative-sources.server",
+    ]);
+  });
+});
