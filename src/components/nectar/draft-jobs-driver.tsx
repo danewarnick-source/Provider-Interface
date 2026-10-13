@@ -1,11 +1,9 @@
-// Global driver for NECTAR draft-requirement jobs. Mounted once inside the
-// authenticated dashboard shell so a long extraction keeps advancing even
-// when the user navigates away from the Authoritative Sources page.
+// Global driver for NECTAR draft-requirement jobs, mounted once in the dashboard
+// shell so a long extraction keeps advancing across pages. N2 removes it.
 //
 // Responsibilities:
-//   1. Poll `getActiveDraftJobs` for the current org and pick up any job
-//      whose status is still `extracting` — including jobs left over from
-//      a previous session or a page reload.
+//   1. For owners and agency-wide admins only, load `getActiveDraftJobs` and
+//      poll it every 5 s while a job is still `extracting` (lib/nectar/draft-jobs-poll.ts).
 //   2. Drive a bounded-concurrency loop calling `processDraftChunk` per
 //      unprocessed chunk index. Idempotency on the server makes overlap
 //      with the background tick a no-op.
@@ -19,7 +17,9 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState } from 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { useAccess } from "@/hooks/use-access";
 import { useCurrentOrg } from "@/hooks/use-org";
+import { draftJobsPollInterval, draftJobsQueryEnabled } from "@/lib/nectar/draft-jobs-poll";
 import {
   finalizeRequirementsDraft,
   getActiveDraftJobs,
@@ -64,7 +64,6 @@ const DraftJobsContext = createContext<Ctx>({
 // workers at 8 requests/minute anyway, so running more parallel workers here
 // just spends budget waiting on the bucket.
 const CLIENT_CONCURRENCY = 1;
-const POLL_INTERVAL_MS = 5_000;
 const TRANSIENT_RETRY_PAUSE_MS = 30_000;
 
 function wait(ms: number): Promise<void> {
@@ -105,6 +104,7 @@ export function formatEta(ms: number | null): string {
 export function DraftJobsProvider({ children }: { children: React.ReactNode }) {
   const { data: org } = useCurrentOrg();
   const orgId = (org as { organization_id?: string } | null)?.organization_id ?? null;
+  const { isAgencyAdmin } = useAccess();
   const qc = useQueryClient();
   const getActive = useServerFn(getActiveDraftJobs);
   const processFn = useServerFn(processDraftChunk);
@@ -126,8 +126,8 @@ export function DraftJobsProvider({ children }: { children: React.ReactNode }) {
         jobs: ActiveJob[];
       };
     },
-    enabled: !!orgId,
-    refetchInterval: POLL_INTERVAL_MS,
+    enabled: draftJobsQueryEnabled(orgId, isAgencyAdmin),
+    refetchInterval: (query) => draftJobsPollInterval(query.state.data?.jobs),
     refetchOnWindowFocus: true,
   });
 
