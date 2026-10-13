@@ -2,7 +2,7 @@
 // Inputs come from DB-shaped records; no I/O happens here so the same code
 // can run server-side (rankStaffForShift) and client-side (preview chips).
 
-import { minStaffAgeForCode } from "./code-colors";
+import { minStaffAgeForCode } from "./rules.ts";
 
 export type EligibilityInputs = {
   serviceCode: string | null | undefined;
