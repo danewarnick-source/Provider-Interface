@@ -11,6 +11,7 @@
 
 import { listReadiness } from "./list.ts";
 import { daysUntil, parseLocalDate } from "./dates.ts";
+import { hrrStatusDetail, isHrrDone, type RestrictionRecord } from "./hrc.ts";
 import { addDaysYmd } from "./plan-dates.ts";
 import { pcspState, pcspWords } from "./pcsp-status.ts";
 import type { ClientPlan } from "./plans.ts";
@@ -117,7 +118,8 @@ export type ReadinessInput = {
   /** Support strategies sent to the support coordinator (strategy-sends.ts). */
   strategies: StrategySendState;
   summaries: readonly { label: string; dueDate: string | null }[];
-  restrictions: readonly { title: string; nextReview: string | null; complete: boolean }[];
+  /** Active rights restrictions (HRRs); done means fully signed (hrc.ts isHrrDone). */
+  restrictions: readonly RestrictionRecord[];
   setup: { staffCount: number; hasPin: boolean; guardianGap: string | null };
   /** Cards the client's setup answers hide (support-scope.ts); they never count here. */
   hidden?: readonly ScopeCard[];
@@ -256,19 +258,19 @@ export function clientAttention(input: ReadinessInput, now: Date = new Date()): 
   }
 
   for (const r of input.restrictions) {
-    const days = daysUntil(r.nextReview, now);
-    if (!r.complete) {
+    const days = daysUntil(r.next_review_date, now);
+    if (!isHrrDone(r)) {
       add({
-        key: `hrc:${r.title}`,
-        title: `Rights restriction: ${r.title}`,
-        detail: "Documentation incomplete",
+        key: `hrc:${r.id}`,
+        title: `Rights restriction: ${r.restriction_title}`,
+        detail: hrrStatusDetail(r),
         tone: "bad",
         section: "plans",
       });
     } else if (days != null && days <= ATTENTION_DUE_DAYS) {
       add({
-        key: `hrc:${r.title}`,
-        title: `HRC review: ${r.title}`,
+        key: `hrc:${r.id}`,
+        title: `HRC review: ${r.restriction_title}`,
         detail: dueText(days),
         tone: days < 0 ? "bad" : "warn",
         section: "plans",

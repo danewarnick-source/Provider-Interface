@@ -87,6 +87,10 @@ describe("tableConfig", () => {
     assert.equal(CLIENT_RECORD_TABLES.pba_transactions.action, "edit_funds");
     assert.equal(CLIENT_RECORD_TABLES.client_documents.action, "edit");
   });
+  it("rights restrictions are only inserted here; saves go through saveHrr", () => {
+    assert.throws(() => tableConfig("hrc_restriction_records", "update"), /not allowed/);
+    assert.equal(tableConfig("hrc_restriction_records", "insert").action, "edit_hrc");
+  });
 });
 
 describe("stampRows", () => {

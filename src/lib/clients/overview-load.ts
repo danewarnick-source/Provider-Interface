@@ -3,7 +3,7 @@
 // last notes. Runs with the caller's RLS-scoped client; called only from
 // overview.functions.ts.
 
-import { computeRestrictionCompletion, type RestrictionRecord } from "./hrc";
+import type { RestrictionRecord } from "./hrc";
 import { isActiveCodeRow, loadActiveCodes } from "./codes";
 import { loadClientContacts } from "./contacts";
 import { guardianGap, guardianStatus } from "./guardian";
@@ -98,11 +98,7 @@ export async function loadClientOverview(
       plans,
       strategies,
       summaries: summaries.map((s) => ({ label: s.period_label ?? "", dueDate: s.due_date })),
-      restrictions: restrictions.map((r) => ({
-        title: r.restriction_title,
-        nextReview: r.next_review_date,
-        complete: computeRestrictionCompletion(r).isComplete,
-      })),
+      restrictions,
       hidden: scope.hidden,
       directive: scope.directive,
       setup: {

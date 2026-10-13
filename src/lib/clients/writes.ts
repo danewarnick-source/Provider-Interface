@@ -114,9 +114,10 @@ export const CLIENT_RECORD_TABLES = {
     hasOrgColumn: true,
   },
   sjd_assessment_selections: { action: "edit", ops: ["upsert"], key: "client", hasOrgColumn: true },
+  // Updates go through saveHrr (hrr.functions.ts), which checks signatures.
   hrc_restriction_records: {
     action: "edit_hrc",
-    ops: ["insert", "update"],
+    ops: ["insert"],
     key: "client",
     hasOrgColumn: true,
   },
