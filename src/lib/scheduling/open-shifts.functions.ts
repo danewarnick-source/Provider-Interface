@@ -3,6 +3,9 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { isAgencyAdmin } from "@/lib/access/levels";
+import { assertShiftAllowed } from "@/lib/scheduler/shift-checks";
+import { notify } from "@/lib/scheduler/notify";
+import { dayKey } from "@/lib/scheduler/time";
 
 /**
  * Open shifts = scheduled_shifts where staff_id IS NULL and status='open'.
@@ -71,19 +74,16 @@ export const claimOpenShift = createServerFn({ method: "POST" })
     if (uErr) throw uErr;
     if (!updated?.length) throw new Error("This shift is no longer available to request.");
 
-    // Notify admins (best-effort): role-targeted notification
-    try {
-      await supabase.from("notifications").insert({
-        organization_id: shift.organization_id,
-        recipient_role: "admin",
-        type: "shift_claim_request",
-        title: "Open shift requested",
-        body: `A team member requested ${shift.service_code ?? "an open shift"} on ${new Date(shift.starts_at).toLocaleDateString()}.`,
-        link_to: `/dashboard/scheduler`,
-        related_id: data.shiftId,
-        related_type: "scheduled_shift",
-      });
-    } catch { /* best-effort */ }
+    await notify(supabase, {
+      organization_id: shift.organization_id,
+      recipient_role: "admin",
+      type: "shift_claim_request",
+      title: "Open shift requested",
+      body: `A team member requested ${shift.service_code ?? "an open shift"} on ${dayKey(shift.starts_at)}.`,
+      link_to: `/dashboard/scheduler`,
+      related_id: data.shiftId,
+      related_type: "scheduled_shift",
+    });
 
     return { ok: true };
   });
@@ -97,7 +97,7 @@ export const decideClaim = createServerFn({ method: "POST" })
     if (!supabase || !userId) return { ok: false };
     const { data: shift, error: gErr } = await supabase
       .from("scheduled_shifts")
-      .select("id, organization_id, claim_requested_by, service_code, starts_at")
+      .select("id, organization_id, claim_requested_by, service_code, client_id, starts_at")
       .eq("id", data.shiftId).maybeSingle();
     if (gErr) throw gErr;
     if (!shift) throw new Error("Shift not found");
@@ -111,6 +111,17 @@ export const decideClaim = createServerFn({ method: "POST" })
 
     const claimant = shift.claim_requested_by;
 
+    // Approving puts the claimant on a client's shift: same checks saveShift runs.
+    if (data.approve) {
+      await assertShiftAllowed(supabase, {
+        organization_id: shift.organization_id,
+        staff_id: claimant,
+        client_id: shift.client_id,
+        code: shift.service_code,
+        starts_at: shift.starts_at,
+      });
+    }
+
     const patch = data.approve
       ? { status: "accepted", staff_id: claimant, claim_requested_by: null }
       : { status: "open", claim_requested_by: null };
@@ -121,21 +132,19 @@ export const decideClaim = createServerFn({ method: "POST" })
       .eq("id", data.shiftId);
     if (uErr) throw uErr;
 
-    try {
-      await supabase.from("notifications").insert({
-        recipient_user_id: claimant,
-        recipient_role: "employee",
-        organization_id: shift.organization_id,
-        type: data.approve ? "shift_claim_approved" : "shift_claim_denied",
-        title: data.approve ? "Claim approved" : "Claim denied",
-        body: data.approve
-          ? `Your claim for ${shift.service_code ?? "the open shift"} on ${new Date(shift.starts_at).toLocaleDateString()} was approved.`
-          : `Your claim for ${shift.service_code ?? "the open shift"} was not approved.`,
-        link_to: `/dashboard/schedule`,
-        related_id: data.shiftId,
-        related_type: "scheduled_shift",
-      });
-    } catch { /* best-effort */ }
+    await notify(supabase, {
+      recipient_user_id: claimant,
+      recipient_role: "staff",
+      organization_id: shift.organization_id,
+      type: data.approve ? "shift_claim_approved" : "shift_claim_denied",
+      title: data.approve ? "Claim approved" : "Claim denied",
+      body: data.approve
+        ? `Your claim for ${shift.service_code ?? "the open shift"} on ${dayKey(shift.starts_at)} was approved.`
+        : `Your claim for ${shift.service_code ?? "the open shift"} was not approved.`,
+      link_to: `/dashboard/schedule`,
+      related_id: data.shiftId,
+      related_type: "scheduled_shift",
+    });
 
     return { ok: true };
   });

@@ -24,6 +24,7 @@
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import { dayKey, toLocalRange } from "../scheduler/time.ts";
 
 export type ShiftInsertRow = {
   organization_id: string;
@@ -63,7 +64,7 @@ export class ComplianceReviewRequiredError extends Error {
 const ACTIVE_STATES = new Set(["active", "active_by_code"]);
 
 function dateOf(iso: string): string {
-  return iso.slice(0, 10);
+  return dayKey(iso);
 }
 
 /** Bundle key: one (client_id, date) group. */
@@ -103,15 +104,21 @@ async function fetchSiblingCodes(
   supabase: SupabaseClient<Database>,
   bundle: Bundle,
 ): Promise<string[]> {
-  const dayStart = `${bundle.date}T00:00:00.000Z`;
-  const dayEnd = `${bundle.date}T23:59:59.999Z`;
-  const { data, error } = await supabase
+  const { startIso, endExclusiveIso } = toLocalRange(bundle.date);
+  // Rows being re-saved must not conflict with their own earlier version.
+  const ownIds = bundle.rows
+    .map((r) => (typeof r.id === "string" ? r.id : null))
+    .filter((id): id is string => Boolean(id));
+  let query = supabase
     .from("scheduled_shifts")
     .select("service_code")
     .eq("organization_id", bundle.organizationId)
     .eq("client_id", bundle.clientId)
-    .gte("starts_at", dayStart)
-    .lte("starts_at", dayEnd);
+    .neq("status", "cancelled")
+    .gte("starts_at", startIso)
+    .lt("starts_at", endExclusiveIso);
+  if (ownIds.length > 0) query = query.not("id", "in", `(${ownIds.join(",")})`);
+  const { data, error } = await query;
   if (error) throw error;
   return (data ?? [])
     .map((r) => (r.service_code ? String(r.service_code).toUpperCase() : null))
@@ -234,4 +241,30 @@ export async function gateScheduledShiftInsert(
     await raiseAndMaybeResolve(supabase, opts.userId, c, null);
   }
   return { candidates, blocked: false };
+}
+
+export class BillingConflictError extends Error {
+  candidates: CandidateFlagLike[];
+  constructor(candidates: CandidateFlagLike[]) {
+    super(
+      candidates
+        .map((c) => `Can't save: ${c.humanExplanation} Change or remove one of the services first.`)
+        .join(" "),
+    );
+    this.name = "BillingConflictError";
+    this.candidates = candidates;
+  }
+}
+
+/**
+ * Detects overlapping services for a client (billing_conflict rules) and
+ * throws a clear error instead of letting the shift through. Use for inserts
+ * and for updates (pass the row's `id` so it is not compared with itself).
+ */
+export async function assertNoBillingConflict(
+  supabase: SupabaseClient<Database>,
+  rows: ShiftInsertRow | ShiftInsertRow[],
+): Promise<void> {
+  const candidates = await detectShiftBundleConflicts(supabase, Array.isArray(rows) ? rows : [rows]);
+  if (candidates.length > 0) throw new BillingConflictError(candidates);
 }
