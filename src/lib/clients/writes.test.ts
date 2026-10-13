@@ -105,14 +105,18 @@ describe("stampRows", () => {
     assert.equal(row.client_id, CLIENT);
     assert.equal(row.service_code, "SLH");
   });
-  it("leaves parent-keyed rows without org/client columns alone", () => {
+  it("stamps the organization on parent-keyed rows but adds no client column", () => {
     const [row] = stampRows(
-      tableConfig("client_budget_lines", "insert"),
-      [{ budget_id: "b" }],
+      tableConfig("pba_transactions", "insert"),
+      [{ account_id: "a", organization_id: "x" }],
       ORG,
       CLIENT,
     );
-    assert.deepEqual(row, { budget_id: "b" });
+    assert.deepEqual(row, { account_id: "a", organization_id: ORG });
+  });
+  it("the monthly budget tables are gone", () => {
+    assert.throws(() => tableConfig("client_budgets", "insert"), /Unknown client table/);
+    assert.throws(() => tableConfig("client_budget_lines", "insert"), /Unknown client table/);
   });
   it("requires a client for client tables", () => {
     assert.throws(
