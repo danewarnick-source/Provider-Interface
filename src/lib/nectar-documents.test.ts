@@ -19,6 +19,23 @@ describe("nectar-documents.functions.ts (N1)", () => {
     assert.doesNotMatch(ingest, /applyExtractedFieldsToClient|parseDocumentWithAI/);
   });
 
+  it("queryDocuments checks membership before it reads, as a second layer to RLS", () => {
+    const query = serverFn("queryDocuments");
+    assert.match(query, /if \(!supabase \|\| !userId\) return \{ documents: \[\] \};/);
+    const check = query.indexOf("await requireOrgMembership(supabase, userId, data.organizationId);");
+    assert.ok(check > 0 && check < query.indexOf('.from("nectar_documents")'), "membership before the read");
+  });
+
+  it("getDocument returns nothing about a document unless the caller is a member of its organization", () => {
+    const get = serverFn("getDocument");
+    assert.match(get, /if \(!supabase \|\| !userId\) return null;/);
+    const check = get.indexOf("await requireOrgMembership(supabase, userId, doc.organization_id);");
+    assert.ok(check > 0, "membership check on the document's organization");
+    for (const later of ['.from("nectar_extracted_fields")', "createSignedUrl", "return { document"]) {
+      assert.ok(check < get.indexOf(later), `membership before ${later}`);
+    }
+  });
+
   it("keeps its exported names and fits the lib size limit", () => {
     for (const name of [
       "ingestDocument",

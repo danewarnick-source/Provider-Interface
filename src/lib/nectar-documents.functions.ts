@@ -76,8 +76,10 @@ export const queryDocuments = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { supabase } = context;
-    if (!supabase) return { documents: [] };
+    const { supabase, userId } = context;
+    if (!supabase || !userId) return { documents: [] };
+    // Second layer to RLS: an active member of the organization being read.
+    await requireOrgMembership(supabase, userId, data.organizationId);
     let q = supabase
       .from("nectar_documents")
       .select(
@@ -103,14 +105,17 @@ export const getDocument = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({ documentId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const { supabase } = context;
-    if (!supabase) return null;
+    const { supabase, userId } = context;
+    if (!supabase || !userId) return null;
     const { data: doc, error } = await supabase
       .from("nectar_documents")
       .select("*")
       .eq("id", data.documentId)
       .single();
     if (error || !doc) throw new Error(error?.message ?? "Not found");
+    // Second layer to RLS: nothing about the document leaves unless the caller
+    // is an active member of its organization.
+    await requireOrgMembership(supabase, userId, doc.organization_id);
 
     const { data: fields } = await supabase
       .from("nectar_extracted_fields")
