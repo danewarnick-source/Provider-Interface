@@ -21,6 +21,9 @@ import {
 } from "@/lib/staff-qualifications.functions";
 
 // ─── Legacy hardcoded requirements (DHHS91172 minimums) ───────────────────
+// S4-REPOINT (Scheduler rebuild S3): this fallback map and the nectar_compliance_rules
+// lookup are replaced by requirementsFor()/qualificationsOnDate() in
+// rules-qualifications.ts. Marked, not deleted; S4 re-points the callers.
 // KEEP as fallback until every listed code has confirmed-rule coverage.
 // Values are the legacy qualification keys still used by the scheduler.
 export const HARDCODED_SERVICE_CODE_REQUIRED_CERTS: Record<string, string[]> = {

@@ -1,4 +1,8 @@
 /**
+ * S4-REPOINT (Scheduler rebuild S3): the scheduler's qualification question is answered by
+ * qualificationsOnDate() in src/lib/scheduler/rules-qualifications.ts (Evidence only).
+ * This resolver stays until S4 re-points its scheduler callers, then it is removed.
+ *
  * Unified "what qualifications does this staff member currently hold" resolver.
  *
  * Reads across every existing qualification source and returns one canonical
