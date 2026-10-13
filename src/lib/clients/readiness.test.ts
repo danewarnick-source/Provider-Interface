@@ -8,6 +8,7 @@ import {
   type ReadinessInput,
 } from "./readiness.ts";
 import type { ClientPlan } from "./plans.ts";
+import type { RestrictionRecord } from "./hrc.ts";
 
 const NOW = new Date(2026, 9, 6); // Oct 6, 2026, local
 
@@ -25,6 +26,38 @@ function plan(over: Partial<ClientPlan>): ClientPlan {
     document_id: null,
     ...over,
   };
+}
+
+/** A rights restriction: fully signed and HRC-approved when `done`, else only answered. */
+function hrr(id: string, title: string, nextReview: string | null, done: boolean): RestrictionRecord {
+  const answered = {
+    condition_description_text: "x",
+    assessed_need_text: "x",
+    positive_interventions_text: "x",
+    less_intrusive_methods_text: "x",
+    data_review_text: "x",
+    last_review_date: "2026-09-01",
+    time_limits_text: "x",
+    no_harm_text: "x",
+  };
+  const signed = {
+    consent_signer_name: "Pat",
+    consent_at: "2026-10-01T00:00:00Z",
+    admin_signer_name: "Alex",
+    admin_signed_at: "2026-10-01T00:00:00Z",
+    sc_name: "Sam",
+    sc_signed_on: "2026-10-01",
+    sc_method: "email",
+    hrc_decision: "approved",
+    hrc_decision_on: "2026-10-02",
+  };
+  return {
+    id,
+    restriction_title: title,
+    next_review_date: nextReview,
+    ...answered,
+    ...(done ? signed : {}),
+  } as unknown as RestrictionRecord;
 }
 
 function input(over: Partial<ReadinessInput> = {}): ReadinessInput {
@@ -153,8 +186,8 @@ describe("clientAttention", () => {
           { label: "2026-Q4", dueDate: "2027-01-15" },
         ],
         restrictions: [
-          { title: "Locked pantry", nextReview: "2026-10-01", complete: true },
-          { title: "Door alarm", nextReview: null, complete: false },
+          hrr("r1", "Locked pantry", "2026-10-01", true),
+          hrr("r2", "Door alarm", "2026-12-01", false),
         ],
       }),
       NOW,
@@ -167,8 +200,14 @@ describe("clientAttention", () => {
     assert.ok(keys.includes("strategies"));
     assert.ok(keys.includes("summary:2026-Q3:2026-10-15"));
     assert.ok(!keys.some((k) => k.includes("2026-Q4")));
-    assert.ok(keys.includes("hrc:Locked pantry"));
-    assert.ok(keys.includes("hrc:Door alarm"));
+    assert.ok(keys.includes("hrc:r1"));
+    assert.equal(items.find((i) => i.key === "hrc:r1")?.title, "HRC review: Locked pantry");
+    const unsigned = items.find((i) => i.key === "hrc:r2");
+    assert.equal(unsigned?.title, "Rights restriction: Door alarm");
+    assert.equal(
+      unsigned?.detail,
+      "Waiting on: client consent, provider admin, support coordinator, human rights committee",
+    );
     const waiting = items.find((i) => i.key === "pcsp-waiting");
     assert.equal(waiting?.title, "PCSP is 36 days overdue");
     assert.equal(waiting?.detail, "Upload it, or contact the support coordinator if you don't have it yet.");

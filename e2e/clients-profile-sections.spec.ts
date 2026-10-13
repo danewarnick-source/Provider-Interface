@@ -42,6 +42,8 @@ test("client profile opens every section from the side menu", async ({ page }) =
     if (key === "health") {
       await expect(page.getByTestId("advance-directive")).toBeVisible();
       await expect(page.getByTestId("client-health-events")).toBeVisible();
+      await expect(page.getByTestId("client-health-emergency-plan")).toBeVisible();
+      await expect(page.getByTestId("health-list-mobility")).toBeVisible();
     }
     if (key === "plans") {
       await expect(page.getByTestId("client-plan-years")).toBeVisible();
@@ -51,7 +53,7 @@ test("client profile opens every section from the side menu", async ({ page }) =
     if (key === "services") {
       await expect(page.getByTestId("client-authorization-row")).toHaveCount(1);
       await expect(page.getByText("600 left")).toBeVisible();
-      await expect(page.getByTestId("client-monthly-budget")).toBeVisible();
+      await expect(page.getByTestId("client-monthly-budget")).toHaveCount(0);
     }
     if (key === "money") {
       await expect(page.getByTestId("client-money-pba")).toBeVisible();

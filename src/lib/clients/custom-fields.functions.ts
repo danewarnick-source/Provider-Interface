@@ -3,7 +3,6 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { SECTION_NAMES } from "@/lib/clients/staff-visibility";
 import { chunkIds } from "@/lib/clients/custom-fields-delete";
-import { BUILT_IN_CLIENT_FIELDS } from "@/lib/clients/custom-fields-builtin";
 
 const Kind = z.enum(["employee", "client"]);
 const Section = z.enum(SECTION_NAMES as unknown as [string, ...string[]]);
@@ -72,52 +71,6 @@ export const setCustomFieldValue = createServerFn({ method: "POST" })
     }, { onConflict: "definition_id,entity_id" });
     if (error) throw new Error(error.message);
     return { ok: true };
-  });
-
-/**
- * The agency's definition row for a built-in client field (Primary language),
- * created on first use. Returns its id.
- */
-export const ensureBuiltInClientField = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({
-      organizationId: z.string().uuid(),
-      fieldKey: z.enum(
-        BUILT_IN_CLIENT_FIELDS.map((b) => b.field_key) as unknown as [string, ...string[]],
-      ),
-    }).parse(d)
-  )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
-    if (!supabase || !userId) throw new Error("Not signed in");
-    await assertOrgMember(supabase, userId, data.organizationId);
-    const builtIn = BUILT_IN_CLIENT_FIELDS.find((b) => b.field_key === data.fieldKey)!;
-    const { data: existing, error: findErr } = await supabase
-      .from("custom_field_definitions")
-      .select("id")
-      .eq("organization_id", data.organizationId)
-      .eq("entity_kind", "client")
-      .eq("field_key", builtIn.field_key)
-      .maybeSingle();
-    if (findErr) throw new Error(findErr.message);
-    if (existing) return { id: existing.id as string };
-    const { data: inserted, error } = await supabase
-      .from("custom_field_definitions")
-      .insert({
-        organization_id: data.organizationId,
-        entity_kind: "client",
-        field_key: builtIn.field_key,
-        field_label: builtIn.field_label,
-        data_type: "text",
-        section: builtIn.section,
-        source: "manual",
-        created_by: userId,
-      })
-      .select("id")
-      .single();
-    if (error) throw new Error(error.message);
-    return { id: inserted!.id as string };
   });
 
 /**

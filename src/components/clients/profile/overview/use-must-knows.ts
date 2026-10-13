@@ -1,4 +1,4 @@
-// Data and actions for the Must-knows card: who approved the current text,
+// Data and actions for the Must-knows card: the client's documents,
 // Nectar's draft (held in memory until a person approves), the approve, and
 // the manual save of special_directions.
 

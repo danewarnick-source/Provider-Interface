@@ -4,16 +4,16 @@
 // apply. Needs Client medical: Edit.
 
 import { useState } from "react";
-import { useClientCareData } from "@/hooks/use-client-care-data";
 import { directiveStatus } from "@/lib/clients/health";
 import type { ScopeAnswer, SupportScope } from "@/lib/clients/support-scope";
 import { AdvanceDirectiveCard } from "@/components/clients/profile/health/advance-directive-card";
 import { DietCard } from "@/components/clients/profile/health/diet-card";
+import { HealthList } from "@/components/clients/profile/health/health-list";
 import {
   useCanEditMedical,
   useClientHealth,
 } from "@/components/clients/profile/health/use-client-health";
-import { ListAnswer, MedicationChoices } from "./health-answers";
+import { MedicationChoices } from "./health-answers";
 import { useSaveSupportScope } from "./use-support-scope";
 import { YesNo } from "./yes-no";
 
@@ -30,7 +30,6 @@ export function StepHealth({
 }) {
   const canEdit = useCanEditMedical();
   const healthQ = useClientHealth(orgId, clientId);
-  const care = useClientCareData(clientId);
   const save = useSaveSupportScope(orgId, clientId);
   const [local, setLocal] = useState<Record<string, boolean | null>>({});
   const h = healthQ.data;
@@ -45,7 +44,6 @@ export function StepHealth({
   }
   if (!h) return <p className="text-sm text-muted-foreground">Loading health details…</p>;
 
-  const diet = care.data?.custom_fields.find((f) => f.field_key === "dietary_restrictions");
   const status = directiveStatus(h.dnr_status) ?? (h.polst_status ? "polst" : null);
   const asked = (key: string, fallback: boolean | null) => (key in local ? local[key] : fallback);
   const scoped = (answer: ScopeAnswer, fallback: boolean | null) =>
@@ -59,31 +57,33 @@ export function StepHealth({
   return (
     <div data-testid="client-setup-health">
       <YesNo question="Any allergies?" value={asked("allergies", hasAny(h.allergies))} onChange={answerLocal("allergies")}>
-        <ListAnswer
-          orgId={orgId}
-          health={h}
-          fields={[{ key: "allergies", label: "Which allergies?" }]}
-          saveLabel="Save allergies"
-        />
+        <HealthList orgId={orgId} health={h} listKey="allergies" canEdit danger label="Which allergies?" />
       </YesNo>
       <YesNo
         question="Any diagnoses or ongoing conditions?"
         value={asked("diagnoses", hasAny(h.diagnoses) ?? hasAny(h.chronic_conditions))}
         onChange={answerLocal("diagnoses")}
       >
-        <ListAnswer
-          orgId={orgId}
-          health={h}
-          fields={[
-            { key: "diagnoses", label: "Diagnoses (the first is the primary one)" },
-            { key: "chronic_conditions", label: "Ongoing conditions" },
-          ]}
-          saveLabel="Save diagnoses and conditions"
-        />
+        <div className="space-y-4">
+          <HealthList
+            orgId={orgId}
+            health={h}
+            listKey="diagnoses"
+            canEdit
+            label="Diagnoses (the first is the primary one)"
+          />
+          <HealthList
+            orgId={orgId}
+            health={h}
+            listKey="chronic_conditions"
+            canEdit
+            label="Ongoing conditions"
+          />
+        </div>
       </YesNo>
       <YesNo
         question="Special diet or eating needs (including trouble swallowing)?"
-        value={asked("diet", h.dysphagia || diet?.value?.value_text ? true : null)}
+        value={asked("diet", h.dysphagia || hasAny(h.diets) ? true : null)}
         onChange={answerLocal("diet")}
       >
         <DietCard orgId={orgId} health={h} />

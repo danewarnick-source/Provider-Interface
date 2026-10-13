@@ -276,6 +276,17 @@ export function strategyStatusText(s: StrategyStatus): string {
   return `Approved ${formatDate(s.at)} by ${s.by}`;
 }
 
+/**
+ * "Drafted by Nectar: review" shows on a Nectar draft no person has edited,
+ * and only until the strategies are approved (approving is the review).
+ */
+export function showsNectarTag(
+  v: Pick<StrategyView, "nectar">,
+  status: StrategyStatus | null | undefined,
+): boolean {
+  return v.nectar && status?.kind !== "approved";
+}
+
 /** Sections in display groups, one per goal, in order. */
 export function groupByGoal(
   views: readonly StrategyView[],

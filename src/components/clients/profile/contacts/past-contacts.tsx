@@ -1,11 +1,23 @@
 // "Past contacts": ended contacts, kept for the record (never deleted).
-// A link at the bottom of Contacts that opens the read-only list.
+// A link at the bottom of Contacts that opens the list; editors can Restore
+// one, which clears its end date and puts it back on the active list.
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/clients/dates";
 import { contactTag, type ClientContact } from "@/lib/clients/contacts";
 
-export function PastContacts({ contacts }: { contacts: ClientContact[] }) {
+export function PastContacts({
+  contacts,
+  canEdit,
+  restoring,
+  onRestore,
+}: {
+  contacts: ClientContact[];
+  canEdit: boolean;
+  restoring: boolean;
+  onRestore: (id: string) => void;
+}) {
   const [open, setOpen] = useState(false);
   if (contacts.length === 0) return null;
   return (
@@ -27,6 +39,17 @@ export function PastContacts({ contacts }: { contacts: ClientContact[] }) {
               <span className="ml-auto text-xs text-muted-foreground">
                 Ended {formatDate(c.ended_on)}
               </span>
+              {canEdit ? (
+                <Button
+                  variant="outline"
+                  disabled={restoring}
+                  onClick={() => onRestore(c.id)}
+                  aria-label={`Restore ${c.name}`}
+                  data-testid="client-past-contact-restore"
+                >
+                  Restore
+                </Button>
+              ) : null}
             </li>
           ))}
         </ul>

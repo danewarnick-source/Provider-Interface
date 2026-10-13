@@ -19,32 +19,45 @@ describe("health tiles", () => {
     assert.equal(allergyTile(["Peanuts"]).value, "1 allergy");
   });
   it("diet includes swallowing", () => {
-    const t = dietTile({ dysphagia: true, swallowingAlerts: ["Thickened liquids"], diet: null });
+    const t = dietTile({ dysphagia: true, swallowingAlerts: ["Thickened liquids"], diets: [] });
     assert.deepEqual(t, { value: "Trouble swallowing", note: "Thickened liquids", warn: true });
-    assert.equal(dietTile({ dysphagia: false, swallowingAlerts: [], diet: "Low salt" }).note, "Low salt");
     assert.equal(
-      dietTile({ dysphagia: null, swallowingAlerts: null, diet: " " }).value,
+      dietTile({ dysphagia: true, swallowingAlerts: [], diets: ["Pureed"] }).note,
+      "Pureed",
+    );
+    assert.deepEqual(dietTile({ dysphagia: false, swallowingAlerts: [], diets: ["Low sodium"] }), {
+      value: "Special diet",
+      note: "Low sodium",
+      warn: false,
+    });
+    assert.equal(
+      dietTile({ dysphagia: null, swallowingAlerts: null, diets: [" "] }).value,
       "No special diet on file",
     );
   });
-  it("mobility reads notes and equipment", () => {
-    assert.equal(mobilityTile({ mobility: null, equipment: null }).value, "Not on file");
-    assert.deepEqual(mobilityTile({ mobility: "Uses a walker", equipment: "Shower chair" }), {
-      value: "Uses a walker",
-      note: "Equipment: Shower chair",
+  it("mobility: the first need, then the rest", () => {
+    assert.equal(mobilityTile(null).value, "Not on file");
+    assert.deepEqual(mobilityTile(["Walker", "Gait belt", "Fall risk", "No stairs"]), {
+      value: "Walker",
+      note: "Gait belt, Fall risk +1 more",
       warn: false,
     });
+    assert.equal(mobilityTile(["Cane"]).note, null);
   });
-  it("emergency plan: DNR/POLST and the treatment authorization", () => {
-    const dnr = emergencyPlanTile({ dnrStatus: "DNR", polstStatus: null, treatmentAuthorization: true });
-    assert.equal(dnr.value, "DNR on file");
-    assert.equal(dnr.note, "Emergency treatment authorization signed");
-    const none = emergencyPlanTile({ dnrStatus: null, polstStatus: null, treatmentAuthorization: false });
-    assert.equal(none.value, "Advance directive not set");
-    assert.equal(none.warn, true);
+  it("emergency plan: the plan's first line and the directive", () => {
+    const none = emergencyPlanTile({ plan: null, dnrStatus: null, polstStatus: null });
+    assert.deepEqual(none, { value: "No plan written", note: null, warn: true });
+    const dnr = emergencyPlanTile({
+      plan: "\nCall 911.\nThen call the guardian.",
+      dnrStatus: "DNR",
+      polstStatus: null,
+    });
+    assert.deepEqual(dnr, { value: "Call 911.", note: "DNR on file", warn: true });
+    const plain = emergencyPlanTile({ plan: "Call 911.", dnrStatus: null, polstStatus: null });
+    assert.equal(plain.warn, false);
     assert.equal(
-      emergencyPlanTile({ dnrStatus: null, polstStatus: "POLST", treatmentAuthorization: true }).value,
-      "POLST on file",
+      emergencyPlanTile({ plan: "x".repeat(80), dnrStatus: null, polstStatus: "POLST" }).value.length,
+      60,
     );
   });
   it("event dots by type", () => {

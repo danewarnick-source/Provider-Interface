@@ -7,7 +7,6 @@ import {
   directiveStatus,
   medicationSupportLabel,
   showsAbsences,
-  splitList,
 } from "./health.ts";
 
 describe("advance directive", () => {
@@ -54,8 +53,5 @@ describe("health helpers", () => {
     assert.equal(absenceProblem("2026-10-03", "2026-10-01"), "The return date can't be before the first day away.");
     assert.equal(absenceProblem("", null), "Pick the first day away.");
     assert.equal(absenceProblem("2026-10-01", null), null);
-  });
-  it("splits lists", () => {
-    assert.deepEqual(splitList("Peanuts, penicillin\npeanuts\n "), ["Peanuts", "penicillin"]);
   });
 });

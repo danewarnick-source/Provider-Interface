@@ -1,12 +1,15 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  clientAgencyStart,
   currentSummaryPeriod,
   noteAddressesAny,
   noteAddressesGoal,
   summaryButtonLabel,
+  summaryDueRule,
   summaryGoals,
   summaryPeriodName,
+  summariesSince,
 } from "./plan-summaries.ts";
 import type { ClientGoal, ClientPlan, ClientPlanBundle } from "./plans.ts";
 
@@ -88,5 +91,42 @@ describe("summary names on buttons", () => {
     const now = new Date(2026, 9, 7);
     assert.deepEqual(currentSummaryPeriod(["quarterly"], now), { kind: "quarterly", label: "2026-Q4" });
     assert.deepEqual(currentSummaryPeriod(["quarterly", "monthly"], now), { kind: "monthly", label: "2026-10" });
+  });
+});
+
+describe("summaries list on the profile", () => {
+  it("starts at the admission date, else the PI start, else the day added", () => {
+    assert.equal(
+      clientAgencyStart({
+        admission_date: "2026-03-02",
+        hive_start_date: "2026-07-01",
+        created_at: "2026-06-20T10:00:00Z",
+      }),
+      "2026-03-02",
+    );
+    assert.equal(
+      clientAgencyStart({ admission_date: null, hive_start_date: "2026-07-01", created_at: "2026-06-20T10:00:00Z" }),
+      "2026-07-01",
+    );
+    assert.equal(clientAgencyStart({ created_at: "2026-06-20T10:00:00Z" }), "2026-06-20");
+    assert.equal(clientAgencyStart({}), null);
+  });
+  it("keeps summaries whose period ends on or after the start", () => {
+    const rows = [
+      { id: "q1", period_end: "2026-03-31" },
+      { id: "q2", period_end: "2026-06-30" },
+      { id: "q3", period_end: "2026-09-30" },
+      { id: "x", period_end: null },
+    ];
+    assert.deepEqual(
+      summariesSince(rows, "2026-06-30").map((r) => r.id),
+      ["q2", "q3", "x"],
+    );
+    assert.equal(summariesSince(rows, null).length, 4);
+  });
+  it("says the due rule in words", () => {
+    assert.equal(summaryDueRule("quarterly"), "15 days after quarter end");
+    assert.equal(summaryDueRule("monthly"), "15th of the next month");
+    assert.equal(summaryDueRule(null), null);
   });
 });

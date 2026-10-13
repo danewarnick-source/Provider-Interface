@@ -43,3 +43,20 @@ export function teamCards(
     }))
     .sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
 }
+
+/**
+ * Who works one code (Services & billing "Team on SLN: …"): assigned team
+ * members whose explicit codes list it, only those in `active` (active
+ * members, the same list the Team section picks from), by name.
+ */
+export function teamOnCode(
+  assigned: ReadonlyMap<string, readonly string[]>,
+  active: readonly { id: string; name: string }[],
+  code: string,
+): { id: string; name: string }[] {
+  const want = code.trim().toUpperCase();
+  if (!want) return [];
+  return active
+    .filter((s) => (assigned.get(s.id) ?? []).some((c) => c.trim().toUpperCase() === want))
+    .sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
+}

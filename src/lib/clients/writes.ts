@@ -9,6 +9,9 @@ export const MEDICAL_CLIENT_FIELDS: ReadonlySet<string> = new Set([
   "allergies",
   "dysphagia",
   "swallowing_alerts",
+  "diets",
+  "mobility",
+  "emergency_plan",
   "self_admin_med_support",
   "self_admin_med_support_locked",
   "insurance",
@@ -86,8 +89,6 @@ export interface ClientRecordTable {
   action: ManageClientAction;
   ops: readonly ClientRecordOp[];
   key: ClientRecordKey;
-  /** false when the table has no organization_id column. */
-  hasOrgColumn: boolean;
 }
 
 export const CLIENT_RECORD_TABLES = {
@@ -95,56 +96,39 @@ export const CLIENT_RECORD_TABLES = {
     action: "edit",
     ops: ["insert", "update"],
     key: "client",
-    hasOrgColumn: true,
   },
-  client_progress_summaries: { action: "edit", ops: ["insert"], key: "client", hasOrgColumn: true },
+  client_progress_summaries: { action: "edit", ops: ["insert"], key: "client" },
   client_health_events: {
     action: "edit_medical",
     ops: ["insert", "update"],
     key: "client",
-    hasOrgColumn: true,
   },
   client_absences: {
     action: "edit_medical",
     ops: ["insert", "update"],
     key: "client",
-    hasOrgColumn: true,
   },
-  sjd_assessment_selections: { action: "edit", ops: ["upsert"], key: "client", hasOrgColumn: true },
+  sjd_assessment_selections: { action: "edit", ops: ["upsert"], key: "client" },
+  // Updates go through saveHrr (hrr.functions.ts), which checks signatures.
   hrc_restriction_records: {
     action: "edit_hrc",
-    ops: ["insert", "update"],
+    ops: ["insert"],
     key: "client",
-    hasOrgColumn: true,
   },
-  hrc_reviews: { action: "edit_hrc", ops: ["insert"], key: "org", hasOrgColumn: true },
-  hrc_meetings: { action: "edit_hrc", ops: ["insert"], key: "org", hasOrgColumn: true },
+  hrc_reviews: { action: "edit_hrc", ops: ["insert"], key: "org" },
+  hrc_meetings: { action: "edit_hrc", ops: ["insert"], key: "org" },
   client_billing_codes: {
     action: "edit_billing",
     ops: ["insert", "update", "upsert"],
     key: "client",
-    hasOrgColumn: true,
   },
-  client_budgets: {
-    action: "edit_funds",
-    ops: ["insert", "update"],
-    key: "client",
-    hasOrgColumn: true,
-  },
-  client_budget_lines: {
-    action: "edit_funds",
-    ops: ["insert", "update"],
-    key: { parent: "client_budgets", fk: "budget_id" },
-    hasOrgColumn: false,
-  },
-  pba_accounts: { action: "edit_funds", ops: ["insert"], key: "client", hasOrgColumn: true },
+  pba_accounts: { action: "edit_funds", ops: ["insert"], key: "client" },
   pba_transactions: {
     action: "edit_funds",
     ops: ["insert"],
     key: { parent: "pba_accounts", fk: "account_id" },
-    hasOrgColumn: true,
   },
-  pba_audit_samples: { action: "edit_funds", ops: ["update"], key: "org", hasOrgColumn: true },
+  pba_audit_samples: { action: "edit_funds", ops: ["update"], key: "org" },
 } as const satisfies Record<string, ClientRecordTable>;
 
 export type ClientRecordTableName = keyof typeof CLIENT_RECORD_TABLES;
@@ -170,8 +154,7 @@ export function stampRows(
   clientId: string | null,
 ): Record<string, unknown>[] {
   return rows.map((r) => {
-    const out: Record<string, unknown> = { ...r };
-    if (cfg.hasOrgColumn) out.organization_id = organizationId;
+    const out: Record<string, unknown> = { ...r, organization_id: organizationId };
     if (cfg.key === "client") {
       if (!clientId) throw new Error("A client is required for this change");
       out.client_id = clientId;

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { readinessTag, teamCards } from "./team.ts";
+import { readinessTag, teamCards, teamOnCode } from "./team.ts";
 
 describe("team cards", () => {
   const assigned = new Map([
@@ -34,6 +34,42 @@ describe("team cards", () => {
     assert.equal(
       readinessTag({ id: "x", readyAlone: false, readinessLabel: "Readiness not available" }).tone,
       "neutral",
+    );
+  });
+});
+
+describe("team on a code", () => {
+  const assigned = new Map([
+    ["m", ["SLN", "DSI"]],
+    ["d", ["sln "]],
+    ["x", ["SLN"]],
+    ["h", ["SLH"]],
+    ["e", []],
+  ]);
+  const active = [
+    { id: "m", name: "Maria Lopez" },
+    { id: "d", name: "Devin Park" },
+    { id: "h", name: "Hana Ito" },
+    { id: "e", name: "Eli Stone" },
+  ];
+
+  it("only active team members whose codes list it, by name", () => {
+    assert.deepEqual(
+      teamOnCode(assigned, active, "SLN").map((s) => s.name),
+      ["Devin Park", "Maria Lopez"],
+    );
+  });
+
+  it("separated team members (not in the active list) and empty codes never count", () => {
+    assert.ok(!teamOnCode(assigned, active, "SLN").some((s) => s.id === "x"));
+    assert.deepEqual(teamOnCode(assigned, active, "HHS"), []);
+    assert.deepEqual(teamOnCode(assigned, active, " "), []);
+  });
+
+  it("matches the code however it is cased", () => {
+    assert.deepEqual(
+      teamOnCode(assigned, active, "slh").map((s) => s.id),
+      ["h"],
     );
   });
 });

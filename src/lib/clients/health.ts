@@ -104,13 +104,3 @@ export function absenceProblem(from: string, to: string | null): string | null {
   if (to && to < from) return "The return date can't be before the first day away.";
   return null;
 }
-
-/** Splits a comma / newline separated list into trimmed, distinct items. */
-export function splitList(text: string): string[] {
-  const out: string[] = [];
-  for (const raw of text.split(/[\n,]/)) {
-    const v = raw.trim();
-    if (v && !out.some((o) => o.toLowerCase() === v.toLowerCase())) out.push(v);
-  }
-  return out;
-}

@@ -3,12 +3,20 @@
 // with Renew, and earlier periods). Authorizations are never deleted.
 
 import { useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { FileUp, Loader2, Plus, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { EmptyState } from "@/components/clients/profile/cards/card-parts";
 import type { AuthorizationRow as Row } from "@/lib/clients/authorizations";
 import { pastPeriods } from "@/lib/clients/authorization-renewal";
+import { primaryContact } from "@/lib/clients/contacts";
+import { teamOnCode } from "@/lib/clients/team";
+import { getUnitAlerts } from "@/lib/clients/unit-alerts.functions";
+import { useAllClientContacts } from "@/components/clients/shared/hooks/use-client-contacts";
+import { useOrgStaff } from "@/components/clients/shared/hooks/use-org-staff";
+import { useClientTeam } from "@/components/clients/profile/team/use-client-team";
 import { AuthorizationCard } from "./authorization-card";
 import { PastAuthorizationsCard } from "./past-authorizations-card";
 import { money } from "./money";
@@ -23,13 +31,28 @@ type Editing = { row: Row | null; renew: boolean } | null;
 export function Authorizations({
   orgId,
   clientId,
+  clientName,
   canEdit,
 }: {
   orgId: string;
   clientId: string;
+  clientName: string;
   canEdit: boolean;
 }) {
   const q = useClientServices(orgId, clientId);
+  const qc = useQueryClient();
+  const alertsFn = useServerFn(getUnitAlerts);
+  const alertsKey = ["client-unit-alerts", clientId] as const;
+  const alertsQ = useQuery({
+    queryKey: alertsKey,
+    queryFn: () => alertsFn({ data: { organizationId: orgId, clientId } }),
+  });
+  const contactsQ = useAllClientContacts(clientId);
+  const coordinatorEmail =
+    primaryContact(contactsQ.data ?? [], "support_coordinator")?.email ?? null;
+  const teamQ = useClientTeam(orgId, clientId);
+  const staffQ = useOrgStaff(orgId);
+  const teamLoaded = !!teamQ.data && !!staffQ.data;
   const refresh = useRefreshServices(clientId);
   const imp = use1056Import(orgId, clientId, refresh);
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -115,6 +138,19 @@ export function Authorizations({
           v={v}
           history={data?.history[v.row.id] ?? []}
           canEdit={canEdit}
+          team={
+            teamLoaded
+              ? teamOnCode(teamQ.data!.assigned, staffQ.data!, v.row.service_code)
+              : null
+          }
+          email={{
+            orgId,
+            clientId,
+            clientName,
+            alerts: alertsQ.data ?? [],
+            coordinatorEmail,
+            onChanged: () => void qc.invalidateQueries({ queryKey: alertsKey }),
+          }}
           onEdit={() => setEditing({ row: v.row, renew: false })}
           onEnd={() => setEnding(v.row)}
         />
