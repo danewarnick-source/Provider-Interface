@@ -10,8 +10,8 @@ import {
   textSource,
   type IngestDeps,
   type IngestInput,
-  type ParsedDocument,
 } from "./ingest.ts";
+import type { ParsedDocument } from "./extracted-fields.ts";
 
 const ORG = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const USER = "11111111-1111-4111-8111-111111111111";
