@@ -1,3 +1,6 @@
+// S4-REPOINT (Scheduler rebuild S3): qualification and certificate checks in this file are replaced by
+// qualificationsOnDate() in rules-qualifications.ts (Evidence only, as of the shift date).
+// Marked, not deleted: S4 re-points the callers and removes this path.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
