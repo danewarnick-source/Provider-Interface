@@ -21,7 +21,7 @@ const DOC_ID = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
 
 type Member = { level: "owner" | "admin" | "staff"; scope: "agency" | "assigned" | "self" };
 
-function fakeDeps(opts: { member?: Member | "none"; parsed?: ParsedDocument; parseThrows?: boolean; parentVersion?: number | null }) {
+function fakeDeps(opts: { member?: Member | "none"; parsed?: ParsedDocument; parseThrows?: boolean; parentVersion?: number | null; text?: string }) {
   const calls: string[] = [];
   const inserted: Array<Record<string, unknown>> = [];
   const updates: Array<Record<string, unknown>> = [];
@@ -48,7 +48,7 @@ function fakeDeps(opts: { member?: Member | "none"; parsed?: ParsedDocument; par
     updateDocument: async (_id, patch) => void updates.push(patch),
     readText: async (source) => {
       calls.push(`readText:${source}`);
-      return "Policy text.";
+      return opts.text ?? "Policy text.";
     },
     parseFields: async () => {
       calls.push("parseFields");
@@ -126,6 +126,12 @@ describe("Knowledge base uploads (company / state)", () => {
       assert.deepEqual(result, { document: { id: DOC_ID }, extracted: [] });
     });
   }
+
+  it("a file with no readable text is marked no_text, not parsed (N3)", async () => {
+    const { deps, updates } = fakeDeps({ text: "  \n " });
+    await runIngest(input({ ownerKind: "company" }), deps);
+    assert.equal(updates[0]?.parse_status, "no_text");
+  });
 });
 
 describe("client path (unchanged apart from where autofill may run)", () => {
