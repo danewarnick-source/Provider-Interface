@@ -3,6 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
+import { helpDeepLink } from "@/lib/nectar/help-links";
 import {
   UNTRUSTED_DOCUMENT_RULE,
   delimitUntrustedDocument,
@@ -709,17 +710,8 @@ OUTPUT FORMAT — return STRICT JSON only:
       typeof parsed.answer === "string" && parsed.answer.trim().length > 0
         ? parsed.answer.trim()
         : "I don't have that on file yet — try rephrasing and I'll look again.";
-    const dl =
-      parsed.deepLink && typeof parsed.deepLink === "object"
-        ? (parsed.deepLink as { path?: unknown; label?: unknown })
-        : null;
-    const deepLink =
-      dl && typeof dl.path === "string" && dl.path.startsWith("/dashboard")
-        ? {
-            path: dl.path,
-            label: typeof dl.label === "string" && dl.label.trim() ? dl.label : "Take me there",
-          }
-        : null;
+    // Shown only when the path is a real screen (never a $clientId placeholder).
+    const deepLink = helpDeepLink(parsed.deepLink);
     const followUps = Array.isArray(parsed.followUps)
       ? parsed.followUps.filter((s): s is string => typeof s === "string").slice(0, 4)
       : [];

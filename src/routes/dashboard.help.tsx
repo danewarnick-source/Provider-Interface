@@ -238,14 +238,8 @@ function HelpPage() {
                   text={msg.text}
                   reply={msg.reply}
                   onFollowUp={send}
-                  onNavigate={(path) => {
-                    // Use raw navigation since paths come from AI with literal $clientId etc.
-                    if (path.includes("$clientId")) {
-                      navigate({ to: "/dashboard/billing" });
-                    } else {
-                      window.location.assign(path);
-                    }
-                  }}
+                  // The server keeps a deep link only when it is a real screen (lib/nectar/help-links.ts).
+                  onNavigate={(path) => window.location.assign(path)}
                 />
               )}
             </li>
