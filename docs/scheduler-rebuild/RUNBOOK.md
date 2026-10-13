@@ -323,6 +323,7 @@ You are running unattended. Jeff will tell you which part to run ("Part A" or "P
 3. Scheduled vs worked hours per staff member for the week (from linked punches), shown in the Staff row tooltip.
 4. **Punches against the schedule (Decision 23):** a weekly list of exceptions (late, early, no punch, unscheduled punch, open punch, edited time) with one-click Approve or Send back, then a payroll export (CSV: staff, date, code, client or home, start, end, hours, regular vs overtime, holiday flag) per pay period from `time_pay_settings`.
 5. Projected unit run-out date per code ("SLH runs out about Mar 3 at this pace"); SJD hours used of 80; EPR months used of 24; HHS/PPS respite days used.
+6. **One "on track" line on the client's Services & billing card (Jeff, Oct 13: keep it simple).** Under each code's existing pace line, add a single sentence from the published schedule, e.g. "With the shifts on the schedule, Mia is on track to use about 1,010 of 1,040 units by Sep 30, 2027." No new numbers, bars or charts. If the schedule would go over, the same sentence says so in the warning color. That component lives in the Clients area (`components/clients/profile/services/authorization-card.tsx`); keep the change to that one line and its helper.
 
 **Done when:** a user without `financial_reports` can't see cost figures (server-checked); burn-down matches `client_billing_codes` minus scheduled and billed units.
 
