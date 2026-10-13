@@ -51,6 +51,16 @@ describe("admin help facts (N1)", () => {
   });
 });
 
+describe("admin help navigation map (N2)", () => {
+  it("is built from the real sidebar arrays, not written by hand", () => {
+    assert.match(HELP_FNS, /import dashboardSource from "@\/routes\/dashboard\.tsx\?raw";/);
+    assert.match(HELP_FNS, /\$\{navMapForPrompt\(sidebarNav\(dashboardSource\)\)\}/);
+    assert.doesNotMatch(HELP_FNS, /^- \/dashboard/m);
+    assert.doesNotMatch(HELP_FNS, /NAVIGATION MAP/);
+    assert.match(HELP_FNS, /ROLE RULES: Staff & host-family NEVER see billing rates/);
+  });
+});
+
 describe("admin help deep links (N1)", () => {
   it("are checked against real routes on the server before they are shown", () => {
     assert.match(HELP_FNS, /import \{ helpDeepLink \} from "@\/lib\/nectar\/help-links"/);
