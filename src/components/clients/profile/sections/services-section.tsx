@@ -10,7 +10,12 @@ export function ServicesSection({ orgId, data }: { orgId: string; data: ClientPr
   const canEdit = useAccess().canCategory("billing", "edit");
   return (
     <div className="flex flex-col gap-5" data-testid="client-section-services">
-      <Authorizations orgId={orgId} clientId={data.client.id} canEdit={canEdit} />
+      <Authorizations
+        orgId={orgId}
+        clientId={data.client.id}
+        clientName={data.name}
+        canEdit={canEdit}
+      />
     </div>
   );
 }

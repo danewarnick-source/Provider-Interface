@@ -1,6 +1,7 @@
 // One open authorization as a card: code and name, dates, 1056 number,
 // units used vs. left with the pace marker, rate and dollars, and its rate
-// history. Edit and End for Billing: Edit holders; nothing here deletes.
+// history, Email coordinator when the units run out early. Edit and End for
+// Billing: Edit holders; nothing here deletes.
 
 import { useState } from "react";
 import { AlertTriangle, History, Receipt } from "lucide-react";
@@ -15,6 +16,7 @@ import { codeName } from "./code-name";
 import { money } from "./money";
 import { UnitsBar } from "./units-bar";
 import { RateHistory } from "./rate-history";
+import { CoordinatorEmail } from "./coordinator-email";
 
 const num = (n: number) => Math.round(n).toLocaleString();
 
@@ -29,12 +31,15 @@ export function AuthorizationCard({
   v,
   history,
   canEdit,
+  email,
   onEdit,
   onEnd,
 }: {
   v: AuthorizationView;
   history: RateHistoryEntry[];
   canEdit: boolean;
+  /** Email coordinator when the units run out early (coordinator-email.tsx). */
+  email: Omit<Parameters<typeof CoordinatorEmail>[0], "v" | "canEdit">;
   onEdit: () => void;
   onEnd: () => void;
 }) {
@@ -108,6 +113,7 @@ export function AuthorizationCard({
                 ) : null}
               </p>
             ) : null}
+            <CoordinatorEmail v={v} canEdit={canEdit} {...email} />
           </div>
         ) : (
           <p className="text-xs text-muted-foreground">

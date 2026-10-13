@@ -4718,6 +4718,73 @@ export type Database = {
           },
         ]
       }
+      client_unit_alerts: {
+        Row: {
+          billing_code_id: string
+          client_id: string
+          id: string
+          organization_id: string
+          recorded_at: string
+          recorded_by: string
+          runout_on: string | null
+          service_code: string
+          units_total: number
+          units_used: number
+          voided_at: string | null
+          voided_by: string | null
+        }
+        Insert: {
+          billing_code_id: string
+          client_id: string
+          id?: string
+          organization_id: string
+          recorded_at?: string
+          recorded_by: string
+          runout_on?: string | null
+          service_code: string
+          units_total: number
+          units_used: number
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Update: {
+          billing_code_id?: string
+          client_id?: string
+          id?: string
+          organization_id?: string
+          recorded_at?: string
+          recorded_by?: string
+          runout_on?: string | null
+          service_code?: string
+          units_total?: number
+          units_used?: number
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_unit_alerts_billing_code_id_fkey"
+            columns: ["billing_code_id"]
+            isOneToOne: false
+            referencedRelation: "client_billing_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_unit_alerts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_unit_alerts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_weekly_targets: {
         Row: {
           client_id: string

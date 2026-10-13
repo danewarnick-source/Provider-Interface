@@ -596,6 +596,8 @@ function serverFnPayload(url: string, body: string): unknown {
     return { id: "00000000-0000-4000-a000-0000000009a1" };
   }
   if (/getClientServices/i.test(fn)) return clientServicesPayload();
+  if (/getUnitAlerts/i.test(fn)) return [];
+  if (/recordUnitAlert|voidUnitAlert/i.test(fn)) return { ok: true };
   if (/createTeamMember/i.test(fn)) {
     return { status: "created", userId: "00000000-0000-4000-a000-000000000499", invited: true };
   }
