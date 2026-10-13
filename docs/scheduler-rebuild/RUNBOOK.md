@@ -1,6 +1,6 @@
 # Scheduler Rebuild — Runbook (Part A: S1–S3 · Part B: S4–S14 · S15 morning only)
 
-_Updated Oct 12, 2026: adds Jeff's Oct 7 decisions (Evidence is the only source for cards and training; reminders, not blocks; admins create open shifts themselves) and the Oct 12 staff-data trace fixes. Changes from the Oct 6 version are listed at the end._
+_Updated Oct 12, 2026 (evening): adds the Scheduler Rebuild Gap Review (Decisions 18–25: every contract code's rules, overnight and same-day disruption, ease-of-use features). Earlier the same day: Jeff's Oct 7 decisions (Evidence is the only source for cards and training; reminders, not blocks; admins create open shifts themselves) and the Oct 12 staff-data trace fixes. Changes from the Oct 6 version are listed at the end._
 
 Owner: Jeff (Dane Warnick). Repo: danewarnick-source/Provider-Interface. Live Supabase project: dhrrukdcigiiqksibdfb (NEVER refrpqrxpjeqmygxgekp).
 Plan of record: "Scheduler rebuild plan" (Claude Docs). Clickable references: "Scheduler — Live Demo" (Oct 7, the latest board) and "Staff Phone Demo" (Oct 12, the Schedule tab and on-shift screens the phone steps S12–S14 must match). Related: "Staff View Plan" (Claude Docs), whose staff-app steps reuse what S12–S14 build.
@@ -35,6 +35,17 @@ This runbook covers the admin scheduler AND the staff phone in one round. It run
 15. **Expired or missing training and cards are reminders, not blocks** ("We don't block shifts, we remind"). The reminder links to the person's Evidence row ("Open Leo's Evidence") and never clears itself. On the staff phone, "Upload new card" opens the existing Evidence upload for that requirement. The reminder clears only when the new file is uploaded, **reviewed (approved)** and expires **after** the shift date. Between upload and review it reads "New card uploaded, waiting for review". If the new card still expires before a later shift, that shift keeps its reminder.
 16. **PI never creates open shifts on its own.** The old plan to auto-generate DSG open slots from ratio math is dropped. Admins create open shifts themselves: any place or client, any day, any time (to the minute), any code, and how many spots (1+), from "Add a shift" ("Make it an open shift"), the + in the Open shifts row, or the buttons on a Needs you reminder. Open shifts are posted to qualified team members when the week is published (or right away if it already is). Ratio math (DSG staff needed = ceil(Σ 1/ratio)) and home coverage hours stay as **Needs you reminders** ("Lehi Day Program: Mon 0 of 2") with buttons to add a shift or add open shifts. An open shift doesn't count as coverage until someone is assigned.
 17. A shift a staff member gives up ("Can't make it") or that approved time off covers is **not** silently re-posted: it shows in Needs you with **Make it an open shift** (one tap, posts to qualified staff), **Find staff**, or **Leave it**. This keeps decision 16 (the admin decides) and the Staff Phone Demo's "posted to qualified coworkers" once the admin taps it, or automatically only if the agency turns on "Re-post call-outs automatically" (default off).
+
+### Added Oct 12, 2026 (Jeff, from the Scheduler Rebuild Gap Review)
+
+18. **Rules for every contract code, screens only for codes agencies use.** `rules.ts` covers every code in DHHS91172 and its rate table (respite RP2–RP5 and RPS, nursing PM1/PM2/PN1/PN2, behavior BC1–BC3, SED, SEE, SJD, EPR, TFB, PBA and the rest). Codes without their own screen are scheduled as ordinary shifts on the board and are checked by the same rules. Only RHS homes (S8–S9), host homes (S9), DSG/DSP day programs (S10) and the hourly codes on the board get dedicated screens. No respite, nursing or behavior-consult screens.
+19. **2:1 stays as it is:** a hard block without a rights modification (§1.33(2)). No emergency or temporary 2:1 window for now.
+20. **Hold over:** Needs you can extend a shift as "mandated" with a reason; the rolling 16-hours-in-24 check is a warning, logged.
+21. **Text messages** for open shifts, call-outs and changes, with a tap-to-accept link, only to staff with recorded SMS consent and never with client information in the text.
+22. **Auto-approve swaps and pickups that pass every rule:** an agency setting, off by default.
+23. **Approving punches against the schedule and payroll export** are built in S11.
+24. **Asleep overnight:** PI tracks the sleep window and interruptions; whether sleep time is paid is an agency setting (paid, or unpaid only with 5+ uninterrupted hours).
+25. **Client staffing preferences** (such as same-gender personal care) are a warning by default; an agency can make one a block.
 
 ---
 
@@ -132,14 +143,34 @@ You are running unattended. Jeff will tell you which part to run ("Part A" or "P
 2. Output per finding: `{ rule, level: 'block'|'warn', message, fix? }`. Messages are one plain line, for example "Maria isn't trained for Ben yet (Person-specific)".
 3. Rules (SOW rules always on; Agency rules have an on/off + level setting):
    - Block: no authorization that day, or units would go over (§2.1(5)(J)); not on the client's team; on the do-not-schedule list; staff inactive or on approved time off; same staff in two places (a segment inside its own parent shift is fine); client double-booked or two services at once (§2.1(5)(G)); SEI with SEE or SJD the same day; under the minimum age (Decision 4); RHS 1:1 of 4+ hours/day with no Form 930 (§21.3(4)); 2:1 with no rights modification (§1.33(2)); group over the staff needed from client ratios, or over licensed capacity; CMP/CMS over 8 h/day or 40 h/week Sun–Sat; ELS over 6 h/day or 260 days/year or before absence days are used up; segment outside its parent shift.
-   - Warn (Decision 15, reminders not blocks): solo before the 23 general trainings or the client's person-specific training (§1.8(4)); first aid/CPR expired or past 90 days; code-specific qualification missing; driving without a license on file. Each comes from one function, `qualificationsOnDate(staff, shift, evidence)` (Decision 14), that reads only Evidence (reviewed, unexpired on the shift's date, with "uploaded, waiting for review" as its own state) and returns a `fix` linking to that person's Evidence row. DSI over 6 h; weekly hours below the Worksheet; behavior training past 180 days; overtime / under 8 h rest / over 16 h straight (Agency); Supported Living overnight with no awake staff (Agency); **assumed ratio** (Decision 13: warn, block once 15 days have passed since `authorization_approved_on`).
-4. `lib/scheduler/ratios.ts`: `staffNeeded(clientsPresent)` = Σ 1/ratio, rounded up (1:6 → 1/6, 1:3 → 1/3, 1:1 → 1, 2:1 → 2). Ratio defaults when none is entered: DSG/DSP/EPR 1:6, DSI 1:1, SLH/SLN/COM/PAC/SEI 1:1, RHS/HHS/PPS null ("not set"), each marked `assumed: true`.
-5. `lib/evv-codes.ts`: remove ACA and CHA; fix RP3's label. Remove RL6 from the daily codes (Decision 11). Update their tests.
+   - Warn (Decision 15, reminders not blocks): solo before the 23 general trainings or the client's person-specific training (§1.8(4)); first aid/CPR expired or past 90 days; code-specific qualification missing; driving without a license on file. Each comes from one function, `qualificationsOnDate(staff, shift, evidence)` (Decision 14), that reads only Evidence (reviewed, unexpired on the shift's date, with "uploaded, waiting for review" as its own state) and returns a `fix` linking to that person's Evidence row. DSI over 6 h; weekly hours below the Worksheet; behavior training past 180 days; overtime / under 8 h rest / over 16 h straight (Agency); **assumed ratio** (Decision 13: warn, block once 15 days have passed since `authorization_approved_on`).
+3a. **Every contract code (Decision 18).** Add these rules, each citing its section in the finding (block unless marked warn):
+   - **All codes:** no shift on a day the client is a hospital inpatient (the admission day is blocked, the discharge day is allowed) or in jail (§2.1(5)(A),(K)), read from `client_absences` and `client_days`.
+   - **Allowed overlaps:** BC1–BC3, HSQ, PM1, PM2, PBA, PN1 and PN2 may overlap other services (§2.1(5)(G)); exclude them from the "two services at once" block.
+   - **Asleep time** (SLH, SLN, CMP, CMS) is not billable (§31.4(4), §32.4(6)): a contract warn on overnight shifts without an awake slot, replacing the old Agency setting; S14 asks for awake confirmation.
+   - **DCFS and DJJYS custody:** COM and HSQ are barred for DCFS or DJJYS clients (§6.4(3), §12.3); SLH, SLN, CMP, CMS, RP2–RP5 and TFB are barred for DCFS clients (§31.4(2), §32.4(2), §22.4(1), §23.4(1), §24.4(1), §25.4(1), §36.3(3)).
+   - **Supported Living and respite:** no more than 4 hours of SLH/SLN when overnight respite falls in the same 24 hours (§31.4(3), §32.4(3)); no RP2–RP5 daily rate on a day with more than 4 hours of SL (§22.4(2), §23.4(2), §24.4(3), §25.4(3)).
+   - **Code by staff relationship (§32.6):** parent, step-parent or guardian → CMP; spouse → CMS; anyone else → SLN. Scheduling the wrong one of the three is a block with the right code as the fix.
+   - **MTP:** only with DSG, DSP, EPR or SED on the same day (§13.1, §9.2(7), §28.2(5)); never with DSI (§8.4(4)); not more MTP days than day-support days billed in the month (§13.4(3)).
+   - **Respite:** facility 1:6; staff's own home 1:3 counting the staff member's own children and others under 14 (§22.3(1)); RP4, RP5 and RPS not in the client's home, and RPS not in a relative's or staff home (§24.4(2), §25.4(2), §26.4); RP3 and RP5 need Form 929 on file (§23.3(1), §25.3).
+   - **Nursing:** PM1/PM2 not billable when the client gets PN1/PN2 (§16.3, §17.3); PN1 only when the agency provides the client's RHS, HHS, PPS or SLH, with PN2 oversight (§18.4); PN2 never daily and session on the same day, daily needs an in-person visit, more than 3 days in a week is a warn needing a reason (§19.4, §19.7); PM1 needs an LPN license, PM2 an RN (qualification check).
+   - **Behavior consults (BC1–BC3):** no direct support or transport on those shifts (§3.5); license tier by code.
+   - **Host homes and PPS:** client 18+ for HHS (§11.2(1)), under 22 for PPS (§20.1); one client per home unless an exception is on file (§11.3(7), §20.3(7)); no HHS and PPS clients in the same home (§11.4(4)); respite in the home at most 14 consecutive days and 21 days per Plan Year, other-home respite at most 20 days per Plan Year (§11.3(7)(D), §11.4(9), §20.3(7)(D), §20.4(9)).
+   - **RHS:** not when the client lives with an immediate relative or guardian (§21.4(1)).
+   - **Supported employment:** SED work groups of 2 to 8 people (§28.2(1)); SJD not for clients under 14, at most 80 hours per client (120 with approval on file) (§33.4(2),(4)); SEI telehealth only combined with in-person (warn) (§30.2(1)(E)).
+   - **EPR:** at least 20% community time each month (warn) and a 24-consecutive-month limit (§9.3(1), §9.4(2)).
+   - **DSP extended:** 10-hour maximum (§7.6(b)). **DSI:** not mostly site-based in any Sun–Sat week (warn) (§8.4(5)). **DSG:** not solely in the client's home or a staff home (§7.4).
+   - **TFB:** not with RHS, HHS, PPS or SLH without written Director approval on file (§36.3(1)).
+   - **ELS by HHS/PPS staff:** only with the 4 documented conditions on file (§10.4(4)).
+3b. **`lib/scheduler/billing-mode.ts`** (pure): one table of every code's unit and billing modes from the rate table, and `billingFor(code, minutes, day)`: COM bills daily when more than 6 hours in a 24-hour day (§6.6), PAC when more than 8 hours (§14.5), RP2 and RP3 when 6 or more hours (§22.6, §23.6), otherwise quarter hours rounded per entry; DSI and SEE bill as daily tiers of 1 to 6 hours (rate-table note 2); DSG/DSP code picking stays in S10. Billing and the burn-down (S10, S11) read this; nothing else decides units.
+3c. **Also in `rules.ts`:** a rolling 16-hours-in-24 fatigue check (Agency warn) that counts holdovers and staff-declared outside hours; time-window requirements on home slots and sessions ("7–9 a.m.: 1 med-trained"), checked through `qualificationsOnDate`; client staffing preferences (Decision 25); a travel-gap warn when back-to-back hourly shifts at different addresses are less than 20 minutes apart (agency can change the minutes).
+4. `lib/scheduler/ratios.ts`: `staffNeeded(clientsPresent)` = Σ 1/ratio, rounded up (1:6 → 1/6, 1:3 → 1/3, 1:1 → 1, 2:1 → 2). Ratio defaults when none is entered: DSG/DSP/EPR/RPS 1:6, RP2–RP5 1:6 in a facility and 1:3 in a staff home, SED by work group (2–8), DSI 1:1, SLH/SLN/COM/PAC/SEI 1:1, RHS/HHS/PPS null ("not set"), each marked `assumed: true`.
+5. `lib/evv-codes.ts`: remove ACA, CHA and LPS (none are in DHHS91172); fix RP3's label. Remove RL6 from the daily codes (Decision 11). Make `service-billing.ts`'s daily-code list come from `billing-mode.ts` (it misses PN1 and the daily modes of COM, PAC, RP2, RP3, EPR, PN2). Update their tests.
 6. `minStaffAgeForCode` follows Decision 4 (move it into `rules.ts`; delete the old one in `code-colors.ts`).
 7. Delete `org_shift_behavior_settings` readers that only the old engine used; the new settings shape is read in S4.
 8. Mark (don't delete yet) the old qualification paths that S4 re-points to `qualificationsOnDate`: `eligibility.functions.ts`, `staff-qualifications.functions.ts`, `team-members/readiness.ts`'s CPR rule and the `nectar_compliance_rules` fallback map. List them in the PR.
 
-**Done when:** `rules.test.ts` and `ratios.test.ts` have at least one passing and one failing case per rule (and `qualificationsOnDate` has cases for reviewed, waiting for review, expiring before vs after the shift date, and the 90-day CPR grace), including the worked example 9 at 1:6 + one at 1:3 + one at 1:1 = 2.83 → 3; the old `conflicts*.ts` files are gone; build/tsc/unit pass.
+**Done when:** `rules.test.ts`, `ratios.test.ts` and `billing-mode.test.ts` have at least one passing and one failing case per rule and per code (including COM at 6 h vs 6 h 15 m, DSI tiers, SLH asleep, a DCFS client on COM, MTP with DSI, PM1 with PN1, and HHS respite day 22) (and `qualificationsOnDate` has cases for reviewed, waiting for review, expiring before vs after the shift date, and the 90-day CPR grace), including the worked example 9 at 1:6 + one at 1:3 + one at 1:1 = 2.83 → 3; the old `conflicts*.ts` files are gone; build/tsc/unit pass.
 
 ---
 
@@ -158,7 +189,17 @@ You are running unattended. Jeff will tell you which part to run ("Part A" or "P
 2. Code: read `service_code` only (stop reading `job_code` and `code_id`). Read homes and programs from `teams` only (stop reading `locations`).
 3. Punch pad: when a staff member clocks in on a scheduled shift, store `scheduled_shift_id`. Clock-in runs `rules.ts` for that shift and blocks on a block finding.
 4. Wire `rules.ts` into `saveShift`, `applyDrafts`, `decideClaim`, `publishWeek` and the punch pad, replacing S1's interim checks. Context is loaded once per request by `lib/scheduler/rules-context.functions.ts`. Re-point every qualification reader listed in S3 step 8 to `qualificationsOnDate` and delete the old paths (Team Members readiness and the scheduler must now agree on every card and training).
-4a. `org_shift_behavior_settings` also gets `repost_callouts_automatically` (bool, default false; Decision 17).
+4a. `org_shift_behavior_settings` also gets `repost_callouts_automatically` (bool, default false; Decision 17), `auto_approve_requests` (bool, default false; Decision 22), `sleep_time_paid` ('paid'|'unpaid_if_5h'; Decision 24), `travel_gap_minutes` (default 20), `request_notice_days` (default 14).
+4c. **Context data for the new rules (Decision 18), additive migration `…_scheduler_rule_context.sql`:**
+   - `clients.custody` ('none'|'dcfs'|'djjys', default 'none') and `clients.lives_with_relative_or_guardian` bool. Show both on the client's Profile (Clients guard for writes).
+   - `staff_client_relationships` (organization_id, staff_id, client_id, relationship 'parent'|'step_parent'|'guardian'|'spouse'|'other_relative'). Edited on the client's Team section.
+   - `client_staffing_preferences` (organization_id, client_id, kind 'gender'|'other', value, applies_to text, requested_by 'person'|'guardian'|'team', decided_on, level 'warn'|'block').
+   - `client_approvals_on_file` (organization_id, client_id, kind 'form_929'|'tfb_director'|'hhs_extra_client'|'sjd_120h'|'els_hhs_conditions'|'original_packaging', document_id, valid_from, valid_to). The rules read approvals from here.
+   - `staff_outside_hours` (organization_id, staff_id, week_start, hours, note): staff declare second-job hours for fatigue checks.
+   - `on_call_shifts` (organization_id, team_id null for agency-wide, staff_id, backup_staff_id, starts_at, ends_at). Edited on the board (an On call row) and shown in Needs you.
+   - `org_holidays` (organization_id, day, name); the Staff view shows holidays worked per person this year.
+   - `vehicles` (organization_id, name, seats, wheelchair_spots, active) for day program rides.
+   - `shift_tasks` (organization_id, shift_id or pattern_line_id, text, due_time null, done_at, done_by) and a `handoff_note` on `scheduled_shifts`; both show at clock-in.
 4b. `scheduled_shifts` also gets `is_training_shift` (bool), `trainer_staff_id`, and `involves_driving` (bool) (Staff View Plan F2, F6): the vehicle check before clock-in and the new hire's "training shift with Tom" read these.
 5. Client profile → Services → code row: add a **Staffing** card (ratio, when it applies, source, confirm button; 2:1 needs the rights modification upload; RHS 1:1 4+ h/day needs Form 930 upload). This file lives under `src/components/clients/profile/services/`; keep it ≤ 250 lines and use the Clients guard for writes.
 
@@ -206,9 +247,17 @@ You are running unattended. Jeff will tell you which part to run ("Part A" or "P
 4. Time off and swaps (existing `time_off_requests`, `shift_swap_requests`, `lib/scheduler/requests.ts`): shown on the grid and in the tray; approving time off over a scheduled shift puts that shift in Needs you (Decision 17). Swaps: the coworker accepts first (S1 step 12), then the scheduler approves; the coworker list is filtered by `rules.ts`.
 5. My Schedule (`routes/dashboard.schedule.tsx`): light touch only so it reads the new shifts (team shifts, segments, cancelled) correctly. The phone redesign is S12.
 6. Call-outs: replace the shift page's call-out panel with a server function used by S12; the tray shows each call-out with Find staff and Make it an open shift. The scheduler board reads `shift_callouts`.
+8. **Hold over (Decision 20):** on a call-out or a no-show for the next shift, Needs you offers "Hold over <name>": extends their shift to cover, runs the fatigue check, saves "mandated" and the reason.
+9. **Fill by text (Decision 21):** "Text available staff" sends the open shift to qualified, rested staff with SMS consent (first-come or scheduler-approves per Decision 8); each open shift shows outreach: "Sent to 7 · 2 declined · 1 interested · 40 min ago" with Send to more. Staff can Decline from the text or the app. Messages carry no client information, only "An open shift is available in PI" and the link.
+10. **Close or partly close a program day:** one action marks the session closed or short-staffed, marks expected attendees absent (RHS residents get absence days and their homes get daytime coverage needs), cancels rides and tells the affected staff.
+11. **Give up part of a shift:** staff (S12) or admins can split a shift and post only the uncovered part.
+12. **Notice period:** time off or unavailability sent with less than `request_notice_days` notice is flagged "short notice" in Needs you (still allowed).
+13. **Auto-approve (Decision 22):** when the setting is on, swaps and pickups that pass every rule are approved immediately and noted in the audit log.
+14. **Printable weekly schedule** per home and per program (PDF with `pdf-lib`), for the house wall and surveys.
+15. **Phone width for admins:** the Needs you tray, Find staff → Assign, Hold over and Text available staff all work at 390 px.
 7. **Changes after publish** (Staff View Plan F2): migration adds `scheduled_shift_changes` (shift_id, changed_by, changed_at, before jsonb, after jsonb, sent_at, acknowledged_at, acknowledged_by). Edits to a published shift stay pending until **Send changes**, which records the change, marks the shift Changed and notifies that team member; their **Got it** sets `acknowledged_at`. Publish notifications use this table to notify only changed staff.
 
-**Done when:** e2e: publish refused with a DSG ratio block, then succeeds after Find staff → Assign; only changed staff get notifications; approving time off puts the shift in Needs you, and Make it an open shift posts it; PI never creates an open shift without an admin action.
+**Done when:** e2e: publish refused with a DSG ratio block, then succeeds after Find staff → Assign; only changed staff get notifications; approving time off puts the shift in Needs you, and Make it an open shift posts it; PI never creates an open shift without an admin action; Hold over extends a shift and logs it; Text available staff records outreach; closing a program day marks attendees absent.
 
 ---
 
@@ -223,6 +272,8 @@ You are running unattended. Jeff will tell you which part to run ("Part A" or "P
 5. **Away** blocks on a resident's standard week (school, job, another provider's program): stored as `schedule_pattern_lines` with `service_code = 'AWAY'`, not billed. They lower the home's needed coverage for those hours.
 6. DSI/SEI segments inside a home shift (`parent_shift_id`), planned on the standard week, run through `rules.ts` (no overlap with the resident's other services, units, coverage left behind).
 7. The Form 930 block for RHS 1:1 4+ h/day shows on the home page with the upload button (from S4's Staffing card).
+7a. **Slot requirements:** each home slot can carry time-window requirements ("7–9 a.m.: 1 med-trained"), optional handoff overlap minutes, and a type: awake or asleep overnight with a sleep window (Decision 24).
+7b. **Live coverage:** changing a resident's day card (hospital, away, stayed home from DSG) recalculates that home's coverage for those hours right away and raises a Needs you item to add or cut staff.
 8. Move the old homes board (`homes-teams-board.tsx`, `dashboard.homes.$teamId.tsx`) into this page and delete them; `/dashboard/homes` redirects here. `dashboard.host-home-control.tsx` stays read-only and is linked from each HHS home's row.
 
 **Done when:** the demo's Maple House Coverage tab works with real data; a planned DSI that leaves a resident alone shows the warning; Worksheet hours per resident show "x of y h".
@@ -233,15 +284,16 @@ You are running unattended. Jeff will tell you which part to run ("Part A" or "P
 
 **Goal:** the RHS bill comes from each resident's day card, not from a fake per-client shift.
 
-1. Migration `…_scheduler_client_days.sql`: `client_days` (id, organization_id, client_id, team_id, day date, code 'RHS'|'HHS'|'PPS', status 'home'|'absence_day'|'hospital_admit'|'hospital'|'hospital_discharge'|'away'|'jail'|'moved_out', reason, note_id null, billable bool, billable_reason text, source 'auto'|'roster'|'staff'|'admin', unique (client_id, day, code)). RLS: `scheduling` view, write via server function; staff on that home's shift that day can set Home/Absence day with a reason.
-2. `lib/scheduler/client-days.ts` (pure): billable when authorized + status allows + a daily note exists from staff who worked in that home that day (via `scheduled_shift_id` on punches). Hospital: admission and inpatient not billable, discharge billable (§2.1(5)(A)); jail not billable; moved-out day not billable for the off-boarding provider; Away per Decision 6. Tests for each.
+1. Migration `…_scheduler_client_days.sql`: `client_days` (id, organization_id, client_id, team_id, day date, code 'RHS'|'HHS'|'PPS', status 'home'|'absence_day'|'hospital_admit'|'hospital'|'hospital_discharge'|'away'|'respite_in'|'respite_out'|'jail'|'moved_out', reason, **overnight_stayed bool, overnight_confirmed_at, overnight_confirmed_by** (HHS and PPS), note_id null, billable bool, billable_reason text, source 'auto'|'roster'|'staff'|'host'|'admin', unique (client_id, day, code)). Backfill HHS overnights from `hhs_monthly_attendance` (Present = stayed overnight). RLS: `scheduling` view, write via server function; staff on that home's shift that day can set Home/Absence day with a reason.
+2. `lib/scheduler/client-days.ts` (pure): billable when authorized + status allows + a daily note exists from staff who worked in that home that day (via `scheduled_shift_id` on punches). Hospital: admission and inpatient not billable, discharge billable (§2.1(5)(A)); jail not billable; moved-out day not billable for the off-boarding provider; Away per Decision 6. **HHS and PPS: no billing without `overnight_stayed = true` (§11.4(8), §20.4(8)).** Respite counters: respite in the home at most 14 consecutive days and 21 days per Plan Year, other-home respite at most 20 days (§11.3(7)(D), §11.4(9)). Tests for each, including an HHS day with a note but no overnight (not billable).
 3. A nightly job creates each RHS resident's card for the day. A DSG roster "Absent" for an RHS resident sets that day to `absence_day` with source 'roster' (wired in S10). Absence days also write `client_absences` (Clients rebuild) for the date and reason.
 4. Absence counter: used vs `worksheet_absence_days` for the plan year. When used up, the tray and home page prompt "Add ELS block (up to 6 h)", `rules.ts` enforces ELS 6 h/day and 260 days/year, and PI drafts the Support Coordinator notice (contact from `client_contacts`) for a human to send.
 5. Rebuild `hhs_daily_records_v` on `client_days` (for HHS and PPS too; no fan-out per code), **keeping every column it has today** so production keeps working. A day bills only when the note is **approved** (not sent back) and is for that code. Billing reads it.
 6. Residents' days tab on the home page, as in the demo: one card per resident per day, click to change status, counts ready / waiting on a note / not billable.
-7. Delete `hhs_monthly_attendance` writers (the side-effect upsert in `hhs.functions.ts`) and `setAttendance`.
+7. The host's day card (Staff View Plan host home Today card) writes `overnight_stayed` and the away reason to `client_days` through a server function; once it does, delete the `hhs_monthly_attendance` writers (the side-effect upsert in `hhs.functions.ts`) and `setAttendance`. Never remove the overnight check.
+8. A non-billable **hospital sitter** shift type for staff who stay with a hospitalized resident.
 
-**Done when:** unit tests cover every status; a week with one missing note shows 1 "waiting"; the old view's "overnight not confirmed" blocks are gone.
+**Done when:** unit tests cover every status; a week with one missing note shows 1 "waiting"; an HHS day with a note but no confirmed overnight shows "Not billable: no overnight stay"; the old view's duplicate per-code rows are gone.
 
 ---
 
@@ -256,6 +308,9 @@ You are running unattended. Jeff will tell you which part to run ("Part A" or "P
 5. Close session: every attending client needs a summary note; "Draft notes with Nectar" drafts from the session's activity (Decision 12), staff edit and sign. Closing writes billing rows (`day_program_billable_v` rebuilt and read by billing) and MTP rows (only on days with DSG/DSP billed, ride logged).
 6. Absent RHS residents → `client_days.absence_day` (S9).
 7. Delete any old Day Program tab code left in the scheduler.
+8. MTP rows also for SED and EPR attendance; never for DSI (S3 rule). Rides pick a vehicle from `vehicles`; a run over its seats or wheelchair spots is a block.
+9. **Breaks:** a Break button on the roster takes a staff member out of the live staff-needed meter until they tap Back; agency setting "On-duty meals" (no automatic meal deduction).
+10. **Close the day:** the S7 close action from the roster header.
 
 **Done when:** the demo flow works on staging: Lucas (1:1) arriving with 2 staff turns the meter red; clocking in a third fixes it; closing the session produces DSG/DSP rows and MTP rows; unit tests cover code picking and staff needed.
 
@@ -266,6 +321,8 @@ You are running unattended. Jeff will tell you which part to run ("Part A" or "P
 1. Clients view (`rows/client-row.tsx`): rows for clients with hourly codes; scheduled hours against the 1056 as a burn-down per code ("SLH 212 / 520 h"); DSI segments shown inside their home shift.
 2. Cost per home (Decision 9): scheduled hours × `profiles.hourly_rate` vs the home's daily rates × residents for the week, on the home page header and the Homes row; hidden without `financial_reports` view.
 3. Scheduled vs worked hours per staff member for the week (from linked punches), shown in the Staff row tooltip.
+4. **Punches against the schedule (Decision 23):** a weekly list of exceptions (late, early, no punch, unscheduled punch, open punch, edited time) with one-click Approve or Send back, then a payroll export (CSV: staff, date, code, client or home, start, end, hours, regular vs overtime, holiday flag) per pay period from `time_pay_settings`.
+5. Projected unit run-out date per code ("SLH runs out about Mar 3 at this pace"); SJD hours used of 80; EPR months used of 24; HHS/PPS respite days used.
 
 **Done when:** a user without `financial_reports` can't see cost figures (server-checked); burn-down matches `client_billing_codes` minus scheduled and billed units.
 
@@ -279,6 +336,7 @@ You are running unattended. Jeff will tell you which part to run ("Part A" or "P
 2. My shifts: upcoming published shifts only, with place, code, segments; "Confirm all" after a publish and per-shift **Confirm** (sets `confirmed_at`); **Can't make it** with reason chips → releases the shift (S7 call-out function) into the scheduler's Needs you (Decision 17).
 3. Open shifts: only ones this staff member passes `rules.ts` for; ones they can't take show the reason with a link (e.g. "Needs MANDT on file" → Upload it, Decision 15). **Pick up** follows Decision 8 (request → scheduler approves, or first qualified claim wins).
 4. Clock-in from a scheduled shift opens the punch pad with the shift prefilled.
+4a. **Reminders and alerts:** a reminder 1 hour before each shift (app, and text with consent); if nobody has clocked in 10 minutes after a shift starts, the on-call person (S4 `on_call_shifts`) and the scheduler get an alert, with a backup after 15 more minutes. Open shifts can be declined.
 5. Delete the old My Schedule components replaced here.
 
 **Done when:** e2e: confirm a shift, release a shift (appears open on the board), pick up an open shift (appears in the tray for approval).
@@ -299,6 +357,8 @@ You are running unattended. Jeff will tell you which part to run ("Part A" or "P
 
 1. On a home shift, the phone lists the home's residents with where each is right now (from S8's day lanes). **Start DSI** / **Start SEI** shows only when the resident is authorized for that code with units left. Before starting, run `rules.ts` including coverage left behind; a block stops it, a warn asks to confirm. Start creates a segment (`parent_shift_id` = the home shift) with a start time; **End** sets the end time and asks for the segment's note. Pay keeps running on the home shift; billing uses the segment.
 2. Clock-out (Decision 2): list every required note not yet done for this shift: RHS daily notes for residents of that home without one today, segment notes, client shift notes. If any are missing, clock-out is blocked with "Write notes" (Nectar drafts them). A supervisor override (staff with `timesheets:edit`) can allow it with a reason, saved to the audit log and shown on the timesheet.
+2a. **Overnight and handoff:** at clock-out from an SL overnight, confirm the person was awake-supported or log asleep time (not billable). On an asleep overnight slot, a "Woke up" button logs each interruption for the sleep-pay rule (Decision 24). At a home clock-out, if relief hasn't clocked in and the home would drop below coverage, warn "Relief not clocked in" and ask for a reason (the on-call person is alerted). Shift tasks and the handoff note show at clock-in and can be checked off.
+2b. **EVV exceptions:** every location or time mismatch needs a reason code; a weekly exception list for admins, with a warning before the 3-month UEVV submission deadline.
 3. Delete the shift page's own clock-in/out code if the punch pad now covers it, and turn `routes/dashboard.shift.$shiftId.tsx` into a read-only shift summary or a redirect (grep links first).
 
 **Done when:** e2e: start and end DSI from a home shift creates a segment with its own times; clock-out with a missing RHS daily note is blocked, then allowed after the note is written or with a supervisor override.
@@ -327,6 +387,7 @@ Drops, applied to live only after the rebuild is on production:
 - S9: billable only with an approved note for that code (Oct 12 trace found sent-back and other-code notes counted).
 - S12–S13: phone screens match the Staff Phone Demo (My shifts / Open shifts / Requests).
 - Coordination: don't run S4 or S14 at the same time as the medications rebuild's M5.
+- Gap review (Decisions 18–25): rules for every contract code with screens only for codes agencies use; `billing-mode.ts` for quarter-hour vs daily and DSI/SEE tiers; the HHS/PPS overnight rule kept and moved to `client_days`; asleep time as a contract rule; overlap exceptions; DCFS/DJJYS exclusions; SL and respite limits; relationship-based CMP/CMS/SLN; MTP, nursing, respite, SJD, EPR and TFB rules; LPS removed; on-call, hold over, fill by text with outreach, close a program day, partial give-up, notice period, auto-approve setting, printable schedules, slot time windows and sleep windows, live coverage from day cards, hospital sitter, vehicles, breaks, punch exceptions and payroll export, run-out dates, reminders and no-clock-in alerts, relief check, EVV reason codes. 2:1 unchanged (Decision 19).
 
 ---
 
