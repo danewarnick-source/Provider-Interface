@@ -15,8 +15,9 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { computeEntryUnits } from "@/lib/billing-units";
-import { invalidateStaffCaseloadWork } from "@/lib/staff-caseload-cache";
+import { useAccess } from "@/hooks/use-access";
+import { notify } from "@/lib/scheduler/notify";
+import { staffClockOutSearch } from "@/lib/staff-clock-out";
 import { monthlySupportHoursTarget } from "@/lib/scheduling/hhs-visit";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -46,6 +47,7 @@ type Shift = {
 function ShiftOverviewPage() {
   const { shiftId } = useParams({ from: "/dashboard/shift/$shiftId" });
   const { user } = useAuth();
+  const { canCategory, isLoading: accessLoading } = useAccess();
 
   const { data: shift, isLoading } = useQuery({
     enabled: !!shiftId,
@@ -63,8 +65,12 @@ function ShiftOverviewPage() {
     },
   });
 
-  if (isLoading) return <div className="p-6 text-sm text-muted-foreground">Loading shift…</div>;
+  if (isLoading || accessLoading) return <div className="p-6 text-sm text-muted-foreground">Loading shift…</div>;
   if (!shift) return <div className="p-6 text-sm text-muted-foreground">Shift not found.</div>;
+  // Only the shift's own team member, or someone with scheduling view, may open it.
+  if (shift.staff_id !== user?.id && !canCategory("scheduling", "view")) {
+    return <div className="p-6 text-sm text-muted-foreground">You don't have access to this shift.</div>;
+  }
 
   const clientName = `${shift.client?.first_name ?? ""} ${shift.client?.last_name ?? ""}`.trim() || "Client";
   const codeLabel = shift.code?.code ?? shift.job_code ?? "—";
@@ -203,39 +209,15 @@ function ClientProfileCard({ shift, clientName }: { shift: Shift; clientName: st
   );
 }
 
-const getGPS = (): Promise<{ lat: number; lng: number; accuracy?: number }> =>
-  new Promise((resolve) => {
-    if (!navigator.geolocation) {
-      resolve({ lat: 0, lng: 0 });
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy }),
-      () => resolve({ lat: 0, lng: 0 }),
-      { timeout: 5000, maximumAge: 30000 },
-    );
-  });
-
+// The shift page never punches on its own. Clock in and out open the client
+// workspace punch pad, which runs the geofence, authorization, and shift
+// verification checks, with this shift's own service code preselected.
 function ActiveClockPanel({ shift, userId }: { shift: Shift; userId?: string }) {
-  const qc = useQueryClient();
-  const code = shift.code?.code ?? shift.job_code ?? "";
+  const code = (shift.code?.code ?? shift.job_code ?? "").toUpperCase();
   const isContinuous = shift.code?.kind === "continuous";
 
-  const { data: org } = useQuery({
-    enabled: !!shift.organization_id,
-    queryKey: ["org-evv", shift.organization_id],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("organizations")
-        .select("dhhs_provider_id")
-        .eq("id", shift.organization_id)
-        .maybeSingle();
-      return data as { dhhs_provider_id: string | null } | null;
-    },
-  });
-
   const { data: activePunch } = useQuery({
-    enabled: !!userId,
+    enabled: !!userId && !!code,
     queryKey: ["evv-active", userId, shift.client_id, code],
     queryFn: async () => {
       const { data } = await supabase
@@ -245,50 +227,8 @@ function ActiveClockPanel({ shift, userId }: { shift: Shift; userId?: string }) 
         .is("clock_out_timestamp", null)
         .order("clock_in_timestamp", { ascending: false })
         .limit(5);
-      return (data ?? []).find((r: any) => r.client_id === shift.client_id && r.service_type_code === code) ?? null;
+      return (data ?? []).find((r) => r.client_id === shift.client_id && r.service_type_code === code) ?? null;
     },
-  });
-
-  const clockIn = useMutation({
-    mutationFn: async () => {
-      const gps = await getGPS();
-      const { data, error } = await (supabase as any).from("evv_timesheets").insert({
-        organization_id: shift.organization_id,
-        staff_id: userId,
-        client_id: shift.client_id,
-        utah_medicaid_provider_id: org?.dhhs_provider_id ?? "PENDING",
-        utah_medicaid_member_id: shift.client?.medicaid_id ?? "PENDING",
-        service_type_code: code || "RHS",
-        gps_in_coordinates: { lat: gps.lat, lng: gps.lng, ...(gps.accuracy !== undefined && { accuracy: gps.accuracy }), advisory: gps.lat === 0 && gps.lng === 0 },
-        shift_entry_type: "Client_Profile_Pass",
-        status: "Active",
-      }).select().single();
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => { toast.success(`Clocked in — ${code}`); qc.invalidateQueries({ queryKey: ["evv-active"] }); },
-    onError: (e: any) => toast.error(e.message ?? "Clock-in failed"),
-  });
-
-  const clockOut = useMutation({
-    mutationFn: async () => {
-      if (!activePunch) return;
-      const outIso = new Date().toISOString();
-      const gps = await getGPS();
-      const { error } = await (supabase as any).from("evv_timesheets").update({
-        clock_out_timestamp: outIso,
-        gps_out_coordinates: { lat: gps.lat, lng: gps.lng, ...(gps.accuracy !== undefined && { accuracy: gps.accuracy }), advisory: gps.lat === 0 && gps.lng === 0 },
-        status: "Pending",
-        // Per-entry quarter-hour units (round-to-NEAREST); raw timestamps untouched.
-        billed_units: computeEntryUnits((activePunch as any).clock_in_timestamp, outIso),
-      }).eq("id", (activePunch as any).id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Clocked out");
-      void invalidateStaffCaseloadWork(qc);
-    },
-    onError: (e: any) => toast.error(e.message ?? "Clock-out failed"),
   });
 
   return (
@@ -309,13 +249,17 @@ function ActiveClockPanel({ shift, userId }: { shift: Shift; userId?: string }) 
         )}
       </div>
       <div className="mt-3 flex gap-2">
-        {activePunch ? (
-          <Button onClick={() => clockOut.mutate()} disabled={clockOut.isPending} className="flex-1 min-h-[44px]" variant="destructive">
-            Clock out
-          </Button>
+        {!code ? (
+          <p className="text-xs text-muted-foreground">This shift has no service code, so it can't be clocked into. Ask your scheduler.</p>
         ) : (
-          <Button onClick={() => clockIn.mutate()} disabled={clockIn.isPending || !userId} className="flex-1 min-h-[44px]">
-            Clock in to {code || "shift"}
+          <Button asChild className="flex-1 min-h-[44px]" variant={activePunch ? "destructive" : "default"}>
+            <Link
+              to="/dashboard/workspace/$clientId"
+              params={{ clientId: shift.client_id }}
+              search={activePunch ? staffClockOutSearch(code) : { tab: "clock-in", code }}
+            >
+              {activePunch ? "Clock out" : `Clock in to ${code}`}
+            </Link>
           </Button>
         )}
       </div>
@@ -324,8 +268,9 @@ function ActiveClockPanel({ shift, userId }: { shift: Shift; userId?: string }) 
 }
 
 function RhsOverviewPanel({ shift }: { shift: Shift }) {
-  const code = shift.code?.code ?? "RHS";
+  const code = shift.code?.code ?? shift.job_code ?? "";
   const { data } = useQuery({
+    enabled: !!code,
     queryKey: ["rhs-overview", shift.client_id, code],
     queryFn: async () => {
       const { data: auth } = await supabase
@@ -592,43 +537,37 @@ function CalloutPanel({ shift, userId }: { shift: Shift; userId?: string }) {
         status: "open",
       }).select().single();
       if (error) throw error;
-      // Seed initial parallel escalation events (simulated channels — real SMS/voice wires later)
-      const seed = [
-        { step: 1, channel: "in_app", target_role: "manager", outcome: "sent", detail: "Push + in-app notification fanned out to all on-shift managers." },
-        { step: 1, channel: "system", target_role: "qualified_staff", outcome: "sent", detail: "Shift opened to qualified staff in parallel." },
-      ];
-      for (const e of seed) {
-        await (supabase as any).from("callout_escalation_events").insert({ organization_id: shift.organization_id, callout_id: co.id, ...e });
-      }
+      // Until the full call-out flow ships, a call-out only notifies the scheduler.
+      // The event row records what actually happened, never an alert that was not sent.
+      const startLabel = new Date(shift.starts_at).toLocaleString("en-US", {
+        timeZone: "America/Denver", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+      });
+      const sent = await notify(supabase, {
+        organization_id: shift.organization_id,
+        recipient_role: "admin",
+        type: "callout",
+        urgency: urgency === "critical" ? "critical" : urgency === "high" ? "high" : "normal",
+        title: `Call-out: ${shift.code?.code ?? shift.job_code ?? "shift"} · ${startLabel}`,
+        body: reason.trim() || "A team member can't make their shift.",
+        link_to: "/dashboard/scheduler",
+        related_id: shift.id,
+        related_type: "scheduled_shift",
+      });
+      const { error: evErr } = await (supabase as any).from("callout_escalation_events").insert({
+        organization_id: shift.organization_id,
+        callout_id: co.id,
+        step: 1,
+        channel: "in_app",
+        target_role: "manager",
+        outcome: sent ? "sent" : "failed",
+        detail: sent ? "Scheduler notified in the app." : "Could not notify the scheduler. Tell them directly.",
+      });
+      if (evErr) console.error("[callout] event insert failed", evErr.message);
+      if (!sent) throw new Error("Your call-out was saved, but we could not notify the scheduler. Please tell them directly.");
       return co;
     },
-    onSuccess: () => { toast.success("Call-out received. Coverage search opened."); setReason(""); qc.invalidateQueries({ queryKey: ["callout", shift.id] }); },
+    onSuccess: () => { toast.success("Call-out received. Your scheduler has been notified."); setReason(""); qc.invalidateQueries({ queryKey: ["callout", shift.id] }); },
     onError: (e: any) => toast.error(e.message ?? "Call-out failed"),
-  });
-
-  const escalate = useMutation({
-    mutationFn: async () => {
-      if (!existing) return;
-      const nextStep = (events?.length ?? 0) + 1;
-      const ladder = [
-        { channel: "sms", target_role: "manager", detail: "SMS sent to primary manager." },
-        { channel: "voice", target_role: "manager", detail: "Automated voice call placed to primary manager." },
-        { channel: "sms", target_role: "director", detail: "Escalated to backup manager/director via SMS." },
-        { channel: "voice", target_role: "director", detail: "Escalated to director via voice call." },
-      ];
-      const step = ladder[Math.min(nextStep - 2, ladder.length - 1)];
-      const { error } = await (supabase as any).from("callout_escalation_events").insert({
-        organization_id: shift.organization_id,
-        callout_id: existing.id,
-        step: nextStep,
-        channel: step.channel,
-        target_role: step.target_role,
-        outcome: "sent",
-        detail: step.detail,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["callout-events", existing?.id] }),
   });
 
   const acknowledge = useMutation({
@@ -694,11 +633,10 @@ function CalloutPanel({ shift, userId }: { shift: Shift; userId?: string }) {
           ))}
         </ol>
         <div className="mt-3 flex flex-wrap gap-2">
-          {existing.status === "open" && <Button size="sm" variant="outline" onClick={() => escalate.mutate()}>Escalate next step</Button>}
           {existing.status === "open" && <Button size="sm" onClick={() => acknowledge.mutate()}>Manager acknowledge</Button>}
           {existing.status === "manager_acknowledged" && <Button size="sm" onClick={() => lockCoverage.mutate()}>Lock coverage & close</Button>}
         </div>
-        <p className="mt-2 text-[10px] text-amber-900">Closes only when a manager acknowledges AND coverage is locked. Channels are simulated; real SMS/voice wires in when the messaging provider is connected.</p>
+        <p className="mt-2 text-[10px] text-amber-900">Closes only when a manager acknowledges AND coverage is locked.</p>
       </section>
     );
   }
@@ -706,7 +644,7 @@ function CalloutPanel({ shift, userId }: { shift: Shift; userId?: string }) {
   return (
     <section className="rounded-xl border border-border bg-card p-4">
       <h2 className="text-sm font-semibold flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-amber-600" /> Can't make this shift?</h2>
-      <p className="text-xs text-muted-foreground mt-1">Calling out opens the shift to qualified staff in parallel and pings managers with an acknowledgment-required escalation ladder. Urgency scales by shift proximity (currently <strong>{urgency}</strong>).</p>
+      <p className="text-xs text-muted-foreground mt-1">Calling out notifies your scheduler, who decides how to cover the shift. Urgency scales by shift proximity (currently <strong>{urgency}</strong>).</p>
       <Textarea rows={2} placeholder="Reason (optional)" value={reason} onChange={(e) => setReason(e.target.value)} className="mt-2 text-sm" />
       <Button variant="destructive" size="sm" className="mt-2" onClick={() => callOut.mutate()} disabled={callOut.isPending || !userId}>
         Call out

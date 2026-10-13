@@ -7,7 +7,10 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { coerceScheduledShiftStatus } from "@/lib/scheduling/shift-status";
 import { denverWeekUtcBounds } from "@/lib/scheduler/recurrence";
-import { assignmentCoversCode, normalizeServiceCode } from "@/lib/assignment-codes";
+import { requireCategory } from "@/lib/access/require";
+import { assertShiftAllowed, collectShiftFailures } from "@/lib/scheduler/shift-checks";
+import { dayKey } from "@/lib/scheduler/time";
+import { notify } from "@/lib/scheduler/notify";
 
 const ShiftInput = z.object({
   id: z.string().uuid().optional(),
@@ -24,135 +27,22 @@ const ShiftInput = z.object({
 });
 export type ShiftInput = z.infer<typeof ShiftInput>;
 
-async function assertClientAuthorizedForCode(
-  supabase: any,
-  orgId: string,
-  clientId: string,
-  code: string,
-) {
-  const today = new Date().toISOString().slice(0, 10);
-  const { data, error } = await supabase
-    .from("client_billing_codes")
-    .select("id, service_end_date")
-    .eq("organization_id", orgId)
-    .eq("client_id", clientId)
-    .eq("service_code", code);
-  if (error) throw error;
-  const open = (data ?? []).some(
-    (r: { service_end_date: string | null }) =>
-      !r.service_end_date || r.service_end_date > today,
-  );
-  if (!open) {
-    throw new Error(
-      `Client isn't authorized for ${code}. Add the code on the client profile first.`,
-    );
-  }
-}
-
-async function assertStaffOnCaseload(
-  supabase: any,
-  orgId: string,
-  staffId: string,
-  clientId: string,
-  code: string,
-  staffName: string,
-  clientName: string,
-) {
-  const { data, error } = await supabase
-    .from("staff_assignments")
-    .select("id, service_codes")
-    .eq("organization_id", orgId)
-    .eq("staff_id", staffId)
-    .eq("client_id", clientId)
-    .maybeSingle();
-  if (error) throw error;
-  if (!data) {
-    throw new Error(
-      `You can't schedule this — ${staffName} isn't authorized to work with ${clientName}.`,
-    );
-  }
-  // The assignment lists its codes explicitly; NULL / [] covers nothing.
-  if (!assignmentCoversCode((data as { service_codes: string[] | null }).service_codes, code)) {
-    throw new Error(
-      `You can't schedule this — ${staffName} isn't assigned ${normalizeServiceCode(code)} for ${clientName}.`,
-    );
-  }
-}
-
-async function assertStaffNotOnTimeOff(
-  supabase: any,
-  orgId: string,
-  staffId: string,
-  startsAt: string,
-  staffName: string,
-) {
-  const day = startsAt.slice(0, 10);
-  const { data, error } = await supabase
-    .from("time_off_requests")
-    .select("id")
-    .eq("organization_id", orgId)
-    .eq("staff_id", staffId)
-    .eq("status", "approved")
-    .lte("start_date", day)
-    .gte("end_date", day)
-    .maybeSingle();
-  if (error) throw error;
-  if (data) throw new Error(`${staffName} is off that day.`);
-}
-
 export const saveShift = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: ShiftInput) => ShiftInput.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as any;
     if (!supabase || !userId) return { id: "" };
+    await requireCategory(supabase, userId, data.organization_id, "scheduling", "edit");
 
-    await assertClientAuthorizedForCode(
-      supabase,
-      data.organization_id,
-      data.client_id,
-      data.job_code,
-    );
-
-    if (data.staff_id) {
-      // Resolve names for friendlier errors
-      const [{ data: client }, { data: staff }] = await Promise.all([
-        supabase
-          .from("clients")
-          .select("first_name, last_name")
-          .eq("id", data.client_id)
-          .maybeSingle(),
-        supabase
-          .from("profiles")
-          .select("first_name, last_name, full_name")
-          .eq("id", data.staff_id)
-          .maybeSingle(),
-      ]);
-      const staffName =
-        (staff?.full_name && String(staff.full_name).trim()) ||
-        [staff?.first_name, staff?.last_name].filter(Boolean).join(" ").trim() ||
-        "That staff member";
-      const clientName =
-        [client?.first_name, client?.last_name].filter(Boolean).join(" ").trim() ||
-        "this client";
-
-      await assertStaffOnCaseload(
-        supabase,
-        data.organization_id,
-        data.staff_id,
-        data.client_id,
-        data.job_code,
-        staffName,
-        clientName,
-      );
-      await assertStaffNotOnTimeOff(
-        supabase,
-        data.organization_id,
-        data.staff_id,
-        data.starts_at,
-        staffName,
-      );
-    }
+    // Same checks for every path that puts someone on a client's shift.
+    await assertShiftAllowed(supabase, {
+      organization_id: data.organization_id,
+      staff_id: data.staff_id,
+      client_id: data.client_id,
+      code: data.job_code,
+      starts_at: data.starts_at,
+    });
 
     const payload = {
       organization_id: data.organization_id,
@@ -170,6 +60,10 @@ export const saveShift = createServerFn({ method: "POST" })
       created_by: userId,
     };
 
+    // Overlapping services for one client are refused, on insert and on update.
+    const { assertNoBillingConflict } = await import("@/lib/scheduling/shift-commit");
+    await assertNoBillingConflict(supabase, { ...payload, id: data.id } as never);
+
     if (data.id) {
       const { error } = await supabase
         .from("scheduled_shifts")
@@ -179,8 +73,6 @@ export const saveShift = createServerFn({ method: "POST" })
       if (error) throw error;
       return { id: data.id };
     }
-    const { gateScheduledShiftInsert } = await import("@/lib/scheduling/shift-commit");
-    await gateScheduledShiftInsert(supabase, [payload as never], { mode: "bulk_auto", userId });
     const { data: row, error } = await supabase
       .from("scheduled_shifts")
       .insert(payload)
@@ -198,6 +90,7 @@ export const deleteShift = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as any;
     if (!supabase || !userId) return { ok: false };
+    await requireCategory(supabase, userId, data.organization_id, "scheduling", "edit");
     const { error } = await supabase
       .from("scheduled_shifts")
       .delete()
@@ -217,27 +110,68 @@ export const publishWeek = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as any;
-    if (!supabase || !userId) return { shifts: 0, staff: 0 };
+    if (!supabase || !userId) return { ok: true as const, shifts: 0, staff: 0, failures: [] };
+    await requireCategory(supabase, userId, data.organization_id, "scheduling", "edit");
     const { startIso, endExclusiveIso } = denverWeekUtcBounds(data.week_start_iso);
-    const start = new Date(startIso);
+
+    const { data: pending, error: pErr } = await supabase
+      .from("scheduled_shifts")
+      .select("id, organization_id, staff_id, client_id, service_code, job_code, starts_at")
+      .eq("organization_id", data.organization_id)
+      .eq("published", false)
+      .neq("status", "cancelled")
+      .gte("starts_at", startIso)
+      .lt("starts_at", endExclusiveIso)
+      .not("staff_id", "is", null);
+    if (pErr) throw pErr;
+    const toPublish = (pending ?? []) as Array<{
+      id: string; organization_id: string; staff_id: string; client_id: string | null;
+      service_code: string | null; job_code: string | null; starts_at: string;
+    }>;
+
+    // Publish nothing unless every shift passes the same checks saveShift runs.
+    const failed = await collectShiftFailures(
+      supabase,
+      toPublish.map((r) => ({
+        id: r.id,
+        organization_id: r.organization_id,
+        staff_id: r.staff_id,
+        client_id: r.client_id,
+        code: (r.service_code ?? r.job_code ?? "").toUpperCase() || null,
+        starts_at: r.starts_at,
+      })),
+    );
+    if (failed.length > 0) {
+      const byId = new Map(toPublish.map((r) => [r.id, r] as const));
+      return {
+        ok: false as const,
+        shifts: 0,
+        staff: 0,
+        failures: failed.map((f) => ({
+          shift_id: f.shift_id,
+          day: dayKey(byId.get(f.shift_id)!.starts_at),
+          code: byId.get(f.shift_id)!.service_code ?? byId.get(f.shift_id)!.job_code,
+          reason: f.reason,
+        })),
+      };
+    }
+
     const { data: rows, error } = await supabase
       .from("scheduled_shifts")
       .update({ published: true, status: "published" })
-      .eq("organization_id", data.organization_id)
-      .eq("published", false)
-      .gte("starts_at", startIso)
-      .lt("starts_at", endExclusiveIso)
-      .not("staff_id", "is", null)
+      .in("id", toPublish.map((r) => r.id))
       .select("id, staff_id");
     if (error) throw error;
     const byStaff = new Map<string, number>();
     for (const r of rows ?? []) {
-      const sid = (r as any).staff_id as string | null;
+      const sid = (r as { staff_id: string | null }).staff_id;
       if (!sid) continue;
       byStaff.set(sid, (byStaff.get(sid) ?? 0) + 1);
     }
     if (byStaff.size > 0) {
-      const weekLabel = start.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      const weekLabel = new Date(startIso).toLocaleDateString("en-US", {
+        timeZone: "America/Denver", month: "short", day: "numeric",
+      });
       const notifs = Array.from(byStaff.entries()).map(([staffId, count]) => ({
         organization_id: data.organization_id,
         recipient_role: "staff",
@@ -248,9 +182,9 @@ export const publishWeek = createServerFn({ method: "POST" })
         body: `You have ${count} new or updated shift${count === 1 ? "" : "s"} for the week of ${weekLabel}.`,
         link_to: "/dashboard/schedule",
       }));
-      await supabase.from("notifications").insert(notifs);
+      await notify(supabase, notifs);
     }
-    return { shifts: rows?.length ?? 0, staff: byStaff.size };
+    return { ok: true as const, shifts: rows?.length ?? 0, staff: byStaff.size, failures: [] };
   });
 
 export const setAdminTimeOff = createServerFn({ method: "POST" })
@@ -267,6 +201,7 @@ export const setAdminTimeOff = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as any;
     if (!supabase || !userId) return { ok: false };
+    await requireCategory(supabase, userId, data.organization_id, "scheduling", "edit");
     if (data.on) {
       // Insert an approved single-day time off (admin-initiated).
       const { error } = await supabase.from("time_off_requests").insert({
@@ -309,6 +244,7 @@ export const saveAdminHours = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as any;
     if (!supabase || !userId) return { ok: false };
+    await requireCategory(supabase, userId, data.organization_id, "scheduling", "edit");
     const { error } = await supabase
       .from("clients")
       .update({ admin_hours_per_week: data.hours })
@@ -346,6 +282,7 @@ export const saveDayProgramSession = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as any;
     if (!supabase || !userId) return { id: "" };
+    await requireCategory(supabase, userId, data.organization_id, "scheduling", "edit");
     if (data.id) {
       const { error } = await supabase
         .from("day_program_sessions")
@@ -378,6 +315,18 @@ export const saveDayProgramSession = createServerFn({ method: "POST" })
     return { id: row.id as string };
   });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function requireSessionEdit(supabase: any, userId: string, sessionId: string) {
+  const { data: session, error } = await supabase
+    .from("day_program_sessions")
+    .select("organization_id")
+    .eq("id", sessionId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!session) throw new Error("That session no longer exists.");
+  await requireCategory(supabase, userId, session.organization_id, "scheduling", "edit");
+}
+
 export const markAttendance = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: {
@@ -394,6 +343,7 @@ export const markAttendance = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as any;
     if (!supabase || !userId) return { ok: false };
+    await requireSessionEdit(supabase, userId, data.session_id);
     const { error } = await supabase
       .from("day_program_attendance")
       .upsert(
@@ -419,6 +369,7 @@ export const addSessionStaff = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as any;
     if (!supabase || !userId) return { ok: false };
+    await requireSessionEdit(supabase, userId, data.session_id);
     const { error } = await supabase
       .from("day_program_session_staff")
       .upsert(

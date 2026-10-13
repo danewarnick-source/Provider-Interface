@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { notify } from "@/lib/scheduler/notify";
 
 // Staff response to a published shift. Writes status and, on decline, files an
 // admin notification + appends the reason to the shift notes field.
@@ -41,7 +42,7 @@ export const respondToShift = createServerFn({ method: "POST" })
       const startLabel = new Date(shift.starts_at).toLocaleString(undefined, {
         weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
       });
-      await supabase.from("notifications").insert({
+      await notify(supabase, {
         organization_id: shift.organization_id,
         recipient_role: "admin",
         type: "shift_declined",
@@ -100,7 +101,7 @@ export const publishShiftsWithNotify = createServerFn({ method: "POST" })
       related_type: "scheduled_shift",
     }));
     if (inserts.length > 0) {
-      await supabase.from("notifications").insert(inserts);
+      await notify(supabase, inserts);
     }
     return { ok: true, count: data.ids.length, notified: inserts.length };
   });

@@ -121,8 +121,9 @@ function dayStr(d: Date) {
 function SchedulerPage() {
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id;
-  const { can, isLoading: permLoading } = useAccess();
-  const canManageSchedule = can("create_shifts");
+  const { canCategory, isLoading: permLoading } = useAccess();
+  const canViewSchedule = canCategory("scheduling", "view");
+  const canEditSchedule = canCategory("scheduling", "edit");
   const [tab, setTab] = useState<Tab>("schedule");
   const [view, setView] = useState<ViewMode>("day");
   const [anchor, setAnchor] = useState<Date>(() => {
@@ -153,9 +154,18 @@ function SchedulerPage() {
 
   const qc = useQueryClient();
   const publish = useServerFn(publishWeek);
+  const [publishFailures, setPublishFailures] = useState<
+    Array<{ shift_id: string; day: string; code: string | null; reason: string }>
+  >([]);
   const publishMut = useMutation({
     mutationFn: () => publish({ data: { organization_id: orgId!, week_start_iso: startOfWeek(anchor).toISOString() } }),
-    onSuccess: (r: { shifts: number; staff: number }) => {
+    onSuccess: (r) => {
+      if (!r.ok) {
+        setPublishFailures(r.failures);
+        toast.error("Nothing was published. Fix the shifts listed below first.");
+        return;
+      }
+      setPublishFailures([]);
       toast.success(`Published — ${r.shifts} shifts sent to ${r.staff} staff.`);
       qc.invalidateQueries({ queryKey: ["scheduler-data"] });
     },
@@ -165,8 +175,8 @@ function SchedulerPage() {
   if (permLoading) {
     return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
   }
-  if (!canManageSchedule) {
-    // Staff without create_shifts land on caseload / punch pad, not the
+  if (!canViewSchedule) {
+    // Staff without scheduling view land on caseload / punch pad, not the
     // admin scheduler (and not a deleted voice-clock screen).
     return <Navigate to="/dashboard" replace />;
   }
@@ -182,7 +192,7 @@ function SchedulerPage() {
           <TabBtn label="Staff view" active={tab === "staff-view"} onClick={() => setTab("staff-view")} />
         </div>
         <div className="flex-1" />
-        {tab === "schedule" && (
+        {tab === "schedule" && canEditSchedule && (
           <button
             onClick={() => publishMut.mutate()}
             disabled={publishMut.isPending || !orgId}
@@ -192,6 +202,17 @@ function SchedulerPage() {
           </button>
         )}
       </div>
+
+      {publishFailures.length > 0 && (
+        <div role="alert" className="border-b border-[var(--hive-border)] bg-[#fff7e6] px-4 py-3 text-sm">
+          <div className="font-semibold">Nothing was published. These shifts need fixing first:</div>
+          <ul className="mt-1 list-disc pl-5">
+            {publishFailures.map((f) => (
+              <li key={f.shift_id}>{f.day}{f.code ? ` ${f.code}` : ""}: {f.reason}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Sub-toolbar — date nav + view */}
       {tab !== "staff-view" && (

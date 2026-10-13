@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./use-auth";
+import { isStaleOpenPunch } from "@/lib/scheduler/open-punch";
 
 export type ActiveShift = {
   id: string;
@@ -11,12 +12,11 @@ export type ActiveShift = {
   evv_live: boolean;
 };
 
-/**
- * Single global source for the staff member's currently-open EVV timesheet.
- * Drives the persistent clocked-in status bar, caseload "on the clock" badge,
- * and the Time Clock screen so they all share the same client/code/timer.
- */
-export function useActiveShift() {
+export type StaleOpenPunch = ActiveShift;
+
+type OpenPunch = ActiveShift & { stale: boolean };
+
+function useOpenPunch<T>(select: (p: OpenPunch | null) => T) {
   const { user } = useAuth();
 
   return useQuery({
@@ -24,7 +24,8 @@ export function useActiveShift() {
     queryKey: ["active-shift", user?.id],
     refetchInterval: 30_000,
     refetchOnWindowFocus: true,
-    queryFn: async (): Promise<ActiveShift | null> => {
+    select,
+    queryFn: async (): Promise<OpenPunch | null> => {
       const { data, error } = await supabase
         .from("evv_timesheets")
         .select(
@@ -51,10 +52,27 @@ export function useActiveShift() {
         service_type_code: row.service_type_code,
         clock_in_timestamp: row.clock_in_timestamp,
         evv_live: !!row.gps_in_coordinates?.latitude,
+        stale: isStaleOpenPunch(row.clock_in_timestamp),
         client_name: row.clients
           ? `${row.clients.first_name} ${row.clients.last_name}`.trim()
           : "Client",
       };
     },
   });
+}
+
+/**
+ * Single global source for the staff member's currently-open EVV timesheet.
+ * Drives the persistent clocked-in status bar, caseload "on the clock" badge,
+ * and the Time Clock screen so they all share the same client/code/timer.
+ * An open punch left over from a previous day is NOT the current shift; see
+ * useStaleOpenPunch.
+ */
+export function useActiveShift() {
+  return useOpenPunch((p): ActiveShift | null => (p && !p.stale ? p : null));
+}
+
+/** An open punch from a previous day that needs fixing ("You have an open punch from <date>"). */
+export function useStaleOpenPunch() {
+  return useOpenPunch((p): StaleOpenPunch | null => (p && p.stale ? p : null));
 }

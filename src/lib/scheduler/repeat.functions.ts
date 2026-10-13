@@ -11,26 +11,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { newShiftStatus } from "@/lib/scheduling/shift-status";
+import { projectShifts, type ShiftRow } from "@/lib/scheduler/repeat-project";
 import { expandRecurringOccurrences, occurrenceSlotKey } from "@/lib/scheduler/recurrence";
-
-type ShiftRow = {
-  id: string;
-  staff_id: string | null;
-  client_id: string;
-  service_code: string | null;
-  job_code: string | null;
-  starts_at: string;
-  ends_at: string;
-  shift_type: string | null;
-  is_awake_overnight: boolean | null;
-  notes: string | null;
-};
-
-function startOfDay(iso: string): Date {
-  const d = new Date(iso);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
 
 async function loadSourceShifts(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -48,42 +30,6 @@ async function loadSourceShifts(
     .order("starts_at");
   if (error) throw error;
   return (data ?? []) as ShiftRow[];
-}
-
-// Weekday-aligned mapping: each source shift lands on the matching weekday
-// in the target week. Time-of-day, duration, staff, client, code preserved.
-// `targetWeekStartIso` is the Sunday of the target week.
-function projectShifts(
-  shifts: ShiftRow[],
-  targetWeekStartIso: string,
-): Array<ShiftRow & { target_starts_at: string; target_ends_at: string; target_day: string }> {
-  const out: Array<ShiftRow & { target_starts_at: string; target_ends_at: string; target_day: string }> = [];
-  const targetWeekStart = startOfDay(targetWeekStartIso);
-  // Track per-(client, weekday-hh:mm) so a source that has multiple Tuesdays
-  // (i.e. month source) doesn't collapse onto a single target Tuesday slot.
-  const usedKey = new Set<string>();
-  // Sort sources by date so earliest occurrence wins the target slot.
-  const ordered = [...shifts].sort((a, b) => a.starts_at.localeCompare(b.starts_at));
-  for (const s of ordered) {
-    const srcStart = new Date(s.starts_at);
-    const srcEnd = new Date(s.ends_at);
-    const weekday = srcStart.getDay();
-    const target = new Date(targetWeekStart);
-    target.setDate(target.getDate() + weekday);
-    target.setHours(srcStart.getHours(), srcStart.getMinutes(), srcStart.getSeconds(), 0);
-    const durationMs = srcEnd.getTime() - srcStart.getTime();
-    const targetEnd = new Date(target.getTime() + durationMs);
-    const key = `${s.client_id}|${(s.service_code ?? s.job_code ?? "").toUpperCase()}|${weekday}|${srcStart.getHours()}:${srcStart.getMinutes()}|${s.staff_id ?? ""}`;
-    if (usedKey.has(key)) continue;
-    usedKey.add(key);
-    out.push({
-      ...s,
-      target_starts_at: target.toISOString(),
-      target_ends_at: targetEnd.toISOString(),
-      target_day: target.toISOString().slice(0, 10),
-    });
-  }
-  return out;
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -205,8 +151,8 @@ export const applyRepeat = createServerFn({ method: "POST" })
       });
     }
     if (rows.length > 0) {
-      const { gateScheduledShiftInsert } = await import("@/lib/scheduling/shift-commit");
-      await gateScheduledShiftInsert(supabase, rows as never, { mode: "bulk_auto", userId });
+      const { assertNoBillingConflict } = await import("@/lib/scheduling/shift-commit");
+      await assertNoBillingConflict(supabase, rows as never);
       const { error } = await supabase.from("scheduled_shifts").insert(rows);
       if (error) throw error;
       inserted = rows.length;
@@ -315,8 +261,8 @@ export const createRecurringShifts = createServerFn({ method: "POST" })
     );
     if (toInsert.length === 0) return { inserted: 0 };
 
-    const { gateScheduledShiftInsert } = await import("@/lib/scheduling/shift-commit");
-    await gateScheduledShiftInsert(supabase, toInsert as never, { mode: "bulk_auto", userId });
+    const { assertNoBillingConflict } = await import("@/lib/scheduling/shift-commit");
+    await assertNoBillingConflict(supabase, toInsert as never);
     const { error } = await supabase.from("scheduled_shifts").insert(toInsert);
     if (error) throw error;
     return { inserted: toInsert.length };

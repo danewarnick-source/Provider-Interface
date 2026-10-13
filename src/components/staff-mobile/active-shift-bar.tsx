@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { useActiveShift } from "@/hooks/use-active-shift";
+import { useActiveShift, useStaleOpenPunch } from "@/hooks/use-active-shift";
+import { openPunchDateLabel } from "@/lib/scheduler/open-punch";
 import { useGeneralShift } from "@/hooks/use-general-shift";
 import { useLivePayPeriod } from "@/hooks/use-nectar-pay-period";
 import {
@@ -37,6 +38,7 @@ function fmtElapsed(ms: number) {
  */
 export function ActiveShiftBar({ framed = false }: { framed?: boolean }) {
   const { data: active } = useActiveShift();
+  const { data: stale } = useStaleOpenPunch();
   const { shift: general, stop } = useGeneralShift();
   const navigate = useNavigate();
   const [now, setNow] = useState(Date.now());
@@ -54,6 +56,37 @@ export function ActiveShiftBar({ framed = false }: { framed?: boolean }) {
     const t = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(t);
   }, [showing]);
+
+  if (!showing && stale) {
+    return (
+      <div
+        data-staff-clock-bar
+        className={`${framed ? "absolute inset-x-0 z-[45]" : "fixed inset-x-0 z-[45] md:hidden"} bg-amber-600 text-white shadow-[0_-4px_12px_-6px_rgba(0,0,0,0.35)]`}
+        style={{ bottom: STAFF_CLOCK_BAR_OFFSET_CSS }}
+        role="status"
+        aria-live="polite"
+      >
+        <button
+          type="button"
+          onClick={() =>
+            navigate({
+              to: "/dashboard/workspace/$clientId",
+              params: { clientId: stale.client_id },
+              search: staffClockOutSearch(stale.service_type_code),
+            })
+          }
+          className="flex w-full items-center gap-3 px-3 py-2 text-left"
+        >
+          <p className="min-w-0 flex-1 text-[13px] font-semibold">
+            You have an open punch from {openPunchDateLabel(stale.clock_in_timestamp)}.
+          </p>
+          <span className="shrink-0 rounded-md bg-white/20 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide">
+            Fix it
+          </span>
+        </button>
+      </div>
+    );
+  }
 
   if (!showing) return null;
 

@@ -15,19 +15,13 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { previewRepeat, applyRepeat } from "@/lib/scheduler/repeat.functions";
+import { addDaysKey, dayKey, parseLocalDate, startOfWeek } from "@/lib/scheduler/time";
 
 type SourceMode = "prev_week" | "prev_month" | "pick_week";
 
-function startOfDay(d: Date) { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
-function startOfWeek(d: Date) { const x = startOfDay(d); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; } // Monday-aligned (Mon=0)
-function startOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth(), 1); }
-function addDays(d: Date, n: number) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+function addDays(d: Date, n: number) { return parseLocalDate(addDaysKey(dayKey(d), n)); }
 function fmtDay(d: Date) {
   return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-}
-function dayKey(d: Date) {
-  const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, "0"); const dd = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${dd}`;
 }
 
 export function RepeatShiftsDialog({
@@ -59,11 +53,12 @@ export function RepeatShiftsDialog({
       return { start, end: addDays(start, 7) };
     }
     if (mode === "prev_month") {
-      const prevMonth = new Date(targetWeekStart.getFullYear(), targetWeekStart.getMonth() - 1, 1);
-      const monthEnd = new Date(prevMonth.getFullYear(), prevMonth.getMonth() + 1, 1);
+      const [y, m] = dayKey(targetWeekStart).split("-").map(Number);
+      const prevMonth = parseLocalDate(`${m === 1 ? y - 1 : y}-${String(m === 1 ? 12 : m - 1).padStart(2, "0")}-01`);
+      const monthEnd = parseLocalDate(`${y}-${String(m).padStart(2, "0")}-01`);
       return { start: prevMonth, end: monthEnd };
     }
-    const start = startOfWeek(new Date(pickedDate));
+    const start = startOfWeek(parseLocalDate(pickedDate));
     return { start, end: addDays(start, 7) };
   }, [mode, pickedDate, targetWeekStart]);
 
