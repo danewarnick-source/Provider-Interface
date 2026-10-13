@@ -3,6 +3,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   addDaysKey,
+  daysBetween,
   dayKey,
   isInDayRange,
   parseLocalDate,
@@ -87,4 +88,11 @@ test("shiftByDays keeps wall-clock across DST", () => {
   assert.equal(shiftByDays("2026-10-30T15:00:00Z", 3), "2026-11-02T16:00:00.000Z");
   // same weekday one week later
   assert.equal(weekdayOf(dayKey(shiftByDays("2026-10-30T15:00:00Z", 7))), 5);
+});
+
+test("daysBetween counts calendar days across DST", () => {
+  assert.equal(daysBetween("2026-10-11", "2026-10-18"), 7);
+  assert.equal(daysBetween("2026-11-01", "2026-11-02"), 1); // fall back
+  assert.equal(daysBetween("2026-03-08", "2026-03-09"), 1); // spring forward
+  assert.equal(daysBetween("2026-10-18", "2026-10-11"), -7);
 });

@@ -28,6 +28,16 @@ export function addDaysKey(ymd: string, delta: number): string {
   return dt.toISOString().slice(0, 10);
 }
 
+/** Whole calendar days from `fromYmd` to `toYmd` (negative when earlier). */
+export function daysBetween(fromYmd: string, toYmd: string): number {
+  const a = parseYmd(fromYmd);
+  const b = parseYmd(toYmd);
+  if (!a || !b) throw new Error(`Invalid date: ${!a ? fromYmd : toYmd}`);
+  return Math.round(
+    (Date.UTC(b.year, b.month - 1, b.day) - Date.UTC(a.year, a.month - 1, a.day)) / 86_400_000,
+  );
+}
+
 /** Sunday = 0 … Saturday = 6 for a calendar day. */
 export function weekdayOf(ymd: string): number {
   const p = parseYmd(ymd);
