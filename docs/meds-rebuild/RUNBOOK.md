@@ -11,7 +11,7 @@ Result when done: the client's Health → Medications card has two tabs, **Medic
 ## HOW TO RUN THIS (Claude Code, read first)
 
 1. Read `CLAUDE.md` and obey it. Read this whole file once.
-2. Work on branch `meds-rebuild` (it is cut from `clients-rebuild` because the new client profile lives there). `git fetch` and check it out, then merge the latest `origin/main` into it (the Clients rebuild, its cleanup and Security hardening Part H are on `main` by now; confirm that first and stop if not). Never merge `staging` into it.
+2. Work on branch `meds-rebuild` (it is cut from `clients-rebuild` because the new client profile lives there). `git fetch` and check it out, then merge the latest `origin/clients-rebuild` into it so it starts from the newest client profile, including Security hardening Part CS (CS1–CS3). The meds rebuild ships **inside the Clients PR (#468)** so Jeff can test it on the Vercel preview before anything is live. Never merge `staging` or `main` into it.
 3. Run **M1 → M5 in order**. Before each step, also give the subagent that step's lines from "AUDIT ADDITIONS" at the end of this file; they are part of the step and its Done when. **Do not run M6** until Jeff says M1–M5 are on production `main` (M6 drops columns and tables).
 4. For each prompt: start a fresh subagent with the Standard Rules + that prompt only. It works on `meds-rebuild/mN-<name>` cut from the tip of `meds-rebuild`, and must pass before finishing:
    - `npm run build` (commit the regenerated `src/routeTree.gen.ts`)
@@ -20,7 +20,7 @@ Result when done: the client's Health → Medications card has two tabs, **Medic
    - the prompt's own "Done when" list
    Skip e2e (Jeff's rule). Open a PR into `meds-rebuild`, titled `Meds rebuild MN: <name>`. Body: what changed, files added and deleted, migrations applied, test results, anything skipped. If every check passes, squash-merge it into `meds-rebuild` and continue. If a check fails twice after honest fixes, write `BLOCKED: <reason>` at the top of the PR body and stop.
 5. The subagent returns only a ≤ 10-line report. Append it to `docs/meds-rebuild/PROGRESS.md` and commit. A new session reads PROGRESS.md and continues from the first prompt not marked merged.
-6. After M5, open one PR `meds-rebuild` → `staging`. Never merge into `staging` or `main` yourself.
+6. After M5, open one PR `meds-rebuild` → `clients-rebuild` titled `Client Medications rebuild (M1–M5)`, and when every check passes, merge it into `clients-rebuild` with "Create a merge commit" so PR #468 includes it. Add the meds click-through checks to #468's description. Never merge into `staging` or `main` yourself. Never merge into `staging` or `main` yourself.
 
 ---
 
