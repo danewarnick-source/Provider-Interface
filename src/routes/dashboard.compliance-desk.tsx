@@ -20,7 +20,7 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Check, Pencil, MapPin, Clock, Loader2, Download, AlertTriangle, Sparkles, X, Search, Database, Inbox, FolderArchive, Briefcase, MessageSquare, Target, CheckCircle2, ShieldCheck, ShieldAlert, Bot, Calendar, User as UserIcon, Users, Zap, Dna, Filter, AlertCircle, Flag, ChevronRight, ChevronsUpDown, ChevronsDownUp } from "lucide-react";
+import { Check, Pencil, MapPin, Clock, Loader2, Download, AlertTriangle, X, Search, Inbox, FolderArchive, Briefcase, MessageSquare, Target, CheckCircle2, ShieldCheck, ShieldAlert, Bot, Zap, Filter, AlertCircle, Flag, ChevronRight, ChevronsUpDown, ChevronsDownUp } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth as useAuthHook } from "@/hooks/use-auth";
 import { toast } from "sonner";
@@ -30,7 +30,6 @@ import {
 import { EVV_SERVICE_CODES, evvServiceLabel, isEvvLockedCode } from "@/lib/evv-codes";
 import { haversineFeet, isLikelyBadCoord, isDistanceSuspicious, formatDistanceFeet } from "@/lib/geo";
 import { UtahExportDialog, EvvExportArchiveStrip } from "@/components/evv/utah-export-dialog";
-import { searchTimesheetsByVector, backfillTimesheetEmbeddings } from "@/lib/vector-search.functions";
 import { ResidentialDailyTab } from "@/components/residential/residential-daily-tab";
 import { useNavigate } from "@tanstack/react-router";
 import { Home as HomeIcon } from "lucide-react";
@@ -531,10 +530,6 @@ async function hydrateStaff(list: Row[]) {
   return list;
 }
 
-// (Frontend regex constraint extractor removed — the hybrid LLM router on the
-// server now parses caregiver names, client names, dates, and times directly.)
-
-
 
 export function ComplianceDeskPage() {
   const { data: org } = useCurrentOrg();
@@ -545,16 +540,6 @@ export function ComplianceDeskPage() {
   const [editRow, setEditRow] = useState<Row | null>(null);
   const [reasonRow, setReasonRow] = useState<Row | null>(null);
   const [reviewRow, setReviewRow] = useState<Row | null>(null);
-
-  // 🤖 Hybrid AI Search — LLM routes the query into SQL filters
-  // (+ optional vector match). Submission is decoupled from keystrokes:
-  // nothing fires until the admin clicks "Ask NECTAR" or presses Enter.
-  const [aiInput, setAiInput] = useState("");
-  const [submitted, setSubmitted] = useState<{ query: string } | null>(null);
-  const isSearching = submitted !== null;
-
-  const runVectorSearch = useServerFn(searchTimesheetsByVector);
-  const runBackfill = useServerFn(backfillTimesheetEmbeddings);
 
   const pendingQ = useQuery({
     enabled: !!org?.organization_id,
@@ -661,33 +646,6 @@ export function ComplianceDeskPage() {
   });
   const needsReviewCount = needsReviewQ.data?.length ?? 0;
 
-  const vectorQ = useQuery({
-    enabled: isSearching && !!org?.organization_id,
-    queryKey: ["evv-hybrid-search", org?.organization_id, submitted?.query],
-    queryFn: async () => {
-      const res = await runVectorSearch({
-        data: {
-          query: submitted!.query,
-          organizationId: org!.organization_id,
-          matchCount: 50,
-        },
-      });
-      return res;
-    },
-    staleTime: 60_000,
-  });
-
-  const backfillM = useMutation({
-    mutationFn: async () => {
-      if (!org?.organization_id) throw new Error("No organization");
-      return runBackfill({ data: { organizationId: org.organization_id, limit: 25 } });
-    },
-    onSuccess: (res) => {
-      toast.success(`Indexed ${res.embedded} shift${res.embedded === 1 ? "" : "s"}. Remaining: ${res.remaining}.`);
-    },
-    onError: (e) => toast.error((e as Error).message),
-  });
-
   const approve = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("evv_timesheets").update({ status: "Approved" }).eq("id", id);
@@ -749,25 +707,6 @@ export function ComplianceDeskPage() {
     onError: (e) => toast.error((e as Error).message),
   });
 
-  const submitAiSearch = () => {
-    const q = aiInput.trim();
-    if (q.length === 0) {
-      toast.error("Type a question first.");
-      return;
-    }
-    setSubmitted({ query: q });
-  };
-  // 🧹 Reset rule — empties results, unmounts cross-tab grid, restores tabs.
-  const resetAiSearch = () => {
-    setSubmitted(null);
-    qc.cancelQueries({ queryKey: ["evv-hybrid-search"] });
-    qc.removeQueries({ queryKey: ["evv-hybrid-search"] });
-  };
-  const clearAiSearch = () => {
-    setAiInput("");
-    resetAiSearch();
-  };
-
   const [utahExportOpen, setUtahExportOpen] = useState(false);
   const staffNameMap = useMemo(() => {
     const m = new Map<string, string>();
@@ -808,136 +747,33 @@ export function ComplianceDeskPage() {
         </div>
       </header>
 
-      {/* 🤖 AI Vector Search — submits ONLY on click or Enter. No keystroke parsing. */}
-      <div className="space-y-1.5">
-        <div
-          className="group relative rounded-xl p-[1.5px] transition"
-          style={{
-            background: isSearching
-              ? "linear-gradient(135deg, hsl(var(--primary)/0.9), hsl(280 90% 60% / 0.9), hsl(190 95% 55% / 0.9))"
-              : "linear-gradient(135deg, hsl(var(--primary)/0.5), hsl(280 90% 60% / 0.4), hsl(190 95% 55% / 0.5))",
-          }}
-        >
-          <div className="flex items-center gap-2 rounded-[10px] bg-background px-3 py-2 shadow-sm focus-within:shadow-md">
-            <Sparkles className="h-4 w-4 shrink-0 text-primary" />
-            <Input
-              value={aiInput}
-              onChange={(e) => {
-                const val = e.target.value;
-                setAiInput(val);
-                if (val.trim().length === 0) {
-                  resetAiSearch();
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  submitAiSearch();
-                }
-              }}
-              placeholder="Search intent via Vector NECTAR… Try: 'Find shifts where they practiced money skills after 3pm last summer'"
-              className="h-9 flex-1 border-0 bg-transparent px-1 text-sm shadow-none focus-visible:ring-0"
-            />
-            {aiInput.length > 0 && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 shrink-0"
-                onClick={clearAiSearch}
-                aria-label="Clear search"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-            <Button
-              type="button"
-              onClick={submitAiSearch}
-              disabled={vectorQ.isFetching || aiInput.trim().length === 0}
-              className="h-8 shrink-0 bg-gradient-to-r from-primary to-fuchsia-600 text-primary-foreground hover:opacity-90"
-            >
-              {vectorQ.isFetching ? (
-                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Search className="mr-1.5 h-3.5 w-3.5" />
-              )}
-              Ask NECTAR
-            </Button>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-2 px-1">
-          {isSearching ? (
-            <p className="text-xs font-medium text-muted-foreground">
-              Showing cross-tab query results matching your criteria…
-            </p>
-          ) : (
-            <p className="text-[11px] text-muted-foreground">
-              Vector NECTAR scans every shift's narrative, PCSP goals, and geofence notes by meaning — no keyword match required.
-            </p>
-          )}
-          <Button
+      <nav className="inline-flex flex-wrap rounded-lg border border-border bg-card p-1 shadow-soft">
+        {[
+          { id: "pending" as const, label: "Pending Review", Icon: Inbox, count: undefined as number | undefined },
+          { id: "needs-review" as const, label: "Needs Review", Icon: AlertTriangle, count: needsReviewCount },
+          
+          { id: "reconcile" as const, label: "EVV Reconciliation", Icon: AlertCircle, count: reconcilePendingCount },
+          { id: "residential" as const, label: "Residential / Daily", Icon: HomeIcon, count: undefined },
+          { id: "evv-archive" as const, label: "State EVV Archive", Icon: FolderArchive, count: undefined },
+          { id: "non-evv-archive" as const, label: "Internal / Non-EVV Archive", Icon: Briefcase, count: undefined },
+        ].map(({ id, label, Icon, count }) => (
+          <button
+            key={id}
             type="button"
-            variant="ghost"
-            size="sm"
-            className="h-7 text-[11px] text-muted-foreground hover:text-foreground"
-            onClick={() => backfillM.mutate()}
-            disabled={backfillM.isPending}
-            title="Generate embeddings for shifts that haven't been indexed yet."
+            data-testid={`compliance-tab-${id}`}
+            onClick={() => setSub(id)}
+            className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition ${sub === id ? "bg-primary text-primary-foreground shadow-soft" : "text-muted-foreground hover:bg-[var(--hive-hover)] hover:text-foreground"}`}
           >
-            {backfillM.isPending ? (
-              <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-            ) : (
-              <Database className="mr-1 h-3 w-3" />
+            <Icon className="h-4 w-4" />
+            {label}
+            {count !== undefined && count > 0 && (
+              <span className="ml-1 rounded-full bg-warning/20 px-1.5 py-0.5 text-[10px] font-bold text-warning-foreground">{count}</span>
             )}
-            Index embeddings
-          </Button>
-        </div>
-      </div>
+          </button>
+        ))}
+      </nav>
 
-      {!isSearching && (
-        <nav className="inline-flex flex-wrap rounded-lg border border-border bg-card p-1 shadow-soft">
-          {[
-            { id: "pending" as const, label: "Pending Review", Icon: Inbox, count: undefined as number | undefined },
-            { id: "needs-review" as const, label: "Needs Review", Icon: AlertTriangle, count: needsReviewCount },
-            
-            { id: "reconcile" as const, label: "EVV Reconciliation", Icon: AlertCircle, count: reconcilePendingCount },
-            { id: "residential" as const, label: "Residential / Daily", Icon: HomeIcon, count: undefined },
-            { id: "evv-archive" as const, label: "State EVV Archive", Icon: FolderArchive, count: undefined },
-            { id: "non-evv-archive" as const, label: "Internal / Non-EVV Archive", Icon: Briefcase, count: undefined },
-          ].map(({ id, label, Icon, count }) => (
-            <button
-              key={id}
-              type="button"
-              data-testid={`compliance-tab-${id}`}
-              onClick={() => setSub(id)}
-              className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition ${sub === id ? "bg-primary text-primary-foreground shadow-soft" : "text-muted-foreground hover:bg-[var(--hive-hover)] hover:text-foreground"}`}
-            >
-              <Icon className="h-4 w-4" />
-              {label}
-              {count !== undefined && count > 0 && (
-                <span className="ml-1 rounded-full bg-warning/20 px-1.5 py-0.5 text-[10px] font-bold text-warning-foreground">{count}</span>
-              )}
-            </button>
-          ))}
-        </nav>
-      )}
-
-      {isSearching ? (
-        <UnifiedSearchResults
-          query={submitted!.query}
-          route={vectorQ.data?.route ?? null}
-          matches={vectorQ.data?.matches ?? []}
-          pending={pendingQ.data ?? []}
-          approved={approvedQ.data ?? []}
-          loading={vectorQ.isFetching || pendingQ.isLoading || approvedQ.isLoading}
-          error={vectorQ.error as Error | null}
-          onMap={setMapOpen}
-          onEdit={setEditRow}
-          onReason={setReasonRow}
-          onApprove={(id) => approve.mutate(id)}
-          approving={approve.isPending}
-        />
-      ) : sub === "pending" ? (
+      {sub === "pending" ? (
         <div className="space-y-4">
           <PendingTable
             title="Pending EVV Shifts"
@@ -1041,212 +877,6 @@ export function ComplianceDeskPage() {
     </div>
   );
 }
-
-// 🤖 Unified vector-search results renderer.
-// Receives the ranked id list from pgvector RPC and renders the corresponding
-// Row objects in the existing TSheets-style split-block layout.
-function UnifiedSearchResults({
-  query, route, matches, pending, approved, loading, error,
-  onMap, onEdit, onReason, onApprove, approving,
-}: {
-  query: string;
-  route: {
-    caregiver_name: string | null;
-    client_name: string | null;
-    hour_min: number | null;
-    date_from: string | null;
-    date_to: string | null;
-    requires_semantic: boolean;
-  } | null;
-  matches: Array<{ id: string; similarity: number }>;
-  pending: Row[];
-  approved: Row[];
-  loading: boolean;
-  error: Error | null;
-  onMap: (r: Row) => void;
-  onEdit: (r: Row) => void;
-  onReason: (r: Row) => void;
-  onApprove: (id: string) => void;
-  approving: boolean;
-}) {
-  const rowMap = useMemo(() => {
-    const m = new Map<string, Row>();
-    for (const r of pending) m.set(r.id, r);
-    for (const r of approved) m.set(r.id, r);
-    return m;
-  }, [pending, approved]);
-
-  const ranked = useMemo(() => {
-    const out: Array<{ row: Row; similarity: number }> = [];
-    for (const m of matches) {
-      const row = rowMap.get(m.id);
-      if (row) out.push({ row, similarity: m.similarity });
-    }
-    return out;
-  }, [matches, rowMap]);
-
-  const exp = useRowExpansion();
-  const { toggleWithAudit } = useEvvTimesheetPhiAudit();
-  const allIds = useMemo(() => ranked.map((r) => r.row.id), [ranked]);
-
-  return (
-    <section className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          <Bot className="h-4 w-4" /> Vector NECTAR Cross-Tab Results
-        </h2>
-        <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-          <Badge variant="secondary" className="font-mono max-w-[260px] truncate" title={query}>
-            {query}
-          </Badge>
-          {route?.caregiver_name && (
-            <Badge variant="outline" className="font-mono gap-1"><UserIcon className="h-3 w-3" />{route.caregiver_name}</Badge>
-          )}
-          {route?.client_name && (
-            <Badge variant="outline" className="font-mono gap-1"><Users className="h-3 w-3" />{route.client_name}</Badge>
-          )}
-          {route?.date_from && route?.date_to && (
-            <Badge variant="outline" className="font-mono gap-1">
-              <Calendar className="h-3 w-3" />
-              {new Date(route.date_from).toLocaleDateString()} → {new Date(route.date_to).toLocaleDateString()}
-            </Badge>
-          )}
-          {route?.hour_min != null && (
-            <Badge variant="outline" className="font-mono gap-1"><Clock className="h-3 w-3" />≥ {route.hour_min}:00</Badge>
-          )}
-          {route && (
-            <Badge variant="outline" className="font-mono gap-1">
-              {route.requires_semantic ? <><Dna className="h-3 w-3" /> Semantic + SQL</> : <><Zap className="h-3 w-3" /> SQL only</>}
-            </Badge>
-          )}
-          <Badge variant="outline" className="font-mono">{ranked.length} match{ranked.length === 1 ? "" : "es"}</Badge>
-        </div>
-      </div>
-
-
-      {error && (
-        <div className="mb-3 flex items-center gap-2 rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive">
-          <AlertTriangle className="h-3.5 w-3.5" /> {error.message}
-        </div>
-      )}
-
-      <div className="mb-2 flex justify-end">
-        <ExpandControls exp={exp} ids={allIds} />
-      </div>
-
-      <div className="overflow-x-auto [&_thead_th]:h-10 [&_thead_th]:whitespace-nowrap [&_thead_th]:text-[13px] [&_thead_th]:uppercase [&_thead_th]:tracking-wider [&_thead_th]:font-semibold [&_thead_th]:text-muted-foreground [&_tbody_td]:text-sm [&_tbody_td]:align-middle">
-        <Table>
-          <TableHeader>
-                  <TableRow className="[&>td]:border-b-0">
-              <TableHead className="w-8" />
-              <TableHead>Score</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Caregiver</TableHead>
-              <TableHead>Client</TableHead>
-              <TableHead>Service</TableHead>
-              <TableHead>In → Out</TableHead>
-              <TableHead>Duration</TableHead>
-              <TableHead>GPS</TableHead>
-              <TableHead>Geofence Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              Array.from({ length: 4 }).map((_, i) => (
-                <TableRow key={`sk-${i}`}>
-                  <TableCell colSpan={12} className="py-3">
-                    <div className="h-12 w-full animate-pulse rounded-md bg-muted/60" />
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : ranked.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={12} className="py-10 text-center text-sm text-muted-foreground">
-                  No conceptually similar shifts. If you just added shifts, click <span className="font-semibold">Index embeddings</span> above so NECTAR can read them.
-                </TableCell>
-              </TableRow>
-            ) : ranked.map(({ row: r, similarity }) => {
-              const inIso = effectiveIn(r);
-              const outIso = effectiveOut(r);
-              const isPending = r.status === "Pending";
-              const open = exp.isExpanded(r.id);
-              return (
-                <Fragment key={r.id}>
-                  <TableRow
-                    onClick={() => toggleWithAudit(exp, r)}
-                    role="button"
-                    aria-expanded={open}
-                    className="cursor-pointer hover:bg-muted/40 [&>td]:border-b-0 [&>td]:py-1.5"
-                  >
-                    <ChevronCell open={open} />
-                    <TableCell>
-                      <Badge variant="outline" className="font-mono text-[11px]">
-                        {(similarity * 100).toFixed(0)}%
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap font-mono">{fmtDateMDY(inIso)}</TableCell>
-                    <TableCell>
-                      <Badge variant={isPending ? "default" : "secondary"} className="text-[11px]">
-                        {isPending ? "Pending" : "Approved"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap font-medium">
-                      {r.staff?.full_name ?? r.staff?.email ?? "—"}
-                      <EditedByAdminBadge row={r} />
-                      <FlagDot row={r} />
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap">{r.clients?.first_name} {r.clients?.last_name}</TableCell>
-                    <TableCell className="whitespace-nowrap"><Badge variant="outline" className="font-mono">{r.service_type_code}</Badge></TableCell>
-                    <TableCell className="whitespace-nowrap font-mono">
-                      {fmtTimeAmPm(inIso)} → {outIso ? fmtTimeAmPm(outIso) : "—"}
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap font-mono">{fmtDuration(inIso, outIso)}</TableCell>
-                    <TableCell onClick={stopRowToggle}>
-                      <Button variant="outline" size="sm" onClick={() => onMap(r)}>
-                        <MapPin /> View
-                      </Button>
-                    </TableCell>
-                    <TableCell
-                      onClick={(e) => { e.stopPropagation(); if (r.outside_geofence_reason) onReason(r); }}
-                      className={r.outside_geofence_reason ? "cursor-pointer" : ""}
-                    >
-                      <div className="flex flex-wrap items-center gap-1">
-                        <GeofenceBadge row={r} />
-                        <GpsBypassBadge row={r} />
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right" onClick={stopRowToggle}>
-                      <div className="flex justify-end gap-1.5">
-                        {isPending && (
-                          <Button
-                            size="icon"
-                            onClick={() => onApprove(r.id)}
-                            disabled={approving}
-                            aria-label="Approve"
-                          >
-                            {approving ? <Loader2 className="animate-spin" /> : <Check />}
-                          </Button>
-                        )}
-                        <Button size="icon" variant="secondary" onClick={() => onEdit(r)} aria-label="Edit">
-                          <Pencil />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                  {open && <InlineNotesRow row={r} colSpan={12} />}
-                </Fragment>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </div>
-    </section>
-  );
-}
-
-
 
 function PendingTable({
   rows, loading, onMap, onEdit, onApprove, approving, onReason,

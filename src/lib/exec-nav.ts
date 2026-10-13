@@ -91,12 +91,6 @@ export const EXEC_DOMAINS: ExecDomain[] = [
     label: "Compliance & Approvals",
     items: [
       {
-        to: "/dashboard/hive-exec/approvals",
-        label: "Extraction Approvals",
-        icon: ShieldCheck,
-        capability: "extraction.approve",
-      },
-      {
         to: "/dashboard/hive-exec/billing-approvals",
         label: "Billing Approvals",
         icon: ShieldCheck,

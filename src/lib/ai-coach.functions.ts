@@ -27,11 +27,8 @@ import {
 } from "@/lib/nectar/engine/coach-notes";
 import {
   runAnswerProcedural,
-  runDraftVariance,
   validateProcedural,
-  validateVariance,
   type ProceduralResult,
-  type VarianceDraftResult,
 } from "@/lib/nectar/engine/coach-assist";
 import {
   reviewMessages,
@@ -45,7 +42,7 @@ import {
 } from "@/lib/nectar/engine/coach-incidents";
 
 export type { CoachResult, DraftResult, ScanResult, ShiftNoteFollowUp } from "@/lib/nectar/engine/coach-notes";
-export type { ProceduralResult, VarianceDraftResult } from "@/lib/nectar/engine/coach-assist";
+export type { ProceduralResult } from "@/lib/nectar/engine/coach-assist";
 export type {
   IncidentDraftGap,
   IncidentDraftResult,
@@ -84,15 +81,6 @@ export const draftShiftNote = createServerFn({ method: "POST" })
   .inputValidator(validateDraft)
   .handler(async ({ data, context }): Promise<DraftResult> =>
     runDraftShiftNote(data, coachModel(await requireNectarOrg(context))),
-  );
-
-// ─── Variance Justification Drafter — geofence rescue ────────────────────────
-
-export const draftVarianceJustification = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator(validateVariance)
-  .handler(async ({ data, context }): Promise<VarianceDraftResult> =>
-    runDraftVariance(data, coachModel(await requireNectarOrg(context))),
   );
 
 // ─── Procedural Q&A — "am I allowed to…?" grounded in client context ─────────

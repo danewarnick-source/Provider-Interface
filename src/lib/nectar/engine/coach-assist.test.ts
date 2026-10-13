@@ -1,12 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { CoachModel } from "./coach-model.ts";
-import {
-  runAnswerProcedural,
-  runDraftVariance,
-  validateProcedural,
-  validateVariance,
-} from "./coach-assist.ts";
+import { runAnswerProcedural, validateProcedural } from "./coach-assist.ts";
 
 function fakeModel(reply: Record<string, unknown>) {
   const calls: Array<{ system: string; user: string }> = [];
@@ -17,13 +12,8 @@ function fakeModel(reply: Record<string, unknown>) {
   return { model, calls };
 }
 
-describe("validateVariance / validateProcedural", () => {
-  it("keep their limits and defaults", () => {
-    assert.throws(() => validateVariance({ shorthand: "x" }), /2–800/);
-    const v = validateVariance({ shorthand: "gps off at the park", phase: "other", distanceFeet: "9" });
-    assert.equal(v.phase, "clock_in");
-    assert.equal(v.distanceFeet, null);
-    assert.equal(v.clientFirstName, "the client");
+describe("validateProcedural", () => {
+  it("keeps its limits and defaults", () => {
     assert.throws(() => validateProcedural({ question: "ok?" }), /4–500/);
     const p = validateProcedural({ question: "Can I drive to the store?", pcspGoals: ["a", 2] });
     assert.deepEqual(p.pcspGoals, ["a", "2"]);
@@ -53,19 +43,6 @@ describe("runAnswerProcedural", () => {
     await assert.rejects(
       runAnswerProcedural(validateProcedural({ question: "Can I drive?" }), fakeModel({ answer: "" }).model),
       /could not produce an answer/,
-    );
-  });
-});
-
-describe("runDraftVariance", () => {
-  it("returns the trimmed draft or refuses an empty one", async () => {
-    const { model, calls } = fakeModel({ draft: "  Device location was blocked.  " });
-    const result = await runDraftVariance(validateVariance({ shorthand: "gps blocked", limitFeet: 500 }), model);
-    assert.deepEqual(result, { draft: "Device location was blocked." });
-    assert.match(calls[0].user, /ALLOWED RADIUS \(ft\): 500/);
-    await assert.rejects(
-      runDraftVariance(validateVariance({ shorthand: "gps blocked" }), fakeModel({}).model),
-      /could not draft a justification/,
     );
   });
 });

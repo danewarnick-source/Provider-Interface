@@ -43,7 +43,6 @@ import { Route as DashboardAgencyDocumentsRouteImport } from './routes/dashboard
 import { Route as DashboardAskNectarRouteImport } from './routes/dashboard.ask-nectar'
 import { Route as DashboardAssignmentsRouteImport } from './routes/dashboard.assignments'
 import { Route as DashboardAuditRouteImport } from './routes/dashboard.audit'
-import { Route as DashboardAuthoritativeSourcesRouteImport } from './routes/dashboard.authoritative-sources'
 import { Route as DashboardBillingRouteImport } from './routes/dashboard.billing'
 import { Route as DashboardClientBillingCodesRouteImport } from './routes/dashboard.client-billing-codes'
 import { Route as DashboardClientFileRouteImport } from './routes/dashboard.client-file'
@@ -83,7 +82,6 @@ import { Route as DashboardNectarCompanyProfileRouteImport } from './routes/dash
 import { Route as DashboardNectarDocsRouteImport } from './routes/dashboard.nectar-docs'
 import { Route as DashboardPbaLedgerRouteImport } from './routes/dashboard.pba-ledger'
 import { Route as DashboardPersonnelFileRouteImport } from './routes/dashboard.personnel-file'
-import { Route as DashboardPoliciesRouteImport } from './routes/dashboard.policies'
 import { Route as DashboardRecordsDeskRouteImport } from './routes/dashboard.records-desk'
 import { Route as DashboardReimbursementsRouteImport } from './routes/dashboard.reimbursements'
 import { Route as DashboardReportsRouteImport } from './routes/dashboard.reports'
@@ -139,7 +137,6 @@ import { Route as DashboardHhsHubClientIdRouteImport } from './routes/dashboard.
 import { Route as DashboardHiveExecIndexRouteImport } from './routes/dashboard.hive-exec.index'
 import { Route as DashboardHiveExecOrgIdRouteImport } from './routes/dashboard.hive-exec.$orgId'
 import { Route as DashboardHiveExecAgreementsRouteImport } from './routes/dashboard.hive-exec.agreements'
-import { Route as DashboardHiveExecApprovalsRouteImport } from './routes/dashboard.hive-exec.approvals'
 import { Route as DashboardHiveExecBaseTemplateRouteImport } from './routes/dashboard.hive-exec.base-template'
 import { Route as DashboardHiveExecBillingApprovalsRouteImport } from './routes/dashboard.hive-exec.billing-approvals'
 import { Route as DashboardHiveExecClassesRouteImport } from './routes/dashboard.hive-exec.classes'
@@ -187,7 +184,6 @@ import { Route as DashboardWorkspaceClientIdRouteImport } from './routes/dashboa
 import { Route as E2eHhsHubClientIdRouteImport } from './routes/e2e.hhs-hub.$clientId'
 import { Route as ApiPublicHooksBillingDailyCheckRouteImport } from './routes/api/public/hooks/billing-daily-check'
 import { Route as ApiPublicHooksGmailIngestRouteImport } from './routes/api/public/hooks/gmail-ingest'
-import { Route as ApiPublicHooksNectarDraftTickRouteImport } from './routes/api/public/hooks/nectar-draft-tick'
 import { Route as ApiPublicHooksNectarSchedulesRouteImport } from './routes/api/public/hooks/nectar-schedules'
 import { Route as ApiPublicHooksSmartImportRemindersRouteImport } from './routes/api/public/hooks/smart-import-reminders'
 import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
@@ -377,12 +373,6 @@ const DashboardAuditRoute = DashboardAuditRouteImport.update({
   path: '/audit',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardAuthoritativeSourcesRoute =
-  DashboardAuthoritativeSourcesRouteImport.update({
-    id: '/authoritative-sources',
-    path: '/authoritative-sources',
-    getParentRoute: () => DashboardRoute,
-  } as any)
 const DashboardBillingRoute = DashboardBillingRouteImport.update({
   id: '/billing',
   path: '/billing',
@@ -587,11 +577,6 @@ const DashboardPbaLedgerRoute = DashboardPbaLedgerRouteImport.update({
 const DashboardPersonnelFileRoute = DashboardPersonnelFileRouteImport.update({
   id: '/personnel-file',
   path: '/personnel-file',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardPoliciesRoute = DashboardPoliciesRouteImport.update({
-  id: '/policies',
-  path: '/policies',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardRecordsDeskRoute = DashboardRecordsDeskRouteImport.update({
@@ -887,12 +872,6 @@ const DashboardHiveExecAgreementsRoute =
     path: '/agreements',
     getParentRoute: () => DashboardHiveExecRoute,
   } as any)
-const DashboardHiveExecApprovalsRoute =
-  DashboardHiveExecApprovalsRouteImport.update({
-    id: '/approvals',
-    path: '/approvals',
-    getParentRoute: () => DashboardHiveExecRoute,
-  } as any)
 const DashboardHiveExecBaseTemplateRoute =
   DashboardHiveExecBaseTemplateRouteImport.update({
     id: '/base-template',
@@ -1162,12 +1141,6 @@ const ApiPublicHooksGmailIngestRoute =
     path: '/api/public/hooks/gmail-ingest',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicHooksNectarDraftTickRoute =
-  ApiPublicHooksNectarDraftTickRouteImport.update({
-    id: '/api/public/hooks/nectar-draft-tick',
-    path: '/api/public/hooks/nectar-draft-tick',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicHooksNectarSchedulesRoute =
   ApiPublicHooksNectarSchedulesRouteImport.update({
     id: '/api/public/hooks/nectar-schedules',
@@ -1302,7 +1275,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/ask-nectar': typeof DashboardAskNectarRoute
   '/dashboard/assignments': typeof DashboardAssignmentsRoute
   '/dashboard/audit': typeof DashboardAuditRoute
-  '/dashboard/authoritative-sources': typeof DashboardAuthoritativeSourcesRoute
   '/dashboard/billing': typeof DashboardBillingRouteWithChildren
   '/dashboard/client-billing-codes': typeof DashboardClientBillingCodesRoute
   '/dashboard/client-file': typeof DashboardClientFileRoute
@@ -1342,7 +1314,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/nectar-docs': typeof DashboardNectarDocsRoute
   '/dashboard/pba-ledger': typeof DashboardPbaLedgerRoute
   '/dashboard/personnel-file': typeof DashboardPersonnelFileRoute
-  '/dashboard/policies': typeof DashboardPoliciesRoute
   '/dashboard/records-desk': typeof DashboardRecordsDeskRoute
   '/dashboard/reimbursements': typeof DashboardReimbursementsRoute
   '/dashboard/reports': typeof DashboardReportsRoute
@@ -1395,7 +1366,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/hhs-hub/$clientId': typeof DashboardHhsHubClientIdRoute
   '/dashboard/hive-exec/$orgId': typeof DashboardHiveExecOrgIdRoute
   '/dashboard/hive-exec/agreements': typeof DashboardHiveExecAgreementsRouteWithChildren
-  '/dashboard/hive-exec/approvals': typeof DashboardHiveExecApprovalsRoute
   '/dashboard/hive-exec/base-template': typeof DashboardHiveExecBaseTemplateRoute
   '/dashboard/hive-exec/billing-approvals': typeof DashboardHiveExecBillingApprovalsRoute
   '/dashboard/hive-exec/classes': typeof DashboardHiveExecClassesRoute
@@ -1449,7 +1419,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/team-members/': typeof DashboardTeamMembersIndexRoute
   '/api/public/hooks/billing-daily-check': typeof ApiPublicHooksBillingDailyCheckRoute
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
-  '/api/public/hooks/nectar-draft-tick': typeof ApiPublicHooksNectarDraftTickRoute
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
   '/api/public/hooks/smart-import-reminders': typeof ApiPublicHooksSmartImportRemindersRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
@@ -1497,7 +1466,6 @@ export interface FileRoutesByTo {
   '/dashboard/ask-nectar': typeof DashboardAskNectarRoute
   '/dashboard/assignments': typeof DashboardAssignmentsRoute
   '/dashboard/audit': typeof DashboardAuditRoute
-  '/dashboard/authoritative-sources': typeof DashboardAuthoritativeSourcesRoute
   '/dashboard/client-billing-codes': typeof DashboardClientBillingCodesRoute
   '/dashboard/client-file': typeof DashboardClientFileRoute
   '/dashboard/client-loans': typeof DashboardClientLoansRoute
@@ -1532,7 +1500,6 @@ export interface FileRoutesByTo {
   '/dashboard/nectar-docs': typeof DashboardNectarDocsRoute
   '/dashboard/pba-ledger': typeof DashboardPbaLedgerRoute
   '/dashboard/personnel-file': typeof DashboardPersonnelFileRoute
-  '/dashboard/policies': typeof DashboardPoliciesRoute
   '/dashboard/records-desk': typeof DashboardRecordsDeskRoute
   '/dashboard/reimbursements': typeof DashboardReimbursementsRoute
   '/dashboard/reports': typeof DashboardReportsRoute
@@ -1584,7 +1551,6 @@ export interface FileRoutesByTo {
   '/dashboard/hhs-hub/$clientId': typeof DashboardHhsHubClientIdRoute
   '/dashboard/hive-exec/$orgId': typeof DashboardHiveExecOrgIdRoute
   '/dashboard/hive-exec/agreements': typeof DashboardHiveExecAgreementsRouteWithChildren
-  '/dashboard/hive-exec/approvals': typeof DashboardHiveExecApprovalsRoute
   '/dashboard/hive-exec/base-template': typeof DashboardHiveExecBaseTemplateRoute
   '/dashboard/hive-exec/billing-approvals': typeof DashboardHiveExecBillingApprovalsRoute
   '/dashboard/hive-exec/classes': typeof DashboardHiveExecClassesRoute
@@ -1638,7 +1604,6 @@ export interface FileRoutesByTo {
   '/dashboard/team-members': typeof DashboardTeamMembersIndexRoute
   '/api/public/hooks/billing-daily-check': typeof ApiPublicHooksBillingDailyCheckRoute
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
-  '/api/public/hooks/nectar-draft-tick': typeof ApiPublicHooksNectarDraftTickRoute
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
   '/api/public/hooks/smart-import-reminders': typeof ApiPublicHooksSmartImportRemindersRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
@@ -1690,7 +1655,6 @@ export interface FileRoutesById {
   '/dashboard/ask-nectar': typeof DashboardAskNectarRoute
   '/dashboard/assignments': typeof DashboardAssignmentsRoute
   '/dashboard/audit': typeof DashboardAuditRoute
-  '/dashboard/authoritative-sources': typeof DashboardAuthoritativeSourcesRoute
   '/dashboard/billing': typeof DashboardBillingRouteWithChildren
   '/dashboard/client-billing-codes': typeof DashboardClientBillingCodesRoute
   '/dashboard/client-file': typeof DashboardClientFileRoute
@@ -1730,7 +1694,6 @@ export interface FileRoutesById {
   '/dashboard/nectar-docs': typeof DashboardNectarDocsRoute
   '/dashboard/pba-ledger': typeof DashboardPbaLedgerRoute
   '/dashboard/personnel-file': typeof DashboardPersonnelFileRoute
-  '/dashboard/policies': typeof DashboardPoliciesRoute
   '/dashboard/records-desk': typeof DashboardRecordsDeskRoute
   '/dashboard/reimbursements': typeof DashboardReimbursementsRoute
   '/dashboard/reports': typeof DashboardReportsRoute
@@ -1783,7 +1746,6 @@ export interface FileRoutesById {
   '/dashboard/hhs-hub/$clientId': typeof DashboardHhsHubClientIdRoute
   '/dashboard/hive-exec/$orgId': typeof DashboardHiveExecOrgIdRoute
   '/dashboard/hive-exec/agreements': typeof DashboardHiveExecAgreementsRouteWithChildren
-  '/dashboard/hive-exec/approvals': typeof DashboardHiveExecApprovalsRoute
   '/dashboard/hive-exec/base-template': typeof DashboardHiveExecBaseTemplateRoute
   '/dashboard/hive-exec/billing-approvals': typeof DashboardHiveExecBillingApprovalsRoute
   '/dashboard/hive-exec/classes': typeof DashboardHiveExecClassesRoute
@@ -1837,7 +1799,6 @@ export interface FileRoutesById {
   '/dashboard/team-members/': typeof DashboardTeamMembersIndexRoute
   '/api/public/hooks/billing-daily-check': typeof ApiPublicHooksBillingDailyCheckRoute
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
-  '/api/public/hooks/nectar-draft-tick': typeof ApiPublicHooksNectarDraftTickRoute
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
   '/api/public/hooks/smart-import-reminders': typeof ApiPublicHooksSmartImportRemindersRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
@@ -1890,7 +1851,6 @@ export interface FileRouteTypes {
     | '/dashboard/ask-nectar'
     | '/dashboard/assignments'
     | '/dashboard/audit'
-    | '/dashboard/authoritative-sources'
     | '/dashboard/billing'
     | '/dashboard/client-billing-codes'
     | '/dashboard/client-file'
@@ -1930,7 +1890,6 @@ export interface FileRouteTypes {
     | '/dashboard/nectar-docs'
     | '/dashboard/pba-ledger'
     | '/dashboard/personnel-file'
-    | '/dashboard/policies'
     | '/dashboard/records-desk'
     | '/dashboard/reimbursements'
     | '/dashboard/reports'
@@ -1983,7 +1942,6 @@ export interface FileRouteTypes {
     | '/dashboard/hhs-hub/$clientId'
     | '/dashboard/hive-exec/$orgId'
     | '/dashboard/hive-exec/agreements'
-    | '/dashboard/hive-exec/approvals'
     | '/dashboard/hive-exec/base-template'
     | '/dashboard/hive-exec/billing-approvals'
     | '/dashboard/hive-exec/classes'
@@ -2037,7 +1995,6 @@ export interface FileRouteTypes {
     | '/dashboard/team-members/'
     | '/api/public/hooks/billing-daily-check'
     | '/api/public/hooks/gmail-ingest'
-    | '/api/public/hooks/nectar-draft-tick'
     | '/api/public/hooks/nectar-schedules'
     | '/api/public/hooks/smart-import-reminders'
     | '/api/public/webhooks/stripe'
@@ -2085,7 +2042,6 @@ export interface FileRouteTypes {
     | '/dashboard/ask-nectar'
     | '/dashboard/assignments'
     | '/dashboard/audit'
-    | '/dashboard/authoritative-sources'
     | '/dashboard/client-billing-codes'
     | '/dashboard/client-file'
     | '/dashboard/client-loans'
@@ -2120,7 +2076,6 @@ export interface FileRouteTypes {
     | '/dashboard/nectar-docs'
     | '/dashboard/pba-ledger'
     | '/dashboard/personnel-file'
-    | '/dashboard/policies'
     | '/dashboard/records-desk'
     | '/dashboard/reimbursements'
     | '/dashboard/reports'
@@ -2172,7 +2127,6 @@ export interface FileRouteTypes {
     | '/dashboard/hhs-hub/$clientId'
     | '/dashboard/hive-exec/$orgId'
     | '/dashboard/hive-exec/agreements'
-    | '/dashboard/hive-exec/approvals'
     | '/dashboard/hive-exec/base-template'
     | '/dashboard/hive-exec/billing-approvals'
     | '/dashboard/hive-exec/classes'
@@ -2226,7 +2180,6 @@ export interface FileRouteTypes {
     | '/dashboard/team-members'
     | '/api/public/hooks/billing-daily-check'
     | '/api/public/hooks/gmail-ingest'
-    | '/api/public/hooks/nectar-draft-tick'
     | '/api/public/hooks/nectar-schedules'
     | '/api/public/hooks/smart-import-reminders'
     | '/api/public/webhooks/stripe'
@@ -2277,7 +2230,6 @@ export interface FileRouteTypes {
     | '/dashboard/ask-nectar'
     | '/dashboard/assignments'
     | '/dashboard/audit'
-    | '/dashboard/authoritative-sources'
     | '/dashboard/billing'
     | '/dashboard/client-billing-codes'
     | '/dashboard/client-file'
@@ -2317,7 +2269,6 @@ export interface FileRouteTypes {
     | '/dashboard/nectar-docs'
     | '/dashboard/pba-ledger'
     | '/dashboard/personnel-file'
-    | '/dashboard/policies'
     | '/dashboard/records-desk'
     | '/dashboard/reimbursements'
     | '/dashboard/reports'
@@ -2370,7 +2321,6 @@ export interface FileRouteTypes {
     | '/dashboard/hhs-hub/$clientId'
     | '/dashboard/hive-exec/$orgId'
     | '/dashboard/hive-exec/agreements'
-    | '/dashboard/hive-exec/approvals'
     | '/dashboard/hive-exec/base-template'
     | '/dashboard/hive-exec/billing-approvals'
     | '/dashboard/hive-exec/classes'
@@ -2424,7 +2374,6 @@ export interface FileRouteTypes {
     | '/dashboard/team-members/'
     | '/api/public/hooks/billing-daily-check'
     | '/api/public/hooks/gmail-ingest'
-    | '/api/public/hooks/nectar-draft-tick'
     | '/api/public/hooks/nectar-schedules'
     | '/api/public/hooks/smart-import-reminders'
     | '/api/public/webhooks/stripe'
@@ -2481,7 +2430,6 @@ export interface RootRouteChildren {
   E2eHhsHubClientIdRoute: typeof E2eHhsHubClientIdRoute
   ApiPublicHooksBillingDailyCheckRoute: typeof ApiPublicHooksBillingDailyCheckRoute
   ApiPublicHooksGmailIngestRoute: typeof ApiPublicHooksGmailIngestRoute
-  ApiPublicHooksNectarDraftTickRoute: typeof ApiPublicHooksNectarDraftTickRoute
   ApiPublicHooksNectarSchedulesRoute: typeof ApiPublicHooksNectarSchedulesRoute
   ApiPublicHooksSmartImportRemindersRoute: typeof ApiPublicHooksSmartImportRemindersRoute
   ApiPublicWebhooksStripeRoute: typeof ApiPublicWebhooksStripeRoute
@@ -2726,13 +2674,6 @@ declare module '@tanstack/react-router' {
       path: '/audit'
       fullPath: '/dashboard/audit'
       preLoaderRoute: typeof DashboardAuditRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/authoritative-sources': {
-      id: '/dashboard/authoritative-sources'
-      path: '/authoritative-sources'
-      fullPath: '/dashboard/authoritative-sources'
-      preLoaderRoute: typeof DashboardAuthoritativeSourcesRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/billing': {
@@ -3006,13 +2947,6 @@ declare module '@tanstack/react-router' {
       path: '/personnel-file'
       fullPath: '/dashboard/personnel-file'
       preLoaderRoute: typeof DashboardPersonnelFileRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/policies': {
-      id: '/dashboard/policies'
-      path: '/policies'
-      fullPath: '/dashboard/policies'
-      preLoaderRoute: typeof DashboardPoliciesRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/records-desk': {
@@ -3400,13 +3334,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardHiveExecAgreementsRouteImport
       parentRoute: typeof DashboardHiveExecRoute
     }
-    '/dashboard/hive-exec/approvals': {
-      id: '/dashboard/hive-exec/approvals'
-      path: '/approvals'
-      fullPath: '/dashboard/hive-exec/approvals'
-      preLoaderRoute: typeof DashboardHiveExecApprovalsRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
     '/dashboard/hive-exec/base-template': {
       id: '/dashboard/hive-exec/base-template'
       path: '/base-template'
@@ -3736,13 +3663,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksGmailIngestRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/hooks/nectar-draft-tick': {
-      id: '/api/public/hooks/nectar-draft-tick'
-      path: '/api/public/hooks/nectar-draft-tick'
-      fullPath: '/api/public/hooks/nectar-draft-tick'
-      preLoaderRoute: typeof ApiPublicHooksNectarDraftTickRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/hooks/nectar-schedules': {
       id: '/api/public/hooks/nectar-schedules'
       path: '/api/public/hooks/nectar-schedules'
@@ -4018,7 +3938,6 @@ const DashboardHiveExecStatesRouteWithChildren =
 interface DashboardHiveExecRouteChildren {
   DashboardHiveExecOrgIdRoute: typeof DashboardHiveExecOrgIdRoute
   DashboardHiveExecAgreementsRoute: typeof DashboardHiveExecAgreementsRouteWithChildren
-  DashboardHiveExecApprovalsRoute: typeof DashboardHiveExecApprovalsRoute
   DashboardHiveExecBaseTemplateRoute: typeof DashboardHiveExecBaseTemplateRoute
   DashboardHiveExecBillingApprovalsRoute: typeof DashboardHiveExecBillingApprovalsRoute
   DashboardHiveExecClassesRoute: typeof DashboardHiveExecClassesRoute
@@ -4043,7 +3962,6 @@ const DashboardHiveExecRouteChildren: DashboardHiveExecRouteChildren = {
   DashboardHiveExecOrgIdRoute: DashboardHiveExecOrgIdRoute,
   DashboardHiveExecAgreementsRoute:
     DashboardHiveExecAgreementsRouteWithChildren,
-  DashboardHiveExecApprovalsRoute: DashboardHiveExecApprovalsRoute,
   DashboardHiveExecBaseTemplateRoute: DashboardHiveExecBaseTemplateRoute,
   DashboardHiveExecBillingApprovalsRoute:
     DashboardHiveExecBillingApprovalsRoute,
@@ -4149,7 +4067,6 @@ interface DashboardRouteChildren {
   DashboardAskNectarRoute: typeof DashboardAskNectarRoute
   DashboardAssignmentsRoute: typeof DashboardAssignmentsRoute
   DashboardAuditRoute: typeof DashboardAuditRoute
-  DashboardAuthoritativeSourcesRoute: typeof DashboardAuthoritativeSourcesRoute
   DashboardBillingRoute: typeof DashboardBillingRouteWithChildren
   DashboardClientBillingCodesRoute: typeof DashboardClientBillingCodesRoute
   DashboardClientFileRoute: typeof DashboardClientFileRoute
@@ -4189,7 +4106,6 @@ interface DashboardRouteChildren {
   DashboardNectarDocsRoute: typeof DashboardNectarDocsRoute
   DashboardPbaLedgerRoute: typeof DashboardPbaLedgerRoute
   DashboardPersonnelFileRoute: typeof DashboardPersonnelFileRoute
-  DashboardPoliciesRoute: typeof DashboardPoliciesRoute
   DashboardRecordsDeskRoute: typeof DashboardRecordsDeskRoute
   DashboardReimbursementsRoute: typeof DashboardReimbursementsRoute
   DashboardReportsRoute: typeof DashboardReportsRoute
@@ -4233,7 +4149,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAskNectarRoute: DashboardAskNectarRoute,
   DashboardAssignmentsRoute: DashboardAssignmentsRoute,
   DashboardAuditRoute: DashboardAuditRoute,
-  DashboardAuthoritativeSourcesRoute: DashboardAuthoritativeSourcesRoute,
   DashboardBillingRoute: DashboardBillingRouteWithChildren,
   DashboardClientBillingCodesRoute: DashboardClientBillingCodesRoute,
   DashboardClientFileRoute: DashboardClientFileRoute,
@@ -4274,7 +4189,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardNectarDocsRoute: DashboardNectarDocsRoute,
   DashboardPbaLedgerRoute: DashboardPbaLedgerRoute,
   DashboardPersonnelFileRoute: DashboardPersonnelFileRoute,
-  DashboardPoliciesRoute: DashboardPoliciesRoute,
   DashboardRecordsDeskRoute: DashboardRecordsDeskRoute,
   DashboardReimbursementsRoute: DashboardReimbursementsRoute,
   DashboardReportsRoute: DashboardReportsRoute,
@@ -4371,7 +4285,6 @@ const rootRouteChildren: RootRouteChildren = {
   E2eHhsHubClientIdRoute: E2eHhsHubClientIdRoute,
   ApiPublicHooksBillingDailyCheckRoute: ApiPublicHooksBillingDailyCheckRoute,
   ApiPublicHooksGmailIngestRoute: ApiPublicHooksGmailIngestRoute,
-  ApiPublicHooksNectarDraftTickRoute: ApiPublicHooksNectarDraftTickRoute,
   ApiPublicHooksNectarSchedulesRoute: ApiPublicHooksNectarSchedulesRoute,
   ApiPublicHooksSmartImportRemindersRoute:
     ApiPublicHooksSmartImportRemindersRoute,

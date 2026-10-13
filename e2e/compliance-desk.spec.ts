@@ -288,29 +288,11 @@ test.describe("Records review — admin harness", () => {
     await shot(page, "10-internal-archive");
   });
 
-  test("Ask NECTAR: does not search on keystrokes; empty Enter toasts; clear/reset restores tabs", async ({
-    page,
-  }) => {
+  test("no AI search box or embeddings button; the tabs show straight away", async ({ page }) => {
     await openDesk(page);
-    const search = page.getByPlaceholder(/Search intent via Vector NECTAR/i);
-    await expect(search).toBeVisible();
-    await expect(page.getByRole("button", { name: /Ask NECTAR/i })).toBeVisible();
-
-    await search.fill("practiced money skills");
-    // Keystrokes must not hide tabs / fire search
-    await expect(page.getByTestId("compliance-tab-pending")).toBeVisible();
-    await expect(page.getByText(/Showing cross-tab query results/i)).toHaveCount(0);
-
-    await search.fill("");
-    await search.press("Enter");
-    await expect(page.getByText(/Type a question first/i)).toBeVisible();
-
-    await search.fill("practiced money skills");
-    await page.getByRole("button", { name: /Ask NECTAR/i }).click();
-    await expect(page.getByText(/Showing cross-tab query results/i)).toBeVisible();
-    await shot(page, "11-ask-nectar-results");
-
-    await page.getByRole("button", { name: "Clear search" }).click();
+    // Nectar rebuild N2 removed the timesheet search, whose embeddings never worked.
+    await expect(page.getByPlaceholder(/Search intent/i)).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /Index embeddings/i })).toHaveCount(0);
     await expect(page.getByTestId("compliance-tab-pending")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Pending EVV Shifts" })).toBeVisible();
   });

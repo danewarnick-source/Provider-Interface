@@ -1,18 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import type { Json } from "@/integrations/supabase/types";
-
 
 // ============================================================
 // PI Executive NECTAR — platform ticket queue.
-// Tickets are real DB rows, not seeded sample data. They come from
-// two sources:
-//   1. auto — NECTAR detects a platform-level event (parsing failure,
-//      no-extraction-found, AI error, etc.) and files a ticket.
-//   2. manual — a PI executive files one for issues NECTAR cannot
-//      yet detect on its own (permission inconsistencies, UX gaps).
+// Tickets are real DB rows, not seeded sample data. A PI executive files
+// them for platform issues (permission inconsistencies, UX gaps). Older
+// rows with source "auto" came from the requirements pipeline, which was
+// removed in the Nectar rebuild (N2).
 // ============================================================
 
 const CATEGORY = [
@@ -25,129 +20,6 @@ const CATEGORY = [
 ] as const;
 const SEVERITY = ["low", "medium", "high", "critical"] as const;
 const STATUS = ["new", "in_progress", "resolved"] as const;
-
-// ---------------------------------------------------------------
-// Auto-report a platform event. Called from inside the company-side
-// flow (e.g. generateRequirementsFromSource) — the caller is a
-// company admin, not a PI exec, so this MUST use supabaseAdmin to
-// bypass RLS for insert. Dedupes on (event_kind, dedupe_key) while
-// any prior ticket for the same key is still open.
-// ---------------------------------------------------------------
-export async function reportPlatformEvent(input: {
-  eventKind:
-    | "parsing_no_text"
-    | "ai_error"
-    | "no_requirements_found"
-    | "ingest_failure"
-    | "requirement_unmapped"
-    | "unknown_code_structure";
-
-  organizationId: string | null;
-  organizationName: string | null;
-  title: string;
-  detail: string;
-  category: (typeof CATEGORY)[number];
-  severity: (typeof SEVERITY)[number];
-  dedupeKey: string; // stable, unique to this recurring class for this org/doc
-  eventRef: Record<string, unknown>;
-  nectarProposal?: {
-    type: "operational" | "architectural";
-    summary: string;
-    changeKind: string;
-    blastRadius: string;
-    risk: "low" | "medium" | "high";
-  };
-}): Promise<void> {
-  try {
-    // If an open (not resolved) ticket with the same dedupe key exists,
-    // append an audit entry instead of creating a duplicate.
-    const { data: existing, error: lookupErr } = await supabaseAdmin
-      .from("hive_platform_tickets")
-      .select("id, audit, affected_orgs, triggering_org_id")
-      .eq("dedupe_key", input.dedupeKey)
-      .neq("status", "resolved")
-      .maybeSingle();
-    if (lookupErr) {
-      console.error("[hive-tickets] dedupe lookup failed", lookupErr);
-    }
-
-    if (existing) {
-      const prevAudit = Array.isArray(existing.audit)
-        ? (existing.audit as unknown[])
-        : [];
-      const entry = {
-        ts: new Date().toISOString(),
-        actor: "NECTAR",
-        action: "Re-observed event",
-        note: `event=${input.eventKind}`,
-      };
-      const distinctOrgBumped =
-        input.organizationId &&
-        existing.triggering_org_id &&
-        input.organizationId !== existing.triggering_org_id;
-      const { error: updateErr } = await supabaseAdmin
-        .from("hive_platform_tickets")
-        .update({
-          audit: [...prevAudit, entry] as unknown as Json,
-          affected_orgs: distinctOrgBumped
-            ? (existing.affected_orgs as number) + 1
-            : (existing.affected_orgs as number),
-        })
-        .eq("id", existing.id);
-      if (updateErr) {
-        console.error("[hive-tickets] dedupe update failed", updateErr);
-      }
-      return;
-    }
-
-    const audit = [
-      {
-        ts: new Date().toISOString(),
-        actor: "NECTAR",
-        action: "Auto-filed from live event",
-        note: `event=${input.eventKind}`,
-      },
-    ];
-    const resolution = input.nectarProposal
-      ? { ...input.nectarProposal, affectedCompanies: 1, state: "drafted" }
-      : {};
-    const { error: insertErr } = await supabaseAdmin
-      .from("hive_platform_tickets")
-      .insert({
-        triggering_org_id: input.organizationId,
-        triggering_org_name:
-          input.organizationName ?? "Platform-wide pattern",
-        title: input.title.slice(0, 240),
-        detail: input.detail.slice(0, 4000),
-        category: input.category,
-        severity: input.severity,
-        status: "new",
-        source: "auto",
-        event_kind: input.eventKind,
-        event_ref: input.eventRef as unknown as Json,
-        dedupe_key: input.dedupeKey,
-        affected_orgs: 1,
-        resolution: resolution as unknown as Json,
-        audit: audit as unknown as Json,
-      });
-    if (insertErr) {
-      console.error("[hive-tickets] auto-file insert failed", {
-        dedupeKey: input.dedupeKey,
-        eventKind: input.eventKind,
-        error: insertErr,
-      });
-    } else {
-      console.info("[hive-tickets] auto-filed", {
-        dedupeKey: input.dedupeKey,
-        eventKind: input.eventKind,
-      });
-    }
-  } catch (e) {
-    // NEVER block the company-side flow on a PI-queue write failure.
-    // Log so the failure is visible in server logs for debugging.
-    console.error("[hive-tickets] reportPlatformEvent threw", e);
-  }
-}
 
 // ---------------------------------------------------------------
 // PI-exec-scoped reads/writes. RLS already restricts these to

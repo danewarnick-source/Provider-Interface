@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { HELP_LINK_ROUTES, helpDeepLink, realHelpPath } from "./help-links.ts";
+import { sidebarNav } from "./nav-map.ts";
 
 const ID = "2b7c9e4a-1f3d-4c8b-9a6e-5d4c3b2a1f0e";
 
@@ -76,5 +77,14 @@ describe("HELP_LINK_ROUTES", () => {
     for (const route of HELP_LINK_ROUTES) {
       assert.ok(byFullPath.includes(`'${route}':`), route);
     }
+  });
+
+  it("accepts every screen in the real sidebar, so any path in the help map can be a link (N2)", () => {
+    const nav = sidebarNav(
+      readFileSync(new URL("../../routes/dashboard.tsx", import.meta.url), "utf8"),
+    );
+    const paths = [...nav.admin, ...nav.nectar, ...nav.staff].map((link) => link.path);
+    assert.ok(paths.length >= 20, "sidebar read");
+    for (const path of paths) assert.equal(realHelpPath(path), path, path);
   });
 });

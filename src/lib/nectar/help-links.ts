@@ -4,10 +4,15 @@
 
 import type { FileRoutesByFullPath } from "../../routeTree.gen.ts";
 
-/** Screens admin help may link to. Type-checked against the generated route tree. */
+/**
+ * Screens admin help may link to. Type-checked against the generated route tree.
+ * Every sidebar screen is here (help-links.test.ts reads the sidebar arrays in
+ * routes/dashboard.tsx), so any path in the help prompt's map can be a link.
+ */
 export const HELP_LINK_ROUTES = [
   "/dashboard",
   "/dashboard/agency-documents",
+  "/dashboard/ask-nectar",
   "/dashboard/billing",
   "/dashboard/billing/$clientId",
   "/dashboard/billing/form520",
@@ -19,12 +24,23 @@ export const HELP_LINK_ROUTES = [
   "/dashboard/compliance-desk",
   "/dashboard/daily-logs",
   "/dashboard/evidence",
+  "/dashboard/help",
+  "/dashboard/hive-training/",
+  "/dashboard/hub/clients",
+  "/dashboard/hub/documentation",
+  "/dashboard/hub/finances",
   "/dashboard/hub/knowledge",
+  "/dashboard/inbox",
+  "/dashboard/my-historical-records",
   "/dashboard/my-obligations",
+  "/dashboard/my-time-corrections",
   "/dashboard/pba-ledger",
   "/dashboard/personnel-file",
+  "/dashboard/schedule",
+  "/dashboard/scheduler",
   "/dashboard/scheduling",
   "/dashboard/settings",
+  "/dashboard/summaries",
   "/dashboard/team-members/",
   "/dashboard/team-members/$staffId",
   "/dashboard/teams",

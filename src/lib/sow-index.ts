@@ -3,7 +3,7 @@
  * Static rows derived from the keyed catalog, standing duties, SOW
  * perimeters (R1–R5), and encoded EVV / daily-rate / cadence rules.
  * ~300 searchable rows. No invented duties — only what the product already
- * encodes. Promote overlay stays on the Step 7 catalog-relation path.
+ * encodes.
  */
 import { EVV_SERVICE_CODES } from "./evv-codes.ts";
 import { DAILY_SERVICE_CODES } from "./service-billing.ts";

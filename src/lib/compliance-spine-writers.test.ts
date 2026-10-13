@@ -77,9 +77,6 @@ describe("Compliance spine — parallel writers killed", () => {
     const attest = read("./authoritative-sources.functions.ts");
     assert.doesNotMatch(attest, /export const getRequirementDrillDown/);
     assert.doesNotMatch(attest, /export const recordComplianceEvidence/);
-    const held = read("./nectar-held-timesheets.functions.ts");
-    assert.match(held, /nectar_compliance_flags writes are retired/);
-    assert.doesNotMatch(held, /\.update\(\{[\s\S]*resolution:/);
   });
 
   it("orphan create APIs throw 410 and do not insert", () => {

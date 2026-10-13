@@ -54,7 +54,6 @@ export function CommandCenterLanding() {
               count={n?.upgrade_requests ?? 0}
               emphasis
             />
-            <NeedsRow to="/dashboard/hive-exec/approvals" icon={<ShieldCheck className="h-4 w-4" />} label="Extraction approvals" count={n?.extraction_approvals ?? 0} />
             <NeedsRow to="/dashboard/hive-exec/billing-approvals" icon={<ShieldCheck className="h-4 w-4" />} label="Billing approvals" count={n?.billing_approvals ?? 0} />
             <NeedsRow to="/dashboard/hive-exec/functionality" icon={<Wrench className="h-4 w-4" />} label="Open functionality reports" count={n?.functionality_reports ?? 0} />
             <NeedsRow to="/dashboard/hive-exec/agreements" icon={<FileSignature className="h-4 w-4" />} label="Agreements overdue / expiring ≤30d" count={n?.agreements_attention ?? 0} />

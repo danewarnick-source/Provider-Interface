@@ -15,109 +15,10 @@ export type TourAnchor = {
 export const TOUR_ANCHORS: TourAnchor[] = [
   // Sidebar navigation (admin)
   {
-    id: "nav.audit",
-    label: "Audit tab",
-    route: "/dashboard/audit",
-    description: "Open the Audit zone where audit folders and checklists live.",
-    surface: "admin",
-  },
-  {
-    id: "nav.authoritative-sources",
-    label: "Knowledge",
-    route: "/dashboard/hub/knowledge",
-    description: "Upload the Scope of Work, policies, or any agency documents for Nectar search.",
-    surface: "admin",
-  },
-  {
-    id: "nav.nectar-docs",
-    label: "NECTAR Docs",
-    route: "/dashboard/nectar-docs",
-    description:
-      "Client and staff document repository — parsed extracted fields and version history.",
-    surface: "admin",
-  },
-  {
-    id: "nav.records-desk",
-    label: "Records review",
-    route: "/dashboard/compliance-desk",
-    description: "Review submitted timesheets, daily logs, EVV punches and incidents.",
-    surface: "admin",
-  },
-  {
-    id: "nav.billing",
-    label: "Billing",
-    route: "/dashboard/billing",
-    description: "Billing forms, 520 generation, and exports.",
-    surface: "admin",
-  },
-  {
-    id: "nav.scheduling",
-    label: "Scheduling",
-    route: "/dashboard/scheduling",
-    description: "Publish and edit staff shifts on the calendar.",
-    surface: "admin",
-  },
-  {
-    id: "nav.employees",
-    label: "Team Members",
-    route: "/dashboard/team-members",
-    description: "Staff roster and profiles.",
-    surface: "admin",
-  },
-  {
-    id: "nav.compliance",
-    label: "Evidence",
-    route: "/dashboard/evidence",
-    description: "Staff, Client, and Company evidence packs — upload or attest. Suggestions only.",
-    surface: "admin",
-  },
-  {
     id: "nav.evidence",
     label: "Evidence",
     route: "/dashboard/evidence",
     description: "People × requirements tracker. Packs are suggestions, not a scoreboard.",
-    surface: "admin",
-  },
-  {
-    id: "nav.personnel-file",
-    label: "Staff file",
-    route: "/dashboard/compliance",
-    description: "Org-wide staff file status — missing, due soon, and on file.",
-    surface: "admin",
-  },
-  {
-    id: "nav.client-file",
-    label: "Client file",
-    route: "/dashboard/compliance",
-    description: "Org-wide client file status — missing, due soon, and on file.",
-    surface: "admin",
-  },
-  {
-    id: "nav.agency-documents",
-    label: "Agency file",
-    route: "/dashboard/compliance",
-    description: "Org-wide standing flags, encoded DSPD policies, and the company-policies binder.",
-    surface: "admin",
-  },
-  {
-    id: "nav.clients",
-    label: "Clients",
-    route: "/dashboard/clients",
-    description: "Client profiles, demographics and documents.",
-    surface: "admin",
-  },
-  {
-    id: "nav.teams",
-    label: "Teams & Homes",
-    route: "/dashboard/teams",
-    description: "Team and home assignments.",
-    surface: "admin",
-  },
-  {
-    id: "nav.pba-ledger",
-    label: "PBA Trust Ledger",
-    route: "/dashboard/pba-ledger",
-    description: "Client personal-budget accounts and audit samples.",
     surface: "admin",
   },
   {
@@ -135,15 +36,6 @@ export const TOUR_ANCHORS: TourAnchor[] = [
     surface: "admin",
   },
 
-  // Auditor portal
-  {
-    id: "auditor.folders",
-    label: "Shared folders list",
-    route: "/auditor",
-    description: "Folders shared with you by the provider.",
-    surface: "admin",
-  },
-
   // Page-level CTAs (admin)
   {
     id: "audit.body",
@@ -157,13 +49,6 @@ export const TOUR_ANCHORS: TourAnchor[] = [
     label: "Upload a knowledge document",
     route: "/dashboard/hub/knowledge",
     description: "Upload a Scope of Work, policy, or any agency document for Nectar search.",
-    surface: "admin",
-  },
-  {
-    id: "nectardocs.body",
-    label: "NECTAR Docs body",
-    route: "/dashboard/nectar-docs",
-    description: "Review parsed fields and version history.",
     surface: "admin",
   },
 
@@ -216,14 +101,6 @@ export const TOUR_ANCHORS: TourAnchor[] = [
     label: "Ask NECTAR",
     route: "/dashboard/ask-nectar",
     description: "Ask NECTAR a staff question about your shift, caseload, or a form.",
-    surface: "staff",
-  },
-  {
-    id: "nav.courses",
-    label: "Staff file",
-    route: "/dashboard/my-obligations",
-    description:
-      "Assigned trainings and forms — staff only complete what is already on the staff file.",
     surface: "staff",
   },
   {

@@ -47,7 +47,6 @@ const STATIC_ROUTES: string[] = [
   "/dashboard/ask-nectar",
   "/dashboard/assignments",
   "/dashboard/audit",
-  "/dashboard/authoritative-sources",
   "/dashboard/client-billing-codes",
   "/dashboard/client-loans",
   "/dashboard/command-center",
@@ -111,7 +110,6 @@ const STATIC_ROUTES: string[] = [
 
   // HIVE exec
   "/dashboard/hive-exec",
-  "/dashboard/hive-exec/approvals",
   "/dashboard/hive-exec/base-template",
   "/dashboard/hive-exec/company-migration",
   "/dashboard/hive-exec/health",

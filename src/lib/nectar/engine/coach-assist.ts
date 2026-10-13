@@ -1,78 +1,8 @@
-// In-shift assists: the EVV geofence variance drafter and the "am I allowed
-// to…?" procedural Q&A (clock-out "ask a question" in punch-pad). Pure prompts
-// and runners; lib/ai-coach.functions.ts adds the Nectar guard and binds the
-// model to the caller's agency.
+// In-shift assist: the "am I allowed to…?" procedural Q&A (clock-out "ask a
+// question" in punch-pad). Pure prompt and runner; lib/ai-coach.functions.ts
+// adds the Nectar guard and binds the model to the caller's agency.
 
 import { parseModelJson, type CoachModel } from "./coach-model.ts";
-
-// ─── Variance Justification Drafter — geofence rescue ────────────────────────
-
-export interface VarianceDraftInput {
-  shorthand: string;
-  distanceFeet?: number | null;
-  limitFeet?: number | null;
-  serviceCode?: string | null;
-  clientFirstName: string;
-  phase: "clock_in" | "clock_out";
-  frameBlocked?: boolean;
-}
-
-export function validateVariance(input: unknown): VarianceDraftInput {
-  const i = (input ?? {}) as Record<string, unknown>;
-  const shorthand = typeof i.shorthand === "string" ? i.shorthand.trim() : "";
-  if (shorthand.length < 2 || shorthand.length > 800) {
-    throw new Error("Variance shorthand must be 2–800 characters.");
-  }
-  const phase = i.phase === "clock_out" ? "clock_out" : "clock_in";
-  return {
-    shorthand,
-    distanceFeet: typeof i.distanceFeet === "number" ? i.distanceFeet : null,
-    limitFeet:    typeof i.limitFeet === "number" ? i.limitFeet : null,
-    serviceCode:  typeof i.serviceCode === "string" ? i.serviceCode.slice(0, 16) : null,
-    clientFirstName:
-      typeof i.clientFirstName === "string" ? i.clientFirstName.slice(0, 80) : "the client",
-    phase,
-    frameBlocked: !!i.frameBlocked,
-  };
-}
-
-export interface VarianceDraftResult { draft: string; }
-
-const VARIANCE_SYSTEM = `You are NECTAR, drafting an EVV geofence variance justification for a Medicaid DSPD caregiver.
-
-GOAL: Turn the caregiver's quick shorthand into a 2–4 sentence written justification (40–90 words) that an auditor will accept. Past tense, objective, no fluff, no fabrication.
-
-RULES:
-- Never invent a reason that wasn't implied by the shorthand. If the shorthand is sparse, write a baseline-honest justification (e.g. "Device location was restricted at clock-in; caregiver confirmed proximity to the client visually.").
-- If the caregiver indicates community access / outing / transit / appointment, frame it as community-based service delivery aligned with the client's plan.
-- If the caregiver indicates a device/GPS/signal issue, frame it as a technology variance, not a service variance.
-- Mention the measured distance and the allowed radius if both are provided.
-- No markdown. Return one short paragraph.
-
-OUTPUT FORMAT — STRICT JSON only:
-{"draft":"<the justification paragraph>"}`;
-
-export async function runDraftVariance(
-  data: VarianceDraftInput,
-  model: CoachModel,
-): Promise<VarianceDraftResult> {
-  const user = `PHASE: ${data.phase === "clock_in" ? "Clock-in" : "Clock-out"}
-CLIENT FIRST NAME: ${data.clientFirstName}
-SERVICE CODE: ${data.serviceCode ?? "—"}
-MEASURED DISTANCE (ft): ${data.distanceFeet ?? "unknown"}
-ALLOWED RADIUS (ft): ${data.limitFeet ?? "unknown"}
-DEVICE LOCATION BLOCKED: ${data.frameBlocked ? "yes" : "no"}
-
-CAREGIVER SHORTHAND:
-"""
-${data.shorthand}
-"""`;
-
-  const parsed = parseModelJson(await model(VARIANCE_SYSTEM, user));
-  const draft = typeof parsed.draft === "string" ? parsed.draft.trim() : "";
-  if (!draft) throw new Error("NECTAR could not draft a justification — please write one manually.");
-  return { draft };
-}
 
 // ─── Procedural Q&A — "am I allowed to…?" grounded in client context ─────────
 
