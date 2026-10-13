@@ -12,8 +12,11 @@ import { EmptyState } from "@/components/clients/profile/cards/card-parts";
 import type { AuthorizationRow as Row } from "@/lib/clients/authorizations";
 import { pastPeriods } from "@/lib/clients/authorization-renewal";
 import { primaryContact } from "@/lib/clients/contacts";
+import { teamOnCode } from "@/lib/clients/team";
 import { getUnitAlerts } from "@/lib/clients/unit-alerts.functions";
 import { useAllClientContacts } from "@/components/clients/shared/hooks/use-client-contacts";
+import { useOrgStaff } from "@/components/clients/shared/hooks/use-org-staff";
+import { useClientTeam } from "@/components/clients/profile/team/use-client-team";
 import { AuthorizationCard } from "./authorization-card";
 import { PastAuthorizationsCard } from "./past-authorizations-card";
 import { money } from "./money";
@@ -47,6 +50,9 @@ export function Authorizations({
   const contactsQ = useAllClientContacts(clientId);
   const coordinatorEmail =
     primaryContact(contactsQ.data ?? [], "support_coordinator")?.email ?? null;
+  const teamQ = useClientTeam(orgId, clientId);
+  const staffQ = useOrgStaff(orgId);
+  const teamLoaded = !!teamQ.data && !!staffQ.data;
   const refresh = useRefreshServices(clientId);
   const imp = use1056Import(orgId, clientId, refresh);
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -132,6 +138,11 @@ export function Authorizations({
           v={v}
           history={data?.history[v.row.id] ?? []}
           canEdit={canEdit}
+          team={
+            teamLoaded
+              ? teamOnCode(teamQ.data!.assigned, staffQ.data!, v.row.service_code)
+              : null
+          }
           email={{
             orgId,
             clientId,
