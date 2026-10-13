@@ -1,5 +1,6 @@
 // Progress summaries: which of the client's codes owe one and how often
-// (progress-summaries.ts cadence rules) and the summaries on file. Each
+// (progress-summaries.ts cadence rules) and the summaries on file from the
+// day the client started with the agency, each with its due date. Each
 // opens in a side panel here, using the same editor as /dashboard/summaries
 // (which stays the agency-wide list); closing it leaves the profile as it was.
 
@@ -11,8 +12,11 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/clients/dates";
 import {
+  clientAgencyStart,
   currentSummaryPeriod,
+  summariesSince,
   summaryButtonLabel,
+  summaryDueRule,
   summaryPeriodName,
 } from "@/lib/clients/plan-summaries";
 import { summariesOwed } from "@/lib/progress-summaries";
@@ -30,13 +34,12 @@ const CADENCE: Record<string, string> = {
 
 type SummaryRow = {
   id: string;
-  summary_kind: string | null;
   period_kind: string | null;
   period_label: string | null;
   period_start: string | null;
   period_end: string | null;
+  due_date: string | null;
   status: string | null;
-  finalized_at: string | null;
 };
 
 export function SummariesPanel({
@@ -59,22 +62,31 @@ export function SummariesPanel({
     enabled: !!orgId,
     queryKey,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("client_progress_summaries")
-        .select(
-          "id, summary_kind, period_kind, period_label, period_start, period_end, status, finalized_at",
-        )
-        .eq("organization_id", orgId!)
-        .eq("client_id", clientId)
-        .order("period_end", { ascending: false })
-        .limit(60);
-      if (error) throw error;
-      return (data ?? []) as SummaryRow[];
+      const [summaries, client] = await Promise.all([
+        supabase
+          .from("client_progress_summaries")
+          .select("id, period_kind, period_label, period_start, period_end, due_date, status")
+          .eq("organization_id", orgId!)
+          .eq("client_id", clientId)
+          .order("period_end", { ascending: false })
+          .limit(60),
+        supabase
+          .from("clients")
+          .select("admission_date, hive_start_date, created_at")
+          .eq("organization_id", orgId!)
+          .eq("id", clientId)
+          .maybeSingle(),
+      ]);
+      if (summaries.error) throw summaries.error;
+      if (client.error) throw client.error;
+      const start = client.data ? clientAgencyStart(client.data) : null;
+      return { start, rows: summariesSince((summaries.data ?? []) as SummaryRow[], start) };
     },
   });
+  const rows = q.data?.rows ?? [];
   const owed = summariesOwed(codes);
   const period = currentSummaryPeriod(owed.map((o) => o.cadence));
-  const started = (q.data ?? []).some((r) => r.period_label === period.label);
+  const started = rows.some((r) => r.period_label === period.label);
   const refresh = () => {
     qc.invalidateQueries({ queryKey });
     qc.invalidateQueries({ queryKey: ["deadlines", "summaries", orgId] });
@@ -106,10 +118,15 @@ export function SummariesPanel({
           ))
         )}
       </div>
+      {q.data?.start ? (
+        <p className="pb-2 text-xs text-muted-foreground" data-testid="client-summaries-since">
+          Since {formatDate(q.data.start)}, when {clientName} started with the agency.
+        </p>
+      ) : null}
       <ReadOnlyTable
         loading={q.isLoading}
         empty="No progress summaries on file."
-        rows={q.data ?? []}
+        rows={rows}
         columns={[
           {
             header: "Period",
@@ -117,10 +134,21 @@ export function SummariesPanel({
               summaryPeriodName(r.period_label) ??
               `${formatDate(r.period_start)} – ${formatDate(r.period_end)}`,
           },
-          { header: "Kind", cell: (r) => <StatusTag>{r.summary_kind ?? "—"}</StatusTag> },
+          {
+            header: "Due",
+            cell: (r) => (
+              <span className="block">
+                <span className="block font-medium text-hive-ink">{formatDate(r.due_date)}</span>
+                {summaryDueRule(r.period_kind) ? (
+                  <span className="block text-xs text-muted-foreground">
+                    {summaryDueRule(r.period_kind)}
+                  </span>
+                ) : null}
+              </span>
+            ),
+          },
           { header: "Cadence", cell: (r) => r.period_kind ?? "—" },
           { header: "Status", cell: (r) => r.status ?? "—" },
-          { header: "Finalized", cell: (r) => formatDate(r.finalized_at) },
           {
             header: "",
             cell: (r) => (

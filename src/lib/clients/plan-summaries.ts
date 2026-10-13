@@ -98,3 +98,36 @@ export function currentSummaryPeriod(
   }
   return { kind: "quarterly", label: `${y}-Q${Math.floor(now.getMonth() / 3) + 1}` };
 }
+
+/**
+ * When the client started with the agency: the admission date, else the
+ * day they started in PI (hive_start_date), else the day they were added.
+ * The profile lists summaries from here on.
+ */
+export function clientAgencyStart(c: {
+  admission_date?: string | null;
+  hive_start_date?: string | null;
+  created_at?: string | null;
+}): string | null {
+  for (const v of [c.admission_date, c.hive_start_date, c.created_at]) {
+    const ymd = (v ?? "").slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return ymd;
+  }
+  return null;
+}
+
+/** Summaries whose period ends on or after `start` (all of them when there's no start). */
+export function summariesSince<T extends { period_end: string | null }>(
+  rows: readonly T[],
+  start: string | null,
+): T[] {
+  if (!start) return [...rows];
+  return rows.filter((r) => !r.period_end || r.period_end.slice(0, 10) >= start);
+}
+
+/** The due rule in words (progress-summaries.ts sets each period's due_date by it). */
+export function summaryDueRule(periodKind: string | null | undefined): string | null {
+  if (periodKind === "quarterly") return "15 days after quarter end";
+  if (periodKind === "monthly") return "15th of the next month";
+  return null;
+}
