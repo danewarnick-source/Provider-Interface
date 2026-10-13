@@ -103,12 +103,12 @@ describe("levels", () => {
   });
 
   it("open-shift approve and deny are limited to an owner or an agency-wide admin", () => {
-    const fn = readFileSync(new URL("../scheduling/open-shifts.functions.ts", import.meta.url), "utf8");
+    const fn = readFileSync(new URL("../scheduler/open-shifts.functions.ts", import.meta.url), "utf8");
     const decide = fn.slice(fn.indexOf("export const decideClaim"), fn.length);
     assert.match(decide, /requireOrgMembership\(supabase, userId, shift\.organization_id, "admin"\)/);
     assert.match(decide, /isAgencyAdmin\(access\.level, access\.scope\)/);
     const panel = readFileSync(
-      new URL("../../components/scheduling/open-shifts-panel.tsx", import.meta.url),
+      new URL("../../components/scheduler/shared/open-shifts-panel.tsx", import.meta.url),
       "utf8",
     );
     assert.match(panel, /mode === "admin" && pending && isAgencyAdmin/);

@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Sparkles, Check, X } from "lucide-react";
-import { listOpenShifts, decideClaim, claimOpenShift } from "@/lib/scheduling/open-shifts.functions";
+import { listOpenShifts, decideClaim, claimOpenShift } from "@/lib/scheduler/open-shifts.functions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";

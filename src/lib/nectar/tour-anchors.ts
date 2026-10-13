@@ -53,7 +53,7 @@ export const TOUR_ANCHORS: TourAnchor[] = [
   {
     id: "nav.scheduling",
     label: "Scheduling",
-    route: "/dashboard/scheduling",
+    route: "/dashboard/scheduler",
     description: "Publish and edit staff shifts on the calendar.",
     surface: "admin",
   },

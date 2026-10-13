@@ -38,7 +38,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
-import { syncTeamToLocation } from "@/lib/scheduling/locations.functions";
+import { syncTeamToLocation } from "@/lib/scheduler/locations.functions";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PersonAvatar } from "@/components/person/person-avatar";
 
@@ -750,8 +750,7 @@ export function HomesTeamsBoard() {
                       staff / shift
                     </span>
                     <Link
-                      to="/dashboard/scheduling"
-                      search={{ tab: "schedule" }}
+                      to="/dashboard/scheduler"
                       className="font-medium text-primary hover:underline"
                     >
                       View schedule →

@@ -6,7 +6,7 @@
 // NOTE: RP3 is HOURLY — it is an EVV punch code (SOW §1.12), not a
 // daily-rate code.
 // NOTE: DSP is mode-dependent (qtr-hr OR daily) — handled in
-// src/lib/day-program-billing.ts, NOT here. MTP is flat daily.
+// src/lib/scheduler/day-program.ts, NOT here. MTP is flat daily.
 export const DAILY_SERVICE_CODES: ReadonlySet<string> = new Set([
   "HHS", "RHS", "PPS", "DSG", "RL6", "RP4", "RP5", "SED", "MTP",
 ]);

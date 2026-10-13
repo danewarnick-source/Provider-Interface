@@ -49,7 +49,7 @@ export const respondToShift = createServerFn({ method: "POST" })
         urgency: "urgent",
         title: `Shift declined — ${shift.service_code ?? "shift"} · ${startLabel}`,
         body: data.declineReason || "Staff declined the published shift.",
-        link_to: "/dashboard/schedule-preview",
+        link_to: "/dashboard/scheduler",
         related_id: shift.id,
         related_type: "shift_decline",
       });

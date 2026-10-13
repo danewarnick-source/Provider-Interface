@@ -54,7 +54,6 @@ import { Route as DashboardCompanyObligationsRouteImport } from './routes/dashbo
 import { Route as DashboardComplianceRouteImport } from './routes/dashboard.compliance'
 import { Route as DashboardComplianceDeskRouteImport } from './routes/dashboard.compliance-desk'
 import { Route as DashboardDailyLogsRouteImport } from './routes/dashboard.daily-logs'
-import { Route as DashboardDayProgramRouteImport } from './routes/dashboard.day-program'
 import { Route as DashboardDeadlinesRouteImport } from './routes/dashboard.deadlines'
 import { Route as DashboardEmarRouteImport } from './routes/dashboard.emar'
 import { Route as DashboardEvidenceRouteImport } from './routes/dashboard.evidence'
@@ -88,9 +87,7 @@ import { Route as DashboardRecordsDeskRouteImport } from './routes/dashboard.rec
 import { Route as DashboardReimbursementsRouteImport } from './routes/dashboard.reimbursements'
 import { Route as DashboardReportsRouteImport } from './routes/dashboard.reports'
 import { Route as DashboardScheduleRouteImport } from './routes/dashboard.schedule'
-import { Route as DashboardSchedulePreviewRouteImport } from './routes/dashboard.schedule-preview'
 import { Route as DashboardSchedulerRouteImport } from './routes/dashboard.scheduler'
-import { Route as DashboardSchedulingRouteImport } from './routes/dashboard.scheduling'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardSmartImportRouteImport } from './routes/dashboard.smart-import'
 import { Route as DashboardStateAuditRouteImport } from './routes/dashboard.state-audit'
@@ -435,11 +432,6 @@ const DashboardDailyLogsRoute = DashboardDailyLogsRouteImport.update({
   path: '/daily-logs',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardDayProgramRoute = DashboardDayProgramRouteImport.update({
-  id: '/day-program',
-  path: '/day-program',
-  getParentRoute: () => DashboardRoute,
-} as any)
 const DashboardDeadlinesRoute = DashboardDeadlinesRouteImport.update({
   id: '/deadlines',
   path: '/deadlines',
@@ -614,20 +606,9 @@ const DashboardScheduleRoute = DashboardScheduleRouteImport.update({
   path: '/schedule',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardSchedulePreviewRoute =
-  DashboardSchedulePreviewRouteImport.update({
-    id: '/schedule-preview',
-    path: '/schedule-preview',
-    getParentRoute: () => DashboardRoute,
-  } as any)
 const DashboardSchedulerRoute = DashboardSchedulerRouteImport.update({
   id: '/scheduler',
   path: '/scheduler',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardSchedulingRoute = DashboardSchedulingRouteImport.update({
-  id: '/scheduling',
-  path: '/scheduling',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
@@ -1313,7 +1294,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/compliance': typeof DashboardComplianceRoute
   '/dashboard/compliance-desk': typeof DashboardComplianceDeskRoute
   '/dashboard/daily-logs': typeof DashboardDailyLogsRoute
-  '/dashboard/day-program': typeof DashboardDayProgramRoute
   '/dashboard/deadlines': typeof DashboardDeadlinesRoute
   '/dashboard/emar': typeof DashboardEmarRoute
   '/dashboard/evidence': typeof DashboardEvidenceRoute
@@ -1347,9 +1327,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/reimbursements': typeof DashboardReimbursementsRoute
   '/dashboard/reports': typeof DashboardReportsRoute
   '/dashboard/schedule': typeof DashboardScheduleRoute
-  '/dashboard/schedule-preview': typeof DashboardSchedulePreviewRoute
   '/dashboard/scheduler': typeof DashboardSchedulerRoute
-  '/dashboard/scheduling': typeof DashboardSchedulingRoute
   '/dashboard/settings': typeof DashboardSettingsRouteWithChildren
   '/dashboard/smart-import': typeof DashboardSmartImportRouteWithChildren
   '/dashboard/state-audit': typeof DashboardStateAuditRoute
@@ -1506,7 +1484,6 @@ export interface FileRoutesByTo {
   '/dashboard/compliance': typeof DashboardComplianceRoute
   '/dashboard/compliance-desk': typeof DashboardComplianceDeskRoute
   '/dashboard/daily-logs': typeof DashboardDailyLogsRoute
-  '/dashboard/day-program': typeof DashboardDayProgramRoute
   '/dashboard/deadlines': typeof DashboardDeadlinesRoute
   '/dashboard/emar': typeof DashboardEmarRoute
   '/dashboard/evidence': typeof DashboardEvidenceRoute
@@ -1537,9 +1514,7 @@ export interface FileRoutesByTo {
   '/dashboard/reimbursements': typeof DashboardReimbursementsRoute
   '/dashboard/reports': typeof DashboardReportsRoute
   '/dashboard/schedule': typeof DashboardScheduleRoute
-  '/dashboard/schedule-preview': typeof DashboardSchedulePreviewRoute
   '/dashboard/scheduler': typeof DashboardSchedulerRoute
-  '/dashboard/scheduling': typeof DashboardSchedulingRoute
   '/dashboard/settings': typeof DashboardSettingsRouteWithChildren
   '/dashboard/state-audit': typeof DashboardStateAuditRoute
   '/dashboard/summaries': typeof DashboardSummariesRoute
@@ -1701,7 +1676,6 @@ export interface FileRoutesById {
   '/dashboard/compliance': typeof DashboardComplianceRoute
   '/dashboard/compliance-desk': typeof DashboardComplianceDeskRoute
   '/dashboard/daily-logs': typeof DashboardDailyLogsRoute
-  '/dashboard/day-program': typeof DashboardDayProgramRoute
   '/dashboard/deadlines': typeof DashboardDeadlinesRoute
   '/dashboard/emar': typeof DashboardEmarRoute
   '/dashboard/evidence': typeof DashboardEvidenceRoute
@@ -1735,9 +1709,7 @@ export interface FileRoutesById {
   '/dashboard/reimbursements': typeof DashboardReimbursementsRoute
   '/dashboard/reports': typeof DashboardReportsRoute
   '/dashboard/schedule': typeof DashboardScheduleRoute
-  '/dashboard/schedule-preview': typeof DashboardSchedulePreviewRoute
   '/dashboard/scheduler': typeof DashboardSchedulerRoute
-  '/dashboard/scheduling': typeof DashboardSchedulingRoute
   '/dashboard/settings': typeof DashboardSettingsRouteWithChildren
   '/dashboard/smart-import': typeof DashboardSmartImportRouteWithChildren
   '/dashboard/state-audit': typeof DashboardStateAuditRoute
@@ -1901,7 +1873,6 @@ export interface FileRouteTypes {
     | '/dashboard/compliance'
     | '/dashboard/compliance-desk'
     | '/dashboard/daily-logs'
-    | '/dashboard/day-program'
     | '/dashboard/deadlines'
     | '/dashboard/emar'
     | '/dashboard/evidence'
@@ -1935,9 +1906,7 @@ export interface FileRouteTypes {
     | '/dashboard/reimbursements'
     | '/dashboard/reports'
     | '/dashboard/schedule'
-    | '/dashboard/schedule-preview'
     | '/dashboard/scheduler'
-    | '/dashboard/scheduling'
     | '/dashboard/settings'
     | '/dashboard/smart-import'
     | '/dashboard/state-audit'
@@ -2094,7 +2063,6 @@ export interface FileRouteTypes {
     | '/dashboard/compliance'
     | '/dashboard/compliance-desk'
     | '/dashboard/daily-logs'
-    | '/dashboard/day-program'
     | '/dashboard/deadlines'
     | '/dashboard/emar'
     | '/dashboard/evidence'
@@ -2125,9 +2093,7 @@ export interface FileRouteTypes {
     | '/dashboard/reimbursements'
     | '/dashboard/reports'
     | '/dashboard/schedule'
-    | '/dashboard/schedule-preview'
     | '/dashboard/scheduler'
-    | '/dashboard/scheduling'
     | '/dashboard/settings'
     | '/dashboard/state-audit'
     | '/dashboard/summaries'
@@ -2288,7 +2254,6 @@ export interface FileRouteTypes {
     | '/dashboard/compliance'
     | '/dashboard/compliance-desk'
     | '/dashboard/daily-logs'
-    | '/dashboard/day-program'
     | '/dashboard/deadlines'
     | '/dashboard/emar'
     | '/dashboard/evidence'
@@ -2322,9 +2287,7 @@ export interface FileRouteTypes {
     | '/dashboard/reimbursements'
     | '/dashboard/reports'
     | '/dashboard/schedule'
-    | '/dashboard/schedule-preview'
     | '/dashboard/scheduler'
-    | '/dashboard/scheduling'
     | '/dashboard/settings'
     | '/dashboard/smart-import'
     | '/dashboard/state-audit'
@@ -2805,13 +2768,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardDailyLogsRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/day-program': {
-      id: '/dashboard/day-program'
-      path: '/day-program'
-      fullPath: '/dashboard/day-program'
-      preLoaderRoute: typeof DashboardDayProgramRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/deadlines': {
       id: '/dashboard/deadlines'
       path: '/deadlines'
@@ -3043,25 +2999,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardScheduleRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/schedule-preview': {
-      id: '/dashboard/schedule-preview'
-      path: '/schedule-preview'
-      fullPath: '/dashboard/schedule-preview'
-      preLoaderRoute: typeof DashboardSchedulePreviewRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/scheduler': {
       id: '/dashboard/scheduler'
       path: '/scheduler'
       fullPath: '/dashboard/scheduler'
       preLoaderRoute: typeof DashboardSchedulerRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/scheduling': {
-      id: '/dashboard/scheduling'
-      path: '/scheduling'
-      fullPath: '/dashboard/scheduling'
-      preLoaderRoute: typeof DashboardSchedulingRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/settings': {
@@ -4160,7 +4102,6 @@ interface DashboardRouteChildren {
   DashboardComplianceRoute: typeof DashboardComplianceRoute
   DashboardComplianceDeskRoute: typeof DashboardComplianceDeskRoute
   DashboardDailyLogsRoute: typeof DashboardDailyLogsRoute
-  DashboardDayProgramRoute: typeof DashboardDayProgramRoute
   DashboardDeadlinesRoute: typeof DashboardDeadlinesRoute
   DashboardEmarRoute: typeof DashboardEmarRoute
   DashboardEvidenceRoute: typeof DashboardEvidenceRoute
@@ -4194,9 +4135,7 @@ interface DashboardRouteChildren {
   DashboardReimbursementsRoute: typeof DashboardReimbursementsRoute
   DashboardReportsRoute: typeof DashboardReportsRoute
   DashboardScheduleRoute: typeof DashboardScheduleRoute
-  DashboardSchedulePreviewRoute: typeof DashboardSchedulePreviewRoute
   DashboardSchedulerRoute: typeof DashboardSchedulerRoute
-  DashboardSchedulingRoute: typeof DashboardSchedulingRoute
   DashboardSettingsRoute: typeof DashboardSettingsRouteWithChildren
   DashboardSmartImportRoute: typeof DashboardSmartImportRouteWithChildren
   DashboardStateAuditRoute: typeof DashboardStateAuditRoute
@@ -4244,7 +4183,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardComplianceRoute: DashboardComplianceRoute,
   DashboardComplianceDeskRoute: DashboardComplianceDeskRoute,
   DashboardDailyLogsRoute: DashboardDailyLogsRoute,
-  DashboardDayProgramRoute: DashboardDayProgramRoute,
   DashboardDeadlinesRoute: DashboardDeadlinesRoute,
   DashboardEmarRoute: DashboardEmarRoute,
   DashboardEvidenceRoute: DashboardEvidenceRoute,
@@ -4279,9 +4217,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardReimbursementsRoute: DashboardReimbursementsRoute,
   DashboardReportsRoute: DashboardReportsRoute,
   DashboardScheduleRoute: DashboardScheduleRoute,
-  DashboardSchedulePreviewRoute: DashboardSchedulePreviewRoute,
   DashboardSchedulerRoute: DashboardSchedulerRoute,
-  DashboardSchedulingRoute: DashboardSchedulingRoute,
   DashboardSettingsRoute: DashboardSettingsRouteWithChildren,
   DashboardSmartImportRoute: DashboardSmartImportRouteWithChildren,
   DashboardStateAuditRoute: DashboardStateAuditRoute,

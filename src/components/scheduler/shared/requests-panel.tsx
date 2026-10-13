@@ -15,8 +15,8 @@ import {
   fetchConflictingShifts,
   type SwapRequest,
   type TimeOffRequest,
-} from "@/lib/schedule-requests";
-import type { StaffRow } from "@/hooks/use-schedule-preview";
+} from "@/lib/scheduler/requests";
+import type { StaffRow } from "@/components/scheduler/shared/hooks/use-schedule-preview";
 import { SCHED } from "./sched-ui";
 
 // ── tokens / small style helpers (ported from the demo weekstrip) ─────

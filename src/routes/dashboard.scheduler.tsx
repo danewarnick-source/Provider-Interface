@@ -31,8 +31,8 @@ import { useAccess } from "@/hooks/use-access";
 import {
   useSchedulerData, startOfWeek, startOfDay, startOfMonth,
   type SchedClient, type SchedStaff, type SchedShift,
-} from "@/hooks/use-scheduler-data";
-import { useDayProgramData } from "@/hooks/use-day-program-data";
+} from "@/components/scheduler/shared/hooks/use-scheduler-data";
+import { useDayProgramData } from "@/components/scheduler/shared/hooks/use-day-program-data";
 import {
   saveShift, deleteShift, publishWeek, setAdminTimeOff,
   saveDayProgramSession, markAttendance, addSessionStaff,
@@ -41,8 +41,8 @@ import { isClockableServiceCode } from "@/lib/service-billing";
 import { addStaffToClientCode } from "@/lib/scheduler/setup.functions";
 import { assignmentCoversCode } from "@/lib/assignment-codes";
 import { evvServiceLabel } from "@/lib/evv-codes";
-import { RequestsPanel } from "@/components/schedule-preview/requests-panel";
-import { OpenShiftsPanel } from "@/components/scheduling/open-shifts-panel";
+import { RequestsPanel } from "@/components/scheduler/shared/requests-panel";
+import { OpenShiftsPanel } from "@/components/scheduler/shared/open-shifts-panel";
 import { NectarBar } from "@/components/scheduler/nectar-bar";
 import { NectarFocusBanner } from "@/components/nectar/nectar-focus-banner";
 import { createRecurringShifts } from "@/lib/scheduler/repeat.functions";

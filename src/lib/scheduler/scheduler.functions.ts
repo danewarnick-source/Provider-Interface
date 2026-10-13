@@ -5,7 +5,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { coerceScheduledShiftStatus } from "@/lib/scheduling/shift-status";
+import { coerceScheduledShiftStatus } from "@/lib/scheduler/shift-status";
 import { denverWeekUtcBounds } from "@/lib/scheduler/recurrence";
 import { requireCategory } from "@/lib/access/require";
 import { assertShiftAllowed, collectShiftFailures } from "@/lib/scheduler/shift-checks";
@@ -61,7 +61,7 @@ export const saveShift = createServerFn({ method: "POST" })
     };
 
     // Overlapping services for one client are refused, on insert and on update.
-    const { assertNoBillingConflict } = await import("@/lib/scheduling/shift-commit");
+    const { assertNoBillingConflict } = await import("@/lib/scheduler/shift-commit");
     await assertNoBillingConflict(supabase, { ...payload, id: data.id } as never);
 
     if (data.id) {

@@ -1,6 +1,6 @@
 import { Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { HHS_VISIT_TOOLTIP } from "@/lib/scheduling/hhs-visit";
+import { HHS_VISIT_TOOLTIP } from "@/lib/scheduler/hhs-visit";
 import { cn } from "@/lib/utils";
 
 /**

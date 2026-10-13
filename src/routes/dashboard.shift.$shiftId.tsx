@@ -18,7 +18,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useAccess } from "@/hooks/use-access";
 import { notify } from "@/lib/scheduler/notify";
 import { staffClockOutSearch } from "@/lib/staff-clock-out";
-import { monthlySupportHoursTarget } from "@/lib/scheduling/hhs-visit";
+import { monthlySupportHoursTarget } from "@/lib/scheduler/hhs-visit";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
