@@ -1,5 +1,4 @@
-// More details: Primary language (built in, can't be deleted) and the
-// agency's custom client fields as small tiles. Editors open edit mode to change values, add a
+// More details: the agency's own client fields as small tiles. Editors open edit mode to change values, add a
 // field or delete fields; a delete removes the field for every client.
 // Select all / Delete selected work on the whole list.
 
@@ -25,7 +24,8 @@ import { deleteCustomFieldDefinitions } from "@/lib/clients/custom-fields.functi
 import { chunkIds, customFieldDeleteCopy } from "@/lib/clients/custom-fields-delete";
 import { EditButton, SectionCard } from "@/components/clients/profile/cards/section-card";
 import { RowMenu } from "@/components/clients/profile/cards/row-menu";
-import { isBuiltInField, withBuiltInFields } from "@/lib/clients/custom-fields-builtin";
+import { EmptyState } from "@/components/clients/profile/cards/card-parts";
+import { moreDetailsFields } from "@/lib/clients/more-details";
 import { DetailTile } from "./detail-tile";
 import { AddCustomFieldButton, CustomFieldRow } from "./more-details-parts";
 
@@ -34,9 +34,7 @@ export function MoreDetailsCard({ clientId }: { clientId: string }) {
   const canEdit = useAccess().canCategory("clients", "edit");
   const orgId = care.data?.identity.organization_id ?? null;
   const qc = useQueryClient();
-  const fields = useMemo(() => withBuiltInFields(care.data?.custom_fields ?? []), [care.data]);
-  // Built-in fields (Primary language) can't be selected or deleted.
-  const deletable = useMemo(() => fields.filter((f) => !isBuiltInField(f)), [fields]);
+  const fields = useMemo(() => moreDetailsFields(care.data?.custom_fields ?? []), [care.data]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [confirm, setConfirm] = useState<{ ids: string[]; labels: string[] } | null>(null);
   const [editing, setEditing] = useState(false);
@@ -86,9 +84,9 @@ export function MoreDetailsCard({ clientId }: { clientId: string }) {
     },
   });
 
-  const allSelected = deletable.length > 0 && deletable.every((f) => selected.has(f.id));
-  const someSelected = deletable.some((f) => selected.has(f.id));
-  const selectedFields = deletable.filter((f) => selected.has(f.id));
+  const allSelected = fields.length > 0 && fields.every((f) => selected.has(f.id));
+  const someSelected = fields.some((f) => selected.has(f.id));
+  const selectedFields = fields.filter((f) => selected.has(f.id));
   const copy = customFieldDeleteCopy(confirm?.labels ?? []);
 
   function requestDelete(ids: string[]) {
@@ -101,7 +99,7 @@ export function MoreDetailsCard({ clientId }: { clientId: string }) {
     icon: ListPlus,
     tone: "profile" as const,
     title: "More details",
-    description: "Primary language and your agency's own fields, the same on every client.",
+    description: "Your agency's own fields, the same on every client.",
   };
 
   return (
@@ -131,7 +129,17 @@ export function MoreDetailsCard({ clientId }: { clientId: string }) {
         ) : null
       }
     >
-      {!editing ? (
+      {!editing && fields.length === 0 ? (
+        <EmptyState
+          testId="client-more-details-empty"
+          action={
+            canEdit && orgId ? <AddCustomFieldButton clientId={clientId} orgId={orgId} /> : null
+          }
+        >
+          No agency fields yet.
+        </EmptyState>
+      ) : null}
+      {!editing && fields.length > 0 ? (
         <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3" data-testid="client-more-details">
           {fields.map((f) => (
             <DetailTile key={f.id} field={f} />
@@ -144,7 +152,7 @@ export function MoreDetailsCard({ clientId }: { clientId: string }) {
             <Checkbox
               checked={allSelected ? true : someSelected ? "indeterminate" : false}
               onCheckedChange={(v) =>
-                setSelected(v === true ? new Set(deletable.map((f) => f.id)) : new Set())
+                setSelected(v === true ? new Set(fields.map((f) => f.id)) : new Set())
               }
               aria-label="Select all custom fields"
             />
