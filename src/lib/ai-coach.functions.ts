@@ -3,9 +3,11 @@
 // those screens call; prompts and parsing live in src/lib/nectar/engine/coach-*.ts.
 //
 // Every call runs the Nectar guard (signed in, active member, `nectar` on for
-// the agency) and charges the caller's agency in the per-agency Bedrock rate
-// limit. Two calls never block the person on Nectar: the submit completeness
-// check falls back to the local word count when Nectar is off, and the
+// the agency, and the agency's AI setting for the feature on: shift note help
+// for the note and incident helpers, Ask for the procedural question) and
+// charges the caller's agency in the per-agency Bedrock rate limit. Two calls
+// never block the person on Nectar: the submit completeness check falls back
+// to the local word count when Nectar or shift note help is off, and the
 // incident reviewer stays fail-open.
 
 import { createServerFn } from "@tanstack/react-start";
@@ -13,6 +15,7 @@ import { getRequest } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { gatewayFetch, assertBedrockConfigured } from "@/lib/ai-bedrock.server";
 import { coachModelFor, type CoachModel } from "@/lib/nectar/engine/coach-model";
+import { isNectarOff } from "@/lib/nectar/engine/guard";
 import { nectarCaller, requireNectarOrg } from "@/lib/nectar/engine/guard.server";
 import {
   runDraftShiftNote,
@@ -50,6 +53,9 @@ export type {
   IncidentReviewResult,
 } from "@/lib/nectar/engine/coach-incidents";
 
+/** The note and incident helpers run under the agency's "Shift note help" setting. */
+const NOTE_HELP = { feature: "note_help" } as const;
+
 /**
  * The model for this request, charged to the caller's agency. It forwards the
  * request's abort signal so a client-side cancel (e.g. the 20s incident-report
@@ -69,8 +75,8 @@ export const evaluateShiftNote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(validateCoach)
   .handler(async ({ data, context }): Promise<CoachResult> => {
-    const caller = await nectarCaller(context);
-    if (!caller.ok && caller.reason !== "feature_off") throw new Error(caller.message);
+    const caller = await nectarCaller(context, NOTE_HELP);
+    if (!caller.ok && !isNectarOff(caller)) throw new Error(caller.message);
     return runEvaluateShiftNote(data, caller.ok ? coachModel(caller.orgId) : null);
   });
 
@@ -80,7 +86,7 @@ export const draftShiftNote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(validateDraft)
   .handler(async ({ data, context }): Promise<DraftResult> =>
-    runDraftShiftNote(data, coachModel(await requireNectarOrg(context))),
+    runDraftShiftNote(data, coachModel(await requireNectarOrg(context, NOTE_HELP))),
   );
 
 // ─── Procedural Q&A — "am I allowed to…?" grounded in client context ─────────
@@ -89,7 +95,7 @@ export const answerProceduralQuestion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(validateProcedural)
   .handler(async ({ data, context }): Promise<ProceduralResult> =>
-    runAnswerProcedural(data, coachModel(await requireNectarOrg(context))),
+    runAnswerProcedural(data, coachModel(await requireNectarOrg(context, { feature: "ask" }))),
   );
 
 // ─── Content Scanner — runs AFTER quality coach passes ───────────────────────
@@ -98,7 +104,7 @@ export const scanNoteForTriggers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(validateScan)
   .handler(async ({ data, context }): Promise<ScanResult> =>
-    runScanNoteForTriggers(data, coachModel(await requireNectarOrg(context))),
+    runScanNoteForTriggers(data, coachModel(await requireNectarOrg(context, NOTE_HELP))),
   );
 
 // ─── Incident-report narrative drafter ───────────────────────────────────────
@@ -107,7 +113,7 @@ export const draftIncidentNarrative = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(validateIncidentDraft)
   .handler(async ({ data, context }): Promise<IncidentDraftResult> =>
-    runDraftIncidentNarrative(data, coachModel(await requireNectarOrg(context))),
+    runDraftIncidentNarrative(data, coachModel(await requireNectarOrg(context, NOTE_HELP))),
   );
 
 // ─── Incident report reviewer ───────────────────────────────────────────────
@@ -120,7 +126,7 @@ export const reviewIncidentReport = createServerFn({ method: "POST" })
   .inputValidator(validateReviewInput)
   .handler(async ({ data, context }): Promise<IncidentReviewResult> => {
     try {
-      const caller = await nectarCaller(context);
+      const caller = await nectarCaller(context, NOTE_HELP);
       if (!caller.ok) return skippedReview(caller.message);
 
       const aiRes = await gatewayFetch({

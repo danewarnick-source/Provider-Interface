@@ -579,7 +579,7 @@ export const askNectarHelp = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId)
       return { answer: "", deepLink: null, isDataRequest: false, followUps: [] };
-    await requireNectarOrg(context, { orgId: data.organizationId });
+    await requireNectarOrg(context, { orgId: data.organizationId, feature: "ask" });
     const access = await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     const audience = resolveNectarAudience(access, { role: data.role });
     const directory = await memberOrgDirectory(

@@ -2,8 +2,13 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import {
+  aiSettingRefusal,
   checkNectarCaller,
+  DEFAULT_NECTAR_SETTINGS,
+  isNectarOff,
   nectarOrgIdsFrom,
+  nectarSettingsFrom,
+  NECTAR_AI_FEATURES,
   NECTAR_REFUSAL_MESSAGE,
   type NectarCallerDeps,
 } from "./guard.ts";
@@ -13,8 +18,8 @@ const ORG_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const ORG_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const ORG_C = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 
-function fakeDeps(opts: { memberOf?: string[]; nectarOn?: string[] }) {
-  const calls = { active: [] as string[], nectar: [] as string[][] };
+function fakeDeps(opts: { memberOf?: string[]; nectarOn?: string[]; settings?: Record<string, unknown> }) {
+  const calls = { active: [] as string[], nectar: [] as string[][], settings: [] as string[] };
   const deps: NectarCallerDeps = {
     loadActiveOrgIds: async (userId) => {
       calls.active.push(userId);
@@ -23,6 +28,10 @@ function fakeDeps(opts: { memberOf?: string[]; nectarOn?: string[] }) {
     loadNectarOrgIds: async (orgIds) => {
       calls.nectar.push(orgIds);
       return orgIds.filter((id) => (opts.nectarOn ?? []).includes(id));
+    },
+    loadNectarSettings: async (orgId) => {
+      calls.settings.push(orgId);
+      return opts.settings?.[orgId];
     },
   };
   return { deps, calls };
@@ -87,6 +96,46 @@ describe("checkNectarCaller", () => {
   });
 });
 
+describe("AI settings (N3)", () => {
+  it("reads missing, non-object or non-boolean settings as on", () => {
+    assert.deepEqual(nectarSettingsFrom(undefined), DEFAULT_NECTAR_SETTINGS);
+    assert.deepEqual(nectarSettingsFrom([]), DEFAULT_NECTAR_SETTINGS);
+    assert.deepEqual(nectarSettingsFrom({ ask: "no", note_help: false }), { ...DEFAULT_NECTAR_SETTINGS, note_help: false });
+    assert.deepEqual([...NECTAR_AI_FEATURES], ["ask", "note_help", "pcsp_reading", "summary_drafts"]);
+  });
+
+  it("refuses a feature when Nectar or that feature is off", () => {
+    assert.equal(aiSettingRefusal(DEFAULT_NECTAR_SETTINGS, "ask"), null);
+    assert.equal(aiSettingRefusal({ ...DEFAULT_NECTAR_SETTINGS, enabled: false }, "ask"), "Nectar is turned off for your agency.");
+    assert.equal(aiSettingRefusal({ ...DEFAULT_NECTAR_SETTINGS, ask: false }, "ask"), "Ask is turned off for your agency.");
+    assert.equal(aiSettingRefusal({ ...DEFAULT_NECTAR_SETTINGS, ask: false }, "note_help"), null);
+  });
+
+  it("checks the settings of the agency the call runs under, only for an AI call", async () => {
+    const settings = { [ORG_A]: { note_help: false } };
+    const noted = fakeDeps({ memberOf: [ORG_A], nectarOn: [ORG_A], settings });
+    const refused = await checkNectarCaller(USER, noted.deps, { feature: "note_help" });
+    assert.deepEqual(refused, { ok: false, reason: "setting_off", message: "Shift note help is turned off for your agency." });
+    assert.equal(isNectarOff(refused), true);
+    assert.deepEqual(noted.calls.settings, [ORG_A]);
+
+    const library = fakeDeps({ memberOf: [ORG_A], nectarOn: [ORG_A], settings: { [ORG_A]: { enabled: false } } });
+    assert.deepEqual(await checkNectarCaller(USER, library.deps, { orgId: ORG_A, feature: null }), { ok: true, orgId: ORG_A });
+    assert.equal(library.calls.settings.length, 0, "no model call, no settings read");
+
+    const signedOut = fakeDeps({ memberOf: [ORG_A], nectarOn: [ORG_A] });
+    const out = await checkNectarCaller(null, signedOut.deps, { feature: "ask" });
+    assert.equal(isNectarOff(out), false, "a signed-out caller is not 'Nectar off'");
+  });
+
+  it("leaves current agencies unchanged: every setting defaults to on", async () => {
+    const { deps } = fakeDeps({ memberOf: [ORG_A], nectarOn: [ORG_A] });
+    for (const feature of NECTAR_AI_FEATURES) {
+      assert.deepEqual(await checkNectarCaller(USER, deps, { feature }), { ok: true, orgId: ORG_A });
+    }
+  });
+});
+
 describe("nectarOrgIdsFrom", () => {
   it("lets an agency's own setting win over the registry default", () => {
     const overrides = [
@@ -119,5 +168,10 @@ describe("guard.server.ts wiring", () => {
 
   it("refuses when the request has no signed-in user", () => {
     assert.match(src, /if \(!supabase \|\| !userId\) return Promise\.resolve\(nectarRefusal\("signed_out"\)\)/);
+  });
+
+  it("reads the agency's AI settings from organizations.nectar_settings, and every caller names its feature (N3)", () => {
+    assert.match(src, /\.from\("organizations"\)[\s\S]*?\.select\("nectar_settings"\)[\s\S]*?\.eq\("id", orgId\)/);
+    assert.match(src, /export type NectarGuardOptions = \{ orgId\?: string; feature: NectarAiFeature \| null \};/);
   });
 });
