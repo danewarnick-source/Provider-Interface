@@ -13,6 +13,7 @@ import {
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { startOfWeek as schedulerStartOfWeek } from "@/lib/scheduler/time";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useTimePaySettings } from "@/hooks/use-time-pay-settings";
 import { respondToShift } from "@/lib/scheduling/workflow.functions";
@@ -94,10 +95,7 @@ function endOfDay(d: Date) {
   return x;
 }
 function startOfWeek(d: Date) {
-  // Sunday start to match common US scheduling UX
-  const x = startOfDay(d);
-  x.setDate(x.getDate() - x.getDay());
-  return x;
+  return schedulerStartOfWeek(d);
 }
 function endOfWeek(d: Date) {
   const s = startOfWeek(d);
@@ -181,8 +179,8 @@ function useMyScheduledShifts(view: ViewMode, anchor: Date) {
         .eq("organization_id", org!.organization_id)
         .gte("starts_at", from.toISOString())
         .lte("starts_at", to.toISOString())
-        // Assigned to this staff — drafts included. Publish still drives
-        // accept/decline + notifications; cancelled stays hidden.
+        // Team members only see published shifts; drafts stay with the scheduler.
+        .eq("published", true)
         .neq("status", "cancelled")
         .order("starts_at", { ascending: true });
       if (error) throw error;

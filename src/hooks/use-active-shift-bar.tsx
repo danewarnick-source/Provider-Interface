@@ -1,4 +1,4 @@
-import { useActiveShift } from "@/hooks/use-active-shift";
+import { useActiveShift, useStaleOpenPunch } from "@/hooks/use-active-shift";
 import { useGeneralShift } from "@/hooks/use-general-shift";
 
 /**
@@ -8,6 +8,7 @@ import { useGeneralShift } from "@/hooks/use-general-shift";
  */
 export function useActiveShiftBarVisible(): boolean {
   const { data: active } = useActiveShift();
+  const { data: stale } = useStaleOpenPunch();
   const { shift: general } = useGeneralShift();
-  return !!active || !!general;
+  return !!active || !!general || !!stale;
 }
