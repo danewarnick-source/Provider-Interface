@@ -62,7 +62,7 @@ export const STAFF = {
 export const DSP_USER_ID = STAFF.jake.id;
 
 /** Daily-rate codes (worksheet / attendance) — not SLH/SLN. */
-export const DAILY_CODES = new Set(["HHS", "RHS", "PPS", "DSG", "RL6", "RP4", "RP5", "SED", "MTP"]);
+export const DAILY_CODES = new Set(["HHS", "RHS", "PPS", "DSG", "RP4", "RP5", "SED", "MTP", "PN1"]);
 
 /** Per-client worksheet rates (HHS/DSI/SEI). SLH/SLN use table rates. */
 export const WORKSHEET_CODES = new Set(["HHS", "RHS", "DSI", "SEI", "DSG", "DSP"]);

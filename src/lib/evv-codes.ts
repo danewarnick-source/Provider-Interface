@@ -2,8 +2,8 @@
 //
 // `evvLock: true`  → EVV-MANDATED per SOW §1.12: geofence enforced at punch
 //                    AND the visit is transmitted to UEVV (the state EVV
-//                    aggregator). Exactly these codes: ACA, CHA, COM, HSQ,
-//                    PAC, RP2, RP3, SLH, SLN, CMP, CMS.
+//                    aggregator). Exactly these codes: COM, HSQ, PAC, RP2,
+//                    RP3, SLH, SLN, CMP, CMS.
 // `evvLock: false` → NOT EVV-mandated. Punches capture time for payroll /
 //                    service-evidence only (passive GPS, no geofence lock,
 //                    no UEVV transmission). This explicitly includes SEI,
@@ -16,15 +16,13 @@ export interface ServiceCodeDef {
 
 export const EVV_SERVICE_CODES: ReadonlyArray<ServiceCodeDef> = [
   // EVV-MANDATED CODES (SOW §1.12 — geofence + UEVV transmission)
-  { code: "ACA", label: "ACA — Provider Based Attendant Care", evvLock: true },
-  { code: "CHA", label: "CHA — Chore Services – Provider", evvLock: true },
   { code: "CMP", label: "CMP — Caregiver Compensation – Parent/Guardian (Supported Living Natural)", evvLock: true },
   { code: "CMS", label: "CMS — Caregiver Compensation – Spouse (Supported Living Natural)", evvLock: true },
   { code: "COM", label: "COM — Companion Services – Provider", evvLock: true },
   { code: "HSQ", label: "HSQ — Homemaker Services Provider", evvLock: true },
   { code: "PAC", label: "PAC — Personal Assistance – Provider", evvLock: true },
-  { code: "RP2", label: "RP2 — Provider Basic Hourly Respite Care", evvLock: true },
-  { code: "RP3", label: "RP3 — Provider Intensive Daily Respite Care", evvLock: true },
+  { code: "RP2", label: "RP2 — Routine Respite Without Room and Board", evvLock: true },
+  { code: "RP3", label: "RP3 — Exceptional Care Respite Without Room and Board", evvLock: true },
   { code: "SLH", label: "SLH — Supported Living Hourly – Provider", evvLock: true },
   { code: "SLN", label: "SLN — Supported Living, Natural Supports", evvLock: true },
 
@@ -38,7 +36,6 @@ export const EVV_SERVICE_CODES: ReadonlyArray<ServiceCodeDef> = [
   { code: "ELS", label: "ELS — Extended Living Supports", evvLock: false },
   { code: "EPR", label: "EPR — Employment Preparation Services", evvLock: false },
   { code: "HHS", label: "HHS — Host Home Supports", evvLock: false },
-  { code: "LPS", label: "LPS — Peer Support Services, Individual", evvLock: false },
   { code: "MTP", label: "MTP — Motor Transportation Payment", evvLock: false },
   { code: "PBA", label: "PBA — Personal Budget Assistant", evvLock: false },
   { code: "PM1", label: "PM1 — Professional Medication Monitoring LPN", evvLock: false },
