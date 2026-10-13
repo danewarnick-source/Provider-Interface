@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { CoachModel } from "./coach-model.ts";
 import {
+  describeWhatYouDid,
   NECTAR_OFF_COMPLETENESS_FEEDBACK,
   runDraftShiftNote,
   runEvaluateShiftNote,
@@ -111,6 +112,39 @@ describe("runDraftShiftNote", () => {
     assert.deepEqual(result.followUps, []);
     assert.match(calls[0].system, /Follow-up answers ARE provided/);
     assert.match(calls[0].user, /STAFF ANSWERS TO NECTAR FOLLOW-UPS/);
+  });
+
+  it("with no goals and nothing described, asks the team member what they did (no model call)", async () => {
+    const { model, calls } = fakeModel({ draft: "Client A had a calm day with baseline support." });
+    for (const shorthand of ["good shift", "n/a nothing to report", "No issues, client was fine."]) {
+      await assert.rejects(
+        runDraftShiftNote(validateDraft({ shorthand, goals: [], clientFirstName: "Client A" }), model),
+        { message: describeWhatYouDid("Client A") },
+      );
+    }
+    assert.equal(calls.length, 0);
+    assert.match(describeWhatYouDid("the client"), /^Describe what you did with the client during this shift/);
+  });
+
+  it("never asks the model for a baseline narrative, and asks the person when it writes none", async () => {
+    const { model, calls } = fakeModel({ draft: "" });
+    await assert.rejects(
+      runDraftShiftNote(validateDraft({ shorthand: "park, soda, calm", goals: [], clientFirstName: "Client A" }), model),
+      { message: describeWhatYouDid("Client A") },
+    );
+    assert.match(calls[0].user, /CHECKED PCSP GOALS \(0\):\n\(none\)\n/);
+    assert.doesNotMatch(calls[0].user, /baseline/);
+    assert.match(calls[0].system, /Never invent activities/);
+    assert.match(calls[0].system, /never a general or baseline narrative/);
+  });
+
+  it("drafts from a described activity even without goals", async () => {
+    const { model } = fakeModel({ draft: "Staff supported Client A at the park." });
+    const result = await runDraftShiftNote(
+      validateDraft({ shorthand: "park, soda, calm", goals: [], clientFirstName: "Client A" }),
+      model,
+    );
+    assert.equal(result.draft, "Staff supported Client A at the park.");
   });
 
   it("refuses to hand back an empty draft", async () => {

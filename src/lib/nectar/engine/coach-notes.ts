@@ -12,6 +12,7 @@ import {
   type CompletenessResult,
 } from "../../nectar-completeness.ts";
 import { parseModelJson, type CoachModel } from "./coach-model.ts";
+import { describesActivity } from "./note-activity.ts";
 
 /** Submit-time completeness result. Kept as CoachResult so existing callers compile. */
 export type CoachResult = CompletenessResult;
@@ -188,6 +189,7 @@ REQUIREMENTS:
 - Reference each checked PCSP goal only from what the caregiver wrote. If a goal is not covered, do not fabricate an event.
 - Use the client's first name naturally.
 - Never invent injuries, medications, or incidents.
+- Never invent activities. If the caregiver note does not describe what happened or how staff supported the person, return an empty draft — never a general or baseline narrative.
 - No markdown, no headings, no bullet lists — one or two clean paragraphs.
 
 FOLLOW-UPS:
@@ -200,11 +202,21 @@ OUTPUT FORMAT — return STRICT JSON only, no markdown, no code fences:
 {"draft":"<the narrative paragraph(s)>","followUps":[{"question":"<one concrete question>"}]}`;
 }
 
+/** What draft assist asks for instead of writing a note from nothing. */
+export function describeWhatYouDid(clientFirstName: string): string {
+  return `Describe what you did with ${clientFirstName} during this shift and how you supported them. Nectar only drafts from what you write.`;
+}
+
 export async function runDraftShiftNote(data: DraftInput, model: CoachModel): Promise<DraftResult> {
+  // No checked goals and no described activity: nothing to draft from, so ask.
+  const noGoals = data.goals.length === 0;
+  if (noGoals && !describesActivity(`${data.shorthand}\n${data.followUpAnswers ?? ""}`)) {
+    throw new Error(describeWhatYouDid(data.clientFirstName));
+  }
   const foldingAnswers = !!data.followUpAnswers;
   const user = `CLIENT FIRST NAME: ${data.clientFirstName}
 CHECKED PCSP GOALS (${data.goals.length}):
-${data.goals.length ? data.goals.map((g, i) => `${i + 1}. ${g}`).join("\n") : "(none — write a general baseline-support narrative)"}
+${data.goals.length ? data.goals.map((g, i) => `${i + 1}. ${g}`).join("\n") : "(none)"}
 
 CAREGIVER NOTE:
 """
@@ -214,7 +226,13 @@ ${data.followUpAnswers ? `\nSTAFF ANSWERS TO NECTAR FOLLOW-UPS:\n"""\n${data.fol
 
   const parsed = parseModelJson(await model(draftSystem(foldingAnswers), user));
   const draft = typeof parsed.draft === "string" ? parsed.draft.trim() : "";
-  if (!draft) throw new Error("NECTAR could not generate a draft — please try again or write the note manually.");
+  if (!draft) {
+    throw new Error(
+      noGoals
+        ? describeWhatYouDid(data.clientFirstName)
+        : "NECTAR could not generate a draft — please try again or write the note manually.",
+    );
+  }
 
   const followUps: ShiftNoteFollowUp[] = foldingAnswers
     ? []
