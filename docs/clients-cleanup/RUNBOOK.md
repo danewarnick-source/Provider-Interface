@@ -27,13 +27,15 @@ Owner: Jeff (Dane Warnick). Repo: danewarnick-source/Provider-Interface. Live Su
 
 ## K1 — Apply the pending Phase B migrations and fix migration file names
 
-1. Apply these three, in this order, after checking each one's comment for its precondition. Look each up **by name** in `supabase_migrations.schema_migrations` first; skip any already applied.
+1. Apply these five, oldest first, after checking each one's comment for its precondition. Look each up **by name** in `supabase_migrations.schema_migrations` first; skip any already applied.
    - `20261006100300_clients_b_codes_copy_trigger_noop.sql` (switches off the old service-code copy into `job_code` / `authorized_dspd_codes`).
    - `20261007160000_smart_import_phase_b_discard_drafts_and_reminders.sql` (marks the open Smart Import client draft discarded; unschedules the `smart-import-reminders` cron job).
    - `20261008120000_clients_b_drop_client_notes.sql` (drops `client_notes`; export its rows first if any).
+   - `20261013060000_hrr_b_drop_legacy_consent_columns.sql` (drops the old free-text consent columns on `hrc_restriction_records`; no live row used them).
+   - `20261013200000_clients_b_drop_monthly_budget.sql` (drops `client_budgets` and `client_budget_lines`, the removed Monthly budget card; export their rows to the `archive` bucket first).
 2. **Make the repo match the database.** Some migration files were applied under a different version than their file name (example: `20261007190000_people_soft_delete_columns.sql` is recorded live as `20261007063308`). For every file in `supabase/migrations/` whose name is recorded under a different version, `git mv` it to the recorded version. List every rename in the PR body.
 
-**Done when:** the three are recorded as applied; `client_notes` is gone; the cron job is unscheduled; every migration file's version matches `schema_migrations`.
+**Done when:** the five are recorded as applied; `client_notes`, `client_budgets` and `client_budget_lines` are gone; the cron job is unscheduled; every migration file's version matches `schema_migrations`.
 
 ## K2 — Drop the old tables and columns
 
