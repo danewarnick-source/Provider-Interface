@@ -2,7 +2,8 @@
 // let Nectar draft the answers from it (saves nothing), and save the HRR.
 // Every one needs HRC: Edit for this client (assertCanManageClient); a save
 // that signs also needs Clients: Edit. Who signed and when is stamped by the
-// database trigger (hrr_stamp_signatures), never taken from the caller.
+// database trigger (hrr_stamp_signatures), never taken from the caller. Editing
+// the answers after signing clears the signatures.
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -18,7 +19,9 @@ import {
   hrrNectarPrompt,
   hrrPatchSigns,
   hrrSaveError,
+  withSignaturesCleared,
   type HrrDraft,
+  type HrrSignerKey,
   type RestrictionRecord,
 } from "./hrc";
 
@@ -145,22 +148,27 @@ export const draftHrrFromDocument = createServerFn({ method: "POST" })
     return { readable: true, ...checkHrrDraft(reply, text) };
   });
 
-/** Saves changed HRR columns. Signing needs Clients: Edit too, and every question answered. */
+/**
+ * Saves changed HRR columns. Signing needs Clients: Edit too, and every
+ * question answered. Changing the title or an answer clears the signatures
+ * already given (withSignaturesCleared), so everyone signs again.
+ */
 export const saveHrr = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
     scope.extend({ patch: z.record(z.string(), z.unknown()) }).parse(d),
   )
-  .handler(async ({ data, context }): Promise<{ id: string }> => {
-    const patch = cleanHrrPatch(data.patch);
-    const actions: ManageClientAction[] = hrrPatchSigns(patch)
+  .handler(async ({ data, context }): Promise<{ id: string; cleared: HrrSignerKey[] }> => {
+    const cleaned = cleanHrrPatch(data.patch);
+    const actions: ManageClientAction[] = hrrPatchSigns(cleaned)
       ? ["edit_hrc", "edit"]
       : ["edit_hrc"];
     const { sb } = await guard(context, data, actions);
-    if (!Object.keys(patch).length) return { id: data.restrictionId };
+    if (!Object.keys(cleaned).length) return { id: data.restrictionId, cleared: [] };
     const before = await loadRestriction(sb, data);
-    const problem = hrrSaveError(before, patch);
+    const problem = hrrSaveError(before, cleaned);
     if (problem) throw new Error(problem);
+    const { patch, cleared } = withSignaturesCleared(before, cleaned);
     const { data: rows, error } = await sb
       .from("hrc_restriction_records")
       .update(patch)
@@ -170,5 +178,5 @@ export const saveHrr = createServerFn({ method: "POST" })
       .select("id");
     if (error) throw new Error(error.message);
     assertRowsChanged(rows);
-    return { id: data.restrictionId };
+    return { id: data.restrictionId, cleared };
   });

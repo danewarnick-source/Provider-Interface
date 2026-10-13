@@ -4,6 +4,7 @@
 //   2. the questions the contract requires (hrc.ts HRR_QUESTIONS);
 //   3. informed consent, typed by the client or their guardian;
 //   4. signatures: provider admin, support coordinator, Human Rights Committee.
+// Changing the answers after signing clears the signatures (warned before Save).
 // Opened from the client's Plans section; the HRC page opens it read-only.
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -34,10 +35,12 @@ import {
   consentNameWarning,
   consentSigner,
   consentStatement,
+  hrrSignatures,
   hrrStatus,
   hrrStatusDetail,
   missingQuestions,
   remainingNectarFields,
+  signaturesClearedBy,
   type HrrField,
   type RestrictionRecord,
 } from "@/lib/clients/hrc";
@@ -245,6 +248,14 @@ export function RestrictionDialog({
     return changed;
   }, [title, active, marks, agreed, consentName, consentClient, signer.role, attest, adminName, scName, scOn, scMethod, hrcDecision, hrcOn, answers, record]);
 
+  // Signatures this save would clear because the answers changed (hrc.ts).
+  const clearing = useMemo(() => {
+    const keys = signaturesClearedBy(record, patch);
+    return hrrSignatures(record)
+      .filter((s) => keys.includes(s.key))
+      .map((s) => s.label);
+  }, [record, patch]);
+
   const save = useMutation({
     mutationFn: async () => {
       if (!title.trim()) throw new Error("Give the restriction a title.");
@@ -253,10 +264,14 @@ export function RestrictionDialog({
       const typedAdmin = adminName.trim();
       if (!attest && typedAdmin && typedAdmin !== myName && typedAdmin !== (record.admin_signer_name ?? ""))
         throw new Error("Tick the box to sign as provider admin, or clear the name.");
-      await saveFn({ data: { organizationId: orgId, clientId, restrictionId: record.id, patch } });
+      return saveFn({ data: { organizationId: orgId, clientId, restrictionId: record.id, patch } });
     },
-    onSuccess: () => {
-      toast.success("Rights restriction saved");
+    onSuccess: (res) => {
+      toast.success(
+        res.cleared.length
+          ? "Rights restriction saved. The answers changed, so everyone needs to sign again."
+          : "Rights restriction saved",
+      );
       void qc.invalidateQueries({ queryKey: ["hrc-restrictions", orgId] });
       void qc.invalidateQueries({ queryKey: clientRestrictionsKey(clientId) });
       void qc.invalidateQueries({ queryKey: ["client-overview"] });
@@ -516,6 +531,15 @@ export function RestrictionDialog({
           </Section>
         </div>
 
+        {canManage && clearing.length ? (
+          <p
+            className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100"
+            data-testid="hrr-signatures-clearing"
+          >
+            You changed the answers after signing. Saving clears these signatures, and they must be
+            given again: {clearing.join(", ")}.
+          </p>
+        ) : null}
         <DialogFooter className="flex-wrap gap-2">
           {savedStatus === "signed" ? (
             <>

@@ -597,6 +597,48 @@ export function hrrPatchSigns(patch: Record<string, unknown>): boolean {
   return HRR_SIGNATURE_COLUMNS.some((c) => c in patch && patch[c] != null);
 }
 
+/** What the signers agreed to: the title and every answer. */
+export const HRR_CONTENT_COLUMNS: readonly string[] = ["restriction_title", ...HRR_FIELDS];
+
+/** The columns that make up each signature. */
+const SIGNER_COLUMNS: Record<HrrSignerKey, readonly string[]> = {
+  consent: ["consent_signer_name", "consent_signer_role", "consent_client_name"],
+  admin: ["admin_signer_name"],
+  sc: ["sc_name", "sc_signed_on", "sc_method"],
+  hrc: ["hrc_decision", "hrc_decision_on"],
+};
+
+/**
+ * Signatures an edit to the answers takes away: when the save changes the
+ * title or any answer, every signature already on the record (and not given
+ * again in this same save) is cleared, so everyone signs what it now says.
+ */
+export function signaturesClearedBy(
+  before: RestrictionRecord,
+  patch: Record<string, unknown>,
+): HrrSignerKey[] {
+  const was = before as unknown as Record<string, unknown>;
+  const changesContent = HRR_CONTENT_COLUMNS.some(
+    (c) => c in patch && (patch[c] ?? null) !== (was[c] ?? null),
+  );
+  if (!changesContent) return [];
+  return (Object.keys(SIGNER_COLUMNS) as HrrSignerKey[]).filter((k) => {
+    const cols = SIGNER_COLUMNS[k];
+    return cols.some((c) => was[c] != null && was[c] !== "") && !cols.some((c) => c in patch);
+  });
+}
+
+/** The patch with those signatures cleared (the database trigger clears who/when). */
+export function withSignaturesCleared(
+  before: RestrictionRecord,
+  patch: Record<string, unknown>,
+): { patch: Record<string, unknown>; cleared: HrrSignerKey[] } {
+  const cleared = signaturesClearedBy(before, patch);
+  const out = { ...patch };
+  for (const k of cleared) for (const c of SIGNER_COLUMNS[k]) out[c] = null;
+  return { patch: out, cleared };
+}
+
 /** Why this save can't go through, or null. Signing needs every required question answered. */
 export function hrrSaveError(before: RestrictionRecord, patch: Record<string, unknown>): string | null {
   if (!hrrPatchSigns(patch)) return null;

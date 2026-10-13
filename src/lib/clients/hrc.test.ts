@@ -22,9 +22,12 @@ import {
   parseHrrDate,
   remainingNectarFields,
   scMethodLabel,
+  signaturesClearedBy,
   traceableToDocument,
+  withSignaturesCleared,
   type RestrictionRecord,
 } from "./hrc.ts";
+import { readFileSync } from "node:fs";
 
 function rec(over: Partial<RestrictionRecord> = {}): RestrictionRecord {
   return {
@@ -352,5 +355,73 @@ describe("saving", () => {
       null,
     );
     assert.match(hrrSaveError(rec(answered), { hrc_decision: "approved" }) ?? "", /committee/);
+  });
+});
+
+describe("editing the answers after signing clears the signatures", () => {
+  const full = () => rec({ ...answered, ...signed });
+
+  it("an answer or title change clears every signature on the record", () => {
+    const changed = { assessed_need_text: "Night eating risk, updated" };
+    assert.deepEqual(signaturesClearedBy(full(), changed), ["consent", "admin", "sc", "hrc"]);
+    const { patch, cleared } = withSignaturesCleared(full(), changed);
+    assert.equal(cleared.length, 4);
+    assert.equal(patch.assessed_need_text, "Night eating risk, updated");
+    for (const c of [
+      "consent_signer_name",
+      "consent_signer_role",
+      "consent_client_name",
+      "admin_signer_name",
+      "sc_name",
+      "sc_signed_on",
+      "sc_method",
+      "hrc_decision",
+      "hrc_decision_on",
+    ])
+      assert.equal(patch[c], null, c);
+    assert.equal(hrrStatus({ ...full(), ...patch } as RestrictionRecord), "awaiting_signatures");
+    assert.deepEqual(signaturesClearedBy(full(), { restriction_title: "Pantry locked overnight" }).length, 4);
+    assert.deepEqual(signaturesClearedBy(full(), { next_review_date: "2027-01-01" }).length, 4);
+  });
+
+  it("nothing is cleared when the answers don't change", () => {
+    assert.deepEqual(signaturesClearedBy(full(), {}), []);
+    assert.deepEqual(signaturesClearedBy(full(), { active: false }), []);
+    assert.deepEqual(signaturesClearedBy(full(), { nectar_fields: [] }), []);
+    assert.deepEqual(signaturesClearedBy(full(), { sc_method: "in_person" }), []);
+    assert.deepEqual(signaturesClearedBy(full(), { assessed_need_text: "Night eating risk" }), []);
+    const { patch, cleared } = withSignaturesCleared(full(), { active: false });
+    assert.deepEqual(cleared, []);
+    assert.deepEqual(patch, { active: false });
+  });
+
+  it("only signatures already given are cleared; one given in the same save stays", () => {
+    const partly = rec({ ...answered, admin_signer_name: "Alex Admin" });
+    assert.deepEqual(signaturesClearedBy(partly, { no_harm_text: "Changed" }), ["admin"]);
+    assert.deepEqual(
+      signaturesClearedBy(full(), { no_harm_text: "Changed", admin_signer_name: "Alex Admin" }),
+      ["consent", "sc", "hrc"],
+    );
+    assert.deepEqual(signaturesClearedBy(rec(answered), { no_harm_text: "Changed" }), []);
+  });
+
+  it("a denial is cleared too, so the committee decides again", () => {
+    const denied = rec({ ...answered, hrc_decision: "denied", hrc_decision_on: "2026-10-04" });
+    assert.deepEqual(signaturesClearedBy(denied, { no_harm_text: "Changed" }), ["hrc"]);
+  });
+
+  it("saveHrr applies it after the checks, and the form warns before Save", () => {
+    const fn = readFileSync(new URL("./hrr.functions.ts", import.meta.url), "utf8");
+    const save = fn.slice(fn.indexOf("export const saveHrr"));
+    const order = ["hrrSaveError(before, cleaned)", "withSignaturesCleared(before, cleaned)", ".update(patch)"].map(
+      (s) => save.indexOf(s),
+    );
+    assert.ok(order.every((i, n) => i > 0 && (n === 0 || i > order[n - 1])), String(order));
+    const ui = readFileSync(
+      new URL("../../components/clients/profile/plans/restriction-dialog.tsx", import.meta.url),
+      "utf8",
+    );
+    assert.match(ui, /signaturesClearedBy\(record, patch\)/);
+    assert.match(ui, /data-testid="hrr-signatures-clearing"/);
   });
 });
