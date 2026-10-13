@@ -3,11 +3,26 @@ import { describe, it } from "node:test";
 import { EXEC_CAPABILITIES, capabilitiesForRole } from "./exec-capabilities.ts";
 
 describe("exec capabilities (N2)", () => {
-  it("no longer lists the retired extraction approval", () => {
-    const caps: readonly string[] = EXEC_CAPABILITIES;
-    assert.equal(caps.includes("extraction.approve"), false);
-    assert.ok(caps.includes("billing.approve"));
-    assert.equal(new Set(caps).size, caps.length);
+  it("lists exactly the capabilities exec screens check (extraction approval retired in N2)", () => {
+    assert.deepEqual(
+      [...EXEC_CAPABILITIES],
+      [
+        "companies.read",
+        "companies.write",
+        "billing.approve",
+        "upgrades.manage",
+        "features.manage",
+        "states.edit",
+        "roles.manage",
+        "agreements.read",
+        "agreements.manage",
+        "health.read",
+        "support.manage",
+        "steve.use",
+        "knowledge.manage",
+        "training.manage",
+      ],
+    );
   });
 
   it("gives the executive role every capability and no role none", () => {

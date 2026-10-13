@@ -10,9 +10,27 @@ const SRC = read("./exec-command.functions.ts");
 const LANDING = read("../components/hive-exec/command/command-landing.tsx");
 
 describe("exec Needs-you summary (N2)", () => {
-  it("no longer counts requirement extraction approvals", () => {
-    assert.doesNotMatch(SRC, /extraction_approvals|nectar_requirements/);
-    assert.doesNotMatch(LANDING, /extraction_approvals|hive-exec\/approvals/);
+  it("counts four queues and no longer reads requirements", () => {
+    const start = SRC.indexOf("export interface NeedsYouSummary {");
+    const block = SRC.slice(start, SRC.indexOf("}", start));
+    const keys = [...block.matchAll(/^\s+(\w+): number;/gm)].map((m) => m[1]);
+    assert.deepEqual(keys, [
+      "upgrade_requests",
+      "billing_approvals",
+      "functionality_reports",
+      "agreements_attention",
+    ]);
+    assert.doesNotMatch(SRC, /nectar_requirements/);
+  });
+
+  it("links each Needs-you row to a queue that still exists", () => {
+    const targets = [...LANDING.matchAll(/<NeedsRow\s+to="([^"]+)"/g)].map((m) => m[1]);
+    assert.deepEqual(targets, [
+      "/dashboard/hive-exec/upgrade-requests",
+      "/dashboard/hive-exec/billing-approvals",
+      "/dashboard/hive-exec/functionality",
+      "/dashboard/hive-exec/agreements",
+    ]);
   });
 
   it("still counts and shows the other four queues", () => {
