@@ -4,7 +4,7 @@
 // easily. Supports read "Support: … + codes" / "Support details: …".
 import type { ReactNode } from "react";
 import type { GoalView } from "@/lib/clients/plans";
-import { SupportLines } from "./support-lines";
+import { GOAL_BLOCK, GOAL_HEAD, GOAL_TITLE, SupportLines } from "./support-lines";
 
 export function GoalTree({
   goals,
@@ -28,30 +28,26 @@ export function GoalTree({
     );
   }
   return (
-    <ul className="space-y-3">
+    <ul className="space-y-4">
       {goals.map((g) => (
-        <li key={g.id} className="rounded-lg border border-border/60 bg-card p-3">
-          <div className="flex items-start gap-2">
+        <li key={g.id} className={GOAL_BLOCK} data-testid="plan-goal">
+          <div className={`flex items-start gap-2 ${GOAL_HEAD}`}>
             <div className="min-w-0 flex-1">
               {g.kind === "other_need" ? (
-                <p className="text-base font-semibold leading-snug text-hive-ink">
-                  Other needs in the PCSP
-                </p>
+                <p className={GOAL_TITLE}>Other needs in the PCSP</p>
               ) : (
                 <>
                   <div className="mb-0.5 text-xs font-medium text-muted-foreground">Goal{g.domain ? ` · ${g.domain}` : ""}</div>
-                  <p className="whitespace-pre-wrap text-base font-semibold leading-snug text-hive-ink">
-                    {g.goal}
-                  </p>
+                  <p className={GOAL_TITLE}>{g.goal}</p>
                 </>
               )}
             </div>
             {goalActions?.(g)}
           </div>
-          <ul className="mt-2 space-y-2.5 border-l-2 border-border pl-3">
-            {g.supports.length === 0 && <li className="text-xs italic text-muted-foreground">No supports yet.</li>}
+          <ul className="divide-y divide-hive-steel/30">
+            {g.supports.length === 0 && <li className="px-4 py-3 text-xs italic text-muted-foreground">No supports yet.</li>}
             {g.supports.map((s) => (
-              <li key={s.id} className="flex items-start gap-2">
+              <li key={s.id} className="flex items-start gap-2 px-4 py-3">
                 <div className="min-w-0 flex-1">
                   <SupportLines
                     support={s.support_text}
@@ -64,7 +60,7 @@ export function GoalTree({
               </li>
             ))}
           </ul>
-          {addSupport ? <div className="mt-2">{addSupport(g)}</div> : null}
+          {addSupport ? <div className="border-t border-hive-steel/30 px-4 py-3">{addSupport(g)}</div> : null}
         </li>
       ))}
     </ul>

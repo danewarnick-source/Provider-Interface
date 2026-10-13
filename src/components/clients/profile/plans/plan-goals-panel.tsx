@@ -18,6 +18,7 @@ import { todayYmd } from "@/lib/clients/dates";
 import { currentPlan, goalView, supportsForCode, type GoalView } from "@/lib/clients/plans";
 import { addClientPlan, endClientGoal, endGoalSupport } from "@/lib/clients/plans.functions";
 import { GoalTree } from "./goal-tree";
+import { PLAN_CARD } from "./support-lines";
 import { GoalDialog, SupportDialog } from "./goal-dialogs";
 
 type Support = GoalView["supports"][number];
@@ -69,6 +70,7 @@ export function PlanGoalsPanel({
       icon={Target}
       tone="ok"
       title="Goals and supports"
+      className={PLAN_CARD}
       description="This plan year's PCSP goals and the supports for each. View as a code to see what a team member on it sees."
       actions={
         <>

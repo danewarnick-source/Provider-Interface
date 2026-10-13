@@ -7,6 +7,7 @@ import {
   carryForward,
   groupByGoal,
   isUploadDoc,
+  showsNectarTag,
   strategyCoverage,
   strategyStatus,
   strategyStatusText,
@@ -334,5 +335,16 @@ describe("isUploadDoc", () => {
     assert.equal(isUploadDoc({ sections: [{ id: "a", title: "Uploaded", items: [link] }] }), true);
     assert.equal(isUploadDoc({ sections: [] }), false);
     assert.equal(isUploadDoc(null), false);
+  });
+});
+
+describe("showsNectarTag", () => {
+  it("tags an unedited Nectar draft until the strategies are approved", () => {
+    const draft = { nectar: true };
+    assert.equal(showsNectarTag(draft, { kind: "draft" }), true);
+    assert.equal(showsNectarTag(draft, { kind: "outdated", newPlan: true }), true);
+    assert.equal(showsNectarTag(draft, null), true);
+    assert.equal(showsNectarTag(draft, { kind: "approved", at: "2026-10-08", by: "Pat Lee" }), false);
+    assert.equal(showsNectarTag({ nectar: false }, { kind: "draft" }), false);
   });
 });

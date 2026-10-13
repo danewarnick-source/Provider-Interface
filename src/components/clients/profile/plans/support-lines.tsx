@@ -1,8 +1,19 @@
 // One support, labeled the same way everywhere (PCSP review, Goals and
 // supports, Support strategies): "Support: <text> + code badges" and
-// "Support details: <details>" (or "None listed").
+// "Support details: <details>" (or "None listed"). Plus the goal block
+// classes both cards share, so goals and supports read the same in each.
 
 import type { ReactNode } from "react";
+
+/** A goal's block: a firm border and a green bar on the left where the goal starts. */
+export const GOAL_BLOCK =
+  "overflow-hidden rounded-xl border border-hive-steel/60 border-l-4 border-l-[var(--hive-ok)] bg-hive-surface";
+/** The strip at the top of a goal's block that holds its title. */
+export const GOAL_HEAD = "border-b border-hive-steel/40 bg-[var(--hive-muted-surface)] px-4 py-3";
+/** A goal's title: bold and a size up so goals are easy to scan. */
+export const GOAL_TITLE = "whitespace-pre-wrap text-base font-semibold leading-snug text-hive-ink";
+/** The card around Goals and supports, and around Support strategies. */
+export const PLAN_CARD = "border-hive-steel/60";
 
 export function CodeBadges({ codes, empty }: { codes: readonly string[]; empty?: ReactNode }) {
   if (!codes.length) return empty ? <>{empty}</> : null;

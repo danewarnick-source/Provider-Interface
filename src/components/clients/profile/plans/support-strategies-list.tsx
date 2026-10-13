@@ -2,24 +2,34 @@
 // its code badges and details (read-only, from the PCSP) and its "Support
 // strategy" bullets, which have their own pencil to edit in place (one
 // bullet per line). Empty ones say "Strategy needed"; supports whose codes
-// need none say why (§1.24(5)). Nectar drafts are tagged until edited.
+// need none say why (§1.24(5)). Nectar drafts are tagged until a person
+// edits them or the strategies are approved. Each goal is its own bordered
+// block with a bold title, each support a bordered card inside it.
 
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { groupByGoal, type StrategyView } from "@/lib/clients/support-strategies";
+import {
+  groupByGoal,
+  showsNectarTag,
+  type StrategyStatus,
+  type StrategyView,
+} from "@/lib/clients/support-strategies";
 import { MAX_BULLETS, MIN_BULLETS, strategyNeedText } from "@/lib/clients/strategy-rules";
 import { EditButton, SaveBar } from "@/components/clients/profile/cards/section-card";
 import { StatusTag } from "@/components/clients/profile/cards/card-parts";
-import { SupportLines } from "./support-lines";
+import { GOAL_BLOCK, GOAL_HEAD, GOAL_TITLE, SupportLines } from "./support-lines";
 
 function StrategyItem({
   v,
   current,
+  nectarTag,
   canEdit,
   saving,
   onSave,
 }: {
   v: StrategyView;
+  /** Show "Drafted by Nectar: review" (an unapproved Nectar draft). */
+  nectarTag: boolean;
   /** The support is in the current PCSP. */
   current: boolean;
   canEdit: boolean;
@@ -30,7 +40,7 @@ function StrategyItem({
   const needed = v.need.kind === "needed";
   return (
     <li
-      className="space-y-2 rounded-xl border border-hive-border p-3"
+      className="space-y-2 rounded-xl border border-hive-steel/50 bg-hive-surface p-3 shadow-sm"
       data-testid="support-strategy"
     >
       <div className="flex items-start gap-2">
@@ -52,7 +62,7 @@ function StrategyItem({
         <div className="space-y-1">
           <p className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
             Support strategy
-            {v.nectar ? <StatusTag tone="info">Drafted by Nectar: review</StatusTag> : null}
+            {nectarTag ? <StatusTag tone="info">Drafted by Nectar: review</StatusTag> : null}
           </p>
           {draft !== null ? (
             <>
@@ -89,12 +99,15 @@ function StrategyItem({
 
 export function SupportStrategiesList({
   views,
+  status,
   currentIds,
   canEdit,
   saving,
   onSave,
 }: {
   views: StrategyView[];
+  /** Approved strategies don't show the Nectar draft tag. */
+  status: StrategyStatus | null;
   currentIds: ReadonlySet<string>;
   canEdit: boolean;
   saving: boolean;
@@ -103,17 +116,18 @@ export function SupportStrategiesList({
   return (
     <div className="space-y-4" data-testid="support-strategies-list">
       {groupByGoal(views).map((g, i) => (
-        <div key={`${g.goal}-${i}`} className="space-y-2">
-          <p className="text-sm">
-            <span className="font-medium text-hive-ink">Goal:</span>{" "}
-            {g.goal || "Not linked to a goal"}
-          </p>
-          <ul className="space-y-2">
+        <div key={`${g.goal}-${i}`} className={GOAL_BLOCK} data-testid="support-strategy-goal">
+          <div className={GOAL_HEAD}>
+            <div className="mb-0.5 text-xs font-medium text-muted-foreground">Goal</div>
+            <p className={GOAL_TITLE}>{g.goal || "Not linked to a goal"}</p>
+          </div>
+          <ul className="space-y-3 p-3">
             {g.items.map((v) => (
               <StrategyItem
                 key={v.id}
                 v={v}
                 current={!v.supportId || currentIds.has(v.supportId)}
+                nectarTag={showsNectarTag(v, status)}
                 canEdit={canEdit}
                 saving={saving}
                 onSave={(text) => onSave(v.id, text)}

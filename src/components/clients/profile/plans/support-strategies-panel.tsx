@@ -38,6 +38,7 @@ import { PcspFirstDialog } from "./support-strategies-parts";
 import { StrategiesSendRow, strategySendKey } from "./support-strategies-send";
 import { StrategiesEmpty, StrategiesStatus, StrategiesUploaded } from "./support-strategies-cards";
 import { SupportStrategiesList } from "./support-strategies-list";
+import { PLAN_CARD } from "./support-lines";
 import { PublishConfirmDialog } from "./publish-confirm-dialog";
 
 type SSRow = {
@@ -194,6 +195,7 @@ export function SupportStrategiesPanel({
       icon={ClipboardList}
       tone="ok"
       title="Support strategies"
+      className={PLAN_CARD}
       description="Support strategies: instructions to staff for each support."
       testId="support-strategies-card"
     >
@@ -249,6 +251,7 @@ export function SupportStrategiesPanel({
           <StrategiesSendRow clientId={clientId} fromUpload={!!content?.source_document_id} />
           <SupportStrategiesList
             views={sections.map(strategyView)}
+            status={status}
             currentIds={new Set(supports.map((s) => s.supportId))}
             canEdit={canEdit}
             saving={updateMut.isPending}
