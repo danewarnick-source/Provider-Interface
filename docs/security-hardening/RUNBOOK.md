@@ -143,10 +143,18 @@ Leave alone (other runbooks fix them): `scheduled_shifts`, `evv_timesheets` cloc
 
 1. Replace DELETE policies with archive/void columns, and add a shared `BEFORE DELETE` trigger that raises an error, on: `daily_logs`, `evv_timesheets`, `shift_reports`, `submitted_forms`, `form_submissions`, `incident_reports`, `hhs_incident_reports`, `hhs_monthly_attendance`, `hhs_monthly_summaries`, `hhs_medical_logs`, `hhs_transfer_logs`, `hhs_evacuation_drills`, `hhs_monthly_certifications`, `client_progress_summaries`, `upi_attestations`, the `hrc_*` tables, `client_documents`, `company_obligation_completions`, `host_home_certifications`, `employee_documents`, `hr_documents`, `general_shifts`, `audit_files`, `pba_transactions`, `client_loan_entries`, `client_spending_log`, `evidence_items`, `evidence_files`. (Medication and shift tables are handled by their rebuilds.)
 2. Find every `.delete()` in `src/` on those tables and switch it to archiving; list each in the PR.
+2a. **Users still get a Delete button (Jeff, Oct 13).** Deleting is a soft delete: the record disappears from every screen, list, count, report, billing and EVV export, and stays in the database marked deleted. Every **Delete** works the same way, using the Clients C10 pattern ("Delete made-by-mistake people"):
+   - It's shown only to people with edit rights for that area (and Owner-only where C10 already requires it).
+   - A warning says what will disappear and that the record is kept for 7 years for Medicaid, then asks for a reason (a short list: "Test or practice", "Made by mistake", "Duplicate", "Other" with a note) and a typed confirmation or checkbox ("I understand").
+   - It records `deleted_at`, `deleted_by`, `delete_reason` (additive columns where missing), never a database DELETE.
+   - An Owner can restore it from a "Recently deleted" list in Settings for 30 days; after that it stays archived but hidden from that list.
+   - Add it (one shared dialog component) to: clock-ins and timesheets (a test punch), daily notes, shift reports, scheduled shifts, form submissions, incident report drafts, documents and evidence files, client loans and spending entries, and anything else in the list above that has a remove button today. Clients and team members already have it (C10).
+   - A record that was already sent outside PI (a punch sent to UEVV, a submitted incident report, a billed day) can't be deleted; the dialog says why and offers **Void with a reason** instead, which keeps it visible as voided so the outside system can be corrected.
+2b. **Trial agencies.** When an agency's free trial ends without a subscription, or a trial agency asks to start over, an Owner (or a PI executive) can **Clear test data**: it soft-deletes every client, team member (except the Owner), shift, punch, note and document created during the trial in one step, with the same warning and reason. Nothing is hard-deleted, and nothing from the trial ever shows in reports or exports.
 3. Storage: remove DELETE on PHI buckets for everyone except a server function that archives (moves to an `archived/` prefix) and logs.
 4. Drop the 21 locked `*_backup_20260928*` tables after exporting their rows to the private `archive` bucket.
 
-**Done when:** a `DELETE` on any listed table fails even for an admin; the app's remove buttons archive; the backup tables are exported and gone.
+**Done when:** a `DELETE` on any listed table fails even for an admin; every Delete button shows the warning and reason, hides the record everywhere, and an Owner can restore it within 30 days; a record already sent to UEVV offers Void instead; Clear test data hides a trial agency's records; the backup tables are exported and gone.
 
 ## H6 — Duplicates and speed
 
