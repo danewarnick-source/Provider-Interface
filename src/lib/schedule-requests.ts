@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAuth } from "@/hooks/use-auth";
 import { saveShift } from "@/lib/scheduler/scheduler.functions";
+import { notify } from "@/lib/scheduler/notify";
 
 export type TimeOffRequest = {
   id: string;
@@ -37,6 +38,8 @@ export type SwapRequest = {
   to_staff_id: string | null;
   note: string | null;
   status: "pending" | "approved" | "denied" | "cancelled";
+  partner_status: "pending" | "accepted" | "declined";
+  partner_responded_at: string | null;
   decided_by: string | null;
   decided_at: string | null;
   created_at: string;
@@ -128,21 +131,17 @@ export async function createTimeOffRequest(input: {
   });
   if (error) throw error;
 
-  // Best-effort in-app notification to admins/managers. Failure here must
-  // never block the request itself.
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase as any).from("notifications").insert({
-      organization_id: input.organization_id,
-      recipient_role: "admin",
-      type: "time_off_requested",
-      urgency: "normal",
-      title: "New time-off request",
-      body: `${fmtRange(input.start_date, input.end_date)} · ${input.type.toUpperCase()}${input.note ? ` — ${input.note.trim()}` : ""}`,
-      link_to: "/dashboard/scheduler",
-      related_type: "time_off_request",
-    });
-  } catch { /* ignore notification failure */ }
+  // A failed notification is logged and never blocks the request itself.
+  await notify(supabase, {
+    organization_id: input.organization_id,
+    recipient_role: "admin",
+    type: "time_off_requested",
+    urgency: "normal",
+    title: "New time-off request",
+    body: `${fmtRange(input.start_date, input.end_date)} · ${input.type.toUpperCase()}${input.note ? ` — ${input.note.trim()}` : ""}`,
+    link_to: "/dashboard/scheduler",
+    related_type: "time_off_request",
+  });
 }
 
 function fmtRange(s: string, e: string) {
@@ -186,15 +185,40 @@ export async function createSwapRequest(input: {
   note?: string | null;
 }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any).from("shift_swap_requests").insert({
+  const { data: row, error } = await (supabase as any).from("shift_swap_requests").insert({
     organization_id: input.organization_id,
     shift_id: input.shift_id,
     from_staff_id: input.from_staff_id,
     to_staff_id: input.to_staff_id ?? null,
     note: input.note?.trim() || null,
     status: "pending",
-  });
+  }).select("id").single();
   if (error) throw error;
+  const base = {
+    organization_id: input.organization_id,
+    type: "swap_request",
+    related_id: row?.id as string | undefined,
+    related_type: "shift_swap_request",
+  };
+  await notify(supabase, [
+    {
+      ...base,
+      recipient_role: "admin",
+      title: "Swap requested",
+      body: "A team member asked to swap a shift. Review it in the scheduler.",
+      link_to: "/dashboard/scheduler",
+    },
+    ...(input.to_staff_id
+      ? [{
+          ...base,
+          recipient_role: "staff" as const,
+          recipient_user_id: input.to_staff_id,
+          title: "A coworker asked you to take a shift",
+          body: "Open your schedule to accept or decline the swap.",
+          link_to: "/dashboard/schedule",
+        }]
+      : []),
+  ]);
 }
 
 // ─── Decide (admin) ────────────────────────────────────────────────────────
@@ -223,22 +247,18 @@ export async function decideTimeOff(
     decided_by: deciderId,
     decided_at: new Date().toISOString(),
   });
-  // In-app notification back to the requesting staff member.
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase as any).from("notifications").insert({
-      organization_id: req.organization_id,
-      recipient_role: "staff",
-      recipient_user_id: req.staff_id,
-      type: "time_off_decided",
-      urgency: "normal",
-      title: decision === "approved" ? "Time off approved" : "Time off denied",
-      body: `${fmtRange(req.start_date, req.end_date)} · ${req.type.toUpperCase()}`,
-      link_to: "/dashboard/schedule",
-      related_id: req.id,
-      related_type: "time_off_request",
-    });
-  } catch { /* ignore */ }
+  await notify(supabase, {
+    organization_id: req.organization_id,
+    recipient_role: "staff",
+    recipient_user_id: req.staff_id,
+    type: "time_off_decided",
+    urgency: "normal",
+    title: decision === "approved" ? "Time off approved" : "Time off denied",
+    body: `${fmtRange(req.start_date, req.end_date)} · ${req.type.toUpperCase()}`,
+    link_to: "/dashboard/schedule",
+    related_id: req.id,
+    related_type: "time_off_request",
+  });
 }
 
 /**
