@@ -11,6 +11,7 @@ import { NectarTaskCenter } from "@/components/nectar/nectar-task-center";
 import { NectarAnswer } from "@/components/nectar/nectar-answer";
 import { RequireLevel } from "@/components/rbac-guard";
 import { FeatureGate } from "@/components/upgrade-gate";
+import { clearLegacyNectarStorage } from "@/lib/nectar/browser-storage";
 
 export const Route = createFileRoute("/dashboard/help")({
   head: () => ({ meta: [{ title: "Need help? — NECTAR" }] }),
@@ -24,6 +25,8 @@ export const Route = createFileRoute("/dashboard/help")({
 
 /** Admins only; a team member opening the URL is sent to Ask Nectar. */
 function HelpRoute() {
+  // One-time cleanup of the question history older builds kept in the browser.
+  useEffect(() => clearLegacyNectarStorage(), []);
   return (
     <RequireLevel min="admin" redirectTo="/dashboard/ask-nectar">
       <HelpPage />
@@ -48,16 +51,6 @@ const STARTERS = [
   "How do I pull a 520?",
 ];
 
-const HISTORY_KEY = "hive.nectar.helpHistory";
-
-function loadRecent(): string[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(HISTORY_KEY);
-    return raw ? (JSON.parse(raw) as string[]) : [];
-  } catch { return []; }
-}
-
 function HelpPage() {
   const { data: org } = useCurrentOrg();
   const role = org?.access.level ?? "staff";
@@ -65,6 +58,7 @@ function HelpPage() {
 
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
+  // Recent questions live in memory for this visit only — never in browser storage.
   const [recent, setRecent] = useState<string[]>([]);
   const [ticketId, setTicketId] = useState<string | null>(null);
   const [taskCenterOpen, setTaskCenterOpen] = useState(false);
@@ -75,7 +69,6 @@ function HelpPage() {
   const escalate = useServerFn(escalateHelpToHive);
   const getStatus = useServerFn(getHelpTicketStatus);
 
-  useEffect(() => { setRecent(loadRecent()); }, []);
   useEffect(() => { inputRef.current?.focus(); }, []);
 
   // Auto-send a question routed in from the global NECTAR search bar
@@ -109,11 +102,7 @@ function HelpPage() {
         ...prev,
         { id: `n-${Date.now()}`, role: "nectar", text: reply.answer, reply },
       ]);
-      const next = [q, ...recent.filter((x) => x !== q)].slice(0, 8);
-      setRecent(next);
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
-      }
+      setRecent((prev) => [q, ...prev.filter((x) => x !== q)].slice(0, 8));
       setTimeout(() => inputRef.current?.focus(), 50);
     },
     onError: (e) => {
