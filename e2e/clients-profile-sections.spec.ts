@@ -42,6 +42,8 @@ test("client profile opens every section from the side menu", async ({ page }) =
     if (key === "health") {
       await expect(page.getByTestId("advance-directive")).toBeVisible();
       await expect(page.getByTestId("client-health-events")).toBeVisible();
+      await expect(page.getByTestId("client-health-emergency-plan")).toBeVisible();
+      await expect(page.getByTestId("health-list-mobility")).toBeVisible();
     }
     if (key === "plans") {
       await expect(page.getByTestId("client-plan-years")).toBeVisible();

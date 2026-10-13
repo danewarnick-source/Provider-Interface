@@ -1,7 +1,8 @@
 // Health: the header (Log a health event, four tiles), allergies /
 // diagnoses / conditions, then cards in pairs: Medications | Recent health
 // events, Care needs | Absences (RHS clients), Diet and swallowing |
-// Advance directive. Cards the setup answers hide (support-scope.ts) are
+// Mobility, Emergency plan | Advance directive. Every list and the plan are
+// added and edited right on their card. Cards the setup answers hide (support-scope.ts) are
 // left out, with "Show hidden sections" below. Must-knows live on Overview.
 // Needs Client medical: View; edits need Client medical: Edit.
 
@@ -14,6 +15,8 @@ import { MedicalListsCard } from "@/components/clients/profile/health/medical-li
 import { MedicationsCard } from "@/components/clients/profile/health/medications-card";
 import { CareNeedsCard } from "@/components/clients/profile/health/care-needs-card";
 import { DietCard } from "@/components/clients/profile/health/diet-card";
+import { MobilityCard } from "@/components/clients/profile/health/mobility-card";
+import { EmergencyPlanCard } from "@/components/clients/profile/health/emergency-plan-card";
 import { AdvanceDirectiveCard } from "@/components/clients/profile/health/advance-directive-card";
 import { HealthEventsCard } from "@/components/clients/profile/health/health-events-card";
 import { AbsencesCard } from "@/components/clients/profile/health/absences-card";
@@ -28,15 +31,7 @@ import { useSupportScope } from "@/components/clients/profile/setup/use-support-
 /** Two columns; an odd last card spans both so no column sits empty. */
 const PAIRS = "grid gap-5 md:grid-cols-2 md:[&>*:last-child:nth-child(odd)]:col-span-2";
 
-export function HealthSection({
-  orgId,
-  data,
-  onOpenProfile,
-}: {
-  orgId: string;
-  data: ClientProfileData;
-  onOpenProfile: () => void;
-}) {
+export function HealthSection({ orgId, data }: { orgId: string; data: ClientProfileData }) {
   const clientId = data.client.id;
   const health = useClientHealth(orgId, clientId);
   const canEdit = useCanEditMedical();
@@ -50,13 +45,10 @@ export function HealthSection({
   return (
     <div className="flex flex-col gap-5" data-testid="client-section-health">
       <HealthHeader
-        clientId={clientId}
         firstName={data.client.first_name?.trim() || data.name}
         health={h}
         canEdit={canEdit}
         onLog={shows("health_events") ? () => setLogging(true) : undefined}
-        onOpenProfile={onOpenProfile}
-        directiveShown={shows("advance_directive")}
       />
       {health.isLoading ? (
         <p className="text-sm text-muted-foreground">
@@ -81,6 +73,8 @@ export function HealthSection({
         {h ? <CareNeedsCard orgId={orgId} health={h} /> : null}
         {showsAbsences(data.codes) ? <AbsencesCard orgId={orgId} clientId={clientId} /> : null}
         {h ? <DietCard orgId={orgId} health={h} /> : null}
+        {h ? <MobilityCard orgId={orgId} health={h} /> : null}
+        {h ? <EmergencyPlanCard orgId={orgId} health={h} /> : null}
         {h && shows("advance_directive") ? <AdvanceDirectiveCard orgId={orgId} health={h} /> : null}
       </div>
       <HiddenSections orgId={orgId} clientId={clientId} cards={hiddenCards("health", scope, facts)} />

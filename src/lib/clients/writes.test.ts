@@ -42,6 +42,15 @@ describe("actionsForClientPatch", () => {
       "edit_medical",
     ]);
   });
+  it("diet, mobility and the emergency plan are medical info", () => {
+    for (const [k, v] of [
+      ["diets", ["Pureed"]],
+      ["mobility", ["Walker"]],
+      ["emergency_plan", "Call 911."],
+    ] as const) {
+      assert.deepEqual(actionsForClientPatch({ [k]: null }, { [k]: v }), ["edit", "edit_medical"]);
+    }
+  });
   it("status and discharge date change only through the discharge flow", () => {
     assert.throws(
       () => actionsForClientPatch({ account_status: "active" }, { account_status: "archived" }),

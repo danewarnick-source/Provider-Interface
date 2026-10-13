@@ -225,7 +225,7 @@ export async function applyExtractedFieldsToClient(
     .select(
       "id, first_name, last_name, date_of_birth, medicaid_id, phone_number, physical_address, " +
       "is_own_guardian, " +
-      "special_directions, allergies, dysphagia, swallowing_alerts, self_admin_med_support, " +
+      "special_directions, allergies, dysphagia, swallowing_alerts, diets, mobility, self_admin_med_support, " +
       "team_id, " +
       "bsp_status, insurance, about_me, housing_voucher, " +
       "plan_year, disability_category, staff_ratio, " +
@@ -395,6 +395,17 @@ export async function applyExtractedFieldsToClient(
   if (allergiesF) mergeArrayColumn("allergies", fieldArray(allergiesF) ?? []);
   const swallowF = byKey.get("swallowing_alerts");
   if (swallowF) mergeArrayColumn("swallowing_alerts", fieldArray(swallowF) ?? []);
+  // Diet and mobility land in the Health tab's columns (adaptive equipment
+  // joins mobility).
+  const dietF = byKey.get("dietary_restrictions");
+  if (dietF) mergeArrayColumn("diets", fieldArray(dietF) ?? []);
+  mergeArrayColumn(
+    "mobility",
+    ["mobility_notes", "adaptive_equipment"].flatMap((k) => {
+      const f = byKey.get(k);
+      return f ? (fieldArray(f) ?? []) : [];
+    }),
+  );
 
   const goals = ok
     .filter((f) => f.field_key === "pcsp_goal")

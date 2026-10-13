@@ -4811,6 +4811,9 @@ export type Database = {
           emergency_contact_phone: string | null
           emergency_contact_relationship: string | null
           emergency_medical_treatment_authorization: boolean | null
+          diets: string[]
+          emergency_plan: string | null
+          mobility: string[]
           ethnic_origin: string | null
           eye_color: string | null
           feature_config: Json | null
@@ -4951,6 +4954,9 @@ export type Database = {
           emergency_contact_phone?: string | null
           emergency_contact_relationship?: string | null
           emergency_medical_treatment_authorization?: boolean | null
+          diets?: string[]
+          emergency_plan?: string | null
+          mobility?: string[]
           ethnic_origin?: string | null
           eye_color?: string | null
           feature_config?: Json | null
@@ -5091,6 +5097,9 @@ export type Database = {
           emergency_contact_phone?: string | null
           emergency_contact_relationship?: string | null
           emergency_medical_treatment_authorization?: boolean | null
+          diets?: string[]
+          emergency_plan?: string | null
+          mobility?: string[]
           ethnic_origin?: string | null
           eye_color?: string | null
           feature_config?: Json | null

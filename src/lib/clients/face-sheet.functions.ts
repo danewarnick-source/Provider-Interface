@@ -463,6 +463,13 @@ function drawFaceSheet(page: PDFPage, helv: PDFFont, helvB: PDFFont, ctx: Ctx): 
   let ySF = y;
   ySF = drawKV(page, "Must-knows / health concerns", field(client.special_directions), M, ySF, s2, helv, helvB);
   ySF = drawKV(page, "Allergies", field(client.allergies), M, ySF, s2, helv, helvB);
+  // Same clients columns the Health tab edits.
+  const swallowing = client.dysphagia
+    ? ["Trouble swallowing", ...((client.swallowing_alerts as string[] | null) ?? [])]
+    : [];
+  ySF = drawKV(page, "Diet and swallowing", field([...((client.diets as string[] | null) ?? []), ...swallowing]), M, ySF, s2, helv, helvB);
+  ySF = drawKV(page, "Mobility", field(client.mobility), M, ySF, s2, helv, helvB);
+  ySF = drawKV(page, "Emergency plan", field(client.emergency_plan), M, ySF, s2, helv, helvB);
 
   let ySFR = y;
   const desc = [

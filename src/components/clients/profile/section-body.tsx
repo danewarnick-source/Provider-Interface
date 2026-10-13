@@ -51,7 +51,7 @@ export function SectionBody({
     case "contacts":
       return <ContactsSection orgId={orgId} data={data} />;
     case "health":
-      return <HealthSection orgId={orgId} data={data} onOpenProfile={() => onSelect("profile")} />;
+      return <HealthSection orgId={orgId} data={data} />;
     case "plans":
       return <PlansSection orgId={orgId} data={data} />;
     case "services":

@@ -1,5 +1,6 @@
 // The four tiles at the top of the client Health section (Allergies, Diet,
-// Mobility, Emergency plan) and the dot tone of each health event type.
+// Mobility, Emergency plan), read from the same clients columns the Health
+// cards edit, and the dot tone of each health event type.
 // Plain wording only; pure, importable by node --test.
 
 import { directiveLabel, directiveStatus } from "./health.ts";
@@ -23,49 +24,38 @@ export function allergyTile(allergies: readonly string[] | null | undefined): He
 export function dietTile(args: {
   dysphagia: boolean | null | undefined;
   swallowingAlerts: readonly string[] | null | undefined;
-  diet: string | null | undefined;
+  diets: readonly string[] | null | undefined;
 }): HealthTile {
-  const diet = args.diet?.trim() || null;
+  const diets = (args.diets ?? []).filter((d) => d.trim());
   const alerts = (args.swallowingAlerts ?? []).filter((a) => a.trim());
   if (args.dysphagia)
     return {
       value: "Trouble swallowing",
-      note: alerts.length ? first(alerts, 2) : diet,
+      note: alerts.length ? first(alerts, 2) : diets.length ? first(diets, 2) : null,
       warn: true,
     };
-  return { value: diet ? "Special diet" : "No special diet on file", note: diet, warn: false };
+  if (!diets.length) return { value: "No special diet on file", note: null, warn: false };
+  return { value: "Special diet", note: first(diets, 3), warn: false };
 }
 
-export function mobilityTile(args: {
-  mobility: string | null | undefined;
-  equipment: string | null | undefined;
-}): HealthTile {
-  const mobility = args.mobility?.trim() || null;
-  const equipment = args.equipment?.trim() || null;
-  if (!mobility && !equipment) return { value: "Not on file", note: null, warn: false };
-  return {
-    value: mobility ?? "See equipment",
-    note: equipment ? `Equipment: ${equipment}` : null,
-    warn: false,
-  };
+export function mobilityTile(mobility: readonly string[] | null | undefined): HealthTile {
+  const list = (mobility ?? []).filter((m) => m.trim());
+  if (!list.length) return { value: "Not on file", note: null, warn: false };
+  return { value: list[0], note: list.length > 1 ? first(list.slice(1), 2) : null, warn: false };
 }
 
+/** The emergency plan text (its first line) and the advance directive under it. */
 export function emergencyPlanTile(args: {
+  plan: string | null | undefined;
   dnrStatus: string | null | undefined;
   polstStatus: string | null | undefined;
-  treatmentAuthorization: boolean | null | undefined;
 }): HealthTile {
   const status = directiveStatus(args.dnrStatus) ?? (args.polstStatus ? "polst" : null);
-  const treatment = args.treatmentAuthorization
-    ? "Emergency treatment authorization signed"
-    : "No emergency treatment authorization";
-  if (status === "dnr" || status === "polst")
-    return { value: `${directiveLabel(status)} on file`, note: treatment, warn: true };
-  return {
-    value: status === "none" ? "No advance directive" : "Advance directive not set",
-    note: treatment,
-    warn: !args.treatmentAuthorization,
-  };
+  const directive = status === "dnr" || status === "polst" ? `${directiveLabel(status)} on file` : null;
+  const line = (args.plan ?? "").split(/\r?\n/).find((l) => l.trim())?.trim() ?? null;
+  if (!line) return { value: "No plan written", note: directive, warn: true };
+  const value = line.length > 60 ? `${line.slice(0, 59)}…` : line;
+  return { value, note: directive, warn: !!directive };
 }
 
 /** Dot color per health event type on the timeline. */

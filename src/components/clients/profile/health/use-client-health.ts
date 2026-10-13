@@ -9,15 +9,18 @@ import { useAccess } from "@/hooks/use-access";
 import { updateClient } from "@/lib/clients/writes.functions";
 
 const HEALTH_COLUMNS =
-  "id, allergies, diagnoses, chronic_conditions, dysphagia, swallowing_alerts, dnr_status, dnr_location, polst_status, palliative_care_status, hospice_status, advance_directive_notes, emergency_medical_treatment_authorization, self_admin_med_support, has_abi";
+  "id, allergies, diagnoses, chronic_conditions, diets, dysphagia, swallowing_alerts, mobility, emergency_plan, dnr_status, dnr_location, polst_status, palliative_care_status, hospice_status, advance_directive_notes, emergency_medical_treatment_authorization, self_admin_med_support, has_abi";
 
 export type ClientHealthRow = {
   id: string;
   allergies: string[] | null;
   diagnoses: string[] | null;
   chronic_conditions: string[] | null;
+  diets: string[] | null;
   dysphagia: boolean | null;
   swallowing_alerts: string[] | null;
+  mobility: string[] | null;
+  emergency_plan: string | null;
   dnr_status: string | null;
   dnr_location: string | null;
   polst_status: string | null;
