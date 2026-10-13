@@ -9770,64 +9770,124 @@ export type Database = {
       hrc_restriction_records: {
         Row: {
           active: boolean
+          admin_signed_at: string | null
+          admin_signed_by: string | null
+          admin_signer_name: string | null
           assessed_need_text: string | null
           client_id: string
           condition_description_text: string | null
+          consent_at: string | null
+          consent_by: string | null
+          consent_client_name: string | null
           consent_signed_date: string | null
+          consent_signer_name: string | null
+          consent_signer_role: string | null
           consent_text: string | null
           created_at: string
           created_by: string | null
           data_review_text: string | null
+          document_id: string | null
+          hrc_decision: string | null
+          hrc_decision_on: string | null
+          hrc_recorded_at: string | null
+          hrc_recorded_by: string | null
           id: string
           last_review_date: string | null
           less_intrusive_methods_text: string | null
+          nectar_fields: string[]
           next_review_date: string | null
           no_harm_text: string | null
           organization_id: string
           positive_interventions_text: string | null
+          restore_plan_text: string | null
           restriction_title: string
+          sc_method: string | null
+          sc_name: string | null
+          sc_recorded_at: string | null
+          sc_recorded_by: string | null
+          sc_signed_on: string | null
           time_limits_text: string | null
           updated_at: string
         }
         Insert: {
           active?: boolean
+          admin_signed_at?: string | null
+          admin_signed_by?: string | null
+          admin_signer_name?: string | null
           assessed_need_text?: string | null
           client_id: string
           condition_description_text?: string | null
+          consent_at?: string | null
+          consent_by?: string | null
+          consent_client_name?: string | null
           consent_signed_date?: string | null
+          consent_signer_name?: string | null
+          consent_signer_role?: string | null
           consent_text?: string | null
           created_at?: string
           created_by?: string | null
           data_review_text?: string | null
+          document_id?: string | null
+          hrc_decision?: string | null
+          hrc_decision_on?: string | null
+          hrc_recorded_at?: string | null
+          hrc_recorded_by?: string | null
           id?: string
           last_review_date?: string | null
           less_intrusive_methods_text?: string | null
+          nectar_fields?: string[]
           next_review_date?: string | null
           no_harm_text?: string | null
           organization_id: string
           positive_interventions_text?: string | null
+          restore_plan_text?: string | null
           restriction_title: string
+          sc_method?: string | null
+          sc_name?: string | null
+          sc_recorded_at?: string | null
+          sc_recorded_by?: string | null
+          sc_signed_on?: string | null
           time_limits_text?: string | null
           updated_at?: string
         }
         Update: {
           active?: boolean
+          admin_signed_at?: string | null
+          admin_signed_by?: string | null
+          admin_signer_name?: string | null
           assessed_need_text?: string | null
           client_id?: string
           condition_description_text?: string | null
+          consent_at?: string | null
+          consent_by?: string | null
+          consent_client_name?: string | null
           consent_signed_date?: string | null
+          consent_signer_name?: string | null
+          consent_signer_role?: string | null
           consent_text?: string | null
           created_at?: string
           created_by?: string | null
           data_review_text?: string | null
+          document_id?: string | null
+          hrc_decision?: string | null
+          hrc_decision_on?: string | null
+          hrc_recorded_at?: string | null
+          hrc_recorded_by?: string | null
           id?: string
           last_review_date?: string | null
           less_intrusive_methods_text?: string | null
+          nectar_fields?: string[]
           next_review_date?: string | null
           no_harm_text?: string | null
           organization_id?: string
           positive_interventions_text?: string | null
+          restore_plan_text?: string | null
           restriction_title?: string
+          sc_method?: string | null
+          sc_name?: string | null
+          sc_recorded_at?: string | null
+          sc_recorded_by?: string | null
+          sc_signed_on?: string | null
           time_limits_text?: string | null
           updated_at?: string
         }
@@ -9837,6 +9897,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hrc_restriction_records_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "client_documents"
             referencedColumns: ["id"]
           },
           {
