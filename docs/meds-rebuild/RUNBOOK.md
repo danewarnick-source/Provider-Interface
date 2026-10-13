@@ -11,8 +11,8 @@ Result when done: the client's Health → Medications card has two tabs, **Medic
 ## HOW TO RUN THIS (Claude Code, read first)
 
 1. Read `CLAUDE.md` and obey it. Read this whole file once.
-2. Work on branch `meds-rebuild` (it is cut from `clients-rebuild` because the new client profile lives there). `git fetch` and check it out, then merge the latest `origin/clients-rebuild` into it so it starts from the newest client profile.
-3. Run **M1 → M5 in order**. **Do not run M6** until Jeff says M1–M5 are on production `main` (M6 drops columns and tables).
+2. Work on branch `meds-rebuild` (it is cut from `clients-rebuild` because the new client profile lives there). `git fetch` and check it out, then merge the latest `origin/main` into it (the Clients rebuild, its cleanup and Security hardening Part H are on `main` by now; confirm that first and stop if not). Never merge `staging` into it.
+3. Run **M1 → M5 in order**. Before each step, also give the subagent that step's lines from "AUDIT ADDITIONS" at the end of this file; they are part of the step and its Done when. **Do not run M6** until Jeff says M1–M5 are on production `main` (M6 drops columns and tables).
 4. For each prompt: start a fresh subagent with the Standard Rules + that prompt only. It works on `meds-rebuild/mN-<name>` cut from the tip of `meds-rebuild`, and must pass before finishing:
    - `npm run build` (commit the regenerated `src/routeTree.gen.ts`)
    - `npx tsc --noEmit` with no new errors versus the start of the prompt (record both counts)
@@ -20,7 +20,7 @@ Result when done: the client's Health → Medications card has two tabs, **Medic
    - the prompt's own "Done when" list
    Skip e2e (Jeff's rule). Open a PR into `meds-rebuild`, titled `Meds rebuild MN: <name>`. Body: what changed, files added and deleted, migrations applied, test results, anything skipped. If every check passes, squash-merge it into `meds-rebuild` and continue. If a check fails twice after honest fixes, write `BLOCKED: <reason>` at the top of the PR body and stop.
 5. The subagent returns only a ≤ 10-line report. Append it to `docs/meds-rebuild/PROGRESS.md` and commit. A new session reads PROGRESS.md and continues from the first prompt not marked merged.
-6. After M5, open one PR `meds-rebuild` → `clients-rebuild` if `clients-rebuild` hasn't reached `staging` yet; otherwise `meds-rebuild` → `staging`. Never merge into `staging` or `main` yourself.
+6. After M5, open one PR `meds-rebuild` → `staging`. Never merge into `staging` or `main` yourself.
 
 ---
 
@@ -167,3 +167,28 @@ Before each drop, grep `main` and this branch for the column, table or function 
 Tables kept on purpose: `client_medications`, `emar_logs`, `emar_log_addenda`, `controlled_med_counts`, `medication_transfers` (now "Send with client"), plus the new `client_medication_changes` and `medication_month_reviews`. `hhs_medical_logs` is appointments, not medications; leave it.
 
 **Done when:** the drops are applied, types regenerated, build and unit tests pass, and no code references a dropped name.
+
+---
+
+## AUDIT ADDITIONS (Oct 13, 2026 security and data-integrity audit, confirmed on live)
+
+**M1**
+- **Only the right staff log doses, only for that client's meds.** The live `emar_logs` INSERT rule is just "agency member and staff_id = self", and `logMedicationPass` (`emar-pass.functions.ts` ~56–100) loads the med by id without checking it belongs to `clientId`. `logMedicationPass` checks the med's `client_id` = `clientId`, the med is active and not paused, and the caller can see the client (`can_access_client_phi`) or has a shift or host assignment for that client today. Tighten the `emar_logs`, `controlled_med_counts` and `emar_log_addenda` INSERT rules the same way.
+- **Duplicate doses at the database level.** The live unique index `emar_logs_terminal_dedupe` covers `self_administered`, `refused`, `omitted`, `missed` but not `administered` (what the code saves). Add a second partial unique index on `(medication_id, scheduled_for)` where status is `administered` (confirm no duplicates first). Make `client_request_id` required on every new dose.
+- **PRN races.** Check the PRN minimum interval and daily maximum inside one SQL function that locks the medication row (`SELECT … FOR UPDATE`) before inserting, so two fast taps or two staff can't both pass.
+- **Staff can edit logged doses until M6.** Add a `BEFORE UPDATE` trigger now that refuses staff changes to a logged dose's time, status, route, medication, client and counts (admins keep the review flag; corrections are addenda). First grep what the current code updates on `emar_logs` and allow exactly that until M5 replaces it. M6 still removes the policy.
+- **HHS meds path.** `saveEmarLog` (`hhs.functions.ts` ~103) skips the training, role, witness and attestation checks, accepts `staffName` from the browser and free-text meds with no `medicationId`, and its duplicate check misses `administered`. Make it call `logMedicationPass` (or remove it) now, not in M5; never accept a staff name from the browser.
+- **Org-wide reads.** Query `pg_policies` on live for `emar_logs`, `emar_log_addenda`, `controlled_med_counts`, `medication_transfers` and `medication_change_proposals` and drop any SELECT rule that is only `is_org_member` before adding the PHI-scoped ones.
+
+**M2**
+- `parseMedicationsAI` (`medications.functions.ts` ~24) lets any signed-in user send text and images to Bedrock with no agency check. Guard any label or order reading with `assertCanManageClient(edit_medical)`, pass the agency to the rate limit, cap image size at 5 MB and text at 20,000 characters; delete it if nothing uses it.
+
+**M3**
+- **Corrections:** `addEmarAddendum` (~343) has no permission check. It requires `client_medical:edit`, or being the person who logged the dose within 24 hours; a reason is required; addenda are insert-only (no UPDATE or DELETE rule).
+- **MAR PDF and monthly review:** generate the PDF on the server only, store it in the private client-documents bucket under `<orgId>/<clientId>/medications/`, readable only with `can_access_client_phi`, served by a short-lived signed link. Saving a `medication_month_reviews` row requires `client_medical:edit`; a signed month can't be changed (reopening is logged).
+
+**M5**
+- **Controlled substances:** the expected count is read on the server, never sent by the browser. The count goes down in one statement (`UPDATE … SET pill_count_current = pill_count_current - 1 … RETURNING`); a negative or mismatched count flags a discrepancy instead of being clamped to 0. The witness must be a different active member of the agency who confirms with their own sign-in or PIN (`witness_confirmed_at`), not just a chosen name.
+- **Dose times:** reject an actual-taken time in the future or more than 24 hours back; the documented time is always the server's `now()`; more than 60 minutes after the due time marks it late (shows in the MAR exceptions).
+- **Training check:** Give meds uses the scheduler's `qualificationsOnDate` (approved, unexpired training on that date) instead of `is_med_assist_current`; with no medication training set up for the agency, show admins "Set up medication training in Evidence" rather than treating everyone as trained.
+- **Inventory:** the dose and its pill-count change save in the same SQL function, so one can't succeed without the other.
