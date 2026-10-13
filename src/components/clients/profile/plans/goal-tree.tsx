@@ -1,6 +1,7 @@
 // Read-only goals → supports → codes for one plan year. Used by the Goals
 // and supports card, the client-specific training card and the staff
-// training page. Supports read "Support: … + codes" / "Support details: …".
+// training page. Each goal's title is bold and a size up so goals scan
+// easily. Supports read "Support: … + codes" / "Support details: …".
 import type { ReactNode } from "react";
 import type { GoalView } from "@/lib/clients/plans";
 import { SupportLines } from "./support-lines";
@@ -10,11 +11,14 @@ export function GoalTree({
   empty,
   goalActions,
   supportActions,
+  addSupport,
 }: {
   goals: GoalView[];
   empty?: ReactNode;
   goalActions?: (goal: GoalView) => ReactNode;
   supportActions?: (goal: GoalView, support: GoalView["supports"][number]) => ReactNode;
+  /** Under the goal's supports, e.g. an "Add support" button. */
+  addSupport?: (goal: GoalView) => ReactNode;
 }) {
   if (goals.length === 0) {
     return (
@@ -30,11 +34,15 @@ export function GoalTree({
           <div className="flex items-start gap-2">
             <div className="min-w-0 flex-1">
               {g.kind === "other_need" ? (
-                <p className="text-sm font-medium">Other needs in the PCSP</p>
+                <p className="text-base font-semibold leading-snug text-hive-ink">
+                  Other needs in the PCSP
+                </p>
               ) : (
                 <>
                   <div className="mb-0.5 text-xs font-medium text-muted-foreground">Goal{g.domain ? ` · ${g.domain}` : ""}</div>
-                  <p className="whitespace-pre-wrap text-sm">{g.goal}</p>
+                  <p className="whitespace-pre-wrap text-base font-semibold leading-snug text-hive-ink">
+                    {g.goal}
+                  </p>
                 </>
               )}
             </div>
@@ -56,6 +64,7 @@ export function GoalTree({
               </li>
             ))}
           </ul>
+          {addSupport ? <div className="mt-2">{addSupport(g)}</div> : null}
         </li>
       ))}
     </ul>

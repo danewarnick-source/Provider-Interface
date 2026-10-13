@@ -1,6 +1,7 @@
 // Goals and supports: the current plan year's goals → supports → codes
-// (plus "Other needs in the PCSP"), with add / edit / end for people who can
-// edit, and "View as" a code (what a team member working that code sees).
+// (plus "Other needs in the PCSP"). Editors get one ⋯ menu per goal (Edit /
+// End goal), one per support (Edit / End support) and "Add support" under
+// each goal's supports; "View as" a code (what a team member working that code sees).
 // Nothing is deleted: goals are ended, supports get an end date.
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -8,7 +9,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Loader2, Plus, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { EditButton, SectionCard } from "@/components/clients/profile/cards/section-card";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { RowMenu } from "@/components/clients/profile/cards/row-menu";
 import { FieldVisibilityToggle } from "@/components/clients/profile/visibility-toggles";
 import { clientPlansKey, useClientPlans } from "@/components/clients/shared/hooks/use-plan-goals";
@@ -105,24 +106,28 @@ export function PlanGoalsPanel({
             goalActions={!canEdit ? undefined : (g) => (
               <div className="flex shrink-0 items-center gap-2">
                 <FieldVisibilityToggle clientId={clientId} section="care_plan" kind="goal" id={g.id} label="this goal" />
-                <Button size="icon" variant="outline" className="h-10 w-10 max-md:h-11 max-md:w-11" aria-label="Add support" title="Add support" onClick={() => setSupportDlg({ goal: g, support: null })}>
-                  <Plus className="h-4 w-4" />
-                </Button>
-                <EditButton label="Edit goal" onClick={() => plan && setGoalDlg({ goal: g, planId: plan.id })} />
                 <RowMenu
-                  label="More actions for this goal"
-                  items={[{ label: "End goal", danger: true, disabled: !scope, onSelect: act(() => endGoalFn({ data: { ...scope!, goalId: g.id } })) }]}
+                  label="Goal actions"
+                  items={[
+                    { label: "Edit goal", disabled: !plan, onSelect: () => plan && setGoalDlg({ goal: g, planId: plan.id }) },
+                    { label: "End goal", danger: true, disabled: !scope, onSelect: act(() => endGoalFn({ data: { ...scope!, goalId: g.id } })) },
+                  ]}
                 />
               </div>
             )}
             supportActions={!canEdit ? undefined : (g, s) => (
-              <div className="flex shrink-0 items-center gap-2">
-                <EditButton label="Edit support" onClick={() => setSupportDlg({ goal: g, support: s })} />
-                <RowMenu
-                  label="More actions for this support"
-                  items={[{ label: "End support", danger: true, disabled: !scope, onSelect: act(() => endSupportFn({ data: { ...scope!, goalId: g.id, supportId: s.id } })) }]}
-                />
-              </div>
+              <RowMenu
+                label="Support actions"
+                items={[
+                  { label: "Edit support", onSelect: () => setSupportDlg({ goal: g, support: s }) },
+                  { label: "End support", danger: true, disabled: !scope, onSelect: act(() => endSupportFn({ data: { ...scope!, goalId: g.id, supportId: s.id } })) },
+                ]}
+              />
+            )}
+            addSupport={!canEdit ? undefined : (g) => (
+              <Button type="button" variant="outline" onClick={() => setSupportDlg({ goal: g, support: null })}>
+                <Plus className="h-4 w-4" /> Add support
+              </Button>
             )}
           />
         )}
