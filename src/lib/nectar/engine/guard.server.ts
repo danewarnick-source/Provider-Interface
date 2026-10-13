@@ -71,14 +71,20 @@ export function nectarCallerDeps(supabase: Db): NectarCallerDeps {
 }
 
 /** Signed in + active member + `nectar` on + the AI setting on. Never throws for a refusal. */
-export function nectarCaller(context: NectarContext, opts: NectarGuardOptions): Promise<NectarCallerCheck> {
+export function nectarCaller(
+  context: NectarContext,
+  opts: NectarGuardOptions,
+): Promise<NectarCallerCheck> {
   const { supabase, userId } = context;
   if (!supabase || !userId) return Promise.resolve(nectarRefusal("signed_out"));
   return checkNectarCaller(userId, nectarCallerDeps(supabase), opts);
 }
 
 /** nectarCaller that throws the refusal message. Returns the agency id. */
-export async function requireNectarOrg(context: NectarContext, opts: NectarGuardOptions): Promise<string> {
+export async function requireNectarOrg(
+  context: NectarContext,
+  opts: NectarGuardOptions,
+): Promise<string> {
   const check = await nectarCaller(context, opts);
   if (!check.ok) throw new Error(check.message);
   return check.orgId;

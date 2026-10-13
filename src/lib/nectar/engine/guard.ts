@@ -40,8 +40,7 @@ export const NECTAR_SETTING_OFF_MESSAGE: Record<NectarAiFeature, string> = {
 };
 
 export type NectarCallerCheck =
-  | { ok: true; orgId: string }
-  | { ok: false; reason: NectarRefusal; message: string };
+  { ok: true; orgId: string } | { ok: false; reason: NectarRefusal; message: string };
 
 export interface NectarCallerDeps {
   /** Agencies where this user has an active membership. */
@@ -58,13 +57,17 @@ export interface NectarCallerOptions {
   feature?: NectarAiFeature | null;
 }
 
-export function nectarRefusal(reason: NectarRefusal, message = NECTAR_REFUSAL_MESSAGE[reason]): NectarCallerCheck {
+export function nectarRefusal(
+  reason: NectarRefusal,
+  message = NECTAR_REFUSAL_MESSAGE[reason],
+): NectarCallerCheck {
   return { ok: false, reason, message };
 }
 
 /** The agency's AI settings. Anything missing or not a boolean counts as on (the default). */
 export function nectarSettingsFrom(raw: unknown): NectarSettings {
-  const obj = raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
+  const obj =
+    raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
   const out = { ...DEFAULT_NECTAR_SETTINGS };
   for (const key of ["enabled", ...NECTAR_AI_FEATURES] as const) {
     if (typeof obj[key] === "boolean") out[key] = obj[key] as boolean;
@@ -73,7 +76,10 @@ export function nectarSettingsFrom(raw: unknown): NectarSettings {
 }
 
 /** Null when the feature may run; otherwise the message to show. */
-export function aiSettingRefusal(settings: NectarSettings, feature: NectarAiFeature): string | null {
+export function aiSettingRefusal(
+  settings: NectarSettings,
+  feature: NectarAiFeature,
+): string | null {
   if (!settings.enabled) return NECTAR_REFUSAL_MESSAGE.setting_off;
   return settings[feature] ? null : NECTAR_SETTING_OFF_MESSAGE[feature];
 }
@@ -103,7 +109,10 @@ export async function checkNectarCaller(
   const orgId = [...candidates].sort().find((id) => on.has(id));
   if (!orgId) return nectarRefusal("feature_off");
   if (opts.feature) {
-    const refused = aiSettingRefusal(nectarSettingsFrom(await deps.loadNectarSettings(orgId)), opts.feature);
+    const refused = aiSettingRefusal(
+      nectarSettingsFrom(await deps.loadNectarSettings(orgId)),
+      opts.feature,
+    );
     if (refused) return nectarRefusal("setting_off", refused);
   }
   return { ok: true, orgId };
@@ -119,5 +128,5 @@ export function nectarOrgIdsFrom(
   overrides: ReadonlyArray<{ organization_id: string; enabled: boolean | null }>,
 ): string[] {
   const own = new Map(overrides.map((o) => [o.organization_id, o.enabled === true]));
-  return orgIds.filter((id) => own.get(id) ?? (registryDefault === true));
+  return orgIds.filter((id) => own.get(id) ?? registryDefault === true);
 }

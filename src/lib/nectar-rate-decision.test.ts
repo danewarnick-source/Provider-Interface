@@ -20,7 +20,14 @@ describe("embedding rate limits (N3)", () => {
 });
 
 describe("decideBedrockSlot", () => {
-  const base = { limiterError: null, waitMs: 0, dayTokensUsed: 10, dayFull: false, elapsedMs: 0, maxWaitMs: 60_000 };
+  const base = {
+    limiterError: null,
+    waitMs: 0,
+    dayTokensUsed: 10,
+    dayFull: false,
+    elapsedMs: 0,
+    maxWaitMs: 60_000,
+  };
 
   it("grants a free slot and fails closed when the limiter is down", () => {
     assert.deepEqual(decideBedrockSlot(base), { action: "grant", dayTokensUsed: 10 });
@@ -28,8 +35,17 @@ describe("decideBedrockSlot", () => {
   });
 
   it("waits for the next window, but not past the maximum wait or a full day", () => {
-    assert.deepEqual(decideBedrockSlot({ ...base, waitMs: 5_000 }), { action: "wait", waitMs: 5_000 });
-    assert.equal(decideBedrockSlot({ ...base, waitMs: 5_000, elapsedMs: 58_000 }).action, "fail_closed");
-    assert.equal(decideBedrockSlot({ ...base, waitMs: 5_000, dayFull: true }).action, "fail_closed");
+    assert.deepEqual(decideBedrockSlot({ ...base, waitMs: 5_000 }), {
+      action: "wait",
+      waitMs: 5_000,
+    });
+    assert.equal(
+      decideBedrockSlot({ ...base, waitMs: 5_000, elapsedMs: 58_000 }).action,
+      "fail_closed",
+    );
+    assert.equal(
+      decideBedrockSlot({ ...base, waitMs: 5_000, dayFull: true }).action,
+      "fail_closed",
+    );
   });
 });

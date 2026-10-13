@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { checkNectarCaller, isNectarOff, type NectarCallerDeps } from "./nectar/engine/guard.ts";
-import { COACH_RATE_LIMIT_MESSAGE, coachModelFor, type CoachGateway } from "./nectar/engine/coach-model.ts";
+import {
+  COACH_RATE_LIMIT_MESSAGE,
+  coachModelFor,
+  type CoachGateway,
+} from "./nectar/engine/coach-model.ts";
 import { runAnswerProcedural, validateProcedural } from "./nectar/engine/coach-assist.ts";
 
 const SRC = readFileSync(new URL("./ai-coach.functions.ts", import.meta.url), "utf8");
@@ -30,18 +34,31 @@ describe("ai-coach.functions.ts (N1 server guards)", () => {
     // N2 removed the one server function nothing called (the geofence variance drafter).
     const exported = [...SRC.matchAll(/^export const (\w+) = createServerFn/gm)].map((m) => m[1]);
     assert.deepEqual(exported, SERVER_FNS);
-    for (const type of ["CoachResult", "ScanResult", "ProceduralResult", "DraftResult", "IncidentReviewResult"]) {
+    for (const type of [
+      "CoachResult",
+      "ScanResult",
+      "ProceduralResult",
+      "DraftResult",
+      "IncidentReviewResult",
+    ]) {
       assert.match(SRC, new RegExp(`\\b${type}\\b[^;]*from "@/lib/nectar/engine/coach-`), type);
     }
     assert.match(PUNCH_PAD, /import \{ evaluateShiftNote \} from "@\/lib\/ai-coach\.functions"/);
-    assert.match(PUNCH_PAD, /import \{ answerProceduralQuestion, type ProceduralResult \} from "@\/lib\/ai-coach\.functions"/);
+    assert.match(
+      PUNCH_PAD,
+      /import \{ answerProceduralQuestion, type ProceduralResult \} from "@\/lib\/ai-coach\.functions"/,
+    );
   });
 
   it("runs the Nectar guard in every server function, with the AI setting each one uses (N3)", () => {
     assert.match(SRC, /const NOTE_HELP = \{ feature: "note_help" \} as const;/);
     for (const name of SERVER_FNS) {
       const feature = name === "answerProceduralQuestion" ? '\\{ feature: "ask" \\}' : "NOTE_HELP";
-      assert.match(serverFn(name), new RegExp(`(requireNectarOrg|nectarCaller)\\(context, ${feature}\\)`), name);
+      assert.match(
+        serverFn(name),
+        new RegExp(`(requireNectarOrg|nectarCaller)\\(context, ${feature}\\)`),
+        name,
+      );
     }
   });
 
@@ -50,16 +67,24 @@ describe("ai-coach.functions.ts (N1 server guards)", () => {
     const direct = SRC.match(/gatewayFetch\(\{/g) ?? [];
     assert.equal(direct.length, 1, "only the reviewer calls gatewayFetch directly");
     assert.match(serverFn("reviewIncidentReport"), /orgId: caller\.orgId/);
-    for (const name of SERVER_FNS.filter((n) => !["evaluateShiftNote", "reviewIncidentReport"].includes(n))) {
+    for (const name of SERVER_FNS.filter(
+      (n) => !["evaluateShiftNote", "reviewIncidentReport"].includes(n),
+    )) {
       assert.match(serverFn(name), /coachModel\(await requireNectarOrg\(context, [^)]+\)\)/, name);
     }
   });
 
   it("never blocks clock-out or the incident clock on Nectar or shift note help being off", () => {
     const evaluate = serverFn("evaluateShiftNote");
-    assert.match(evaluate, /if \(!caller\.ok && !isNectarOff\(caller\)\) throw new Error\(caller\.message\);/);
+    assert.match(
+      evaluate,
+      /if \(!caller\.ok && !isNectarOff\(caller\)\) throw new Error\(caller\.message\);/,
+    );
     assert.match(evaluate, /caller\.ok \? coachModel\(caller\.orgId\) : null/);
-    assert.match(serverFn("reviewIncidentReport"), /if \(!caller\.ok\) return skippedReview\(caller\.message\);/);
+    assert.match(
+      serverFn("reviewIncidentReport"),
+      /if \(!caller\.ok\) return skippedReview\(caller\.message\);/,
+    );
   });
 
   it("fits the lib size limit", () => {
@@ -78,7 +103,11 @@ describe("guarded coach call, end to end with fakes", () => {
 
   it("refuses a non-member before any model call", async () => {
     const check = await checkNectarCaller("11111111-1111-4111-8111-111111111111", deps([]));
-    assert.deepEqual(check, { ok: false, reason: "not_member", message: "Not a member of this organization" });
+    assert.deepEqual(check, {
+      ok: false,
+      reason: "not_member",
+      message: "Not a member of this organization",
+    });
   });
 
   it("charges the member's agency and surfaces the rate limit", async () => {
@@ -97,12 +126,28 @@ describe("guarded coach call, end to end with fakes", () => {
 
   it("refuses note help when the agency turned it off, and the completeness check falls back (N3)", async () => {
     const user = "11111111-1111-4111-8111-111111111111";
-    const off = await checkNectarCaller(user, deps([ORG], { note_help: false }), { feature: "note_help" });
-    assert.deepEqual(off, { ok: false, reason: "setting_off", message: "Shift note help is turned off for your agency." });
-    assert.equal(isNectarOff(off), true, "evaluateShiftNote uses the local word count instead of failing");
-    const nectarOff = await checkNectarCaller(user, deps([ORG], { enabled: false }), { feature: "ask" });
+    const off = await checkNectarCaller(user, deps([ORG], { note_help: false }), {
+      feature: "note_help",
+    });
+    assert.deepEqual(off, {
+      ok: false,
+      reason: "setting_off",
+      message: "Shift note help is turned off for your agency.",
+    });
+    assert.equal(
+      isNectarOff(off),
+      true,
+      "evaluateShiftNote uses the local word count instead of failing",
+    );
+    const nectarOff = await checkNectarCaller(user, deps([ORG], { enabled: false }), {
+      feature: "ask",
+    });
     assert.equal(!nectarOff.ok && nectarOff.message, "Nectar is turned off for your agency.");
     const defaults = await checkNectarCaller(user, deps([ORG]), { feature: "note_help" });
-    assert.deepEqual(defaults, { ok: true, orgId: ORG }, "missing settings count as on, so current agencies are unchanged");
+    assert.deepEqual(
+      defaults,
+      { ok: true, orgId: ORG },
+      "missing settings count as on, so current agencies are unchanged",
+    );
   });
 });
