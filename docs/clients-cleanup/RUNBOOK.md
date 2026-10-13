@@ -57,7 +57,7 @@ Owner: Jeff (Dane Warnick). Repo: danewarnick-source/Provider-Interface. Live Su
    - `src/components/clients/shared/client-documents-card.tsx` (583)
    - `src/components/staff-client-grid.tsx` (572)
    - `src/lib/clients/care-data.functions.ts` (539)
-   - `src/lib/clients/face-sheet.functions.ts` (498), `budget-pdf.ts` (476)
+   - `src/lib/clients/face-sheet.functions.ts` (498)
    Merge duplicate helpers (date formatting, status chips, contact formatting, guards) into one shared file each. No new features, no visual change.
 4. Delete tests that only tested deleted code. Keep every test for behavior that still exists.
 5. Delete `docs/clients-rebuild/` and `docs/clients-polish/`.
