@@ -158,6 +158,15 @@ export function pastContacts<T extends Pick<ClientContact, "ended_on">>(
     .sort((a, b) => (b.ended_on ?? "").localeCompare(a.ended_on ?? ""));
 }
 
+/**
+ * The patch that puts an ended contact back on the active list: the end date
+ * is cleared (primary stays off). Throws when the contact isn't ended.
+ */
+export function restoreContactPatch(c: Pick<ClientContact, "ended_on">): { ended_on: null } {
+  if (!c.ended_on) throw new Error("This contact is already active.");
+  return { ended_on: null };
+}
+
 /** Up to two initials for an avatar ("?" when the name is blank). */
 export function contactInitials(name: string): string {
   return (

@@ -12,6 +12,7 @@ import {
   pastContacts,
   contactsWithRole,
   primaryContact,
+  restoreContactPatch,
   setContactParts,
   type ClientContact,
   type ContactRole,
@@ -49,6 +50,19 @@ const list = [
 describe("activeContacts", () => {
   it("drops contacts ended today or earlier", () => {
     assert.deepEqual(activeContacts(list, NOW).map((x) => x.id), ["1", "2", "4", "5"]);
+  });
+});
+
+describe("restoreContactPatch", () => {
+  it("clears the end date so the contact is active again", () => {
+    const ended = list[2];
+    const restored = { ...ended, ...restoreContactPatch(ended) };
+    assert.equal(restored.ended_on, null);
+    assert.deepEqual(pastContacts([restored], NOW), []);
+    assert.deepEqual(activeContacts([restored], NOW).map((x) => x.id), ["3"]);
+  });
+  it("refuses a contact that isn't ended", () => {
+    assert.throws(() => restoreContactPatch(list[0]), /already active/);
   });
 });
 

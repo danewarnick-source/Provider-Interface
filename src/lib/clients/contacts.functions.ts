@@ -1,4 +1,4 @@
-// Client contacts: list / add / update / end. Every write runs
+// Client contacts: list / add / update / end / restore. Every write runs
 // assertCanManageClient first, then writes with the caller's own (RLS-scoped)
 // Supabase client and confirms a row really changed. Contacts are ended
 // (ended_on), never deleted.
@@ -14,6 +14,7 @@ import {
   CONTACT_ROLES,
   cleanContactFields,
   loadClientContacts,
+  restoreContactPatch,
   type ClientContact,
 } from "./contacts";
 import { todayYmd } from "./dates";
@@ -122,6 +123,35 @@ export const endClientContact = createServerFn({ method: "POST" })
     const { data: rows, error } = await sb
       .from("client_contacts")
       .update({ ended_on: todayYmd(), is_primary: false })
+      .eq("id", contactId)
+      .eq("client_id", clientId)
+      .eq("organization_id", organizationId)
+      .select("id");
+    if (error) throw new Error(error.message);
+    assertRowsChanged(rows);
+    return { id: contactId };
+  });
+
+/** Restore an ended contact: its end date is cleared and it is back on the active list. */
+export const restoreClientContact = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ ...scope, contactId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { sb, userId } = ctx(context);
+    const { organizationId, clientId, contactId } = data;
+    await assertCanManageClient({ supabase: sb, actorId: userId, organizationId, clientId, action: "edit" });
+    const { data: found, error: findErr } = await sb
+      .from("client_contacts")
+      .select("ended_on")
+      .eq("id", contactId)
+      .eq("client_id", clientId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+    if (findErr) throw new Error(findErr.message);
+    if (!found) throw new Error("Contact not found.");
+    const { data: rows, error } = await sb
+      .from("client_contacts")
+      .update(restoreContactPatch(found as { ended_on: string | null }))
       .eq("id", contactId)
       .eq("client_id", clientId)
       .eq("organization_id", organizationId)

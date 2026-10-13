@@ -1,7 +1,8 @@
 // Contacts section: one grid of contact cards from client_contacts, guardian
 // first, then the support coordinator, then everyone else by name. The face
 // sheet, staff quick-info and shift page read the same rows. Contacts are
-// ended (archived), never deleted; ended ones are under "Past contacts".
+// ended (archived), never deleted; ended ones are under "Past contacts",
+// where Restore puts one back on the active list.
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -27,6 +28,7 @@ import {
 import {
   addClientContact,
   endClientContact,
+  restoreClientContact,
   updateClientContact,
 } from "@/lib/clients/contacts.functions";
 import { guardianStatus } from "@/lib/clients/guardian";
@@ -48,6 +50,7 @@ export function ContactsSection({ orgId, data }: { orgId: string; data: ClientPr
   const addFn = useServerFn(addClientContact);
   const updateFn = useServerFn(updateClientContact);
   const endFn = useServerFn(endClientContact);
+  const restoreFn = useServerFn(restoreClientContact);
   const updateClientFn = useServerFn(updateClient);
   const scope = { organizationId: orgId, clientId };
   const refresh = () => qc.invalidateQueries({ queryKey: clientContactsKey(clientId) });
@@ -68,6 +71,14 @@ export function ContactsSection({ orgId, data }: { orgId: string; data: ClientPr
     mutationFn: (id: string) => endFn({ data: { ...scope, contactId: id } }),
     onSuccess: () => {
       toast.success("Contact ended. It's kept under Past contacts.");
+      void refresh();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const restore = useMutation({
+    mutationFn: (id: string) => restoreFn({ data: { ...scope, contactId: id } }),
+    onSuccess: () => {
+      toast.success("Contact restored.");
       void refresh();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -154,7 +165,12 @@ export function ContactsSection({ orgId, data }: { orgId: string; data: ClientPr
         </ul>
       )}
 
-      <PastContacts contacts={past} />
+      <PastContacts
+        contacts={past}
+        canEdit={canEdit}
+        restoring={restore.isPending}
+        onRestore={(id) => restore.mutate(id)}
+      />
 
       <ContactDialog
         open={!!dialog}
