@@ -46,3 +46,31 @@ export function decideBedrockSlot(input: {
   }
   return { action: "wait", waitMs: input.waitMs };
 }
+
+/** Requests per minute and tokens per day for one Bedrock bucket, account-wide and per agency. */
+export interface BedrockRateLimits {
+  key: string;
+  maxPerMin: number;
+  dailyTokenCap: number;
+  orgMaxPerMin: number;
+  orgDailyTokenCap: number;
+}
+
+/**
+ * Titan Text Embeddings v2 has its own Bedrock quota, far above Claude's 10
+ * requests a minute. Publishing a library document embeds every section, so
+ * embeddings count in their own buckets instead of spending the Sonnet
+ * minute. Each agency is still capped so one library can't use it all.
+ */
+export const EMBED_RATE_LIMITS: BedrockRateLimits = {
+  key: "bedrock:titan-embed",
+  maxPerMin: 600,
+  dailyTokenCap: 50_000_000,
+  orgMaxPerMin: 300,
+  orgDailyTokenCap: 10_000_000,
+};
+
+/** The per-agency bucket next to an account-wide one. */
+export function orgRateKey(baseKey: string, orgId: string): string {
+  return `${baseKey}:org:${orgId}`;
+}
