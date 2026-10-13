@@ -1,13 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import {
-  catalogRelationWritePatch,
-  citationSection,
-  missingCatalogRelationColumn,
-  promoteOverlayStatus,
-  proposeCatalogRelation,
-} from "./catalog-relation.ts";
+import { citationSection, proposeCatalogRelation } from "./catalog-relation.ts";
 
 describe("proposeCatalogRelation", () => {
   it("matches exact catalog titles", () => {
@@ -91,53 +85,27 @@ describe("proposeCatalogRelation", () => {
     assert.equal(got.catalog_key, null);
   });
 
-  it("writes a proposed patch without confirming", () => {
+  it("matches a training title with no overlay", () => {
     const proposal = proposeCatalogRelation({
       title: "Person-Centered Thinking and Practices Training",
     });
-    const patch = catalogRelationWritePatch(proposal);
-    assert.equal(patch.catalog_relation, "match");
-    assert.equal(patch.catalog_key, "pct_hire_practices");
-    assert.equal(patch.catalog_relation_status, "proposed");
-    assert.equal(patch.catalog_overlay, null);
-  });
-
-  it("promotes overlay via the confirmed status (Step 7c path)", () => {
-    assert.equal(promoteOverlayStatus(), "confirmed");
+    assert.equal(proposal.kind, "match");
+    assert.equal(proposal.catalog_key, "pct_hire_practices");
+    assert.equal(proposal.overlay, null);
   });
 });
 
-describe("citation + Soft-column helpers", () => {
+describe("citation helpers", () => {
   it("pulls § sections from intake and catalog citations", () => {
     assert.equal(citationSection("DHHS91172 SOW §1.8(5)"), "1 8 5");
     assert.equal(citationSection("Addendum — §1.25"), "1 25");
     assert.equal(citationSection("no section here"), null);
   });
 
-  it("does not introduce UI emoji or supabase-as-any in the Step 7 surface", () => {
-    const ui = readFileSync(
-      new URL("../../components/nectar/agency-sources-panel.tsx", import.meta.url),
-      "utf8",
-    );
-    const fns = readFileSync(
-      new URL("./catalog-relation.functions.ts", import.meta.url),
-      "utf8",
-    );
-    assert.equal(/\p{Extended_Pictographic}/u.test(ui), false);
-    assert.doesNotMatch(fns, /supabase as any/);
-  });
-
-  it("detects missing Soft columns without treating other errors as Soft", () => {
-    assert.equal(
-      missingCatalogRelationColumn(
-        'column nectar_requirements.catalog_key does not exist',
-      ),
-      true,
-    );
-    assert.equal(
-      missingCatalogRelationColumn('Could not find the catalog_relation column of nectar_requirements in the schema cache'),
-      true,
-    );
-    assert.equal(missingCatalogRelationColumn("permission denied"), false);
+  it("keeps the Step 7 module pure and emoji-free now that its writer is gone (N2)", () => {
+    const src = readFileSync(new URL("./catalog-relation.ts", import.meta.url), "utf8");
+    assert.equal(/\p{Extended_Pictographic}/u.test(src), false);
+    assert.doesNotMatch(src, /supabase|createServerFn/);
+    assert.doesNotMatch(src, /catalog-relation\.functions/);
   });
 });

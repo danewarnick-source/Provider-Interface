@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
 function read(rel: string) {
@@ -38,10 +38,6 @@ describe("Knowledge surface lock", () => {
     const ext = read("../routes/dashboard.external-compliance.tsx");
     assert.match(ext, /to: "\/dashboard\/hub\/knowledge"/);
     assert.doesNotMatch(ext, /tab: "external"/);
-    assert.equal(
-      existsSync(new URL("../routes/dashboard.authoritative-sources.tsx", import.meta.url)),
-      false,
-    );
     const tree = read("../routeTree.gen.ts");
     assert.doesNotMatch(tree, /'\/dashboard\/authoritative-sources'/);
     assert.doesNotMatch(tree, /'\/dashboard\/policies'/);

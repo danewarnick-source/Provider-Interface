@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { promoteOverlayStatus } from "./obligations/catalog-relation.ts";
 import {
   buildSowIndex,
   searchSowIndex,
@@ -28,17 +27,6 @@ describe("SOW index", () => {
     const hits = searchSowIndex("cpr");
     assert.ok(hits.length > 0);
     assert.ok(hits.some((r) => /cpr/i.test(r.title) || /cpr/i.test(r.key)));
-  });
-
-  it("promote overlay stays on the Step 7 confirm path", () => {
-    assert.equal(promoteOverlayStatus(), "confirmed");
-    const panel = readFileSync(
-      new URL("../components/nectar/agency-sources-panel.tsx", import.meta.url),
-      "utf8",
-    );
-    assert.match(panel, /setCatalogRelationStatus/);
-    assert.match(panel, /Promote overlay/);
-    assert.doesNotMatch(panel, /promoteOverlayToCatalog|secondPromote/);
   });
 
   it("does not introduce UI emoji", () => {

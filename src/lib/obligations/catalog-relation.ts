@@ -7,7 +7,8 @@
  *   overlay  — agency wording of a known catalog duty
  *   conflict — competing keys, citation mismatch, or no counterpart
  *
- * Pure. Persist lives in catalog-relation.functions.ts.
+ * Pure. Nothing writes the relation back any more (the requirements
+ * pipeline that persisted it was removed in the Nectar rebuild, N2).
  */
 
 import {
@@ -19,13 +20,6 @@ import {
 
 export const CATALOG_RELATION_KINDS = ["match", "overlay", "conflict"] as const;
 export type CatalogRelationKind = (typeof CATALOG_RELATION_KINDS)[number];
-
-export const CATALOG_RELATION_STATUSES = [
-  "proposed",
-  "confirmed",
-  "dismissed",
-] as const;
-export type CatalogRelationStatus = (typeof CATALOG_RELATION_STATUSES)[number];
 
 export type CatalogRelationInput = {
   title: string;
@@ -263,54 +257,4 @@ export function proposeCatalogRelation(
     overlay: null,
     confidence: "none",
   };
-}
-
-export function isCatalogRelationKind(
-  value: string | null | undefined,
-): value is CatalogRelationKind {
-  return (
-    value === "match" || value === "overlay" || value === "conflict"
-  );
-}
-
-export function isCatalogRelationStatus(
-  value: string | null | undefined,
-): value is CatalogRelationStatus {
-  return (
-    value === "proposed" ||
-    value === "confirmed" ||
-    value === "dismissed"
-  );
-}
-
-export function catalogRelationWritePatch(proposal: CatalogRelationProposal): {
-  catalog_key: string | null;
-  catalog_relation: CatalogRelationKind;
-  catalog_relation_status: CatalogRelationStatus;
-  catalog_relation_rationale: string;
-  catalog_overlay: CatalogOverlay | null;
-} {
-  return {
-    catalog_key: proposal.catalog_key,
-    catalog_relation: proposal.kind,
-    catalog_relation_status: "proposed",
-    catalog_relation_rationale: proposal.rationale,
-    catalog_overlay: proposal.overlay,
-  };
-}
-
-/**
- * Step 7c / Step 9c promote overlay — same persist path as Agency Sources
- * Confirm (`setCatalogRelationStatus` → `confirmed`). Do not invent a
- * second promote writer.
- */
-export function promoteOverlayStatus(): CatalogRelationStatus {
-  return "confirmed";
-}
-
-export function missingCatalogRelationColumn(message: string): boolean {
-  return (
-    /catalog_key|catalog_relation|catalog_overlay/i.test(message) &&
-    /does not exist|schema cache|could not find|column/i.test(message)
-  );
 }
