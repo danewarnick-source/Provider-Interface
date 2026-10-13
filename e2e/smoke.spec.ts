@@ -47,7 +47,6 @@ const STATIC_ROUTES: string[] = [
   "/dashboard/ask-nectar",
   "/dashboard/assignments",
   "/dashboard/audit",
-  "/dashboard/authoritative-sources",
   "/dashboard/client-billing-codes",
   "/dashboard/client-loans",
   "/dashboard/command-center",

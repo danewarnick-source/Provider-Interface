@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
 function read(rel: string) {
@@ -34,11 +34,16 @@ describe("Knowledge surface lock", () => {
     assert.ok(uploadIdx >= 0 && listIdx > uploadIdx, "upload sits above the document list");
   });
 
-  it("retires External compliance and Authoritative Sources to Knowledge", () => {
+  it("retires External compliance to Knowledge and drops the Authoritative Sources URL (N2)", () => {
     const ext = read("../routes/dashboard.external-compliance.tsx");
     assert.match(ext, /to: "\/dashboard\/hub\/knowledge"/);
     assert.doesNotMatch(ext, /tab: "external"/);
-    const auth = read("../routes/dashboard.authoritative-sources.tsx");
-    assert.match(auth, /to: "\/dashboard\/hub\/knowledge"/);
+    assert.equal(
+      existsSync(new URL("../routes/dashboard.authoritative-sources.tsx", import.meta.url)),
+      false,
+    );
+    const tree = read("../routeTree.gen.ts");
+    assert.doesNotMatch(tree, /'\/dashboard\/authoritative-sources'/);
+    assert.doesNotMatch(tree, /'\/dashboard\/policies'/);
   });
 });

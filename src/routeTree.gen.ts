@@ -43,7 +43,6 @@ import { Route as DashboardAgencyDocumentsRouteImport } from './routes/dashboard
 import { Route as DashboardAskNectarRouteImport } from './routes/dashboard.ask-nectar'
 import { Route as DashboardAssignmentsRouteImport } from './routes/dashboard.assignments'
 import { Route as DashboardAuditRouteImport } from './routes/dashboard.audit'
-import { Route as DashboardAuthoritativeSourcesRouteImport } from './routes/dashboard.authoritative-sources'
 import { Route as DashboardBillingRouteImport } from './routes/dashboard.billing'
 import { Route as DashboardClientBillingCodesRouteImport } from './routes/dashboard.client-billing-codes'
 import { Route as DashboardClientFileRouteImport } from './routes/dashboard.client-file'
@@ -83,7 +82,6 @@ import { Route as DashboardNectarCompanyProfileRouteImport } from './routes/dash
 import { Route as DashboardNectarDocsRouteImport } from './routes/dashboard.nectar-docs'
 import { Route as DashboardPbaLedgerRouteImport } from './routes/dashboard.pba-ledger'
 import { Route as DashboardPersonnelFileRouteImport } from './routes/dashboard.personnel-file'
-import { Route as DashboardPoliciesRouteImport } from './routes/dashboard.policies'
 import { Route as DashboardRecordsDeskRouteImport } from './routes/dashboard.records-desk'
 import { Route as DashboardReimbursementsRouteImport } from './routes/dashboard.reimbursements'
 import { Route as DashboardReportsRouteImport } from './routes/dashboard.reports'
@@ -377,12 +375,6 @@ const DashboardAuditRoute = DashboardAuditRouteImport.update({
   path: '/audit',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardAuthoritativeSourcesRoute =
-  DashboardAuthoritativeSourcesRouteImport.update({
-    id: '/authoritative-sources',
-    path: '/authoritative-sources',
-    getParentRoute: () => DashboardRoute,
-  } as any)
 const DashboardBillingRoute = DashboardBillingRouteImport.update({
   id: '/billing',
   path: '/billing',
@@ -587,11 +579,6 @@ const DashboardPbaLedgerRoute = DashboardPbaLedgerRouteImport.update({
 const DashboardPersonnelFileRoute = DashboardPersonnelFileRouteImport.update({
   id: '/personnel-file',
   path: '/personnel-file',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardPoliciesRoute = DashboardPoliciesRouteImport.update({
-  id: '/policies',
-  path: '/policies',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardRecordsDeskRoute = DashboardRecordsDeskRouteImport.update({
@@ -1302,7 +1289,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/ask-nectar': typeof DashboardAskNectarRoute
   '/dashboard/assignments': typeof DashboardAssignmentsRoute
   '/dashboard/audit': typeof DashboardAuditRoute
-  '/dashboard/authoritative-sources': typeof DashboardAuthoritativeSourcesRoute
   '/dashboard/billing': typeof DashboardBillingRouteWithChildren
   '/dashboard/client-billing-codes': typeof DashboardClientBillingCodesRoute
   '/dashboard/client-file': typeof DashboardClientFileRoute
@@ -1342,7 +1328,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/nectar-docs': typeof DashboardNectarDocsRoute
   '/dashboard/pba-ledger': typeof DashboardPbaLedgerRoute
   '/dashboard/personnel-file': typeof DashboardPersonnelFileRoute
-  '/dashboard/policies': typeof DashboardPoliciesRoute
   '/dashboard/records-desk': typeof DashboardRecordsDeskRoute
   '/dashboard/reimbursements': typeof DashboardReimbursementsRoute
   '/dashboard/reports': typeof DashboardReportsRoute
@@ -1497,7 +1482,6 @@ export interface FileRoutesByTo {
   '/dashboard/ask-nectar': typeof DashboardAskNectarRoute
   '/dashboard/assignments': typeof DashboardAssignmentsRoute
   '/dashboard/audit': typeof DashboardAuditRoute
-  '/dashboard/authoritative-sources': typeof DashboardAuthoritativeSourcesRoute
   '/dashboard/client-billing-codes': typeof DashboardClientBillingCodesRoute
   '/dashboard/client-file': typeof DashboardClientFileRoute
   '/dashboard/client-loans': typeof DashboardClientLoansRoute
@@ -1532,7 +1516,6 @@ export interface FileRoutesByTo {
   '/dashboard/nectar-docs': typeof DashboardNectarDocsRoute
   '/dashboard/pba-ledger': typeof DashboardPbaLedgerRoute
   '/dashboard/personnel-file': typeof DashboardPersonnelFileRoute
-  '/dashboard/policies': typeof DashboardPoliciesRoute
   '/dashboard/records-desk': typeof DashboardRecordsDeskRoute
   '/dashboard/reimbursements': typeof DashboardReimbursementsRoute
   '/dashboard/reports': typeof DashboardReportsRoute
@@ -1690,7 +1673,6 @@ export interface FileRoutesById {
   '/dashboard/ask-nectar': typeof DashboardAskNectarRoute
   '/dashboard/assignments': typeof DashboardAssignmentsRoute
   '/dashboard/audit': typeof DashboardAuditRoute
-  '/dashboard/authoritative-sources': typeof DashboardAuthoritativeSourcesRoute
   '/dashboard/billing': typeof DashboardBillingRouteWithChildren
   '/dashboard/client-billing-codes': typeof DashboardClientBillingCodesRoute
   '/dashboard/client-file': typeof DashboardClientFileRoute
@@ -1730,7 +1712,6 @@ export interface FileRoutesById {
   '/dashboard/nectar-docs': typeof DashboardNectarDocsRoute
   '/dashboard/pba-ledger': typeof DashboardPbaLedgerRoute
   '/dashboard/personnel-file': typeof DashboardPersonnelFileRoute
-  '/dashboard/policies': typeof DashboardPoliciesRoute
   '/dashboard/records-desk': typeof DashboardRecordsDeskRoute
   '/dashboard/reimbursements': typeof DashboardReimbursementsRoute
   '/dashboard/reports': typeof DashboardReportsRoute
@@ -1890,7 +1871,6 @@ export interface FileRouteTypes {
     | '/dashboard/ask-nectar'
     | '/dashboard/assignments'
     | '/dashboard/audit'
-    | '/dashboard/authoritative-sources'
     | '/dashboard/billing'
     | '/dashboard/client-billing-codes'
     | '/dashboard/client-file'
@@ -1930,7 +1910,6 @@ export interface FileRouteTypes {
     | '/dashboard/nectar-docs'
     | '/dashboard/pba-ledger'
     | '/dashboard/personnel-file'
-    | '/dashboard/policies'
     | '/dashboard/records-desk'
     | '/dashboard/reimbursements'
     | '/dashboard/reports'
@@ -2085,7 +2064,6 @@ export interface FileRouteTypes {
     | '/dashboard/ask-nectar'
     | '/dashboard/assignments'
     | '/dashboard/audit'
-    | '/dashboard/authoritative-sources'
     | '/dashboard/client-billing-codes'
     | '/dashboard/client-file'
     | '/dashboard/client-loans'
@@ -2120,7 +2098,6 @@ export interface FileRouteTypes {
     | '/dashboard/nectar-docs'
     | '/dashboard/pba-ledger'
     | '/dashboard/personnel-file'
-    | '/dashboard/policies'
     | '/dashboard/records-desk'
     | '/dashboard/reimbursements'
     | '/dashboard/reports'
@@ -2277,7 +2254,6 @@ export interface FileRouteTypes {
     | '/dashboard/ask-nectar'
     | '/dashboard/assignments'
     | '/dashboard/audit'
-    | '/dashboard/authoritative-sources'
     | '/dashboard/billing'
     | '/dashboard/client-billing-codes'
     | '/dashboard/client-file'
@@ -2317,7 +2293,6 @@ export interface FileRouteTypes {
     | '/dashboard/nectar-docs'
     | '/dashboard/pba-ledger'
     | '/dashboard/personnel-file'
-    | '/dashboard/policies'
     | '/dashboard/records-desk'
     | '/dashboard/reimbursements'
     | '/dashboard/reports'
@@ -2728,13 +2703,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAuditRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/authoritative-sources': {
-      id: '/dashboard/authoritative-sources'
-      path: '/authoritative-sources'
-      fullPath: '/dashboard/authoritative-sources'
-      preLoaderRoute: typeof DashboardAuthoritativeSourcesRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/billing': {
       id: '/dashboard/billing'
       path: '/billing'
@@ -3006,13 +2974,6 @@ declare module '@tanstack/react-router' {
       path: '/personnel-file'
       fullPath: '/dashboard/personnel-file'
       preLoaderRoute: typeof DashboardPersonnelFileRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/policies': {
-      id: '/dashboard/policies'
-      path: '/policies'
-      fullPath: '/dashboard/policies'
-      preLoaderRoute: typeof DashboardPoliciesRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/records-desk': {
@@ -4149,7 +4110,6 @@ interface DashboardRouteChildren {
   DashboardAskNectarRoute: typeof DashboardAskNectarRoute
   DashboardAssignmentsRoute: typeof DashboardAssignmentsRoute
   DashboardAuditRoute: typeof DashboardAuditRoute
-  DashboardAuthoritativeSourcesRoute: typeof DashboardAuthoritativeSourcesRoute
   DashboardBillingRoute: typeof DashboardBillingRouteWithChildren
   DashboardClientBillingCodesRoute: typeof DashboardClientBillingCodesRoute
   DashboardClientFileRoute: typeof DashboardClientFileRoute
@@ -4189,7 +4149,6 @@ interface DashboardRouteChildren {
   DashboardNectarDocsRoute: typeof DashboardNectarDocsRoute
   DashboardPbaLedgerRoute: typeof DashboardPbaLedgerRoute
   DashboardPersonnelFileRoute: typeof DashboardPersonnelFileRoute
-  DashboardPoliciesRoute: typeof DashboardPoliciesRoute
   DashboardRecordsDeskRoute: typeof DashboardRecordsDeskRoute
   DashboardReimbursementsRoute: typeof DashboardReimbursementsRoute
   DashboardReportsRoute: typeof DashboardReportsRoute
@@ -4233,7 +4192,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAskNectarRoute: DashboardAskNectarRoute,
   DashboardAssignmentsRoute: DashboardAssignmentsRoute,
   DashboardAuditRoute: DashboardAuditRoute,
-  DashboardAuthoritativeSourcesRoute: DashboardAuthoritativeSourcesRoute,
   DashboardBillingRoute: DashboardBillingRouteWithChildren,
   DashboardClientBillingCodesRoute: DashboardClientBillingCodesRoute,
   DashboardClientFileRoute: DashboardClientFileRoute,
@@ -4274,7 +4232,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardNectarDocsRoute: DashboardNectarDocsRoute,
   DashboardPbaLedgerRoute: DashboardPbaLedgerRoute,
   DashboardPersonnelFileRoute: DashboardPersonnelFileRoute,
-  DashboardPoliciesRoute: DashboardPoliciesRoute,
   DashboardRecordsDeskRoute: DashboardRecordsDeskRoute,
   DashboardReimbursementsRoute: DashboardReimbursementsRoute,
   DashboardReportsRoute: DashboardReportsRoute,
