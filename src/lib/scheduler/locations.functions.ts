@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { locationTypeForTeam } from "@/lib/scheduling/location-type";
+import { locationTypeForTeam } from "@/lib/scheduler/location-type";
 
 const LocationTypeZ = z.enum(["residential", "host_home", "day_site", "community"]);
 

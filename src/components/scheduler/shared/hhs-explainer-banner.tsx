@@ -1,6 +1,6 @@
 import { X, Home } from "lucide-react";
 import { useUiDismissal } from "@/hooks/use-ui-dismissal";
-import { HHS_EXPLAINER_BANNER, HHS_EXPLAINER_PREF_KEY } from "@/lib/scheduling/hhs-visit";
+import { HHS_EXPLAINER_BANNER, HHS_EXPLAINER_PREF_KEY } from "@/lib/scheduler/hhs-visit";
 
 /**
  * One-time, per-user explainer shown the first time someone encounters a host

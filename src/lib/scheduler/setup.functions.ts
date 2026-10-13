@@ -619,7 +619,7 @@ export const applyDrafts = createServerFn({ method: "POST" })
           code,
           starts_at: insertRow.starts_at,
         });
-        const { assertNoBillingConflict } = await import("@/lib/scheduling/shift-commit");
+        const { assertNoBillingConflict } = await import("@/lib/scheduler/shift-commit");
         await assertNoBillingConflict(supabase, insertRow as never);
         const { error } = await supabase.from("scheduled_shifts").insert(insertRow);
         if (error) throw error;

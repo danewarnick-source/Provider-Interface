@@ -9,7 +9,6 @@
  *
  * Consumers:
  *   - scheduling eligibility (rankStaffForShift)
- *   - shift conflict evaluator (evaluateRange)
  *   - superset verification report (verifyRequiredCertsCoverage)
  */
 import { createServerFn } from "@tanstack/react-start";

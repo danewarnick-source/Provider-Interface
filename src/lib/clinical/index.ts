@@ -1,8 +1,7 @@
 // Domain Lib: Clinical, HHS, RHS & eMAR
 
-export * from '../hhs.functions';
+export * from '../scheduler/hhs.functions';
 export * from '../hhs-certifications.functions';
-export * from '../rhs-board.functions';
 export * from '../rhs-evacuation-drills.functions';
 export * from '../rhs-hospitalization.functions';
 export * from '../emar-pass.functions';

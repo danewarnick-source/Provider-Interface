@@ -60,7 +60,7 @@ describe("Compliance spine — parallel writers killed", () => {
     assert.match(resolve, /skipNectarComplianceMutation/);
     assert.doesNotMatch(resolve, /\.from\(["']nectar_compliance_flags/);
 
-    const shift = read("./scheduling/shift-commit.ts");
+    const shift = read("./scheduler/shift-commit.ts");
     const raiseFn = shift.slice(
       shift.indexOf("async function raiseAndMaybeResolve"),
       shift.indexOf("export type GateOpts"),

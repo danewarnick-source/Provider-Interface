@@ -10,7 +10,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { newShiftStatus } from "@/lib/scheduling/shift-status";
+import { newShiftStatus } from "@/lib/scheduler/shift-status";
 import { projectShifts, type ShiftRow } from "@/lib/scheduler/repeat-project";
 import { expandRecurringOccurrences, occurrenceSlotKey } from "@/lib/scheduler/recurrence";
 
@@ -151,7 +151,7 @@ export const applyRepeat = createServerFn({ method: "POST" })
       });
     }
     if (rows.length > 0) {
-      const { assertNoBillingConflict } = await import("@/lib/scheduling/shift-commit");
+      const { assertNoBillingConflict } = await import("@/lib/scheduler/shift-commit");
       await assertNoBillingConflict(supabase, rows as never);
       const { error } = await supabase.from("scheduled_shifts").insert(rows);
       if (error) throw error;
@@ -261,7 +261,7 @@ export const createRecurringShifts = createServerFn({ method: "POST" })
     );
     if (toInsert.length === 0) return { inserted: 0 };
 
-    const { assertNoBillingConflict } = await import("@/lib/scheduling/shift-commit");
+    const { assertNoBillingConflict } = await import("@/lib/scheduler/shift-commit");
     await assertNoBillingConflict(supabase, toInsert as never);
     const { error } = await supabase.from("scheduled_shifts").insert(toInsert);
     if (error) throw error;

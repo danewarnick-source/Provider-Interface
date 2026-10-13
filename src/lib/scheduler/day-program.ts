@@ -1,5 +1,5 @@
 // Day Program billing — single source of truth for DSG / DSP / DSI / MTP
-// (Utah DSPD SOW DHHS91172 Art. 7, 9, 13, eff. 7/1/26).
+// (Utah DSPD SOW DHHS91172 Art. 7, 8, 13, eff. 7/1/26).
 //
 // Day-program codes bill PER CLIENT PER DAY off a Day Program Session.
 // Staff clock-in on a session is for labor/payroll only and NEVER drives
@@ -90,7 +90,7 @@ export function dspModeForMinutes(minutes: number): DspModeResult {
 export type DsiTier = { tierHours: 1 | 2 | 3 | 4 | 5 | 6; cap: number };
 
 /**
- * DSI tier is selected by ACTUAL hours delivered (SOW 9). We round UP to
+ * DSI tier is selected by ACTUAL hours delivered (SOW Article 8). We round UP to
  * the next whole hour up to a max of 6 — anything beyond 6h still bills
  * at the 6h tier.
  */

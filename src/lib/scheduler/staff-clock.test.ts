@@ -12,7 +12,7 @@ import {
   scheduleShiftCta,
   scheduleShiftOpensPunchPad,
   scheduleStaffHidesStatusBadge,
-} from "./schedule-staff-clock.ts";
+} from "./staff-clock.ts";
 
 describe("scheduleHasOpenPunch", () => {
   it("is true for a client EVV punch or a general punch", () => {
@@ -70,7 +70,7 @@ describe("schedule non-client extra clock", () => {
 
 describe("staff Schedule page source", () => {
   const src = readFileSync(
-    fileURLToPath(new URL("../routes/dashboard.schedule.tsx", import.meta.url)),
+    fileURLToPath(new URL("../../routes/dashboard.schedule.tsx", import.meta.url)),
     "utf8",
   );
 
@@ -94,7 +94,7 @@ describe("staff Schedule page source", () => {
 
 describe("Request time off dialog", () => {
   const src = readFileSync(
-    fileURLToPath(new URL("../components/schedule-preview/request-time-off-dialog.tsx", import.meta.url)),
+    fileURLToPath(new URL("../../components/scheduler/shared/request-time-off-dialog.tsx", import.meta.url)),
     "utf8",
   );
 
