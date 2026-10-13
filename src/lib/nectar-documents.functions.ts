@@ -142,51 +142,6 @@ export const getDocument = createServerFn({ method: "POST" })
     return { document: doc, fields: fields ?? [], versions: versions ?? [], signedUrl };
   });
 
-// Targeted retrieval: structured fields by document + field_key — drives
-// downstream features like rate auto-fill.
-export const getExtractedFields = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input) =>
-    z
-      .object({
-        organizationId: z.string().uuid(),
-        clientId: z.string().uuid().optional().nullable(),
-        documentType: z.string().max(40).optional(),
-        fieldGroup: z.string().max(80).optional(),
-        fieldKey: z.string().max(80).optional(),
-        confirmedOnly: z.boolean().default(false),
-        currentOnly: z.boolean().default(true),
-        limit: z.number().int().min(1).max(500).default(200),
-      })
-      .parse(input),
-  )
-  .handler(async ({ data, context }) => {
-    const { supabase } = context;
-    if (!supabase) return { fields: [] };
-    let docQ = supabase
-      .from("nectar_documents")
-      .select("id")
-      .eq("organization_id", data.organizationId);
-    if (data.clientId) docQ = docQ.eq("client_id", data.clientId);
-    if (data.documentType) docQ = docQ.eq("document_type", data.documentType);
-    if (data.currentOnly) docQ = docQ.eq("is_current", true);
-    const { data: docs } = await docQ;
-    const ids = (docs ?? []).map((d) => d.id as string);
-    if (!ids.length) return { fields: [] };
-
-    let fQ = supabase
-      .from("nectar_extracted_fields")
-      .select("*")
-      .in("document_id", ids)
-      .limit(data.limit);
-    if (data.fieldGroup) fQ = fQ.eq("field_group", data.fieldGroup);
-    if (data.fieldKey) fQ = fQ.eq("field_key", data.fieldKey);
-    if (data.confirmedOnly) fQ = fQ.eq("status", "confirmed");
-    const { data: rows, error } = await fQ;
-    if (error) throw new Error(error.message);
-    return { fields: rows ?? [] };
-  });
-
 // =============================================================
 // 3. SOURCE-OF-TRUTH — confirm / override extracted field
 // =============================================================

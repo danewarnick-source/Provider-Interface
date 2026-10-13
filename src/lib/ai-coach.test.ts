@@ -11,7 +11,6 @@ const PUNCH_PAD = readFileSync(new URL("../components/evv/punch-pad.tsx", import
 const SERVER_FNS = [
   "evaluateShiftNote",
   "draftShiftNote",
-  "draftVarianceJustification",
   "answerProceduralQuestion",
   "scanNoteForTriggers",
   "draftIncidentNarrative",
@@ -28,6 +27,9 @@ function serverFn(name: string): string {
 describe("ai-coach.functions.ts (N1 server guards)", () => {
   it("keeps every exported name, input and output punch-pad and the other screens import", () => {
     for (const name of SERVER_FNS) serverFn(name);
+    // N2 removed the one server function nothing called (the geofence variance drafter).
+    const exported = [...SRC.matchAll(/^export const (\w+) = createServerFn/gm)].map((m) => m[1]);
+    assert.deepEqual(exported, SERVER_FNS);
     for (const type of ["CoachResult", "ScanResult", "ProceduralResult", "DraftResult", "IncidentReviewResult"]) {
       assert.match(SRC, new RegExp(`\\b${type}\\b[^;]*from "@/lib/nectar/engine/coach-`), type);
     }

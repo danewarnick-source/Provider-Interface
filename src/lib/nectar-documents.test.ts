@@ -41,12 +41,22 @@ describe("nectar-documents.functions.ts (N1)", () => {
       "ingestDocument",
       "queryDocuments",
       "getDocument",
-      "getExtractedFields",
       "reviewExtractedField",
       "deleteDocument",
     ]) {
       serverFn(name);
     }
     assert.ok(SRC.split("\n").length <= 300);
+  });
+
+  it("exports nothing else; the unused extracted-fields lookup went in N2", () => {
+    const exported = [...SRC.matchAll(/^export const (\w+)/gm)].map((m) => m[1]);
+    assert.deepEqual(exported, [
+      "ingestDocument",
+      "queryDocuments",
+      "getDocument",
+      "reviewExtractedField",
+      "deleteDocument",
+    ]);
   });
 });
