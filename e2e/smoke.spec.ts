@@ -110,7 +110,6 @@ const STATIC_ROUTES: string[] = [
 
   // HIVE exec
   "/dashboard/hive-exec",
-  "/dashboard/hive-exec/approvals",
   "/dashboard/hive-exec/base-template",
   "/dashboard/hive-exec/company-migration",
   "/dashboard/hive-exec/health",

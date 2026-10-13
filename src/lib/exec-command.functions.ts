@@ -66,7 +66,6 @@ export const getCommandMetrics = createServerFn({ method: "GET" })
 
 export interface NeedsYouSummary {
   upgrade_requests: number;
-  extraction_approvals: number;
   billing_approvals: number;
   functionality_reports: number;
   agreements_attention: number;
@@ -79,7 +78,6 @@ export const getNeedsYouSummary = createServerFn({ method: "GET" })
     if (!supabase || !userId) {
       return {
         upgrade_requests: 0,
-        extraction_approvals: 0,
         billing_approvals: 0,
         functionality_reports: 0,
         agreements_attention: 0,
@@ -91,9 +89,8 @@ export const getNeedsYouSummary = createServerFn({ method: "GET" })
     const in30 = new Date(now.getTime() + 30 * 86_400_000).toISOString().slice(0, 10);
     const today = now.toISOString().slice(0, 10);
 
-    const [upgrades, extractions, billing, funcReports, agreementsAttn] = await Promise.all([
+    const [upgrades, billing, funcReports, agreementsAttn] = await Promise.all([
       supabase.from("feature_upgrade_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
-      supabase.from("nectar_requirements").select("id", { count: "exact", head: true }).eq("approval_state", "nectar_drafted"),
       supabase.from("billing_code_approval_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
       supabase.from("functionality_reports").select("id", { count: "exact", head: true }).in("status", ["open", "triaged"]),
       supabase
@@ -104,7 +101,6 @@ export const getNeedsYouSummary = createServerFn({ method: "GET" })
 
     return {
       upgrade_requests: upgrades.count ?? 0,
-      extraction_approvals: extractions.count ?? 0,
       billing_approvals: billing.count ?? 0,
       functionality_reports: funcReports.count ?? 0,
       agreements_attention: agreementsAttn.count ?? 0,

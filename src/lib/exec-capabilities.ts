@@ -10,7 +10,6 @@ export const EXEC_CAPABILITIES = [
   "companies.read",
   "companies.write",
   "billing.approve",
-  "extraction.approve",
   "upgrades.manage",
   "features.manage",
   "states.edit",
