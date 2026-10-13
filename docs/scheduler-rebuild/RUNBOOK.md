@@ -75,6 +75,7 @@ You are running unattended. Jeff will tell you which part to run ("Part A" or "P
    - Before the next prompt, `git fetch` and start from the current tip of the integration branch.
    - Append each report to `docs/scheduler-rebuild/PROGRESS.md` on the integration branch (commit it). If the run is interrupted, read PROGRESS.md and continue from the first prompt not marked merged.
 7. **Running beside the Clients rebuild (Part A only):** stay on your own branch. Touch no file under `src/lib/clients/`, `src/components/clients/` or any client route. If `src/integrations/supabase/types.ts` conflicts when rebasing, regenerate it from the live schema instead of hand-merging.
+8. **Audit additions (Oct 13):** before starting a Part B step, find that step in the "AUDIT ADDITIONS" section below and give its lines to the subagent together with the step. They are part of the step and its Done when.
 
 ---
 
@@ -171,6 +172,46 @@ You are running unattended. Jeff will tell you which part to run ("Part A" or "P
 8. Mark (don't delete yet) the old qualification paths that S4 re-points to `qualificationsOnDate`: `eligibility.functions.ts`, `staff-qualifications.functions.ts`, `team-members/readiness.ts`'s CPR rule and the `nectar_compliance_rules` fallback map. List them in the PR.
 
 **Done when:** `rules.test.ts`, `ratios.test.ts` and `billing-mode.test.ts` have at least one passing and one failing case per rule and per code (including COM at 6 h vs 6 h 15 m, DSI tiers, SLH asleep, a DCFS client on COM, MTP with DSI, PM1 with PN1, and HHS respite day 22) (and `qualificationsOnDate` has cases for reviewed, waiting for review, expiring before vs after the shift date, and the 90-day CPR grace), including the worked example 9 at 1:6 + one at 1:3 + one at 1:1 = 2.83 → 3; the old `conflicts*.ts` files are gone; build/tsc/unit pass.
+
+---
+
+# AUDIT ADDITIONS (Oct 13, 2026 security and data-integrity audit, confirmed on live)
+
+Each line belongs to the step named and is part of that step's Done when.
+
+**S4**
+- **Staff shift updates:** the live guard `scheduled_shifts_staff_update_guard` lets staff change `status` and `notes` on their own shift to any value (they can mark a shift completed or cancelled), and it also blocks schedulers who aren't agency-wide admins. Staff get no direct UPDATE on `scheduled_shifts`; confirm, claim, call-out and decline go through SECURITY DEFINER functions (like `respond_to_swap_request`) that each change only their own columns and allowed status steps. The guard lets anyone passing `access_can_write_shift` through.
+- **Shift functions:** add `requireCategory(scheduling, edit)` to `createShift`, `updateShift`, `publishShifts` (`shifts.functions.ts` ~128, ~214, ~269) and `publishShiftsWithNotify` (`workflow.functions.ts` ~62, which takes bare ids with no agency filter), or delete the ones S7 replaces; all of them go through `rules.ts`.
+- **Clock-in and clock-out on the server:** `punch-pad.tsx` (~626–676, ~1347, ~1432) inserts `evv_timesheets` from the browser with the phone's clock, a browser-computed geofence result and a staff-chosen time zone. Move clock-in and clock-out into server functions: the server sets the times from `now()`, recomputes the geofence decision and `gps_validated` from the submitted coordinates, rejects a device clock more than 5 minutes off, forces America/Denver, and checks `scheduled_shift_id` is the caller's, published, and matches the client and code.
+- **No double clock-ins:** every clock-in carries a `client_request_id` (unique) so a retry or a second device returns the existing punch instead of a new one; the database index from the Security runbook (H6) backs it up, and nested DSI/SEI segments still work.
+- **Authorization dates:** `src/lib/scheduler/client-codes.functions.ts` (~18–27) uses today's UTC date, ignores the shift's date and treats the end date as already expired (`service_end_date <= today`). Delete it in favor of `rules.ts`, which checks the shift's own date in Denver time with an inclusive end date; also retire `clientAuthorizedCodes` (`lib/assignment-codes.ts` ~39), which still reads the old `job_code` fields.
+- **Read scope:** `access_can_read_shift` returns every shift (with notes) to anyone with scheduling view, ignoring a scoped manager's scope; apply `access_scope` like `access_can_write_shift`.
+
+**S6**
+- Draft generation runs only from a `CRON_SECRET`-protected endpoint or a pg_cron function that loops per agency with explicit `organization_id` filters; on page load it runs only for `scheduling:edit` users; it's idempotent with a unique `(pattern_line_id, starts_at)` index and `ON CONFLICT DO NOTHING`.
+
+**S7**
+- **Publishing:** publish a week in one SQL function that locks the week's rows (`FOR UPDATE`), re-runs `rules.ts` on the locked rows, and fails if any `updated_at` changed since the publish screen loaded. `saveShift` never overwrites `created_by` on update.
+- **Claims:** claim an open spot through one SQL function: `UPDATE … SET open_spots = open_spots - 1 WHERE id = $1 AND open_spots > 0 RETURNING`, insert the assigned copy in the same transaction, unique `(parent_open_shift_id, staff_id)`.
+- **Notifications:** revoke direct INSERT on `notifications` from signed-in users (today any member can send any notification type to anyone in the agency); insert only through a SECURITY DEFINER `notify()` that sets the sender to `auth.uid()`, allows only the types that caller may send, and requires the recipient to be in the same agency. Apply the `/dashboard/` check on `link_to` everywhere it navigates (`NotificationBell.tsx` ~103 skips it).
+- **Text message links (Decision 21):** a random one-time token stored hashed, bound to the staff member and shift, expiring at the earlier of 24 hours or shift start, single-use; opening it requires that staff member to be signed in and re-runs `rules.ts` and the claim function. Store SMS consent with time and source, honor STOP, log each send, never put client names or addresses in a text.
+- **Wall printout** (step 14) shows staff and times only, no client names or codes.
+
+**S9**
+- `client_days` writes by staff and hosts go through a server function that checks the caller has a published shift or host assignment for that home and date, and records `changed_by` and source.
+- The host home daily note save carries a `client_request_id` (unique) so a retry after an error doesn't create a second note; the note and the day card update save in one SQL function.
+
+**S11**
+- Payroll export requires `timesheets:edit` and `financial_reports:view` (checked on the server), prefixes any cell starting with `=`, `+`, `-` or `@` with an apostrophe, logs each export, and uses the home name or client initials instead of full client names.
+
+**S12**
+- No-show alerts are idempotent (unique `(shift_id, alert_kind)`), go only to the on-call person for that agency, team and time, and fall back to the scheduler if nobody is on call.
+
+**S13**
+- Open swap requests are visible only to coworkers who pass `rules.ts` for that shift (today every member reads every open swap and its reason), and `respond_to_swap_request` checks the same.
+
+**S15**
+- Before dropping `claim_requested_by`, `location_id` or `is_awake_overnight`, grep `pg_policies` and every function for each column and rewrite those first; never use `CASCADE` (the S1 UPDATE rule references `claim_requested_by`).
 
 ---
 
@@ -370,7 +411,7 @@ You are running unattended. Jeff will tell you which part to run ("Part A" or "P
 
 Drops, applied to live only after the rebuild is on production:
 1. Clear the 198 never-published SLH drafts (`published = false`, `created_from` the old repeat path, starting on or before 2027-12-08; list the exact count first and stop if it isn't 198 ± what Jeff approves).
-2. Drop tables (confirm 0 rows or fully copied first, compare counts): `recurring_shift_patterns`, `shift_templates_backup_20260928b` (export its 36 rows to a CSV in the PR first), `locations`, `location_coverage_requirements`, `client_ratios`, `client_weekly_targets`, `home_designations`, `day_program_transport`, `hhs_monthly_attendance`, `callout_escalation_events`, `home_staff_designations` (after its rows, if any, are in `staff_assignments`).
+2. Drop tables (confirm 0 rows or fully copied first, compare counts). **Never drop `home_designations`** (CLAUDE.md: it holds the care-team role labels). Drop `client_ratios` only if S4 moved every row to its replacement; the Clients cleanup copies `clients.staff_ratio` into it, so compare counts first: `recurring_shift_patterns`, `shift_templates_backup_20260928b` (export its 36 rows to a CSV in the PR first), `locations`, `location_coverage_requirements`, `client_ratios`, `client_weekly_targets`, `day_program_transport`, `hhs_monthly_attendance`, `callout_escalation_events`, `home_staff_designations` (after its rows, if any, are in `staff_assignments`).
 3. Drop columns: `scheduled_shifts.job_code`, `code_id`, `is_recurring`, `recurrence_rule`, `recurrence_end_date`, `location_id`, `is_awake_overnight`, `claim_requested_by`; `day_program_sessions.location_id`; `teams.capacity` (after confirming `licensed_capacity` is read everywhere).
 4. Drop functions and triggers only those columns or tables used.
 5. Regenerate types; run `npx knip` and delete every unused file and export it reports in the scheduler area; grep each dropped name in `src/` → zero.
