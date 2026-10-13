@@ -2,8 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
-
-import { parseDocumentWithAI } from "@/lib/document-extraction";
+import { DOC_TYPES, OWNER_KINDS, runIngest } from "@/lib/nectar/library/ingest";
+import { ingestDeps } from "@/lib/nectar/library/ingest.server";
 
 // =============================================================
 // NECTAR Universal Document Store — server functions
@@ -11,70 +11,14 @@ import { parseDocumentWithAI } from "@/lib/document-extraction";
 // monthly billing support docs, etc.) read from this layer.
 // =============================================================
 
-const OwnerKind = z.enum(["client", "staff", "company", "state", "other"]);
-
-const DOC_TYPES = [
-  "pcsp",
-  "1056_budget",
-  "sow",
-  "referral",
-  "intake",
-  "assessment",
-  "certification",
-  "training",
-  "contract",
-  "evv_report",
-  "timesheet",
-  "incident_report",
-  "billing_record",
-  "hrc_approval",
-  "ol_residential_license",
-  "ol_residential_certification",
-  "ol_day_treatment_license",
-  "ol_day_support_certification",
-  "usor_approved_vendor",
-  "usor_approved_vendor_job_development",
-  "other",
-] as const;
-
-// ---------- PDF / text extraction ----------
-
-async function extractPdfText(base64: string): Promise<string> {
-  const bin = atob(base64);
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  const { extractText, getDocumentProxy } = await import("unpdf");
-  const pdf = await getDocumentProxy(bytes);
-  const { text } = await extractText(pdf, { mergePages: true });
-  return Array.isArray(text) ? text.join("\n") : text;
-}
-
-function decodeBase64Text(base64: string): string {
-  try {
-    return atob(base64);
-  } catch {
-    return "";
-  }
-}
-
-// ---------- AI parsing via shared extractor (AWS Bedrock) ----------
-// SYSTEM_PROMPT, FieldOut, ParseOut, and the gateway call live in
-// src/lib/document-extraction.ts so Smart Import and the per-client
-// uploader share one path. Field-key names match what
-// applyExtractedFieldsToClient consumes.
-
-async function callLovableAI(documentText: string, hint?: string, orgId?: string | null) {
-  return parseDocumentWithAI(documentText, hint, orgId);
-}
-
-// Client autofill logic lives in src/lib/client-import-schema.ts so both
-// per-client upload and Smart Import call the same path.
-import { applyExtractedFieldsToClient } from "@/lib/client-import-schema";
-
-
+const OwnerKind = z.enum(OWNER_KINDS);
 
 // =============================================================
 // 1. INGEST — upload + parse
+// Pipeline and rules live in src/lib/nectar/library/ingest.ts: owner or
+// agency-wide admin only (checked before storage), no client-field
+// extraction for Knowledge base uploads, client autofill only for a
+// client-profile upload.
 // =============================================================
 
 export const ingestDocument = createServerFn({ method: "POST" })
@@ -106,169 +50,7 @@ export const ingestDocument = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return null;
-    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
-
-
-    // 1. Upload to storage
-    const binary = Uint8Array.from(atob(data.fileBase64), (c) => c.charCodeAt(0));
-    const objectPath = `${data.organizationId}/${crypto.randomUUID()}-${data.fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-    const upload = await supabase.storage
-      .from("nectar-documents")
-      .upload(objectPath, binary, {
-        contentType: data.mimeType ?? "application/octet-stream",
-        upsert: false,
-      });
-    if (upload.error) throw new Error(`Upload failed: ${upload.error.message}`);
-
-    // 2. Version chain: if parentDocumentId provided, increment version and mark old non-current
-    let version = 1;
-    if (data.parentDocumentId) {
-      const { data: parent } = await supabase
-        .from("nectar_documents")
-        .select("version")
-        .eq("id", data.parentDocumentId)
-        .maybeSingle();
-      version = ((parent?.version as number) ?? 1) + 1;
-      await supabase
-        .from("nectar_documents")
-        .update({ is_current: false })
-        .eq("id", data.parentDocumentId);
-    }
-
-    // 3. Fetch uploader display name
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("full_name, email")
-      .eq("id", userId)
-      .maybeSingle();
-
-    const { data: doc, error: insertErr } = await supabase
-      .from("nectar_documents")
-      .insert({
-        organization_id: data.organizationId,
-        owner_kind: data.ownerKind,
-        client_id: data.clientId ?? null,
-        staff_id: data.staffId ?? null,
-        document_type: data.documentType,
-        category: data.category ?? null,
-        title: data.title,
-        parent_document_id: data.parentDocumentId ?? null,
-        version,
-        is_current: true,
-        effective_start: data.effectiveStart ?? null,
-        effective_end: data.effectiveEnd ?? null,
-        fiscal_year: data.fiscalYear ?? null,
-        medicaid_id: data.medicaidId ?? null,
-        external_ids: data.externalIds ?? {},
-        tags: data.tags,
-        storage_path: objectPath,
-        file_name: data.fileName,
-        mime_type: data.mimeType ?? null,
-        file_size_bytes: binary.byteLength,
-        source: "upload",
-        parse_status: data.autoParse ? "parsing" : "skipped",
-        uploaded_by: userId,
-        uploaded_by_name: (profile?.full_name as string) ?? (profile?.email as string) ?? null,
-      })
-      .select("*")
-      .single();
-    if (insertErr || !doc) throw new Error(insertErr?.message ?? "Insert failed");
-
-    if (!data.autoParse) return { document: doc, extracted: [] as Array<{ field_key: string }> };
-
-    // 4. Parse
-    try {
-      let text = "";
-      const mime = (data.mimeType ?? "").toLowerCase();
-      if (mime.includes("pdf") || data.fileName.toLowerCase().endsWith(".pdf")) {
-        text = await extractPdfText(data.fileBase64);
-      } else if (mime.startsWith("text/") || /\.(txt|csv|md|json|html?)$/i.test(data.fileName)) {
-        text = decodeBase64Text(data.fileBase64);
-      } else {
-        // For images / scans / unsupported formats, store the document but skip parse
-        await supabase
-          .from("nectar_documents")
-          .update({ parse_status: "skipped", parse_error: "OCR not yet enabled for this format" })
-          .eq("id", doc.id);
-        return { document: doc, extracted: [] as Array<{ field_key: string }> };
-      }
-
-      const ai = await callLovableAI(text, `documentType=${data.documentType}`, data.organizationId);
-      const rows = (ai.fields ?? []).map((f) => {
-        // Fold value_bool / value_array into value_json so they persist (the
-        // table has no boolean/array columns).
-        let value_json = f.value_json ?? null;
-        if (f.value_bool !== undefined && f.value_bool !== null) {
-          value_json = { ...(value_json ?? {}), bool: f.value_bool };
-        }
-        if (f.value_array && f.value_array.length) {
-          value_json = { ...(value_json ?? {}), array: f.value_array };
-        }
-        return {
-          organization_id: data.organizationId,
-          document_id: doc.id,
-          field_key: f.field_key,
-          field_group: f.field_group ?? null,
-          value_text: f.value_text ?? null,
-          value_number: f.value_number ?? null,
-          value_date: f.value_date ?? null,
-          value_json,
-          source_locator: f.source_locator ?? null,
-          confidence: f.confidence ?? null,
-          status: "proposed" as const,
-        };
-      });
-      if (rows.length) {
-        await supabase.from("nectar_extracted_fields").insert(rows);
-      }
-
-      // ─── Autofill the client record from extracted fields ───────────
-      let autofillResult: { autofilled: string[]; suggested: string[] } = {
-        autofilled: [],
-        suggested: [],
-      };
-      let autofillError: string | null = null;
-      const effectiveDocType = (ai.document_type ?? data.documentType ?? "").toLowerCase();
-      const AUTOFILL_TYPES = new Set(["pcsp", "1056_budget", "intake", "assessment"]);
-      if (data.clientId && AUTOFILL_TYPES.has(effectiveDocType)) {
-        try {
-          autofillResult = await applyExtractedFieldsToClient({
-            supabase,
-            organizationId: data.organizationId,
-            clientId: data.clientId,
-            fields: ai.fields ?? [],
-          });
-        } catch (err) {
-          autofillError = (err as Error).message;
-        }
-      }
-
-      await supabase
-        .from("nectar_documents")
-        .update({
-          parse_status: "parsed",
-          parsed_at: new Date().toISOString(),
-          raw_text: text,
-          parse_error: autofillError ? `autofill: ${autofillError}` : null,
-          // Backfill any fields the parser identified more confidently than the user input
-          fiscal_year: data.fiscalYear ?? ai.fiscal_year ?? null,
-          medicaid_id: data.medicaidId ?? ai.medicaid_id ?? null,
-        })
-        .eq("id", doc.id);
-
-      return {
-        document: doc,
-        extracted: rows,
-        autofilled: autofillResult.autofilled,
-        suggested: autofillResult.suggested,
-      };
-    } catch (err) {
-      await supabase
-        .from("nectar_documents")
-        .update({ parse_status: "failed", parse_error: (err as Error).message })
-        .eq("id", doc.id);
-      return { document: doc, extracted: [], parseError: (err as Error).message };
-    }
+    return runIngest(data, ingestDeps(supabase, userId, data.organizationId));
   });
 
 // =============================================================
