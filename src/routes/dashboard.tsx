@@ -705,6 +705,7 @@ function DashboardLayout() {
 
   return (
     <GuidedTourProvider>
+      <>
         <div className="flex h-screen h-[100dvh] flex-col overflow-hidden">
           <ImpersonationBanner />
           {isCognitoAuth() && (orgError || awsDbFailed) && (
@@ -950,6 +951,7 @@ function DashboardLayout() {
             </div>
           </div>
         </div>
+      </>
     </GuidedTourProvider>
   );
 }

@@ -26,7 +26,9 @@ describe("navEntries", () => {
       { path: "/dashboard", label: "Home" },
       { path: "/dashboard/team-members", label: "Team Members" },
     ]);
-    assert.deepEqual(navEntries(SAMPLE, "NECTAR_NAV"), [{ path: "/dashboard/help", label: "Nectar" }]);
+    assert.deepEqual(navEntries(SAMPLE, "NECTAR_NAV"), [
+      { path: "/dashboard/help", label: "Nectar" },
+    ]);
   });
 
   it("returns nothing for an array that is not there", () => {

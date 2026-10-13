@@ -71,7 +71,10 @@ describe("Team Members addresses", () => {
       navMapForPrompt(sidebarNav(read("routes/dashboard.tsx"))),
       /\/dashboard\/team-members — Team Members/,
     );
-    assert.match(read("lib/nectar-help.functions.ts"), /navMapForPrompt\(sidebarNav\(dashboardSource\)\)/);
+    assert.match(
+      read("lib/nectar-help.functions.ts"),
+      /navMapForPrompt\(sidebarNav\(dashboardSource\)\)/,
+    );
     assert.match(read("lib/admin-home-feeling.ts"), /to: "\/dashboard\/team-members"/);
     assert.match(
       read("lib/agency-health.functions.ts"),

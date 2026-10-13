@@ -39,7 +39,9 @@ function dataTourIds(): Set<string> {
 describe("tour anchors (N2)", () => {
   it("derives sidebar and bottom-tab ids the same way the components do", () => {
     assert.ok(
-      read("routes/dashboard.tsx").includes('const slug = item.to.replace(/^\\/dashboard\\/?/, "") || "home";'),
+      read("routes/dashboard.tsx").includes(
+        'const slug = item.to.replace(/^\\/dashboard\\/?/, "") || "home";',
+      ),
     );
     assert.ok(read("routes/dashboard.tsx").includes("data-tour={`nav.${slug}`}"));
     assert.ok(
@@ -61,7 +63,10 @@ describe("tour anchors (N2)", () => {
     const start = tree.indexOf("export interface FileRoutesByFullPath {");
     const byFullPath = tree.slice(start, tree.indexOf("\n}", start));
     for (const a of TOUR_ANCHORS) {
-      assert.ok(byFullPath.includes(`'${a.route}':`) || byFullPath.includes(`'${a.route}/':`), a.route);
+      assert.ok(
+        byFullPath.includes(`'${a.route}':`) || byFullPath.includes(`'${a.route}/':`),
+        a.route,
+      );
     }
   });
 

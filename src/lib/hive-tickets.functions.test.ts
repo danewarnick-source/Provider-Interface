@@ -6,8 +6,14 @@ const SRC = readFileSync(new URL("./hive-tickets.functions.ts", import.meta.url)
 
 describe("hive-tickets.functions.ts (N2)", () => {
   it("only exports the exec ticket list, create and update functions", () => {
-    const exported = [...SRC.matchAll(/^export (?:async )?(?:const|function) (\w+)/gm)].map((m) => m[1]);
-    assert.deepEqual(exported, ["listPlatformTickets", "createPlatformTicket", "updatePlatformTicket"]);
+    const exported = [...SRC.matchAll(/^export (?:async )?(?:const|function) (\w+)/gm)].map(
+      (m) => m[1],
+    );
+    assert.deepEqual(exported, [
+      "listPlatformTickets",
+      "createPlatformTicket",
+      "updatePlatformTicket",
+    ]);
   });
 
   it("no longer files tickets with the service-role client", () => {

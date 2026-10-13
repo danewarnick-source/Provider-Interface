@@ -80,7 +80,9 @@ describe("HELP_LINK_ROUTES", () => {
   });
 
   it("accepts every screen in the real sidebar, so any path in the help map can be a link (N2)", () => {
-    const nav = sidebarNav(readFileSync(new URL("../../routes/dashboard.tsx", import.meta.url), "utf8"));
+    const nav = sidebarNav(
+      readFileSync(new URL("../../routes/dashboard.tsx", import.meta.url), "utf8"),
+    );
     const paths = [...nav.admin, ...nav.nectar, ...nav.staff].map((link) => link.path);
     assert.ok(paths.length >= 20, "sidebar read");
     for (const path of paths) assert.equal(realHelpPath(path), path, path);
