@@ -5,7 +5,15 @@
 // void). A record for an older row (e.g. before a renewal) never shows.
 // Pure (no Supabase), node --test.
 
+import { isAdminLevel } from "../access/levels.ts";
 import { formatDate } from "./dates.ts";
+
+export const UNIT_ALERT_NOT_ALLOWED = "Only Owners and Admins with Billing edit can record this.";
+
+/** Who may record "I sent it" (or Undo it): Owners, and Admins with Billing: Edit. */
+export function canRecordUnitAlert(level: string | null | undefined, billingEdit: boolean): boolean {
+  return isAdminLevel(level) && billingEdit;
+}
 
 /** A live (not voided) "coordinator emailed" record. */
 export type UnitAlert = {
@@ -62,7 +70,8 @@ export type UnitAlertState =
  * What the card shows: nothing unless the run-out warning shows; the record
  * once "I sent it" is ticked; otherwise the Contacts link (no coordinator
  * email), the "I sent it" checkbox (after the button was clicked), or the
- * Email coordinator button. Viewers who can't edit only see a record.
+ * Email coordinator button. Anyone who can't record it (canRecordUnitAlert)
+ * only sees a record.
  */
 export function unitAlertState(input: {
   warning: boolean;

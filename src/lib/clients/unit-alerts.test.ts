@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, it } from "node:test";
 import {
+  UNIT_ALERT_NOT_ALLOWED,
+  canRecordUnitAlert,
   coordinatorEmail,
   coordinatorMailto,
   unitAlertLine,
@@ -117,10 +119,58 @@ describe("client_unit_alerts wiring", () => {
     assert.doesNotMatch(sql, /using \(true\)|\bdrop\b|\bdelete\b/i);
   });
 
-  it("records for Billing editors, only while the warning shows; Undo is a soft void", () => {
+  it("records only while the warning shows; Undo is a soft void", () => {
     assert.match(fns, /action: "edit_billing"/);
     assert.match(fns, /!view\.runsOutOn/);
     assert.match(fns, /voided_at: new Date\(\)\.toISOString\(\), voided_by: userId/);
     assert.doesNotMatch(fns, /\.delete\(/);
+  });
+});
+
+describe("who can record \"I sent it\"", () => {
+  it("Owners and Admins with Billing edit; nobody else", () => {
+    assert.equal(canRecordUnitAlert("owner", true), true);
+    assert.equal(canRecordUnitAlert("admin", true), true);
+    assert.equal(canRecordUnitAlert("admin", false), false);
+    assert.equal(canRecordUnitAlert("staff", true), false);
+    assert.equal(canRecordUnitAlert(null, true), false);
+    assert.equal(canRecordUnitAlert("manager", true), false);
+  });
+
+  it("someone who can't record sees only a saved record", () => {
+    const base = {
+      warning: true,
+      billingCodeId: "bc1",
+      coordinatorEmail: "sc@example.org",
+      clicked: false,
+      canEdit: canRecordUnitAlert("staff", true),
+    };
+    assert.deepEqual(unitAlertState({ ...base, alerts: [] }), { kind: "hidden" });
+    const alert = { id: "a1", billingCodeId: "bc1", by: "Dane Warnick", on: "2026-10-13" };
+    assert.equal(unitAlertState({ ...base, alerts: [alert] }).kind, "recorded");
+  });
+
+  it("server, screen and database all apply it", () => {
+    const fns = readFileSync(new URL("./unit-alerts.functions.ts", import.meta.url), "utf8");
+    for (const fn of ["export const recordUnitAlert", "export const voidUnitAlert"]) {
+      const body = fns.slice(fns.indexOf(fn), fns.indexOf("export const", fns.indexOf(fn) + 1) >>> 0);
+      assert.match(body, /await assertCanRecord\(sb, userId, organizationId, clientId\)/, fn);
+    }
+    assert.match(fns, /requireCategory\(sb, userId, organizationId, "billing", "edit"\)/);
+    assert.match(fns, /canRecordUnitAlert\(access\.level, true\)\) throw new Error\(UNIT_ALERT_NOT_ALLOWED\)/);
+    assert.match(UNIT_ALERT_NOT_ALLOWED, /Owners and Admins with Billing edit/);
+    const ui = readFileSync(
+      new URL("../../components/clients/profile/services/coordinator-email.tsx", import.meta.url),
+      "utf8",
+    );
+    assert.match(ui, /canRecordUnitAlert\(useAccess\(\)\.level, canEdit\)/);
+    assert.match(ui, /canEdit: canRecord/);
+    const dir = new URL("../../../supabase/migrations/", import.meta.url);
+    const file = readdirSync(dir).find((f) => f.endsWith("_client_unit_alerts_owners_admins.sql"));
+    assert.ok(file, "policy migration exists");
+    const sql = readFileSync(new URL(file!, dir), "utf8");
+    assert.equal(sql.match(/m\.access_level in \('owner', 'admin'\)/g)?.length, 3);
+    assert.equal(sql.match(/access_has_category\(organization_id, auth\.uid\(\), 'billing', 'edit'\)/g)?.length, 3);
+    assert.doesNotMatch(sql, /is_org_admin_or_manager|\brole\b|using \(true\)|\bdrop\b|\bdelete\b/i);
   });
 });

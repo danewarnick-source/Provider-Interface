@@ -1,7 +1,9 @@
 // Under the "At this pace the units run out …" warning: Email coordinator
 // (a mailto: link — PI sends nothing), then "I sent it" records who and
 // when, shown as "✓ Coordinator emailed by …, <date>" with Undo. No
-// coordinator email → a link to Contacts. The rule is lib/clients/unit-alerts.ts.
+// coordinator email → a link to Contacts. Only Owners and Admins with Billing
+// edit get the button, the checkbox and Undo; everyone else sees the record.
+// The rule is lib/clients/unit-alerts.ts.
 
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
@@ -11,8 +13,10 @@ import { toast } from "sonner";
 import { Mail, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAccess } from "@/hooks/use-access";
 import type { AuthorizationView } from "@/lib/clients/authorizations";
 import {
+  canRecordUnitAlert,
   coordinatorMailto,
   unitAlertLine,
   unitAlertState,
@@ -40,6 +44,7 @@ export function CoordinatorEmail({
   onChanged: () => void;
 }) {
   const [clicked, setClicked] = useState(false);
+  const canRecord = canRecordUnitAlert(useAccess().level, canEdit);
   const recordFn = useServerFn(recordUnitAlert);
   const voidFn = useServerFn(voidUnitAlert);
   const record = useMutation({
@@ -63,7 +68,7 @@ export function CoordinatorEmail({
     alerts,
     coordinatorEmail,
     clicked,
-    canEdit,
+    canEdit: canRecord,
   });
   if (state.kind === "hidden") return null;
 
@@ -74,7 +79,7 @@ export function CoordinatorEmail({
         data-testid="unit-alert-recorded"
       >
         <span>{unitAlertLine(state.alert)}</span>
-        {canEdit ? (
+        {canRecord ? (
           <Button
             variant="ghost"
             size="sm"
