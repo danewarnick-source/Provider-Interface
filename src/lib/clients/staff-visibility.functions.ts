@@ -1,10 +1,13 @@
 /**
- * Setter for client_staff_visibility. Admin/manager only.
+ * Setter for client_staff_visibility. Admin level plus the client guard
+ * (Clients: Edit, the client is in this agency and in the caller's scope).
  * Merges either a section patch or a field patch onto the existing row,
  * upserting on client_id.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireOrgMembership } from "@/integrations/supabase/require-org";
+import { assertCanManageClientById } from "@/lib/clients/guards.server";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -31,23 +34,22 @@ export const setClientStaffVisibility = createServerFn({ method: "POST" })
     if (!supabase || !context.userId) return { ok: true as const };
     const { clientId, sectionPatch, fieldPatch } = data;
 
-    // Look up organization for the client + existing row (RLS enforces
-    // admin/manager on the write below).
-    const [clientRes, curRes] = await Promise.all([
-      supabase
-        .from("clients")
-        .select("organization_id")
-        .eq("id", clientId)
-        .maybeSingle(),
-      supabase
-        .from("client_staff_visibility")
-        .select("sections, fields")
-        .eq("client_id", clientId)
-        .maybeSingle(),
-    ]);
-    if (clientRes.error) throw clientRes.error;
-    if (!clientRes.data) throw new Error("Client not found");
-    const organizationId = (clientRes.data as { organization_id: string }).organization_id;
+    // The guard resolves the client's agency and checks category + scope;
+    // the server client may bypass RLS, so RLS can't be the only check.
+    const organizationId = await assertCanManageClientById({
+      supabase,
+      actorId: context.userId,
+      clientId,
+      action: "edit",
+    });
+    await requireOrgMembership(supabase, context.userId, organizationId, "admin");
+    const curRes = await supabase
+      .from("client_staff_visibility")
+      .select("sections, fields")
+      .eq("client_id", clientId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+    if (curRes.error) throw curRes.error;
 
     const curSections: Record<string, boolean> =
       (curRes?.data?.sections as Record<string, boolean> | null) ?? {};

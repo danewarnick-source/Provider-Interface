@@ -71,6 +71,7 @@ describe("categoryForClientAction", () => {
     view_medical: ["client_medical", "view"],
     edit_medical: ["client_medical", "edit"],
     edit_billing: ["billing", "edit"],
+    view_hrc: ["hrc", "view"],
     edit_hrc: ["hrc", "edit"],
     edit_funds: ["billing", "edit"],
     edit_loans: ["loans", "edit"],
@@ -136,7 +137,20 @@ describe("runManageClientGuard", () => {
     const { deps } = fakeDeps({ discharged: true });
     await run("view", deps);
     await run("view_medical", deps);
+    await run("view_hrc", deps);
     await run("discharge", deps);
+  });
+
+  it("CS3: a scoped admin can't set fields, pins, loans or HRC on a client outside their scope", async () => {
+    for (const action of ["edit", "edit_loans", "edit_hrc", "edit_medical", "view_hrc"] as const) {
+      const { deps } = fakeDeps({ scope: "assigned", canSee: false });
+      await assert.rejects(run(action, deps), new RegExp(CLIENT_OUT_OF_SCOPE_MESSAGE), action);
+    }
+  });
+
+  it("CS3: a client in another agency is refused", async () => {
+    const { deps } = fakeDeps({ clientOrg: OTHER_ORG });
+    await assert.rejects(run("edit_loans", deps), new RegExp(CLIENT_NOT_FOUND_MESSAGE));
   });
 
   it("a deleted client rejects every action, even for an Owner", async () => {

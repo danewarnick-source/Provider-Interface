@@ -18,36 +18,11 @@ import { assertCanManageClient, type ManageClientAction } from "@/lib/clients/gu
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { isAdminLevel } from "@/lib/access/levels";
+import { requireOrgMembership } from "@/integrations/supabase/require-org";
+import { denverYmd } from "@/lib/denver-date";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = any;
-
-async function requireAdminForClient(
-  sb: Sb,
-  userId: string,
-  clientId: string,
-): Promise<string> {
-  const { data: client } = await sb
-    .from("clients")
-    .select("organization_id")
-    .eq("id", clientId)
-    .maybeSingle();
-  if (!client) throw new Error("Client not found");
-  const { data: membership } = await sb
-    .from("organization_members")
-    .select("access_level")
-    .eq("organization_id", client.organization_id)
-    .eq("user_id", userId)
-    .eq("active", true)
-    .maybeSingle();
-  if (!membership) throw new Error("Forbidden");
-  const level = (membership as { access_level: string | null }).access_level;
-  if (!isAdminLevel(level)) {
-    throw new Error("Forbidden");
-  }
-  return client.organization_id as string;
-}
 
 // ── End-of-life statuses (DNR / POLST / palliative / hospice) ────────────
 const EOL_FIELDS = ["dnr_status", "polst_status", "palliative_care_status", "hospice_status"] as const;
@@ -68,12 +43,16 @@ export const setEndOfLifeStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as Sb;
     if (!sb || !context.userId) return { ok: false };
-    await requireAdminForClient(sb, context.userId as string, data.clientId);
+    const orgId = await guardClient(sb, context.userId as string, data.clientId, ["edit_medical"]);
     const patch: Record<string, unknown> = { [data.field as EolField]: data.status };
     if (data.field === "dnr_status") {
       patch.dnr_location = data.location ?? null;
     }
-    const { error } = await sb.from("clients").update(patch).eq("id", data.clientId);
+    const { error } = await sb
+      .from("clients")
+      .update(patch)
+      .eq("id", data.clientId)
+      .eq("organization_id", orgId);
     if (error) throw error;
     return { ok: true };
   });
@@ -93,18 +72,20 @@ export const appendClientArrayField = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as Sb;
     if (!sb || !context.userId) return { ok: false, count: 0 };
-    await requireAdminForClient(sb, context.userId as string, data.clientId);
+    const orgId = await guardClient(sb, context.userId as string, data.clientId, ["edit_medical"]);
     const { data: row } = await sb
       .from("clients")
       .select(data.field)
       .eq("id", data.clientId)
+      .eq("organization_id", orgId)
       .maybeSingle();
     const current = (row?.[data.field] as string[] | null) ?? [];
     const next = Array.from(new Set([...current, data.value.trim()]));
     const { error } = await sb
       .from("clients")
       .update({ [data.field]: next })
-      .eq("id", data.clientId);
+      .eq("id", data.clientId)
+      .eq("organization_id", orgId);
     if (error) throw error;
     return { ok: true, count: next.length };
   });
@@ -365,11 +346,12 @@ export const setLevelOfNeed = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as Sb;
     if (!sb || !context.userId) return { ok: false };
-    await requireAdminForClient(sb, context.userId as string, data.clientId);
+    const orgId = await guardClient(sb, context.userId as string, data.clientId, ["edit"]);
     const { error } = await sb
       .from("clients")
       .update({ level_of_need: data.value?.trim() || null })
-      .eq("id", data.clientId);
+      .eq("id", data.clientId)
+      .eq("organization_id", orgId);
     if (error) throw error;
     return { ok: true };
   });
@@ -387,14 +369,16 @@ export const setGrievanceAcknowledgment = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as Sb;
     if (!sb || !context.userId) return { ok: false };
-    await requireAdminForClient(sb, context.userId as string, data.clientId);
+    const orgId = await guardClient(sb, context.userId as string, data.clientId, ["edit"]);
     const patch: Record<string, unknown> = {
       grievance_acknowledged: data.acknowledged,
-      grievance_signed_date: data.acknowledged
-        ? (data.signedDate || new Date().toISOString().slice(0, 10))
-        : null,
+      grievance_signed_date: data.acknowledged ? (data.signedDate || denverYmd()) : null,
     };
-    const { error } = await sb.from("clients").update(patch).eq("id", data.clientId);
+    const { error } = await sb
+      .from("clients")
+      .update(patch)
+      .eq("id", data.clientId)
+      .eq("organization_id", orgId);
     if (error) throw error;
     return { ok: true };
   });
@@ -409,11 +393,12 @@ export const listHrcReviewsForClient = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as Sb;
     if (!sb || !context.userId) return { reviews: [] };
-    await requireAdminForClient(sb, context.userId as string, data.clientId);
+    const orgId = await guardClient(sb, context.userId as string, data.clientId, ["view_hrc"]);
     const { data: rows, error } = await sb
       .from("hrc_reviews")
       .select("id, restriction_summary, status, created_at")
       .eq("client_id", data.clientId)
+      .eq("organization_id", orgId)
       .order("created_at", { ascending: false });
     if (error) throw error;
     return { reviews: rows ?? [] };
@@ -431,7 +416,7 @@ export const createHrcReview = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as Sb;
     if (!sb || !context.userId) return { ok: false, review: null };
-    const orgId = await requireAdminForClient(sb, context.userId as string, data.clientId);
+    const orgId = await guardClient(sb, context.userId as string, data.clientId, ["edit_hrc"]);
     const { data: ins, error } = await sb
       .from("hrc_reviews")
       .insert({
@@ -465,7 +450,9 @@ export const signClientDocument = createServerFn({ method: "POST" })
       .eq("id", data.documentId)
       .maybeSingle();
     if (!doc) throw new Error("Document not found");
-    await requireAdminForClient(sb, context.userId as string, doc.client_id);
+    // Admin level (unchanged) plus the client guard: in this agency and in scope.
+    const docOrg = await guardClient(sb, context.userId as string, doc.client_id as string, ["view"]);
+    await requireOrgMembership(sb, context.userId as string, docOrg, "admin");
     const path = (doc.storage_path as string) || (doc.file_url as string);
     if (!path) throw new Error("Document has no storage path");
     const { data: signed, error } = await sb.storage

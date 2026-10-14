@@ -17,6 +17,7 @@ export const MANAGE_CLIENT_ACTIONS = [
   "view_medical",
   "edit_medical",
   "edit_billing",
+  "view_hrc",
   "edit_hrc",
   "edit_funds",
   "edit_loans",
@@ -37,6 +38,7 @@ export const CLIENT_DISCHARGED_MESSAGE =
 export const DISCHARGED_CLIENT_ACTIONS: ReadonlySet<ManageClientAction> = new Set([
   "view",
   "view_medical",
+  "view_hrc",
   "discharge",
 ]);
 
@@ -60,6 +62,8 @@ export function categoryForClientAction(action: ManageClientAction): {
     case "edit_billing":
     case "edit_funds":
       return { category: "billing", min: "edit" };
+    case "view_hrc":
+      return { category: "hrc", min: "view" };
     case "edit_hrc":
       return { category: "hrc", min: "edit" };
     case "edit_loans":
