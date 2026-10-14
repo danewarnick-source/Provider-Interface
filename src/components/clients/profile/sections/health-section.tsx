@@ -60,7 +60,7 @@ export function HealthSection({ orgId, data }: { orgId: string; data: ClientProf
         <MedicalListsCard orgId={orgId} health={h} />
       )}
       <div className={PAIRS}>
-        {h && shows("medications") ? <MedicationsCard health={h} clientName={data.name} /> : null}
+        {h && shows("medications") ? <MedicationsCard health={h} canEdit={canEdit} /> : null}
         {shows("health_events") ? (
           <HealthEventsCard
             orgId={orgId}

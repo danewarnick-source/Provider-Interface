@@ -79,7 +79,6 @@ import { Route as DashboardFinancialRouteImport } from './routes/dashboard.finan
 import { Route as DashboardExternalComplianceRouteImport } from './routes/dashboard.external-compliance'
 import { Route as DashboardEvvArchiveRouteImport } from './routes/dashboard.evv-archive'
 import { Route as DashboardEvidenceRouteImport } from './routes/dashboard.evidence'
-import { Route as DashboardEmarRouteImport } from './routes/dashboard.emar'
 import { Route as DashboardDeadlinesRouteImport } from './routes/dashboard.deadlines'
 import { Route as DashboardDayProgramRouteImport } from './routes/dashboard.day-program'
 import { Route as DashboardDailyLogsRouteImport } from './routes/dashboard.daily-logs'
@@ -177,7 +176,6 @@ import { Route as DashboardBillingNectarRouteImport } from './routes/dashboard.b
 import { Route as DashboardBillingImportsRouteImport } from './routes/dashboard.billing.imports'
 import { Route as DashboardBillingForm520RouteImport } from './routes/dashboard.billing.form520'
 import { Route as DashboardBillingClientIdRouteImport } from './routes/dashboard.billing.$clientId'
-import { Route as DashboardAdminEmarAuditRouteImport } from './routes/dashboard.admin.emar-audit'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 import { Route as ApiPublicRuntimeConfigRouteImport } from './routes/api/public/runtime-config'
 import { Route as ApiComplianceUrgentRouteImport } from './routes/api/compliance/urgent'
@@ -558,11 +556,6 @@ const DashboardEvvArchiveRoute = DashboardEvvArchiveRouteImport.update({
 const DashboardEvidenceRoute = DashboardEvidenceRouteImport.update({
   id: '/evidence',
   path: '/evidence',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardEmarRoute = DashboardEmarRouteImport.update({
-  id: '/emar',
-  path: '/emar',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardDeadlinesRoute = DashboardDeadlinesRouteImport.update({
@@ -1102,11 +1095,6 @@ const DashboardBillingClientIdRoute =
     path: '/$clientId',
     getParentRoute: () => DashboardBillingRoute,
   } as any)
-const DashboardAdminEmarAuditRoute = DashboardAdminEmarAuditRouteImport.update({
-  id: '/admin/emar-audit',
-  path: '/admin/emar-audit',
-  getParentRoute: () => DashboardRoute,
-} as any)
 const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
   id: '/api/stripe/webhook',
   path: '/api/stripe/webhook',
@@ -1274,7 +1262,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/daily-logs': typeof DashboardDailyLogsRoute
   '/dashboard/day-program': typeof DashboardDayProgramRoute
   '/dashboard/deadlines': typeof DashboardDeadlinesRoute
-  '/dashboard/emar': typeof DashboardEmarRoute
   '/dashboard/evidence': typeof DashboardEvidenceRoute
   '/dashboard/evv-archive': typeof DashboardEvvArchiveRoute
   '/dashboard/external-compliance': typeof DashboardExternalComplianceRoute
@@ -1325,7 +1312,6 @@ export interface FileRoutesByFullPath {
   '/api/compliance/urgent': typeof ApiComplianceUrgentRoute
   '/api/public/runtime-config': typeof ApiPublicRuntimeConfigRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
-  '/dashboard/admin/emar-audit': typeof DashboardAdminEmarAuditRoute
   '/dashboard/billing/$clientId': typeof DashboardBillingClientIdRoute
   '/dashboard/billing/form520': typeof DashboardBillingForm520Route
   '/dashboard/billing/imports': typeof DashboardBillingImportsRoute
@@ -1461,7 +1447,6 @@ export interface FileRoutesByTo {
   '/dashboard/daily-logs': typeof DashboardDailyLogsRoute
   '/dashboard/day-program': typeof DashboardDayProgramRoute
   '/dashboard/deadlines': typeof DashboardDeadlinesRoute
-  '/dashboard/emar': typeof DashboardEmarRoute
   '/dashboard/evidence': typeof DashboardEvidenceRoute
   '/dashboard/evv-archive': typeof DashboardEvvArchiveRoute
   '/dashboard/external-compliance': typeof DashboardExternalComplianceRoute
@@ -1509,7 +1494,6 @@ export interface FileRoutesByTo {
   '/api/compliance/urgent': typeof ApiComplianceUrgentRoute
   '/api/public/runtime-config': typeof ApiPublicRuntimeConfigRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
-  '/dashboard/admin/emar-audit': typeof DashboardAdminEmarAuditRoute
   '/dashboard/billing/$clientId': typeof DashboardBillingClientIdRoute
   '/dashboard/billing/form520': typeof DashboardBillingForm520Route
   '/dashboard/billing/imports': typeof DashboardBillingImportsRoute
@@ -1651,7 +1635,6 @@ export interface FileRoutesById {
   '/dashboard/daily-logs': typeof DashboardDailyLogsRoute
   '/dashboard/day-program': typeof DashboardDayProgramRoute
   '/dashboard/deadlines': typeof DashboardDeadlinesRoute
-  '/dashboard/emar': typeof DashboardEmarRoute
   '/dashboard/evidence': typeof DashboardEvidenceRoute
   '/dashboard/evv-archive': typeof DashboardEvvArchiveRoute
   '/dashboard/external-compliance': typeof DashboardExternalComplianceRoute
@@ -1702,7 +1685,6 @@ export interface FileRoutesById {
   '/api/compliance/urgent': typeof ApiComplianceUrgentRoute
   '/api/public/runtime-config': typeof ApiPublicRuntimeConfigRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
-  '/dashboard/admin/emar-audit': typeof DashboardAdminEmarAuditRoute
   '/dashboard/billing/$clientId': typeof DashboardBillingClientIdRoute
   '/dashboard/billing/form520': typeof DashboardBillingForm520Route
   '/dashboard/billing/imports': typeof DashboardBillingImportsRoute
@@ -1845,7 +1827,6 @@ export interface FileRouteTypes {
     | '/dashboard/daily-logs'
     | '/dashboard/day-program'
     | '/dashboard/deadlines'
-    | '/dashboard/emar'
     | '/dashboard/evidence'
     | '/dashboard/evv-archive'
     | '/dashboard/external-compliance'
@@ -1896,7 +1877,6 @@ export interface FileRouteTypes {
     | '/api/compliance/urgent'
     | '/api/public/runtime-config'
     | '/api/stripe/webhook'
-    | '/dashboard/admin/emar-audit'
     | '/dashboard/billing/$clientId'
     | '/dashboard/billing/form520'
     | '/dashboard/billing/imports'
@@ -2032,7 +2012,6 @@ export interface FileRouteTypes {
     | '/dashboard/daily-logs'
     | '/dashboard/day-program'
     | '/dashboard/deadlines'
-    | '/dashboard/emar'
     | '/dashboard/evidence'
     | '/dashboard/evv-archive'
     | '/dashboard/external-compliance'
@@ -2080,7 +2059,6 @@ export interface FileRouteTypes {
     | '/api/compliance/urgent'
     | '/api/public/runtime-config'
     | '/api/stripe/webhook'
-    | '/dashboard/admin/emar-audit'
     | '/dashboard/billing/$clientId'
     | '/dashboard/billing/form520'
     | '/dashboard/billing/imports'
@@ -2221,7 +2199,6 @@ export interface FileRouteTypes {
     | '/dashboard/daily-logs'
     | '/dashboard/day-program'
     | '/dashboard/deadlines'
-    | '/dashboard/emar'
     | '/dashboard/evidence'
     | '/dashboard/evv-archive'
     | '/dashboard/external-compliance'
@@ -2272,7 +2249,6 @@ export interface FileRouteTypes {
     | '/api/compliance/urgent'
     | '/api/public/runtime-config'
     | '/api/stripe/webhook'
-    | '/dashboard/admin/emar-audit'
     | '/dashboard/billing/$clientId'
     | '/dashboard/billing/form520'
     | '/dashboard/billing/imports'
@@ -2902,13 +2878,6 @@ declare module '@tanstack/react-router' {
       path: '/evidence'
       fullPath: '/dashboard/evidence'
       preLoaderRoute: typeof DashboardEvidenceRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/emar': {
-      id: '/dashboard/emar'
-      path: '/emar'
-      fullPath: '/dashboard/emar'
-      preLoaderRoute: typeof DashboardEmarRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/deadlines': {
@@ -3590,13 +3559,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardBillingClientIdRouteImport
       parentRoute: typeof DashboardBillingRoute
     }
-    '/dashboard/admin/emar-audit': {
-      id: '/dashboard/admin/emar-audit'
-      path: '/admin/emar-audit'
-      fullPath: '/dashboard/admin/emar-audit'
-      preLoaderRoute: typeof DashboardAdminEmarAuditRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/api/stripe/webhook': {
       id: '/api/stripe/webhook'
       path: '/api/stripe/webhook'
@@ -4026,7 +3988,6 @@ interface DashboardRouteChildren {
   DashboardDailyLogsRoute: typeof DashboardDailyLogsRoute
   DashboardDayProgramRoute: typeof DashboardDayProgramRoute
   DashboardDeadlinesRoute: typeof DashboardDeadlinesRoute
-  DashboardEmarRoute: typeof DashboardEmarRoute
   DashboardEvidenceRoute: typeof DashboardEvidenceRoute
   DashboardEvvArchiveRoute: typeof DashboardEvvArchiveRoute
   DashboardExternalComplianceRoute: typeof DashboardExternalComplianceRoute
@@ -4067,7 +4028,6 @@ interface DashboardRouteChildren {
   DashboardTeamsRoute: typeof DashboardTeamsRoute
   DashboardTimeclockRoute: typeof DashboardTimeclockRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
-  DashboardAdminEmarAuditRoute: typeof DashboardAdminEmarAuditRoute
   DashboardClientIntakeClientIdRoute: typeof DashboardClientIntakeClientIdRoute
   DashboardClientTrainingClientIdRoute: typeof DashboardClientTrainingClientIdRoute
   DashboardEmployeesStaffIdRoute: typeof DashboardEmployeesStaffIdRoute
@@ -4109,7 +4069,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardDailyLogsRoute: DashboardDailyLogsRoute,
   DashboardDayProgramRoute: DashboardDayProgramRoute,
   DashboardDeadlinesRoute: DashboardDeadlinesRoute,
-  DashboardEmarRoute: DashboardEmarRoute,
   DashboardEvidenceRoute: DashboardEvidenceRoute,
   DashboardEvvArchiveRoute: DashboardEvvArchiveRoute,
   DashboardExternalComplianceRoute: DashboardExternalComplianceRoute,
@@ -4151,7 +4110,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardTeamsRoute: DashboardTeamsRoute,
   DashboardTimeclockRoute: DashboardTimeclockRoute,
   DashboardIndexRoute: DashboardIndexRoute,
-  DashboardAdminEmarAuditRoute: DashboardAdminEmarAuditRoute,
   DashboardClientIntakeClientIdRoute: DashboardClientIntakeClientIdRoute,
   DashboardClientTrainingClientIdRoute: DashboardClientTrainingClientIdRoute,
   DashboardEmployeesStaffIdRoute: DashboardEmployeesStaffIdRoute,
