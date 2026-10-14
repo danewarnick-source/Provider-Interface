@@ -3,12 +3,13 @@ import assert from "node:assert/strict";
 import { inflateSync } from "node:zlib";
 import { denverWallToIso } from "../denver-date.ts";
 import { buildMarGrid } from "./mar-grid.ts";
-import type { MarMonthData } from "./mar-data.ts";
+import { MAR_LOG_COLUMNS, type MarMonthData } from "./mar-data.ts";
 import { MAR_PDF_SECTIONS, renderMarPdf } from "./mar-pdf.ts";
 import {
   changeRows,
   countRows,
   dayLabel,
+  doseCountCells,
   exceptionRows,
   medicationListRows,
   prnRows,
@@ -134,6 +135,8 @@ export function fixture(): MarMonthData {
         context: "pass",
         expected_count: 20,
         counted_value: 19,
+        count_after: 18,
+        expected_after: 19,
         variance: -1,
         flagged: true,
         staff_id: "s2",
@@ -211,7 +214,64 @@ describe("mar-pdf rows", () => {
     assert.equal(prn[4], "Pacing and yelling");
     assert.equal(prn[6], "Helped");
     assert.equal(prn[7], "4:02p");
-    assert.deepEqual(countRows(data)[0].slice(3), ["20", "19", "-1 (flagged)", "Bo King"]);
+    assert.deepEqual(prn.slice(8), ["19", "18", "Bo King"]);
+    assert.deepEqual(countRows(data)[0], [
+      "Sep 4",
+      "3:00p",
+      "Lorazepam 1 mg",
+      "19",
+      "18",
+      "20",
+      "19",
+      "Flagged",
+      "Bo King",
+    ]);
+  });
+
+  it("count cells: stored counts for controlled doses, Not recorded when missing, blank otherwise", () => {
+    assert.deepEqual(doseCountCells({ controlled: true, before: 12, after: 11 }), ["12", "11"]);
+    assert.deepEqual(doseCountCells({ controlled: true, before: 0, after: 0 }), ["0", "0"]);
+    assert.deepEqual(doseCountCells({ controlled: true, before: 12, after: null }), [
+      "12",
+      "Not recorded",
+    ]);
+    assert.deepEqual(doseCountCells({ controlled: true, before: undefined, after: 4 }), [
+      "Not recorded",
+      "4",
+    ]);
+    assert.deepEqual(doseCountCells({ controlled: false, before: 12, after: 11 }), ["", ""]);
+  });
+
+  it("every controlled dose gets a count row; an older dose without counts says Not recorded", () => {
+    const older = {
+      ...data,
+      doses: [
+        ...data.doses,
+        {
+          id: "p0",
+          medication_id: "m2",
+          scheduled_for: at("2026-09-02", 15),
+          status: "administered",
+          actual_taken_at: at("2026-09-02", 15),
+          documented_at: at("2026-09-02", 15),
+          staff_id: "s1",
+          is_prn: true,
+          is_controlled: true,
+          pill_count_value: 21,
+        },
+      ],
+    };
+    const rows = countRows(older);
+    assert.equal(rows.length, 2);
+    const old = rows.find((r) => r[0] === "Sep 2");
+    assert.deepEqual(old?.slice(3, 8), ["21", "Not recorded", "", "", ""]);
+    // Non-controlled doses never get a count row; their PRN cells stay blank.
+    assert.ok(!rows.some((r) => r[2].startsWith("Sertraline")));
+    const nonControlled = prnRows({
+      ...data,
+      doses: [{ ...data.doses[3], id: "p5", medication_id: "m1", is_controlled: false }],
+    })[0];
+    assert.deepEqual(nonControlled.slice(8, 10), ["", ""]);
   });
 
   it("lists refusals, misses, errors with incident numbers, late entries and corrections", () => {
@@ -259,6 +319,45 @@ describe("mar-pdf rows", () => {
     assert.equal(rows.find((r) => r[3] === "PRN past its limit")?.[4], "Reason: nurse said yes");
   });
 
+  it("marks a dose given without current med training in exceptions and the grid", () => {
+    const doses = [
+      ...data.doses.filter((d) => d.id !== "d1"),
+      { ...data.doses[0], given_without_current_training: true, training_issue: "expired" },
+    ];
+    const marked = {
+      ...data,
+      doses,
+      grid: buildMarGrid({
+        month: "2026-09",
+        meds: data.meds,
+        changes: [],
+        logs: doses,
+        initials: new Map([["s1", "TJ"]]),
+        now: new Date(at("2026-10-02", 9)),
+      }),
+    };
+    const row = exceptionRows(marked).find(
+      (r) => r[3] === "Given by staff without current med training",
+    );
+    assert.deepEqual(row, [
+      "Sep 1",
+      "8:04a",
+      "Sertraline 50 mg",
+      "Given by staff without current med training",
+      "training expired - Tara Jones",
+    ]);
+    const cell = marked.grid.rows[0].cells[0];
+    assert.equal(cell.untrained, true);
+    assert.equal(marked.grid.rows[0].cells[2].untrained, false);
+    assert.ok(!exceptionRows(data).some((r) => r[3].startsWith("Given by staff")));
+  });
+
+  it("the MAR loads the dose's mark, controlled flag and count before", () => {
+    const cols = MAR_LOG_COLUMNS.split(", ");
+    for (const c of ["given_without_current_training", "training_issue", "is_controlled", "pill_count_value"])
+      assert.ok(cols.includes(c), c);
+  });
+
   it("labels days", () => {
     assert.equal(dayLabel("2026-09-05"), "Sep 5");
   });
@@ -287,5 +386,8 @@ describe("renderMarPdf", () => {
     assert.ok(text.includes("TJ 8:04a"));
     assert.ok(text.includes("Jeff Admin"));
     assert.ok(text.includes("IR-2026-014"));
+    assert.ok(text.includes("Count before"));
+    assert.ok(text.includes("Count after"));
+    assert.ok(text.includes("# given by staff without current med training"));
   });
 });

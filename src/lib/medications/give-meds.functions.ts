@@ -1,12 +1,13 @@
 // Give meds server functions: load what a staff member needs to give meds,
 // log one dose (logMedicationPass) and save a PRN follow-up. Every dose goes
 // through log_medication_dose, which locks the medication row, checks the
-// client, PRN limits, time taken, training, counts and witness, and saves the
-// dose with its pill-count change.
+// client, PRN limits, time taken, counts and witness, and saves the dose with
+// its pill-count change. Training never blocks a dose: log_medication_dose
+// marks a dose given without current med training and notifies admins.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { denverYmd, denverYmdFromInstant, denverWallToIso } from "@/lib/denver-date";
+import { denverYmd, denverWallToIso } from "@/lib/denver-date";
 import { passBlockReason } from "./dose-status";
 import { GIVE_LOG_COLUMNS, GIVE_MED_COLUMNS, type GiveLog, type GiveMed } from "./give-meds";
 import {
@@ -18,7 +19,6 @@ import {
   passProblem,
   type PassMed,
 } from "./give-meds-pass";
-import { canGiveWithTraining } from "./med-training";
 import { medTrainingStatus } from "./med-training.server";
 
 type Ctx = {
@@ -136,13 +136,6 @@ export const logMedicationPass = createServerFn({ method: "POST" })
     // how_taken decides who gives it (support_level stays written for main until M6).
     const role = administratorRole(m.how_taken, data.nurseRole);
     if (given) {
-      const day = denverYmdFromInstant(data.actualTakenAt) ?? denverYmd();
-      const training = await medTrainingStatus(supabase, userId, m.organization_id, day);
-      if (!canGiveWithTraining(training)) {
-        throw new Error(
-          "Your medication training isn't approved or has expired. Ask an admin before giving medications.",
-        );
-      }
       if (isHandsOn(role)) {
         const { data: allowed, error: gateErr } = await supabase.rpc("med_admin_role_permitted", {
           _client_id: data.clientId,

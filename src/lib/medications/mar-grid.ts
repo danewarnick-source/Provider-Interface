@@ -126,6 +126,7 @@ export function buildMarGrid(input: MarGridInput): MarGrid {
     initials: "",
     late: false,
     error: false,
+    untrained: false,
   });
 
   for (const med of meds) {
@@ -189,6 +190,7 @@ export function buildMarGrid(input: MarGridInput): MarGrid {
           initials: input.initials.get(log.staff_id ?? "") ?? "",
           late: isLateEntry(log) || isLateDose(log),
           error: !!log.is_medication_error,
+          untrained: !!log.given_without_current_training,
         };
       });
       for (const c of cells) {

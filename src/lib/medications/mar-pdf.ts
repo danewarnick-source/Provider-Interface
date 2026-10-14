@@ -44,11 +44,11 @@ export interface MarPdfInput {
 }
 
 export const GRID_KEY =
-  "R refused · M missed · H held · NA not at home · * late entry · ! medication error · PRN rows show doses given that day";
+  "R refused · M missed · H held · NA not at home · * late entry · ! medication error · # given by staff without current med training · PRN rows show doses given that day";
 
 function cellText(c: MarCell): string {
   const code = cellCode(c);
-  return `${code}${c.late ? "*" : ""}${c.error ? "!" : ""}`;
+  return `${code}${c.late ? "*" : ""}${c.error ? "!" : ""}${c.untrained ? "#" : ""}`;
 }
 
 function drawGrid(w: MarPages, data: MarMonthData, from: number, to: number) {
@@ -170,10 +170,12 @@ export async function renderMarPdf(input: MarPdfInput): Promise<Uint8Array> {
       { label: "Time", width: 5 },
       { label: "Medication", width: 13 },
       { label: "Dose", width: 7 },
-      { label: "Reason", width: 15 },
-      { label: "Tried first", width: 12 },
+      { label: "Reason", width: 13 },
+      { label: "Tried first", width: 10 },
       { label: "Helped?", width: 6 },
       { label: "Follow-up", width: 9 },
+      { label: "Count before", width: 7 },
+      { label: "Count after", width: 7 },
       { label: "Staff", width: 10 },
     ],
     prnRows(data),
@@ -196,16 +198,18 @@ export async function renderMarPdf(input: MarPdfInput): Promise<Uint8Array> {
   w.newPage("Controlled counts");
   w.table(
     [
-      { label: "Date", width: 6 },
+      { label: "Date", width: 5 },
+      { label: "Time", width: 5 },
       { label: "Medication", width: 16 },
-      { label: "When", width: 8 },
-      { label: "Expected", width: 6 },
-      { label: "Counted", width: 6 },
-      { label: "Difference", width: 8 },
+      { label: "Count before", width: 7 },
+      { label: "Count after", width: 7 },
+      { label: "Expected before", width: 8 },
+      { label: "Expected after", width: 8 },
+      { label: "Flag", width: 5 },
       { label: "Staff", width: 12 },
     ],
     countRows(data),
-    "No controlled counts this month.",
+    "No controlled doses or counts this month.",
   );
 
   w.newPage("Review");

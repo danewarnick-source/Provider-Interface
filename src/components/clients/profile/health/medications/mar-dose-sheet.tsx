@@ -12,6 +12,8 @@ import { nameWithStrength } from "@/lib/medications/med-display";
 import { isLateEntry, logKind } from "@/lib/medications/mar-cells";
 import { isLateDose } from "@/lib/medications/give-meds";
 import { longDateTime } from "@/lib/medications/mar-month";
+import { doseCountCells } from "@/lib/medications/mar-pdf-rows";
+import { doseTrainingMark } from "@/lib/medications/med-training";
 import { useAddCorrection, type MarMonth } from "./use-mar";
 
 type Dose = MarMonth["doses"][number];
@@ -76,6 +78,12 @@ function DoseDetail(p: { data: MarMonth; dose: Dose; canEdit: boolean; clientId:
   const med = data.meds.find((m) => m.id === dose.medication_id);
   const count = data.counts.find((c) => c.emar_log_id === dose.id);
   const addenda = data.addenda.filter((a) => a.emar_log_id === dose.id);
+  const controlled = dose.is_controlled ?? !!med?.is_controlled;
+  const [before, after] = doseCountCells({
+    controlled,
+    before: count?.counted_value ?? dose.pill_count_value,
+    after: count?.count_after,
+  });
   const staff =
     (dose.staff_id && (data.names[dose.staff_id] || null)) || dose.staff_name || "Unknown";
   const followup = dose.prn_followup_at
@@ -100,6 +108,7 @@ function DoseDetail(p: { data: MarMonth; dose: Dose; canEdit: boolean; clientId:
         />
         <Fact label="Route" value={dose.route} />
         <Fact label="Staff" value={staff} />
+        <Fact label="Med training" value={doseTrainingMark(dose)} />
         <Fact label="PRN reason" value={dose.prn_reason} />
         <Fact label="Tried first" value={dose.prn_tried_first} />
         <Fact label="Did it help?" value={followup} />
@@ -113,8 +122,8 @@ function DoseDetail(p: { data: MarMonth; dose: Dose; canEdit: boolean; clientId:
         <Fact
           label="Controlled count"
           value={
-            count
-              ? `${count.counted_value} counted${count.expected_count != null ? ` (expected ${count.expected_count})` : ""}${count.flagged ? " · flagged" : ""}`
+            controlled && logKind(dose) === "given"
+              ? `Before ${before} · After ${after}${count?.flagged ? " · flagged" : ""}`
               : null
           }
         />

@@ -229,7 +229,21 @@ describe("loadMarMonth", () => {
           changes: {},
         },
       ],
-      controlled_med_counts: [],
+      controlled_med_counts: [
+        {
+          id: "k1",
+          client_id: CLIENT,
+          medication_id: "m1",
+          emar_log_id: "d1",
+          context: "pass",
+          counted_value: 10,
+          count_after: 9,
+          flagged: false,
+          staff_id: "s1",
+          // Saved past the month's edge; still the dose's count.
+          created_at: at("2026-10-01", 1),
+        },
+      ],
       medication_month_reviews: [],
       profiles: [
         { id: "s1", full_name: "Tara Jones" },
@@ -252,6 +266,10 @@ describe("loadMarMonth", () => {
       ["c2"],
     );
     assert.equal(m.addenda.length, 1);
+    assert.deepEqual(
+      m.counts.map((c) => [c.emar_log_id, c.counted_value, c.count_after]),
+      [["d1", 10, 9]],
+    );
     assert.equal(m.incidents.d1, "IR-7");
     assert.deepEqual(m.staff, [
       { id: "s1", full_name: "Tara Jones", title: "DSP", initials: "TJ" },

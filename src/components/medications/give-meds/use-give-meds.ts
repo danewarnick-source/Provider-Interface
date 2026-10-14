@@ -62,7 +62,7 @@ export function useGiveMeds(clientId: string, day?: string, window?: GiveMedsWin
     loading: q.isLoading,
     error: q.error as Error | null,
     clientFirstName: q.data?.clientFirstName ?? "",
-    training: q.data?.training ?? "approved",
+    training: q.data?.training ?? "current",
     isAdmin: q.data?.isAdmin ?? false,
     refresh: () => qc.invalidateQueries({ queryKey: ["give-meds", clientId] }),
   };

@@ -1,7 +1,7 @@
-// Server-side medication training check for Give meds. Counts only approved
-// (review_status = 'accepted'), unexpired medication training on the dose
-// date (med_training_status). log_medication_dose runs the same check, so a
-// dose can't skip it.
+// Server-side medication training status for Give meds' notice. Counts only
+// approved (review_status = 'accepted'), unexpired medication training on the
+// day (med_training_status). It never blocks a dose: log_medication_dose runs
+// the same check and marks the dose and notifies admins, so a dose can't skip it.
 // S4-REPOINT: use qualificationsOnDate
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";

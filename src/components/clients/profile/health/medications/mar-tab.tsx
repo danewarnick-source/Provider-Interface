@@ -74,6 +74,7 @@ export function MarTab({ clientId, canEdit }: { clientId: string; canEdit: boole
             ))}
             <li>* Late entry (documented over an hour after it was taken)</li>
             <li>! Medication error</li>
+            <li># Given by staff without current med training</li>
           </ul>
           <MarDoseSheet
             data={mar.data}
