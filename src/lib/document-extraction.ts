@@ -128,7 +128,7 @@ Common field_key values to extract when present (use field_group to bucket relat
     { text }. Emit one pcsp_goal per ROW of the goal table, not one combined entry.
 
   Health (group "health"): allergies (value_array), dysphagia (value_bool),
-    swallowing_alerts (value_array), self_admin_med_support (value_bool),
+    swallowing_alerts (value_array),
     clinical_alert (value_text — any high-priority safety/clinical notice, e.g. choking risk),
     special_directions (value_text — care/access notes)
   Medications (group "medications"): emit ONE field per medication listed in the document with
@@ -137,7 +137,8 @@ Common field_key values to extract when present (use field_group to bucket relat
       instructions, prescriber, purpose, adverse_effects, choking_risk (bool), choking_risk_details,
       is_controlled (bool), pharmacy, rx_number, packaging, side_effects,
       contributes_to_swallowing_difficulty (bool), support_level, support_explanation, notes
-    }.
+    }. support_level is per medication: how much help the person gets with THIS medication
+    ("independent" | "reminder" | "set_up" | "full_assist" | "nurse"), only when the document says.
     Include only keys supported by the document; do not invent clinical purpose, adverse effects,
     controlled-substance status, choking risk, pharmacy, or Rx number when not stated.
     ALSO emit a single field "pcsp_has_medications" with value_bool. Set TRUE if the document

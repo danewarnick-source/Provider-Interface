@@ -12,8 +12,6 @@ export const MEDICAL_CLIENT_FIELDS: ReadonlySet<string> = new Set([
   "diets",
   "mobility",
   "emergency_plan",
-  "self_admin_med_support",
-  "self_admin_med_support_locked",
   "insurance",
   "advanced_directives",
   "emergency_medical_treatment_authorization",
@@ -34,7 +32,9 @@ export const MEDICAL_CLIENT_FIELDS: ReadonlySet<string> = new Set([
 
 /**
  * clients columns no caller may set through a patch. Status and discharge
- * date change only through the discharge flow (discharge.functions.ts).
+ * date change only through the discharge flow (discharge.functions.ts). The
+ * client-level self-admin flags are replaced by each medication's how_taken
+ * (the columns stay until the Phase B clean-up).
  */
 export const LOCKED_CLIENT_FIELDS: ReadonlySet<string> = new Set([
   "id",
@@ -42,6 +42,8 @@ export const LOCKED_CLIENT_FIELDS: ReadonlySet<string> = new Set([
   "created_at",
   "account_status",
   "discharge_date",
+  "self_admin_med_support",
+  "self_admin_med_support_locked",
 ]);
 
 function sameValue(a: unknown, b: unknown): boolean {
