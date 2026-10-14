@@ -1,5 +1,5 @@
 // Pieces of the More details panel: one custom field row (value + save +
-// delete) and the "Add a detail" dialog.
+// archive, or read-only + restore when archived) and the "Add a detail" dialog.
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -26,6 +26,7 @@ import {
   setCustomFieldValue,
 } from "@/lib/clients/custom-fields.functions";
 import { SECTION_LABEL, SECTION_NAMES, type SectionName } from "@/lib/clients/staff-visibility";
+import { customFieldLabel } from "@/lib/clients/more-details";
 import { RowMenu } from "@/components/clients/profile/cards/row-menu";
 
 type DataType = "text" | "number" | "boolean" | "date";
@@ -36,17 +37,22 @@ export function CustomFieldRow({
   field,
   selected,
   onSelectedChange,
-  onDelete,
-  deletePending,
+  onArchive,
+  archivePending,
+  onRestore,
+  restorePending,
 }: {
   clientId: string;
   orgId: string | null;
   field: CustomFieldWithValue;
   selected: boolean;
   onSelectedChange: (checked: boolean) => void;
-  onDelete: () => void;
-  deletePending: boolean;
+  onArchive: () => void;
+  archivePending: boolean;
+  onRestore: () => void;
+  restorePending: boolean;
 }) {
+  const archived = field.archived;
   const qc = useQueryClient();
   const saveFn = useServerFn(setCustomFieldValue);
 
@@ -84,15 +90,16 @@ export function CustomFieldRow({
   return (
     <li className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-background px-3 py-2">
       <Checkbox
-        checked={selected}
+        checked={archived ? false : selected}
+        disabled={archived}
         onCheckedChange={(v) => onSelectedChange(v === true)}
         aria-label={`Select ${field.field_label}`}
       />
-      <Label className="min-w-[140px] text-sm font-medium">{field.field_label}</Label>
+      <Label className="min-w-[140px] text-sm font-medium">{customFieldLabel(field)}</Label>
 
       <div className="flex-1 min-w-[180px]">
         {field.data_type === "boolean" ? (
-          <Switch checked={value === true} onCheckedChange={(v) => setValue(v)} />
+          <Switch checked={value === true} disabled={archived} onCheckedChange={(v) => setValue(v)} />
         ) : (
           <Input
             type={
@@ -100,29 +107,34 @@ export function CustomFieldRow({
             }
             value={value === null || value === false || value === true ? "" : String(value)}
             onChange={(e) => setValue(e.target.value)}
+            disabled={archived}
             className="h-10"
           />
         )}
       </div>
 
-      <Button
-        type="button"
-        variant="outline"
-        onClick={() => saveMut.mutate(value)}
-        disabled={saveMut.isPending}
-        aria-label={`Save ${field.field_label}`}
-      >
-        {saveMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
-      </Button>
+      {archived ? null : (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => saveMut.mutate(value)}
+          disabled={saveMut.isPending}
+          aria-label={`Save ${field.field_label}`}
+        >
+          {saveMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
+        </Button>
+      )}
       <RowMenu
         label={`More actions for ${field.field_label}`}
         items={[
-          {
-            label: "Delete field for every client",
-            danger: true,
-            disabled: deletePending,
-            onSelect: onDelete,
-          },
+          archived
+            ? { label: "Restore field", disabled: restorePending, onSelect: onRestore }
+            : {
+                label: "Archive field for every client",
+                danger: true,
+                disabled: archivePending,
+                onSelect: onArchive,
+              },
         ]}
       />
     </li>

@@ -35,6 +35,7 @@ import { careDataReach, scopeCareData, staffContacts } from "./care-data-scope";
 import { currentPlan, goalView, goalsOn, supportsForCode, type GoalView, type PlanStatus } from "./plans";
 import { loadPlanBundle } from "./plans-load";
 import { todayYmd } from "./dates";
+import { hasCustomValue } from "./more-details";
 import { authorizationCovers } from "./codes";
 import { STAFF_MED_COLUMNS, staffVisibleMeds, type StaffMedication } from "@/lib/medications/staff-meds";
 import {
@@ -115,6 +116,8 @@ export type CustomFieldWithValue = {
   field_label: string;
   data_type: "text" | "number" | "boolean" | "date";
   section: SectionName;
+  /** Archived definition: takes no new values; a saved value still shows, labelled. */
+  archived: boolean;
   value: CustomFieldValue;
 };
 
@@ -281,7 +284,7 @@ export const getClientCareData = createServerFn({ method: "GET" })
         .maybeSingle(),
       supabase
         .from("custom_field_definitions")
-        .select("id, field_key, field_label, data_type, section, organization_id")
+        .select("id, field_key, field_label, data_type, section, organization_id, archived_at")
         .eq("entity_kind", "client")
         .order("created_at", { ascending: true }),
       supabase
@@ -459,10 +462,14 @@ export const getClientCareData = createServerFn({ method: "GET" })
         field_label: String(d.field_label ?? ""),
         data_type: (d.data_type ?? "text") as CustomFieldWithValue["data_type"],
         section: ((d.section ?? "identity") as SectionName),
+        archived: d.archived_at != null,
         value: cfValueByDef.get(d.id) ?? null,
       }));
-    // Custom fields inherit their section's toggle — no per-field key.
-    const customFieldsStaff = custom_fields.filter((f) => sections[f.section]);
+    // Custom fields inherit their section's toggle — no per-field key. Staff
+    // see an archived field only where this client has a value.
+    const customFieldsStaff = custom_fields.filter(
+      (f) => sections[f.section] && (!f.archived || hasCustomValue(f.value)),
+    );
 
     // goalsForStaff — clock-out checklist: the supports for the shift's
     // code, grouped under their goal. Per-goal visibility is still honored.
