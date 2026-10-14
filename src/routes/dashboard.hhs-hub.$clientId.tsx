@@ -27,7 +27,6 @@ import {
 } from "lucide-react";
 import { HhsMonthlyAttendanceTab } from "@/components/workspace/hhs-monthly-attendance-tab";
 import { HhsAttendanceCalendar } from "@/components/hhs/hhs-attendance-calendar";
-import { HhsMarOverviewCalendar } from "@/components/hhs/hhs-mar-overview-calendar";
 
 import { toast } from "sonner";
 import { evaluateShiftNote } from "@/lib/ai-coach.functions";
@@ -164,6 +163,17 @@ export function HhsClientHub({ clientId }: { clientId: string }) {
       <div className="flex flex-wrap items-center gap-2">
         <h1 className="text-base font-semibold">{fullName}</h1>
         <Badge className="bg-amber-500 text-[10px]">HHS</Badge>
+        {emarEnabled && (
+          <Link
+            to="/dashboard/clients/$clientId"
+            params={{ clientId: client.id }}
+            search={{ section: "health" }}
+            hash="health-mar"
+            className="ml-auto inline-flex h-8 items-center gap-1 text-xs font-medium text-primary hover:underline"
+          >
+            <Pill className="h-3.5 w-3.5" /> MAR
+          </Link>
+        )}
       </div>
 
       {client.special_directions && (
@@ -184,11 +194,8 @@ export function HhsClientHub({ clientId }: { clientId: string }) {
         value={tabParam ?? "note"}
         onValueChange={(val) => navigate({ to: ".", search: { tab: val }, replace: true })}
       >
-        <TabsList className={`grid h-auto w-full ${emarEnabled ? "grid-cols-5" : "grid-cols-4"} gap-1 p-1`}>
+        <TabsList className="grid h-auto w-full grid-cols-4 gap-1 p-1">
           <TabsTrigger value="note" className="h-11 text-[11px] sm:text-sm"><FileText className="mr-1 h-4 w-4" />Daily Note</TabsTrigger>
-          {emarEnabled && (
-            <TabsTrigger value="emar" className="h-11 text-[11px] sm:text-sm"><Pill className="mr-1 h-4 w-4" />MAR</TabsTrigger>
-          )}
           <TabsTrigger value="att" className="h-11 text-[11px] sm:text-sm"><Calendar className="mr-1 h-4 w-4" />Attendance</TabsTrigger>
           <TabsTrigger value="month" className="h-11 text-[11px] sm:text-sm"><CalendarRange className="mr-1 h-4 w-4" />Monthly</TabsTrigger>
           <TabsTrigger value="prn" className="h-11 text-[11px] sm:text-sm"><ClipboardList className="mr-1 h-4 w-4" />PRN Forms</TabsTrigger>
@@ -201,11 +208,6 @@ export function HhsClientHub({ clientId }: { clientId: string }) {
             medications={(meds as DailyNoteMedication[]) ?? []}
           />
         </TabsContent>
-        {emarEnabled && (
-          <TabsContent value="emar" className="mt-3">
-            <HhsMarOverviewCalendar orgId={orgId} clientId={client.id} />
-          </TabsContent>
-        )}
         <TabsContent value="att" className="mt-3">
           <HhsAttendanceCalendar orgId={orgId} clientId={client.id} />
         </TabsContent>
