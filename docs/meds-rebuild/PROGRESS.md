@@ -27,3 +27,11 @@ One short report per prompt, newest last.
 - Deleted hhs-mar-overview-calendar and its HHS hub tab (now a link to Health → MAR), normalizeEmarStatus, EMAR_STATUS_LABELS, and that tab's e2e test. Zero references remain.
 - Skipped the Documentation → Medications unsigned-months link (that area isn't on this branch). PDF content is tested; nobody has looked at how it renders.
 - tsc 203 → 203; build passes; unit tests 2336/2341, same 5 base failures.
+
+## M4 — Staff see the medications (read-only) — MERGED
+- PR https://github.com/danewarnick-source/Provider-Interface/pull/482 squash-merged into meds-rebuild (609065da); checks green.
+- No migrations. Live RLS on client_medications is can_access_client_phi. Checked on live as a real staff member in a rolled-back transaction: 0 rows unassigned, 5 rows when assigned.
+- Added src/lib/medications/staff-meds.ts (+test), src/components/medications/meds-read-only-list.tsx and meds-read-only-item.tsx. The list is used on the shift screen, the quick-info sheet (new there) and the staff workspace client page (About tab).
+- care-data returns the new fields for active, not paused meds, and no longer returns scheduled_time, self_admin_med_support* or CareFlags. training.functions adds route, what it's for, side effects, signs of a bad reaction, PRN rules and psychotropic use; versioning unchanged.
+- The shift screen's MAR panel lost its inline med details. Its dose logging and StaffMedicationsPanel remain for M5.
+- tsc 203 → 203; build passes; unit tests 2344/2349, same 5 base failures.
