@@ -6,6 +6,7 @@ import {
   isHandsOnRole,
   type AdministratorRole,
 } from "@/lib/med-attestation";
+import { CHARTED_STATUSES, passBlockReason, storedStatus } from "@/lib/medications/dose-status";
 
 // 'given' = hands-on administration; distinct from 'self_administered'
 // (self-directed) so a hands-on pass never inherits the self-directed
@@ -51,6 +52,12 @@ const PassInput = z.object({
   serviceContext: z.string().max(40).optional().nullable(),
   // Controlled-substance second-witness identity (profile UUID)
   secondWitnessId: z.string().uuid().optional().nullable(),
+  // Offline retry safety: the same id never creates a second dose row.
+  clientRequestId: z.string().uuid().optional().nullable(),
+  // PRN: given past the minimum interval or daily maximum, with a reason.
+  prnOverrideReason: z.string().max(500).optional().nullable(),
+  prnTriedFirst: z.string().max(500).optional().nullable(),
+  prescriberNotified: z.boolean().optional().nullable(),
 });
 
 export const logMedicationPass = createServerFn({ method: "POST" })
@@ -84,13 +91,17 @@ export const logMedicationPass = createServerFn({ method: "POST" })
     const { data: med, error: mErr } = await supabase
       .from("client_medications")
       .select(
-        "id, medication_name, is_prn, is_controlled, is_rescue, pill_count_current, refill_threshold, refill_status",
+        "id, client_id, is_active, discontinued_at, paused_at, medication_name, is_prn, is_controlled, is_rescue, pill_count_current, refill_threshold, refill_status",
       )
       .eq("id", data.medicationId)
       .single();
     if (mErr || !med) throw new Error("Medication not found.");
     type MedRow = {
       id: string;
+      client_id: string;
+      is_active: boolean;
+      discontinued_at: string | null;
+      paused_at: string | null;
       medication_name: string;
       is_prn: boolean;
       is_controlled: boolean;
@@ -100,6 +111,17 @@ export const logMedicationPass = createServerFn({ method: "POST" })
       refill_status: string | null;
     };
     const m = med as MedRow;
+
+    // Only this client's own, active, unpaused med, charted by someone who
+    // can see the client or is working with them today (shift or host home).
+    const blocked = passBlockReason(m, data.clientId);
+    if (blocked) throw new Error(blocked);
+    const { data: canLog, error: canLogErr } = await supabase.rpc("can_log_client_meds", {
+      _client_id: data.clientId,
+      _user: userId,
+    });
+    if (canLogErr) throw new Error(canLogErr.message);
+    if (canLog !== true) throw new Error("You can't chart medications for this client.");
 
     // ── COMPLIANCE GATE ──────────────────────────────────────────────────
     // Hands-on administration paths (staff_administered / lpn / rn /
@@ -203,41 +225,38 @@ export const logMedicationPass = createServerFn({ method: "POST" })
           ? "dsi"
           : "general";
 
-    // Dedupe guard: reject if a terminal-status row already exists for this dose
-    const { data: existingLog } = await supabase
+    // Dedupe guard: doses are stored as 'administered' (plus older spellings),
+    // so any charted status for this dose blocks a second one. A retry of the
+    // same request (clientRequestId) is not a duplicate: log_medication_dose
+    // returns the first row.
+    const clientRequestId = data.clientRequestId ?? crypto.randomUUID();
+    const { data: existingLogs } = await supabase
       .from("emar_logs")
-      .select("id")
+      .select("id, client_request_id")
       .eq("medication_id", data.medicationId)
       .eq("scheduled_for", data.scheduledFor)
-      .in("status", ["self_administered", "given", "refused", "omitted", "missed", "loa"])
-      .maybeSingle();
+      .in("status", [...CHARTED_STATUSES])
+      .limit(1);
+    const existingLog = (existingLogs ?? [])[0] as { id: string; client_request_id: string } | undefined;
+    if (existingLog?.client_request_id === clientRequestId) return { id: existingLog.id };
     if (existingLog) throw new Error("This dose has already been documented.");
-
 
     // Treat 'self_administered' and 'given' as terminal-taken statuses.
     const wasTaken = data.status === "self_administered" || data.status === "given";
     const insertPayload = {
-      organization_id: orgId,
       client_id: data.clientId,
       medication_id: data.medicationId,
       scheduled_for: data.scheduledFor,
       scheduled_time_label: data.scheduledTimeLabel ?? null,
       administered_at: wasTaken ? data.actualTakenAt : null,
       actual_taken_at: wasTaken ? data.actualTakenAt : null,
-      // DB check constraint allows only: administered | refused | omitted | missed | held.
-      // Map the client-facing statuses to those values.
-      status:
-        data.status === "self_administered" || data.status === "given"
-          ? "administered"
-          : data.status === "loa"
-            ? "omitted"
-            : data.status,
+      // Stored as administered | refused | omitted | missed.
+      status: storedStatus(data.status),
       administrator_role: role,
       credential_id: data.credentialId ?? null,
-      // route captured in validator for attestation copy; column does not exist on emar_logs
+      route: data.route,
       exception_reason: wasTaken ? null : (data.exceptionReason ?? null),
       notes: data.notes ?? null,
-      staff_id: userId,
       staff_name: fullName,
       signature_attestation: `${fullName} @ ${new Date().toISOString()} — [${attnLevel}] ${attestation}`,
       signature_data_url: data.signatureDataUrl,
@@ -255,15 +274,27 @@ export const logMedicationPass = createServerFn({ method: "POST" })
       service_context: data.serviceContext ?? null,
       recorded_in: recordedIn,
       second_witness_id: data.secondWitnessId ?? null,
+      prn_tried_first: m.is_prn ? (data.prnTriedFirst ?? null) : null,
+      prescriber_notified: data.prescriberNotified ?? null,
+      client_request_id: clientRequestId,
     };
 
-    const { data: inserted, error: insErr } = await supabase
-      .from("emar_logs")
-      .insert(insertPayload as never)
-      .select("id")
-      .single();
-    if (insErr) throw new Error(insErr.message);
-    const logId = (inserted as { id: string }).id;
+    // One SQL function charts the dose: it locks the medication row so PRN
+    // interval/daily-max checks can't race, re-checks the client, and sets
+    // staff_id to the caller.
+    const { data: inserted, error: insErr } = await supabase.rpc("log_medication_dose", {
+      _dose: insertPayload,
+      _prn_override_reason: data.prnOverrideReason ?? undefined,
+    });
+    if (insErr) {
+      if (insErr.message.startsWith("PRN_LIMIT")) {
+        throw new Error(
+          "This as-needed medication was given too recently or has reached its daily maximum. Add a reason to give it anyway.",
+        );
+      }
+      throw new Error(insErr.message);
+    }
+    const logId = inserted as string;
 
     // Controlled count log row
     if (m.is_controlled && data.controlledCountedValue != null) {
