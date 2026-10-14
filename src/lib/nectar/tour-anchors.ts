@@ -46,9 +46,10 @@ export const TOUR_ANCHORS: TourAnchor[] = [
   },
   {
     id: "authsources.upload",
-    label: "Upload a knowledge document",
+    label: "Add a document to the Knowledge base",
     route: "/dashboard/hub/knowledge",
-    description: "Upload a Scope of Work, policy, or any agency document for Nectar search.",
+    description:
+      "New document: type a policy or upload a PDF, Word or text file. It saves as a draft; Nectar uses it once published.",
     surface: "admin",
   },
 

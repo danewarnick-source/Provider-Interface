@@ -4,24 +4,11 @@ import { describe, it } from "node:test";
 
 const SRC = readFileSync(new URL("./authoritative-sources.functions.ts", import.meta.url), "utf8");
 
-describe("listAuthoritativeSources (N1)", () => {
-  it("checks org membership on the server before reading, as a second layer to RLS", () => {
-    const start = SRC.indexOf("export const listAuthoritativeSources = createServerFn");
-    assert.ok(start >= 0);
-    const fn = SRC.slice(start, SRC.indexOf("export const ", start + 1));
-    assert.match(fn, /if \(!supabase \|\| !userId\) return \{ sources: \[\] \};/);
-    const check = fn.indexOf("await requireOrgMembership(supabase, userId, data.organizationId);");
-    assert.ok(check > 0 && check < fn.indexOf('.from("nectar_documents")'), "membership before the read");
-    assert.match(fn, /\.in\("owner_kind", \["company", "state"\]\)/);
-  });
-});
-
-describe("authoritative-sources.functions.ts (N2)", () => {
+describe("authoritative-sources.functions.ts (N2, N4)", () => {
   it("keeps only the exports live screens import", () => {
     const exported = [...SRC.matchAll(/^export const (\w+)/gm)].map((m) => m[1]);
+    // N4: ingestWebSource and listAuthoritativeSources went with the old Knowledge page.
     assert.deepEqual(exported, [
-      "ingestWebSource",
-      "listAuthoritativeSources",
       "markAsAuthoritativeSource",
       "recordAttestation",
       "REDUCED_LIABILITY_NOTICE",
@@ -29,8 +16,9 @@ describe("authoritative-sources.functions.ts (N2)", () => {
     assert.ok(SRC.split("\n").length <= 300);
   });
 
-  it("no longer drafts, approves or explains requirements", () => {
+  it("no longer drafts, approves or explains requirements, or captures web pages", () => {
     assert.doesNotMatch(SRC, /from\("nectar_requirements"\)|from\("nectar_draft_jobs"\)/);
+    assert.doesNotMatch(SRC, /fetch\(|stripHtmlToText/);
     const imports = [...SRC.matchAll(/(?:from|import\() "([^"]+)"/g)].map((m) => m[1]);
     assert.deepEqual(imports, [
       "@tanstack/react-start",
@@ -57,12 +45,5 @@ describe("Knowledge base uploads land in the library (N3)", () => {
       mark,
       /if \(data\.isAuthoritative && docRow\.owner_kind === "company"\) \{\s*update\.library_group = libraryGroupForKind\(data\.authoritativeKind\);/,
     );
-  });
-
-  it("a captured web page keeps all its text and joins the library too", () => {
-    const capture = fn("ingestWebSource");
-    assert.match(capture, /raw_text: text,/);
-    assert.doesNotMatch(capture, /slice\(0, 50000\)/);
-    assert.match(capture, /library_group: libraryGroupForKind\(data\.authoritativeKind\),/);
   });
 });
