@@ -24,10 +24,11 @@ import {
   scMethodLabel,
   signaturesClearedBy,
   traceableToDocument,
-  withSignaturesCleared,
+  HRR_CONTENT_COLUMNS,
+  HRR_SIGNER_COLUMNS,
   type RestrictionRecord,
 } from "./hrc.ts";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 
 function rec(over: Partial<RestrictionRecord> = {}): RestrictionRecord {
   return {
@@ -364,22 +365,10 @@ describe("editing the answers after signing clears the signatures", () => {
   it("an answer or title change clears every signature on the record", () => {
     const changed = { assessed_need_text: "Night eating risk, updated" };
     assert.deepEqual(signaturesClearedBy(full(), changed), ["consent", "admin", "sc", "hrc"]);
-    const { patch, cleared } = withSignaturesCleared(full(), changed);
-    assert.equal(cleared.length, 4);
-    assert.equal(patch.assessed_need_text, "Night eating risk, updated");
-    for (const c of [
-      "consent_signer_name",
-      "consent_signer_role",
-      "consent_client_name",
-      "admin_signer_name",
-      "sc_name",
-      "sc_signed_on",
-      "sc_method",
-      "hrc_decision",
-      "hrc_decision_on",
-    ])
-      assert.equal(patch[c], null, c);
-    assert.equal(hrrStatus({ ...full(), ...patch } as RestrictionRecord), "awaiting_signatures");
+    // What the trigger leaves: those signature columns cleared.
+    const after: Record<string, unknown> = { ...full(), ...changed };
+    for (const k of signaturesClearedBy(full(), changed)) for (const c of HRR_SIGNER_COLUMNS[k]) after[c] = null;
+    assert.equal(hrrStatus(after as unknown as RestrictionRecord), "awaiting_signatures");
     assert.deepEqual(signaturesClearedBy(full(), { restriction_title: "Pantry locked overnight" }).length, 4);
     assert.deepEqual(signaturesClearedBy(full(), { next_review_date: "2027-01-01" }).length, 4);
   });
@@ -390,9 +379,6 @@ describe("editing the answers after signing clears the signatures", () => {
     assert.deepEqual(signaturesClearedBy(full(), { nectar_fields: [] }), []);
     assert.deepEqual(signaturesClearedBy(full(), { sc_method: "in_person" }), []);
     assert.deepEqual(signaturesClearedBy(full(), { assessed_need_text: "Night eating risk" }), []);
-    const { patch, cleared } = withSignaturesCleared(full(), { active: false });
-    assert.deepEqual(cleared, []);
-    assert.deepEqual(patch, { active: false });
   });
 
   it("only signatures already given are cleared; one given in the same save stays", () => {
@@ -410,10 +396,10 @@ describe("editing the answers after signing clears the signatures", () => {
     assert.deepEqual(signaturesClearedBy(denied, { no_harm_text: "Changed" }), ["hrc"]);
   });
 
-  it("saveHrr applies it after the checks, and the form warns before Save", () => {
+  it("saveHrr checks first and lets the trigger clear; the form warns before Save", () => {
     const fn = readFileSync(new URL("./hrr.functions.ts", import.meta.url), "utf8");
     const save = fn.slice(fn.indexOf("export const saveHrr"));
-    const order = ["hrrSaveError(before, cleaned)", "withSignaturesCleared(before, cleaned)", ".update(patch)"].map(
+    const order = ["hrrSaveError(before, cleaned)", "signaturesClearedBy(before, cleaned)", ".update(cleaned)"].map(
       (s) => save.indexOf(s),
     );
     assert.ok(order.every((i, n) => i > 0 && (n === 0 || i > order[n - 1])), String(order));
@@ -423,5 +409,39 @@ describe("editing the answers after signing clears the signatures", () => {
     );
     assert.match(ui, /signaturesClearedBy\(record, patch\)/);
     assert.match(ui, /data-testid="hrr-signatures-clearing"/);
+  });
+});
+
+describe("the database trigger clears signatures with the same rule", () => {
+  const dir = new URL("../../../supabase/migrations/", import.meta.url);
+  const file = readdirSync(dir).find((f) => f.endsWith("_cs2_hrr_clear_signatures_when_answers_change.sql"));
+  const sql = file ? readFileSync(new URL(file, dir), "utf8") : "";
+
+  it("checks the title and every answer for a change", () => {
+    assert.ok(file, "migration file exists");
+    for (const c of HRR_CONTENT_COLUMNS) assert.match(sql, new RegExp(`new\\.${c} is distinct from old\\.${c}`), c);
+  });
+
+  it("clears each signature group already on the row unless the same update changes it", () => {
+    for (const cols of Object.values(HRR_SIGNER_COLUMNS)) {
+      for (const c of cols) {
+        assert.match(sql, new RegExp(`new\\.${c} is not distinct from old\\.${c}`), c);
+        assert.match(sql, new RegExp(`new\\.${c} := null`), c);
+      }
+    }
+    assert.match(sql, /create or replace function public\.hrr_stamp_signatures\(\)/);
+    assert.doesNotMatch(sql, /\bdrop\b|\bdelete\b/i);
+  });
+});
+
+describe("the HRR document upload path", () => {
+  it("uploads under the agency folder and the server checks the same folder", () => {
+    const ui = readFileSync(
+      new URL("../../components/clients/profile/plans/restriction-dialog.tsx", import.meta.url),
+      "utf8",
+    );
+    assert.match(ui, /clientUploadFolder\(orgId, clientId, "hrc_approval"\)/);
+    const fn = readFileSync(new URL("./hrr.functions.ts", import.meta.url), "utf8");
+    assert.match(fn, /isClientUploadPath\(data\.storagePath, data\.organizationId, data\.clientId\)/);
   });
 });

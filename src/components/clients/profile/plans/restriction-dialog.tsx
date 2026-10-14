@@ -26,6 +26,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAllClientContacts } from "@/components/clients/shared/hooks/use-client-contacts";
 import { guardianStatus } from "@/lib/clients/guardian";
 import { primaryContact } from "@/lib/clients/contacts";
+import { clientUploadFolder } from "@/lib/clients/document-review";
 import {
   CONSENT_CHECKBOX,
   HRR_FIELDS,
@@ -177,7 +178,7 @@ export function RestrictionDialog({
     try {
       setBusy("upload");
       const safe = file.name.replace(/[^\w.-]+/g, "_");
-      const path = `${clientId}/hrc_approval/${Date.now()}-${safe}`;
+      const path = `${clientUploadFolder(orgId, clientId, "hrc_approval")}${Date.now()}-${safe}`;
       const up = await supabase.storage
         .from("client-documents")
         .upload(path, file, { upsert: false, contentType: file.type || undefined });

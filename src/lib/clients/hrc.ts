@@ -601,7 +601,7 @@ export function hrrPatchSigns(patch: Record<string, unknown>): boolean {
 export const HRR_CONTENT_COLUMNS: readonly string[] = ["restriction_title", ...HRR_FIELDS];
 
 /** The columns that make up each signature. */
-const SIGNER_COLUMNS: Record<HrrSignerKey, readonly string[]> = {
+export const HRR_SIGNER_COLUMNS: Record<HrrSignerKey, readonly string[]> = {
   consent: ["consent_signer_name", "consent_signer_role", "consent_client_name"],
   admin: ["admin_signer_name"],
   sc: ["sc_name", "sc_signed_on", "sc_method"],
@@ -612,6 +612,8 @@ const SIGNER_COLUMNS: Record<HrrSignerKey, readonly string[]> = {
  * Signatures an edit to the answers takes away: when the save changes the
  * title or any answer, every signature already on the record (and not given
  * again in this same save) is cleared, so everyone signs what it now says.
+ * The database trigger (hrr_stamp_signatures) does the clearing on every
+ * update; this is the same rule, for the form's warning and the save's reply.
  */
 export function signaturesClearedBy(
   before: RestrictionRecord,
@@ -622,21 +624,10 @@ export function signaturesClearedBy(
     (c) => c in patch && (patch[c] ?? null) !== (was[c] ?? null),
   );
   if (!changesContent) return [];
-  return (Object.keys(SIGNER_COLUMNS) as HrrSignerKey[]).filter((k) => {
-    const cols = SIGNER_COLUMNS[k];
+  return (Object.keys(HRR_SIGNER_COLUMNS) as HrrSignerKey[]).filter((k) => {
+    const cols = HRR_SIGNER_COLUMNS[k];
     return cols.some((c) => was[c] != null && was[c] !== "") && !cols.some((c) => c in patch);
   });
-}
-
-/** The patch with those signatures cleared (the database trigger clears who/when). */
-export function withSignaturesCleared(
-  before: RestrictionRecord,
-  patch: Record<string, unknown>,
-): { patch: Record<string, unknown>; cleared: HrrSignerKey[] } {
-  const cleared = signaturesClearedBy(before, patch);
-  const out = { ...patch };
-  for (const k of cleared) for (const c of SIGNER_COLUMNS[k]) out[c] = null;
-  return { patch: out, cleared };
 }
 
 /** Why this save can't go through, or null. Signing needs every required question answered. */
