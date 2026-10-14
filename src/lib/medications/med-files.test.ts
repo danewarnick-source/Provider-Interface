@@ -67,7 +67,8 @@ describe("med-files.functions.ts wiring", () => {
       );
     }
     assert.equal(src.match(/requireSupabaseAuth\]/g)?.length, fns.length);
-    assert.match(src, /assertCanManageClient\(/);
+    const guard = readFileSync(new URL("./med-guard.server.ts", import.meta.url), "utf8");
+    assert.match(guard, /await assertCanManageClient\(/);
   });
 
   it("checks the file belongs to the client before signing a link", () => {
