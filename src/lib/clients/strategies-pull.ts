@@ -105,3 +105,64 @@ export function parsePullReply(
   });
   return { drafts, blank, dropped };
 }
+
+// Draft versions over approved strategies: a pull over published (approved)
+// strategies is saved as the next draft version in draft_content. Staff keep
+// reading the approved content until an admin approves the draft, which
+// moves it into content.
+
+type StrategiesRow<C> = {
+  status: string | null;
+  version: number | null;
+  content: C | null;
+  draft_content?: C | null;
+};
+
+/** The write for a pull: a new draft version beside the approved one, or the draft itself. */
+export function pullSavePatch<C>(
+  row: Pick<StrategiesRow<C>, "status" | "version">,
+  content: C,
+): Record<string, unknown> {
+  if (row.status === "published") return { draft_content: content };
+  return {
+    content,
+    draft_content: null,
+    status: "draft",
+    version: (row.version ?? 1) + 1,
+    approved_by: null,
+    approved_at: null,
+  };
+}
+
+/** What the editor works on: the pending draft version when there is one. */
+export function workingStrategies<C>(row: StrategiesRow<C>): {
+  content: C | null;
+  status: string | null;
+  /** A draft version waits for approval; staff still see the approved one. */
+  pending: boolean;
+} {
+  if (row.draft_content != null) return { content: row.draft_content, status: "draft", pending: true };
+  return { content: row.content, status: row.status, pending: false };
+}
+
+/** The write for edited strategies: into the pending draft version, or the row itself. */
+export function editSavePatch<C>(
+  row: Pick<StrategiesRow<C>, "status" | "draft_content">,
+  content: C,
+): Record<string, unknown> {
+  if (row.draft_content != null) return { draft_content: content };
+  // Editing a published version returns it to draft (requires re-approval).
+  if (row.status === "published") return { content, status: "draft", approved_by: null, approved_at: null };
+  return { content };
+}
+
+/** What approving publishes: the pending draft version (then cleared), or the current content. */
+export function approvalContent<C>(row: StrategiesRow<C>): {
+  content: C | null;
+  patch: Record<string, unknown>;
+} {
+  if (row.draft_content != null) {
+    return { content: row.draft_content, patch: { draft_content: null, version: (row.version ?? 1) + 1 } };
+  }
+  return { content: row.content, patch: {} };
+}

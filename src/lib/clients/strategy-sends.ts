@@ -177,3 +177,35 @@ export function evidenceChip(
   if (!state || isEvidenceSkipped(item)) return matrixChip(args);
   return strategyChip(state, item.id, today);
 }
+
+/** What recording a send does, in order (the server function supplies each step). */
+export type RecordSendSteps = {
+  /** Insert the live send; the one-live-send-per-plan index makes a second insert fail. */
+  insertSend: () => Promise<string>;
+  /** File the Evidence copy; returns its file id (null when the client has no Evidence item). */
+  fileEvidence: () => Promise<string | null>;
+  /** Point the send at its Evidence copy. */
+  linkEvidence: (sendId: string, evidenceFileId: string) => Promise<void>;
+  /** Soft-void the send (no hard deletes). */
+  voidSend: (sendId: string) => Promise<void>;
+};
+
+/**
+ * Record a send, then file its Evidence copy. The send goes first, so a
+ * double click makes one send (the second insert fails before anything is
+ * filed). If filing fails the send is voided again, so nothing is left
+ * half-done, and the error is passed on.
+ */
+export async function recordSendThenFile(
+  steps: RecordSendSteps,
+): Promise<{ sendId: string; evidenceFileId: string | null }> {
+  const sendId = await steps.insertSend();
+  try {
+    const evidenceFileId = await steps.fileEvidence();
+    if (evidenceFileId) await steps.linkEvidence(sendId, evidenceFileId);
+    return { sendId, evidenceFileId };
+  } catch (e) {
+    await steps.voidSend(sendId).catch(() => undefined);
+    throw e;
+  }
+}

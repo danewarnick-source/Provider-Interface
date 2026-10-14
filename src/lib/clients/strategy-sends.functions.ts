@@ -2,8 +2,10 @@
 // one live record per PCSP plan). The strategies card reads the state
 // (strategy-sends.ts) and records or undoes a send. Recording files a copy
 // as an accepted "Support Strategies" Evidence file: the exact PDF of the
-// approved strategies, or the uploaded strategies document. Undo is a soft
-// void; the Evidence file stays on record. Editors only.
+// approved strategies, or the uploaded strategies document. The send is
+// inserted first (one live send per plan), then the copy is filed; a failed
+// filing voids the send again. Undo is a soft void; the Evidence file stays
+// on record. Editors only.
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -16,9 +18,10 @@ import { applyClientPackPlan, loadClientFileView } from "./file-packs.server";
 import { assertCanManageClient } from "./guards.server";
 import { currentPlan, type ClientPlan } from "./plans";
 import { coordinatorName, loadStrategiesDocument } from "./strategies-doc.server";
-import { strategiesApprovedFor, type StrategySendState } from "./strategy-sends";
+import { recordSendThenFile, strategiesApprovedFor, type StrategySendState } from "./strategy-sends";
 import { STRATEGIES_KEY, loadStrategyStates } from "./strategy-sends.server";
 import { isUploadDoc } from "./support-strategies";
+import { assertRowsChanged } from "./writes";
 import type { CSTContent } from "./training.functions";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -161,62 +164,89 @@ export const markStrategiesSent = createServerFn({ method: "POST" })
       throw new Error("Approve the support strategies for this plan year first.");
     }
 
-    // A copy of what was sent, filed as Evidence.
+    // The send first: the one-live-send-per-plan index stops a double click
+    // before anything is filed. Then the Evidence copy of what was sent; if
+    // that fails the send is voided again (recordSendThenFile).
     const item = await strategiesItem(sb, userId, client);
-    let evidenceFileId: string | null = null;
-    if (item) {
-      let bytes: Blob | Uint8Array;
-      let filename: string;
-      let contentType = "application/pdf";
-      if (uploaded) {
-        const doc = await uploadedStrategiesDoc(sb, client.id, content);
-        if (!doc) throw new Error("The uploaded strategies document wasn't found.");
-        const dl = await sb.storage.from("client-documents").download(doc.storage_path);
-        if (dl.error || !dl.data)
-          throw new Error(dl.error?.message ?? "The uploaded file wasn't found.");
-        bytes = dl.data as Blob;
-        filename = doc.file_name;
-        contentType = (dl.data as Blob).type || "application/octet-stream";
-      } else {
-        const out = await loadStrategiesDocument(sb, client);
-        bytes = out.pdf;
-        filename = out.filename;
-      }
-      const path = `${client.organization_id}/${item.id}/${Date.now()}-${filename.replace(/[^\w.-]+/g, "_")}`;
-      const up = await sb.storage
-        .from(EVIDENCE_BUCKET)
-        .upload(path, bytes, { contentType, upsert: false });
-      if (up.error) throw new Error(up.error.message);
-      evidenceFileId = await saveUploadOnItem(sb, true, {
-        organizationId: client.organization_id,
-        userId,
-        item,
-        storagePath: path,
-        filename,
-        // An editor recording the send is filing it.
-        accepted: true,
-        documentDate: data.sentOn,
-        notes: "Sent to the support coordinator",
-      });
-    }
-
-    const { error } = await sb.from("client_strategy_sends").insert({
-      organization_id: client.organization_id,
-      client_id: client.id,
-      plan_id: plan.id,
-      source: uploaded ? "upload" : "nectar",
-      sent_on: data.sentOn,
-      sent_to: await coordinatorName(sb, client.id),
-      evidence_file_id: evidenceFileId,
-      recorded_by: userId,
+    const sentTo = await coordinatorName(sb, client.id);
+    await recordSendThenFile({
+      insertSend: async () => {
+        const { data: rows, error } = await sb
+          .from("client_strategy_sends")
+          .insert({
+            organization_id: client.organization_id,
+            client_id: client.id,
+            plan_id: plan.id,
+            source: uploaded ? "upload" : "nectar",
+            sent_on: data.sentOn,
+            sent_to: sentTo,
+            evidence_file_id: null,
+            recorded_by: userId,
+          })
+          .select("id");
+        if (error) {
+          throw new Error(
+            /duplicate|unique/i.test(error.message)
+              ? "These strategies are already marked as sent for this plan year."
+              : error.message,
+          );
+        }
+        return (assertRowsChanged(rows as { id: string }[])[0] as { id: string }).id;
+      },
+      fileEvidence: async () => {
+        if (!item) return null;
+        let bytes: Blob | Uint8Array;
+        let filename: string;
+        let contentType = "application/pdf";
+        if (uploaded) {
+          const doc = await uploadedStrategiesDoc(sb, client.id, content);
+          if (!doc) throw new Error("The uploaded strategies document wasn't found.");
+          const dl = await sb.storage.from("client-documents").download(doc.storage_path);
+          if (dl.error || !dl.data)
+            throw new Error(dl.error?.message ?? "The uploaded file wasn't found.");
+          bytes = dl.data as Blob;
+          filename = doc.file_name;
+          contentType = (dl.data as Blob).type || "application/octet-stream";
+        } else {
+          const out = await loadStrategiesDocument(sb, client);
+          bytes = out.pdf;
+          filename = out.filename;
+        }
+        const path = `${client.organization_id}/${item.id}/${Date.now()}-${filename.replace(/[^\w.-]+/g, "_")}`;
+        const up = await sb.storage
+          .from(EVIDENCE_BUCKET)
+          .upload(path, bytes, { contentType, upsert: false });
+        if (up.error) throw new Error(up.error.message);
+        return saveUploadOnItem(sb, true, {
+          organizationId: client.organization_id,
+          userId,
+          item,
+          storagePath: path,
+          filename,
+          // An editor recording the send is filing it.
+          accepted: true,
+          documentDate: data.sentOn,
+          notes: "Sent to the support coordinator",
+        });
+      },
+      linkEvidence: async (sendId, evidenceFileId) => {
+        const { data: rows, error } = await sb
+          .from("client_strategy_sends")
+          .update({ evidence_file_id: evidenceFileId })
+          .eq("id", sendId)
+          .select("id");
+        if (error) throw new Error(error.message);
+        assertRowsChanged(rows as unknown[]);
+      },
+      voidSend: async (sendId) => {
+        const { error } = await sb
+          .from("client_strategy_sends")
+          .update({ voided_at: new Date().toISOString(), voided_by: userId })
+          .eq("id", sendId)
+          .is("voided_at", null);
+        if (error) throw new Error(error.message);
+      },
     });
-    if (error) {
-      throw new Error(
-        /duplicate|unique/i.test(error.message)
-          ? "These strategies are already marked as sent for this plan year."
-          : error.message,
-      );
-    }
     return { ok: true };
   });
 

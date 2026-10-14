@@ -2,9 +2,12 @@
 // Nectar copies the strategies already written in the uploaded strategies
 // document under each current PCSP support paid to the agency. Every bullet
 // is checked against the document text (strategies-pull.ts) and dropped when
-// not found. The result is a marked Nectar draft (status draft, approval
-// cleared) an admin reviews and approves; the uploaded file stays the
-// official copy (content.source_document_id). Editors only.
+// not found. The result is a marked Nectar draft an admin reviews and
+// approves; the uploaded file stays the official copy
+// (content.source_document_id). Over published, approved strategies the
+// pull is saved as the next draft version (draft_content) and staff keep
+// seeing the approved one until it is approved (strategies-pull.ts
+// pullSavePatch). Editors only.
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -13,7 +16,7 @@ import { askNectarJson } from "./client-doc-texts.server";
 import { todayYmd } from "./dates";
 import { activeGoalViewsOn } from "./plans";
 import { loadPlanBundle } from "./plans-load";
-import { PULL_SYSTEM_PROMPT, parsePullReply, pullUserPrompt } from "./strategies-pull";
+import { PULL_SYSTEM_PROMPT, parsePullReply, pullSavePatch, pullUserPrompt } from "./strategies-pull";
 import { editableClient, uploadedStrategiesDoc } from "./strategy-sends.functions";
 import { formatBullets } from "./strategy-rules";
 import { agencySupports, buildStrategySections, supportNeedsStrategy } from "./support-strategies";
@@ -25,12 +28,12 @@ type AnySupabase = any;
 export const pullStrategiesFromDocument = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ clientId: z.string().uuid() }).parse(d))
-  .handler(async ({ data, context }): Promise<{ copied: number; blank: string[] }> => {
+  .handler(async ({ data, context }): Promise<{ copied: number; blank: string[]; pending: boolean }> => {
     const sb = context.supabase as AnySupabase;
     const client = await editableClient(sb, context.userId as string, data.clientId);
     const { data: training, error } = await sb
       .from("client_specific_trainings")
-      .select("id, content, version")
+      .select("id, content, status, version")
       .eq("client_id", client.id)
       .eq("training_type", "support_strategies")
       .maybeSingle();
@@ -73,16 +76,33 @@ export const pullStrategiesFromDocument = createServerFn({ method: "POST" })
       ),
       source_document_id: doc.id,
     };
+    // Over approved strategies the pull is the next draft version
+    // (draft_content): staff keep seeing the approved one until it's approved.
     const { error: uErr } = await sb
       .from("client_specific_trainings")
-      .update({
-        content: content as unknown,
-        status: "draft",
-        version: (training.version ?? 1) + 1,
-        approved_by: null,
-        approved_at: null,
-      })
+      .update(pullSavePatch(training, content as unknown))
       .eq("id", training.id);
     if (uErr) throw new Error(uErr.message);
-    return { copied: drafts.size, blank: blank.map((s) => s.support || "Support") };
+    return {
+      copied: drafts.size,
+      blank: blank.map((s) => s.support || "Support"),
+      pending: training.status === "published",
+    };
+  });
+
+/** Throw away a pulled draft version; the approved strategies stay as they are. */
+export const discardPulledStrategies = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ clientId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const sb = context.supabase as AnySupabase;
+    const client = await editableClient(sb, context.userId as string, data.clientId);
+    const { error } = await sb
+      .from("client_specific_trainings")
+      .update({ draft_content: null })
+      .eq("client_id", client.id)
+      .eq("organization_id", client.organization_id)
+      .eq("training_type", "support_strategies");
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });

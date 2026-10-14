@@ -3,7 +3,7 @@
 // Every one needs HRC: Edit for this client (assertCanManageClient); a save
 // that signs also needs Clients: Edit. Who signed and when is stamped by the
 // database trigger (hrr_stamp_signatures), never taken from the caller. Editing
-// the answers after signing clears the signatures.
+// the answers after signing clears the signatures (the same trigger).
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -12,6 +12,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertCanManageClient, type ManageClientAction } from "./guards.server";
 import { askNectarJson } from "./client-doc-texts.server";
 import { assertRowsChanged } from "./writes";
+import { isClientUploadPath } from "./document-review";
 import {
   HRR_NECTAR_SYSTEM,
   checkHrrDraft,
@@ -19,7 +20,7 @@ import {
   hrrNectarPrompt,
   hrrPatchSigns,
   hrrSaveError,
-  withSignaturesCleared,
+  signaturesClearedBy,
   type HrrDraft,
   type HrrSignerKey,
   type RestrictionRecord,
@@ -80,7 +81,7 @@ export const attachHrrDocument = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<{ documentId: string }> => {
     const { sb, userId } = await guard(context, data, ["edit_hrc"]);
-    if (!data.storagePath.startsWith(`${data.clientId}/`))
+    if (!isClientUploadPath(data.storagePath, data.organizationId, data.clientId))
       throw new Error("That file isn't in this client's documents.");
     await loadRestriction(sb, data);
     const { data: doc, error } = await sb
@@ -151,7 +152,9 @@ export const draftHrrFromDocument = createServerFn({ method: "POST" })
 /**
  * Saves changed HRR columns. Signing needs Clients: Edit too, and every
  * question answered. Changing the title or an answer clears the signatures
- * already given (withSignaturesCleared), so everyone signs again.
+ * already given, so everyone signs again: the database trigger
+ * (hrr_stamp_signatures) clears them on every update, even one racing a
+ * signature; `cleared` (signaturesClearedBy, the same rule) says which.
  */
 export const saveHrr = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -168,10 +171,10 @@ export const saveHrr = createServerFn({ method: "POST" })
     const before = await loadRestriction(sb, data);
     const problem = hrrSaveError(before, cleaned);
     if (problem) throw new Error(problem);
-    const { patch, cleared } = withSignaturesCleared(before, cleaned);
+    const cleared = signaturesClearedBy(before, cleaned);
     const { data: rows, error } = await sb
       .from("hrc_restriction_records")
-      .update(patch)
+      .update(cleaned)
       .eq("id", data.restrictionId)
       .eq("organization_id", data.organizationId)
       .eq("client_id", data.clientId)

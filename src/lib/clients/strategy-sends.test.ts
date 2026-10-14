@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import type { EvidenceItemRow } from "../evidence/types.ts";
 import {
   evidenceChip,
+  recordSendThenFile,
   sentLine,
   strategiesApprovedFor,
   strategyAttention,
@@ -142,5 +143,63 @@ describe("support strategies send rule", () => {
     assert.equal(evidenceChip({ item: skipped, file: null, today }, states).kind, "skipped");
     const other = { ...base, requirement_key: "client_pcsp" };
     assert.equal(evidenceChip({ item: other, file: null, today }, states).kind, "add");
+  });
+});
+
+describe("recordSendThenFile", () => {
+  /** A stand-in for the table with its one-live-send-per-plan index. */
+  function fakeSends() {
+    const sends: { id: string; voided: boolean; evidence: string | null }[] = [];
+    const files: string[] = [];
+    let n = 0;
+    const steps = (failFiling = false) => ({
+      insertSend: async () => {
+        await Promise.resolve();
+        if (sends.some((s) => !s.voided)) throw new Error("These strategies are already marked as sent for this plan year.");
+        const id = `send-${++n}`;
+        sends.push({ id, voided: false, evidence: null });
+        return id;
+      },
+      fileEvidence: async () => {
+        await Promise.resolve();
+        if (failFiling) throw new Error("storage down");
+        const id = `file-${++n}`;
+        files.push(id);
+        return id;
+      },
+      linkEvidence: async (sendId: string, fileId: string) => {
+        sends.find((s) => s.id === sendId)!.evidence = fileId;
+      },
+      voidSend: async (sendId: string) => {
+        sends.find((s) => s.id === sendId)!.voided = true;
+      },
+    });
+    return { sends, files, steps };
+  }
+
+  it("a double click makes one send and one Evidence file", async () => {
+    const db = fakeSends();
+    const results = await Promise.allSettled([recordSendThenFile(db.steps()), recordSendThenFile(db.steps())]);
+    assert.deepEqual(results.map((r) => r.status).sort(), ["fulfilled", "rejected"]);
+    assert.equal(db.sends.length, 1);
+    assert.equal(db.files.length, 1);
+    assert.equal(db.sends[0].evidence, db.files[0]);
+  });
+
+  it("voids the send when filing fails, so it can be recorded again", async () => {
+    const db = fakeSends();
+    await assert.rejects(recordSendThenFile(db.steps(true)), /storage down/);
+    assert.deepEqual(db.sends.map((s) => s.voided), [true]);
+    assert.equal(db.files.length, 0);
+    const ok = await recordSendThenFile(db.steps());
+    assert.equal(db.sends.filter((s) => !s.voided).length, 1);
+    assert.equal(ok.evidenceFileId, db.files[0]);
+  });
+
+  it("records the send without a file when the client has no Evidence item", async () => {
+    const db = fakeSends();
+    const out = await recordSendThenFile({ ...db.steps(), fileEvidence: async () => null });
+    assert.equal(out.evidenceFileId, null);
+    assert.deepEqual(db.sends.map((s) => [s.voided, s.evidence]), [[false, null]]);
   });
 });

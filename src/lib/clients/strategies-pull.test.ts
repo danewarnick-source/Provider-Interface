@@ -1,11 +1,15 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  approvalContent,
   bulletInDocument,
   cleanBullet,
+  editSavePatch,
   normalizeForMatch,
   parsePullReply,
+  pullSavePatch,
   pullUserPrompt,
+  workingStrategies,
 } from "./strategies-pull.ts";
 import type { StrategySupport } from "./support-strategies.ts";
 
@@ -79,5 +83,54 @@ describe("pulling strategies from an uploaded document", () => {
     assert.match(p, /1\. Goal: Cook a meal/);
     assert.match(p, /2\. Goal: Work/);
     assert.match(p, /STRATEGIES DOCUMENT TEXT:\nSupport Strategies/);
+  });
+});
+
+describe("a pull never overwrites approved strategies", () => {
+  const approved = { sections: [{ id: "a" }] };
+  const pulled = { sections: [{ id: "p" }], source_document_id: "doc-1" };
+  const published = { status: "published", version: 3, content: approved, draft_content: null };
+
+  it("over published strategies saves the next draft version only", () => {
+    assert.deepEqual(pullSavePatch(published, pulled), { draft_content: pulled });
+  });
+
+  it("over a draft replaces the draft (nothing approved to keep)", () => {
+    assert.deepEqual(pullSavePatch({ status: "draft", version: 2 }, pulled), {
+      content: pulled,
+      draft_content: null,
+      status: "draft",
+      version: 3,
+      approved_by: null,
+      approved_at: null,
+    });
+  });
+
+  it("the editor works on the pending version; staff content stays the approved one", () => {
+    const row = { ...published, draft_content: pulled };
+    assert.deepEqual(workingStrategies(row), { content: pulled, status: "draft", pending: true });
+    assert.deepEqual(workingStrategies(published), { content: approved, status: "published", pending: false });
+    assert.equal(row.content, approved);
+  });
+
+  it("edits go into the pending version and leave the approval alone", () => {
+    assert.deepEqual(editSavePatch({ status: "published", draft_content: pulled }, approved), {
+      draft_content: approved,
+    });
+    assert.deepEqual(editSavePatch({ status: "published", draft_content: null }, pulled), {
+      content: pulled,
+      status: "draft",
+      approved_by: null,
+      approved_at: null,
+    });
+    assert.deepEqual(editSavePatch({ status: "draft", draft_content: null }, pulled), { content: pulled });
+  });
+
+  it("approving publishes the pending version and clears it", () => {
+    assert.deepEqual(approvalContent({ ...published, draft_content: pulled }), {
+      content: pulled,
+      patch: { draft_content: null, version: 4 },
+    });
+    assert.deepEqual(approvalContent(published), { content: approved, patch: {} });
   });
 });

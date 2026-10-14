@@ -13,6 +13,21 @@ import {
 } from "./authorizations.ts";
 import { isDailyServiceCode } from "../service-billing.ts";
 
+/** Where a 1056 PDF is uploaded before the server reads it (the storage rule keys off the org folder). */
+export const budget1056Folder = (organizationId: string, clientId: string) =>
+  `${organizationId}/${clientId}/1056/`;
+
+/** A 1056 upload path the server may read: a file directly in this client's 1056 folder, no traversal. */
+export function isBudget1056Path(storagePath: string, organizationId: string, clientId: string): boolean {
+  const folder = budget1056Folder(organizationId, clientId);
+  return (
+    storagePath.startsWith(folder) &&
+    storagePath.length > folder.length &&
+    !storagePath.includes("..") &&
+    !storagePath.slice(folder.length).includes("/")
+  );
+}
+
 export type Sourced<T> = { value: T | null; page: number | null; quote: string };
 
 export type Read1056Line = {
