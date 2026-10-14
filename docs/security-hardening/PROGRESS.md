@@ -35,3 +35,30 @@ No RLS policies changed.
   - The scheduler and some other screens still drop a code on its end date. Only the two named places were changed.
   - The existing `discharge_client` needs a signed-in user, so it may fail where AWS server functions use a trusted client.
   - A 1056 that fails its checks after uploading stays in storage with no document record.
+
+### CS3 — Records are kept, and every write checks scope
+Merged Oct 14, 2026 as PR #489 (squash ac1e336c). Migrations, applied live and recorded:
+- `20261014054824_cs3_loans_void_instead_of_delete`
+- `20261014054828_cs3_custom_field_definitions_archive`
+
+Both add nullable columns plus triggers: a void needs a reason and is final, and an archived field refuses new values. No policies changed.
+- **Loan voids:** loans and their entries are voided with a reason, never deleted. Balances, counts and the PDF leave voided entries out of the math. The editor, the Money section, the Client loans page and the PDF still list them struck through, with the reason.
+- **Custom field archive:** field definitions are archived instead of deleted, and can be restored. Old values still show, labelled "(archived field)".
+- **Custom field scope:**
+  - Setting a client's custom field value runs `assertCanManageClient(edit)`.
+  - Team member fields check Team roster: Edit, membership in the agency, and the caller's scope.
+- **Pins, visibility and loans:**
+  - Home pin and staff visibility add the scope guard through `assertCanManageClientById`.
+  - Loan writes add `edit_loans`. A loan can't move to another client, and a new ledger entry checks the loan is in the agency.
+- **CS1 leftovers:**
+  - End-of-life status, allergies and immunizations need `edit_medical`.
+  - Level of need and grievance need `edit`, and the grievance date uses `denverYmd`.
+  - HRC uses `view_hrc` / `edit_hrc`.
+  - `signClientDocument` adds the scope check.
+- **Checks:** build passes; tsc stays at 203. Unit tests went from 2469 pass / 5 fail to 2495 pass / 5 fail, the same baseline 5. Rolled-back live SQL checks are in the PR body.
+- **Open:**
+  - Which category `signClientDocument` should need (Clients or Client medical) is a design decision, so it's left as is.
+  - Live has no assigned-scope admin, so that refusal was tested with a temporary scope change in a rolled-back transaction.
+  - The delete policies on loans and field definitions should be removed in a Phase B once this reaches main.
+
+**Part CS complete.**
