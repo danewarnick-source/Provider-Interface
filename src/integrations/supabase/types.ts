@@ -6624,6 +6624,7 @@ export type Database = {
           id: string
           note: string
           organization_id: string
+          reason: string | null
           signature_data_url: string | null
           staff_id: string
           staff_name: string | null
@@ -6634,6 +6635,7 @@ export type Database = {
           id?: string
           note: string
           organization_id: string
+          reason?: string | null
           signature_data_url?: string | null
           staff_id: string
           staff_name?: string | null
@@ -6644,6 +6646,7 @@ export type Database = {
           id?: string
           note?: string
           organization_id?: string
+          reason?: string | null
           signature_data_url?: string | null
           staff_id?: string
           staff_name?: string | null
@@ -11437,6 +11440,67 @@ export type Database = {
           },
         ]
       }
+      medication_month_review_events: {
+        Row: {
+          action: string
+          actor_id: string | null
+          at: string
+          client_id: string
+          id: string
+          month: string
+          organization_id: string
+          pdf_path: string | null
+          reason: string | null
+          review_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          at?: string
+          client_id: string
+          id?: string
+          month: string
+          organization_id: string
+          pdf_path?: string | null
+          reason?: string | null
+          review_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          at?: string
+          client_id?: string
+          id?: string
+          month?: string
+          organization_id?: string
+          pdf_path?: string | null
+          reason?: string | null
+          review_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medication_month_review_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medication_month_review_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medication_month_review_events_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "medication_month_reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medication_month_reviews: {
         Row: {
           client_id: string
@@ -11445,8 +11509,12 @@ export type Database = {
           notes: string | null
           organization_id: string
           pdf_path: string | null
+          reopen_reason: string | null
+          reopened_at: string | null
+          reopened_by: string | null
           reviewed_at: string
           reviewed_by: string | null
+          status: string
         }
         Insert: {
           client_id: string
@@ -11455,8 +11523,12 @@ export type Database = {
           notes?: string | null
           organization_id: string
           pdf_path?: string | null
+          reopen_reason?: string | null
+          reopened_at?: string | null
+          reopened_by?: string | null
           reviewed_at?: string
           reviewed_by?: string | null
+          status?: string
         }
         Update: {
           client_id?: string
@@ -11465,8 +11537,12 @@ export type Database = {
           notes?: string | null
           organization_id?: string
           pdf_path?: string | null
+          reopen_reason?: string | null
+          reopened_at?: string | null
+          reopened_by?: string | null
           reviewed_at?: string
           reviewed_by?: string | null
+          status?: string
         }
         Relationships: [
           {
