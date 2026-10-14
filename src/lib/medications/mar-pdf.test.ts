@@ -227,6 +227,38 @@ describe("mar-pdf rows", () => {
     assert.match(fix?.[4] ?? "", /Reason: Wrong box ticked/);
   });
 
+  it("lists late doses and PRNs given past their limits (Give meds)", () => {
+    const late = {
+      ...data,
+      doses: [
+        ...data.doses,
+        {
+          id: "d9",
+          medication_id: "m1",
+          scheduled_for: at("2026-09-06", 8),
+          status: "administered",
+          actual_taken_at: at("2026-09-06", 9, 30),
+          documented_at: at("2026-09-06", 9, 31),
+          staff_id: "s1",
+        },
+        {
+          id: "p9",
+          medication_id: "m2",
+          scheduled_for: at("2026-09-07", 15),
+          status: "administered",
+          actual_taken_at: at("2026-09-07", 15),
+          documented_at: at("2026-09-07", 15),
+          staff_id: "s2",
+          is_prn: true,
+          exception_reason: "PRN limit override: nurse said yes",
+        },
+      ],
+    };
+    const rows = exceptionRows(late);
+    assert.match(rows.find((r) => r[3] === "Late dose")?.[4] ?? "", /^Due .*, taken /);
+    assert.equal(rows.find((r) => r[3] === "PRN past its limit")?.[4], "Reason: nurse said yes");
+  });
+
   it("labels days", () => {
     assert.equal(dayLabel("2026-09-05"), "Sep 5");
   });

@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { nameWithStrength } from "@/lib/medications/med-display";
 import { isLateEntry, logKind } from "@/lib/medications/mar-cells";
+import { isLateDose } from "@/lib/medications/give-meds";
 import { longDateTime } from "@/lib/medications/mar-month";
 import { useAddCorrection, type MarMonth } from "./use-mar";
 
@@ -78,7 +79,7 @@ function DoseDetail(p: { data: MarMonth; dose: Dose; canEdit: boolean; clientId:
   const staff =
     (dose.staff_id && (data.names[dose.staff_id] || null)) || dose.staff_name || "Unknown";
   const followup = dose.prn_followup_at
-    ? `${EFFECT[dose.prn_effect ?? ""] ?? "Checked"} · ${longDateTime(dose.prn_followup_at)}`
+    ? `${EFFECT[dose.prn_effect ?? ""] ?? "Checked"} · ${longDateTime(dose.prn_followup_at)}${dose.prn_followup_note ? ` · ${dose.prn_followup_note}` : ""}`
     : dose.prn_followup_due_at
       ? `Not checked yet (due ${longDateTime(dose.prn_followup_due_at)})`
       : null;
@@ -89,7 +90,10 @@ function DoseDetail(p: { data: MarMonth; dose: Dose; canEdit: boolean; clientId:
       </p>
       <dl className="mt-2 space-y-1">
         <Fact label="Due" value={dose.is_prn ? "As needed" : longDateTime(dose.scheduled_for)} />
-        <Fact label="Taken" value={longDateTime(dose.actual_taken_at ?? dose.administered_at)} />
+        <Fact
+          label="Taken"
+          value={`${longDateTime(dose.actual_taken_at ?? dose.administered_at)}${isLateDose(dose) ? " (late dose)" : ""}`}
+        />
         <Fact
           label="Documented"
           value={`${longDateTime(dose.documented_at ?? dose.created_at)}${isLateEntry(dose) ? " (late entry)" : ""}`}

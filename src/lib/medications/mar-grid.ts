@@ -6,6 +6,7 @@
 import { denverMonthUtcBounds, denverWallToIso, denverYmdFromInstant } from "../denver-date.ts";
 import { sortMedications, sortedTimes } from "./med-display.ts";
 import { isTakenStatus } from "./dose-status.ts";
+import { isLateDose } from "./give-meds.ts";
 import { monthDays, monthEnd, monthStart, shortTime } from "./mar-month.ts";
 import {
   isLateEntry,
@@ -186,7 +187,7 @@ export function buildMarGrid(input: MarGridInput): MarGrid {
           logId: log.id,
           time: kind === "given" ? shortTime(log.actual_taken_at ?? log.administered_at) : "",
           initials: input.initials.get(log.staff_id ?? "") ?? "",
-          late: isLateEntry(log),
+          late: isLateEntry(log) || isLateDose(log),
           error: !!log.is_medication_error,
         };
       });
