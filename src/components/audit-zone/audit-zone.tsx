@@ -1,11 +1,11 @@
 import { useMemo, useState, useRef } from "react";
-import { NectarAnswer } from "@/components/nectar/nectar-answer";
+import { NectarReply } from "@/components/nectar/nectar-reply";
+import { useAskNectar } from "@/components/nectar/use-ask-nectar";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { supabase } from "@/integrations/supabase/client";
 import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
-import { askNectarHelp, type NectarHelpReply } from "@/lib/nectar-help.functions";
+import type { AskNectarResult } from "@/lib/nectar/engine/ask-types";
 import { NectarInfusionLock } from "@/components/nectar/nectar-infusion-lock";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -260,11 +260,11 @@ function DocumentPull({ orgId }: { orgId?: string }) {
 
   // NECTAR Infusion: plain-language pull
   const [nectarPrompt, setNectarPrompt] = useState("");
-  const [nectarReply, setNectarReply] = useState<NectarHelpReply | null>(null);
-  const ask = useServerFn(askNectarHelp);
+  const [nectarReply, setNectarReply] = useState<AskNectarResult | null>(null);
+  const nectar = useAskNectar("admin");
   const askMutation = useMutation({
-    mutationFn: async (q: string) => ask({ data: { question: q, role: "admin", organizationId: orgId ?? "" } }),
-    onSuccess: (r: NectarHelpReply) => setNectarReply(r),
+    mutationFn: (q: string) => nectar.ask(q),
+    onSuccess: (r: AskNectarResult) => setNectarReply(r),
     onError: (e: any) => toast.error(e?.message ?? "NECTAR couldn't answer that."),
   });
 
@@ -403,15 +403,11 @@ function DocumentPull({ orgId }: { orgId?: string }) {
             </div>
             {nectarReply && (
               <div className="mt-3 rounded-md border border-[color:var(--amber-200)] bg-white/80 p-3 text-sm">
-                <NectarAnswer text={nectarReply.answer} />
-                {nectarReply.deepLink && (
-                  <a
-                    href={nectarReply.deepLink.path}
-                    className="mt-2 inline-block text-xs font-medium text-[color:var(--amber-700)] hover:underline"
-                  >
-                    {nectarReply.deepLink.label} →
-                  </a>
-                )}
+                <NectarReply
+                  reply={nectarReply}
+                  linkSources={nectar.view === "admin"}
+                  onRate={nectar.rate}
+                />
               </div>
             )}
           </div>

@@ -3,7 +3,6 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
-import { navMapForPrompt, sidebarNav } from "../nectar/nav-map.ts";
 
 /**
  * Team Members lives at /dashboard/team-members. The old employees addresses
@@ -66,14 +65,10 @@ describe("Team Members addresses", () => {
       read("lib/sow-perimeters.functions.ts").match(/\/dashboard\/team-members\//g)?.length,
       3,
     );
-    // Nectar's help map is built from the sidebar (N2), so it carries the sidebar's address.
+    // The sidebar carries the address (Nectar's old help map read it from here until N5).
     assert.match(
-      navMapForPrompt(sidebarNav(read("routes/dashboard.tsx"))),
-      /\/dashboard\/team-members — Team Members/,
-    );
-    assert.match(
-      read("lib/nectar-help.functions.ts"),
-      /navMapForPrompt\(sidebarNav\(dashboardSource\)\)/,
+      read("routes/dashboard.tsx"),
+      /to: "\/dashboard\/team-members",\s+label: "Team Members"/,
     );
     assert.match(read("lib/admin-home-feeling.ts"), /to: "\/dashboard\/team-members"/);
     assert.match(

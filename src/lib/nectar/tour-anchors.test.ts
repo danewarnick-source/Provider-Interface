@@ -3,7 +3,6 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
-import { sidebarNav } from "./nav-map.ts";
 import { TOUR_ANCHORS, anchorsForPrompt, anchorsForSurface, findAnchor } from "./tour-anchors.ts";
 
 const SRC = fileURLToPath(new URL("../../", import.meta.url));
@@ -20,14 +19,25 @@ function sourceFiles(dir = SRC, out: string[] = []): string[] {
 
 const navSlug = (to: string) => `nav.${to.replace(/^\/dashboard\/?/, "") || "home"}`;
 
+/** The `to:` paths of the sidebar arrays (ADMIN_NAV, NECTAR_NAV, STAFF_NAV) in routes/dashboard.tsx. */
+function sidebarPaths(source: string): string[] {
+  return ["ADMIN_NAV", "NECTAR_NAV", "STAFF_NAV"].flatMap((name) => {
+    const start = source.indexOf(`const ${name}: NavItem[] = [`);
+    if (start < 0) return [];
+    const block = source.slice(start, source.indexOf("];", start));
+    return [...block.matchAll(/\{\s*to:\s*"([^"]+)"/g)].map((m) => m[1]!);
+  });
+}
+
 /** Every data-tour value an element can carry: literal attributes plus sidebar and bottom-tab slugs. */
 function dataTourIds(): Set<string> {
   const ids = new Set<string>();
   for (const file of sourceFiles()) {
     for (const m of readFileSync(file, "utf8").matchAll(/data-tour="([^"]+)"/g)) ids.add(m[1]);
   }
-  const nav = sidebarNav(read("routes/dashboard.tsx"));
-  for (const link of [...nav.admin, ...nav.nectar, ...nav.staff]) ids.add(navSlug(link.path));
+  const paths = sidebarPaths(read("routes/dashboard.tsx"));
+  assert.ok(paths.length > 10, "the sidebar arrays were found");
+  for (const path of paths) ids.add(navSlug(path));
   const tabs = read("components/staff-mobile/staff-bottom-tabs.tsx");
   const start = tabs.indexOf("const TABS: StaffTab[] = [");
   for (const m of tabs.slice(start, tabs.indexOf("];", start)).matchAll(/to: "([^"]+)"/g)) {

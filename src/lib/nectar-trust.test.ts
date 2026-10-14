@@ -3,10 +3,8 @@ import { describe, it } from "node:test";
 import {
   UNTRUSTED_DOCUMENT_RULE,
   delimitUntrustedDocument,
-  factsBelongToMemberOrg,
-  labelCountForOrg,
   nectarAudienceFromMembership,
-  otherMemberOrgNamedInQuestion,
+  orgBoundaryRule,
   resolveNectarAudience,
 } from "./nectar-trust.ts";
 import { decideBedrockSlot } from "./nectar-rate-decision.ts";
@@ -35,37 +33,12 @@ describe("Nectar role is membership, not the client (N-04)", () => {
 });
 
 describe("Nectar does not attribute another organization's numbers (L7)", () => {
-  it("refuses when the question names a different organization the user belongs to", () => {
-    const other = otherMemberOrgNamedInQuestion(
-      "How many clients does North Valley Supports have?",
-      "True North Supports",
-      ["True North Supports", "North Valley Supports"],
-    );
-    assert.equal(other, "North Valley Supports");
-  });
-
-  it("answers about the current organization when no other name is in the question", () => {
-    assert.equal(
-      otherMemberOrgNamedInQuestion("How many active clients do we have?", "True North Supports", [
-        "True North Supports",
-        "North Valley Supports",
-      ]),
-      null,
-    );
-  });
-
-  it("will not label a count with a different organization id", () => {
-    assert.deepEqual(labelCountForOrg("org-a", 12, "org-a"), {
-      organization_id: "org-a",
-      count: 12,
-    });
-    assert.throws(
-      () => labelCountForOrg("org-a", 12, "org-b"),
-      /different organization/,
-    );
-    assert.equal(factsBelongToMemberOrg("org-a", "org-a"), true);
-    assert.equal(factsBelongToMemberOrg("org-b", "org-a"), false);
-    assert.equal(factsBelongToMemberOrg(null, "org-a"), false);
+  it("labels every fact with the asker's organization and refuses questions about another", () => {
+    // N5: the one engine puts this rule in every prompt; its facts come only from the caller's agency.
+    const rule = orgBoundaryRule("org-a", "Sample Supports");
+    assert.match(rule, /belongs only to organization org-a \(Sample Supports\)/);
+    assert.match(rule, /any other organization, agency, or company, refuse/);
+    assert.match(rule, /Do not guess zero/);
   });
 });
 

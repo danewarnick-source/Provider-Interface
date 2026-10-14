@@ -241,29 +241,30 @@ describe("staff phone leftover search + tab scroll (source)", () => {
   });
 
   it("Ask NECTAR uses one chrome title and never prints AI error (status)", () => {
-    const chat = readFileSync(
-      fileURLToPath(new URL("../components/staff-mobile/ask-nectar-staff.tsx", import.meta.url)),
-      "utf8",
-    );
-    const fn = readFileSync(
-      fileURLToPath(new URL("./nectar-staff.functions.ts", import.meta.url)),
-      "utf8",
-    );
+    const read = (rel: string) =>
+      readFileSync(fileURLToPath(new URL(rel, import.meta.url)), "utf8");
+    const chat = read("../components/staff-mobile/ask-nectar-staff.tsx");
+    // N5: one engine. The server picks what the caller may read; model errors are plain words.
+    const ask = read("./nectar/engine/ask.functions.ts");
+    const engine = read("./nectar/engine/ask.ts");
+    const shifts = read("./nectar/context/shifts.ts");
     assert.doesNotMatch(chat, /Ask NECTAR · Staff/);
     assert.doesNotMatch(chat, /Staff assistant/);
-    assert.match(chat, /staffNectarFailureMessage/);
-    assert.match(fn, /staffNectarFailureMessage/);
-    assert.doesNotMatch(fn, /AI error \(/);
+    assert.match(chat, /useAskNectar\("staff"\)/);
+    assert.match(chat, /<NectarReply reply=\{m\.reply\}/);
+    assert.match(ask, /throw new Error\(NECTAR_BUSY\)/);
+    assert.match(ask, /throw new Error\(NECTAR_UNAVAILABLE\)/);
+    for (const src of [chat, ask, engine]) assert.doesNotMatch(src, /AI error \(/);
     assert.doesNotMatch(chat, /\bHive\b/);
     assert.doesNotMatch(chat, /How many hours have I worked this period/);
     assert.match(chat, /I only know your assignments, your shifts, and your policies/);
-    assert.match(chat, /STAFF_PAY_PERIOD_PATH/);
-    assert.match(chat, /to="\/dashboard"/);
-    assert.match(fn, /scheduled_shifts/);
-    assert.match(fn, /questionWantsPayOrHours/);
-    assert.doesNotMatch(fn, /evv_timesheets/);
-    assert.doesNotMatch(fn, /hours_this_period/);
-    assert.doesNotMatch(fn, /estimated_earnings/);
+    assert.match(shifts, /\.from\("scheduled_shifts"\)/);
+    assert.match(engine, /questionWantsPayOrHours\(q\)/);
+    for (const src of [engine, shifts]) {
+      assert.doesNotMatch(src, /evv_timesheets/);
+      assert.doesNotMatch(src, /hours_this_period/);
+      assert.doesNotMatch(src, /estimated_earnings/);
+    }
   });
 
   it("Ask NECTAR page does not pull under the title bar", () => {

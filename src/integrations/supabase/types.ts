@@ -17917,6 +17917,29 @@ export type Database = {
         Args: { p_key: string; p_tokens: number }
         Returns: undefined
       }
+      nectar_search_sections: {
+        Args: {
+          p_client_ids: string[]
+          p_document_ids: string[]
+          p_embedding?: string
+          p_limit?: number
+          p_organization_id: string
+          p_query: string
+          p_state_document_ids: string[]
+        }
+        Returns: {
+          body: string
+          client_id: string
+          document_id: string
+          heading: string
+          id: string
+          organization_id: string
+          state_document_id: string
+          text_rank: number
+          vector_similarity: number
+          version: number
+        }[]
+      }
       notify_incident_filed: {
         Args: {
           p_client_name: string
