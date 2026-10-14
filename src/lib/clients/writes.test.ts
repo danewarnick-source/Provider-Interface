@@ -61,6 +61,10 @@ describe("actionsForClientPatch", () => {
       /can't be changed: discharge_date/,
     );
   });
+  it("the old client-level self-admin flags are no longer editable", () => {
+    for (const k of ["self_admin_med_support", "self_admin_med_support_locked"])
+      assert.throws(() => actionsForClientPatch({}, { [k]: true }), /can't be changed/);
+  });
   it("refuses to move a client to another organization", () => {
     assert.throws(() => actionsForClientPatch({}, { organization_id: ORG }), /can't be changed/);
   });

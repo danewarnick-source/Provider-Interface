@@ -54,7 +54,6 @@ const STATIC_ROUTES: string[] = [
   "/dashboard/daily-logs",
   "/dashboard/day-program",
   "/dashboard/deadlines",
-  "/dashboard/emar",
   "/dashboard/evv-archive",
   "/dashboard/external-compliance",
   "/dashboard/help",
@@ -76,9 +75,6 @@ const STATIC_ROUTES: string[] = [
   "/dashboard/summaries",
   "/dashboard/teams",
   "/dashboard/timeclock",
-  // Admin sub-routes
-  "/dashboard/admin/emar-audit",
-
   // Billing
   "/dashboard/billing",
   "/dashboard/billing/form520",
@@ -242,7 +238,7 @@ async function assertPageHealth(page: Page, url: string, isDetail: boolean): Pro
   }
 
   // eMAR-specific: status badge must follow self-administration model
-  if (url.includes("emar") || url.includes("emar-audit")) {
+  if (url.includes("emar")) {
     const badgeLocator = page.locator(
       '[data-status], .status-badge, [class*="badge"], [class*="status"]',
     );

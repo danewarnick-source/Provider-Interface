@@ -34,6 +34,7 @@ import { activeContacts, loadClientContacts, type ClientContact } from "./contac
 import { currentPlan, goalView, goalsOn, supportsForCode, type GoalView, type PlanStatus } from "./plans";
 import { loadPlanBundle } from "./plans-load";
 import { todayYmd } from "./dates";
+import { STAFF_MED_COLUMNS, staffVisibleMeds, type StaffMedication } from "@/lib/medications/staff-meds";
 import {
   type ClientVisibilityRow,
   type SectionName,
@@ -79,29 +80,8 @@ export type CareIdentity = {
 };
 
 
-export type CareFlags = {
-  self_admin_med_support: boolean;
-  self_admin_med_support_locked: boolean;
-};
-
-export type CareMedication = {
-  id: string;
-  medication_name: string | null;
-  dosage: string | null;
-  route: string | null;
-  frequency: string | null;
-  scheduled_time: string | null;
-  prescriber: string | null;
-  instructions: string | null;
-  support_level: string | null;
-  is_prn: boolean | null;
-  prn_instructions: string | null;
-  purpose: string | null;
-  adverse_effects: string | null;
-  choking_risk: string | null;
-  is_controlled: boolean | null;
-  is_active: boolean | null;
-};
+/** An active, not paused medication with the fields staff read (staff-meds.ts). */
+export type CareMedication = StaffMedication;
 
 export type CareAuthorizedCode = {
   id: string;
@@ -171,7 +151,6 @@ export type ClientCareVisibility = {
 
 export type ClientCareData = {
   identity: CareIdentity;
-  flags: CareFlags;
   /** The plan in effect today (null when the client has none). */
   plan: CarePlan;
   goals: CareGoal[];
@@ -240,7 +219,6 @@ export const getClientCareData = createServerFn({ method: "GET" })
       } as Record<SectionName, boolean>;
       return {
         identity: emptyIdentity,
-        flags: { self_admin_med_support: false, self_admin_med_support_locked: false },
         plan: null,
         goals: [],
         medications: [],
@@ -272,7 +250,7 @@ export const getClientCareData = createServerFn({ method: "GET" })
       supabase
         .from("clients")
         .select(
-          "id, organization_id, first_name, last_name, date_of_birth, admission_date, discharge_date, medicaid_id, account_status, self_admin_med_support, self_admin_med_support_locked, about_me, phone_number, is_own_guardian, has_abi, hr_applicable, dnr_applicable, diagnoses, special_directions",
+          "id, organization_id, first_name, last_name, date_of_birth, admission_date, discharge_date, medicaid_id, account_status, about_me, phone_number, is_own_guardian, has_abi, hr_applicable, dnr_applicable, diagnoses, special_directions",
         )
         .eq("id", clientId)
         .maybeSingle(),
@@ -281,12 +259,11 @@ export const getClientCareData = createServerFn({ method: "GET" })
       loadPlanBundle(supabase, clientId).catch(() => ({ plans: [], goals: [] })),
       supabase
         .from("client_medications")
-        .select(
-          "id, medication_name, dosage, route, frequency, scheduled_time, prescriber, instructions, support_level, is_prn, prn_instructions, purpose, adverse_effects, choking_risk, is_controlled, is_active",
-        )
+        .select(STAFF_MED_COLUMNS)
         .eq("client_id", clientId)
         .eq("is_active", true)
-        .order("medication_name", { ascending: true }),
+        .is("paused_at", null)
+        .is("discontinued_at", null),
       supabase
         .from("client_billing_codes")
         .select("*")
@@ -367,11 +344,6 @@ export const getClientCareData = createServerFn({ method: "GET" })
     };
 
 
-    const flags: CareFlags = {
-      self_admin_med_support: !!row.self_admin_med_support,
-      self_admin_med_support_locked: !!row.self_admin_med_support_locked,
-    };
-
     // Goals of the plan in effect today (the ended plan while waiting for a new one).
     const today = todayYmd();
     const inEffect = goalsOn(planBundle, today);
@@ -392,7 +364,7 @@ export const getClientCareData = createServerFn({ method: "GET" })
       (codesRes.data ?? []) as CareAuthorizedCode[]
     ).filter((c) => !c.service_end_date || c.service_end_date > today);
 
-    const medications = (medsRes.data ?? []) as CareMedication[];
+    const medications = staffVisibleMeds((medsRes.data ?? []) as CareMedication[]);
 
     // ── Visibility layer — the ONE place staff-side filters live ──────────
     const visRow = (visRes?.data ?? null) as {
@@ -507,7 +479,6 @@ export const getClientCareData = createServerFn({ method: "GET" })
 
     return {
       identity,
-      flags,
       plan,
       goals,
       medications,

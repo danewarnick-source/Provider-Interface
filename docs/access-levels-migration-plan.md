@@ -77,8 +77,6 @@ Literal role words written directly inside SQL in the migrations: `'admin'` ~240
 | Tests and e2e mocks | Personas `admin` / `manager` / `dsp`; permission tests | Update to the new levels |
 | Docs | `CLAUDE.md`, Employees docs, the Permission appendix | Update |
 
-**Careful:** `src/lib/med-attestation.ts` has its own `ROLE_LABEL` for medication administrators. It has the same name but nothing to do with company roles, so leave it alone.
-
 ---
 
 ## 3. The biggest trap: the word "admin"

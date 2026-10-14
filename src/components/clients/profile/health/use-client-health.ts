@@ -9,7 +9,7 @@ import { useAccess } from "@/hooks/use-access";
 import { updateClient } from "@/lib/clients/writes.functions";
 
 const HEALTH_COLUMNS =
-  "id, allergies, diagnoses, chronic_conditions, diets, dysphagia, swallowing_alerts, mobility, emergency_plan, dnr_status, dnr_location, polst_status, palliative_care_status, hospice_status, advance_directive_notes, emergency_medical_treatment_authorization, self_admin_med_support, has_abi";
+  "id, allergies, diagnoses, chronic_conditions, diets, dysphagia, swallowing_alerts, mobility, emergency_plan, dnr_status, dnr_location, polst_status, palliative_care_status, hospice_status, advance_directive_notes, emergency_medical_treatment_authorization, has_abi";
 
 export type ClientHealthRow = {
   id: string;
@@ -28,7 +28,6 @@ export type ClientHealthRow = {
   hospice_status: string | null;
   advance_directive_notes: string | null;
   emergency_medical_treatment_authorization: boolean | null;
-  self_admin_med_support: boolean | null;
   has_abi: boolean | null;
 };
 

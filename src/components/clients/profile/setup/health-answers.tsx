@@ -1,5 +1,5 @@
-// Follow-up to the Health setup's medication question: the medication
-// choices (eMAR or a MAR sheet).
+// Follow-up to the Health setup's medication question: add medications on
+// the client's Health → Medications card, or upload the MAR sheet used now.
 
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,17 @@ export function MedicationChoices({ orgId, clientId }: { orgId: string; clientId
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
-          Add their medications on the eMAR, or upload the MAR sheet you use now.
+          Add their medications under Health → Medications, or upload the MAR sheet you use now.
         </p>
         <Button variant="outline" asChild>
-          <Link to="/dashboard/emar">Set up the eMAR</Link>
+          <Link
+            to="/dashboard/clients/$clientId"
+            params={{ clientId }}
+            search={{ section: "health" }}
+            hash="health-medications"
+          >
+            Open Medications
+          </Link>
         </Button>
       </div>
       <NectarAsk

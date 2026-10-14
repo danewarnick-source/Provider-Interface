@@ -12,6 +12,7 @@ import { MobileBottomSheet } from "./mobile-bottom-sheet";
 import { useActiveShift } from "@/hooks/use-active-shift";
 import { useClientCareData } from "@/hooks/use-client-care-data";
 import type { CaseloadClient } from "@/hooks/use-caseload";
+import { MedsReadOnlyList } from "@/components/medications/meds-read-only-list";
 import { displayPersonName } from "@/lib/person-name";
 import { useClientContacts } from "@/components/clients/shared/hooks/use-client-contacts";
 import { CONTACT_ROLE_LABELS, contactsWithRole } from "@/lib/clients/contacts";
@@ -120,6 +121,8 @@ export function ClientQuickInfoSheet({ client, trigger }: Props) {
               </p>
             )}
           </Section>
+
+          {open && <MedsReadOnlyList clientId={client.id} serviceCode={shiftCode} />}
 
           {/* (b) PCSP goals — today + view all */}
           <Section tone="success" icon={<Target className="h-4 w-4" />} title="Goals">
