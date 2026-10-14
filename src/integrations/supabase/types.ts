@@ -4511,6 +4511,7 @@ export type Database = {
           attestation_statement: string
           client_id: string
           content: Json
+          draft_content: Json | null
           created_at: string
           goals: Json
           id: string
@@ -4528,6 +4529,7 @@ export type Database = {
           attestation_statement?: string
           client_id: string
           content?: Json
+          draft_content?: Json | null
           created_at?: string
           goals?: Json
           id?: string
@@ -4545,6 +4547,7 @@ export type Database = {
           attestation_statement?: string
           client_id?: string
           content?: Json
+          draft_content?: Json | null
           created_at?: string
           goals?: Json
           id?: string
@@ -17579,6 +17582,20 @@ export type Database = {
       }
       apply_med_change_proposal: {
         Args: { _proposal_id: string }
+        Returns: string
+      }
+      apply_reviewed_pcsp: {
+        Args: {
+          _actor: string
+          _client_id: string
+          _client_patch: Json
+          _codes: Json
+          _contacts: Json
+          _document_id: string
+          _goals: Json
+          _organization_id: string
+          _plan: Json
+        }
         Returns: string
       }
       archive_eligible_referrals: {

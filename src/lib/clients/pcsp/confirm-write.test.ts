@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { parsePcsp } from "./parser.ts";
 import { proposeCarryOver } from "./carry-over.ts";
 import { initialReview } from "./review.ts";
-import { applyReviewedPcsp, splitCodesByBilling } from "./confirm-write.ts";
+import { applyReviewedPcsp, pcspWrite, splitCodesByBilling } from "./confirm-write.ts";
 import { SAMPLE_AGENCY, SAMPLE_PCSP_PAGES } from "./fixture/sample-pages.ts";
 
 type Row = Record<string, unknown>;
@@ -49,7 +49,39 @@ function fakeDb(seed: Record<string, Row[]>) {
     };
     return q;
   }
-  return { from, tables };
+  // Stand-in for apply_reviewed_pcsp: the same writes, all or nothing.
+  const rpcCalls: { fn: string; args: Row }[] = [];
+  let failRpc: string | null = null;
+  async function rpc(fn: string, args: Row) {
+    rpcCalls.push({ fn, args });
+    if (fn !== "apply_reviewed_pcsp") return { data: null, error: { message: `unknown rpc ${fn}` } };
+    if (failRpc) return { data: null, error: { message: failRpc } };
+    const plan = args._plan as Row;
+    if (plan.status === "current") {
+      for (const p of tables.client_plans ?? []) if (p.client_id === args._client_id && p.status === "current") p.status = "past";
+    }
+    const planId = `client_plans-${++n}`;
+    (tables.client_plans ??= []).push({
+      id: planId, organization_id: args._organization_id, client_id: args._client_id, ...plan,
+      source: "pcsp_upload", created_by: args._actor, document_id: args._document_id,
+    });
+    (args._goals as Row[]).forEach((g, sort) => {
+      const { supports, ...goal } = g as Row & { supports: Row[] };
+      const goalId = `client_goals-${++n}`;
+      (tables.client_goals ??= []).push({ id: goalId, plan_id: planId, client_id: args._client_id, sort, kind: "goal", ...goal });
+      supports.forEach((x, i) => (tables.client_goal_supports ??= []).push({ id: `s-${++n}`, goal_id: goalId, sort: i, ...x }));
+    });
+    for (const c of args._codes as Row[]) {
+      const hit = tables.client_billing_codes.find((r) => r.client_id === args._client_id && r.service_code === c.service_code);
+      if (hit) Object.assign(hit, c);
+      else tables.client_billing_codes.push({ id: `client_billing_codes-${++n}`, ...c });
+    }
+    const client = tables.clients.find((c) => c.id === args._client_id)!;
+    for (const [k, v] of Object.entries(args._client_patch as Row)) if (!String(client[k] ?? "").trim()) client[k] = v;
+    for (const k of args._contacts as Row[]) tables.client_contacts.push({ id: `k-${++n}`, ...k });
+    return { data: planId, error: null };
+  }
+  return { from, rpc, tables, rpcCalls, failNextRpc: (m: string) => { failRpc = m; } };
 }
 
 const parse = parsePcsp(SAMPLE_PCSP_PAGES, SAMPLE_AGENCY);
@@ -141,4 +173,37 @@ test("splitCodesByBilling holds every code back without billing access", () => {
   const rows = [{ service_code: "SLH" }, { service_code: "DSI" }];
   assert.deepEqual(splitCodesByBilling(rows, true), { write: rows, held: [] });
   assert.deepEqual(splitCodesByBilling(rows, false), { write: [], held: ["SLH", "DSI"] });
+});
+
+test("every write goes in one database call; a failure there leaves the old plan current", async () => {
+  const db = fakeDb(seed());
+  const before = JSON.stringify(db.tables);
+  const r = review();
+  r.plan.start = "2000-01-01";
+  db.failNextRpc("forced failure part way");
+  await assert.rejects(applyReviewedPcsp(db, args(r)), /forced failure part way/);
+  // Nothing was written outside the transaction: the old plan is still current.
+  assert.equal(JSON.stringify(db.tables), before);
+  assert.equal(db.tables.client_plans.find((p) => p.id === "old")!.status, "current");
+  assert.deepEqual(db.rpcCalls.map((c) => c.fn), ["apply_reviewed_pcsp"]);
+  const sent = db.rpcCalls[0].args;
+  assert.deepEqual(
+    [sent._organization_id, sent._client_id, sent._actor, sent._document_id],
+    ["org", "c1", "u1", "doc-1"],
+  );
+  assert.equal((sent._plan as { status: string }).status, "current");
+});
+
+test("pcspWrite: the plan status comes from its dates on the given day; codes are held without billing", () => {
+  const r = review();
+  r.plan.start = "2026-09-01";
+  r.plan.end = "2027-08-31";
+  const read = { currentGoalIds: new Set<string>(), client: {}, contacts: [], today: "2026-08-21" };
+  const w = pcspWrite({ ...args(r), canEditBilling: false }, read);
+  assert.equal(w.plan.status, "upcoming");
+  assert.deepEqual(w.codes, []);
+  assert.deepEqual(w.codesHeld, ["DSI", "HHS", "SEI"]);
+  assert.equal(pcspWrite(args(r), { ...read, today: "2026-09-01" }).plan.status, "current");
+  // A carried-over goal only points at a goal of the plan being replaced.
+  assert.equal(w.goals[0].carried_from_goal_id ?? null, null);
 });
