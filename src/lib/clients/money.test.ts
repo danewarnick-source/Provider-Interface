@@ -88,4 +88,8 @@ describe("money tiles", () => {
     assert.equal(isOpenLoan("Paid"), false);
     assert.equal(isOpenLoan("closed"), false);
   });
+  it("a voided loan is never open, whatever its status", () => {
+    assert.equal(isOpenLoan("active", "2026-10-01T00:00:00Z"), false);
+    assert.equal(isOpenLoan("draft", null), true);
+  });
 });

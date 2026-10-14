@@ -89,8 +89,12 @@ function localMonth(iso: string): string {
 
 const CLOSED_LOAN = new Set(["closed", "paid", "paid_off", "repaid", "void", "cancelled", "canceled"]);
 
-/** A loan still open (drafts count: the agreement is on file, not settled). */
-export function isOpenLoan(status: string | null | undefined): boolean {
+/** A loan still open (drafts count: the agreement is on file, not settled). A voided loan never is. */
+export function isOpenLoan(
+  status: string | null | undefined,
+  voidedAt?: string | null,
+): boolean {
+  if (voidedAt) return false;
   return !CLOSED_LOAN.has((status ?? "").trim().toLowerCase());
 }
 

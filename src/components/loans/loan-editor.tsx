@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Plus, Trash2, FileDown, Save } from "lucide-react";
+import { Ban, Plus, Trash2, FileDown, Save } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,14 +26,26 @@ import {
 } from "@/components/ui/table";
 import {
   addLoanEntry,
-  computeRunningBalance,
-  deleteLoan,
-  deleteLoanEntry,
   getLoan,
   upsertLoan,
+  voidLoan,
+  voidLoanEntry,
   type LoanInput,
 } from "@/lib/clients/loans.functions";
+import { computeRunningBalance, VOID_REASON_MIN } from "@/lib/clients/loan-ledger";
 import { downloadLoanPdf } from "@/lib/clients/loans-pdf";
+import { denverYmd } from "@/lib/denver-date";
+
+/** Ask for a void reason; null when cancelled or too short. */
+function askVoidReason(what: string): string | null {
+  const r = window.prompt(`Why are you voiding ${what}? It stays on file, struck through, with this reason.`);
+  if (r == null) return null;
+  if (r.trim().length < VOID_REASON_MIN) {
+    toast.error("Give a reason for voiding (at least 3 characters).");
+    return null;
+  }
+  return r.trim();
+}
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
@@ -44,7 +56,7 @@ const empty = (organization_id: string, client_id: string, lender_name: string, 
   client_id,
   borrower_name,
   lender_name,
-  agreement_date: new Date().toISOString().slice(0, 10),
+  agreement_date: denverYmd(),
   purpose: "",
   advance_amount: null,
   advance_cadence: "weekly",
@@ -86,9 +98,9 @@ export function LoanEditor({
 }) {
   const fetchLoan = useServerFn(getLoan);
   const saveLoan = useServerFn(upsertLoan);
-  const removeLoan = useServerFn(deleteLoan);
+  const voidLoanFn = useServerFn(voidLoan);
   const addEntry = useServerFn(addLoanEntry);
-  const removeEntry = useServerFn(deleteLoanEntry);
+  const voidEntryFn = useServerFn(voidLoanEntry);
   const qc = useQueryClient();
 
   const q = useQuery({
@@ -135,6 +147,7 @@ export function LoanEditor({
     () => computeRunningBalance(q.data?.entries ?? []),
     [q.data?.entries],
   );
+  const voidedLoan: string | null = q.data?.loan?.voided_at ? (q.data.loan.void_reason ?? "") : null;
 
   const saveMut = useMutation({
     mutationFn: () => saveLoan({ data: { id: loanId, values } }),
@@ -152,14 +165,16 @@ export function LoanEditor({
     onError: (e: any) => toast.error(e?.message ?? "Save failed"),
   });
 
-  const delMut = useMutation({
-    mutationFn: () => removeLoan({ data: { organization_id: organizationId, loan_id: loanId! } }),
+  const voidMut = useMutation({
+    mutationFn: (reason: string) =>
+      voidLoanFn({ data: { organization_id: organizationId, loan_id: loanId!, reason } }),
     onSuccess: () => {
-      toast.success("Loan deleted");
+      toast.success("Loan voided. It stays on file.");
       qc.invalidateQueries({ queryKey: ["loans", organizationId] });
       qc.invalidateQueries({ queryKey: ["loan-markers", organizationId] });
-      onClose();
+      qc.invalidateQueries({ queryKey: ["loan", organizationId, loanId] });
     },
+    onError: (e: any) => toast.error(e?.message ?? "Could not void the loan"),
   });
 
   const handleDownload = () => {
@@ -168,7 +183,8 @@ export function LoanEditor({
         ...values,
         repayment_conditions: values.repayment_conditions ?? [],
         signature_parties: values.signature_parties ?? [],
-        running_balance: balance,
+        entries: loanId ? (q.data?.entries ?? []) : undefined,
+        void_reason: voidedLoan,
       },
       `loan-agreement-${values.borrower_name.replace(/\s+/g, "-").toLowerCase()}.pdf`,
     );
@@ -176,7 +192,7 @@ export function LoanEditor({
 
   // ── Ledger entry form ──
   const [entry, setEntry] = useState({
-    entry_date: new Date().toISOString().slice(0, 10),
+    entry_date: denverYmd(),
     kind: "advance" as "advance" | "direct_payment" | "repayment" | "adjustment",
     amount: 0,
     note: "",
@@ -192,10 +208,14 @@ export function LoanEditor({
     },
     onError: (e: any) => toast.error(e?.message ?? "Could not add entry"),
   });
-  const delEntryMut = useMutation({
-    mutationFn: (id: string) =>
-      removeEntry({ data: { organization_id: organizationId, entry_id: id } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["loan", organizationId, loanId] }),
+  const voidEntryMut = useMutation({
+    mutationFn: (v: { id: string; reason: string }) =>
+      voidEntryFn({ data: { organization_id: organizationId, entry_id: v.id, reason: v.reason } }),
+    onSuccess: () => {
+      toast.success("Entry voided. It stays on the ledger, struck through.");
+      qc.invalidateQueries({ queryKey: ["loan", organizationId, loanId] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Could not void the entry"),
   });
 
   // helpers
@@ -213,16 +233,28 @@ export function LoanEditor({
           <Button variant="outline" onClick={handleDownload}>
             <FileDown className="mr-2 h-4 w-4" /> Download copy for records (PDF)
           </Button>
-          <Button onClick={() => saveMut.mutate()} disabled={saveMut.isPending}>
+          <Button onClick={() => saveMut.mutate()} disabled={saveMut.isPending || voidedLoan != null}>
             <Save className="mr-2 h-4 w-4" /> {saveMut.isPending ? "Saving…" : "Save"}
           </Button>
-          {loanId && (
-            <Button variant="destructive" onClick={() => { if (confirm("Delete this agreement and ledger?")) delMut.mutate(); }}>
-              <Trash2 className="mr-2 h-4 w-4" /> Delete
+          {loanId && voidedLoan == null && (
+            <Button
+              variant="destructive"
+              disabled={voidMut.isPending}
+              onClick={() => {
+                const reason = askVoidReason("this agreement");
+                if (reason) voidMut.mutate(reason);
+              }}
+            >
+              <Ban className="mr-2 h-4 w-4" /> Void
             </Button>
           )}
         </div>
       </div>
+      {voidedLoan != null && (
+        <div className="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm" data-testid="loan-voided-banner">
+          <span className="font-medium">Voided.</span> This agreement is kept on file and can't be changed. Reason: {voidedLoan}
+        </div>
+      )}
 
       <Card>
         <CardHeader><CardTitle className="text-base">Parties &amp; Date</CardTitle></CardHeader>
@@ -412,7 +444,7 @@ export function LoanEditor({
               </Select>
               <Input type="number" step="0.01" placeholder="Amount" value={entry.amount} onChange={(e) => setEntry({ ...entry, amount: Number(e.target.value) || 0 })} />
               <Input placeholder="Note" value={entry.note} onChange={(e) => setEntry({ ...entry, note: e.target.value })} />
-              <Button onClick={() => addEntryMut.mutate()} disabled={!entry.amount || addEntryMut.isPending}>
+              <Button onClick={() => addEntryMut.mutate()} disabled={!entry.amount || addEntryMut.isPending || voidedLoan != null}>
                 <Plus className="mr-1 h-4 w-4" /> Add entry
               </Button>
             </div>
@@ -427,19 +459,37 @@ export function LoanEditor({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(q.data?.entries ?? []).map((e: any) => (
-                  <TableRow key={e.id}>
-                    <TableCell>{e.entry_date}</TableCell>
-                    <TableCell className="capitalize">{e.kind.replace("_", " ")}</TableCell>
-                    <TableCell className="text-right font-mono">${Number(e.amount).toFixed(2)}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{e.note}</TableCell>
-                    <TableCell>
-                      <Button size="icon" variant="ghost" onClick={() => delEntryMut.mutate(e.id)}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {(q.data?.entries ?? []).map((e: any) => {
+                  const voided = !!e.voided_at;
+                  const strike = voided ? "line-through text-muted-foreground" : "";
+                  return (
+                    <TableRow key={e.id} data-voided={voided ? "true" : undefined}>
+                      <TableCell className={strike}>{e.entry_date}</TableCell>
+                      <TableCell className={`capitalize ${strike}`}>{e.kind.replace("_", " ")}</TableCell>
+                      <TableCell className={`text-right font-mono ${strike}`}>${Number(e.amount).toFixed(2)}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        <span className={strike}>{e.note}</span>
+                        {voided && <span className="block text-destructive">Voided: {e.void_reason}</span>}
+                      </TableCell>
+                      <TableCell>
+                        {!voided && voidedLoan == null && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            aria-label="Void entry"
+                            disabled={voidEntryMut.isPending}
+                            onClick={() => {
+                              const reason = askVoidReason("this entry");
+                              if (reason) voidEntryMut.mutate({ id: e.id, reason });
+                            }}
+                          >
+                            <Ban className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
                 {!(q.data?.entries ?? []).length && (
                   <TableRow><TableCell colSpan={5} className="text-center text-xs text-muted-foreground">No entries yet. Use the form above to record advances and repayments.</TableCell></TableRow>
                 )}

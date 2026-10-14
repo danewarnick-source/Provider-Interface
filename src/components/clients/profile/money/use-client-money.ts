@@ -119,7 +119,15 @@ export function useClientSpending(orgId: string, clientId: string) {
   });
 }
 
-export type LoanRow = { id: string; borrower_name: string; agreement_date: string; status: string };
+export type LoanRow = {
+  id: string;
+  borrower_name: string;
+  agreement_date: string;
+  status: string;
+  /** Voided loans stay listed, struck through with the reason. */
+  voided_at: string | null;
+  void_reason: string | null;
+};
 
 /** Loan agreements (owners only): whether loan records are on, and the client's loans. */
 export function useClientLoans(orgId: string, clientId: string, isOwner: boolean) {

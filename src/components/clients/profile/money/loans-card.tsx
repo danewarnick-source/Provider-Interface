@@ -72,10 +72,22 @@ export function LoansCard({
       ) : (
         <ul className="divide-y rounded-xl border">
           {loans.map((l) => (
-            <li key={l.id} className="flex flex-wrap items-center gap-2 px-3 py-2 text-sm">
-              <span className="min-w-0 flex-1 truncate">{l.borrower_name}</span>
-              <span className="text-xs text-muted-foreground">{formatDate(l.agreement_date)}</span>
-              <span className="text-xs capitalize">{l.status}</span>
+            <li
+              key={l.id}
+              className="flex flex-wrap items-center gap-2 px-3 py-2 text-sm"
+              data-voided={l.voided_at ? "true" : undefined}
+            >
+              <span className={`min-w-0 flex-1 truncate ${l.voided_at ? "line-through text-muted-foreground" : ""}`}>
+                {l.borrower_name}
+              </span>
+              <span className={`text-xs text-muted-foreground ${l.voided_at ? "line-through" : ""}`}>
+                {formatDate(l.agreement_date)}
+              </span>
+              {l.voided_at ? (
+                <span className="text-xs text-destructive">Voided: {l.void_reason}</span>
+              ) : (
+                <span className="text-xs capitalize">{l.status}</span>
+              )}
               <Button
                 variant="outline"
                 onClick={() => setEditing({ loanId: l.id, borrower: l.borrower_name })}
