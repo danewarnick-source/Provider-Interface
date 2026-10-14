@@ -11,6 +11,11 @@ import { agencySupports, buildStrategySections, carryForward, supportsToDraft, t
 import { formatBullets } from "./strategy-rules";
 import { STRATEGY_SYSTEM_PROMPT, parseStrategyReply, strategyUserPrompt, type StrategyReply } from "./strategy-prompt";
 import { loadPlanBundle } from "./plans-load";
+import {
+  TRAINING_MED_COLUMNS,
+  trainingMedItems,
+  type StaffMedication,
+} from "@/lib/medications/staff-meds";
 
 /** Active goals (with supports) of the client's plan in effect today. */
 async function planGoals(supabase: AnySupabase, clientId: string): Promise<GoalView[]> {
@@ -237,25 +242,10 @@ async function assembleVerbatim(
   try {
     const { data: meds } = await supabase
       .from("client_medications")
-      .select("medication_name, dosage, frequency, is_prn, choking_risk, is_active")
+      .select(TRAINING_MED_COLUMNS)
       .eq("client_id", clientId);
-    if (meds && meds.length) {
-      const active = (meds as Array<{ medication_name: string; dosage: string | null; frequency: string | null; is_prn: boolean | null; choking_risk: boolean | null; is_active: boolean | null }>)
-        .filter((m) => m.is_active !== false);
-      if (active.length) {
-        const items: CSTItem[] = active.map((m) => ({
-          kind: "kv" as const,
-          label: m.medication_name,
-          pairs: [
-            { label: "Dose", value: m.dosage ?? "—" },
-            { label: "Frequency", value: m.frequency ?? "—" },
-            { label: "PRN", value: m.is_prn ? "Yes" : "No" },
-            { label: "Choking risk flagged", value: m.choking_risk ? "Yes" : "No" },
-          ],
-        }));
-        sections.push({ id: sid(), title: "Medications", items });
-      }
-    }
+    const items: CSTItem[] = trainingMedItems((meds ?? []) as Partial<StaffMedication>[]);
+    if (items.length) sections.push({ id: sid(), title: "Medications", items });
   } catch { /* ignore */ }
 
   // f. Rights & safeguards — SAFETY-CRITICAL — HRC status + restriction_summary, exact
