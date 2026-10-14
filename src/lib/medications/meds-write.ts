@@ -9,6 +9,7 @@ import {
   type HowTaken,
   type MedicationFields,
 } from "./med-rules.ts";
+import { isClientMedicationFile } from "./med-files.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Sb = { from: (table: string) => any };
@@ -181,6 +182,40 @@ function legacySync(
   return out;
 }
 
+const FILE_COLUMNS = ["packaging_approval_path", "label_photo_path", "consent_document_path"];
+
+/** Uploads must be this client's medication files; linked BSP and HRC records must be this client's. */
+async function assertOwnLinks(
+  sb: Sb,
+  a: { organizationId: string; clientId: string },
+  fields: Record<string, unknown>,
+  current: MedicationRow | null,
+) {
+  for (const col of FILE_COLUMNS) {
+    const path = fields[col];
+    if (path == null || path === current?.[col]) continue;
+    if (typeof path !== "string" || !isClientMedicationFile(path, a.organizationId, a.clientId))
+      throw new Error("That file isn't one of this client's medication files.");
+  }
+  const links: Array<[string, string]> = [
+    ["bsp_document_id", "client_documents"],
+    ["hrc_restriction_id", "hrc_restriction_records"],
+  ];
+  for (const [col, table] of links) {
+    const id = fields[col];
+    if (id == null || id === current?.[col]) continue;
+    const { data, error } = await sb
+      .from(table)
+      .select("id")
+      .eq("id", id)
+      .eq("organization_id", a.organizationId)
+      .eq("client_id", a.clientId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error("That plan or approval isn't on this client's record.");
+  }
+}
+
 export async function saveMedicationRow(
   sb: Sb,
   a: {
@@ -206,6 +241,7 @@ export async function saveMedicationRow(
       issues.map((i) => ({ field: String(i.field), message: i.message })),
     );
 
+  await assertOwnLinks(sb, a, fields, current);
   const changes = medicationDiff(current, fields);
   const row = { ...fields, ...legacySync(fields, current) };
   if (!current) {
