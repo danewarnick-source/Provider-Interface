@@ -14,6 +14,15 @@ function memoryStorage(seed: Record<string, string>) {
 }
 
 const HELP_ROUTE = readFileSync(new URL("../../routes/dashboard.help.tsx", import.meta.url), "utf8");
+// N5 moved the chat out of the route; it and the shared Ask pieces keep no browser storage either.
+const ASK_SCREENS = [
+  "../../components/nectar/admin/help-chat.tsx",
+  "../../components/nectar/admin/help-chat-parts.tsx",
+  "../../components/nectar/admin/help-chat-header.tsx",
+  "../../components/nectar/nectar-reply.tsx",
+  "../../components/nectar/use-ask-nectar.ts",
+  "../../components/staff-mobile/ask-nectar-staff.tsx",
+].map((rel) => readFileSync(new URL(rel, import.meta.url), "utf8"));
 
 describe("clearLegacyNectarStorage", () => {
   it("removes the old admin help question history", () => {
@@ -51,8 +60,10 @@ describe("admin help page storage (N1 Done when)", () => {
   });
 
   it("never reads or writes browser storage, so no Nectar key exists after a question", () => {
-    assert.doesNotMatch(HELP_ROUTE, /localStorage|sessionStorage/);
-    assert.doesNotMatch(HELP_ROUTE, /hive\.nectar\./);
+    for (const src of [HELP_ROUTE, ...ASK_SCREENS]) {
+      assert.doesNotMatch(src, /localStorage|sessionStorage/);
+      assert.doesNotMatch(src, /hive\.nectar\./);
+    }
     const storage = memoryStorage({ "hive.nectar.helpHistory": "[\"q\"]" });
     clearLegacyNectarStorage(storage); // page load
     // Asking a question only updates React state on this page.

@@ -1,25 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { Link } from "@tanstack/react-router";
-import { Send, Loader2, Shield, AlertTriangle, ArrowRight } from "lucide-react";
-import {
-  STAFF_PAY_PERIOD_LINK_LABEL,
-  STAFF_PAY_PERIOD_PATH,
-} from "@/lib/nectar-staff-scope";
-import {
-  askNectarStaff,
-  type NectarStaffReply,
-} from "@/lib/nectar-staff.functions";
-import {
-  NectarMark,
-  NectarButton,
-} from "@/components/nectar/nectar-brand";
+import { Send, Loader2, Shield } from "lucide-react";
+import type { AskNectarResult } from "@/lib/nectar/engine/ask-types";
+import { NectarMark, NectarButton } from "@/components/nectar/nectar-brand";
 import { NectarAnswer } from "@/components/nectar/nectar-answer";
+import { NectarReply } from "@/components/nectar/nectar-reply";
+import { useAskNectar, WORKSPACE_LOADING } from "@/components/nectar/use-ask-nectar";
 import { useMobileShellContainer } from "./mobile-shell-context";
 import { useActiveShiftBarVisible } from "@/hooks/use-active-shift-bar";
-import { useCurrentOrg } from "@/hooks/use-org";
-import { staffNectarFailureMessage } from "@/lib/nectar-staff-errors";
 import {
   STAFF_CLOCK_BAR_PX,
   STAFF_TAB_BAR_OFFSET_CSS,
@@ -30,7 +18,7 @@ interface ChatMsg {
   id: string;
   role: "user" | "nectar";
   text: string;
-  reply?: NectarStaffReply;
+  reply?: AskNectarResult;
 }
 
 const STARTERS = [
@@ -44,28 +32,21 @@ const STARTERS = [
 const KEYBOARD_LIFT_MIN_PX = 80;
 
 export interface AskNectarStaffProps {
-  /** Pre-fill a focused client (only used if the staff is actually assigned). */
-  clientId?: string;
-  /** Compact heading variant for embedding into sheets. */
-  compact?: boolean;
   /** Auto-send this question once on mount. */
   initialQuestion?: string;
 }
 
 /**
- * Mobile-friendly scoped NECTAR chat for staff.
- *
- * Server-side scope enforcement lives in `askNectarStaff` — this component
- * just renders the conversation. No DB persistence: each session is in
- * React state only.
+ * Mobile-friendly Nectar chat for team members, on the one engine (N5):
+ * askNectar in the staff view decides on the server what the caller may
+ * read. The conversation lives in React state only. N6 replaces this screen.
  *
  * Composer is an in-flow shrink-0 footer (not a portal). Swipe / overscroll
  * on the thread cannot hide it. Bottom padding clears the clocked-in bar.
  */
-export function AskNectarStaff({ clientId, initialQuestion }: AskNectarStaffProps) {
-  const ask = useServerFn(askNectarStaff);
-  const { data: org } = useCurrentOrg();
-  const organizationId = org?.organization_id;
+export function AskNectarStaff({ initialQuestion }: AskNectarStaffProps) {
+  const nectar = useAskNectar("staff");
+  const organizationId = nectar.organizationId;
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [keyboardLift, setKeyboardLift] = useState(0);
@@ -87,29 +68,12 @@ export function AskNectarStaff({ clientId, initialQuestion }: AskNectarStaffProp
   }, [barVisible, inStaffShell, keyboardLift]);
 
   const mutation = useMutation({
-    mutationFn: async (question: string) =>
-      ask({ data: { question, clientId, organizationId: organizationId ?? "" } }),
-    onSuccess: (reply) => {
-      setMessages((m) => [
-        ...m,
-        {
-          id: crypto.randomUUID(),
-          role: "nectar",
-          text: reply.answer,
-          reply,
-        },
-      ]);
-    },
+    mutationFn: (question: string) => nectar.ask(question),
+    onSuccess: (reply) =>
+      setMessages((m) => [...m, { id: crypto.randomUUID(), role: "nectar", text: reply.answer, reply }]),
     onError: (e: unknown) => {
-      const raw = e instanceof Error ? e.message : "Something went wrong.";
-      const statusMatch = raw.match(/AI error \((\d+)\)/);
-      const msg = statusMatch
-        ? staffNectarFailureMessage(Number(statusMatch[1]), raw)
-        : raw;
-      setMessages((m) => [
-        ...m,
-        { id: crypto.randomUUID(), role: "nectar", text: msg },
-      ]);
+      const text = e instanceof Error ? e.message : "Something went wrong.";
+      setMessages((m) => [...m, { id: crypto.randomUUID(), role: "nectar", text }]);
     },
   });
 
@@ -140,20 +104,17 @@ export function AskNectarStaff({ clientId, initialQuestion }: AskNectarStaffProp
       setMessages((m) => [
         ...m,
         { id: crypto.randomUUID(), role: "user", text },
-        { id: crypto.randomUUID(), role: "nectar", text: "Still loading your workspace — try again in a moment." },
+        { id: crypto.randomUUID(), role: "nectar", text: WORKSPACE_LOADING },
       ]);
       return;
     }
-    setMessages((m) => [
-      ...m,
-      { id: crypto.randomUUID(), role: "user", text },
-    ]);
+    setMessages((m) => [...m, { id: crypto.randomUUID(), role: "user", text }]);
     setInput("");
     mutation.mutate(text);
     requestAnimationFrame(() => taRef.current?.focus());
   };
 
-  // Auto-send an initial question (e.g. from the global NECTAR search bar) once
+  // Auto-send an initial question (e.g. from the global Nectar search bar) once
   // the org is loaded, only once per mount.
   const firedRef = useRef(false);
   useEffect(() => {
@@ -185,9 +146,10 @@ export function AskNectarStaff({ clientId, initialQuestion }: AskNectarStaffProp
               </span>
             </div>
             <p className="text-[13px] leading-snug text-muted-foreground">
-              I help with company policies, your trainings, job duties, your published
-              schedule, and the people on your caseload — their goals, safety, and meds.
-              Hours and pay stay on Caseload.
+              Nectar is an AI assistant. It answers from your agency's policies, the state
+              rules, your published schedule and the plans and medication lists of the people
+              you support, and shows where each answer came from. It doesn't answer pay or
+              hours questions.
             </p>
             <div className="space-y-1.5">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -218,42 +180,10 @@ export function AskNectarStaff({ clientId, initialQuestion }: AskNectarStaffProp
             <div key={m.id} className="flex gap-2">
               <NectarMark size="sm" className="mt-0.5" ornament={false} />
               <div className="max-w-[85%] flex-1 rounded-2xl rounded-tl-sm border border-border bg-card px-3.5 py-2.5 shadow-sm">
-                {m.reply?.refused && (
-                  <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#9a3412]">
-                    <AlertTriangle className="h-3 w-3" />
-                    Out of scope
-                  </div>
-                )}
-                <NectarAnswer text={m.text} />
-                {m.reply?.deepLink?.path === STAFF_PAY_PERIOD_PATH && (
-                  <Link
-                    to="/dashboard"
-                    className="mt-2 inline-flex min-h-[44px] items-center gap-1.5 rounded-md bg-[var(--hive-gold)] px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-[#b8651a]"
-                  >
-                    {m.reply.deepLink.label || STAFF_PAY_PERIOD_LINK_LABEL}
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                )}
-                {m.reply && m.reply.citations.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {m.reply.citations.map((c, i) => (
-                      <span
-                        key={`${c.type}-${c.id}-${i}`}
-                        className="inline-flex items-center rounded border border-[#fed7aa] bg-[#fff7ed] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[#9a3412]"
-                        title={c.title}
-                      >
-                        {c.type === "pcsp"
-                          ? "PCSP"
-                          : c.type === "medication"
-                            ? "Med"
-                            : c.type === "schedule"
-                              ? "Schedule"
-                              : c.type}
-                        {" · "}
-                        {c.title.length > 28 ? c.title.slice(0, 26) + "…" : c.title}
-                      </span>
-                    ))}
-                  </div>
+                {m.reply ? (
+                  <NectarReply reply={m.reply} onRate={nectar.rate} />
+                ) : (
+                  <NectarAnswer text={m.text} />
                 )}
               </div>
             </div>

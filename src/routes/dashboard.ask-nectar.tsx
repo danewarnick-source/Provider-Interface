@@ -3,17 +3,12 @@ import { AskNectarStaff } from "@/components/staff-mobile/ask-nectar-staff";
 import { FeatureGate } from "@/components/upgrade-gate";
 
 interface AskNectarSearch {
-  clientId?: string;
   q?: string;
 }
 
 export const Route = createFileRoute("/dashboard/ask-nectar")({
   head: () => ({ meta: [{ title: "Ask NECTAR — Staff" }] }),
   validateSearch: (search: Record<string, unknown>): AskNectarSearch => ({
-    clientId:
-      typeof search.clientId === "string" && /^[0-9a-f-]{36}$/i.test(search.clientId)
-        ? search.clientId
-        : undefined,
     q: typeof search.q === "string" && search.q.trim().length > 0
       ? search.q.slice(0, 1000)
       : undefined,
@@ -22,7 +17,7 @@ export const Route = createFileRoute("/dashboard/ask-nectar")({
 });
 
 function AskNectarStaffPage() {
-  const { clientId, q } = useSearch({ from: "/dashboard/ask-nectar" });
+  const { q } = useSearch({ from: "/dashboard/ask-nectar" });
   return (
     <FeatureGate featureKey="nectar">
       {/*
@@ -34,7 +29,7 @@ function AskNectarStaffPage() {
         data-ask-nectar-page
         className="flex h-full min-h-0 flex-col overflow-hidden overscroll-none bg-card pt-2 md:mx-auto md:h-[calc(100vh-8rem)] md:w-full md:max-w-3xl md:rounded-2xl md:border md:border-border md:pt-0 md:shadow-[var(--shadow-card)]"
       >
-        <AskNectarStaff clientId={clientId} initialQuestion={q} />
+        <AskNectarStaff initialQuestion={q} />
       </div>
     </FeatureGate>
   );
