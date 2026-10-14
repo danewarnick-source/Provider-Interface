@@ -1,18 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { HelpChat } from "@/components/nectar/admin/help-chat";
+import { NectarPage } from "@/components/nectar/admin/nectar-page";
 import { RequireLevel } from "@/components/rbac-guard";
 import { FeatureGate } from "@/components/upgrade-gate";
 import { clearLegacyNectarStorage } from "@/lib/nectar/browser-storage";
+import { parseAdminNectarSearch } from "@/lib/nectar/nectar-nav";
 
 export const Route = createFileRoute("/dashboard/help")({
-  head: () => ({ meta: [{ title: "Need help? — NECTAR" }] }),
-  validateSearch: (search: Record<string, unknown>): { q?: string } => ({
-    q:
-      typeof search.q === "string" && search.q.trim().length > 0
-        ? search.q.slice(0, 1000)
-        : undefined,
-  }),
+  head: () => ({ meta: [{ title: "Nectar — Provider Interface" }] }),
+  // ?tab=questions | settings, and ?q= from the header search (asked once).
+  validateSearch: (s: Record<string, unknown>) => parseAdminNectarSearch(s),
   component: HelpRoute,
 });
 
@@ -30,7 +27,7 @@ function HelpRoute() {
 function HelpPage() {
   return (
     <FeatureGate featureKey="nectar">
-      <HelpChat />
+      <NectarPage />
     </FeatureGate>
   );
 }

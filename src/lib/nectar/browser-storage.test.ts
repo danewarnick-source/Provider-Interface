@@ -14,14 +14,19 @@ function memoryStorage(seed: Record<string, string>) {
 }
 
 const HELP_ROUTE = readFileSync(new URL("../../routes/dashboard.help.tsx", import.meta.url), "utf8");
-// N5 moved the chat out of the route; it and the shared Ask pieces keep no browser storage either.
+// N5 moved the chat out of the route; N6 rebuilt both Ask screens. They and the shared Ask
+// pieces keep no browser storage either (the conversation is in memory: chat-store.ts).
 const ASK_SCREENS = [
-  "../../components/nectar/admin/help-chat.tsx",
-  "../../components/nectar/admin/help-chat-parts.tsx",
-  "../../components/nectar/admin/help-chat-header.tsx",
+  "../../components/nectar/admin/nectar-page.tsx",
+  "../../components/nectar/admin/ask-tab.tsx",
+  "../../components/nectar/admin/ask-actions.tsx",
+  "../../components/nectar/chat-parts.tsx",
   "../../components/nectar/nectar-reply.tsx",
   "../../components/nectar/use-ask-nectar.ts",
-  "../../components/staff-mobile/ask-nectar-staff.tsx",
+  "../../components/nectar/use-nectar-chat.ts",
+  "../../components/nectar/staff/staff-nectar-page.tsx",
+  "../../components/nectar/staff/staff-ask-tab.tsx",
+  "./chat-store.ts",
 ].map((rel) => readFileSync(new URL(rel, import.meta.url), "utf8"));
 
 describe("clearLegacyNectarStorage", () => {
