@@ -81,6 +81,22 @@ describe("Nectar screens (N6)", () => {
     );
   });
 
+  it("dashboard.tsx: the header search sends questions to the right Ask; the Nectar nav item shows the open count", () => {
+    const dash = read("../routes/dashboard.tsx");
+    const asks = dash.match(
+      /askRoute=\{\s*effectiveView === "staff" \? "\/dashboard\/ask-nectar" : "\/dashboard\/help"\s*\}/g,
+    );
+    assert.equal(asks?.length, 2, "desktop and phone search bars");
+    assert.match(
+      dash,
+      /import \{ NectarQuestionsCount \} from "@\/components\/nectar\/admin\/questions-count";/,
+    );
+    assert.match(dash, /\{item\.to === "\/dashboard\/help" && <NectarQuestionsCount \/>\}/);
+    const count = read("../components/nectar/admin/questions-count.tsx");
+    assert.match(count, /useOpenQuestionCount\(orgId, canView\)/);
+    assert.match(count, /if \(!canView \|\| open <= 0\) return null;/);
+  });
+
   it("every Nectar screen fits the size limit and keeps Nectar data out of the browser", () => {
     assert.ok(ADMIN.length >= 6 && STAFF.length >= 6);
     for (const [file, src] of ALL) {

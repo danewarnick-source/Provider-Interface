@@ -76,6 +76,7 @@ import {
 } from "@/lib/staff-phone-chrome";
 import { NectarTaskCenter } from "@/components/nectar/nectar-task-center";
 import { NectarSearchBar } from "@/components/nectar/nectar-search-bar";
+import { NectarQuestionsCount } from "@/components/nectar/admin/questions-count";
 import { Clock } from "lucide-react";
 import { FeatureLockedRoute, UpgradeGate } from "@/components/upgrade-gate";
 import { OrgSwitcher, DemoBadge, DemoOrgBanner } from "@/components/org-switcher";
@@ -1366,6 +1367,7 @@ function SidebarBody({
                   >
                     <Icon className="h-4 w-4" />
                     {item.label}
+                    {item.to === "/dashboard/help" && <NectarQuestionsCount />}
                   </Link>
                 );
               })}
