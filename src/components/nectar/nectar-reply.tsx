@@ -1,103 +1,120 @@
-// One Nectar answer from askNectar (N5): the AI label, the answer with its
-// numbered markers, the sources it cites, and thumbs up / down. Used by the
-// admin help chat, the staff Ask chat and the audit zone until N6 rebuilds
-// those screens.
+// One Nectar answer from askNectar (N5, N6 as in the demo): the AI label, the
+// answer with its numbered markers, its source chips, any extra action (the
+// team member's "Mark … as reviewed") and thumbs up / down. Used by admin
+// Nectar, team member Nectar and the audit zone.
 
-import { useState } from "react";
+import { useState, type MouseEvent, type ReactNode } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
 import { NectarAnswer } from "@/components/nectar/nectar-answer";
 import type { AskNectarResult, FeedbackValue, NectarSource } from "@/lib/nectar/engine/ask-types";
-import { knowledgeHref } from "@/lib/nectar/library/knowledge-nav";
+import { adminSourceHref, sourceLabel } from "@/lib/nectar/source-links";
 
-/** Where an admin opens a source: the document or state rule, or the Required policies tab. */
-function sourceHref(source: NectarSource): string | null {
-  if (source.documentId) return knowledgeHref({ doc: source.documentId });
-  if (source.stateRuleId) return knowledgeHref({ rule: source.stateRuleId });
-  if (source.kind === "agency") {
-    return knowledgeHref({ tab: source.id === "agency:reviews" ? "reviews" : "required" });
-  }
-  return null;
+const CHIP =
+  "inline-flex min-h-[32px] items-center rounded-full border border-border bg-muted/40 px-2.5 py-1 text-left text-xs font-semibold text-[var(--hive-text)]";
+
+function SourceChip({ n, label, href }: { n: number; label: string; href: string | null }) {
+  const navigate = useNavigate();
+  const text = (
+    <>
+      <span className="mr-1 text-muted-foreground">[{n}]</span>
+      {label}
+    </>
+  );
+  if (!href) return <span className={CHIP}>{text}</span>;
+  const open = (e: MouseEvent<HTMLAnchorElement>) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
+    e.preventDefault();
+    void navigate({ href });
+  };
+  return (
+    <a
+      href={href}
+      onClick={open}
+      className={`${CHIP} hover:border-[var(--hive-gold)]/60 hover:bg-[#fff7ed]`}
+    >
+      {text}
+    </a>
+  );
 }
 
-function sourceLabel(source: NectarSource): string {
-  return [source.documentTitle, source.heading, source.version ? `v${source.version}` : null]
-    .filter(Boolean)
-    .join(" · ");
-}
+const THUMB =
+  "inline-flex h-9 w-10 items-center justify-center rounded-lg border border-border bg-card hover:bg-muted";
 
 export function NectarReply({
   reply,
   linkSources = false,
+  sourceHref,
   onRate,
+  rated: ratedBefore,
+  notFoundNote,
+  children,
 }: {
   reply: AskNectarResult;
-  /** Admins can open sources in the Knowledge base; team members see them as text (N6 adds theirs). */
+  /** Admin view: sources open in the Knowledge base (admin Nectar, audit zone). */
   linkSources?: boolean;
+  /** Where each source opens (team member Nectar); wins over linkSources. */
+  sourceHref?: (source: NectarSource) => string | null;
   onRate?: (questionId: string, value: FeedbackValue) => Promise<unknown>;
+  /** Thumbs already given to this answer. */
+  rated?: FeedbackValue;
+  /** Under a "couldn't find" answer: where the question went. */
+  notFoundNote?: string;
+  /** Extra actions under the answer. */
+  children?: ReactNode;
 }) {
-  const [rated, setRated] = useState<FeedbackValue | null>(null);
+  const [rated, setRated] = useState<FeedbackValue | null>(ratedBefore ?? null);
   const questionId = reply.questionId;
+  const hrefFor = sourceHref ?? (linkSources ? adminSourceHref : () => null);
+  const canRate = reply.found && !!questionId && !!onRate;
   const rate = (value: FeedbackValue) => {
     if (!questionId || !onRate || rated) return;
     setRated(value);
     onRate(questionId, value).catch(() => setRated(null));
   };
+  const showNote = !!notFoundNote && !reply.found && !reply.refusal && !!questionId;
 
   return (
-    <div className="space-y-2">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+    <div className="space-y-2.5">
+      <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
         {reply.label}
       </p>
       <NectarAnswer text={reply.answer} />
+      {showNote ? <p className="text-xs text-muted-foreground">{notFoundNote}</p> : null}
       {reply.sources.length > 0 && (
-        <ol className="space-y-0.5 border-t border-border pt-1.5 text-[11px] text-muted-foreground">
-          {reply.sources.map((source, i) => {
-            const href = linkSources ? sourceHref(source) : null;
-            const label = sourceLabel(source);
-            return (
-              <li key={source.id}>
-                <span className="font-semibold">[{i + 1}]</span>{" "}
-                {href ? (
-                  <a href={href} className="text-[var(--hive-gold)] underline underline-offset-2">
-                    {label}
-                  </a>
-                ) : (
-                  label
-                )}
-              </li>
-            );
-          })}
-        </ol>
-      )}
-      {questionId && onRate && reply.refusal !== "off" && (
-        <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-          {rated ? (
-            <span>
-              {rated === "up" ? "Thanks for the feedback." : "Thanks. An admin will look at this."}
-            </span>
-          ) : (
-            <>
-              <span>Was this helpful?</span>
-              <button
-                type="button"
-                aria-label="Helpful"
-                onClick={() => rate("up")}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
-              >
-                <ThumbsUp className="h-3.5 w-3.5" />
-              </button>
-              <button
-                type="button"
-                aria-label="Not helpful"
-                onClick={() => rate("down")}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
-              >
-                <ThumbsDown className="h-3.5 w-3.5" />
-              </button>
-            </>
-          )}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-xs text-muted-foreground">Sources:</span>
+          {reply.sources.map((source, i) => (
+            <SourceChip
+              key={source.id}
+              n={i + 1}
+              label={sourceLabel(source)}
+              href={hrefFor(source)}
+            />
+          ))}
         </div>
       )}
+      {children}
+      {canRate &&
+        (rated ? (
+          <p className="text-xs text-muted-foreground">
+            {rated === "up" ? "Thanks for the feedback." : "Thanks. Sent to your admin to review."}
+          </p>
+        ) : (
+          <div className="flex items-center gap-1.5">
+            <button type="button" aria-label="Helpful" onClick={() => rate("up")} className={THUMB}>
+              <ThumbsUp className="h-4 w-4 text-[var(--hive-ok-fg)]" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              aria-label="Not helpful"
+              onClick={() => rate("down")}
+              className={THUMB}
+            >
+              <ThumbsDown className="h-4 w-4 text-[var(--hive-danger-fg)]" aria-hidden="true" />
+            </button>
+          </div>
+        ))}
     </div>
   );
 }

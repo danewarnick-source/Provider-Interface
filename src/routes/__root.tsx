@@ -179,7 +179,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     // runs in beforeLoad, i.e. only on a route transition — never poll or
     // re-check this on a mounted page, or it would forcibly interrupt an
     // already-loaded session mid-shift.
-    if (location.pathname.startsWith("/sign-policy/")) return;
+    // N6: /sign-policy/ redirects to the Policies tab in Ask Nectar, where the
+    // policy is marked as reviewed, so that page is exempt too (no loop).
+    const policyPages = ["/sign-policy/", "/dashboard/ask-nectar"];
+    if (policyPages.some((p) => location.pathname.startsWith(p))) return;
     const orgId = membershipRows[0]?.organization_id;
     if (!orgId) return;
     const { data: gatingDocs } = await supabase

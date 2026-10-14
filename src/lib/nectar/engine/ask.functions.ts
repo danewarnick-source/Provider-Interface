@@ -1,6 +1,7 @@
 // The one Nectar engine's server functions (N5): askNectar for both Ask
-// screens (admin /dashboard/help, staff /dashboard/ask-nectar) and
-// feedbackNectar for thumbs up / down.
+// screens (admin /dashboard/help, staff /dashboard/ask-nectar),
+// feedbackNectar for thumbs up / down, and getAskStatus (N6), so both screens
+// can say "Ask is turned off for your agency" before anyone asks.
 //
 // Every call checks, on the server, before anything else: signed in, an
 // active member of the agency, the agency has `nectar` on and its Ask setting
@@ -19,7 +20,7 @@ import { gatewayEmbeddingsFetch, gatewayFetch } from "@/lib/ai-bedrock.server";
 import { isAgencyAdmin } from "@/lib/access/levels";
 import { EMBED_DIMENSIONS, vectorLiteral } from "@/lib/nectar/library/indexing";
 import { runAskNectar } from "./ask";
-import { AskInput, FeedbackInput } from "./ask-input";
+import { AskInput, AskStatusInput, FeedbackInput } from "./ask-input";
 import {
   ADMIN_VIEW_ONLY,
   askOffResult,
@@ -105,6 +106,15 @@ export const askNectar = createServerFn({ method: "POST" })
         model: nectarModel(caller.orgId, getRequest()?.signal),
       },
     );
+  });
+
+/** Whether Ask is on for the agency, by the same check askNectar makes. Any active member. */
+export const getAskStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => AskStatusInput.parse(input))
+  .handler(async ({ data, context }): Promise<{ on: boolean }> => {
+    const caller = await askCaller(context, data.organizationId);
+    return { on: caller !== null };
   });
 
 /** Thumbs up or down on the caller's own answer. Down puts it in the Questions tab. */

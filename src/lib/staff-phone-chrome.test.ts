@@ -243,21 +243,23 @@ describe("staff phone leftover search + tab scroll (source)", () => {
   it("Ask NECTAR uses one chrome title and never prints AI error (status)", () => {
     const read = (rel: string) =>
       readFileSync(fileURLToPath(new URL(rel, import.meta.url)), "utf8");
-    const chat = read("../components/staff-mobile/ask-nectar-staff.tsx");
+    // N6: the staff chat moved to components/nectar/staff (it replaced ask-nectar-staff.tsx).
+    const chat = read("../components/nectar/staff/staff-ask-tab.tsx");
     // N5: one engine. The server picks what the caller may read; model errors are plain words.
     const ask = read("./nectar/engine/ask.functions.ts");
     const engine = read("./nectar/engine/ask.ts");
     const shifts = read("./nectar/context/shifts.ts");
     assert.doesNotMatch(chat, /Ask NECTAR · Staff/);
     assert.doesNotMatch(chat, /Staff assistant/);
-    assert.match(chat, /useAskNectar\("staff"\)/);
-    assert.match(chat, /<NectarReply reply=\{m\.reply\}/);
+    assert.match(chat, /useNectarChat\("staff"\)/);
+    assert.match(chat, /<NectarReply\s+reply=\{turn\.reply\}/);
     assert.match(ask, /throw new Error\(NECTAR_BUSY\)/);
     assert.match(ask, /throw new Error\(NECTAR_UNAVAILABLE\)/);
     for (const src of [chat, ask, engine]) assert.doesNotMatch(src, /AI error \(/);
     assert.doesNotMatch(chat, /\bHive\b/);
     assert.doesNotMatch(chat, /How many hours have I worked this period/);
-    assert.match(chat, /I only know your assignments, your shifts, and your policies/);
+    assert.match(chat, /It answers from your agency's policies, the state contract and the plans/);
+    assert.match(chat, /Client details here are only for the people you support/);
     assert.match(shifts, /\.from\("scheduled_shifts"\)/);
     assert.match(engine, /questionWantsPayOrHours\(q\)/);
     for (const src of [engine, shifts]) {
@@ -280,7 +282,7 @@ describe("staff phone leftover search + tab scroll (source)", () => {
 
   it("Ask NECTAR composer is in-flow, locked, and clears the clock bar", () => {
     const chat = readFileSync(
-      fileURLToPath(new URL("../components/staff-mobile/ask-nectar-staff.tsx", import.meta.url)),
+      fileURLToPath(new URL("../components/nectar/staff/staff-ask-tab.tsx", import.meta.url)),
       "utf8",
     );
     assert.match(chat, /data-ask-nectar-composer/);

@@ -138,7 +138,8 @@ class FakeQuery implements PromiseLike<Result> {
     const matched = rows.filter((r) => this.filters.every((f) => f.test(r)));
     if (this.op === "update") {
       for (const r of matched) Object.assign(r, this.payload as Row);
-      return { data: null, error: null };
+      // .update(...).select(cols) returns the changed rows, as PostgREST does.
+      return this.columns ? this.shape(matched) : { data: null, error: null };
     }
     if (this.countOnly) return { data: null, error: null, count: matched.length };
     const sorted = [...matched].sort((a, b) => {

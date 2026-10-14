@@ -2,8 +2,8 @@
 // base (N4) and the team member Policies tab (N6). Each one checks who is
 // asking on the server first (access.server.ts): owners and agency-wide
 // admins with agency_settings view/edit for the library, any active member
-// for their own policies and "Mark as reviewed". Then it reads or writes on
-// the caller's own data client.
+// for their own policies, "Mark as reviewed" and a cited state rule section.
+// Then it reads or writes on the caller's own data client.
 
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -17,6 +17,7 @@ import {
   OrgInput,
   QuestionInput,
   SaveDraftInput,
+  SectionInput,
   StaffRecordInput,
   StateRuleInput,
   TogglesInput,
@@ -33,6 +34,7 @@ import {
   readLibraryDocument,
   readRequiredSlots,
   readStateRule,
+  readStateRuleSection,
 } from "./library-read.server";
 import { createDraft, saveDraft, setAgencyToggles, setAudience } from "./library-write.server";
 import {
@@ -175,6 +177,15 @@ export const getPolicyForReview = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const caller = await requireLibraryMember(context, data.organizationId);
     return readPolicyForMember(caller.db, caller.orgId, data.documentId, caller.userId);
+  });
+
+/** A state rule section Nectar cited, read-only, for any active member (N6, Decision 7). */
+export const getStateRuleSection = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => SectionInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const caller = await requireLibraryMember(context, data.organizationId);
+    return readStateRuleSection(caller.db, data.sectionId);
   });
 
 /** "Mark as reviewed": any active member the published version is for; idempotent per version. */

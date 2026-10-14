@@ -6,6 +6,7 @@ import {
   NewVersionInput,
   QuestionInput,
   SaveDraftInput,
+  SectionInput,
   StaffRecordInput,
   StateRuleInput,
   UploadUrlInput,
@@ -100,5 +101,14 @@ describe("library server function inputs (N3)", () => {
     assert.equal(StateRuleInput.safeParse({ stateRuleId: DOC }).success, false);
     assert.equal(QuestionInput.safeParse({ organizationId: ORG, questionId: DOC }).success, true);
     assert.equal(QuestionInput.safeParse({ organizationId: ORG }).success, false);
+  });
+
+  it("a state rule section a team member opens from an answer is a section id (N6)", () => {
+    assert.deepEqual(SectionInput.parse({ organizationId: ORG, sectionId: DOC, clientId: DOC }), {
+      organizationId: ORG,
+      sectionId: DOC,
+    });
+    assert.equal(SectionInput.safeParse({ organizationId: ORG, sectionId: "s1" }).success, false);
+    assert.equal(SectionInput.safeParse({ sectionId: DOC }).success, false);
   });
 });

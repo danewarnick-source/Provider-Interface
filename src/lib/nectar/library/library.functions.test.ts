@@ -31,7 +31,8 @@ const ADMIN_WRITES = [
   "setRequiredPolicyAnswers",
   "refreshKnowledgeSearch",
 ];
-const MEMBER_CALLS = ["getPolicyForReview", "markPolicyReviewed"];
+// N6: a team member opens a state rule section Nectar cited (Decision 7).
+const MEMBER_CALLS = ["getPolicyForReview", "markPolicyReviewed", "getStateRuleSection"];
 
 describe("library.functions.ts (N3)", () => {
   it("exports the library server functions N4 and N6 call, and nothing else", () => {

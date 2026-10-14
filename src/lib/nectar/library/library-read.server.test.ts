@@ -40,6 +40,22 @@ describe("library-read.server.ts (N3)", () => {
     assert.doesNotMatch(fn, /\.update\(|\.insert\(/);
   });
 
+  it("a state rule section a team member opens from an answer: state rule sections only, published (N6)", () => {
+    const start = SRC.indexOf("export async function readStateRuleSection(");
+    const fn = SRC.slice(start, SRC.indexOf("export async function", start + 1));
+    assert.ok(start > 0);
+    assert.match(fn, /\.from\("knowledge_sections"\)/);
+    assert.match(fn, /\.eq\("id", sectionId\)\s*\.not\("state_document_id", "is", null\)/);
+    assert.match(fn, /if \(!section\?\.state_document_id\) throw new Error\(NOT_FOUND\);/);
+    assert.match(
+      fn,
+      /\.from\("state_rule_documents"\)[\s\S]*\.eq\("id", section\.state_document_id\)\s*\.not\("published_at", "is", null\)/,
+    );
+    // Never an agency's own (library or client) section, and nothing is written.
+    assert.doesNotMatch(fn, /"document_id"|client_id|organization_id/);
+    assert.doesNotMatch(fn, /\.update\(|\.insert\(/);
+  });
+
   it("a question for Add to library is read only within the caller's agency (N4)", () => {
     const fn = SRC.slice(SRC.indexOf("export async function readDraftQuestion("));
     assert.match(fn, /\.from\("nectar_questions"\)/);
