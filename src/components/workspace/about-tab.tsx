@@ -12,6 +12,7 @@ import {
 import type { CaseloadClient } from "@/hooks/use-caseload";
 import { ClientPhotoCard } from "@/components/clients/profile/client-photo-card";
 import { useClientCareData } from "@/hooks/use-client-care-data";
+import { MedsReadOnlyList } from "@/components/medications/meds-read-only-list";
 import type { CustomFieldWithValue } from "@/lib/clients/care-data.functions";
 import { ageOn, daysUntil } from "@/lib/clients/dates";
 import { contactLine, contactsWithRole, primaryContact } from "@/lib/clients/contacts";
@@ -122,6 +123,8 @@ export function AboutTab({ client }: { client: CaseloadClient }) {
           </div>
         </div>
       </Card>
+
+      <MedsReadOnlyList clientId={client.id} className="md:col-span-2" />
 
       {/* Identity & contact */}
       <Card className="p-5 md:col-span-2">

@@ -27,6 +27,7 @@ import { useClientContacts } from "@/components/clients/shared/hooks/use-client-
 import { contactLine, primaryContact } from "@/lib/clients/contacts";
 import { useClientCareData } from "@/hooks/use-client-care-data";
 import { ShiftFocus } from "@/components/clients/shared/shift-focus";
+import { MedsReadOnlyList } from "@/components/medications/meds-read-only-list";
 
 export const Route = createFileRoute("/dashboard/shift/$shiftId")({
   head: () => ({ meta: [{ title: "Shift Overview — Provider Interface" }] }),
@@ -103,6 +104,7 @@ function ShiftOverviewPage() {
       <ActiveClockPanel shift={shift} userId={user?.id} />
       {isContinuous && <RhsOverviewPanel shift={shift} />}
       <ShiftReportPanel shift={shift} userId={user?.id} />
+      <MedsReadOnlyList clientId={shift.client_id} serviceCode={shift.code?.code ?? shift.job_code ?? null} />
       <MarPanel shift={shift} userId={user?.id} />
       <CalloutPanel shift={shift} userId={user?.id} />
     </div>
@@ -447,7 +449,7 @@ function MarPanel({ shift, userId }: { shift: Shift; userId?: string }) {
   const { data: meds } = useQuery({
     queryKey: ["client-meds", shift.client_id],
     queryFn: async () => {
-      const { data } = await supabase.from("client_medications").select("id, medication_name, dosage, frequency, route, scheduled_times, is_prn, instructions").eq("client_id", shift.client_id).eq("is_active", true).order("medication_name");
+      const { data } = await supabase.from("client_medications").select("id, medication_name, dosage, scheduled_times, is_prn").eq("client_id", shift.client_id).eq("is_active", true).order("medication_name");
       return (data ?? []) as any[];
     },
   });
@@ -516,8 +518,6 @@ function MarPanel({ shift, userId }: { shift: Shift; userId?: string }) {
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="text-sm font-semibold">{m.medication_name} <span className="font-normal text-muted-foreground">{m.dosage}</span></p>
-                    <p className="text-[11px] text-muted-foreground">{m.route} · {m.frequency}</p>
-                    {m.instructions && <p className="text-[11px] text-muted-foreground">{m.instructions}</p>}
                   </div>
                   {m.is_prn && <Badge variant="outline" className="text-[10px]">PRN</Badge>}
                 </div>
