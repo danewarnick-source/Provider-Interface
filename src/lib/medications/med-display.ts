@@ -27,6 +27,20 @@ export interface DisplayMed {
 }
 
 /** Packaging choices on the form. Older rows may hold other wording. */
+/** How a medication goes in (the form's choices; Give meds lets staff change it). */
+export const MED_ROUTES = [
+  "By mouth",
+  "Under the tongue",
+  "On the skin",
+  "Inhaled",
+  "In the eye",
+  "In the ear",
+  "In the nose",
+  "Rectal",
+  "Injection",
+  "Feeding tube",
+] as const;
+
 export const DOSE_PACK = "dose pack";
 export const PACKAGING_OPTIONS = [
   { value: DOSE_PACK, label: "Pharmacy dose pack" },

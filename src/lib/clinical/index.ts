@@ -1,9 +1,6 @@
-// Domain Lib: Clinical, HHS, RHS & eMAR
+// Domain Lib: Clinical, HHS & incidents
 
 export * from '../hhs.functions';
 export * from '../hhs-certifications.functions';
-export * from '../emar-pass.functions';
-export * from '../emar-status';
-export * from '../med-attestation';
 export * from '../incidents.functions';
 export * from '../incident-deadlines';

@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
+  MED_ROUTES,
   formatTime12,
   howTakenSummary,
   medStatus,
@@ -14,6 +15,11 @@ import {
 } from "./med-display.ts";
 
 describe("med-display", () => {
+  it("offers one route list to the form and Give meds", () => {
+    assert.equal(MED_ROUTES[0], "By mouth");
+    assert.ok(MED_ROUTES.includes("Feeding tube"));
+  });
+
   it("formats times in 12-hour form", () => {
     assert.equal(formatTime12("08:00"), "8:00 AM");
     assert.equal(formatTime12("20:30"), "8:30 PM");

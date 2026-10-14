@@ -13,28 +13,74 @@ const migration = (suffix: string) => {
 };
 
 describe("logMedicationPass", () => {
-  const src = read("../emar-pass.functions.ts");
+  const src = read("./give-meds.functions.ts");
   const pass = src.slice(
     src.indexOf("export const logMedicationPass"),
-    src.indexOf("export const addEmarAddendum"),
+    src.indexOf("async function handsOnBlockedReason"),
   );
 
   it("checks the med belongs to the client, is active and not paused, and the caller may chart", () => {
     assert.match(pass, /passBlockReason\(m, data\.clientId\)/);
-    assert.match(pass, /rpc\("can_log_client_meds"/);
-    assert.match(pass, /client_id, is_active, discontinued_at, paused_at/);
+    assert.match(src, /rpc\("can_log_client_meds"/);
+    assert.match(pass, /client_id, organization_id, is_active, discontinued_at, paused_at/);
   });
 
-  it("treats every charted status (including 'administered') as a duplicate", () => {
-    assert.match(pass, /\.in\("status", \[\.\.\.CHARTED_STATUSES\]\)/);
-    assert.match(pass, /This dose has already been documented/);
+  it("reads how_taken (not support_level) and keeps the training and nurse-role checks", () => {
+    assert.match(pass, /administratorRole\(m\.how_taken, data\.nurseRole\)/);
+    const code = pass
+      .split("\n")
+      .filter((l) => !l.trim().startsWith("//"))
+      .join("\n");
+    assert.doesNotMatch(code, /support_level/);
+    assert.match(pass, /medTrainingStatus\(/);
+    assert.match(pass, /rpc\("med_admin_role_permitted"/);
   });
 
-  it("charts through log_medication_dose with a request id and the route", () => {
+  it("charts through log_medication_dose only, with no browser count or decrement", () => {
     assert.match(pass, /rpc\("log_medication_dose"/);
-    assert.match(pass, /client_request_id: clientRequestId/);
-    assert.match(pass, /route: data\.route/);
     assert.doesNotMatch(pass, /from\("emar_logs"\)\s*\.insert/);
+    assert.doesNotMatch(pass, /from\("controlled_med_counts"\)\s*\.insert/);
+    assert.doesNotMatch(pass, /pill_count_current/);
+    assert.doesNotMatch(src, /controlledExpected|expected_count:/);
+  });
+
+  it("the old pass path and its shadow checklists are gone", () => {
+    assert.doesNotMatch(
+      read("../emar-pass.functions.ts"),
+      /logMedicationPass =|logShiftChangeCount/,
+    );
+  });
+});
+
+describe("Give meds is the only place doses are logged", () => {
+  const routes = new URL("../../routes/", import.meta.url);
+  const screens = [
+    readFileSync(new URL("dashboard.workspace.$clientId.tsx", routes), "utf8"),
+    readFileSync(new URL("dashboard.hhs-hub.$clientId.tsx", routes), "utf8"),
+    readFileSync(new URL("dashboard.shift.$shiftId.tsx", routes), "utf8"),
+    read("../../components/medications/give-meds/clock-out-meds.tsx"),
+  ];
+  it("each screen uses the Give meds component", () => {
+    for (const s of screens) assert.match(s, /<GiveMeds\b/);
+    assert.match(read("../../components/evv/punch-pad.tsx"), /<ClockOutMeds\b/);
+  });
+  it("no screen writes emar_logs or calls logMedicationPass itself", () => {
+    for (const s of [...screens, read("../../components/evv/punch-pad.tsx")]) {
+      assert.doesNotMatch(s, /from\("emar_logs"\)\s*\.insert|logMedicationPass/);
+    }
+  });
+  it("Wrong or missed dose? files a Medication error incident linked to the dose", () => {
+    const logged = read("../../components/medications/give-meds/logged-doses.tsx");
+    assert.match(logged, /defaultCategory="Medication error"/);
+    assert.match(logged, /emarLogId=/);
+    const incidents = read("../incidents.functions.ts");
+    assert.match(incidents, /emar_log_id: emarLogId/);
+    assert.match(incidents, /That dose isn't this client's/);
+    assert.match(incidents, /is_medication_error: true/);
+  });
+  it("the clock-out link points at the MAR tab that exists", () => {
+    assert.match(read("../../components/medications/give-meds/clock-out-meds.tsx"), /tab: "emar"/);
+    assert.doesNotMatch(read("../../components/evv/punch-pad.tsx"), /mar-emar/);
   });
 });
 
@@ -45,6 +91,26 @@ describe("HHS meds path", () => {
 });
 
 describe("dose database rules", () => {
+  it("M5: one function saves the dose with its one-statement count change", () => {
+    const sql = migration("_meds_m5_log_medication_dose_counts_times_training.sql");
+    assert.match(sql, /set pill_count_current = pill_count_current - 1/);
+    assert.match(sql, /returning pill_count_current into v_expected_after/);
+    assert.doesNotMatch(sql, /greatest\(0/i, "never clamps at 0");
+    assert.match(sql, /v_expected_before := v_med\.pill_count_current/);
+    assert.match(sql, /interval '24 hours'/);
+    assert.match(sql, /med_training_status\(v_uid/);
+    assert.match(sql, /med_witness_confirmations/);
+    assert.match(sql, /v_conf\.witness_id = v_uid/);
+  });
+
+  it("M5: follow-ups go through record_prn_followup and the lock covers every charted field", () => {
+    const f = migration("_meds_m5_prn_followups.sql");
+    assert.match(f, /'prn_followup_due'/);
+    assert.match(f, /cron\.schedule\('prn-followup-due'/);
+    const lock = migration("_meds_m5_lock_logged_doses_fully.sql");
+    assert.match(lock, /to_jsonb\(new\) - v_review_fields/);
+  });
+
   it("guards taken doses with a unique index and request ids", () => {
     const sql = migration("_meds_m1_emar_logs_new_columns.sql");
     assert.match(sql, /client_request_id uuid not null default gen_random_uuid\(\)/);

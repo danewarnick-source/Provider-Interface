@@ -28,6 +28,7 @@ import { contactLine, primaryContact } from "@/lib/clients/contacts";
 import { useClientCareData } from "@/hooks/use-client-care-data";
 import { ShiftFocus } from "@/components/clients/shared/shift-focus";
 import { MedsReadOnlyList } from "@/components/medications/meds-read-only-list";
+import { GiveMeds } from "@/components/medications/give-meds/give-meds";
 
 export const Route = createFileRoute("/dashboard/shift/$shiftId")({
   head: () => ({ meta: [{ title: "Shift Overview — Provider Interface" }] }),
@@ -105,7 +106,7 @@ function ShiftOverviewPage() {
       {isContinuous && <RhsOverviewPanel shift={shift} />}
       <ShiftReportPanel shift={shift} userId={user?.id} />
       <MedsReadOnlyList clientId={shift.client_id} serviceCode={shift.code?.code ?? shift.job_code ?? null} />
-      <MarPanel shift={shift} userId={user?.id} />
+      <MarPanel shift={shift} />
       <CalloutPanel shift={shift} userId={user?.id} />
     </div>
   );
@@ -444,121 +445,14 @@ function ShiftReportPanel({ shift, userId }: { shift: Shift; userId?: string }) 
   );
 }
 
-function MarPanel({ shift, userId }: { shift: Shift; userId?: string }) {
-  const qc = useQueryClient();
-  const { data: meds } = useQuery({
-    queryKey: ["client-meds", shift.client_id],
-    queryFn: async () => {
-      const { data } = await supabase.from("client_medications").select("id, medication_name, dosage, scheduled_times, is_prn").eq("client_id", shift.client_id).eq("is_active", true).order("medication_name");
-      return (data ?? []) as any[];
-    },
-  });
-  // Unified read: any administration for this client that either was recorded
-  // from this shift (source='shift', scheduled_shift_id=shift.id) OR was
-  // recorded in the eMAR during the shift window. One record, both surfaces.
-  const { data: entries } = useQuery({
-    queryKey: ["mar-entries-unified", shift.id, shift.client_id],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("emar_logs")
-        .select("id, medication_id, scheduled_for, scheduled_time_label, status, administered_at, source, scheduled_shift_id, notes, staff_name")
-        .eq("client_id", shift.client_id)
-        .or(`scheduled_shift_id.eq.${shift.id},and(administered_at.gte.${shift.starts_at},administered_at.lte.${shift.ends_at})`);
-      return (data ?? []) as any[];
-    },
-  });
-
-  // Map the shift-screen's simple statuses to the unified emar_logs status set.
-  //   given   → administered
-  //   refused → refused
-  //   missed  → missed
-  //   held    → held
-  const record = useMutation({
-    mutationFn: async (p: { med: any; status: "given" | "refused" | "missed" | "held"; scheduled_time?: string; notes?: string }) => {
-      const statusMap = { given: "administered", refused: "refused", missed: "missed", held: "held" } as const;
-      const now = new Date().toISOString();
-      const { error } = await (supabase as any).from("emar_logs").insert({
-        organization_id: shift.organization_id,
-        client_id: shift.client_id,
-        medication_id: p.med.id,
-        source: "shift",
-        scheduled_shift_id: shift.id,
-        // scheduled_for is NOT NULL — fall back to the shift start when the row
-        // is a PRN / unscheduled pass. Keep the raw HH:MM label for display.
-        scheduled_for: shift.starts_at,
-        scheduled_time_label: p.scheduled_time ?? null,
-        status: statusMap[p.status],
-        administered_at: p.status === "given" ? now : null,
-        staff_id: userId,
-        notes: p.notes ?? null,
-      });
-      if (error) throw error;
-    },
-    onSuccess: (_d, vars) => {
-      toast.success(`Marked ${vars.status}`);
-      qc.invalidateQueries({ queryKey: ["mar-entries-unified", shift.id, shift.client_id] });
-    },
-    onError: (e: any) => toast.error(e.message ?? "Record failed"),
-  });
-
-  const entryFor = (medId: string, time?: string) =>
-    (entries ?? []).find((e) => e.medication_id === medId && (time ? e.scheduled_time_label === time : true));
-
+function MarPanel({ shift }: { shift: Shift }) {
   return (
     <section className="rounded-xl border border-border bg-card p-4">
-      <h2 className="text-sm font-semibold mb-2 flex items-center gap-2"><Pill className="h-4 w-4" /> Medication Administration (MAR)</h2>
-      {!meds || meds.length === 0 ? (
-        <p className="text-xs text-muted-foreground">No active medications on record for this client.</p>
-      ) : (
-        <ul className="space-y-2">
-          {meds.map((m) => {
-            const times = m.scheduled_times?.length ? m.scheduled_times : (m.is_prn ? ["PRN"] : ["—"]);
-            return (
-              <li key={m.id} className="rounded-md border border-border p-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold">{m.medication_name} <span className="font-normal text-muted-foreground">{m.dosage}</span></p>
-                  </div>
-                  {m.is_prn && <Badge variant="outline" className="text-[10px]">PRN</Badge>}
-                </div>
-                <div className="mt-2 space-y-1">
-                  {times.map((t: string) => {
-                    const e = entryFor(m.id, m.is_prn ? undefined : t);
-                    const stampAt = e?.administered_at ?? e?.scheduled_for;
-                    return (
-                      <div key={t} className="flex items-center gap-2">
-                        <span className="text-[11px] font-mono w-12 shrink-0 text-muted-foreground">{t}</span>
-                        {e ? (
-                          <Badge className={
-                            e.status === "administered" || e.status === "self_administered" ? "bg-emerald-600 text-white" :
-                            e.status === "refused" ? "bg-amber-600 text-white" :
-                            e.status === "missed" || e.status === "omitted" ? "bg-rose-600 text-white" :
-                            e.status === "loa" ? "bg-blue-600 text-white" : "bg-muted"
-                          }>
-                            {e.status}
-                            {stampAt ? ` · ${new Date(stampAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : ""}
-                            {e.source === "emar" ? " · eMAR" : ""}
-                          </Badge>
-                        ) : (
-                          <div className="flex gap-1">
-                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => record.mutate({ med: m, status: "given", scheduled_time: m.is_prn ? undefined : t })}>Given</Button>
-                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => record.mutate({ med: m, status: "refused", scheduled_time: m.is_prn ? undefined : t })}>Refused</Button>
-                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => record.mutate({ med: m, status: "missed", scheduled_time: m.is_prn ? undefined : t })}>Missed</Button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      <h2 className="text-sm font-semibold mb-2 flex items-center gap-2"><Pill className="h-4 w-4" /> Give meds</h2>
+      <GiveMeds clientId={shift.client_id} serviceContext={shift.code?.code ?? shift.job_code ?? null} scheduledShiftId={shift.id} />
     </section>
   );
 }
-
 
 function CalloutPanel({ shift, userId }: { shift: Shift; userId?: string }) {
   const qc = useQueryClient();

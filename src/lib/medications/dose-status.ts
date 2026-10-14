@@ -1,6 +1,6 @@
 // Dose status rules for emar_logs. Doses are stored as 'administered' (taken)
 // or an exception status; older rows may still say 'self_administered' or
-// 'given'. Pure; used by logMedicationPass and its tests.
+// 'given'. Pure; used by logMedicationPass, Give meds and the MAR.
 
 /** Statuses that mean the dose was taken (old and current spellings). */
 export const TAKEN_STATUSES = ["administered", "self_administered", "given"] as const;
@@ -15,9 +15,6 @@ export const CHARTED_STATUSES = [
   "loa",
 ] as const;
 
-export type PassStatus = "self_administered" | "given" | "refused" | "omitted" | "missed" | "loa";
-export type StoredStatus = "administered" | "refused" | "omitted" | "missed";
-
 export function isTakenStatus(status: string | null | undefined): boolean {
   return (TAKEN_STATUSES as readonly string[]).includes(String(status ?? "").toLowerCase());
 }
@@ -27,13 +24,6 @@ export function isDoseAlreadyCharted(existing: ReadonlyArray<{ status: string | 
   return existing.some((r) =>
     (CHARTED_STATUSES as readonly string[]).includes(String(r.status ?? "").toLowerCase()),
   );
-}
-
-/** What logMedicationPass stores for a pass status. */
-export function storedStatus(status: PassStatus): StoredStatus {
-  if (status === "self_administered" || status === "given") return "administered";
-  if (status === "loa") return "omitted";
-  return status;
 }
 
 export interface PassMedication {

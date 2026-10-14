@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef, useEffect } from "react";
+import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
 import { z } from "zod";
@@ -36,8 +36,7 @@ import { invalidateStaffCaseloadWork } from "@/lib/staff-caseload-cache";
 import { useClientFeature } from "@/lib/clients/features";
 import { useClientActiveCodes } from "@/components/clients/shared/hooks/use-active-codes";
 import { NoteTriggerPrompt } from "@/components/residential/note-trigger-prompt";
-import { DailyNoteMedsBlock, type DailyNoteMedication } from "@/components/medications/daily-note-meds-block";
-import { type PendingMedDose } from "@/components/medications/shift-med-due-check";
+import { GiveMeds, type GiveMedsStatus } from "@/components/medications/give-meds/give-meds";
 import { NectarShiftNoteDraft } from "@/components/nectar/nectar-shift-note-draft";
 import { NectarCompletenessErrors } from "@/components/nectar/nectar-completeness-errors";
 import { NECTAR_DRAFT_MIN_WORDS, countNoteWords } from "@/lib/nectar-note-gate";
@@ -109,19 +108,6 @@ export function HhsClientHub({ clientId }: { clientId: string }) {
         .eq("id", clientId)
         .maybeSingle();
       return data as ClientFull | null;
-    },
-  });
-
-  const { data: meds = [] } = useQuery({
-    enabled: isRouteUuid(clientId),
-    queryKey: ["hhs-meds", clientId],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("client_medications")
-        .select("*")
-        .eq("client_id", clientId)
-        .eq("is_active", true);
-      return data ?? [];
     },
   });
 
@@ -205,7 +191,6 @@ export function HhsClientHub({ clientId }: { clientId: string }) {
           <DailyNoteTab
             orgId={orgId}
             client={client}
-            medications={(meds as DailyNoteMedication[]) ?? []}
           />
         </TabsContent>
         <TabsContent value="att" className="mt-3">
@@ -233,11 +218,9 @@ const today = () => denverYmd();
 function DailyNoteTab({
   orgId,
   client,
-  medications,
 }: {
   orgId: string;
   client: ClientFull;
-  medications: DailyNoteMedication[];
 }) {
   const navigate = useNavigate();
   const [note, setNote] = useState("");
@@ -250,8 +233,12 @@ function DailyNoteTab({
   const [triggersResolved, setTriggersResolved] = useState(true);
   // Final attestation — "I attest this note accurately reflects today's support".
   const [finalAttest, setFinalAttest] = useState(false);
+  // Doses due so far on the note's day must be logged in Give meds first.
   const [medDosesResolved, setMedDosesResolved] = useState(true);
-  const [pendingMedDoses, setPendingMedDoses] = useState<PendingMedDose[]>([]);
+  const onMedStatus = useCallback(
+    (st: GiveMedsStatus) => setMedDosesResolved(!st.loading && st.dueByNow === 0),
+    [],
+  );
   const [nectarUsed, setNectarUsed] = useState(false);
   const [nectarAssistChecked, setNectarAssistChecked] = useState(false);
   const [recordDate, setRecordDate] = useState(() => denverYmd());
@@ -341,7 +328,7 @@ function DailyNoteTab({
       return;
     }
     if (!medDosesResolved) {
-      toast.error("Confirm medications on this daily note before submitting.");
+      toast.error("Log every dose due so far today in Give meds (given or not given) before saving the note.");
       return;
     }
     if (!incidentAnswer) {
@@ -379,19 +366,6 @@ function DailyNoteTab({
     if (!ok) return;
 
     const signature = canvasRef.current?.toDataURL("image/png") ?? null;
-
-    if (pendingMedDoses.length > 0) {
-      try {
-        const { logMedicationPass } = await import("@/lib/emar-pass.functions");
-        for (const dose of pendingMedDoses) {
-          await logMedicationPass({ data: dose });
-        }
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        toast.error(`Medication log failed: ${msg}`);
-        return;
-      }
-    }
 
     try {
       const denverToday = denverYmd();
@@ -618,14 +592,10 @@ function DailyNoteTab({
           ) : null}
         </div>
 
-        <DailyNoteMedsBlock
-          clientId={client.id}
-          clientName={client.first_name}
-          medications={medications}
-          recordDate={recordDate}
-          onPendingDosesChange={setPendingMedDoses}
-          onResolvedChange={setMedDosesResolved}
-        />
+        <div className="space-y-2 rounded-lg border border-border p-3">
+          <p className="text-sm font-semibold">Medications</p>
+          <GiveMeds clientId={client.id} day={recordDate} serviceContext="HHS" onStatus={onMedStatus} />
+        </div>
 
 
         {/* Action buttons */}

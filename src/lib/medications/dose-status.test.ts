@@ -1,11 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import {
-  isDoseAlreadyCharted,
-  isTakenStatus,
-  passBlockReason,
-  storedStatus,
-} from "./dose-status.ts";
+import { isDoseAlreadyCharted, isTakenStatus, passBlockReason } from "./dose-status.ts";
 
 describe("duplicate-dose guard", () => {
   it("treats a stored 'administered' row as charted, so the dose can't be charted twice", () => {
@@ -31,12 +26,7 @@ describe("duplicate-dose guard", () => {
     assert.equal(isDoseAlreadyCharted([{ status: null }, { status: "draft" }]), false);
   });
 
-  it("a pass stores what the database guard checks", () => {
-    assert.equal(storedStatus("self_administered"), "administered");
-    assert.equal(storedStatus("given"), "administered");
-    assert.equal(storedStatus("loa"), "omitted");
-    assert.equal(storedStatus("refused"), "refused");
-    assert.equal(isDoseAlreadyCharted([{ status: storedStatus("given") }]), true);
+  it("reads taken statuses in any case", () => {
     assert.equal(isTakenStatus("ADMINISTERED"), true);
     assert.equal(isTakenStatus("refused"), false);
   });
