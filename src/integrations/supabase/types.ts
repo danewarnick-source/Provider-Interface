@@ -5979,9 +5979,11 @@ export type Database = {
         Row: {
           client_id: string
           context: string
+          count_after: number | null
           counted_value: number
           created_at: string
           emar_log_id: string | null
+          expected_after: number | null
           expected_count: number | null
           flagged: boolean
           id: string
@@ -5992,13 +5994,17 @@ export type Database = {
           staff_id: string
           staff_name: string | null
           variance: number | null
+          witness_confirmed_at: string | null
+          witness_id: string | null
         }
         Insert: {
           client_id: string
           context: string
+          count_after?: number | null
           counted_value: number
           created_at?: string
           emar_log_id?: string | null
+          expected_after?: number | null
           expected_count?: number | null
           flagged?: boolean
           id?: string
@@ -6009,13 +6015,17 @@ export type Database = {
           staff_id: string
           staff_name?: string | null
           variance?: number | null
+          witness_confirmed_at?: string | null
+          witness_id?: string | null
         }
         Update: {
           client_id?: string
           context?: string
+          count_after?: number | null
           counted_value?: number
           created_at?: string
           emar_log_id?: string | null
+          expected_after?: number | null
           expected_count?: number | null
           flagged?: boolean
           id?: string
@@ -6026,6 +6036,8 @@ export type Database = {
           staff_id?: string
           staff_name?: string | null
           variance?: number | null
+          witness_confirmed_at?: string | null
+          witness_id?: string | null
         }
         Relationships: [
           {
@@ -6695,6 +6707,7 @@ export type Database = {
           prn_followup_at: string | null
           prn_followup_by: string | null
           prn_followup_due_at: string | null
+          prn_followup_note: string | null
           prn_reason: string | null
           prn_tried_first: string | null
           provider_id: string | null
@@ -6713,7 +6726,9 @@ export type Database = {
           staff_id: string | null
           staff_name: string | null
           status: string
+          training_checked: string | null
           variance_note: string | null
+          witness_confirmed_at: string | null
         }
         Insert: {
           actual_taken_at?: string | null
@@ -6748,6 +6763,7 @@ export type Database = {
           prn_followup_at?: string | null
           prn_followup_by?: string | null
           prn_followup_due_at?: string | null
+          prn_followup_note?: string | null
           prn_reason?: string | null
           prn_tried_first?: string | null
           provider_id?: string | null
@@ -6766,7 +6782,9 @@ export type Database = {
           staff_id?: string | null
           staff_name?: string | null
           status: string
+          training_checked?: string | null
           variance_note?: string | null
+          witness_confirmed_at?: string | null
         }
         Update: {
           actual_taken_at?: string | null
@@ -6801,6 +6819,7 @@ export type Database = {
           prn_followup_at?: string | null
           prn_followup_by?: string | null
           prn_followup_due_at?: string | null
+          prn_followup_note?: string | null
           prn_reason?: string | null
           prn_tried_first?: string | null
           provider_id?: string | null
@@ -6819,7 +6838,9 @@ export type Database = {
           staff_id?: string | null
           staff_name?: string | null
           status?: string
+          training_checked?: string | null
           variance_note?: string | null
+          witness_confirmed_at?: string | null
         }
         Relationships: [
           {
@@ -11354,6 +11375,71 @@ export type Database = {
           },
           {
             foreignKeyName: "locations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      med_witness_confirmations: {
+        Row: {
+          client_id: string
+          confirmed_at: string
+          emar_log_id: string | null
+          id: string
+          medication_id: string
+          organization_id: string
+          requested_by: string
+          used_at: string | null
+          witness_id: string
+        }
+        Insert: {
+          client_id: string
+          confirmed_at?: string
+          emar_log_id?: string | null
+          id?: string
+          medication_id: string
+          organization_id: string
+          requested_by: string
+          used_at?: string | null
+          witness_id: string
+        }
+        Update: {
+          client_id?: string
+          confirmed_at?: string
+          emar_log_id?: string | null
+          id?: string
+          medication_id?: string
+          organization_id?: string
+          requested_by?: string
+          used_at?: string | null
+          witness_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "med_witness_confirmations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "med_witness_confirmations_emar_log_id_fkey"
+            columns: ["emar_log_id"]
+            isOneToOne: false
+            referencedRelation: "emar_logs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "med_witness_confirmations_medication_id_fkey"
+            columns: ["medication_id"]
+            isOneToOne: false
+            referencedRelation: "client_medications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "med_witness_confirmations_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -17968,6 +18054,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      med_training_status: {
+        Args: { _on?: string; _org: string; _user: string }
+        Returns: string
+      }
       medication_belongs_to_client: {
         Args: { _client_id: string; _medication_id: string; _org: string }
         Returns: boolean
@@ -18041,6 +18131,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      notify_prn_followups_due: { Args: never; Returns: number }
       org_member_directory_rows: {
         Args: never
         Returns: {
@@ -18086,6 +18177,16 @@ export type Database = {
         Returns: number
       }
       reactivate_client: { Args: { _client: string }; Returns: undefined }
+      record_prn_followup: {
+        Args: {
+          _effect: string
+          _log_id: string
+          _note?: string
+          _prescriber_notified?: boolean
+          _tried_first?: string
+        }
+        Returns: undefined
+      }
       reject_med_change_proposal: {
         Args: { _notes: string; _proposal_id: string }
         Returns: undefined
