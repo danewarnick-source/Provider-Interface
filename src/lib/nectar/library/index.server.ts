@@ -23,8 +23,8 @@ import {
   type SectionSource,
 } from "./indexing";
 import { looksCut } from "./library";
-import { splitSections } from "./sections";
 import { rereadStoredText } from "./text.server";
+import { splitDocumentSections } from "./typed-sections";
 
 type Db = SupabaseClient<Database>;
 
@@ -117,10 +117,11 @@ async function writeSections(
   db: Db,
   source: SectionSource,
   text: string,
+  mimeType: string | null,
   orgId: string | null,
   opts: IndexOptions,
 ) {
-  const sections = splitSections(text);
+  const sections = splitDocumentSections(text, mimeType);
   const vectors = opts.embed
     ? await embedAll(
         orgId,
@@ -147,7 +148,7 @@ export async function indexLibraryVersion(db: Db, doc: IndexableDocument, opts: 
     version: doc.version,
     title: doc.title,
   };
-  return writeSections(db, source, text, doc.organization_id, opts);
+  return writeSections(db, source, text, doc.mime_type, doc.organization_id, opts);
 }
 
 /** Indexes one state rule version (hive executives; no agency, so only the account-wide rate limit). */
@@ -168,7 +169,7 @@ export async function indexStateRuleVersion(
     version: rule.version,
     title: rule.title,
   };
-  return writeSections(db, source, text, null, opts);
+  return writeSections(db, source, text, rule.mime_type ?? null, null, opts);
 }
 
 /** Embeds sections still missing one (this agency's, or one state rule's) before the deadline. */
@@ -189,14 +190,23 @@ export async function embedPendingSections(
       ? await base.eq("organization_id", scope.organizationId)
       : await base.eq("state_document_id", scope.stateDocumentId);
   if (error || !rows?.length) return 0;
-  const docIds = [...new Set(rows.map((r) => r.document_id).filter((id): id is string => !!id))];
+  const ids = (key: "document_id" | "state_document_id") => [
+    ...new Set(rows.map((r) => r[key]).filter((id): id is string => !!id)),
+  ];
   const titles = new Map<string, string>();
-  if (docIds.length) {
-    const { data: docs } = await db.from("nectar_documents").select("id, title").in("id", docIds);
-    for (const d of docs ?? []) titles.set(d.id, d.title);
-  }
+  const [docs, rules] = await Promise.all([
+    ids("document_id").length
+      ? db.from("nectar_documents").select("id, title").in("id", ids("document_id"))
+      : null,
+    ids("state_document_id").length
+      ? db.from("state_rule_documents").select("id, title").in("id", ids("state_document_id"))
+      : null,
+  ]);
+  for (const d of [...(docs?.data ?? []), ...(rules?.data ?? [])]) titles.set(d.id, d.title);
   const orgId = "organizationId" in scope ? scope.organizationId : null;
-  const inputs = rows.map((r) => embeddingInput(titles.get(r.document_id ?? "") ?? "", r));
+  const inputs = rows.map((r) =>
+    embeddingInput(titles.get(r.document_id ?? r.state_document_id ?? "") ?? "", r),
+  );
   const vectors = await embedAll(orgId, inputs, opts.deadline);
   let done = 0;
   for (const [i, row] of rows.entries()) {

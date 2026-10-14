@@ -3659,13 +3659,74 @@ export type Database = {
           },
         ]
       }
+      client_medication_changes: {
+        Row: {
+          action: string
+          changed_at: string
+          changed_by: string | null
+          changes: Json
+          client_id: string
+          id: string
+          medication_id: string
+          organization_id: string
+          reason: string | null
+        }
+        Insert: {
+          action: string
+          changed_at?: string
+          changed_by?: string | null
+          changes?: Json
+          client_id: string
+          id?: string
+          medication_id: string
+          organization_id: string
+          reason?: string | null
+        }
+        Update: {
+          action?: string
+          changed_at?: string
+          changed_by?: string | null
+          changes?: Json
+          client_id?: string
+          id?: string
+          medication_id?: string
+          organization_id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_medication_changes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_medication_changes_medication_id_fkey"
+            columns: ["medication_id"]
+            isOneToOne: false
+            referencedRelation: "client_medications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_medication_changes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_medications: {
         Row: {
           adverse_effects: string | null
           am_pm: string | null
+          bsp_document_id: string | null
           choking_risk: boolean
           choking_risk_details: string | null
           client_id: string
+          consent_date: string | null
+          consent_document_path: string | null
           contributes_to_swallowing_difficulty: boolean
           controlled_schedule: string | null
           created_at: string
@@ -3674,23 +3735,39 @@ export type Database = {
           discontinued_at: string | null
           discontinued_by: string | null
           dosage: string | null
+          dose_form: string | null
           end_date: string | null
           frequency: string | null
+          how_taken: string | null
+          hrc_restriction_id: string | null
           id: string
           instructions: string | null
           is_active: boolean
           is_controlled: boolean
           is_prn: boolean
+          is_psychotropic: boolean
           is_rescue: boolean
+          label_photo_path: string | null
           medication_name: string
+          next_review_date: string | null
           organization_id: string
           packaging: string | null
+          packaging_approval_path: string | null
+          pause_reason: string | null
+          paused_at: string | null
           pharmacy: string | null
           pill_count_current: number | null
           pill_count_updated_at: string | null
           prescriber: string | null
+          prn_call_if: string | null
+          prn_followup_minutes: number | null
           prn_instructions: string | null
+          prn_max_per_day: number | null
+          prn_min_hours: number | null
+          prn_try_first: string | null
+          psychotropic_type: string | null
           purpose: string | null
+          reference_key: string | null
           refill_date: string | null
           refill_requested_at: string | null
           refill_requested_by: string | null
@@ -3702,16 +3779,22 @@ export type Database = {
           scheduled_times: string[]
           side_effects: string | null
           start_date: string | null
+          stop_reason: string | null
+          strength: string | null
           support_explanation: string | null
           support_level: string | null
           support_level_needs_review: boolean
+          used_for_behavior: boolean
         }
         Insert: {
           adverse_effects?: string | null
           am_pm?: string | null
+          bsp_document_id?: string | null
           choking_risk?: boolean
           choking_risk_details?: string | null
           client_id: string
+          consent_date?: string | null
+          consent_document_path?: string | null
           contributes_to_swallowing_difficulty?: boolean
           controlled_schedule?: string | null
           created_at?: string
@@ -3720,23 +3803,39 @@ export type Database = {
           discontinued_at?: string | null
           discontinued_by?: string | null
           dosage?: string | null
+          dose_form?: string | null
           end_date?: string | null
           frequency?: string | null
+          how_taken?: string | null
+          hrc_restriction_id?: string | null
           id?: string
           instructions?: string | null
           is_active?: boolean
           is_controlled?: boolean
           is_prn?: boolean
+          is_psychotropic?: boolean
           is_rescue?: boolean
+          label_photo_path?: string | null
           medication_name: string
+          next_review_date?: string | null
           organization_id: string
           packaging?: string | null
+          packaging_approval_path?: string | null
+          pause_reason?: string | null
+          paused_at?: string | null
           pharmacy?: string | null
           pill_count_current?: number | null
           pill_count_updated_at?: string | null
           prescriber?: string | null
+          prn_call_if?: string | null
+          prn_followup_minutes?: number | null
           prn_instructions?: string | null
+          prn_max_per_day?: number | null
+          prn_min_hours?: number | null
+          prn_try_first?: string | null
+          psychotropic_type?: string | null
           purpose?: string | null
+          reference_key?: string | null
           refill_date?: string | null
           refill_requested_at?: string | null
           refill_requested_by?: string | null
@@ -3748,16 +3847,22 @@ export type Database = {
           scheduled_times?: string[]
           side_effects?: string | null
           start_date?: string | null
+          stop_reason?: string | null
+          strength?: string | null
           support_explanation?: string | null
           support_level?: string | null
           support_level_needs_review?: boolean
+          used_for_behavior?: boolean
         }
         Update: {
           adverse_effects?: string | null
           am_pm?: string | null
+          bsp_document_id?: string | null
           choking_risk?: boolean
           choking_risk_details?: string | null
           client_id?: string
+          consent_date?: string | null
+          consent_document_path?: string | null
           contributes_to_swallowing_difficulty?: boolean
           controlled_schedule?: string | null
           created_at?: string
@@ -3766,23 +3871,39 @@ export type Database = {
           discontinued_at?: string | null
           discontinued_by?: string | null
           dosage?: string | null
+          dose_form?: string | null
           end_date?: string | null
           frequency?: string | null
+          how_taken?: string | null
+          hrc_restriction_id?: string | null
           id?: string
           instructions?: string | null
           is_active?: boolean
           is_controlled?: boolean
           is_prn?: boolean
+          is_psychotropic?: boolean
           is_rescue?: boolean
+          label_photo_path?: string | null
           medication_name?: string
+          next_review_date?: string | null
           organization_id?: string
           packaging?: string | null
+          packaging_approval_path?: string | null
+          pause_reason?: string | null
+          paused_at?: string | null
           pharmacy?: string | null
           pill_count_current?: number | null
           pill_count_updated_at?: string | null
           prescriber?: string | null
+          prn_call_if?: string | null
+          prn_followup_minutes?: number | null
           prn_instructions?: string | null
+          prn_max_per_day?: number | null
+          prn_min_hours?: number | null
+          prn_try_first?: string | null
+          psychotropic_type?: string | null
           purpose?: string | null
+          reference_key?: string | null
           refill_date?: string | null
           refill_requested_at?: string | null
           refill_requested_by?: string | null
@@ -3794,16 +3915,33 @@ export type Database = {
           scheduled_times?: string[]
           side_effects?: string | null
           start_date?: string | null
+          stop_reason?: string | null
+          strength?: string | null
           support_explanation?: string | null
           support_level?: string | null
           support_level_needs_review?: boolean
+          used_for_behavior?: boolean
         }
         Relationships: [
+          {
+            foreignKeyName: "client_medications_bsp_document_id_fkey"
+            columns: ["bsp_document_id"]
+            isOneToOne: false
+            referencedRelation: "client_documents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "client_medications_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_medications_hrc_restriction_id_fkey"
+            columns: ["hrc_restriction_id"]
+            isOneToOne: false
+            referencedRelation: "hrc_restriction_records"
             referencedColumns: ["id"]
           },
         ]
@@ -6531,6 +6669,7 @@ export type Database = {
           administrator_role: string | null
           attestation_signed: boolean
           client_id: string
+          client_request_id: string
           created_at: string
           credential_id: string | null
           documented_at: string
@@ -6548,9 +6687,16 @@ export type Database = {
           organization_id: string
           pill_count_value: number | null
           pill_count_verified: boolean | null
+          prescriber_notified: boolean | null
+          prn_effect: string | null
+          prn_followup_at: string | null
+          prn_followup_by: string | null
+          prn_followup_due_at: string | null
           prn_reason: string | null
+          prn_tried_first: string | null
           provider_id: string | null
           recorded_in: string
+          route: string | null
           scheduled_for: string
           scheduled_shift_id: string | null
           scheduled_time_label: string | null
@@ -6576,6 +6722,7 @@ export type Database = {
           administrator_role?: string | null
           attestation_signed?: boolean
           client_id: string
+          client_request_id?: string
           created_at?: string
           credential_id?: string | null
           documented_at?: string
@@ -6593,9 +6740,16 @@ export type Database = {
           organization_id: string
           pill_count_value?: number | null
           pill_count_verified?: boolean | null
+          prescriber_notified?: boolean | null
+          prn_effect?: string | null
+          prn_followup_at?: string | null
+          prn_followup_by?: string | null
+          prn_followup_due_at?: string | null
           prn_reason?: string | null
+          prn_tried_first?: string | null
           provider_id?: string | null
           recorded_in?: string
+          route?: string | null
           scheduled_for: string
           scheduled_shift_id?: string | null
           scheduled_time_label?: string | null
@@ -6621,6 +6775,7 @@ export type Database = {
           administrator_role?: string | null
           attestation_signed?: boolean
           client_id?: string
+          client_request_id?: string
           created_at?: string
           credential_id?: string | null
           documented_at?: string
@@ -6638,9 +6793,16 @@ export type Database = {
           organization_id?: string
           pill_count_value?: number | null
           pill_count_verified?: boolean | null
+          prescriber_notified?: boolean | null
+          prn_effect?: string | null
+          prn_followup_at?: string | null
+          prn_followup_by?: string | null
+          prn_followup_due_at?: string | null
           prn_reason?: string | null
+          prn_tried_first?: string | null
           provider_id?: string | null
           recorded_in?: string
+          route?: string | null
           scheduled_for?: string
           scheduled_shift_id?: string | null
           scheduled_time_label?: string | null
@@ -10650,6 +10812,7 @@ export type Database = {
           description: string | null
           details: Json
           discovered_at: string | null
+          emar_log_id: string | null
           family_name: string | null
           family_notified: boolean | null
           family_notified_at: string | null
@@ -10746,6 +10909,7 @@ export type Database = {
           description?: string | null
           details?: Json
           discovered_at?: string | null
+          emar_log_id?: string | null
           family_name?: string | null
           family_notified?: boolean | null
           family_notified_at?: string | null
@@ -10842,6 +11006,7 @@ export type Database = {
           description?: string | null
           details?: Json
           discovered_at?: string | null
+          emar_log_id?: string | null
           family_name?: string | null
           family_notified?: boolean | null
           family_notified_at?: string | null
@@ -10927,6 +11092,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incident_reports_emar_log_id_fkey"
+            columns: ["emar_log_id"]
+            isOneToOne: false
+            referencedRelation: "emar_logs"
             referencedColumns: ["id"]
           },
           {
@@ -11261,6 +11433,54 @@ export type Database = {
             columns: ["medication_id"]
             isOneToOne: false
             referencedRelation: "client_medications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medication_month_reviews: {
+        Row: {
+          client_id: string
+          id: string
+          month: string
+          notes: string | null
+          organization_id: string
+          pdf_path: string | null
+          reviewed_at: string
+          reviewed_by: string | null
+        }
+        Insert: {
+          client_id: string
+          id?: string
+          month: string
+          notes?: string | null
+          organization_id: string
+          pdf_path?: string | null
+          reviewed_at?: string
+          reviewed_by?: string | null
+        }
+        Update: {
+          client_id?: string
+          id?: string
+          month?: string
+          notes?: string | null
+          organization_id?: string
+          pdf_path?: string | null
+          reviewed_at?: string
+          reviewed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medication_month_reviews_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medication_month_reviews_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -17206,6 +17426,10 @@ export type Database = {
       audit_package_org_id: { Args: { _pkg: string }; Returns: string }
       can_access_client_phi: { Args: { _client_id: string }; Returns: boolean }
       can_access_import_job: { Args: { _job_id: string }; Returns: boolean }
+      can_log_client_meds: {
+        Args: { _client_id: string; _user: string }
+        Returns: boolean
+      }
       can_view_client_intake: {
         Args: { _client: string; _org: string; _viewer: string }
         Returns: boolean
@@ -17662,6 +17886,10 @@ export type Database = {
           _role: string
           _user_id: string
         }
+        Returns: boolean
+      }
+      medication_belongs_to_client: {
+        Args: { _client_id: string; _medication_id: string; _org: string }
         Returns: boolean
       }
       nectar_bump_chunk_attempt: {

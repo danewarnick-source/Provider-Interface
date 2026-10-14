@@ -1,26 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { z } from "zod";
-import { KnowledgePage } from "@/components/pages/knowledge-page";
+import { KnowledgePage } from "@/components/knowledge/knowledge-page";
 import { RequireLevel } from "@/components/rbac-guard";
 import { FeatureGate } from "@/components/upgrade-gate";
-
-const search = z.object({
-  // Retired Knowledge tabs (sources / docs / external) still land here.
-  tab: z.string().optional(),
-});
+import { parseKnowledgeSearch } from "@/lib/nectar/library/knowledge-nav";
 
 export const Route = createFileRoute("/dashboard/hub/knowledge")({
   head: () => ({
     meta: [
-      { title: "Knowledge — Provider Interface" },
+      { title: "Knowledge base — Provider Interface" },
       {
         name: "description",
         content:
-          "Upload agency documents. Nectar ingests them into its knowledge base for Nectar search.",
+          "Your agency's policies, procedures and the state rules. Nectar answers only from what's published here.",
       },
     ],
   }),
-  validateSearch: (s) => search.parse(s),
+  // ?tab, ?doc, ?rule and ?new (with ?slot / ?question); old tabs fall back to Library.
+  validateSearch: (s: Record<string, unknown>) => parseKnowledgeSearch(s),
   // Admins only; a team member opening the URL is sent to Ask Nectar.
   component: () => (
     <RequireLevel min="admin" redirectTo="/dashboard/ask-nectar">

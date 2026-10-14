@@ -823,8 +823,6 @@ function serverFnName(url: string, postText: string): string | null {
   const names = [
     "listCompanyObligations",
     "listAgencyDocuments",
-    "listAgencyPolicies",
-    "listPolicyJobCodeOptions",
     "listDeadlineObligationInstances",
     "listMyObligationInstances",
     "getMyEntitlements",
@@ -1060,10 +1058,6 @@ function serverFnResult(
           hiddenClientCards: [],
         },
       };
-    case "listAgencyPolicies":
-      return [];
-    case "listPolicyJobCodeOptions":
-      return [];
     case "listDeadlineObligationInstances":
       return deadlineItems(fx);
     case "listMyObligationInstances":

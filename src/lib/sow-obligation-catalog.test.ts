@@ -137,14 +137,12 @@ describe("SOW catalog pack identity", () => {
     assert.deepEqual([...new Set(seeded)].sort(), catalogKeys);
   });
 
-  it("blocks policy clones of catalog titles; orphan creates stay 410", () => {
+  it("orphan creates stay 410 (the policy binder that could clone catalog titles went in N4)", () => {
     const createSrc = readFileSync(
       new URL("./company-obligations.functions.ts", import.meta.url),
       "utf8",
     );
-    const policySrc = readFileSync(new URL("./agency-policies.functions.ts", import.meta.url), "utf8");
     assert.match(createSrc, /ORPHAN_OBLIGATION_CREATE_GONE/);
-    assert.match(policySrc, /catalogTitleIsReserved\(policy\.title\)/);
   });
 
   it("keeps hire-always titles on obligation disposition only", () => {

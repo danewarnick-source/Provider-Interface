@@ -11,7 +11,16 @@ function serverFn(name: string): string {
   return SRC.slice(start, next < 0 ? undefined : next);
 }
 
-const ADMIN_READS = ["listLibrary", "getLibraryDocument", "getRequiredPolicies", "getReviewMatrix"];
+const ADMIN_READS = [
+  "listLibrary",
+  "getLibraryDocument",
+  "getRequiredPolicies",
+  "getReviewMatrix",
+  // N4: a state rule opened from the Knowledge base, and the question an
+  // "Add to library" draft is prefilled from.
+  "getStateRuleDocument",
+  "getLibraryDraftQuestion",
+];
 const ADMIN_WRITES = [
   "createLibraryDraft",
   "saveLibraryDraft",

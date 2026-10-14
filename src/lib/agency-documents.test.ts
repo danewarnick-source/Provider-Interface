@@ -7,7 +7,6 @@ import {
   AGENCY_DOC_ENCODED_KEYS,
   AGENCY_DOC_FLAG_KEYS,
   AGENCY_DOC_OBLIGATION_TITLES,
-  COMPANY_POLICY_TEMPLATES,
   agencyDocApplies,
   agencyDocKeyForTitle,
   agencyDocStatusLabel,
@@ -185,13 +184,9 @@ describe("Agency documents lock", () => {
     assert.equal(rhsMissing.find((c) => c.key === "ol_licenses")?.status, "missing");
   });
 
-  it("keeps company policy templates off the DSPD card list", () => {
-    assert.deepEqual(
-      COMPANY_POLICY_TEMPLATES.map((t) => t.title),
-      ["Cell phone use", "Vehicle policy", "Visitor rules"],
-    );
-    for (const t of COMPANY_POLICY_TEMPLATES) {
-      assert.equal(isAgencyDocumentTitle(t.title), false);
+  it("keeps agency-owned policy titles off the DSPD card list", () => {
+    for (const title of ["Cell phone use", "Vehicle policy", "Visitor rules"]) {
+      assert.equal(isAgencyDocumentTitle(title), false);
     }
   });
 
@@ -209,7 +204,7 @@ describe("Agency documents lock", () => {
 });
 
 describe("Agency file surface lock", () => {
-  it("folds Agency file under Admin Compliance and keeps Company policies", () => {
+  it("folds Agency file under Admin Compliance and links agency policies to the Knowledge base", () => {
     const nav = readFileSync(new URL("../routes/dashboard.tsx", import.meta.url), "utf8");
     assert.match(nav, /to: "\/dashboard\/evidence", label: "Evidence"/);
     assert.doesNotMatch(nav, /label: "State Audit"/);
@@ -228,7 +223,8 @@ describe("Agency file surface lock", () => {
       "utf8",
     );
     assert.match(panel, /Agency file/);
-    assert.match(panel, /Company policies/);
+    assert.match(panel, /to="\/dashboard\/hub\/knowledge"/);
+    assert.doesNotMatch(panel, /Company policies/);
     assert.doesNotMatch(panel, /ObligationPackGrid/);
     assert.doesNotMatch(panel, /EVV/);
     assert.doesNotMatch(panel, /eMAR/);

@@ -1190,7 +1190,6 @@ function serverFnPayload(url: string, body: string): unknown {
       codes: ["HHS"],
     };
   }
-  if (/listAgencyPolicies|listPolicyJobCodeOptions/i.test(fn)) return [];
   if (/getAgencySetupStatus/i.test(fn)) {
     return {
       complete: true,

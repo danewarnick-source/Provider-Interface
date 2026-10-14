@@ -201,11 +201,17 @@ export const deleteDocument = createServerFn({ method: "POST" })
     if (!supabase || !userId) return { ok: false };
     const { data: doc } = await supabase
       .from("nectar_documents")
-      .select("storage_path, storage_bucket, organization_id, client_id")
+      .select("storage_path, storage_bucket, organization_id, client_id, library_group")
       .eq("id", data.documentId)
       .maybeSingle();
     if (!doc?.organization_id) throw new Error("Document not found");
     await requireOrgMembership(supabase, userId, doc.organization_id as string, "admin");
+    // Knowledge base documents are archived, never deleted (Decision 2).
+    if (doc.library_group) {
+      throw new Error(
+        "Knowledge base documents can't be deleted. Archive it in the Knowledge base.",
+      );
+    }
     if (doc.client_id) {
       throw new Error(
         "Client records can't be deleted. Remove it from the client's Files tab instead — it moves to Outdated and is kept for audits.",

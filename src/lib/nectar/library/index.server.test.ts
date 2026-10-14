@@ -21,7 +21,8 @@ describe("index.server.ts (N3)", () => {
 
   it("writes every section of the version at once, with embeddings made in time", () => {
     const write = body("writeSections");
-    assert.match(write, /const sections = splitSections\(text\);/);
+    // Typed text keeps the headings the New document box asks for (N4).
+    assert.match(write, /const sections = splitDocumentSections\(text, mimeType\);/);
     assert.match(write, /opts\.embed\s*\?\s*await embedAll\(/);
     assert.match(write, /\.from\("knowledge_sections"\)\.insert\(rows\.slice\(i, i \+ 100\)\)/);
   });
@@ -43,11 +44,21 @@ describe("index.server.ts (N3)", () => {
     assert.match(embed, /while \(next < queue\.length && Date\.now\(\) < deadline\)/);
     assert.match(
       body("indexStateRuleVersion"),
-      /return writeSections\(db, source, text, null, opts\);/,
+      /return writeSections\(db, source, text, rule\.mime_type \?\? null, null, opts\);/,
     );
     assert.match(
       body("indexLibraryVersion"),
-      /return writeSections\(db, source, text, doc\.organization_id, opts\);/,
+      /return writeSections\(db, source, text, doc\.mime_type, doc\.organization_id, opts\);/,
+    );
+  });
+
+  it("catch-up embeddings carry the document or state rule title, like the first pass (N4)", () => {
+    const pending = body("embedPendingSections");
+    assert.match(pending, /\.from\("nectar_documents"\)\.select\("id, title"\)/);
+    assert.match(pending, /\.from\("state_rule_documents"\)\.select\("id, title"\)/);
+    assert.match(
+      pending,
+      /embeddingInput\(titles\.get\(r\.document_id \?\? r\.state_document_id \?\? ""\) \?\? "", r\)/,
     );
   });
 
