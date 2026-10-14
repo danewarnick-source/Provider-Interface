@@ -43,6 +43,12 @@ describe("reviews.server.ts (N3)", () => {
     );
   });
 
+  it("a team member sees the same sections as the admin view and Nectar search (N4)", () => {
+    const read = body("readPolicyForMember");
+    assert.match(read, /raw_text, storage_path, storage_bucket, mime_type`\)/);
+    assert.match(read, /sections: splitDocumentSections\(doc\.raw_text \?\? "", doc\.mime_type\)/);
+  });
+
   it("the review matrix and records cover published policies and procedures", () => {
     assert.match(body("readReviewMatrix"), /currentRows\(db, orgId, \{ reviewable: true \}\)/);
     assert.match(body("readStaffRecord"), /currentRows\(db, orgId, \{ reviewable: true \}\)/);

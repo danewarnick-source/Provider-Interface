@@ -15,8 +15,10 @@ import {
   DocInput,
   NewVersionInput,
   OrgInput,
+  QuestionInput,
   SaveDraftInput,
   StaffRecordInput,
+  StateRuleInput,
   TogglesInput,
 } from "./library-input";
 import {
@@ -25,7 +27,13 @@ import {
   publishNewVersion,
   refreshLibraryIndex,
 } from "./library-publish.server";
-import { readLibrary, readLibraryDocument, readRequiredSlots } from "./library-read.server";
+import {
+  readDraftQuestion,
+  readLibrary,
+  readLibraryDocument,
+  readRequiredSlots,
+  readStateRule,
+} from "./library-read.server";
 import { createDraft, saveDraft, setAgencyToggles, setAudience } from "./library-write.server";
 import {
   markReviewed,
@@ -50,6 +58,24 @@ export const getLibraryDocument = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const caller = await requireLibraryAdmin(context, data.organizationId, "view");
     return readLibraryDocument(caller.db, caller.orgId, data.documentId, denverYmd());
+  });
+
+/** A state rule, read-only: loaded by PI for every agency (N4). */
+export const getStateRuleDocument = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => StateRuleInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const caller = await requireLibraryAdmin(context, data.organizationId, "view");
+    return readStateRule(caller.db, data.stateRuleId);
+  });
+
+/** The question a New document is prefilled from ("Add to library", N4/N6). */
+export const getLibraryDraftQuestion = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => QuestionInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const caller = await requireLibraryAdmin(context, data.organizationId, "view");
+    return readDraftQuestion(caller.db, caller.orgId, data.questionId);
   });
 
 /** New document: typed text or an uploaded file. Saves as Draft. */

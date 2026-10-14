@@ -4,8 +4,10 @@ import {
   AudienceInput,
   CreateDraftInput,
   NewVersionInput,
+  QuestionInput,
   SaveDraftInput,
   StaffRecordInput,
+  StateRuleInput,
   UploadUrlInput,
 } from "./library-input.ts";
 
@@ -87,5 +89,16 @@ describe("library server function inputs (N3)", () => {
       }).success,
       false,
     );
+  });
+
+  it("a state rule and an Add to library question are opened by id within an agency (N4)", () => {
+    assert.equal(StateRuleInput.safeParse({ organizationId: ORG, stateRuleId: DOC }).success, true);
+    assert.equal(
+      StateRuleInput.safeParse({ organizationId: ORG, stateRuleId: "x" }).success,
+      false,
+    );
+    assert.equal(StateRuleInput.safeParse({ stateRuleId: DOC }).success, false);
+    assert.equal(QuestionInput.safeParse({ organizationId: ORG, questionId: DOC }).success, true);
+    assert.equal(QuestionInput.safeParse({ organizationId: ORG }).success, false);
   });
 });

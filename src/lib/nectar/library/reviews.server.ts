@@ -23,7 +23,7 @@ import {
   reviewOf,
   staffRecord,
 } from "./reviews";
-import { splitSections } from "./sections";
+import { splitDocumentSections } from "./typed-sections";
 
 /** Reviews tab: team members × published policies and procedures. */
 export async function readReviewMatrix(db: Db, orgId: string) {
@@ -75,7 +75,7 @@ export async function readPolicyForMember(
 ) {
   const { data: doc } = await db
     .from("nectar_documents")
-    .select(`${ROW_COLUMNS}, raw_text, storage_path, storage_bucket`)
+    .select(`${ROW_COLUMNS}, raw_text, storage_path, storage_bucket, mime_type`)
     .eq("id", documentId)
     .eq("organization_id", orgId)
     .is("superseded_by", null)
@@ -89,7 +89,7 @@ export async function readPolicyForMember(
     version: doc.version,
     group: doc.library_group,
     reviewable: isReviewable(doc.library_group),
-    sections: splitSections(doc.raw_text ?? ""),
+    sections: splitDocumentSections(doc.raw_text ?? "", doc.mime_type),
     reviewedAt: reviewOf(doc, userId, reviews)?.signed_at ?? null,
     fileUrl: await signedFileUrl(db, doc.storage_path, doc.storage_bucket),
   };

@@ -26,6 +26,7 @@ import {
 import { isReviewable, reviewCell, reviewCounts } from "./reviews";
 import { splitSections } from "./sections";
 import { requiredSlotStatus, SLOT_STATUS_LABEL, slotCodeLabel, type SlotDef } from "./slots";
+import { splitDocumentSections } from "./typed-sections";
 
 type Row = Awaited<ReturnType<typeof currentRows>>[number];
 
@@ -143,7 +144,9 @@ export async function readLibraryDocument(
       reviewable: isReviewable(doc.library_group),
     },
     versions: versions.data ?? [],
-    sections: splitSections(text ?? ""),
+    /** The version's text, for Edit draft and Publish new version. */
+    text: text ?? "",
+    sections: splitDocumentSections(text ?? "", doc.mime_type),
     people: members.map((m) => ({
       ...m,
       checked: doc.audience_all || doc.policy_assigned_users.includes(m.userId),
@@ -174,4 +177,39 @@ export async function readRequiredSlots(db: Db, orgId: string, today: string) {
     statusLabel: SLOT_STATUS_LABEL[r.status],
   }));
   return { ...status, rows, toggles };
+}
+
+/** A state rule, read-only (Decision 6): its sections and its published versions. */
+export async function readStateRule(db: Db, stateRuleId: string) {
+  const { data: rule } = await db
+    .from("state_rule_documents")
+    .select("id, rule_key, title, version, effective_from, published_at, archived_at, raw_text")
+    .eq("id", stateRuleId)
+    .not("published_at", "is", null)
+    .maybeSingle();
+  if (!rule) throw new Error(NOT_FOUND);
+  const { data: versions } = await db
+    .from("state_rule_documents")
+    .select("id, version, effective_from, published_at, archived_at")
+    .eq("rule_key", rule.rule_key)
+    .not("published_at", "is", null)
+    .order("version", { ascending: false });
+  const { raw_text: text, ...fields } = rule;
+  return {
+    rule: { ...fields, note: STATE_RULES_NOTE },
+    versions: versions ?? [],
+    sections: splitSections(text ?? ""),
+  };
+}
+
+/** The question a new draft answers ("Add to library" from the Questions tab, N6). */
+export async function readDraftQuestion(db: Db, orgId: string, questionId: string) {
+  const { data } = await db
+    .from("nectar_questions")
+    .select("id, question, status")
+    .eq("id", questionId)
+    .eq("organization_id", orgId)
+    .maybeSingle();
+  if (!data) throw new Error("Question not found.");
+  return { id: data.id, question: data.question, status: data.status };
 }

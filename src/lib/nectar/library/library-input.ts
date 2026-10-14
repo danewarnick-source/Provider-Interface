@@ -23,6 +23,10 @@ export type UploadedFile = z.infer<typeof UploadedFile>;
 
 export const OrgInput = z.object({ organizationId: Uuid });
 export const DocInput = OrgInput.extend({ documentId: Uuid });
+/** A state rule opened from the Knowledge base (N4). */
+export const StateRuleInput = OrgInput.extend({ stateRuleId: Uuid });
+/** The question a New document answers ("Add to library", N4/N6). */
+export const QuestionInput = OrgInput.extend({ questionId: Uuid });
 
 const hasText = (text: string | undefined) => !!text && text.trim().length > 0;
 
