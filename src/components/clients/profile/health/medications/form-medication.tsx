@@ -7,24 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { getReference, type MedicationReference } from "@/lib/medications/reference";
 import { strengthOptions } from "@/lib/medications/med-form";
-import { PACKAGING_OPTIONS } from "@/lib/medications/med-display";
+import { MED_ROUTES, PACKAGING_OPTIONS } from "@/lib/medications/med-display";
 import { ORIGINAL_BOTTLE } from "@/lib/medications/med-rules";
 import { CheckRow, FileField, FormField, PartHeading, type FormPartProps } from "./form-fields";
 import { NameTypeahead } from "./name-typeahead";
 import { TimeChips } from "./time-chips";
 
-const ROUTES = [
-  "By mouth",
-  "Under the tongue",
-  "On the skin",
-  "Inhaled",
-  "In the eye",
-  "In the ear",
-  "In the nose",
-  "Rectal",
-  "Injection",
-  "Feeding tube",
-];
 
 export function FormMedication({
   v,
@@ -100,7 +88,7 @@ export function FormMedication({
           data-testid="med-route"
         />
         <datalist id="med-routes">
-          {ROUTES.map((r) => (
+          {MED_ROUTES.map((r) => (
             <option key={r} value={r} />
           ))}
         </datalist>

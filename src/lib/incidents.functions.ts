@@ -23,6 +23,7 @@ import { isAdminLevel } from "@/lib/access/levels";
 import { insertIncidentNumbered } from "@/lib/incident-number";
 import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { MEDICATION_ERROR_CATEGORY_NAME } from "@/lib/incident-detail-schemas";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
@@ -68,6 +69,8 @@ const createInput = z.object({
   is_fatality: z.boolean().default(false),
   triggered_by_note_id: z.string().uuid().nullable().optional(),
   triggered_by_note_type: z.string().max(60).nullable().optional(),
+  // "Wrong or missed dose?" from Give meds: the dose this report is about.
+  emar_log_id: z.string().uuid().nullable().optional(),
   // §1.27 structured detail extensions
   details: z.record(z.string(), z.unknown()).default({}),
   witnessed_directly: z.boolean().nullable().optional(),
@@ -111,6 +114,20 @@ export const createIncident = createServerFn({ method: "POST" })
       if (!sa) throw new Error("You are not assigned to this individual.");
     }
 
+    // A linked dose must be this client's.
+    let emarLogId: string | null = null;
+    if (data.emar_log_id) {
+      const { data: dose } = await (supabaseAdmin as AnySupabase)
+        .from("emar_logs")
+        .select("id, client_id")
+        .eq("id", data.emar_log_id)
+        .maybeSingle();
+      if (!dose || (dose as { client_id: string }).client_id !== data.client_id) {
+        throw new Error("That dose isn't this client's.");
+      }
+      emarLogId = data.emar_log_id;
+    }
+
     const discovered = new Date(data.discovered_at);
     const occurred = data.occurred_at ? new Date(data.occurred_at) : discovered;
 
@@ -142,6 +159,7 @@ export const createIncident = createServerFn({ method: "POST" })
       status: "Pending_Admin_Review",
       triggered_by_note_id: data.triggered_by_note_id ?? null,
       triggered_by_note_type: data.triggered_by_note_type ?? null,
+      emar_log_id: emarLogId,
       details: data.details ?? {},
       witnessed_directly: data.witnessed_directly ?? null,
       reported_to_reporter_by: data.reported_to_reporter_by ?? null,
@@ -180,6 +198,15 @@ export const createIncident = createServerFn({ method: "POST" })
         };
       },
     });
+
+    // A medication-error report marks its dose so the MAR lists it as an error.
+    if (emarLogId && data.category === MEDICATION_ERROR_CATEGORY_NAME) {
+      await (supabaseAdmin as AnySupabase)
+        .from("emar_logs")
+        .update({ is_medication_error: true, error_description: data.description })
+        .eq("id", emarLogId)
+        .eq("is_medication_error", false);
+    }
 
     const incidentCreatedAt = discovered;
     await createIncidentInstances(supabase, m.organization_id, ins.id, incidentCreatedAt);

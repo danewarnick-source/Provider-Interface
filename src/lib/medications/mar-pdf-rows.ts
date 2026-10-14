@@ -1,6 +1,7 @@
 // The rows each MAR PDF page prints, built from getMarMonth's data: the
 // medication list and its changes, the signature key, the PRN log,
-// exceptions (refused, missed, held, errors, late entries, corrections) and
+// exceptions (refused, missed, held, errors, late doses and entries, PRNs
+// given past their limits, corrections) and
 // controlled counts. Pure; mar-pdf.ts draws them and the tests read them.
 
 import { denverYmdFromInstant } from "../denver-date.ts";
@@ -8,6 +9,7 @@ import { formatTime12, nameWithStrength, whenGivenLabel } from "./med-display.ts
 import { prnRule, type MedListMed } from "./med-list-pdf.ts";
 import { isLateEntry, type MarCell } from "./mar-cells.ts";
 import { isTakenStatus } from "./dose-status.ts";
+import { isLateDose, isPrnOverride } from "./give-meds.ts";
 import { longDateTime, shortTime } from "./mar-month.ts";
 import type { MarDose, MarMonthData } from "./mar-data.ts";
 
@@ -182,6 +184,24 @@ export function exceptionRows(data: MarMonthData): PdfRow[] {
         [d.error_description ?? "", incident ? `Incident ${incident}` : "No incident linked"]
           .filter(Boolean)
           .join(" - "),
+      ]);
+    }
+    if (isLateDose(d)) {
+      out.push([
+        doseDay(d),
+        shortTime(d.scheduled_for),
+        medName(data, d.medication_id),
+        "Late dose",
+        `Due ${longDateTime(d.scheduled_for)}, taken ${longDateTime(d.actual_taken_at ?? d.administered_at)}`,
+      ]);
+    }
+    if (isPrnOverride(d)) {
+      out.push([
+        doseDay(d),
+        shortTime(d.actual_taken_at ?? d.scheduled_for),
+        medName(data, d.medication_id),
+        "PRN past its limit",
+        (d.exception_reason ?? "").replace(/^PRN limit override:\s*/i, "Reason: "),
       ]);
     }
     if (isLateEntry(d)) {
