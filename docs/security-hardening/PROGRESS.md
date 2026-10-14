@@ -14,3 +14,24 @@ Merged Oct 14, 2026 as PR #487 (squash 8297a39d). No migrations; no policy, func
 - **Meds:** the Health-setup MAR upload lists one row per medication through the existing import writer. M3–M5 server functions are untouched, and M4 still reads `staffCare.medications`.
 - **Checks:** build passes; tsc stays at 203 errors. Unit tests went from 2385 pass / 5 fail to 2424 pass / 5 fail (same baseline 5). Rolled-back live SQL checks are in the PR body.
 - **Open:** `setEndOfLifeStatus`, `appendClientArrayField` and the HRC/level-of-need functions still use the level-only admin check. A manual Add client still writes codes with Clients:Edit only.
+
+### CS2 — Broken or fragile writes
+Merged Oct 14, 2026 as PR #488 (squash 36101f5a). Migrations, applied live and recorded:
+- `20261014050824_cs2_apply_reviewed_pcsp_one_transaction`
+- `20261014051241_cs2_hrr_clear_signatures_when_answers_change`
+- `20261014051621_cs2_support_strategies_draft_content`
+
+No RLS policies changed.
+- **HRR upload:** HRR documents upload to `<org>/<client>/hrc_approval/`, and the server checks that folder.
+- **Dates:** `todayYmd()` is the Denver date. A new `localYmd()` formats plain calendar dates. The UTC "today" spots are fixed. Billing codes and shift care data keep a code on its last authorized day (`>=`).
+- **1056 upload:** the PDF uploads to storage first, and the server receives only its path.
+- **Atomic writes:**
+  - PCSP confirm runs as one SQL function, `apply_reviewed_pcsp`. It is SECURITY DEFINER, re-checks Clients and Billing edit, and can't be executed by anon. A forced mid-confirm error left the old plan current.
+  - A strategies send is inserted first, then the Evidence copy is filed. The send is voided if filing fails.
+  - The HRR trigger clears signatures when the title or answers change. The JS clearing (`withSignaturesCleared`) is deleted.
+- **Strategies pull:** pulling strategies over approved ones saves to `draft_content`, so staff keep seeing the approved version. A "Discard draft" button was added.
+- **Checks:** build passes; tsc stays at 203 errors. Unit tests went from 2424 pass / 5 fail to 2469 pass / 5 fail (the same 5 baseline failures). The rolled-back live SQL checks are in the PR body.
+- **Open:**
+  - The scheduler and some other screens still drop a code on its end date. Only the two named places were changed.
+  - The existing `discharge_client` needs a signed-in user, so it may fail where AWS server functions use a trusted client.
+  - A 1056 that fails its checks after uploading stays in storage with no document record.
