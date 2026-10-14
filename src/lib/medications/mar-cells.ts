@@ -33,6 +33,8 @@ export interface MarLog {
   is_medication_error?: boolean | null;
   prn_followup_due_at?: string | null;
   prn_followup_at?: string | null;
+  given_without_current_training?: boolean | null;
+  training_issue?: string | null;
 }
 
 export type CellKind = "given" | "refused" | "missed" | "held" | "away" | "not_due" | "upcoming";
@@ -46,6 +48,8 @@ export interface MarCell {
   initials: string;
   late: boolean;
   error: boolean;
+  /** Given by staff without current med training. */
+  untrained: boolean;
 }
 
 export interface MarRow {

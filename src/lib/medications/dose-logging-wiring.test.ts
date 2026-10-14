@@ -25,14 +25,14 @@ describe("logMedicationPass", () => {
     assert.match(pass, /client_id, organization_id, is_active, discontinued_at, paused_at/);
   });
 
-  it("reads how_taken (not support_level) and keeps the training and nurse-role checks", () => {
+  it("reads how_taken (not support_level), keeps the nurse-role check, never blocks on training", () => {
     assert.match(pass, /administratorRole\(m\.how_taken, data\.nurseRole\)/);
     const code = pass
       .split("\n")
       .filter((l) => !l.trim().startsWith("//"))
       .join("\n");
     assert.doesNotMatch(code, /support_level/);
-    assert.match(pass, /medTrainingStatus\(/);
+    assert.doesNotMatch(pass, /medTrainingStatus\(/);
     assert.match(pass, /rpc\("med_admin_role_permitted"/);
   });
 

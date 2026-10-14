@@ -11,6 +11,7 @@ import {
   type GiveMed,
 } from "@/lib/medications/give-meds";
 import { nameWithStrength } from "@/lib/medications/med-display";
+import { doseTrainingMark } from "@/lib/medications/med-training";
 
 function statusLabel(log: GiveLog): string {
   if (isTakenStatus(log.status)) return "Given";
@@ -41,6 +42,7 @@ export function LoggedDoses({
           {logs.map((l) => {
             const med = l.medication_id ? medById.get(l.medication_id) : undefined;
             const taken = isTakenStatus(l.status);
+            const mark = doseTrainingMark(l);
             return (
               <li
                 key={l.id}
@@ -66,6 +68,11 @@ export function LoggedDoses({
                     {isPrnOverride(l) ? (
                       <Badge variant="outline" className="text-[10px]">
                         Past PRN limit
+                      </Badge>
+                    ) : null}
+                    {mark ? (
+                      <Badge variant="outline" className="border-amber-400 text-[10px]">
+                        {mark}
                       </Badge>
                     ) : null}
                   </div>

@@ -16,7 +16,7 @@ export const GIVE_MED_COLUMNS =
   "id, client_id, medication_name, strength, dosage, dose_form, route, scheduled_times, is_prn, is_controlled, is_rescue, is_psychotropic, purpose, side_effects, adverse_effects, how_taken, prn_instructions, prn_try_first, prn_call_if, prn_min_hours, prn_max_per_day, prn_followup_minutes, pill_count_current, start_date, end_date, is_active, discontinued_at, paused_at";
 
 export const GIVE_LOG_COLUMNS =
-  "id, medication_id, scheduled_for, scheduled_time_label, status, actual_taken_at, administered_at, exception_reason, is_prn, prn_reason, prn_followup_due_at, prn_followup_at, prn_effect, staff_id, staff_name";
+  "id, medication_id, scheduled_for, scheduled_time_label, status, actual_taken_at, administered_at, exception_reason, is_prn, prn_reason, prn_followup_due_at, prn_followup_at, prn_effect, staff_id, staff_name, given_without_current_training, training_issue";
 
 export type GiveMed = MedicationFields & {
   id: string;
@@ -44,6 +44,8 @@ export interface GiveLog {
   prn_effect?: string | null;
   staff_id?: string | null;
   staff_name?: string | null;
+  given_without_current_training?: boolean | null;
+  training_issue?: string | null;
 }
 
 export interface DueDose {

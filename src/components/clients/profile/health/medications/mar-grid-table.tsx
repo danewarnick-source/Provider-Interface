@@ -26,7 +26,7 @@ export const MAR_KEY: Array<[CellKind, string]> = [
 ];
 
 function CellButton({ cell, onOpen }: { cell: MarCell; onOpen: (logIds: string[]) => void }) {
-  const text = `${cellCode(cell)}${cell.late ? "*" : ""}${cell.error ? "!" : ""}`;
+  const text = `${cellCode(cell)}${cell.late ? "*" : ""}${cell.error ? "!" : ""}${cell.untrained ? "#" : ""}`;
   const cls = `h-9 w-full whitespace-pre-line px-0.5 text-[10px] leading-tight ${TONE[cell.kind]}`;
   if (!cell.logId) return <div className={`${cls} flex items-center justify-center`}>{text}</div>;
   return (

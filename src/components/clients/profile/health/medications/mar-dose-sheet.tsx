@@ -13,6 +13,7 @@ import { isLateEntry, logKind } from "@/lib/medications/mar-cells";
 import { isLateDose } from "@/lib/medications/give-meds";
 import { longDateTime } from "@/lib/medications/mar-month";
 import { doseCountCells } from "@/lib/medications/mar-pdf-rows";
+import { doseTrainingMark } from "@/lib/medications/med-training";
 import { useAddCorrection, type MarMonth } from "./use-mar";
 
 type Dose = MarMonth["doses"][number];
@@ -107,6 +108,7 @@ function DoseDetail(p: { data: MarMonth; dose: Dose; canEdit: boolean; clientId:
         />
         <Fact label="Route" value={dose.route} />
         <Fact label="Staff" value={staff} />
+        <Fact label="Med training" value={doseTrainingMark(dose)} />
         <Fact label="PRN reason" value={dose.prn_reason} />
         <Fact label="Tried first" value={dose.prn_tried_first} />
         <Fact label="Did it help?" value={followup} />

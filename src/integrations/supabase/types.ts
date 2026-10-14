@@ -6692,6 +6692,7 @@ export type Database = {
           error_description: string | null
           evv_timesheet_id: string | null
           exception_reason: string | null
+          given_without_current_training: boolean
           id: string
           is_controlled: boolean
           is_medication_error: boolean
@@ -6727,6 +6728,7 @@ export type Database = {
           staff_name: string | null
           status: string
           training_checked: string | null
+          training_issue: string | null
           variance_note: string | null
           witness_confirmed_at: string | null
         }
@@ -6748,6 +6750,7 @@ export type Database = {
           error_description?: string | null
           evv_timesheet_id?: string | null
           exception_reason?: string | null
+          given_without_current_training?: boolean
           id?: string
           is_controlled?: boolean
           is_medication_error?: boolean
@@ -6783,6 +6786,7 @@ export type Database = {
           staff_name?: string | null
           status: string
           training_checked?: string | null
+          training_issue?: string | null
           variance_note?: string | null
           witness_confirmed_at?: string | null
         }
@@ -6804,6 +6808,7 @@ export type Database = {
           error_description?: string | null
           evv_timesheet_id?: string | null
           exception_reason?: string | null
+          given_without_current_training?: boolean
           id?: string
           is_controlled?: boolean
           is_medication_error?: boolean
@@ -6839,6 +6844,7 @@ export type Database = {
           staff_name?: string | null
           status?: string
           training_checked?: string | null
+          training_issue?: string | null
           variance_note?: string | null
           witness_confirmed_at?: string | null
         }
@@ -18053,6 +18059,14 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      med_training_decision: {
+        Args: {
+          _agency_has_training: boolean
+          _has_current: boolean
+          _has_expired: boolean
+        }
+        Returns: string
       }
       med_training_status: {
         Args: { _on?: string; _org: string; _user: string }

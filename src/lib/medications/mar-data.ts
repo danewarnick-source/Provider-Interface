@@ -11,7 +11,7 @@ import { monthStart, parseMonth, staffInitials, type MarPerson } from "./mar-mon
 import type { MarChange, MarLog, MarMed } from "./mar-cells.ts";
 
 export const MAR_LOG_COLUMNS =
-  "id, medication_id, scheduled_for, status, actual_taken_at, administered_at, documented_at, created_at, staff_id, staff_name, route, is_prn, prn_reason, prn_effect, prn_followup_due_at, prn_followup_at, prn_followup_note, prn_tried_first, prescriber_notified, notes, exception_reason, is_medication_error, error_description, is_controlled, pill_count_value";
+  "id, medication_id, scheduled_for, status, actual_taken_at, administered_at, documented_at, created_at, staff_id, staff_name, route, is_prn, prn_reason, prn_effect, prn_followup_due_at, prn_followup_at, prn_followup_note, prn_tried_first, prescriber_notified, notes, exception_reason, is_medication_error, error_description, is_controlled, pill_count_value, given_without_current_training, training_issue";
 
 export type MarDose = MarLog & {
   staff_name?: string | null;

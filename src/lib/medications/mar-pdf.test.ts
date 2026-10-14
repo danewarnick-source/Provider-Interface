@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { inflateSync } from "node:zlib";
 import { denverWallToIso } from "../denver-date.ts";
 import { buildMarGrid } from "./mar-grid.ts";
-import type { MarMonthData } from "./mar-data.ts";
+import { MAR_LOG_COLUMNS, type MarMonthData } from "./mar-data.ts";
 import { MAR_PDF_SECTIONS, renderMarPdf } from "./mar-pdf.ts";
 import {
   changeRows,
@@ -319,6 +319,45 @@ describe("mar-pdf rows", () => {
     assert.equal(rows.find((r) => r[3] === "PRN past its limit")?.[4], "Reason: nurse said yes");
   });
 
+  it("marks a dose given without current med training in exceptions and the grid", () => {
+    const doses = [
+      ...data.doses.filter((d) => d.id !== "d1"),
+      { ...data.doses[0], given_without_current_training: true, training_issue: "expired" },
+    ];
+    const marked = {
+      ...data,
+      doses,
+      grid: buildMarGrid({
+        month: "2026-09",
+        meds: data.meds,
+        changes: [],
+        logs: doses,
+        initials: new Map([["s1", "TJ"]]),
+        now: new Date(at("2026-10-02", 9)),
+      }),
+    };
+    const row = exceptionRows(marked).find(
+      (r) => r[3] === "Given by staff without current med training",
+    );
+    assert.deepEqual(row, [
+      "Sep 1",
+      "8:04a",
+      "Sertraline 50 mg",
+      "Given by staff without current med training",
+      "training expired - Tara Jones",
+    ]);
+    const cell = marked.grid.rows[0].cells[0];
+    assert.equal(cell.untrained, true);
+    assert.equal(marked.grid.rows[0].cells[2].untrained, false);
+    assert.ok(!exceptionRows(data).some((r) => r[3].startsWith("Given by staff")));
+  });
+
+  it("the MAR loads the dose's mark, controlled flag and count before", () => {
+    const cols = MAR_LOG_COLUMNS.split(", ");
+    for (const c of ["given_without_current_training", "training_issue", "is_controlled", "pill_count_value"])
+      assert.ok(cols.includes(c), c);
+  });
+
   it("labels days", () => {
     assert.equal(dayLabel("2026-09-05"), "Sep 5");
   });
@@ -349,5 +388,6 @@ describe("renderMarPdf", () => {
     assert.ok(text.includes("IR-2026-014"));
     assert.ok(text.includes("Count before"));
     assert.ok(text.includes("Count after"));
+    assert.ok(text.includes("# given by staff without current med training"));
   });
 });

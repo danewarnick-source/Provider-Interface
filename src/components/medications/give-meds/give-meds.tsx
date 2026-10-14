@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle, Pill } from "lucide-react";
-import { toast } from "sonner";
-import {
-  asTrainingStatus,
-  canGiveWithTraining,
-  trainingNotice,
-} from "@/lib/medications/med-training";
+import { asTrainingStatus, trainingNotice } from "@/lib/medications/med-training";
 import { clockTime, LATE_DOSE_MINUTES, prnStatus, prnWarning } from "@/lib/medications/give-meds";
 import { DoseRow } from "./dose-row";
 import { FollowupCard } from "./followup-card";
@@ -53,7 +48,6 @@ export function GiveMeds({
   const ctx: PassContext = { clientId, serviceContext, scheduledShiftId };
   const training = asTrainingStatus(g.training);
   const notice = trainingNotice(training, g.isAdmin);
-  const canGive = canGiveWithTraining(training);
   const medById = new Map(g.meds.map((m) => [m.id, m]));
 
   useEffect(() => {
@@ -64,13 +58,7 @@ export function GiveMeds({
     });
   }, [onStatus, g.loading, g.dueByNow.length, g.followups.length]);
 
-  const startGive = (t: GiveTarget) => {
-    if (canGive) setGive(t);
-    else
-      toast.error(
-        "Your medication training isn't approved or has expired. You can still log a dose that wasn't given.",
-      );
-  };
+  const startGive = (t: GiveTarget) => setGive(t);
 
   const saved = () => {
     setGive(null);
@@ -86,7 +74,7 @@ export function GiveMeds({
     <div className="space-y-4">
       {notice ? (
         <div
-          className={`flex items-start gap-2 rounded-md border p-3 text-sm ${notice.tone === "danger" ? "border-rose-300 bg-rose-50 text-rose-900 dark:bg-rose-950/30 dark:text-rose-100" : "border-amber-300 bg-amber-50 text-amber-900 dark:bg-amber-950/30 dark:text-amber-100"}`}
+          className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/30 dark:text-amber-100"
         >
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <p>

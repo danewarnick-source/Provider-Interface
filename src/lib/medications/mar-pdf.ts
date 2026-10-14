@@ -44,11 +44,11 @@ export interface MarPdfInput {
 }
 
 export const GRID_KEY =
-  "R refused · M missed · H held · NA not at home · * late entry · ! medication error · PRN rows show doses given that day";
+  "R refused · M missed · H held · NA not at home · * late entry · ! medication error · # given by staff without current med training · PRN rows show doses given that day";
 
 function cellText(c: MarCell): string {
   const code = cellCode(c);
-  return `${code}${c.late ? "*" : ""}${c.error ? "!" : ""}`;
+  return `${code}${c.late ? "*" : ""}${c.error ? "!" : ""}${c.untrained ? "#" : ""}`;
 }
 
 function drawGrid(w: MarPages, data: MarMonthData, from: number, to: number) {

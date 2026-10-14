@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { denverWallToIso } from "../denver-date.ts";
 import {
+  GIVE_LOG_COLUMNS,
   asNeededMeds,
   dayWindow,
   dueDoses,
@@ -174,5 +175,11 @@ describe("dose times", () => {
   it("spots a PRN given past its limit", () => {
     assert.equal(isPrnOverride({ exception_reason: "PRN limit override: nurse said" }), true);
     assert.equal(isPrnOverride({ exception_reason: "Refused" }), false);
+  });
+
+  it("loads each dose's med training mark for the logged list", () => {
+    const cols = GIVE_LOG_COLUMNS.split(", ");
+    assert.ok(cols.includes("given_without_current_training"));
+    assert.ok(cols.includes("training_issue"));
   });
 });

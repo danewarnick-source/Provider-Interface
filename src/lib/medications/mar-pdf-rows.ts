@@ -11,6 +11,7 @@ import { isLateEntry, type MarCell } from "./mar-cells.ts";
 import { isTakenStatus } from "./dose-status.ts";
 import { isLateDose, isPrnOverride } from "./give-meds.ts";
 import { longDateTime, shortTime } from "./mar-month.ts";
+import { UNTRAINED_DOSE_MARK, trainingIssueLabel } from "./med-training.ts";
 import type { MarCount, MarDose, MarMonthData } from "./mar-data.ts";
 
 export type PdfRow = string[];
@@ -237,6 +238,17 @@ export function exceptionRows(data: MarMonthData): PdfRow[] {
         medName(data, d.medication_id),
         "PRN past its limit",
         (d.exception_reason ?? "").replace(/^PRN limit override:\s*/i, "Reason: "),
+      ]);
+    }
+    if (d.given_without_current_training) {
+      out.push([
+        doseDay(d),
+        shortTime(d.actual_taken_at ?? d.administered_at),
+        medName(data, d.medication_id),
+        UNTRAINED_DOSE_MARK,
+        [trainingIssueLabel(d.training_issue), staffName(data, d.staff_id, d.staff_name)]
+          .filter(Boolean)
+          .join(" - "),
       ]);
     }
     if (isLateEntry(d)) {
