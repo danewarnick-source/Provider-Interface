@@ -64,4 +64,19 @@ describe("FakeDb (test support)", () => {
     );
     assert.ok((await d.rpc("missing")).error);
   });
+
+  it("returns the changed rows when an update asks for them (N6)", async () => {
+    const d = db();
+    const changed = await d
+      .from("rows")
+      .update({ status: "archived" })
+      .eq("org", "a")
+      .not("gone", "is", null)
+      .select("id, status")
+      .maybeSingle();
+    assert.deepEqual(changed.data, { id: "2", status: "archived" });
+    const none = await d.from("rows").update({ status: "x" }).eq("id", "9").select("id");
+    assert.deepEqual(none.data, []);
+    assert.equal(d.tables.rows!.find((r) => r.id === "1")!.status, "published");
+  });
 });

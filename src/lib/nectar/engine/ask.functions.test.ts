@@ -18,9 +18,20 @@ function body(name: string): string {
 }
 
 describe("ask.functions.ts (N5 guards)", () => {
-  it("exports askNectar and feedbackNectar only", () => {
+  it("exports askNectar, getAskStatus (N6) and feedbackNectar only", () => {
     const exported = [...SRC.matchAll(/^export const (\w+) = createServerFn/gm)].map((m) => m[1]);
-    assert.deepEqual(exported, ["askNectar", "feedbackNectar"]);
+    assert.deepEqual(exported, ["askNectar", "getAskStatus", "feedbackNectar"]);
+  });
+
+  it("getAskStatus: any active member, by the same check askNectar makes (N6)", () => {
+    const status = serverFn("getAskStatus");
+    assert.match(
+      status,
+      /\.middleware\(\[requireSupabaseAuth\]\)\s*\.inputValidator\(\(input: unknown\) => AskStatusInput\.parse\(input\)\)/,
+    );
+    assert.match(status, /const caller = await askCaller\(context, data\.organizationId\);/);
+    assert.match(status, /return \{ on: caller !== null \};/);
+    assert.doesNotMatch(status, /runAskNectar|gatewayFetch|nectar_questions/);
   });
 
   it("both run behind the auth middleware with validated input", () => {

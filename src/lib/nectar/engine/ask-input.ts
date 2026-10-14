@@ -17,6 +17,9 @@ export const AskInput = z.object({
 });
 export type AskInput = z.infer<typeof AskInput>;
 
+/** Whether Ask is on for the agency (N6): both Ask screens read it before anyone asks. */
+export const AskStatusInput = z.object({ organizationId: z.string().uuid() });
+
 export const FeedbackInput = z.object({
   organizationId: z.string().uuid(),
   questionId: z.string().uuid(),

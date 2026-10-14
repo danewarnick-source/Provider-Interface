@@ -202,6 +202,32 @@ export async function readStateRule(db: Db, stateRuleId: string) {
   };
 }
 
+/**
+ * One state rule section Nectar cited, read-only (N6): a team member opens a
+ * state rule source in their own Nectar screen. Only state rule sections,
+ * which every member may read (Decision 7); never an agency's own section.
+ */
+export async function readStateRuleSection(db: Db, sectionId: string) {
+  const { data: section } = await db
+    .from("knowledge_sections")
+    .select("id, heading, body, version, state_document_id")
+    .eq("id", sectionId)
+    .not("state_document_id", "is", null)
+    .maybeSingle();
+  if (!section?.state_document_id) throw new Error(NOT_FOUND);
+  const { data: rule } = await db
+    .from("state_rule_documents")
+    .select("id, title, version, effective_from")
+    .eq("id", section.state_document_id)
+    .not("published_at", "is", null)
+    .maybeSingle();
+  if (!rule) throw new Error(NOT_FOUND);
+  return {
+    rule: { ...rule, note: STATE_RULES_NOTE },
+    section: { id: section.id, heading: section.heading, body: section.body },
+  };
+}
+
 /** The question a new draft answers ("Add to library" from the Questions tab, N6). */
 export async function readDraftQuestion(db: Db, orgId: string, questionId: string) {
   const { data } = await db

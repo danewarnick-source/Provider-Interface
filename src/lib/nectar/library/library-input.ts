@@ -27,6 +27,8 @@ export const DocInput = OrgInput.extend({ documentId: Uuid });
 export const StateRuleInput = OrgInput.extend({ stateRuleId: Uuid });
 /** The question a New document answers ("Add to library", N4/N6). */
 export const QuestionInput = OrgInput.extend({ questionId: Uuid });
+/** A state rule section a team member opens from an answer (N6). */
+export const SectionInput = OrgInput.extend({ sectionId: Uuid });
 
 const hasText = (text: string | undefined) => !!text && text.trim().length > 0;
 

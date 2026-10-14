@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { AskInput, FeedbackInput, QUESTION_MAX } from "./ask-input.ts";
+import { AskInput, AskStatusInput, FeedbackInput, QUESTION_MAX } from "./ask-input.ts";
 
 const ORG = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const Q = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
@@ -48,6 +48,15 @@ describe("askNectar input", () => {
       scope: "agency",
     });
     assert.deepEqual(Object.keys(parsed).sort(), ["organizationId", "question", "view"]);
+  });
+});
+
+describe("getAskStatus input (N6)", () => {
+  it("takes only an agency id", () => {
+    assert.deepEqual(AskStatusInput.parse({ organizationId: ORG, view: "admin" }), {
+      organizationId: ORG,
+    });
+    assert.throws(() => AskStatusInput.parse({ organizationId: "nope" }));
   });
 });
 
