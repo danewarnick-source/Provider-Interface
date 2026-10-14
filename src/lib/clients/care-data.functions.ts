@@ -31,6 +31,7 @@ import { logPhiAccess } from "@/lib/phi-access-audit.server";
 import { assignmentCoversCode } from "@/lib/assignment-codes";
 import { queryOptions } from "@tanstack/react-query";
 import { activeContacts, loadClientContacts, type ClientContact } from "./contacts";
+import { careDataReach, scopeCareData, staffContacts } from "./care-data-scope";
 import { currentPlan, goalView, goalsOn, supportsForCode, type GoalView, type PlanStatus } from "./plans";
 import { loadPlanBundle } from "./plans-load";
 import { todayYmd } from "./dates";
@@ -142,13 +143,16 @@ export type ClientCareVisibility = {
      *  Custom fields have no per-field visibility switch — they inherit
      *  their section's toggle exclusively. */
     custom_fields: CustomFieldWithValue[];
-    /** Active contacts (client_contacts). Always mirrors admin — no visibility gating. */
+    /** Active guardian, emergency, support coordinator and primary doctor contacts. */
     contacts: ClientContact[];
     /** Always mirrors admin — no visibility gating. */
     about_me: string | null;
   };
 };
 
+/** For callers without Clients / Client medical: View (or out of scope) the
+ *  top-level parts are the staff view (care-data-scope.ts): no Medicaid ID
+ *  unless shown to staff, only the staff contacts and visible medications. */
 export type ClientCareData = {
   identity: CareIdentity;
   /** The plan in effect today (null when the client has none). */
@@ -300,7 +304,15 @@ export const getClientCareData = createServerFn({ method: "GET" })
     if (!organizationIdForAccess) {
       throw new Error("Client not found or not accessible");
     }
-    await requireOrgMembership(supabase, userId, organizationIdForAccess, "staff");
+    const access = await requireOrgMembership(supabase, userId, organizationIdForAccess, "staff");
+    // Staff get only the staff view (scopeCareData below); full parts need
+    // Clients / Client medical: View for a client in the caller's scope.
+    let canSeeClient = access.scope === "agency";
+    if (!canSeeClient) {
+      const { data: seen } = await supabase.rpc("access_can_see_client", { _client: clientId, _user: userId });
+      canSeeClient = seen === true;
+    }
+    const reach = careDataReach({ categories: access.categories, scope: access.scope, canSeeClient });
     void logPhiAccess({
       supabaseUserClient: supabase,
       userId,
@@ -459,6 +471,7 @@ export const getClientCareData = createServerFn({ method: "GET" })
       .map((g) => goalView(g.goal, g.supports));
 
     const contacts = activeContacts((ecRes ?? []) as ClientContact[]);
+    const contactsStaff = staffContacts(contacts);
     const about_me: string | null = row.about_me ?? null;
 
     const visibility: ClientCareVisibility = {
@@ -472,23 +485,26 @@ export const getClientCareData = createServerFn({ method: "GET" })
         medications: medicationsStaff,
         authorized_codes: authorizedCodesStaff,
         custom_fields: customFieldsStaff,
-        contacts,
+        contacts: contactsStaff,
         about_me,
       },
     };
 
-    return {
-      identity,
-      plan,
-      goals,
-      medications,
-      authorized_codes,
-      custom_fields,
-      contacts,
-      about_me,
-      visibilityRow,
-      visibility,
-    };
+    return scopeCareData(
+      {
+        identity,
+        plan,
+        goals,
+        medications,
+        authorized_codes,
+        custom_fields,
+        contacts,
+        about_me,
+        visibilityRow,
+        visibility,
+      } satisfies ClientCareData,
+      reach,
+    );
   });
 
 

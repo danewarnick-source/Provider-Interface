@@ -67,6 +67,9 @@ describe("actionsForClientPatch", () => {
   });
   it("refuses to move a client to another organization", () => {
     assert.throws(() => actionsForClientPatch({}, { organization_id: ORG }), /can't be changed/);
+    for (const k of ["deleted_at", "deleted_by", "delete_reason"]) {
+      assert.throws(() => actionsForClientPatch({}, { [k]: null }), /can't be changed/, k);
+    }
   });
   it("compares arrays by value", () => {
     assert.deepEqual(changedClientFields({ diagnoses: ["A"] }, { diagnoses: ["A"] }), []);

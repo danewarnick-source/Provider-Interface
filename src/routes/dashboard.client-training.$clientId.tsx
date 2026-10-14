@@ -3,6 +3,7 @@ import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useCurrentOrg } from "@/hooks/use-org";
 import { z } from "zod";
 import {
   getStaffClientSpecificTraining,
@@ -64,6 +65,8 @@ function ClientTrainingViewer() {
   const getFn = useServerFn(getStaffClientSpecificTraining);
   const completeFn = useServerFn(completeClientSpecificTraining);
   const checkFn = useServerFn(checkAnswerRelevance);
+  const { data: org } = useCurrentOrg();
+  const organizationId = org?.organization_id ?? null;
   const [signature, setSignature] = useState("");
   const [answers, setAnswers] = useState<QAnswer[]>([]);
   const [lastTrainingId, setLastTrainingId] = useState<string | null>(null);
@@ -72,11 +75,11 @@ function ClientTrainingViewer() {
   const [certOpen, setCertOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  const queryKey = ["staff-client-training", clientId, trainingType, obligationInstance ?? null];
+  const queryKey = ["staff-client-training", organizationId, clientId, trainingType, obligationInstance ?? null];
   const { data, isLoading, error } = useQuery({
-    enabled: isRouteUuid(clientId),
+    enabled: isRouteUuid(clientId) && !!organizationId,
     queryKey,
-    queryFn: () => getFn({ data: { clientId, trainingType } }),
+    queryFn: () => getFn({ data: { organizationId: organizationId!, clientId, trainingType } }),
     retry: false,
   });
 
@@ -131,8 +134,10 @@ function ClientTrainingViewer() {
       const ok = await checkAllRelevance(questions, answers);
       if (!ok) throw new Error("Please address the flagged questions before submitting.");
       // 2. Submit completion
+      if (!organizationId) throw new Error("Your agency is still loading. Try again.");
       return completeFn({
         data: {
+          organizationId,
           clientId,
           trainingType,
           typedSignature: signature.trim(),

@@ -2,13 +2,15 @@
 // folder → readPcsp reads it (plain code), saves it as a 'pcsp' client
 // document and returns the parse for review (or the plain reason it couldn't)
 // → confirmPcsp writes the review and files the PCSP in the Client file.
-// Both need clients:edit for this client (assertCanManageClient).
+// Both need clients:edit for this client (assertCanManageClient); the
+// service codes are written only with Billing: Edit too.
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertCanManageClient } from "../guards.server";
+import { canEditClientBilling } from "../billing-access.server";
 import { proposeCarryOver, type CarryOver } from "./carry-over";
 import type { FallbackSection } from "./nectar-fallback";
 import { fileCurrentPcsp, insertPcspDocument } from "./file-pcsp.server";
@@ -91,8 +93,10 @@ export const confirmPcsp = createServerFn({ method: "POST" })
     const { sb, userId } = ctx(context);
     const { organizationId, clientId } = data;
     await assertCanManageClient({ supabase: sb, actorId: userId, organizationId, clientId, action: "edit" });
+    const canEditBilling = await canEditClientBilling(sb, userId, organizationId, clientId);
     const saved = await applyReviewedPcsp(sb, {
       organizationId, clientId, userId, documentId: data.parseId, review: data.edits, now: new Date().toISOString(),
+      canEditBilling,
     });
     const { data: doc } = await sb
       .from("client_documents").select("file_name, storage_path").eq("id", data.parseId).maybeSingle();

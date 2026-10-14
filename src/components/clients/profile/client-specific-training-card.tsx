@@ -76,7 +76,8 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
 
   const { data, isLoading } = useQuery({
     queryKey,
-    queryFn: () => getFn({ data: { clientId } }),
+    enabled: !!orgId,
+    queryFn: () => getFn({ data: { organizationId: orgId!, clientId } }),
   });
   const training = (data?.training ?? null) as Training | null;
 
@@ -94,7 +95,7 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
   }, [editing, draftContent, training]);
 
   const draftMut = useMutation({
-    mutationFn: (rebuild: boolean) => draftFn({ data: { clientId, rebuild } }),
+    mutationFn: (rebuild: boolean) => draftFn({ data: { organizationId: orgId!, clientId, rebuild } }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey });
       toast.success("NECTAR assembled a draft from this client's authoritative data.");
@@ -103,7 +104,7 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
   });
 
   const blankMut = useMutation({
-    mutationFn: () => draftBlankFn({ data: { clientId } }),
+    mutationFn: () => draftBlankFn({ data: { organizationId: orgId!, clientId } }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey });
       toast.success("Blank draft created — start writing.");
@@ -121,7 +122,7 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
         .from("client-documents")
         .upload(path, file, { upsert: false });
       if (upErr) throw upErr;
-      await attachDocFn({ data: { clientId, fileName: file.name, storagePath: path } });
+      await attachDocFn({ data: { organizationId: orgId, clientId, fileName: file.name, storagePath: path } });
       qc.invalidateQueries({ queryKey });
       toast.success("Document attached.");
     } catch (e: unknown) {
@@ -132,13 +133,13 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
   }
 
   const updateMut = useMutation({
-    mutationFn: (payload: { id: string; title?: string; content?: CSTContent }) => updateFn({ data: payload }),
+    mutationFn: (payload: { id: string; title?: string; content?: CSTContent }) => updateFn({ data: { organizationId: orgId!, ...payload } }),
     onSuccess: () => { qc.invalidateQueries({ queryKey }); toast.success("Saved."); setEditing(false); setDraftContent(null); },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const publishMut = useMutation({
-    mutationFn: (id: string) => publishFn({ data: { id } }),
+    mutationFn: (id: string) => publishFn({ data: { organizationId: orgId!, id } }),
     onSuccess: () => { qc.invalidateQueries({ queryKey }); toast.success("Approved & published."); },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -569,6 +570,7 @@ export function ReviewQuestionsEditor({
   onSaved: () => void;
 }) {
   const saveQFn = useServerFn(saveReviewQuestions);
+  const { data: org } = useCurrentOrg();
   const [draft, setDraft] = useState<CSTReviewQuestion[]>(() => structuredClone(questions));
   const [saving, setSaving] = useState(false);
 
@@ -583,7 +585,8 @@ export function ReviewQuestionsEditor({
   async function save() {
     setSaving(true);
     try {
-      await saveQFn({ data: { id: trainingId, review_questions: draft } });
+      if (!org?.organization_id) throw new Error("Your agency is still loading. Try again.");
+      await saveQFn({ data: { organizationId: org.organization_id, id: trainingId, review_questions: draft } });
       onSaved();
       toast.success("Review questions saved.");
     } catch (e: unknown) {
