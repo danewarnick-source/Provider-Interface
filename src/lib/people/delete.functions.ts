@@ -224,6 +224,16 @@ export const restorePerson = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ name: string }> => {
     const { sb, userId } = signedIn(context);
     await requireLevel(sb, userId, data.organizationId, "owner");
+    if (data.kind === "client") {
+      // The one action a deleted client allows: an Owner's restore.
+      await assertCanManageClient({
+        supabase: sb,
+        actorId: userId,
+        organizationId: data.organizationId,
+        clientId: data.id,
+        action: "restore",
+      });
+    }
     const { rowId, name } = await resolvePerson(sb, data);
     const { error } = await sb.rpc("restore_deleted_person", { _kind: data.kind, _id: rowId });
     if (error) throw new Error(error.message);

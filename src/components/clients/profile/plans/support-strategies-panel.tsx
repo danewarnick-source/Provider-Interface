@@ -11,6 +11,7 @@
 import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useCurrentOrg } from "@/hooks/use-org";
 import { toast } from "sonner";
 import { ClipboardList } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -65,6 +66,9 @@ export function SupportStrategiesPanel({
   canEdit: boolean;
 }) {
   const qc = useQueryClient();
+  const { data: org } = useCurrentOrg();
+  // Training calls name the agency they're for (a person can be in several).
+  const organizationId = orgId ?? org?.organization_id ?? "";
   const getSS = useServerFn(getSupportStrategiesTraining);
   const draftSS = useServerFn(draftSupportStrategies);
   const attachSS = useServerFn(attachSupportStrategyDocument);
@@ -80,8 +84,8 @@ export function SupportStrategiesPanel({
 
   const { data, isLoading } = useQuery({
     queryKey,
-    enabled: canEdit,
-    queryFn: () => getSS({ data: { clientId } }),
+    enabled: canEdit && !!organizationId,
+    queryFn: () => getSS({ data: { organizationId, clientId } }),
   });
   const training = (data?.training ?? null) as SSRow | null;
   const refresh = () => {
@@ -92,7 +96,7 @@ export function SupportStrategiesPanel({
 
   const draftMut = useMutation({
     mutationFn: (mode: "nectar" | "blank" | "rebuild" | "missing") =>
-      draftSS({ data: { clientId, mode } }),
+      draftSS({ data: { organizationId, clientId, mode } }),
     onSuccess: async (res) => {
       await refresh();
       const missed = res?.nectarMissed ?? [];
@@ -108,7 +112,7 @@ export function SupportStrategiesPanel({
     onError: fail,
   });
   const updateMut = useMutation({
-    mutationFn: (content: CSTContent) => updateFn({ data: { id: training!.id, content } }),
+    mutationFn: (content: CSTContent) => updateFn({ data: { organizationId, id: training!.id, content } }),
     onSuccess: () => {
       refresh();
       toast.success("Strategy saved.");
@@ -128,7 +132,7 @@ export function SupportStrategiesPanel({
     onError: fail,
   });
   const publishMut = useMutation({
-    mutationFn: (note?: string) => publishFn({ data: { id: training!.id, note } }),
+    mutationFn: (note?: string) => publishFn({ data: { organizationId, id: training!.id, note } }),
     onSuccess: () => refresh(),
     onError: fail,
   });
@@ -147,7 +151,7 @@ export function SupportStrategiesPanel({
         .from("client-documents")
         .upload(path, file, { upsert: false });
       if (error) throw error;
-      await attachSS({ data: { clientId, fileName: file.name, storagePath: path } });
+      await attachSS({ data: { organizationId, clientId, fileName: file.name, storagePath: path } });
       refresh();
       toast.success("Document attached.");
     } catch (e: unknown) {

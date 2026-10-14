@@ -32,7 +32,9 @@ export const MEDICAL_CLIENT_FIELDS: ReadonlySet<string> = new Set([
 
 /**
  * clients columns no caller may set through a patch. Status and discharge
- * date change only through the discharge flow (discharge.functions.ts). The
+ * date change only through the discharge flow (discharge.functions.ts); the
+ * soft-delete columns only through Delete / Restore (people/delete.functions.ts,
+ * soft_delete_person / restore_deleted_person). The
  * client-level self-admin flags are replaced by each medication's how_taken
  * (the columns stay until the Phase B clean-up).
  */
@@ -42,6 +44,9 @@ export const LOCKED_CLIENT_FIELDS: ReadonlySet<string> = new Set([
   "created_at",
   "account_status",
   "discharge_date",
+  "deleted_at",
+  "deleted_by",
+  "delete_reason",
   "self_admin_med_support",
   "self_admin_med_support_locked",
 ]);

@@ -5,6 +5,8 @@
  * - Every visible value is passed through `field()`. Empty / null / undefined
  *   renders literally as "Not on file". No inference, no autofill from
  *   related data — this is a law-enforcement-facing safety document.
+ * - Needs Client medical: View for a client in the caller's scope, and every
+ *   build writes a PHI access log entry.
  * - Data comes only from real records: clients row, the client's contacts
  *   (client_contacts), organizations row, organization_branding row, and the
  *   client's own uploaded photo (client_photo_url).
@@ -12,6 +14,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { logPhiAccess } from "@/lib/phi-access-audit.server";
+import { assertCanManageClient } from "./guards.server";
 import { PDFDocument, StandardFonts, rgb, type PDFPage, type PDFFont, type PDFImage } from "pdf-lib";
 import {
   activeContacts,
@@ -90,6 +94,24 @@ export const generateClientFaceSheet = createServerFn({ method: "POST" })
       .maybeSingle();
     if (clientErr) throw new Error(clientErr.message);
     if (!client) throw new Error("Client not found");
+    // Medicaid ID, SSN last 4, DNR and doctors: Client medical: View, in scope.
+    await assertCanManageClient({
+      supabase,
+      actorId: context.userId,
+      organizationId: client.organization_id,
+      clientId: client.id,
+      action: "view_medical",
+    });
+    void logPhiAccess({
+      supabaseUserClient: supabase,
+      userId: context.userId,
+      organizationId: client.organization_id,
+      resourceType: "client_chart",
+      resourceId: client.id,
+      clientId: client.id,
+      action: "export",
+      detail: "generateClientFaceSheet",
+    });
 
     // 2) Organization + branding.
     const { data: org } = await supabase

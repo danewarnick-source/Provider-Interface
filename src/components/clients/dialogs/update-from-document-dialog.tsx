@@ -23,6 +23,7 @@ import {
   applySelectedClientFields,
   previewClientUpdateFromDocument,
 } from "@/lib/import-checklist.functions";
+import { defaultChecked } from "@/lib/clients/document-review";
 import { UpdateProposalsList, type UpdateProposal } from "./update-proposals-list";
 
 type DocType = "1056_budget" | "other";
@@ -78,11 +79,7 @@ export function UpdateFromDocumentDialog({
         setReason(res.reason);
       } else {
         setProposals(res.proposals);
-        setChecked(
-          Object.fromEntries(
-            res.proposals.map((p) => [p.field_key, p.changed && !!p.incomingValue]),
-          ),
-        );
+        setChecked(defaultChecked(res.proposals));
       }
     } catch (e) {
       setReason((e as Error).message || "Upload or reading failed.");

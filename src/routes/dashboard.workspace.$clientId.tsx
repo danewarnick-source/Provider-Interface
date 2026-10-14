@@ -3,6 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
 import { z } from "zod";
 import { useCaseload } from "@/hooks/use-caseload";
+import { useAccess } from "@/hooks/use-access";
 import { useMyAssignments, allowedCodesFor } from "@/hooks/use-my-assignments";
 import { isClockableServiceCode } from "@/lib/service-billing";
 import { resolveGeofenceRadiusFeet } from "@/lib/geo";
@@ -80,6 +81,7 @@ function ClientWorkspace() {
   const { clientId } = Route.useParams();
   const { data: caseload, isLoading } = useCaseload();
   const { data: assignments } = useMyAssignments();
+  const { canCategory } = useAccess();
   const navigate = useNavigate();
   const {
     tab: tabParam,
@@ -224,7 +226,8 @@ function ClientWorkspace() {
                   {displayFirst} {displayLast}
                 </h1>
                 <div className="flex shrink-0 items-center gap-2">
-                  <FaceSheetButton clientId={client.id} />
+                  {/* The face sheet carries Medicaid ID and medical info: Client medical: View only. */}
+                  {canCategory("client_medical", "view") ? <FaceSheetButton clientId={client.id} /> : null}
                   <ClientQuickInfoSheet
                     client={client}
                     trigger={
