@@ -5,24 +5,9 @@
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 
-export type UpdateProposal = {
-  field_key: string;
-  label: string;
-  incomingValue: string;
-  currentValue: string | null;
-  changed: boolean;
-  confidence: number;
-  field: {
-    field_key: string;
-    value_text?: string | null;
-    value_number?: number | null;
-    value_date?: string | null;
-    value_bool?: boolean | null;
-    value_array?: string[] | null;
-    value_json?: unknown;
-    confidence?: number | null;
-  };
-};
+import type { ReviewProposal } from "@/lib/clients/document-review";
+
+export type UpdateProposal = ReviewProposal;
 
 export function UpdateProposalsList({
   proposals,
@@ -36,7 +21,7 @@ export function UpdateProposalsList({
   if (proposals.length === 0) {
     return (
       <div className="rounded-md border p-4 text-sm text-muted-foreground">
-        Nectar didn't find any profile fields to update from this document.
+        Nectar didn't find anything to update from this document.
       </div>
     );
   }
