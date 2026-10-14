@@ -6,7 +6,9 @@
 // is activated, then marked as sent (support-strategies-send.tsx). A new
 // plan year keeps carried-over strategies and drafts only the missing ones.
 // An uploaded strategies document can be sent as is, or Nectar copies its
-// strategies in per support for staff to see on shift.
+// strategies in per support for staff to see on shift. Copied over approved
+// strategies, they wait as the next draft version: staff keep seeing the
+// approved ones until an admin approves (or discards) the draft.
 
 import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -34,7 +36,12 @@ import {
   updateClientSpecificTraining,
   type CSTContent,
 } from "@/lib/clients/training.functions";
-import { pullStrategiesFromDocument } from "@/lib/clients/strategies-pull.functions";
+import {
+  discardPulledStrategies,
+  pullStrategiesFromDocument,
+} from "@/lib/clients/strategies-pull.functions";
+import { workingStrategies } from "@/lib/clients/strategies-pull";
+import { Button } from "@/components/ui/button";
 import { PcspFirstDialog } from "./support-strategies-parts";
 import { StrategiesSendRow, strategySendKey } from "./support-strategies-send";
 import { StrategiesEmpty, StrategiesStatus, StrategiesUploaded } from "./support-strategies-cards";
@@ -45,6 +52,8 @@ import { PublishConfirmDialog } from "./publish-confirm-dialog";
 type SSRow = {
   id: string;
   content: CSTContent;
+  /** The next draft version (pulled from a document) awaiting approval. */
+  draft_content?: CSTContent | null;
   status: string;
   version: number;
   approved_at: string | null;
@@ -75,6 +84,7 @@ export function SupportStrategiesPanel({
   const updateFn = useServerFn(updateClientSpecificTraining);
   const publishFn = useServerFn(publishClientSpecificTraining);
   const pullFn = useServerFn(pullStrategiesFromDocument);
+  const discardFn = useServerFn(discardPulledStrategies);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -128,6 +138,15 @@ export function SupportStrategiesPanel({
           `Copied strategies for ${res.copied} support${res.copied === 1 ? "" : "s"}. Nothing found in the document for: ${res.blank.join("; ")}. Write ${res.blank.length === 1 ? "that one" : "those"} by hand.`,
         );
       } else toast.success("Strategies copied from the document. Review each one, then approve.");
+      if (res.pending) toast.message("Staff keep seeing the approved strategies until you approve these.");
+    },
+    onError: fail,
+  });
+  const discardMut = useMutation({
+    mutationFn: () => discardFn({ data: { clientId } }),
+    onSuccess: async () => {
+      await refresh();
+      toast.success("Copied strategies discarded. The approved ones are unchanged.");
     },
     onError: fail,
   });
@@ -176,14 +195,23 @@ export function SupportStrategiesPanel({
   );
   const pickFile = needPcsp(() => fileInputRef.current?.click());
 
-  const content = training?.content;
+  // The editor works on the pending draft version when there is one.
+  const work = training ? workingStrategies(training) : null;
+  const content = work?.content ?? undefined;
+  const pending = !!work?.pending;
   const uploaded = !!content && isUploadDoc(content);
   const link = uploaded ? content!.sections[0].items[0] : null;
   const fileName = link?.kind === "link" ? (link.links[0]?.label ?? "document") : "document";
   const sections = !content || uploaded ? [] : content.sections;
   const coverage = strategyCoverage(supports, sections);
   const status = training
-    ? strategyStatus(training, data?.approverName ?? null, plan, supports, sections)
+    ? strategyStatus(
+        { status: work?.status ?? training.status, approved_at: pending ? null : training.approved_at },
+        data?.approverName ?? null,
+        plan,
+        supports,
+        sections,
+      )
     : null;
   const rebuild = needPcsp(() => {
     if (
@@ -251,6 +279,29 @@ export function SupportStrategiesPanel({
               Copied by Nectar from the uploaded strategies document, which stays the official
               copy.
             </p>
+          ) : null}
+          {pending ? (
+            <div
+              className="flex flex-wrap items-center gap-2 rounded-xl border border-hive-border px-3 py-2 text-xs text-muted-foreground"
+              data-testid="strategies-pending-version"
+            >
+              <span>
+                New draft version. Staff keep seeing the approved strategies until you approve
+                this one.
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-auto"
+                disabled={discardMut.isPending}
+                onClick={() => {
+                  if (window.confirm("Discard the copied strategies? The approved ones stay."))
+                    discardMut.mutate();
+                }}
+              >
+                Discard draft
+              </Button>
+            </div>
           ) : null}
           <StrategiesSendRow clientId={clientId} fromUpload={!!content?.source_document_id} />
           <SupportStrategiesList

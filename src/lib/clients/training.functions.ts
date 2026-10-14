@@ -12,6 +12,7 @@ import { todayYmd } from "./dates";
 import { activeGoalViewsOn, type GoalView } from "./plans";
 import { agencySupports, buildStrategySections, carryForward, supportsToDraft, type StrategySupport } from "./support-strategies";
 import { formatBullets } from "./strategy-rules";
+import { approvalContent, editSavePatch } from "./strategies-pull";
 import { STRATEGY_SYSTEM_PROMPT, parseStrategyReply, strategyUserPrompt, type StrategyReply } from "./strategy-prompt";
 import { loadPlanBundle } from "./plans-load";
 import {
@@ -595,13 +596,15 @@ export const updateClientSpecificTraining = createServerFn({ method: "POST" })
     if (!supabase || !userId) return { training: null };
     const m = await getMembership(supabase, userId, data.organizationId);
     adminGuard(m.access_level);
-    const row = await trainingInOrg(supabase, data.id, m.organization_id, "status");
+    const row = await trainingInOrg(supabase, data.id, m.organization_id, "status, draft_content");
     await guardClient(supabase, userId, m.organization_id, row.client_id, "edit");
-    const patch: Record<string, unknown> = {};
+    // A pending draft version (pulled from a document) takes the edit; staff
+    // keep the approved one. Otherwise editing a published version returns it
+    // to draft (requires re-approval).
+    const patch: Record<string, unknown> =
+      data.content !== undefined ? editSavePatch(row, data.content) : {};
     if (data.title !== undefined) patch.title = data.title;
-    if (data.content !== undefined) patch.content = data.content;
-    // Editing a published version returns it to draft (requires re-approval).
-    if (row.status === "published") {
+    if (data.content === undefined && row.status === "published") {
       patch.status = "draft";
       patch.approved_by = null;
       patch.approved_at = null;
@@ -630,12 +633,15 @@ export const publishClientSpecificTraining = createServerFn({ method: "POST" })
     if (!supabase || !userId) return { training: null };
     const m = await getMembership(supabase, userId, data.organizationId);
     adminGuard(m.access_level);
-    const row = await trainingInOrg(supabase, data.id, m.organization_id, "content");
+    const row = await trainingInOrg(supabase, data.id, m.organization_id, "content, draft_content, status, version");
     await guardClient(supabase, userId, m.organization_id, row.client_id, "edit");
-    const content = (row.content ?? { sections: [] }) as CSTContent;
+    // A pending draft version is what gets approved (it replaces the approved one).
+    const approval = approvalContent<CSTContent>(row);
+    const content = (approval.content ?? { sections: [] }) as CSTContent;
     const { data: updated, error: uErr } = await supabase
       .from("client_specific_trainings")
       .update({
+        ...approval.patch,
         status: "published",
         approved_by: userId,
         approved_at: new Date().toISOString(),
@@ -817,11 +823,12 @@ export const draftSupportStrategies = createServerFn({ method: "POST" })
 
     const { data: current } = await supabase
       .from("client_specific_trainings")
-      .select("content")
+      .select("content, draft_content")
       .eq("client_id", data.clientId)
       .eq("training_type", "support_strategies")
       .maybeSingle();
-    const sections = (current?.content as CSTContent | undefined)?.sections ?? [];
+    // Edited strategies are kept from what the editor shows (a pending draft version first).
+    const sections = ((current?.draft_content ?? current?.content) as CSTContent | undefined)?.sections ?? [];
     const { content, missed } = await assembleSupportStrategyStubs(
       supabase, m.organization_id, data.clientId, sections,
       { nectar: data.mode !== "blank", carry: data.mode === "missing" },
@@ -839,6 +846,7 @@ export const draftSupportStrategies = createServerFn({ method: "POST" })
         .from("client_specific_trainings")
         .update({
           content: content as unknown,
+          draft_content: null,
           status: "draft",
           version: (existing.version ?? 1) + (data.mode === "rebuild" || data.mode === "missing" ? 1 : 0),
           approved_by: null,
@@ -916,7 +924,7 @@ export const attachSupportStrategyDocument = createServerFn({ method: "POST" })
     if (existing) {
       const { error: uErr } = await supabase
         .from("client_specific_trainings")
-        .update({ content: linkContent as unknown, status: "draft", approved_by: null, approved_at: null })
+        .update({ content: linkContent as unknown, draft_content: null, status: "draft", approved_by: null, approved_at: null })
         .eq("id", existing.id);
       if (uErr) throw new Error(uErr.message);
     } else {

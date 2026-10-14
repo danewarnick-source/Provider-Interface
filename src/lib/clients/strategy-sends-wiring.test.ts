@@ -41,6 +41,12 @@ describe("recording a send", () => {
     assert.match(read("../evidence/record-upload.server.ts"), /return row\.id;/);
   });
 
+  it("inserts the send before filing the Evidence copy, and voids it if filing fails", () => {
+    assert.match(fns, /recordSendThenFile\(\{/);
+    assert.ok(fns.indexOf("insertSend:") < fns.indexOf("fileEvidence:"));
+    assert.match(fns, /evidence_file_id: null/);
+  });
+
   it("undoes with a soft void and never deletes", () => {
     assert.match(fns, /voided_at: new Date\(\)\.toISOString\(\), voided_by: userId/);
     assert.doesNotMatch(fns, /\.delete\(/);
@@ -71,8 +77,18 @@ describe("new plan year and uploaded documents", () => {
   it("copies strategies from the document, checks each bullet, and leaves a draft", () => {
     const pull = read("./strategies-pull.functions.ts");
     assert.match(pull, /parsePullReply\(reply, needed, text\)/);
-    assert.match(pull, /status: "draft"/);
     assert.match(pull, /source_document_id: doc\.id/);
-    assert.match(pull, /approved_at: null/);
+    // Saved through pullSavePatch: a new draft version over approved strategies.
+    assert.match(pull, /\.update\(pullSavePatch\(training, content as unknown\)\)/);
+    assert.match(pull, /select\("id, content, status, version"\)/);
+    const pure = read("./strategies-pull.ts");
+    assert.match(pure, /if \(row\.status === "published"\) return \{ draft_content: content \};/);
+  });
+
+  it("approval and edits use the pending draft version; superseding writes clear it", () => {
+    const t = read("./training.functions.ts");
+    assert.match(t, /editSavePatch\(row, data\.content\)/);
+    assert.match(t, /approvalContent<CSTContent>\(row\)/);
+    assert.equal((t.match(/draft_content: null/g) ?? []).length, 2);
   });
 });
