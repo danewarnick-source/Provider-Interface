@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useShiftMedDueStatus } from "@/hooks/use-shift-med-due-status";
 import { logMedicationPass } from "@/lib/emar-pass.functions";
+import { howTakenSummary } from "@/lib/medications/med-display";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,7 +41,6 @@ const STATUS_BADGE_CLASS: Record<string, string> = {
 
 type ClientHeader = {
   allergies: string[] | null;
-  self_admin_med_support: boolean | null;
 };
 
 type MedRow = {
@@ -52,6 +52,7 @@ type MedRow = {
   is_prn: boolean;
   is_controlled: boolean;
   is_rescue: boolean;
+  how_taken: string | null;
 };
 
 type DueRow = {
@@ -112,14 +113,14 @@ export function StaffMedicationsPanel({
     return { windowStart: s.toISOString(), windowEnd: e.toISOString() };
   }, []);
 
-  // Client header (allergies + self-admin support)
+  // Client header (allergies)
   const { data: header } = useQuery({
     enabled: !!clientId,
     queryKey: ["staff-med-panel-header", clientId],
     queryFn: async (): Promise<ClientHeader> => {
       const { data, error } = await supabase
         .from("clients")
-        .select("allergies, self_admin_med_support")
+        .select("allergies")
         .eq("id", clientId)
         .single();
       if (error) throw error;
@@ -136,7 +137,7 @@ export function StaffMedicationsPanel({
       const { data, error } = await (supabase as any)
         .from("client_medications")
         .select(
-          "id, medication_name, dosage, route, scheduled_times, is_prn, is_controlled, is_rescue",
+          "id, medication_name, dosage, route, scheduled_times, is_prn, is_controlled, is_rescue, how_taken",
         )
         .eq("organization_id", orgId!)
         .eq("client_id", clientId)
@@ -227,11 +228,7 @@ export function StaffMedicationsPanel({
   const [showFull, setShowFull] = useState(false);
   const [logTarget, setLogTarget] = useState<DueRow | null>(null);
 
-  const supportText = header?.self_admin_med_support
-    ? "Self-administers with support"
-    : header?.self_admin_med_support === false
-      ? "Not currently cleared for self-administration"
-      : null;
+  const supportText = allMeds?.length ? howTakenSummary(allMeds) : null;
 
   const allergies = header?.allergies ?? [];
 

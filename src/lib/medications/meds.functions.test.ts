@@ -114,6 +114,33 @@ describe("saveMedicationRow", () => {
     assert.equal(db.tables.client_medications?.length ?? 0, 0);
   });
 
+  it("only links this client's files, plan and rights restriction", async () => {
+    const db = fakeDb({
+      client_documents: [{ id: "bsp1", organization_id: "org", client_id: "c1" }],
+      hrc_restriction_records: [{ id: "hrr-other", organization_id: "org", client_id: "c2" }],
+    });
+    await assert.rejects(
+      saveMedicationRow(db, {
+        ...scope,
+        input: { ...complete, label_photo_path: "org/c2/medications/x.jpg" },
+      }),
+      /medication files/,
+    );
+    await assert.rejects(
+      saveMedicationRow(db, { ...scope, input: { ...complete, hrc_restriction_id: "hrr-other" } }),
+      /isn't on this client's record/,
+    );
+    const ok = await saveMedicationRow(db, {
+      ...scope,
+      input: {
+        ...complete,
+        bsp_document_id: "bsp1",
+        label_photo_path: "org/c1/medications/label-x.jpg",
+      },
+    });
+    assert.ok(ok.id);
+  });
+
   it("edits with a field diff, keeps support_level when it already matches, and skips no-op saves", async () => {
     const db = fakeDb({
       client_medications: [

@@ -3,6 +3,7 @@
 // clients show absences. No Supabase, importable by node --test.
 
 import { parseLocalDate } from "./dates.ts";
+import { howTakenSummary, type DisplayMed } from "../medications/med-display.ts";
 
 export type DirectiveStatus = "none" | "dnr" | "polst";
 
@@ -56,11 +57,9 @@ export function directivePatch(d: DirectiveDraft): Record<string, string | boole
   };
 }
 
-/** clients.self_admin_med_support → the plain-English support level. */
-export function medicationSupportLabel(selfAdmin: boolean | null | undefined): string {
-  if (selfAdmin === true) return "Takes their own medications with staff support";
-  if (selfAdmin === false) return "Staff give medications (not cleared to self-administer)";
-  return "Not set";
+/** How the client takes their medications, from each one's how_taken. */
+export function medicationSupportSummary(meds: readonly DisplayMed[]): string {
+  return howTakenSummary(meds);
 }
 
 export const HEALTH_EVENT_TYPES = [

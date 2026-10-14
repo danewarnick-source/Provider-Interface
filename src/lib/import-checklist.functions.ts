@@ -107,56 +107,6 @@ export const appendClientArrayField = createServerFn({ method: "POST" })
     return { ok: true, count: next.length };
   });
 
-// ── Upsert one client_medications row (manual fill-in path) ──────────────
-export const upsertClientMedication = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) =>
-    z
-      .object({
-        clientId: z.string().uuid(),
-        medicationId: z.string().uuid().optional(),
-        medication_name: z.string().min(1).max(200),
-        dosage: z.string().max(120).optional().nullable(),
-        am_pm: z.string().max(40).optional().nullable(),
-        scheduled_time: z.string().max(80).optional().nullable(),
-        prescriber: z.string().max(120).optional().nullable(),
-        support_level: z.string().max(80).optional().nullable(),
-        support_explanation: z.string().max(2000).optional().nullable(),
-      })
-      .parse(i),
-  )
-  .handler(async ({ data, context }) => {
-    const sb = context.supabase as Sb;
-    if (!sb || !context.userId) return { ok: false, id: null };
-    const orgId = await requireAdminForClient(sb, context.userId as string, data.clientId);
-    const row = {
-      client_id: data.clientId,
-      organization_id: orgId,
-      medication_name: data.medication_name,
-      dosage: data.dosage ?? null,
-      am_pm: data.am_pm ?? null,
-      scheduled_time: data.scheduled_time ?? null,
-      prescriber: data.prescriber ?? null,
-      support_level: data.support_level ?? null,
-      support_explanation: data.support_explanation ?? null,
-    };
-    if (data.medicationId) {
-      const { error } = await sb
-        .from("client_medications")
-        .update(row)
-        .eq("id", data.medicationId);
-      if (error) throw error;
-      return { ok: true, id: data.medicationId };
-    }
-    const { data: ins, error } = await sb
-      .from("client_medications")
-      .insert(row)
-      .select("id")
-      .single();
-    if (error) throw error;
-    return { ok: true, id: ins.id as string };
-  });
-
 // ── Attach an uploaded document to the client profile ────────────────────
 // Records the file in client_documents. Extraction is a separate step
 // (extractAndApplyClientUpload below) so the attach succeeds even when the
@@ -328,7 +278,6 @@ const PROFILE_FIELD_MAP: Record<string, ProfileFieldMeta> = {
   [LEGACY_ALERT_KEY]: { column: "special_directions", label: "Must-knows for staff", kind: "text" },
   special_directions: { column: "special_directions", label: "Special directions", kind: "text" },
   dysphagia: { column: "dysphagia", label: "Dysphagia", kind: "bool" },
-  self_admin_med_support: { column: "self_admin_med_support", label: "Self-administer med support", kind: "bool" },
   allergies: { column: "allergies", label: "Allergies", kind: "array" },
   swallowing_alerts: { column: "swallowing_alerts", label: "Swallowing alerts", kind: "array" },
   dietary_restrictions: { column: "diets", label: "Diet", kind: "array" },

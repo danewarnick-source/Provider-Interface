@@ -71,11 +71,7 @@ export default tseslint.config(
       "src/routes/api/**",
       // Existing surfaces on the allowlist until they migrate. Adding a
       // new file here is a red flag in review.
-      "src/components/workspace/emar-chart.tsx",
-      "src/components/workspace/mar-emar-tab.tsx",
-      "src/components/workspace/emar-ops-panel.tsx",
       "src/components/workspace/about-tab.tsx",
-      "src/components/medications-manager.tsx",
       "src/components/mar-calendar.tsx",
       "src/components/clients/add/setup-checklist.tsx",
       "src/components/clients/profile/client-specific-training-card.tsx",
@@ -85,8 +81,6 @@ export default tseslint.config(
       "src/components/staff-mobile/client-quick-info-sheet.tsx",
       "src/components/audit-portal/**",
       "src/components/ai-pdf-importer.tsx",
-      "src/routes/dashboard.emar.tsx",
-      "src/routes/dashboard.admin.emar-audit.tsx",
       "src/routes/dashboard.workspace.$clientId.tsx",
       "src/routes/dashboard.shift.$shiftId.tsx",
       "src/routes/dashboard.hhs-hub.$clientId.tsx",
