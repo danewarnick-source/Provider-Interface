@@ -10,6 +10,7 @@ import {
   type ClientFileSummary,
 } from "./file";
 import type { ClientFileDoc } from "./file-docs";
+import { denverYmd } from "../denver-date.ts";
 import { currentPlan, type ClientPlan } from "./plans";
 import { loadFileRows, loadHousemateStatus, maybe, type AnySupabase } from "./file-index-queries";
 import { loadStrategyStates } from "./strategy-sends.server";
@@ -67,7 +68,7 @@ export async function loadOrgClientFileIndex(
   organizationId: string,
   clientFilter?: string[] | null,
 ): Promise<ClientFileIndex> {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = denverYmd();
 
   const clientRows = await maybe(
     () =>

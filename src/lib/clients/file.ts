@@ -10,6 +10,7 @@ import {
 import { personNeedsSupportStrategies } from "./strategy-rules.ts";
 import { strategyFileFact, type StrategySendState } from "./strategy-sends.ts";
 import { summaryCard } from "./file-summary.ts";
+import { denverYmd } from "../denver-date.ts";
 import {
   CLINICAL_LEGAL_DOC_TYPES,
   GRIEVANCE_DOC_TYPES,
@@ -196,7 +197,7 @@ export function buildClientFileCards(
   };
 
   // Expired documents (past client_documents.expires_on) no longer count.
-  const docs = liveDocs(facts.docs, now.toISOString().slice(0, 10));
+  const docs = liveDocs(facts.docs, denverYmd(now));
   const pcspDocs = docsOfType(docs, PCSP_DOC_TYPES);
   const grievanceDocs = docsOfType(docs, GRIEVANCE_DOC_TYPES);
   const clinicalDocs = docsOfType(docs, CLINICAL_LEGAL_DOC_TYPES);
@@ -218,7 +219,7 @@ export function buildClientFileCards(
   const pcspOnFile = pcspDocs.length > 0;
   push(
     "pcsp",
-    pcspOnFile && !(facts.planEndDate && facts.planEndDate < now.toISOString().slice(0, 10)),
+    pcspOnFile && !(facts.planEndDate && facts.planEndDate < denverYmd(now)),
     facts.planEndDate,
     `${profile}?section=file`,
     { ...firstEvidence(pcspDocs), bucket: "client-documents" },

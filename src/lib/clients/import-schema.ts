@@ -14,6 +14,7 @@
 // =============================================================
 
 import { enrichNamesFromFull, firstNameWithMiddle } from "@/lib/person-name";
+import { denverYmd } from "@/lib/denver-date";
 import { activeContacts, loadClientContacts } from "./contacts";
 import { guardianGap, guardianStatus } from "./guardian";
 import { applyContactMergePlan, planContactMerge } from "./contacts-merge";
@@ -636,7 +637,7 @@ export async function applyExtractedFieldsToClient(
     // Close any existing authorization rows for codes NOT in the new doc.
     // Only authoritative documents (PCSP / 1056) ever close stale rows.
     if (isAuthoritative) {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = denverYmd();
       const { data: existingCodeRows } = await supabase
         .from("client_billing_codes")
         .select("id, service_code, service_end_date")
@@ -871,7 +872,7 @@ export async function applyExtractedFieldsToClient(
     if (m) {
       const ratio_staff = parseInt(m[1], 10);
       const ratio_clients = parseInt(m[2], 10);
-      const today = new Date().toISOString().slice(0, 10);
+      const today = denverYmd();
       const { error: rErr } = await supabase.from("client_ratios").insert({
         organization_id: organizationId,
         client_id: clientId,

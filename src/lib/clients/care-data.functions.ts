@@ -35,6 +35,7 @@ import { careDataReach, scopeCareData, staffContacts } from "./care-data-scope";
 import { currentPlan, goalView, goalsOn, supportsForCode, type GoalView, type PlanStatus } from "./plans";
 import { loadPlanBundle } from "./plans-load";
 import { todayYmd } from "./dates";
+import { authorizationCovers } from "./codes";
 import { STAFF_MED_COLUMNS, staffVisibleMeds, type StaffMedication } from "@/lib/medications/staff-meds";
 import {
   type ClientVisibilityRow,
@@ -371,10 +372,10 @@ export const getClientCareData = createServerFn({ method: "GET" })
       : null;
 
     // Filter authorized codes to currently-open only (same rule as
-    // useClientBillingCodes — no end date or end date > today).
+    // useClientBillingCodes — no end date, or the end date is today or later).
     const authorized_codes: CareAuthorizedCode[] = (
       (codesRes.data ?? []) as CareAuthorizedCode[]
-    ).filter((c) => !c.service_end_date || c.service_end_date > today);
+    ).filter((c) => authorizationCovers(c.service_end_date, today));
 
     const medications = staffVisibleMeds((medsRes.data ?? []) as CareMedication[]);
 

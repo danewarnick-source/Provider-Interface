@@ -3,7 +3,7 @@
 // what a discharge ended (client_discharges.ended_items), and the facts Nectar
 // may use to draft a summary. No Supabase — importable by node --test.
 
-import { parseLocalDate, todayYmd } from "./dates.ts";
+import { localYmd, parseLocalDate, todayYmd } from "./dates.ts";
 
 export const INITIATED_BY = {
   agency: "The agency",
@@ -41,7 +41,7 @@ export function addDays(ymd: string, days: number): string {
   const d = parseLocalDate(ymd);
   if (!d) return ymd;
   d.setDate(d.getDate() + days);
-  return todayYmd(d);
+  return localYmd(d);
 }
 
 /** Problems that block saving the discharge. */
