@@ -2,9 +2,8 @@ import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import type { AddClientForm, CodeLine, FilledField } from "@/lib/clients/create";
+import type { AddClientForm, CodeLine } from "@/lib/clients/create";
 import { DspdCodesMultiSelect } from "./dspd-codes-multiselect";
-import { FromPcspTag } from "./add-identity-fields";
 
 const newLine = (code: string): CodeLine => ({
   code,
@@ -19,12 +18,10 @@ const newLine = (code: string): CodeLine => ({
 export function AddCodesFields({
   form,
   set,
-  filled,
   onMenuOpenChange,
 }: {
   form: AddClientForm;
   set: (patch: Partial<AddClientForm>) => void;
-  filled: FilledField[];
   onMenuOpenChange: (open: boolean) => void;
 }) {
   const codes = form.codes.map((c) => c.code);
@@ -32,10 +29,7 @@ export function AddCodesFields({
     set({ codes: form.codes.map((c, j) => (j === i ? { ...c, ...patch } : c)) });
   return (
     <section className="space-y-2">
-      <h4 className="text-sm font-semibold">
-        Service codes
-        <FromPcspTag show={filled.includes("codes")} />
-      </h4>
+      <h4 className="text-sm font-semibold">Service codes</h4>
       <DspdCodesMultiSelect
         value={codes}
         onOpenChange={onMenuOpenChange}

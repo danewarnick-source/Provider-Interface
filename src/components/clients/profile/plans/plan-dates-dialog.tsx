@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { addClientPlan, updateClientPlanDates } from "@/lib/clients/plans.functions";
 import type { ClientPlan } from "@/lib/clients/plans";
 import { onClientDutyFactsChanged } from "@/lib/staff-assignment-hooks.functions";
-import { LabeledInput } from "@/components/clients/profile/cards/card-shell";
+import { LabeledInput } from "@/components/clients/profile/cards/card-parts";
 import { clientPlansKey } from "@/components/clients/shared/hooks/use-plan-goals";
 
 type Dates = { start_date: string; end_date: string; activated_on: string; meeting_date: string };
@@ -97,11 +97,11 @@ export function PlanDatesDialog({
         </div>
         {problem ? <p className="text-xs text-amber-700">{problem}</p> : null}
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
           <Button disabled={save.isPending || !!problem} onClick={() => save.mutate()}>
-            {save.isPending ? "Saving…" : "Save"}
+            {save.isPending ? "Saving…" : "Save plan dates"}
           </Button>
         </DialogFooter>
       </DialogContent>

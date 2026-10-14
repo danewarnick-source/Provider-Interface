@@ -46,11 +46,13 @@ async function gatherOrgFacts(
       supabase
         .from("organization_members")
         .select("job_title")
+        .is("deleted_at", null)
         .eq("organization_id", organizationId)
         .eq("active", true),
       supabase
         .from("clients")
         .select("id", { count: "exact", head: true })
+        .is("deleted_at", null)
         .eq("organization_id", organizationId),
     ]);
 

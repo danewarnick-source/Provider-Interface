@@ -121,7 +121,7 @@ export function Fill1056Review({
               Cancel
             </Button>
             <Button onClick={onConfirm} disabled={saving || problems.length > 0}>
-              {saving && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}Confirm
+              {saving && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}Save authorizations from the 1056
             </Button>
           </div>
         </DialogFooter>

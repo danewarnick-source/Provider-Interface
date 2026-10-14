@@ -31,9 +31,13 @@ import { logPhiAccess } from "@/lib/phi-access-audit.server";
 import { assignmentCoversCode } from "@/lib/assignment-codes";
 import { queryOptions } from "@tanstack/react-query";
 import { activeContacts, loadClientContacts, type ClientContact } from "./contacts";
+import { careDataReach, scopeCareData, staffContacts } from "./care-data-scope";
 import { currentPlan, goalView, goalsOn, supportsForCode, type GoalView, type PlanStatus } from "./plans";
 import { loadPlanBundle } from "./plans-load";
 import { todayYmd } from "./dates";
+import { hasCustomValue } from "./more-details";
+import { authorizationCovers } from "./codes";
+import { STAFF_MED_COLUMNS, staffVisibleMeds, type StaffMedication } from "@/lib/medications/staff-meds";
 import {
   type ClientVisibilityRow,
   type SectionName,
@@ -79,29 +83,8 @@ export type CareIdentity = {
 };
 
 
-export type CareFlags = {
-  self_admin_med_support: boolean;
-  self_admin_med_support_locked: boolean;
-};
-
-export type CareMedication = {
-  id: string;
-  medication_name: string | null;
-  dosage: string | null;
-  route: string | null;
-  frequency: string | null;
-  scheduled_time: string | null;
-  prescriber: string | null;
-  instructions: string | null;
-  support_level: string | null;
-  is_prn: boolean | null;
-  prn_instructions: string | null;
-  purpose: string | null;
-  adverse_effects: string | null;
-  choking_risk: string | null;
-  is_controlled: boolean | null;
-  is_active: boolean | null;
-};
+/** An active, not paused medication with the fields staff read (staff-meds.ts). */
+export type CareMedication = StaffMedication;
 
 export type CareAuthorizedCode = {
   id: string;
@@ -133,6 +116,8 @@ export type CustomFieldWithValue = {
   field_label: string;
   data_type: "text" | "number" | "boolean" | "date";
   section: SectionName;
+  /** Archived definition: takes no new values; a saved value still shows, labelled. */
+  archived: boolean;
   value: CustomFieldValue;
 };
 
@@ -162,16 +147,18 @@ export type ClientCareVisibility = {
      *  Custom fields have no per-field visibility switch — they inherit
      *  their section's toggle exclusively. */
     custom_fields: CustomFieldWithValue[];
-    /** Active contacts (client_contacts). Always mirrors admin — no visibility gating. */
+    /** Active guardian, emergency, support coordinator and primary doctor contacts. */
     contacts: ClientContact[];
     /** Always mirrors admin — no visibility gating. */
     about_me: string | null;
   };
 };
 
+/** For callers without Clients / Client medical: View (or out of scope) the
+ *  top-level parts are the staff view (care-data-scope.ts): no Medicaid ID
+ *  unless shown to staff, only the staff contacts and visible medications. */
 export type ClientCareData = {
   identity: CareIdentity;
-  flags: CareFlags;
   /** The plan in effect today (null when the client has none). */
   plan: CarePlan;
   goals: CareGoal[];
@@ -240,7 +227,6 @@ export const getClientCareData = createServerFn({ method: "GET" })
       } as Record<SectionName, boolean>;
       return {
         identity: emptyIdentity,
-        flags: { self_admin_med_support: false, self_admin_med_support_locked: false },
         plan: null,
         goals: [],
         medications: [],
@@ -272,7 +258,7 @@ export const getClientCareData = createServerFn({ method: "GET" })
       supabase
         .from("clients")
         .select(
-          "id, organization_id, first_name, last_name, date_of_birth, admission_date, discharge_date, medicaid_id, account_status, self_admin_med_support, self_admin_med_support_locked, about_me, phone_number, is_own_guardian, has_abi, hr_applicable, dnr_applicable, diagnoses, special_directions",
+          "id, organization_id, first_name, last_name, date_of_birth, admission_date, discharge_date, medicaid_id, account_status, about_me, phone_number, is_own_guardian, has_abi, hr_applicable, dnr_applicable, diagnoses, special_directions",
         )
         .eq("id", clientId)
         .maybeSingle(),
@@ -281,12 +267,11 @@ export const getClientCareData = createServerFn({ method: "GET" })
       loadPlanBundle(supabase, clientId).catch(() => ({ plans: [], goals: [] })),
       supabase
         .from("client_medications")
-        .select(
-          "id, medication_name, dosage, route, frequency, scheduled_time, prescriber, instructions, support_level, is_prn, prn_instructions, purpose, adverse_effects, choking_risk, is_controlled, is_active",
-        )
+        .select(STAFF_MED_COLUMNS)
         .eq("client_id", clientId)
         .eq("is_active", true)
-        .order("medication_name", { ascending: true }),
+        .is("paused_at", null)
+        .is("discontinued_at", null),
       supabase
         .from("client_billing_codes")
         .select("*")
@@ -299,7 +284,7 @@ export const getClientCareData = createServerFn({ method: "GET" })
         .maybeSingle(),
       supabase
         .from("custom_field_definitions")
-        .select("id, field_key, field_label, data_type, section, organization_id")
+        .select("id, field_key, field_label, data_type, section, organization_id, archived_at")
         .eq("entity_kind", "client")
         .order("created_at", { ascending: true }),
       supabase
@@ -323,7 +308,15 @@ export const getClientCareData = createServerFn({ method: "GET" })
     if (!organizationIdForAccess) {
       throw new Error("Client not found or not accessible");
     }
-    await requireOrgMembership(supabase, userId, organizationIdForAccess, "staff");
+    const access = await requireOrgMembership(supabase, userId, organizationIdForAccess, "staff");
+    // Staff get only the staff view (scopeCareData below); full parts need
+    // Clients / Client medical: View for a client in the caller's scope.
+    let canSeeClient = access.scope === "agency";
+    if (!canSeeClient) {
+      const { data: seen } = await supabase.rpc("access_can_see_client", { _client: clientId, _user: userId });
+      canSeeClient = seen === true;
+    }
+    const reach = careDataReach({ categories: access.categories, scope: access.scope, canSeeClient });
     void logPhiAccess({
       supabaseUserClient: supabase,
       userId,
@@ -367,11 +360,6 @@ export const getClientCareData = createServerFn({ method: "GET" })
     };
 
 
-    const flags: CareFlags = {
-      self_admin_med_support: !!row.self_admin_med_support,
-      self_admin_med_support_locked: !!row.self_admin_med_support_locked,
-    };
-
     // Goals of the plan in effect today (the ended plan while waiting for a new one).
     const today = todayYmd();
     const inEffect = goalsOn(planBundle, today);
@@ -387,12 +375,12 @@ export const getClientCareData = createServerFn({ method: "GET" })
       : null;
 
     // Filter authorized codes to currently-open only (same rule as
-    // useClientBillingCodes — no end date or end date > today).
+    // useClientBillingCodes — no end date, or the end date is today or later).
     const authorized_codes: CareAuthorizedCode[] = (
       (codesRes.data ?? []) as CareAuthorizedCode[]
-    ).filter((c) => !c.service_end_date || c.service_end_date > today);
+    ).filter((c) => authorizationCovers(c.service_end_date, today));
 
-    const medications = (medsRes.data ?? []) as CareMedication[];
+    const medications = staffVisibleMeds((medsRes.data ?? []) as CareMedication[]);
 
     // ── Visibility layer — the ONE place staff-side filters live ──────────
     const visRow = (visRes?.data ?? null) as {
@@ -474,10 +462,14 @@ export const getClientCareData = createServerFn({ method: "GET" })
         field_label: String(d.field_label ?? ""),
         data_type: (d.data_type ?? "text") as CustomFieldWithValue["data_type"],
         section: ((d.section ?? "identity") as SectionName),
+        archived: d.archived_at != null,
         value: cfValueByDef.get(d.id) ?? null,
       }));
-    // Custom fields inherit their section's toggle — no per-field key.
-    const customFieldsStaff = custom_fields.filter((f) => sections[f.section]);
+    // Custom fields inherit their section's toggle — no per-field key. Staff
+    // see an archived field only where this client has a value.
+    const customFieldsStaff = custom_fields.filter(
+      (f) => sections[f.section] && (!f.archived || hasCustomValue(f.value)),
+    );
 
     // goalsForStaff — clock-out checklist: the supports for the shift's
     // code, grouped under their goal. Per-goal visibility is still honored.
@@ -487,6 +479,7 @@ export const getClientCareData = createServerFn({ method: "GET" })
       .map((g) => goalView(g.goal, g.supports));
 
     const contacts = activeContacts((ecRes ?? []) as ClientContact[]);
+    const contactsStaff = staffContacts(contacts);
     const about_me: string | null = row.about_me ?? null;
 
     const visibility: ClientCareVisibility = {
@@ -500,24 +493,26 @@ export const getClientCareData = createServerFn({ method: "GET" })
         medications: medicationsStaff,
         authorized_codes: authorizedCodesStaff,
         custom_fields: customFieldsStaff,
-        contacts,
+        contacts: contactsStaff,
         about_me,
       },
     };
 
-    return {
-      identity,
-      flags,
-      plan,
-      goals,
-      medications,
-      authorized_codes,
-      custom_fields,
-      contacts,
-      about_me,
-      visibilityRow,
-      visibility,
-    };
+    return scopeCareData(
+      {
+        identity,
+        plan,
+        goals,
+        medications,
+        authorized_codes,
+        custom_fields,
+        contacts,
+        about_me,
+        visibilityRow,
+        visibility,
+      } satisfies ClientCareData,
+      reach,
+    );
   });
 
 

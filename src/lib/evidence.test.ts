@@ -1014,7 +1014,10 @@ describe("Evidence nav + product lock", () => {
   });
 
   it("does not revive requirement_defs dual-write or encoded applicability", () => {
-    const fn = readFileSync(new URL("./evidence.functions.ts", import.meta.url), "utf8");
+    // The Evidence server functions plus the store / item helpers they share with the Client file.
+    const fn = ["./evidence.functions.ts", "./evidence/store.server.ts", "./evidence/items.server.ts"]
+      .map((rel) => readFileSync(new URL(rel, import.meta.url), "utf8"))
+      .join("\n");
     assert.doesNotMatch(fn, /\.from\(["']requirement_defs["']\)/);
     assert.doesNotMatch(fn, /\.from\(["']requirement_applicability["']\)/);
     assert.doesNotMatch(fn, /duty-applicability/);

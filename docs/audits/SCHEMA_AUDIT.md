@@ -142,7 +142,7 @@ Columns: **app** = queried from application code; **RLS** = live; **rows** = liv
 | `host_home_certifications` | table | yes | yes | 1 | live | `src/components/hosts/host-home-certification-dialog.tsx`, `src/lib/agency-health.functions.ts`, `src/lib/host-home-certifications.functions.ts` +1 more |
 | `host_home_cert_concerns` | table | yes | yes | 0 | wired, empty tenant | `src/components/hosts/host-home-certification-dialog.tsx`, `src/lib/host-home-certifications.functions.ts` |
 | `host_supervision_contacts` | table | yes | yes | 0 | wired, empty tenant | `src/components/residential/residential-daily-tab.tsx` |
-| `emar_logs` | table | yes | yes | 1 | live | `src/components/admin-home/admin-home-dashboard.tsx`, `src/components/mar-calendar.tsx`, `src/components/medications/staff-medications-panel.tsx` +11 more |
+| `emar_logs` | table | yes | yes | 1 | live | `src/components/admin-home/admin-home-dashboard.tsx`, `src/components/mar-calendar.tsx`, `src/lib/medications/give-meds.functions.ts` +11 more |
 | `emar_log_addenda` | table | yes | yes | 0 | wired, empty tenant | `src/lib/emar-pass.functions.ts` |
 | `client_medications` | table | yes | yes | 7 | live | `src/components/clients/setup-checklist.tsx`, `src/components/mar-calendar.tsx`, `src/components/medications-manager.tsx` +22 more |
 | `controlled_med_counts` | table | yes | yes | 0 | wired, empty tenant | `src/lib/agency-health.functions.ts`, `src/lib/emar-nectar.functions.ts`, `src/lib/emar-pass.functions.ts` |

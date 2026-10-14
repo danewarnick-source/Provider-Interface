@@ -3,6 +3,7 @@
 // clients show absences. No Supabase, importable by node --test.
 
 import { parseLocalDate } from "./dates.ts";
+import { howTakenSummary, type DisplayMed } from "../medications/med-display.ts";
 
 export type DirectiveStatus = "none" | "dnr" | "polst";
 
@@ -56,11 +57,9 @@ export function directivePatch(d: DirectiveDraft): Record<string, string | boole
   };
 }
 
-/** clients.self_admin_med_support → the plain-English support level. */
-export function medicationSupportLabel(selfAdmin: boolean | null | undefined): string {
-  if (selfAdmin === true) return "Takes their own medications with staff support";
-  if (selfAdmin === false) return "Staff give medications (not cleared to self-administer)";
-  return "Not set";
+/** How the client takes their medications, from each one's how_taken. */
+export function medicationSupportSummary(meds: readonly DisplayMed[]): string {
+  return howTakenSummary(meds);
 }
 
 export const HEALTH_EVENT_TYPES = [
@@ -103,14 +102,4 @@ export function absenceProblem(from: string, to: string | null): string | null {
   if (to && !parseLocalDate(to)) return "The return date isn't a date.";
   if (to && to < from) return "The return date can't be before the first day away.";
   return null;
-}
-
-/** Splits a comma / newline separated list into trimmed, distinct items. */
-export function splitList(text: string): string[] {
-  const out: string[] = [];
-  for (const raw of text.split(/[\n,]/)) {
-    const v = raw.trim();
-    if (v && !out.some((o) => o.toLowerCase() === v.toLowerCase())) out.push(v);
-  }
-  return out;
 }

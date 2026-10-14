@@ -30,8 +30,7 @@ function facts(overrides: Partial<ClientFileFacts> = {}): ClientFileFacts {
     planEndDate: null,
     docs: [],
     belongingsOn: null,
-    supportStrategiesOk: false,
-    supportStrategiesDueAt: null,
+    strategies: { kind: "no_activation", hasPlan: false },
     housemateOnFile: false,
     housemateDueAt: null,
     summaries: [],
@@ -115,6 +114,24 @@ describe("buildClientFileCards", () => {
     assert.ok(titles.includes("Lease/R&B"));
     assert.ok(titles.includes("Money/funds"));
     assert.ok(!titles.some((t) => /rights restriction/i.test(t)));
+  });
+
+  it("scores Support Strategies from the send rule only (a BSP upload no longer counts)", () => {
+    const card = (f: Partial<ClientFileFacts>) =>
+      buildClientFileCards("c1", facts(f), now).find((c) => c.key === "support_strategies");
+    const bsp = [{ document_type: "bsp", storage_path: "org/bsp.pdf", file_name: "bsp.pdf" }];
+    assert.equal(card({ docs: bsp })?.status, "missing");
+    const sent = card({
+      docs: [{ document_type: "support_strategy", storage_path: "org/ss.pdf", file_name: "ss.pdf" }],
+      strategies: { kind: "sent", sendId: "s1", sentOn: "2026-09-01", sentTo: null, by: null, late: false },
+    });
+    assert.equal(sent?.status, "on_file");
+    assert.equal(sent?.evidencePath, "org/ss.pdf");
+    const waiting = card({
+      strategies: { kind: "not_sent", dueOn: "2026-09-12", dueSoon: true, overdue: false },
+    });
+    assert.equal(waiting?.status, "due_soon");
+    assert.equal(waiting?.dueAt, "2026-09-12");
   });
 
   it("renews PCSP on the same card when expiration is due soon", () => {
@@ -202,7 +219,8 @@ describe("Client file surface lock", () => {
       .map((rel) => readFileSync(new URL(rel, import.meta.url), "utf8"))
       .join("\n");
     assert.match(profile, /Client file/);
-    assert.match(profile, /RequiredDocumentsCard/);
+    assert.match(profile, /ClientFileDocuments/);
+    assert.doesNotMatch(profile, /RequiredDocumentsCard/);
     assert.doesNotMatch(profile, /PersonCenteredProfilePanel/);
     assert.doesNotMatch(profile, /<CardTitle className="text-base">Person-Centered Thinking<\/CardTitle>/);
     assert.doesNotMatch(profile, /<TabsTrigger value="files">Files<\/TabsTrigger>/);

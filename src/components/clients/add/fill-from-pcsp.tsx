@@ -1,37 +1,22 @@
-import { useRef, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
+// "Start from their PCSP": pick the PDF; the parent uploads and reads it
+// (use-new-client-pcsp.ts). Saves nothing.
+import { useRef, type ReactNode } from "react";
 import { FileText, Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { readPcspForNewClient } from "@/lib/clients/create.functions";
-import type { PcspResult } from "@/lib/clients/pcsp/parser-shared";
-import { fileToBase64 } from "@/components/clients/shared/file-to-base64";
+import { Button, type ButtonProps } from "@/components/ui/button";
 
-/** "Fill from PCSP": read a USTEPS PCSP and hand the result to the form. Saves nothing. */
 export function FillFromPcsp({
-  organizationId,
-  onRead,
+  reading,
+  onPick,
+  children,
+  buttonProps,
 }: {
-  organizationId: string;
-  onRead: (p: PcspResult) => void;
+  reading: boolean;
+  onPick: (file: File) => void;
+  /** Button content; defaults to "Fill from PCSP". */
+  children?: ReactNode;
+  buttonProps?: ButtonProps;
 }) {
   const input = useRef<HTMLInputElement | null>(null);
-  const readFn = useServerFn(readPcspForNewClient);
-  const [reading, setReading] = useState(false);
-
-  async function pick(file: File | undefined) {
-    if (!file) return;
-    setReading(true);
-    try {
-      onRead(await readFn({ data: { organizationId, fileBase64: await fileToBase64(file) } }));
-    } catch (e) {
-      toast.error((e as Error).message);
-    } finally {
-      setReading(false);
-      if (input.current) input.current.value = "";
-    }
-  }
-
   return (
     <>
       <input
@@ -40,21 +25,31 @@ export function FillFromPcsp({
         accept="application/pdf"
         className="hidden"
         data-testid="fill-from-pcsp-input"
-        onChange={(e) => void pick(e.target.files?.[0])}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) onPick(file);
+          e.target.value = "";
+        }}
       />
       <Button
         type="button"
         size="sm"
         variant="outline"
+        {...buttonProps}
         disabled={reading}
         onClick={() => input.current?.click()}
       >
         {reading ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Reading the PCSP…
+          </>
         ) : (
-          <FileText className="mr-2 h-4 w-4" />
+          (children ?? (
+            <>
+              <FileText className="mr-2 h-4 w-4" /> Fill from PCSP
+            </>
+          ))
         )}
-        Fill from PCSP
       </Button>
     </>
   );

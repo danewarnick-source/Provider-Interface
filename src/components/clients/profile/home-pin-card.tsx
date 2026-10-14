@@ -1,15 +1,19 @@
-// Admin Home location on the client profile.
-// Punch pad geofence compares live GPS to clients.home_latitude / home_longitude
-// using clients.geofence_radius_feet (default 1000).
+// Service address on the client profile: address, pin and clock-in radius,
+// then the extra service locations (client_approved_locations) — other places
+// staff may clock in for this client. The punch pad enforces the circle only
+// for EVV codes (isEvvLockedCode); it compares live GPS to
+// clients.home_latitude / home_longitude using clients.geofence_radius_feet
+// (default 1000), and counts a fix inside any active extra location's circle
+// as inside (recording matched_approved_location_id). Editors only can change
+// them; extra locations are ended (archived_at), never deleted.
 
 import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2 } from "lucide-react";
+import { House, Loader2, MapPin, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -20,15 +24,29 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  saveClientGeofenceRadius,
-  saveClientHomePin,
-  saveClientPhysicalAddress,
-} from "@/lib/clients/home-pin.functions";
-import {
   DEFAULT_GEOFENCE_RADIUS_FEET,
   isHomePinDraftDirty,
   resolveGeofenceRadiusFeet,
 } from "@/lib/geo";
+import {
+  APPROVED_LOCATION_COLUMNS,
+  LOCATION_NEEDS_PIN,
+  activeLocations,
+  locationReasonLabel,
+  type ApprovedLocation,
+  type LocationDraft,
+} from "@/lib/clients/locations";
+import {
+  addServiceLocation,
+  endServiceLocation,
+  updateServiceLocation,
+} from "@/lib/clients/locations.functions";
+import { useAccess } from "@/hooks/use-access";
+import { EditButton, SectionCard } from "@/components/clients/profile/cards/section-card";
+import { RowMenu } from "@/components/clients/profile/cards/row-menu";
+import { EvvNote } from "@/components/clients/profile/details/evv-note";
+import { LocationDialog } from "@/components/clients/profile/details/location-dialog";
+import { useHomePin } from "./use-home-pin";
 import "leaflet/dist/leaflet.css";
 
 type HomePinMapProps = {
@@ -36,13 +54,6 @@ type HomePinMapProps = {
   lng: number | null;
   radiusFeet: number;
   onPick: (lat: number, lng: number) => void;
-};
-
-type HomePinRow = {
-  physical_address: string | null;
-  home_latitude: number | null;
-  home_longitude: number | null;
-  geofence_radius_feet: number | null;
 };
 
 const RADIUS_PRESETS_FT = [100, 300, 1000, 1500] as const;
@@ -55,24 +66,79 @@ function radiusLabel(feet: number): string {
   return `${formatted} ft`;
 }
 
-export function HomePinCard({ clientId }: { clientId: string }) {
+/** The client's active extra service locations, with add / change / end. */
+function useServiceLocations(orgId: string, clientId: string) {
   const qc = useQueryClient();
-  const savePinFn = useServerFn(saveClientHomePin);
-  const saveRadiusFn = useServerFn(saveClientGeofenceRadius);
-  const saveAddrFn = useServerFn(saveClientPhysicalAddress);
+  const addFn = useServerFn(addServiceLocation);
+  const updateFn = useServerFn(updateServiceLocation);
+  const endFn = useServerFn(endServiceLocation);
+  const [dialog, setDialog] = useState<{ location: ApprovedLocation | null } | null>(null);
+  const [needsPin, setNeedsPin] = useState(false);
+  const key = ["client-service-locations", clientId];
+  const scope = { organizationId: orgId, clientId };
 
-  const q = useQuery({
-    queryKey: ["client-home-pin", clientId],
+  const list = useQuery({
+    queryKey: key,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("clients")
-        .select("physical_address, home_latitude, home_longitude, geofence_radius_feet")
-        .eq("id", clientId)
-        .maybeSingle();
+        .from("client_approved_locations")
+        .select(APPROVED_LOCATION_COLUMNS)
+        .eq("organization_id", orgId)
+        .eq("client_id", clientId);
       if (error) throw error;
-      return data as HomePinRow | null;
+      return activeLocations((data ?? []) as ApprovedLocation[]);
     },
   });
+  const refresh = () => {
+    void qc.invalidateQueries({ queryKey: key });
+    void qc.invalidateQueries({ queryKey: ["client-approved-locations", clientId] });
+  };
+  const open = (location: ApprovedLocation | null) => {
+    setNeedsPin(false);
+    setDialog({ location });
+  };
+
+  const save = useMutation({
+    mutationFn: async (draft: LocationDraft) => {
+      const id = dialog?.location?.id;
+      if (id) await updateFn({ data: { ...scope, locationId: id, location: draft } });
+      else await addFn({ data: { ...scope, location: draft } });
+    },
+    onSuccess: () => {
+      toast.success("Service location saved.");
+      setDialog(null);
+      refresh();
+    },
+    onError: (e: Error) => {
+      if (e.message === LOCATION_NEEDS_PIN) setNeedsPin(true);
+      else toast.error(e.message);
+    },
+  });
+  const end = useMutation({
+    mutationFn: (id: string) => endFn({ data: { ...scope, locationId: id } }),
+    onSuccess: () => {
+      toast.success("Location ended. Past clock-ins there keep their record.");
+      refresh();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return { list, dialog, setDialog, needsPin, open, save, end };
+}
+
+export function HomePinCard({
+  orgId,
+  clientId,
+  codes,
+}: {
+  orgId: string;
+  clientId: string;
+  codes: readonly string[];
+}) {
+  const canEdit = useAccess().canCategory("clients", "edit");
+  const { q, saveAddr, savePin, saveRadius } = useHomePin(clientId);
+  const extra = useServiceLocations(orgId, clientId);
+  const locations = extra.list.data ?? [];
 
   const [address, setAddress] = useState<string | null>(null);
   const [draft, setDraft] = useState<{ lat: number; lng: number } | null>(null);
@@ -116,184 +182,189 @@ export function HomePinCard({ clientId }: { clientId: string }) {
     setDraft(null);
   }, [savedLat, savedLng]);
 
-  const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ["client-home-pin", clientId] });
-    qc.invalidateQueries({ queryKey: ["client-profile"] });
-    qc.invalidateQueries({ queryKey: ["client-profile-tab"] });
-    qc.invalidateQueries({ queryKey: ["caseload"] });
-  };
-
-  const saveAddr = useMutation({
-    mutationFn: () =>
-      saveAddrFn({
-        data: { clientId, address: addr.trim() },
-      }),
-    onSuccess: (r) => {
-      toast.success("Address saved.");
-      setAddress(null);
-      qc.setQueryData(["client-home-pin", clientId], (old: HomePinRow | null | undefined) =>
-        old ? { ...old, physical_address: r.address } : old,
-      );
-      invalidate();
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const saveDraft = useMutation({
-    mutationFn: () => {
-      if (!pin) throw new Error("Drop a pin on the house first.");
-      return savePinFn({
-        data: {
-          clientId,
-          latitude: pin.lat,
-          longitude: pin.lng,
-          geofenceRadiusFeet: radius,
-        },
-      });
-    },
-    onSuccess: (r) => {
-      toast.success("Home pin saved. Clock-in will use this house.");
-      qc.setQueryData(["client-home-pin", clientId], (old: HomePinRow | null | undefined) =>
-        old
-          ? {
-              ...old,
-              home_latitude: r.latitude,
-              home_longitude: r.longitude,
-              geofence_radius_feet: r.geofenceRadiusFeet ?? old.geofence_radius_feet,
-            }
-          : old,
-      );
-      setDraft(null);
-      invalidate();
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const saveRadius = useMutation({
-    mutationFn: (feet: number) =>
-      saveRadiusFn({
-        data: { clientId, geofenceRadiusFeet: feet },
-      }),
-    onSuccess: (r) => {
-      toast.success(`Clock-in radius set to ${r.geofenceRadiusFeet.toLocaleString()} ft.`);
-      qc.setQueryData(["client-home-pin", clientId], (old: HomePinRow | null | undefined) =>
-        old ? { ...old, geofence_radius_feet: r.geofenceRadiusFeet } : old,
-      );
-      invalidate();
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
   return (
-    <Card className="overflow-hidden" data-testid="home-location-section" id="home-location">
-      <CardContent className="p-0">
-        <div className="flex items-start gap-2.5 border-b border-border/60 px-5 py-4">
-          <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-semibold leading-tight">Home location</h3>
-          </div>
-        </div>
-
-        <div className="space-y-3 p-5">
-          <div className="space-y-1">
-            <Label htmlFor="home-pin-address" className="text-xs">Physical address</Label>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Input
-                id="home-pin-address"
-                value={addr}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Street, City, ST ZIP"
-                disabled={q.isLoading}
-              />
+    <SectionCard
+      icon={House}
+      tone="profile"
+      title="Service address"
+      description="Where services happen, with the pin and clock-in circle on the map."
+      id="home-location"
+      testId="home-location-section"
+      actions={
+        canEdit ? (
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 max-md:h-11 max-md:w-11"
+            aria-label="Add a service location"
+            title="Add a service location"
+            onClick={() => extra.open(null)}
+            data-testid="add-service-location"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        ) : null
+      }
+    >
+      <EvvNote codes={codes} />
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <Label htmlFor="home-pin-address" className="text-xs">
+            Physical address
+          </Label>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Input
+              id="home-pin-address"
+              value={addr}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Street, City, ST ZIP"
+              disabled={q.isLoading || !canEdit}
+            />
+            {canEdit ? (
               <Button
-                size="sm"
                 variant="outline"
                 className="shrink-0"
-                onClick={() => saveAddr.mutate()}
+                onClick={() => saveAddr.mutate(addr.trim(), { onSuccess: () => setAddress(null) })}
                 disabled={saveAddr.isPending || !addrDirty || !addr.trim()}
               >
                 {saveAddr.isPending ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
                 Save address
               </Button>
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <Label htmlFor="home-pin-radius" className="text-xs">
-              Clock-in geofence radius (feet)
-            </Label>
-            <Select
-              value={String(radius)}
-              onValueChange={(v) => {
-                const feet = Number(v);
-                if (!Number.isFinite(feet) || feet === radius) return;
-                saveRadius.mutate(feet);
-              }}
-              disabled={q.isLoading || saveRadius.isPending}
-            >
-              <SelectTrigger
-                id="home-pin-radius"
-                className="max-w-xs"
-                data-testid="geofence-radius-feet"
-              >
-                <SelectValue placeholder={radiusLabel(DEFAULT_GEOFENCE_RADIUS_FEET)} />
-              </SelectTrigger>
-              <SelectContent>
-                {radiusOptions.map((feet) => (
-                  <SelectItem key={feet} value={String(feet)}>
-                    {radiusLabel(feet)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {saveRadius.isPending ? (
-              <p className="text-xs text-muted-foreground">Saving radius…</p>
             ) : null}
           </div>
-
-          {mapError ? (
-            <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
-              Map could not load. {mapError}
-            </div>
-          ) : MapEl ? (
-            <MapEl
-              lat={pin?.lat ?? null}
-              lng={pin?.lng ?? null}
-              radiusFeet={radius}
-              onPick={(nextLat, nextLng) => setDraft({ lat: nextLat, lng: nextLng })}
-            />
-          ) : (
-            <div className="flex h-[320px] items-center justify-center rounded-lg border border-border bg-muted/30 text-xs text-muted-foreground">
-              Loading map…
-            </div>
-          )}
-
-          {dirty ? (
-            <div
-              className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-amber-400/60 bg-amber-50 px-3 py-2 dark:bg-amber-950/30"
-              data-testid="home-pin-moved-banner"
-            >
-              <p className="text-sm font-medium text-amber-950 dark:text-amber-100">
-                The pin moved. Save it so clock-in uses this house.
-              </p>
-              <Button
-                size="sm"
-                onClick={() => saveDraft.mutate()}
-                disabled={saveDraft.isPending}
-                data-testid="save-home-pin"
-              >
-                {saveDraft.isPending ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
-                Save this pin
-              </Button>
-            </div>
-          ) : (
-            <p className="font-mono text-[11px] text-muted-foreground">
-              {pin
-                ? `Saved pin: ${pin.lat.toFixed(5)}, ${pin.lng.toFixed(5)}`
-                : "No pin yet — tap the map, then save."}
-            </p>
-          )}
         </div>
-      </CardContent>
-    </Card>
+
+        {locations.length > 0 ? (
+          <div className="space-y-1">
+            <p className="text-xs font-medium">Other service locations</p>
+            <ul className="divide-y divide-border/60" data-testid="client-service-locations">
+              {locations.map((l) => {
+                const reason = locationReasonLabel(l);
+                return (
+                  <li key={l.id} className="flex items-center gap-3 py-2 text-sm">
+                    <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium">{l.label}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {l.address ?? "No address"}
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        Within {l.geofence_radius_feet.toLocaleString()} ft
+                        {reason ? ` · ${reason}` : " · No reason recorded"}
+                      </p>
+                    </div>
+                    {canEdit ? (
+                      <div className="flex gap-2">
+                        <EditButton label={`Edit ${l.label}`} onClick={() => extra.open(l)} />
+                        <RowMenu
+                          label={`More actions for ${l.label}`}
+                          items={[
+                            {
+                              label: "Stop clock-ins here",
+                              danger: true,
+                              disabled: extra.end.isPending,
+                              onSelect: () =>
+                                window.confirm(`Stop allowing clock-in at ${l.label}?`) &&
+                                extra.end.mutate(l.id),
+                            },
+                          ]}
+                        />
+                      </div>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ) : null}
+
+        <div className="space-y-1">
+          <Label htmlFor="home-pin-radius" className="text-xs">
+            Clock-in geofence radius (feet)
+          </Label>
+          <Select
+            value={String(radius)}
+            onValueChange={(v) => {
+              const feet = Number(v);
+              if (!Number.isFinite(feet) || feet === radius) return;
+              saveRadius.mutate(feet);
+            }}
+            disabled={q.isLoading || saveRadius.isPending || !canEdit}
+          >
+            <SelectTrigger
+              id="home-pin-radius"
+              className="max-w-xs"
+              data-testid="geofence-radius-feet"
+            >
+              <SelectValue placeholder={radiusLabel(DEFAULT_GEOFENCE_RADIUS_FEET)} />
+            </SelectTrigger>
+            <SelectContent>
+              {radiusOptions.map((feet) => (
+                <SelectItem key={feet} value={String(feet)}>
+                  {radiusLabel(feet)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {saveRadius.isPending ? (
+            <p className="text-xs text-muted-foreground">Saving radius…</p>
+          ) : null}
+        </div>
+
+        {mapError ? (
+          <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+            Map could not load. {mapError}
+          </div>
+        ) : MapEl ? (
+          <MapEl
+            lat={pin?.lat ?? null}
+            lng={pin?.lng ?? null}
+            radiusFeet={radius}
+            onPick={(nextLat, nextLng) => canEdit && setDraft({ lat: nextLat, lng: nextLng })}
+          />
+        ) : (
+          <div className="flex h-[320px] items-center justify-center rounded-lg border border-border bg-muted/30 text-xs text-muted-foreground">
+            Loading map…
+          </div>
+        )}
+
+        {dirty ? (
+          <div
+            className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-hive-gold bg-hive-gold-soft px-3 py-2"
+            data-testid="home-pin-moved-banner"
+          >
+            <p className="text-sm font-medium text-hive-ink">
+              The pin moved. Save it so clock-in uses this house.
+            </p>
+            <Button
+              onClick={() =>
+                pin && savePin.mutate({ ...pin, radius }, { onSuccess: () => setDraft(null) })
+              }
+              disabled={savePin.isPending}
+              data-testid="save-home-pin"
+            >
+              {savePin.isPending ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
+              Save this pin
+            </Button>
+          </div>
+        ) : (
+          <p className="font-mono text-[11px] text-muted-foreground">
+            {pin
+              ? `Saved pin: ${pin.lat.toFixed(5)}, ${pin.lng.toFixed(5)}`
+              : canEdit
+                ? "No pin yet. Tap the map, then save."
+                : "No pin yet."}
+          </p>
+        )}
+      </div>
+      <LocationDialog
+        open={!!extra.dialog}
+        location={extra.dialog?.location ?? null}
+        saving={extra.save.isPending}
+        needsPin={extra.needsPin}
+        onOpenChange={(o) => !o && extra.setDialog(null)}
+        onSave={(d) => extra.save.mutate(d)}
+      />
+    </SectionCard>
   );
 }

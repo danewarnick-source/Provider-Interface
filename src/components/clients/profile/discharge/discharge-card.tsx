@@ -6,7 +6,8 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { LogOut } from "lucide-react";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { Input } from "@/components/ui/input";
 import { useAccess } from "@/hooks/use-access";
 import { formatDate, todayYmd } from "@/lib/clients/dates";
@@ -24,7 +25,7 @@ function clockText(d: DischargeRecord): { text: string; tone: string } {
     return { text: `Summary was due ${formatDate(c.dueOn)}`, tone: "text-destructive" };
   return {
     text: `Summary due ${formatDate(c.dueOn)} (${c.daysLeft} day${c.daysLeft === 1 ? "" : "s"} left)`,
-    tone: "text-amber-700 dark:text-amber-300",
+    tone: "text-hive-ink",
   };
 }
 
@@ -47,13 +48,18 @@ export function DischargeCard({
   const d = q.data;
   if (!d) {
     return (
-      <Card className="mb-4" data-testid="discharge-card">
-        <CardContent className="p-4 text-sm text-muted-foreground">
-          {q.isLoading
+      <SectionCard
+        icon={LogOut}
+        tone="danger"
+        title="Discharged"
+        description={
+          q.isLoading
             ? "Loading discharge…"
-            : "This client is discharged. Their record is read-only; reactivate them from the ⋯ menu to make changes."}
-        </CardContent>
-      </Card>
+            : "Their record is read-only. Reactivate them from the ⋯ menu to make changes."
+        }
+        className="mb-5"
+        testId="discharge-card"
+      />
     );
   }
   const clock = clockText(d);
@@ -66,17 +72,20 @@ export function DischargeCard({
   const fail = (e: Error) => toast.error(e.message);
 
   return (
-    <Card className="mb-4" data-testid="discharge-card">
-      <CardContent className="space-y-3 p-4 text-sm">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <p className="font-medium">
-            Discharged {formatDate(d.discharge_date)} · started by{" "}
-            {INITIATED_BY[d.initiated_by].toLowerCase().replace(/^dspd$/, "DSPD")}
-          </p>
-          <p className={cn("font-medium", clock.tone)} data-testid="discharge-summary-clock">
-            {clock.text}
-          </p>
-        </div>
+    <SectionCard
+      icon={LogOut}
+      tone="danger"
+      title={`Discharged ${formatDate(d.discharge_date)}`}
+      description={`Started by ${INITIATED_BY[d.initiated_by].toLowerCase().replace(/^dspd$/, "DSPD")}. The record is read-only.`}
+      className="mb-5"
+      testId="discharge-card"
+      actions={
+        <p className={cn("text-sm font-medium", clock.tone)} data-testid="discharge-summary-clock">
+          {clock.text}
+        </p>
+      }
+    >
+      <div className="space-y-3 text-sm">
         <p className="whitespace-pre-wrap text-muted-foreground">{d.reason}</p>
         {d.notice_date ? (
           <p className="text-muted-foreground">Notice given {formatDate(d.notice_date)}</p>
@@ -87,8 +96,7 @@ export function DischargeCard({
           ))}
         </ul>
         <p className="text-xs text-muted-foreground">
-          The record is read-only. Reactivating doesn't undo ended authorizations or cancelled
-          shifts.
+          Reactivating doesn't undo ended authorizations or cancelled shifts.
         </p>
 
         {confirmed ? (
@@ -99,18 +107,17 @@ export function DischargeCard({
               <div className="flex flex-wrap items-end gap-2">
                 <Input
                   type="date"
-                  className="w-44"
+                  className="h-10 w-44"
                   value={sentOn}
                   onChange={(e) => setSentOn(e.target.value)}
                   aria-label="Date sent"
                 />
                 <Button
-                  size="sm"
                   disabled={!sentOn || markSent.isPending}
                   onClick={() => markSent.mutate({ dischargeId: d.id, sentOn }, { onError: fail })}
                   data-testid="discharge-summary-mark-sent"
                 >
-                  Mark sent
+                  Mark summary sent
                 </Button>
               </div>
             ) : null}
@@ -137,7 +144,6 @@ export function DischargeCard({
               }
             />
             <Button
-              size="sm"
               disabled={saveSummary.isPending || (!editing.text.trim() && !d.summary_text)}
               onClick={() =>
                 saveSummary.mutate(
@@ -152,7 +158,7 @@ export function DischargeCard({
               }
               data-testid="discharge-summary-save"
             >
-              {editing.confirmed ? "Confirm summary" : "Save draft"}
+              {editing.confirmed ? "Confirm summary" : "Save summary draft"}
             </Button>
           </div>
         ) : (
@@ -160,7 +166,7 @@ export function DischargeCard({
             The discharge summary isn't confirmed yet.
           </p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </SectionCard>
   );
 }

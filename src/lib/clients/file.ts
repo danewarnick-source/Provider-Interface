@@ -7,8 +7,10 @@ import {
   obligationFileStatusLabel,
   type ObligationFileStatus,
 } from "../team-members/file.ts";
-import { personNeedsSupportStrategies } from "../audit-evidence.ts";
+import { personNeedsSupportStrategies } from "./strategy-rules.ts";
+import { strategyFileFact, type StrategySendState } from "./strategy-sends.ts";
 import { summaryCard } from "./file-summary.ts";
+import { denverYmd } from "../denver-date.ts";
 import {
   CLINICAL_LEGAL_DOC_TYPES,
   GRIEVANCE_DOC_TYPES,
@@ -132,8 +134,8 @@ export type ClientFileFacts = {
   planEndDate: string | null;
   docs: ClientFileDoc[];
   belongingsOn: string | null;
-  supportStrategiesOk: boolean;
-  supportStrategiesDueAt: string | null;
+  /** Support strategies sent to the support coordinator (strategy-sends.ts). */
+  strategies: StrategySendState;
   housemateOnFile: boolean;
   housemateDueAt: string | null;
   summaries: ClientFileSummary[];
@@ -195,7 +197,7 @@ export function buildClientFileCards(
   };
 
   // Expired documents (past client_documents.expires_on) no longer count.
-  const docs = liveDocs(facts.docs, now.toISOString().slice(0, 10));
+  const docs = liveDocs(facts.docs, denverYmd(now));
   const pcspDocs = docsOfType(docs, PCSP_DOC_TYPES);
   const grievanceDocs = docsOfType(docs, GRIEVANCE_DOC_TYPES);
   const clinicalDocs = docsOfType(docs, CLINICAL_LEGAL_DOC_TYPES);
@@ -217,7 +219,7 @@ export function buildClientFileCards(
   const pcspOnFile = pcspDocs.length > 0;
   push(
     "pcsp",
-    pcspOnFile && !(facts.planEndDate && facts.planEndDate < now.toISOString().slice(0, 10)),
+    pcspOnFile && !(facts.planEndDate && facts.planEndDate < denverYmd(now)),
     facts.planEndDate,
     `${profile}?section=file`,
     { ...firstEvidence(pcspDocs), bucket: "client-documents" },
@@ -231,12 +233,13 @@ export function buildClientFileCards(
     { ...firstEvidence(grievanceDocs), bucket: "client-documents" },
   );
 
+  const strategies = strategyFileFact(facts.strategies);
   push(
     "support_strategies",
-    facts.supportStrategiesOk || strategyDocs.length > 0,
-    facts.supportStrategiesOk ? null : facts.supportStrategiesDueAt,
+    strategies.onFile,
+    strategies.dueOn,
     `${profile}?section=plans`,
-    { ...firstEvidence(strategyDocs), bucket: "client-documents" },
+    { ...firstEvidence(strategies.onFile ? strategyDocs : []), bucket: "client-documents" },
   );
 
   const summary = summaryCard(facts, now);

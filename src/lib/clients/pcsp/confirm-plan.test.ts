@@ -4,7 +4,7 @@ import { parsePcsp } from "./parser.ts";
 import { proposeCarryOver } from "./carry-over.ts";
 import { initialReview } from "./review.ts";
 import {
-  aboutMeLines, billingRows, blockHeading, carriedFrom, confirmProblems, contactRows, mergePcspBlock, riskLines,
+  billingRows, carriedFrom, confirmProblems, contactRows,
 } from "./confirm-plan.ts";
 import { SAMPLE_AGENCY, SAMPLE_PCSP_PAGES } from "./fixture/sample-pages.ts";
 
@@ -40,26 +40,6 @@ test("authorization rows come from our kept budget lines", () => {
   assert.equal(rows[0].rate_source_document_id, "doc-1");
 });
 
-test("the From PCSP block replaces the old one and keeps typed text", () => {
-  const first = mergePcspBlock("Allergic to cats.", "2025", ["Old risk."]);
-  assert.equal(first, "Allergic to cats.\n\nFrom PCSP 2025:\n- Old risk.");
-  assert.equal(mergePcspBlock(first, "2026", ["New risk."]), "Allergic to cats.\n\nFrom PCSP 2026:\n- New risk.");
-  assert.equal(mergePcspBlock(first, "2026", []), "Allergic to cats.");
-  assert.equal(mergePcspBlock(null, "2026", []), null);
-});
-
-test("risk and about-me lines read plainly", () => {
-  const r = review();
-  assert.deepEqual(riskLines(r), [
-    "Choking on large bites of food. Response: Cut food into small pieces. Response time: Immediate. Staff watch during all meals.",
-  ]);
-  assert.deepEqual(aboutMeLines(r), [
-    "Healthy Living · Likes outdoors: Pat enjoys gardening and music. Morning walks help. (from Pat)",
-    "Safety & Security · Does not like: Loud crowded rooms. (from Guardian)",
-  ]);
-  assert.equal(blockHeading(r), "2026-09-01 – 2027-08-31");
-});
-
 test("other-provider contacts skip names the client already has", () => {
   const r = review();
   assert.deepEqual(contactRows(r, { ...ids, existingNames: [], startSort: 4 }), [{
@@ -69,7 +49,7 @@ test("other-provider contacts skip names the client already has", () => {
   assert.deepEqual(contactRows(r, { ...ids, existingNames: ["sample behavior group inc"], startSort: 0 }), []);
 });
 
-test("continuing goals carry history only from a goal on the current plan", () => {
+test("carried-over goals carry history only from a goal on the current plan", () => {
   const [cook, job] = review().goals;
   assert.equal(carriedFrom(cook, new Set(["g-cook"])), "g-cook");
   assert.equal(carriedFrom(cook, new Set()), null);

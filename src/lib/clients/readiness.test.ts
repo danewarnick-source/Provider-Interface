@@ -8,6 +8,7 @@ import {
   type ReadinessInput,
 } from "./readiness.ts";
 import type { ClientPlan } from "./plans.ts";
+import type { RestrictionRecord } from "./hrc.ts";
 
 const NOW = new Date(2026, 9, 6); // Oct 6, 2026, local
 
@@ -27,6 +28,38 @@ function plan(over: Partial<ClientPlan>): ClientPlan {
   };
 }
 
+/** A rights restriction: fully signed and HRC-approved when `done`, else only answered. */
+function hrr(id: string, title: string, nextReview: string | null, done: boolean): RestrictionRecord {
+  const answered = {
+    condition_description_text: "x",
+    assessed_need_text: "x",
+    positive_interventions_text: "x",
+    less_intrusive_methods_text: "x",
+    data_review_text: "x",
+    last_review_date: "2026-09-01",
+    time_limits_text: "x",
+    no_harm_text: "x",
+  };
+  const signed = {
+    consent_signer_name: "Pat",
+    consent_at: "2026-10-01T00:00:00Z",
+    admin_signer_name: "Alex",
+    admin_signed_at: "2026-10-01T00:00:00Z",
+    sc_name: "Sam",
+    sc_signed_on: "2026-10-01",
+    sc_method: "email",
+    hrc_decision: "approved",
+    hrc_decision_on: "2026-10-02",
+  };
+  return {
+    id,
+    restriction_title: title,
+    next_review_date: nextReview,
+    ...answered,
+    ...(done ? signed : {}),
+  } as unknown as RestrictionRecord;
+}
+
 function input(over: Partial<ReadinessInput> = {}): ReadinessInput {
   return {
     codes: ["SLN"],
@@ -34,10 +67,10 @@ function input(over: Partial<ReadinessInput> = {}): ReadinessInput {
     fileCards: [],
     photo: { url: "photos/a.jpg", takenOn: "2025-01-01" },
     plans: [plan({})],
-    strategies: null,
+    strategies: { kind: "not_needed" },
     summaries: [],
     restrictions: [],
-    setup: { staffCount: 1, hasPin: true, guardianOk: true },
+    setup: { staffCount: 1, hasPin: true, guardianGap: null },
     ...over,
   };
 }
@@ -92,14 +125,26 @@ describe("clientAttention", () => {
 
   it("lists finish-setup gaps with the section that fixes them", () => {
     const items = clientAttention(
-      input({ codes: [], setup: { staffCount: 0, hasPin: false, guardianOk: false } }),
+      input({
+        codes: [],
+        setup: { staffCount: 0, hasPin: false, guardianGap: "Guardian has no phone" },
+      }),
       NOW,
     );
     const by = Object.fromEntries(items.map((i) => [i.detail, i.section]));
     assert.equal(by["No authorized service code"], "services");
     assert.equal(by["No team member assigned"], "team");
-    assert.equal(by["No home pin (address not found)"], "profile");
-    assert.equal(by["Guardian not on file"], "contacts");
+    assert.equal(by["Guardian has no phone"], "contacts");
+  });
+
+  it("flags a missing home pin only for a client with an EVV code", () => {
+    const noPin = { staffCount: 1, hasPin: false, guardianGap: null };
+    const evv = clientAttention(input({ codes: ["SLN"], setup: noPin }), NOW);
+    assert.deepEqual(
+      evv.map((i) => [i.detail, i.section]),
+      [["No home pin (address not found)", "profile"]],
+    );
+    assert.deepEqual(clientAttention(input({ codes: ["DSI"], setup: noPin }), NOW), []);
   });
 
   it("flags units running out, ahead of pace and waiting on the 1056", () => {
@@ -135,14 +180,14 @@ describe("clientAttention", () => {
           { key: "pcsp", title: "PCSP", status: "on_file", dueAt: null },
         ],
         plans: [plan({ start_date: "2025-09-01", end_date: "2026-08-31", status: "current" })],
-        strategies: { published: false },
+        strategies: { kind: "not_approved", dueOn: "2026-10-01", dueSoon: false, overdue: true },
         summaries: [
           { label: "2026-Q3", dueDate: "2026-10-15" },
           { label: "2026-Q4", dueDate: "2027-01-15" },
         ],
         restrictions: [
-          { title: "Locked pantry", nextReview: "2026-10-01", complete: true },
-          { title: "Door alarm", nextReview: null, complete: false },
+          hrr("r1", "Locked pantry", "2026-10-01", true),
+          hrr("r2", "Door alarm", "2026-12-01", false),
         ],
       }),
       NOW,
@@ -155,10 +200,17 @@ describe("clientAttention", () => {
     assert.ok(keys.includes("strategies"));
     assert.ok(keys.includes("summary:2026-Q3:2026-10-15"));
     assert.ok(!keys.some((k) => k.includes("2026-Q4")));
-    assert.ok(keys.includes("hrc:Locked pantry"));
-    assert.ok(keys.includes("hrc:Door alarm"));
+    assert.ok(keys.includes("hrc:r1"));
+    assert.equal(items.find((i) => i.key === "hrc:r1")?.title, "HRC review: Locked pantry");
+    const unsigned = items.find((i) => i.key === "hrc:r2");
+    assert.equal(unsigned?.title, "Rights restriction: Door alarm");
+    assert.equal(
+      unsigned?.detail,
+      "Waiting on: client consent, provider admin, support coordinator, human rights committee",
+    );
     const waiting = items.find((i) => i.key === "pcsp-waiting");
-    assert.equal(waiting?.detail, "36 days since the plan year ended");
+    assert.equal(waiting?.title, "PCSP is 36 days overdue");
+    assert.equal(waiting?.detail, "Upload it, or contact the support coordinator if you don't have it yet.");
     assert.equal(waiting?.tone, "bad");
     // Worst first.
     assert.equal(items[0].tone, "bad");
@@ -167,31 +219,24 @@ describe("clientAttention", () => {
     assert.equal(counts.get("profile"), 1);
   });
 
-  it("counts strategies due 30 days after the current plan starts", () => {
-    const items = clientAttention(
-      input({ plans: [plan({ activated_on: "2026-09-20" })], strategies: { published: false } }),
+  it("reminds about strategies not sent from day 25; quiet before, when sent or not needed", () => {
+    const soon = clientAttention(
+      input({ strategies: { kind: "not_sent", dueOn: "2026-10-10", dueSoon: true, overdue: false } }),
       NOW,
     );
-    const s = items.find((i) => i.key === "strategies");
-    assert.equal(s?.detail, "Due in 14 days");
+    const s = soon.find((i) => i.key === "strategies");
+    assert.equal(s?.title, "Support strategies not sent to the support coordinator — due Oct 10, 2026");
+    assert.equal(s?.detail, "Mark them as sent");
     assert.equal(s?.tone, "warn");
+    const early = { kind: "not_sent", dueOn: "2026-10-30", dueSoon: false, overdue: false } as const;
+    assert.ok(!clientAttention(input({ strategies: early }), NOW).some((i) => i.key === "strategies"));
+    const sent = { kind: "sent", sendId: "s", sentOn: "2026-10-01", sentTo: null, by: null, late: false } as const;
+    assert.ok(!clientAttention(input({ strategies: sent }), NOW).some((i) => i.key === "strategies"));
+    assert.ok(!clientAttention(input(), NOW).some((i) => i.key === "strategies"));
   });
-});
 
-describe("plan-year reminders in needs attention", () => {
-  it("reminds 60 days before the plan year ends", () => {
-    const items = clientAttention(input({ plans: [plan({ end_date: "2026-11-30" })] }), NOW);
-    const r = items.find((i) => i.key === "plan-ending:60");
-    assert.equal(r?.detail, "Ends in 55 days");
-    assert.equal(r?.section, "plans");
-  });
-  it("turns waiting into an office follow-up from day 10", () => {
-    const items = clientAttention(
-      input({ plans: [plan({ start_date: "2025-09-01", end_date: "2026-09-26" })] }),
-      NOW,
-    );
-    const w = items.find((i) => i.key === "pcsp-waiting");
-    assert.equal(w?.title, "Office: follow up on the new PCSP");
-    assert.equal(w?.tone, "bad");
+  it("asks for the activation date when the plan has none", () => {
+    const items = clientAttention(input({ strategies: { kind: "no_activation", hasPlan: true } }), NOW);
+    assert.equal(items.find((i) => i.key === "strategies")?.detail, "Add the PCSP activation date");
   });
 });

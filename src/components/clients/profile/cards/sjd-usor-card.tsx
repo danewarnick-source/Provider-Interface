@@ -5,11 +5,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { listUpiAttestations, recordUpiAttestation } from "@/lib/upi-attestations.functions";
 import { formatPeriodMonthYear } from "@/lib/progress-summaries";
-import { HexMarker, fmtDate } from "./card-shell";
+import { formatDate } from "@/lib/clients/dates";
+import { Megaphone } from "lucide-react";
+import { SectionCard } from "./section-card";
 
 function currentPeriodLabel(): string {
   const now = new Date();
@@ -51,47 +52,39 @@ export function SjdUsorOutreachCard({ clientId, orgId }: { clientId: string; org
   });
 
   return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-0">
-        <div className="flex items-start gap-2.5 px-5 py-4 border-b border-border/60">
-          <HexMarker />
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold leading-tight">
-              USOR Outreach Verification — {formatPeriodMonthYear(period)}
-            </h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Whether the Person received USOR outreach this month, and current USOR funding status.
-            </p>
-          </div>
-        </div>
-        <div className="p-5 space-y-3">
-          {current ? (
-            <div className="rounded-md border border-emerald-300/60 bg-emerald-50/40 p-3 text-sm text-emerald-800">
-              <div className="font-medium">
-                Entered by {current.attested_by_name ?? "staff"} on{" "}
-                {fmtDate(current.attested_at.slice(0, 10))}
-              </div>
-              {current.note_text && (
-                <div className="mt-1 whitespace-pre-wrap">{current.note_text}</div>
-              )}
+    <SectionCard
+      icon={Megaphone}
+      tone="info"
+      title={`USOR outreach verification: ${formatPeriodMonthYear(period)}`}
+      description="Whether they received USOR outreach this month, and current USOR funding status."
+    >
+      <div className="space-y-3">
+        {current ? (
+          <div className="rounded-xl border border-[var(--hive-ok)]/30 bg-[var(--hive-ok-soft)] p-3 text-sm text-[var(--hive-ok-fg)]">
+            <div className="font-medium">
+              Entered by {current.attested_by_name ?? "staff"} on{" "}
+              {formatDate(current.attested_at.slice(0, 10))}
             </div>
-          ) : (
-            <>
-              <Textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="e.g. Person received USOR outreach on 8/10; funding status: active and current."
-                rows={2}
-              />
-              <div className="flex justify-end">
-                <Button size="sm" onClick={() => mut.mutate()} disabled={mut.isPending}>
-                  {mut.isPending ? "Saving…" : "Save"}
-                </Button>
-              </div>
-            </>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+            {current.note_text && (
+              <div className="mt-1 whitespace-pre-wrap">{current.note_text}</div>
+            )}
+          </div>
+        ) : (
+          <>
+            <Textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="e.g. Person received USOR outreach on 8/10; funding status: active and current."
+              rows={2}
+            />
+            <div className="flex justify-end">
+              <Button onClick={() => mut.mutate()} disabled={mut.isPending}>
+                {mut.isPending ? "Saving…" : "Save outreach note"}
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+    </SectionCard>
   );
 }

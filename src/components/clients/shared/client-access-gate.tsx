@@ -30,10 +30,12 @@ export function ClientAccessGate({
     queryKey: ["client-access-gate", orgId, user?.id, clientId],
     queryFn: async (): Promise<boolean> => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any).rpc("clients_for_staff", {
-        _org: orgId,
-        _staff: user!.id,
-      });
+      const { data, error } = await (supabase as any)
+        .rpc("clients_for_staff", {
+          _org: orgId,
+          _staff: user!.id,
+        })
+        .is("deleted_at", null);
       if (error) throw error;
       return ((data ?? []) as Array<{ id: string }>).some((c) => c.id === clientId);
     },

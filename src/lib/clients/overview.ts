@@ -1,10 +1,11 @@
-// The client profile Overview: data shape plus the pure pieces (coming up,
-// last notes). Loaded by overview-load.ts, drawn by components/clients/
+// The client profile Overview: data shape plus the pure pieces (needs
+// attention summary, coming up, last notes). Loaded by overview-load.ts, drawn by components/clients/
 // profile/overview/. No Supabase here — importable by node --test.
 
-import { daysUntil, todayYmd } from "./dates.ts";
+import { daysUntil, formatDate, todayYmd } from "./dates.ts";
 import type { AttentionItem, CodePace } from "./readiness.ts";
 import type { ClientProfileSection } from "./profile-sections.ts";
+import type { StrategySendState } from "./strategy-sends.ts";
 
 export type ComingUpItem = {
   key: string;
@@ -32,12 +33,15 @@ export type OverviewNote = {
   date: string;
   kind: "shift" | "daily";
   code: string | null;
+  /** Who wrote it: the punch's team member, or the daily log's author. */
   author: string | null;
   text: string;
 };
 
 export type ClientOverview = {
   attention: AttentionItem[];
+  /** Support strategies sent to the support coordinator (strategy-sends.ts). */
+  strategies: StrategySendState;
   paces: CodePace[];
   mustKnows: string | null;
   comingUp: ComingUpItem[];
@@ -52,6 +56,36 @@ export const clientOverviewKey = (orgId: string | undefined, clientId: string) =
 export const COMING_UP_DAYS = 30;
 export const COMING_UP_LIMIT = 6;
 export const LAST_NOTES_LIMIT = 4;
+
+/** The collapsed "Needs attention (N)" button: danger when any item blocks, amber otherwise. */
+export function attentionSummary(
+  items: readonly AttentionItem[],
+): { count: number; tone: "danger" | "profile" } | null {
+  if (!items.length) return null;
+  return { count: items.length, tone: items.some((i) => i.tone === "bad") ? "danger" : "profile" };
+}
+
+/** "Today, 9:00 AM", "Tomorrow, 9:00 AM", "Tue, Oct 8, 9:00 AM"; due dates without a time. */
+export function comingUpWhen(i: ComingUpItem): string {
+  const day =
+    i.days === 0
+      ? "Today"
+      : i.days === 1
+        ? "Tomorrow"
+        : formatDate(i.date, { weekday: "short", month: "short", day: "numeric" });
+  if (!i.startsAt) return i.days < 0 ? `${formatDate(i.date)} (overdue)` : day;
+  const time = new Date(i.startsAt).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  return `${day}, ${time}`;
+}
+
+/** The line above a note: "Sam Test · Oct 4, 2026 · SLN shift note". */
+export function noteHeading(n: OverviewNote): string {
+  const what = n.kind === "daily" ? "Daily note" : `${n.code ?? "Shift"} shift note`;
+  return [n.author ?? "Unknown author", formatDate(n.date), what].join(" · ");
+}
 
 /** Shifts and due dates in the next COMING_UP_DAYS (overdue due dates kept), soonest first. */
 export function comingUpItems(

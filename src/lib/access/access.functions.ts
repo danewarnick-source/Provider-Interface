@@ -70,6 +70,7 @@ export const listAccessPresets = createServerFn({ method: "GET" })
       context.supabase
         .from("organization_members")
         .select("access_preset_id")
+        .is("deleted_at", null)
         .eq("organization_id", data.organization_id)
         .eq("active", true),
     ]);
@@ -130,6 +131,7 @@ export const deleteAccessPreset = createServerFn({ method: "POST" })
     const { count } = await supabaseAdmin
       .from("organization_members")
       .select("id", { count: "exact", head: true })
+      .is("deleted_at", null)
       .eq("access_preset_id", data.id)
       .eq("active", true);
     if (count) throw new Error(`Move the ${count} people using this preset to another preset first`);
@@ -268,10 +270,11 @@ export const listAccessTargets = createServerFn({ method: "GET" })
     const orgId = data.organization_id;
     const [{ data: teams }, { data: members }, { data: clients }] = await Promise.all([
       supabaseAdmin.from("teams").select("id, team_name").eq("organization_id", orgId).order("team_name"),
-      supabaseAdmin.from("organization_members").select("user_id").eq("organization_id", orgId).eq("active", true),
+      supabaseAdmin.from("organization_members").select("user_id").is("deleted_at", null).eq("organization_id", orgId).eq("active", true),
       supabaseAdmin
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", orgId)
         .order("last_name")
         .limit(2000),
@@ -311,6 +314,7 @@ export const listTeamAccess = createServerFn({ method: "GET" })
     const { data: members, error } = await supabaseAdmin
       .from("organization_members")
       .select("id, user_id, access_level, access_scope, is_company_executive, access_presets(name)")
+      .is("deleted_at", null)
       .eq("organization_id", data.organization_id)
       .eq("active", true);
     if (error) throw error;

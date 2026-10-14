@@ -29,10 +29,12 @@ export async function fetchAdminHomeWelcomeCounts(orgId: string): Promise<AdminH
     (supabase as any)
       .from("organization_members")
       .select("user_id", { count: "exact", head: true })
+      .is("deleted_at", null)
       .eq("organization_id", orgId),
     (supabase as any)
       .from("clients")
       .select("id", { count: "exact", head: true })
+      .is("deleted_at", null)
       .eq("organization_id", orgId),
     (supabase as any)
       .from("evv_timesheets")

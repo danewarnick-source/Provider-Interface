@@ -1,7 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { JOBY_ROW } from "./progress-summary-joby.fixture.ts";
 import {
   bucketCodes,
+  canFinalizeSummary,
+  finalizeOpensMessage,
+  scSendReminder,
+  summaryFinalizeOpensOn,
   summariesOwed,
   summaryCadenceForCode,
   summaryCadenceLabel,
@@ -49,4 +54,51 @@ test("bucketCodes follows the same cadence rules", () => {
 test("cadence label says where the summary goes", () => {
   assert.match(summaryCadenceLabel("monthly", ["SEI"]), /UPI/);
   assert.match(summaryCadenceLabel("quarterly", ["HHS"]), /15 days after quarter end/);
+});
+
+test("finalize opens on the last day of the period's final month", () => {
+  assert.equal(summaryFinalizeOpensOn("2026-03-31"), "2026-03-31");
+  assert.equal(summaryFinalizeOpensOn("2026-12-31"), "2026-12-31");
+  assert.equal(summaryFinalizeOpensOn("2026-12-15"), "2026-12-31");
+  assert.equal(summaryFinalizeOpensOn("2028-02-01"), "2028-02-29", "leap year");
+  assert.equal(summaryFinalizeOpensOn("2027-02-10"), "2027-02-28");
+  assert.equal(summaryFinalizeOpensOn("2026-04-30"), "2026-04-30");
+  assert.equal(finalizeOpensMessage("2026-12-31"), "You can finalize on Dec 31, 2026.");
+});
+
+test("canFinalizeSummary uses Denver time; late is fine", () => {
+  // Dec 31 00:30 UTC is still Dec 30 in Denver.
+  assert.equal(canFinalizeSummary("2026-12-31", new Date("2026-12-31T00:30:00Z")), false);
+  // Dec 31 08:00 UTC is Dec 31 01:00 in Denver.
+  assert.equal(canFinalizeSummary("2026-12-31", new Date("2026-12-31T08:00:00Z")), true);
+  assert.equal(canFinalizeSummary("2026-12-31", new Date("2027-01-20T18:00:00Z")), true);
+  assert.equal(canFinalizeSummary("2026-03-31", new Date("2026-03-30T18:00:00Z")), false);
+  assert.equal(canFinalizeSummary("2028-02-29", new Date("2028-02-29T18:00:00Z")), true);
+});
+
+test("Support Coordinator reminder: day 10 after the period, overdue at the due date, clears when sent", () => {
+  const row = JOBY_ROW;
+  assert.equal(scSendReminder(row, "2027-01-09"), null, "day 9: nothing yet");
+  assert.equal(scSendReminder(row, "2027-01-10"), "remind", "day 10");
+  assert.equal(scSendReminder(row, "2027-01-14"), "remind");
+  assert.equal(scSendReminder(row, "2027-01-15"), "overdue", "day 15 = due_date");
+  assert.equal(scSendReminder(row, "2027-02-20"), "overdue");
+  assert.equal(
+    scSendReminder({ ...row, sc_sent_at: "2027-01-12T10:00:00Z" }, "2027-01-20"),
+    null,
+    "marked sent clears it",
+  );
+});
+
+test("Support Coordinator reminder leaves UPI summaries and financial statements alone", () => {
+  const row = {
+    summary_kind: "narrative",
+    service_codes: ["SEI"],
+    period_end: "2026-12-31",
+    due_date: "2027-01-15",
+    sc_sent_at: null,
+    completed_at: null,
+  };
+  assert.equal(scSendReminder(row, "2027-01-20"), null);
+  assert.equal(scSendReminder({ ...row, summary_kind: "financial_statement", service_codes: ["PBA"] }, "2027-01-20"), null);
 });

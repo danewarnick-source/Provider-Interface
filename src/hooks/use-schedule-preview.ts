@@ -49,12 +49,14 @@ export function useSchedulePreview(weekStart: Date) {
         supabase
           .from("clients")
           .select("id, first_name, last_name, team_id")
+          .is("deleted_at", null)
           .eq("organization_id", orgId!),
         supabase.from("teams").select("id, team_name").eq("organization_id", orgId!),
         // Org-to-user membership lives here (profiles.tenant_id is unused).
         supabase
           .from("organization_members")
           .select("user_id")
+          .is("deleted_at", null)
           .eq("organization_id", orgId!),
       ]);
       if (shiftsRes.error) throw shiftsRes.error;

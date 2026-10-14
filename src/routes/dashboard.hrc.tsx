@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Scale, CalendarDays, ClipboardList, Users, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
-import { computeRestrictionCompletion, type RestrictionRecord } from "@/lib/clients/hrc";
+import { HRR_STATUS_LABEL, hrrStatus, type RestrictionRecord } from "@/lib/clients/hrc";
 import { RestrictionDialog } from "@/components/clients/profile/plans/restriction-dialog";
 import { useAccess } from "@/hooks/use-access";
 import { useServerFn } from "@tanstack/react-start";
@@ -157,6 +157,7 @@ function RestrictionsPanel({ canManage, orgId }: { canManage: boolean; orgId: st
       const { data, error } = await supabase
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .order("first_name", { ascending: true });
       if (error) throw error;
@@ -203,7 +204,7 @@ function RestrictionsPanel({ canManage, orgId }: { canManage: boolean; orgId: st
       ) : (
         <ul className="divide-y divide-border rounded-md border border-border">
           {active.map((r) => {
-            const completion = computeRestrictionCompletion(r);
+            const status = hrrStatus(r);
             return (
               <li key={r.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
                 <div className="min-w-0">
@@ -212,10 +213,10 @@ function RestrictionsPanel({ canManage, orgId }: { canManage: boolean; orgId: st
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <Badge
-                    variant={completion.isComplete ? "default" : "outline"}
-                    className={completion.isComplete ? "bg-emerald-600 hover:bg-emerald-600" : "border-amber-400 text-amber-800"}
+                    variant={status === "signed" ? "default" : "outline"}
+                    className={status === "signed" ? "bg-emerald-600 hover:bg-emerald-600" : "border-amber-400 text-amber-800"}
                   >
-                    {completion.completedCount}/{completion.total} documented
+                    {HRR_STATUS_LABEL[status]}
                   </Badge>
                   <Button size="sm" variant="ghost" onClick={() => setViewing(r)}>
                     View
@@ -567,6 +568,7 @@ function CommitteeRoster({ canEditAccess, orgId }: { canEditAccess: boolean; org
       const { data: members, error } = await supabase
         .from("organization_members")
         .select("user_id, access_presets!inner(seed_key)")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .eq("active", true)
         .eq("access_presets.seed_key", "hrc_committee");

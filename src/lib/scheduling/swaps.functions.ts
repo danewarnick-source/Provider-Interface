@@ -77,6 +77,7 @@ export const listEligibleSwapPartners = createServerFn({ method: "POST" })
     const { data: members } = await supabase
       .from("organization_members")
       .select("user_id, active")
+      .is("deleted_at", null)
       .eq("organization_id", shift.organization_id)
       .eq("active", true);
     const memberIds = (members ?? []).map((m: any) => m.user_id);

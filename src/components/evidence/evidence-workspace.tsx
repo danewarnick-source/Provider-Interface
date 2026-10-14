@@ -36,7 +36,8 @@ import {
   itemsForEvidenceTab,
   peopleForEvidenceTab,
 } from "@/lib/evidence/people.ts";
-import { formatExpiresOn, latestFileForItem, matrixChip } from "@/lib/evidence/status.ts";
+import { formatExpiresOn, latestFileForItem } from "@/lib/evidence/status.ts";
+import { evidenceChip } from "@/lib/clients/strategy-sends";
 import {
   EVIDENCE_SEND_MESSAGE_UNAVAILABLE,
   EVIDENCE_STORAGE_UNAVAILABLE,
@@ -392,6 +393,7 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
         <RosterPanel
           items={rosterItems}
           files={board?.files ?? []}
+          strategyStates={board?.strategyStates}
           people={people}
           peopleError={peopleError}
           tab={tab}
@@ -473,6 +475,7 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
 function RosterPanel({
   items,
   files,
+  strategyStates,
   people: roster,
   peopleError,
   tab,
@@ -485,6 +488,7 @@ function RosterPanel({
 }: {
   items: EvidenceBoard["items"];
   files: EvidenceBoard["files"];
+  strategyStates: EvidenceBoard["strategyStates"] | undefined;
   people: EvidencePerson[];
   peopleError: string | null;
   tab: EvidenceSubject;
@@ -516,6 +520,7 @@ function RosterPanel({
       people={people}
       items={items}
       files={files}
+      strategyStates={strategyStates}
       today={denverYmd()}
       search={q}
       onSearchChange={setQ}
@@ -590,7 +595,7 @@ function ReviewPanel({
   const file = item ? latestFileForItem(board?.files ?? [], item.id) : null;
   const person = board?.people.find((p) => p.id === item?.subject_id);
   const chip = item
-    ? matrixChip({ item, file, today: denverYmd() })
+    ? evidenceChip({ item, file, today: denverYmd() }, board?.strategyStates)
     : { kind: "na" as const, label: "N/A", itemId: null };
   const [peerId, setPeerId] = useState("");
   const [due, setDue] = useState<EvidenceDueDraft | null>(item ? draftFromItem(item) : null);

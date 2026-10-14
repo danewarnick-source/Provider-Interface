@@ -39,7 +39,7 @@ import type { AgencySetupFacts } from "../../src/lib/agency-setup-completion";
 import { emptyOrgScopeSnapshot } from "../../src/lib/obligations/scope";
 import { levelForRole, withAccessLevel } from "./access-level";
 import { clientOverviewPayload } from "./client-profile-mock";
-import { clientServicesPayload, requiredDocumentsPayload } from "./client-services-mock";
+import { clientServicesPayload } from "./client-services-mock";
 import { isPcspServerFn, pcspServerFnPayload } from "./pcsp-mock";
 import { addClientPayload, listClientsPayload } from "./clients-list-mock";
 import { staffClientReadiness } from "../../src/lib/team-members/readiness";
@@ -421,7 +421,6 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
     case "training_tracks":
     case "courses":
     case "course_assignments":
-    case "import_subjects":
     case "auditor_accounts":
     case "staff_types":
     case "hr_documents":
@@ -1027,9 +1026,8 @@ function serverFnPayload(url: string, body: string): unknown {
   }
   // Client profile Overview (src/lib/clients/overview.functions.ts).
   if (/^getClientOverview/.test(fn)) return clientOverviewPayload();
-  // Services & billing and Client file (services.functions.ts, file.functions.ts).
+  // Services & billing (services.functions.ts).
   if (/^getClientServices/.test(fn)) return clientServicesPayload();
-  if (/^listClientRequiredDocuments/.test(fn)) return requiredDocumentsPayload();
   // PCSP import (src/lib/clients/pcsp/import.functions.ts).
   const pcsp = /readPcsp/.test(fn) ? "readPcsp" : /confirmPcsp/.test(fn) ? "confirmPcsp" : isPcspServerFn(body);
   if (pcsp) return pcspServerFnPayload(pcsp);

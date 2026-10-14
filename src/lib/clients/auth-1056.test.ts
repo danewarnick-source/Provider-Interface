@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { readFileSync } from "node:fs";
 import {
+  budget1056Folder,
   initial1056Review,
+  isBudget1056Path,
   parseAmount,
   parseFormDate,
   read1056Checks,
@@ -115,5 +118,43 @@ describe("1056 review", () => {
     assert.equal(rows[0].authorization_approved_on, "2026-06-20");
     assert.equal(rows[0].rate_source_document_id, "d");
     assert.equal(rows[0].client_id, "c");
+  });
+});
+
+describe("1056 upload folder", () => {
+  const ORG = "00000000-0000-4000-a000-0000000000a1";
+  const CLIENT = "00000000-0000-4000-a000-0000000000c1";
+  const OTHER = "00000000-0000-4000-a000-0000000000c2";
+  it("sits under the org folder first (the storage rule needs it)", () => {
+    assert.equal(budget1056Folder(ORG, CLIENT), `${ORG}/${CLIENT}/1056/`);
+  });
+  it("accepts a file in this client's 1056 folder", () => {
+    assert.equal(isBudget1056Path(`${ORG}/${CLIENT}/1056/1700000000000_budget.pdf`, ORG, CLIENT), true);
+  });
+  it("refuses another client's folder, the bare folder, traversal and subfolders", () => {
+    assert.equal(isBudget1056Path(`${ORG}/${OTHER}/1056/x.pdf`, ORG, CLIENT), false);
+    assert.equal(isBudget1056Path(`${ORG}/${CLIENT}/1056/`, ORG, CLIENT), false);
+    assert.equal(isBudget1056Path(`${ORG}/${CLIENT}/1056/../pcsp/x.pdf`, ORG, CLIENT), false);
+    assert.equal(isBudget1056Path(`${ORG}/${CLIENT}/1056/a/x.pdf`, ORG, CLIENT), false);
+    assert.equal(isBudget1056Path(`${CLIENT}/1056/x.pdf`, ORG, CLIENT), false);
+  });
+});
+
+describe("1056 upload goes through storage", () => {
+  const fn = readFileSync(new URL("./budget-parse.functions.ts", import.meta.url), "utf8");
+  const hook = readFileSync(
+    new URL("../../components/clients/profile/services/use-1056-import.ts", import.meta.url),
+    "utf8",
+  );
+  it("the browser uploads to the 1056 folder and sends only the storage path", () => {
+    assert.match(hook, /uploadPdfToFolder\(\s*budget1056Folder\(orgId, clientId\)/);
+    assert.match(hook, /storagePath \}/);
+    assert.doesNotMatch(hook + fn, /fileBase64|base64/);
+  });
+  it("the server checks the folder, then reads the file from storage", () => {
+    const check = fn.indexOf("isBudget1056Path(storagePath, organizationId, clientId)");
+    const download = fn.indexOf('.from("client-documents").download(storagePath)');
+    assert.ok(check > 0 && download > check);
+    assert.doesNotMatch(fn, /\.upload\(/);
   });
 });

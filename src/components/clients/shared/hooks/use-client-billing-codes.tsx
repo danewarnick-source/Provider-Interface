@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "../../../../hooks/use-org";
 import { billingCodesForLiveClients } from "@/lib/billing-codes-live-clients";
+import { authorizationCovers } from "@/lib/clients/codes";
+import { denverYmd } from "@/lib/denver-date";
 
 export type ClientBillingCode = {
   id: string;
@@ -44,13 +46,14 @@ export function useClientBillingCodes(clientId: string | undefined) {
         .eq("client_id", clientId!)
         .order("service_code");
       if (error) throw error;
-      // Only currently-open authorizations. Soft-closed rows
-      // (service_end_date <= today) are excluded so removed codes disappear
-      // from the editor, profile summary, EVV clock-in dropdown, scheduler,
-      // and cap modal. Billing history reads use their own query.
-      const today = new Date().toISOString().slice(0, 10);
+      // Only currently-open authorizations (Denver today; the end date is the
+      // last authorized day, inclusive). Rows that ended before today are
+      // excluded so removed codes disappear from the editor, profile summary,
+      // EVV clock-in dropdown, scheduler, and cap modal. Billing history reads
+      // use their own query.
+      const today = denverYmd();
       const rows = (data ?? []) as unknown as ClientBillingCode[];
-      return rows.filter((r) => !r.service_end_date || r.service_end_date > today);
+      return rows.filter((r) => authorizationCovers(r.service_end_date, today));
     },
   });
 }
@@ -76,6 +79,7 @@ export function useAllClientBillingCodes() {
       const { data: clients, error: clientsError } = await supabase
         .from("clients")
         .select("id")
+        .is("deleted_at", null)
         .eq("organization_id", org!.organization_id);
       if (clientsError) throw clientsError;
       return billingCodesForLiveClients(

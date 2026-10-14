@@ -170,8 +170,8 @@ export const writeClientRecord = createServerFn({ method: "POST" })
       let q = sb
         .from(table)
         .update(stripScopeColumns((data.values as Record<string, unknown>) ?? {}))
-        .eq("id", id);
-      if (cfg.hasOrgColumn) q = q.eq("organization_id", organizationId);
+        .eq("id", id)
+        .eq("organization_id", organizationId);
       if (cfg.key === "client") q = q.eq("client_id", clientId as string);
       result = await q.select("id");
     }

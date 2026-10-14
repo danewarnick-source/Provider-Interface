@@ -46,13 +46,12 @@ export function FaceSheetButton({ clientId }: { clientId: string }) {
     <Button
       type="button"
       variant="outline"
-      size="sm"
       onClick={() => void open()}
       disabled={busy}
       className="shrink-0"
     >
       <FileText className="mr-1.5 h-3.5 w-3.5" />
-      {busy ? "Building…" : "Client Face Sheet"}
+      {busy ? "Building the face sheet…" : "Open face sheet PDF"}
     </Button>
   );
 }

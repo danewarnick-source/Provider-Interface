@@ -14,6 +14,7 @@ export async function fetchEvidenceClientPeople(
     sb
       .from("clients")
       .select(columns)
+      .is("deleted_at", null)
       .eq("organization_id", organizationId)
       .order("last_name", { ascending: true }),
     (ids) => loadActiveCodes(supabase, ids),

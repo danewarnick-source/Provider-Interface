@@ -192,6 +192,12 @@ export function ProfilePage() {
     }),
   );
   const attention = overview?.attention ?? [];
+  // Job title, else the positions the header shows.
+  const positionLabel = new Map(data.options.staffTypes.map((t) => [t.key, t.label] as const));
+  const jobLine =
+    data.member.jobTitle?.trim() ||
+    data.profile.staffTypeKeys.map((k) => positionLabel.get(k) ?? k).join(", ") ||
+    null;
 
   return (
     <div
@@ -216,6 +222,19 @@ export function ProfilePage() {
         activeKey={activeTab}
         onSelect={select}
         panel={null}
+        sidebar={{
+          back: {
+            label: "All team members",
+            to: "/dashboard/team-members",
+            search: lastRosterSearch(),
+            testId: "profile-sidebar-back",
+          },
+          person: {
+            name: data.profile.displayName,
+            subline: jobLine,
+            photo: { bucket: "staff-photos", path: data.profile.photoPath },
+          },
+        }}
       >
         {activeTab === "overview" ? (
           <OverviewSection

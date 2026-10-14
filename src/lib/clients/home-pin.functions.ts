@@ -7,35 +7,30 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { isLikelyBadCoord } from "@/lib/geo";
 import { syncHomePinFromAddress } from "@/lib/clients/home-pin";
-import { isAdminLevel } from "@/lib/access/levels";
+import { requireOrgMembership } from "@/integrations/supabase/require-org";
+import { assertCanManageClientById } from "@/lib/clients/guards.server";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = any;
 
+/**
+ * Admin level plus the client guard: Clients: Edit, the client is in this
+ * agency, in the caller's scope, and not deleted or discharged. Returns the
+ * client's agency.
+ */
 async function requireAdminForClient(
   sb: Sb,
   userId: string,
   clientId: string,
 ): Promise<{ organizationId: string }> {
-  const { data: client } = await sb
-    .from("clients")
-    .select("organization_id")
-    .eq("id", clientId)
-    .maybeSingle();
-  if (!client) throw new Error("Client not found");
-  const { data: membership } = await sb
-    .from("organization_members")
-    .select("access_level")
-    .eq("organization_id", client.organization_id)
-    .eq("user_id", userId)
-    .eq("active", true)
-    .maybeSingle();
-  if (!membership) throw new Error("Forbidden");
-  const level = (membership as { access_level: string | null }).access_level;
-  if (!isAdminLevel(level)) {
-    throw new Error("Forbidden");
-  }
-  return { organizationId: client.organization_id as string };
+  const organizationId = await assertCanManageClientById({
+    supabase: sb,
+    actorId: userId,
+    clientId,
+    action: "edit",
+  });
+  await requireOrgMembership(sb, userId, organizationId, "admin");
+  return { organizationId };
 }
 
 /** Admin map drag / tap — writes the EVV geofence center. No GPS accuracy check. */

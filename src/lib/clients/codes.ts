@@ -16,6 +16,14 @@ export function isActiveCodeRow(row: Pick<ClientCodeRow, "service_end_date">, to
   return !row.service_end_date || row.service_end_date.slice(0, 10) > today;
 }
 
+/**
+ * True when an authorization whose last day is `endDate` still covers `today`.
+ * The end date is inclusive: a code ending today still shows today.
+ */
+export function authorizationCovers(endDate: string | null | undefined, today: string): boolean {
+  return !endDate || endDate.slice(0, 10) >= today;
+}
+
 function addCode(list: string[], raw: string | null): void {
   const code = String(raw ?? "").trim().toUpperCase();
   if (code && !list.includes(code)) list.push(code);

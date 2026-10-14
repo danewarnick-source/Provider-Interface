@@ -66,7 +66,7 @@ import { IncidentReportDialog } from "@/components/incidents/incident-report-dia
 import { AlertTriangle as AlertTriangleIcon } from "lucide-react";
 import { useActiveCodes } from "@/components/clients/shared/hooks/use-active-codes";
 import { useClientCareData } from "@/hooks/use-client-care-data";
-import { ShiftMedDueCheck, type PendingMedDose } from "@/components/medications/shift-med-due-check";
+import { ClockOutMeds } from "@/components/medications/give-meds/clock-out-meds";
 import { useComplianceGate } from "@/hooks/use-compliance-gate";
 import { useAccess } from "@/hooks/use-access";
 import { useServerFn } from "@tanstack/react-start";
@@ -122,6 +122,7 @@ import {
 import { gpsFixFromPosition, HIGH_ACCURACY_GPS_OPTIONS } from "@/lib/gps";
 import { selectedPill, unselectedPill } from "@/components/evv/toggle-styles";
 import { BASELINE_GOAL, GoalSupportChecklist } from "@/components/evv/goal-support-checklist";
+import { ShiftFocus } from "@/components/clients/shared/shift-focus";
 import { goalSupportOptions } from "@/lib/clients/plans";
 import { isAdminLevel } from "@/lib/access/levels";
 
@@ -352,9 +353,8 @@ export function PunchPad({
   const [dismissReasonDraft, setDismissReasonDraft] = useState("");
   const navigate = useNavigate();
 
-  // ── Pre-submit medication check (reads real emar_logs, no shadow store) ───
+  // ── Clock-out "Meds" check: Give meds logs each dose as it happens ───
   const [medDosesResolved, setMedDosesResolved] = useState(true);
-  const [pendingMedDoses, setPendingMedDoses] = useState<PendingMedDose[]>([]);
 
 
 
@@ -1004,7 +1004,6 @@ export function PunchPad({
     setLongShiftAck(false);
     setTriggersResolved(true);
     setMedDosesResolved(true);
-    setPendingMedDoses([]);
     setIncidentReportIds([]);
     setCorrectionOpen(false);
     setCorrectionIn("");
@@ -1402,22 +1401,6 @@ export function PunchPad({
   }) {
     if (!user || !active) return;
 
-    // Flush the shift-med checklist into emar_logs BEFORE the timesheet commits.
-    // If any dose fails, abort — nothing partial ends up in the DB.
-    if (pendingMedDoses.length > 0) {
-      try {
-        const { logMedicationPass } = await import("@/lib/emar-pass.functions");
-        for (const dose of pendingMedDoses) {
-          await logMedicationPass({ data: dose });
-        }
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        toast.error(`Medication log failed: ${msg}`);
-        return;
-      }
-    }
-
-
     const work = selectedGoalWork();
 
     const clockOut = new Date().toISOString();
@@ -1702,7 +1685,7 @@ export function PunchPad({
       return;
     }
     if (!medDosesResolved) {
-      toast.error("Log all scheduled medication doses in eMAR before submitting.");
+      toast.error("Log every dose due this shift in Give meds (given or not given) before clocking out.");
       return;
     }
     if (nectarUsed && !nectarAssistChecked) {
@@ -2113,6 +2096,11 @@ export function PunchPad({
               </Link>
             </div>
           </div>
+        )}
+
+        {/* ── Focus for this shift: goals + approved support strategies (pre-clock-in) ── */}
+        {!isRunning && clientForPunch && serviceCode && (
+          <ShiftFocus clientId={clientForPunch.id} groups={goalGroups} serviceCode={serviceCode} className="mb-4" />
         )}
 
         {/* ── NECTAR Shift Pre-Flight (pre-clock-in only) ── */}
@@ -2643,6 +2631,12 @@ export function PunchPad({
 
             <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 pb-6 sm:px-6">
               <div className="grid gap-4">
+                <ShiftFocus
+                  clientId={active?.client_id}
+                  groups={goalGroups}
+                  serviceCode={active?.service_type_code ?? null}
+                />
+
                 {/* PCSP goals */}
                 <div className="grid gap-2">
                   <h3 className="text-sm font-semibold">Goals worked on this shift</h3>
@@ -2825,16 +2819,14 @@ export function PunchPad({
                 />
 
 
-                {/* Pre-submit medication check — routes staff into the real MAR */}
-                {active && org?.organization_id && (
-                  <ShiftMedDueCheckSlot
-                    organizationId={org.organization_id}
+                {/* Clock-out "Meds" item: opens Give meds for this client */}
+                {active && (
+                  <ClockOutMeds
                     clientId={active.client_id}
                     clientName={active.client_name ?? "this client"}
                     clockInIso={active.clock_in_timestamp}
-                    emarHref={`/dashboard/workspace/${active.client_id}?tab=mar-emar`}
+                    serviceContext={active.service_type_code ?? null}
                     onResolvedChange={setMedDosesResolved}
-                    onPendingDosesChange={setPendingMedDoses}
                   />
                 )}
 
@@ -3206,37 +3198,4 @@ export function PunchPad({
   );
 }
 
-/**
- * Wraps ShiftMedDueCheck with a windowEnd captured ONCE per shift (keyed on
- * clockInIso). The parent re-renders every second to drive the live shift
- * timer; without this the React Query key would change every second and
- * refetch continuously.
- */
-function ShiftMedDueCheckSlot(props: {
-  organizationId: string;
-  clientId: string;
-  clientName: string;
-  clockInIso: string;
-  emarHref: string;
-  onResolvedChange: (resolved: boolean) => void;
-  onPendingDosesChange: (pending: PendingMedDose[]) => void;
-}) {
-  const windowEnd = useMemo(
-    () => new Date().toISOString(),
-    // Only recompute when the active shift itself changes.
-    [props.clockInIso],
-  );
-  return (
-    <ShiftMedDueCheck
-      organizationId={props.organizationId}
-      clientId={props.clientId}
-      clientName={props.clientName}
-      windowStart={props.clockInIso}
-      windowEnd={windowEnd}
-      emarHref={props.emarHref}
-      onResolvedChange={props.onResolvedChange}
-      onPendingDosesChange={props.onPendingDosesChange}
-    />
-  );
-}
 

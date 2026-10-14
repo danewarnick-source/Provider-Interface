@@ -25,7 +25,7 @@ export function ReceiptLink({ path, bucket }: { path: string | null; bucket: str
   };
   return (
     <button type="button" className="text-xs text-primary underline" onClick={() => void open()}>
-      View
+      Open receipt
     </button>
   );
 }

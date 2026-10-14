@@ -4,7 +4,7 @@
 // today or earlier is ended (same rule as codes.ts isActiveCodeRow).
 
 import { isDailyServiceCode } from "../service-billing.ts";
-import { parseLocalDate, todayYmd } from "./dates.ts";
+import { localYmd, parseLocalDate, todayYmd } from "./dates.ts";
 import { codePace, type CodePace } from "./readiness.ts";
 
 export type AuthorizationRow = {
@@ -60,7 +60,7 @@ export type AuthorizationView = {
 };
 
 function ymd(d: Date): string {
-  return todayYmd(d);
+  return localYmd(d);
 }
 
 /** The view of one authorization with `used` units (from units.ts usedUnitsForCode). */

@@ -148,7 +148,7 @@ export function DischargeDialog({
               onClick={save}
               data-testid="discharge-save"
             >
-              {discharge.isPending ? "Discharging…" : "Discharge"}
+              {discharge.isPending ? "Discharging…" : "Discharge client"}
             </Button>
           )}
         </DialogFooter>

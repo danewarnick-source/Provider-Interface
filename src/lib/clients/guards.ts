@@ -17,15 +17,20 @@ export const MANAGE_CLIENT_ACTIONS = [
   "view_medical",
   "edit_medical",
   "edit_billing",
+  "view_hrc",
   "edit_hrc",
   "edit_funds",
   "edit_loans",
+  "restore",
 ] as const;
 export type ManageClientAction = (typeof MANAGE_CLIENT_ACTIONS)[number];
 
 export const NO_PERMISSION_MESSAGE = "You don't have permission to change this";
 export const CLIENT_OUT_OF_SCOPE_MESSAGE = "This client isn't in your assigned homes or clients";
 export const CLIENT_NOT_FOUND_MESSAGE = "Client not found in this organization";
+export const CLIENT_DELETED_MESSAGE =
+  "This client was deleted. Only an Owner can restore them (Settings → Recently deleted).";
+export const CLIENT_NOT_DELETED_MESSAGE = "This client isn't deleted.";
 export const CLIENT_DISCHARGED_MESSAGE =
   "This client is discharged, so their record is read-only. Reactivate them to make changes.";
 
@@ -33,6 +38,7 @@ export const CLIENT_DISCHARGED_MESSAGE =
 export const DISCHARGED_CLIENT_ACTIONS: ReadonlySet<ManageClientAction> = new Set([
   "view",
   "view_medical",
+  "view_hrc",
   "discharge",
 ]);
 
@@ -56,10 +62,14 @@ export function categoryForClientAction(action: ManageClientAction): {
     case "edit_billing":
     case "edit_funds":
       return { category: "billing", min: "edit" };
+    case "view_hrc":
+      return { category: "hrc", min: "view" };
     case "edit_hrc":
       return { category: "hrc", min: "edit" };
     case "edit_loans":
       return { category: "loans", min: "edit" };
+    case "restore":
+      return { category: "delete_people", min: "edit" };
   }
 }
 
@@ -77,8 +87,10 @@ export interface ManageClientGuardDeps {
     category: CategoryId,
     min: "view" | "edit",
   ) => Promise<{ level: AccessLevel; scope: AccessScope }>;
-  /** The client's organization and whether they are discharged, or null when no row. */
-  loadClient: (clientId: string) => Promise<{ organizationId: string; discharged: boolean } | null>;
+  /** The client's organization, whether they are discharged or deleted, or null when no row. */
+  loadClient: (
+    clientId: string,
+  ) => Promise<{ organizationId: string; discharged: boolean; deleted?: boolean } | null>;
   /** access_can_see_client(_client, _user). */
   canSeeClient: (clientId: string) => Promise<boolean>;
 }
@@ -88,7 +100,8 @@ export interface ManageClientGuardDeps {
  *  (a) category at the action's minimum,
  *  (b) the client exists and belongs to organizationId,
  *  (c) non-agency-scope actors must be able to see the client,
- *  (d) a discharged client is read-only: only view and discharge actions pass.
+ *  (d) a deleted client is off limits: only an Owner's restore passes,
+ *  (e) a discharged client is read-only: only view and discharge actions pass.
  * (b)–(d) are skipped when there is no client yet.
  */
 export async function runManageClientGuard(
@@ -105,6 +118,12 @@ export async function runManageClientGuard(
   if (!client || client.organizationId !== input.organizationId) {
     throw new Error(CLIENT_NOT_FOUND_MESSAGE);
   }
+
+  if (client.deleted) {
+    if (input.action !== "restore" || actor.level !== "owner") throw new Error(CLIENT_DELETED_MESSAGE);
+    return actor;
+  }
+  if (input.action === "restore") throw new Error(CLIENT_NOT_DELETED_MESSAGE);
 
   if (actor.scope !== "agency") {
     const visible = await deps.canSeeClient(clientId);

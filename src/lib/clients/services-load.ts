@@ -24,6 +24,9 @@ export type RateHistoryEntry = {
   effective_start: string | null;
   effective_end: string | null;
   rate_source: string | null;
+  authorization_number: string | null;
+  authorization_approved_on: string | null;
+  annual_unit_authorization: number | null;
   superseded_at: string;
 };
 
@@ -70,7 +73,7 @@ export async function loadClientServices(
       sb
         .from("client_billing_code_rate_history")
         .select(
-          "id, billing_code_id, rate_per_unit, unit_type, effective_start, effective_end, rate_source, superseded_at",
+          "id, billing_code_id, rate_per_unit, unit_type, effective_start, effective_end, rate_source, authorization_number, authorization_approved_on, annual_unit_authorization, superseded_at",
         )
         .eq("organization_id", orgId)
         .eq("client_id", clientId)

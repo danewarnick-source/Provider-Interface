@@ -1,7 +1,6 @@
 // Team section writes that aren't code assignments: the do-not-schedule list
-// (client_staff_exclusions) and office notes (client_notes). Each runs
-// assertCanManageClient first and writes with the caller's RLS client.
-// Exclusions are ended and notes archived — never deleted. Staff-to-code
+// (client_staff_exclusions). Each runs assertCanManageClient first and writes
+// with the caller's RLS client. Exclusions are ended — never deleted. Staff-to-code
 // assignments stay on setStaffClientCodes (lib/scheduler/setup.functions).
 
 import { createServerFn } from "@tanstack/react-start";
@@ -10,7 +9,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertCanManageClient } from "./guards.server";
 import { cleanExclusionReason } from "./exclusions";
-import { cleanNoteBody } from "./notes";
 import { assertRowsChanged } from "./writes";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -87,45 +85,6 @@ export const endStaffExclusion = createServerFn({ method: "POST" })
       .eq("organization_id", data.organizationId)
       .eq("client_id", data.clientId)
       .is("ended_at", null)
-      .select("id");
-    if (error) throw new Error(error.message);
-    assertRowsChanged(rows);
-    return { ok: true };
-  });
-
-/** Add an office note. */
-export const addClientNote = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => scope.extend({ body: z.string() }).parse(d))
-  .handler(async ({ data, context }) => {
-    const { sb, userId } = await guard(context, data);
-    const body = ok(cleanNoteBody(data.body));
-    const { data: rows, error } = await sb
-      .from("client_notes")
-      .insert({
-        organization_id: data.organizationId,
-        client_id: data.clientId,
-        body,
-        created_by: userId,
-      })
-      .select("id");
-    if (error) throw new Error(error.message);
-    return { id: assertRowsChanged(rows)[0].id as string };
-  });
-
-/** Archive an office note (kept for the record). */
-export const archiveClientNote = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => scope.extend({ noteId: z.string().uuid() }).parse(d))
-  .handler(async ({ data, context }) => {
-    const { sb, userId } = await guard(context, data);
-    const { data: rows, error } = await sb
-      .from("client_notes")
-      .update({ archived_at: new Date().toISOString(), archived_by: userId })
-      .eq("id", data.noteId)
-      .eq("organization_id", data.organizationId)
-      .eq("client_id", data.clientId)
-      .is("archived_at", null)
       .select("id");
     if (error) throw new Error(error.message);
     assertRowsChanged(rows);

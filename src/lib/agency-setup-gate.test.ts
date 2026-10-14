@@ -253,11 +253,11 @@ describe("unit: agency setup gate — skip, create, redirect", () => {
     const hire = read("./team-members/members.functions.ts");
     const invites = read("./team-members/invites.functions.ts");
     const clients = read("../components/clients/list/clients-page.tsx");
-    const importCommit = read("./smart-import-commit.functions.ts");
+    const addClient = read("../components/clients/add/use-add-client.ts");
     assert.match(hire, /assertAgencySetupCompleteForOrg/);
     assert.match(invites, /assertAgencySetupCompleteForOrg/);
     assert.match(clients, /assertAgencySetupCompleteForOrg|shouldBlockStaffClientCreate/);
-    assert.match(importCommit, /assertAgencySetupCompleteForOrg/);
+    assert.match(addClient, /assertAgencySetupComplete\b/);
     for (const api of SETUP_CREATE_APIS) {
       assert.ok(api.length > 0);
     }

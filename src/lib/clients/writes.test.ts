@@ -42,6 +42,15 @@ describe("actionsForClientPatch", () => {
       "edit_medical",
     ]);
   });
+  it("diet, mobility and the emergency plan are medical info", () => {
+    for (const [k, v] of [
+      ["diets", ["Pureed"]],
+      ["mobility", ["Walker"]],
+      ["emergency_plan", "Call 911."],
+    ] as const) {
+      assert.deepEqual(actionsForClientPatch({ [k]: null }, { [k]: v }), ["edit", "edit_medical"]);
+    }
+  });
   it("status and discharge date change only through the discharge flow", () => {
     assert.throws(
       () => actionsForClientPatch({ account_status: "active" }, { account_status: "archived" }),
@@ -52,8 +61,15 @@ describe("actionsForClientPatch", () => {
       /can't be changed: discharge_date/,
     );
   });
+  it("the old client-level self-admin flags are no longer editable", () => {
+    for (const k of ["self_admin_med_support", "self_admin_med_support_locked"])
+      assert.throws(() => actionsForClientPatch({}, { [k]: true }), /can't be changed/);
+  });
   it("refuses to move a client to another organization", () => {
     assert.throws(() => actionsForClientPatch({}, { organization_id: ORG }), /can't be changed/);
+    for (const k of ["deleted_at", "deleted_by", "delete_reason"]) {
+      assert.throws(() => actionsForClientPatch({}, { [k]: null }), /can't be changed/, k);
+    }
   });
   it("compares arrays by value", () => {
     assert.deepEqual(changedClientFields({ diagnoses: ["A"] }, { diagnoses: ["A"] }), []);
@@ -78,6 +94,10 @@ describe("tableConfig", () => {
     assert.equal(CLIENT_RECORD_TABLES.pba_transactions.action, "edit_funds");
     assert.equal(CLIENT_RECORD_TABLES.client_documents.action, "edit");
   });
+  it("rights restrictions are only inserted here; saves go through saveHrr", () => {
+    assert.throws(() => tableConfig("hrc_restriction_records", "update"), /not allowed/);
+    assert.equal(tableConfig("hrc_restriction_records", "insert").action, "edit_hrc");
+  });
 });
 
 describe("stampRows", () => {
@@ -92,14 +112,18 @@ describe("stampRows", () => {
     assert.equal(row.client_id, CLIENT);
     assert.equal(row.service_code, "SLH");
   });
-  it("leaves parent-keyed rows without org/client columns alone", () => {
+  it("stamps the organization on parent-keyed rows but adds no client column", () => {
     const [row] = stampRows(
-      tableConfig("client_budget_lines", "insert"),
-      [{ budget_id: "b" }],
+      tableConfig("pba_transactions", "insert"),
+      [{ account_id: "a", organization_id: "x" }],
       ORG,
       CLIENT,
     );
-    assert.deepEqual(row, { budget_id: "b" });
+    assert.deepEqual(row, { account_id: "a", organization_id: ORG });
+  });
+  it("the monthly budget tables are gone", () => {
+    assert.throws(() => tableConfig("client_budgets", "insert"), /Unknown client table/);
+    assert.throws(() => tableConfig("client_budget_lines", "insert"), /Unknown client table/);
   });
   it("requires a client for client tables", () => {
     assert.throws(

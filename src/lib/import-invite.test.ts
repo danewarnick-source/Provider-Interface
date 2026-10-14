@@ -4,7 +4,6 @@ import {
   canSendImportInvite,
   classifyImportInvite,
   hasUsableInviteEmail,
-  summarizeImportInviteBuckets,
 } from "./import-invite.ts";
 
 describe("hasUsableInviteEmail", () => {
@@ -100,20 +99,6 @@ describe("canSendImportInvite", () => {
         { force: true },
       ),
       false,
-    );
-  });
-});
-
-describe("summarizeImportInviteBuckets", () => {
-  it("counts the three done-page totals", () => {
-    assert.deepEqual(
-      summarizeImportInviteBuckets([
-        { email: "a@x.org", mustChangePassword: true, invitationStatus: null },
-        { email: "b@x.org", mustChangePassword: true, invitationStatus: null },
-        { email: "", mustChangePassword: true, invitationStatus: null },
-        { email: "c@x.org", mustChangePassword: false, invitationStatus: null },
-      ]),
-      { ready: 2, missing_email: 1, already_login: 1 },
     );
   });
 });

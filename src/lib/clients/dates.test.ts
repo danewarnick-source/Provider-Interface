@@ -2,7 +2,7 @@
 // only shows west of UTC.
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { ageOn, daysUntil, formatDate, parseLocalDate, todayYmd } from "./dates.ts";
+import { ageOn, daysUntil, formatDate, localYmd, parseLocalDate, todayYmd } from "./dates.ts";
 
 process.env.TZ = "America/Denver";
 
@@ -64,10 +64,25 @@ describe("daysUntil", () => {
   });
 });
 
+describe("localYmd", () => {
+  it("formats a local calendar date as is", () => {
+    assert.equal(localYmd(parseLocalDate("2026-07-01")!), "2026-07-01");
+    assert.equal(localYmd(new Date(2026, 11, 31)), "2026-12-31");
+  });
+});
+
 describe("todayYmd", () => {
   it("uses the local calendar day, not UTC", () => {
     // 11pm in Utah on Jul 1 is already Jul 2 in UTC.
     assert.equal(todayYmd(new Date(2026, 6, 1, 23, 30)), "2026-07-01");
     assert.equal(todayYmd(new Date(2026, 0, 5)), "2026-01-05");
+  });
+  it("is the Denver day even when the clock is read in UTC (8 pm Denver = 2 am UTC next day)", () => {
+    // 2026-07-02T02:00Z is 8 pm MDT on Jul 1.
+    assert.equal(todayYmd(new Date("2026-07-02T02:00:00Z")), "2026-07-01");
+    // 2026-01-06T03:00Z is 8 pm MST on Jan 5.
+    assert.equal(todayYmd(new Date("2026-01-06T03:00:00Z")), "2026-01-05");
+    // Just after Denver midnight it is the next day.
+    assert.equal(todayYmd(new Date("2026-07-02T06:30:00Z")), "2026-07-02");
   });
 });

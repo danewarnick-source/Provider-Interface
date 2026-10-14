@@ -203,6 +203,7 @@ async function liveUsageCounts(
     const staffRes = await db
       .from("organization_members")
       .select("id", { count: "exact", head: true })
+      .is("deleted_at", null)
       .eq("organization_id", orgId)
       .eq("active", true);
     staff = staffRes.count ?? 0;
@@ -394,6 +395,7 @@ export const getBillingStatusFn = createServerFn({ method: "POST" })
     const { data: memberships } = await context.supabase
       .from("organization_members")
       .select("organization_id, access_level, organizations(name, is_demo, display_acronym)")
+      .is("deleted_at", null)
       .eq("user_id", context.userId)
       .eq("active", true);
     const ms = (memberships ?? []) as Array<{
