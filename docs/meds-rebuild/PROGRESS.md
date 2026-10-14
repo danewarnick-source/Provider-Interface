@@ -18,3 +18,12 @@ One short report per prompt, newest last.
 - "Fill from label photo" skipped: document-extraction.ts sends only raw text to Bedrock.
 - Self-admin flag removed from UI/writes. Support summary comes from how_taken; import maps support level per medication. care-data still returns the old flags (M4).
 - tsc 203 → 203; build passes; unit tests 2311/2316, same 5 base failures.
+
+## M3 — MAR tab, printout and monthly review — MERGED
+- PR https://github.com/danewarnick-source/Provider-Interface/pull/481 squash-merged into meds-rebuild (31e8b2ec); checks green.
+- Migrations applied live: 20261014001000_meds_m3_addendum_rules (correction reason; edit_medical or the logger within 24h; insert-only addenda) and 20261014001100_meds_m3_month_review_lock (review status/reopen columns + insert-only medication_month_review_events). Types regenerated.
+- Added src/lib/medications/: mar.functions (getMarMonth, printMarMonth, signOffMarMonth, reopenMarMonth), mar-data, mar-grid, mar-cells, mar-month, mar-review, mar-pdf(-layout,-rows), med-guard.server, with tests. UI: mar-tab, mar-grid-table, mar-dose-sheet, mar-signoff, use-mar.
+- Sign-off builds the PDF on the server, stores it at <orgId>/<clientId>/medications/ as a mar_month client document, and serves it through a short-lived signed link.
+- Deleted hhs-mar-overview-calendar and its HHS hub tab (now a link to Health → MAR), normalizeEmarStatus, EMAR_STATUS_LABELS, and that tab's e2e test. Zero references remain.
+- Skipped the Documentation → Medications unsigned-months link (that area isn't on this branch). PDF content is tested; nobody has looked at how it renders.
+- tsc 203 → 203; build passes; unit tests 2336/2341, same 5 base failures.
