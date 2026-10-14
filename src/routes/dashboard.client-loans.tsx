@@ -138,11 +138,23 @@ function LoanArea({ organizationId, lenderName }: { organizationId: string; lend
               </TableHeader>
               <TableBody>
                 {(loans.data ?? []).map((l: any) => (
-                  <TableRow key={l.id}>
-                    <TableCell>{clientLabel.get(l.client_id) ?? l.client_id}</TableCell>
-                    <TableCell>{l.borrower_name}</TableCell>
-                    <TableCell>{l.agreement_date}</TableCell>
-                    <TableCell className="capitalize">{l.status}</TableCell>
+                  <TableRow key={l.id} data-voided={l.voided_at ? "true" : undefined}>
+                    <TableCell className={l.voided_at ? "line-through text-muted-foreground" : ""}>
+                      {clientLabel.get(l.client_id) ?? l.client_id}
+                    </TableCell>
+                    <TableCell className={l.voided_at ? "line-through text-muted-foreground" : ""}>
+                      {l.borrower_name}
+                    </TableCell>
+                    <TableCell className={l.voided_at ? "line-through text-muted-foreground" : ""}>
+                      {l.agreement_date}
+                    </TableCell>
+                    <TableCell className="capitalize">
+                      {l.voided_at ? (
+                        <span className="normal-case text-destructive">Voided: {l.void_reason}</span>
+                      ) : (
+                        l.status
+                      )}
+                    </TableCell>
                     <TableCell className="text-right">
                       <Button size="sm" variant="outline" onClick={() => setEditing({ loanId: l.id, clientId: l.client_id, borrower: l.borrower_name })}>
                         Open

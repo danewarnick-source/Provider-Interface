@@ -198,7 +198,7 @@ export const CATEGORIES: AccessCategory[] = [
     explain: {
       off: "Can't see employee loans.",
       view: "Can see loan agreements, signatures and ledgers. Can't create, edit, send for signature, or delete.",
-      edit: "Can create and edit loans, send them for e-signature, add ledger entries, and delete loans.",
+      edit: "Can create and edit loans, send them for e-signature, add ledger entries, and void loans or entries (voided records stay on file).",
     },
   },
   {

@@ -1,7 +1,9 @@
 // One custom client field as a small read-only tile in More details.
+// An archived field's label says so.
 
 import type { CustomFieldWithValue } from "@/lib/clients/care-data.functions";
 import { formatDate } from "@/lib/clients/dates";
+import { customFieldLabel } from "@/lib/clients/more-details";
 
 /** Small muted tile: the field's label and its value (or a dash). */
 export function DetailTile({ field }: { field: CustomFieldWithValue }) {
@@ -24,7 +26,7 @@ export function DetailTile({ field }: { field: CustomFieldWithValue }) {
           : v?.value_text?.trim() || null;
   return (
     <li className="min-w-0 rounded-xl bg-[var(--hive-muted-surface)] px-3 py-2">
-      <p className="text-xs text-muted-foreground">{field.field_label}</p>
+      <p className="text-xs text-muted-foreground">{customFieldLabel(field)}</p>
       <p className="mt-0.5 break-words text-sm font-medium text-hive-ink">
         {text ?? <span className="font-normal text-muted-foreground">—</span>}
       </p>

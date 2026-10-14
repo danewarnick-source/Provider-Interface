@@ -3281,6 +3281,9 @@ export type Database = {
           loan_id: string
           note: string | null
           organization_id: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
         }
         Insert: {
           amount: number
@@ -3292,6 +3295,9 @@ export type Database = {
           loan_id: string
           note?: string | null
           organization_id: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
         }
         Update: {
           amount?: number
@@ -3303,6 +3309,9 @@ export type Database = {
           loan_id?: string
           note?: string | null
           organization_id?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
         }
         Relationships: [
           {
@@ -3348,6 +3357,9 @@ export type Database = {
           signature_parties: Json
           status: string
           updated_at: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
           voluntary_ack: boolean
         }
         Insert: {
@@ -3376,6 +3388,9 @@ export type Database = {
           signature_parties?: Json
           status?: string
           updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
           voluntary_ack?: boolean
         }
         Update: {
@@ -3404,6 +3419,9 @@ export type Database = {
           signature_parties?: Json
           status?: string
           updated_at?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
           voluntary_ack?: boolean
         }
         Relationships: [
@@ -6068,6 +6086,8 @@ export type Database = {
       }
       custom_field_definitions: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           created_at: string
           created_by: string | null
           data_type: string
@@ -6080,6 +6100,8 @@ export type Database = {
           source: string
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
           created_by?: string | null
           data_type: string
@@ -6092,6 +6114,8 @@ export type Database = {
           source?: string
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
           created_by?: string | null
           data_type?: string

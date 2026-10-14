@@ -15,6 +15,7 @@ import { useClientCareData } from "@/hooks/use-client-care-data";
 import { MedsReadOnlyList } from "@/components/medications/meds-read-only-list";
 import type { CustomFieldWithValue } from "@/lib/clients/care-data.functions";
 import { ageOn, daysUntil } from "@/lib/clients/dates";
+import { customFieldLabel } from "@/lib/clients/more-details";
 import { contactLine, contactsWithRole, primaryContact } from "@/lib/clients/contacts";
 
 function formatCustomValue(f: CustomFieldWithValue): string {
@@ -177,7 +178,7 @@ export function AboutTab({ client }: { client: CaseloadClient }) {
             {identityCustom.map((f) => {
               const v = formatCustomValue(f);
               return v && v !== "—" ? (
-                <Row key={f.id} label={f.field_label}>{v}</Row>
+                <Row key={f.id} label={customFieldLabel(f)}>{v}</Row>
               ) : null;
             })}
           </Group>
@@ -266,7 +267,7 @@ export function AboutTab({ client }: { client: CaseloadClient }) {
             {carePlanCustom.map((f) => (
               <div key={f.id} className="text-xs">
                 <dt className="inline font-medium text-muted-foreground">
-                  {f.field_label}:
+                  {customFieldLabel(f)}:
                 </dt>{" "}
                 <dd className="inline">{formatCustomValue(f)}</dd>
               </div>

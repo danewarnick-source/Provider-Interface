@@ -26,7 +26,7 @@ export function MoneyHeader({
   const spending = useClientSpending(orgId, clientId).data ?? [];
   const loans = useClientLoans(orgId, clientId, isOwner);
   const balance = account ? Number(account.current_balance) : null;
-  const openLoans = (loans.loans.data ?? []).filter((l) => isOpenLoan(l.status)).length;
+  const openLoans = (loans.loans.data ?? []).filter((l) => isOpenLoan(l.status, l.voided_at)).length;
   const month = new Date().toLocaleDateString("en-US", { month: "long" });
   return (
     <SectionCard

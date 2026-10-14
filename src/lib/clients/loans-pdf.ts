@@ -4,6 +4,7 @@
  * triggers a download.
  */
 import { jsPDF } from "jspdf";
+import { computeRunningBalance, ledgerLines, type LedgerEntry } from "./loan-ledger";
 
 export type LoanPdfData = {
   borrower_name: string;
@@ -25,7 +26,10 @@ export type LoanPdfData = {
   voluntary_ack: boolean;
   signature_parties: { id: string; role: string; name: string; title?: string | null }[];
   notes?: string | null;
-  running_balance?: number;
+  /** Ledger entries, voided ones included: they are listed struck through and left out of the balance. */
+  entries?: LedgerEntry[];
+  /** Set when the whole agreement was voided. */
+  void_reason?: string | null;
 };
 
 function fmtMoney(n: number | null | undefined): string {
@@ -80,6 +84,9 @@ export function generateLoanPdf(d: LoanPdfData): jsPDF {
   doc.setFontSize(9);
   doc.text("DRAFT — pending legal review", pageW / 2, y, { align: "center" });
   y += 20;
+  if (d.void_reason != null) {
+    writeP(`VOIDED — this agreement was voided and is kept on file only. Reason: ${d.void_reason}`, { bold: true });
+  }
 
   writeP(
     `This document is a copy of the Loan Agreement kept on file. It was entered into on ${fmtDate(d.agreement_date)} between ${d.lender_name} ("Lender") and ${d.borrower_name} ("Borrower"), reflecting an arrangement the company and the client's support team independently decided to enter into.`,
@@ -129,12 +136,33 @@ export function generateLoanPdf(d: LoanPdfData): jsPDF {
   heading(6, "Entire Agreement");
   writeP("This Agreement constitutes the entire understanding between the parties with respect to the subject matter herein and supersedes all prior agreements, representations, and understandings, whether written or oral.");
 
-  if (typeof d.running_balance === "number") {
+  const hasLedger = Array.isArray(d.entries);
+  if (hasLedger) {
+    const entries = d.entries ?? [];
     heading(7, "Current Running Balance");
-    writeP(`As of ${fmtDate(new Date().toISOString())}, the running principal balance owed by the Borrower under this Agreement is ${fmtMoney(d.running_balance)}.`);
+    writeP(`As of ${fmtDate(new Date().toISOString())}, the running principal balance owed by the Borrower under this Agreement is ${fmtMoney(computeRunningBalance(entries))}. Voided entries are listed struck through and are not counted.`);
+    const lines = ledgerLines(entries);
+    if (!lines.length) writeP("No ledger entries recorded.");
+    for (const l of lines) {
+      const text = `${l.date}   ${l.kind}   ${l.amount}${l.note ? `   ${l.note}` : ""}`;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      ensureSpace(l.voided ? 28 : 16);
+      doc.text(text, M, y);
+      if (l.voided) {
+        const w = doc.getTextWidth(text);
+        doc.line(M, y - 3.5, M + w, y - 3.5);
+        y += 13;
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(9);
+        doc.text(`VOID: ${l.voidReason ?? ""}`, M + 12, y);
+      }
+      y += 15;
+    }
+    y += 6;
   }
 
-  heading(typeof d.running_balance === "number" ? 8 : 7, "Signatures");
+  heading(hasLedger ? 8 : 7, "Signatures");
   const parties = d.signature_parties.length
     ? d.signature_parties
     : [
