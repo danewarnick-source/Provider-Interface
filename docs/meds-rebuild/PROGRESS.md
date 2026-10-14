@@ -35,3 +35,12 @@ One short report per prompt, newest last.
 - care-data returns the new fields for active, not paused meds, and no longer returns scheduled_time, self_admin_med_support* or CareFlags. training.functions adds route, what it's for, side effects, signs of a bad reaction, PRN rules and psychotropic use; versioning unchanged.
 - The shift screen's MAR panel lost its inline med details. Its dose logging and StaffMedicationsPanel remain for M5.
 - tsc 203 → 203; build passes; unit tests 2344/2349, same 5 base failures.
+
+## M5 — One Give meds component for staff — MERGED
+- PR https://github.com/danewarnick-source/Provider-Interface/pull/485 squash-merged into meds-rebuild (f3b461c2); checks green.
+- 5 migrations applied live (20261014001200–1600): witness/count columns + med_witness_confirmations, med_training_status, log_medication_dose rewrite (dose and one-statement pill decrement saved together, unclamped, server-read expected count, time-taken limits, approved training only, witness confirmed by their own sign-in), PRN follow-ups (prn_followup_due notification type + 5-minute pg_cron job), tighter logged-dose lock. Two first versions broke on live (controlled-dose write, admin review update). Both were fixed within minutes and re-verified in a rolled-back transaction.
+- Added give-meds/ (10 files). It's used on the workspace MAR tab, the shift screen, the clock-out Meds item (?tab=emar; a due follow-up is a reminder) and the HHS daily note. logMedicationPass moved to src/lib/medications/give-meds.functions.ts and reads how_taken.
+- Deleted staff-medications-panel, daily-note-meds-block, shift-med-due-check, use-shift-med-due-status, med-attestation, emar-status. logShiftChangeCount was already deleted in M2. Zero references remain.
+- Decision for Jeff: no agency has medication training set up live, so staff can still log doses (training_checked='not_set_up'). Admins see "Set up medication training in Evidence".
+- Not done: the MAR PDF prints only the count before the dose; nobody has looked at the screens in a browser.
+- tsc 203 → 203; build passes; unit tests 2385/2390, same 5 base failures.
