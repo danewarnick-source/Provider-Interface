@@ -6,8 +6,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { assertCanManageClient } from "@/lib/clients/guards.server";
-import { DENVER_TZ } from "@/lib/denver-date";
+import { clientName, guardClient, medAdmin as admin } from "./med-guard.server";
 import {
   MEDICATION_FILE_BUCKET,
   MEDICATION_FILE_KINDS,
@@ -15,66 +14,9 @@ import {
   medicationFilePath,
   medicationFileProblem,
 } from "./med-files";
-import { listMedications, type Sb } from "./meds-write";
+import { listMedications } from "./meds-write";
 import { medListFilename, renderMedListPdf, type MedListMed } from "./med-list-pdf";
-
-type Storage = {
-  from: (bucket: string) => {
-    upload: (
-      path: string,
-      body: Uint8Array,
-      o: { contentType: string; upsert: boolean },
-    ) => Promise<{ error: { message: string } | null }>;
-    createSignedUrl: (
-      path: string,
-      seconds: number,
-    ) => Promise<{ data: { signedUrl: string } | null; error: { message: string } | null }>;
-  };
-};
-
-async function admin(): Promise<{ db: Sb; storage: Storage }> {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  return {
-    db: supabaseAdmin as unknown as Sb,
-    storage: (supabaseAdmin as unknown as { storage: Storage }).storage,
-  };
-}
-
-/** Signed in, the client exists, and the caller may do `action` for them. */
-async function guardClient(
-  context: { userId?: string | null; supabase?: unknown },
-  db: Sb,
-  clientId: string,
-  action: "view_medical" | "edit_medical",
-) {
-  if (!context.supabase || !context.userId) throw new Error("Not signed in.");
-  const { data, error } = await db
-    .from("clients")
-    .select(
-      "organization_id, first_name, last_name, date_of_birth, allergies, dysphagia, swallowing_alerts",
-    )
-    .eq("id", clientId)
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("Client not found.");
-  const client = data as {
-    organization_id: string;
-    first_name: string | null;
-    last_name: string | null;
-    date_of_birth: string | null;
-    allergies: string[] | null;
-    dysphagia: boolean | null;
-    swallowing_alerts: string[] | null;
-  };
-  await assertCanManageClient({
-    supabase: context.supabase as Parameters<typeof assertCanManageClient>[0]["supabase"],
-    actorId: context.userId,
-    organizationId: client.organization_id,
-    clientId,
-    action,
-  });
-  return { userId: context.userId, client };
-}
+import { longDateTime } from "./mar-month";
 
 export const uploadMedicationFile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -127,17 +69,6 @@ export const openMedicationFile = createServerFn({ method: "POST" })
     return { url: signed.signedUrl };
   });
 
-function printedAt(now: Date): string {
-  return now.toLocaleString("en-US", {
-    timeZone: DENVER_TZ,
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
-
 export const printMedicationList = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) => z.object({ clientId: z.string().uuid() }).parse(i))
@@ -149,7 +80,7 @@ export const printMedicationList = createServerFn({ method: "POST" })
       db.from("profiles").select("full_name").eq("id", userId).maybeSingle(),
       listMedications(db, data.clientId),
     ]);
-    const name = [client.first_name, client.last_name].filter(Boolean).join(" ") || "Client";
+    const name = clientName(client);
     const swallow = [client.dysphagia ? "Yes" : null, ...(client.swallowing_alerts ?? [])].filter(
       Boolean,
     );
@@ -160,7 +91,7 @@ export const printMedicationList = createServerFn({ method: "POST" })
       allergies: client.allergies ?? [],
       swallowingRisk: swallow.length ? swallow.join(", ") : "None on file",
       printedBy: (me as { full_name?: string | null } | null)?.full_name || "Staff",
-      printedAt: printedAt(new Date()),
+      printedAt: longDateTime(new Date().toISOString()),
     });
     return { pdfBase64: Buffer.from(bytes).toString("base64"), filename: medListFilename(name) };
   });

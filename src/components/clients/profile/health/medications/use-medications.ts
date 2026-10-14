@@ -129,26 +129,29 @@ export function useMedicationFiles(clientId: string) {
   };
 }
 
-/** Builds the medication list PDF and opens it (downloads when pop-ups are blocked). */
+/** Opens a PDF sent as base64 (downloads it when pop-ups are blocked). */
+export function openPdfBase64(pdfBase64: string, filename: string) {
+  const bin = atob(pdfBase64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+  if (!window.open(url, "_blank", "noopener,noreferrer")) {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
+
+/** Builds the medication list PDF and opens it. */
 export function usePrintMedicationList(clientId: string) {
   const print = useServerFn(printMedicationList);
   return useMutation({
     mutationFn: () => print({ data: { clientId } }),
-    onSuccess: ({ pdfBase64, filename }) => {
-      const bin = atob(pdfBase64);
-      const bytes = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-      const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
-      if (!window.open(url, "_blank", "noopener,noreferrer")) {
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      }
-      setTimeout(() => URL.revokeObjectURL(url), 60_000);
-    },
+    onSuccess: ({ pdfBase64, filename }) => openPdfBase64(pdfBase64, filename),
     onError: (e: Error) => toast.error(e.message),
   });
 }

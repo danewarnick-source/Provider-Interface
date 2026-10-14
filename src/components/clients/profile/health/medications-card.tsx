@@ -1,7 +1,7 @@
 // Medications: allergies and swallowing risk (read-only here; edited in the
 // Health cards), how the client takes their medications, Add medication and
-// Print medication list, then two tabs: Medications and MAR (the MAR tab
-// fills in later). Spans both columns of the Health grid.
+// Print medication list, then two tabs: Medications and MAR. A link to
+// #health-mar opens the MAR tab. Spans both columns of the Health grid.
 
 import { useState } from "react";
 import { Pill, Printer, Plus } from "lucide-react";
@@ -13,6 +13,7 @@ import { medicationSupportSummary } from "@/lib/clients/health";
 import type { ClientHealthRow } from "./use-client-health";
 import { MedicationsTab } from "./medications/medications-tab";
 import { MedicationFormSheet } from "./medications/medication-form-sheet";
+import { MarTab } from "./medications/mar-tab";
 import {
   useClientMedications,
   usePrintMedicationList,
@@ -36,6 +37,9 @@ export function MedicationsCard({
   const meds = useClientMedications(clientId);
   const print = usePrintMedicationList(clientId);
   const [form, setForm] = useState<{ med: ClientMedication | null } | null>(null);
+  const [tab, setTab] = useState(() =>
+    typeof window !== "undefined" && window.location.hash === "#health-mar" ? "mar" : "medications",
+  );
   const allergies = (health.allergies ?? []).filter(Boolean);
   const swallow = swallowingRisk(health);
   const list = meds.data ?? [];
@@ -72,7 +76,8 @@ export function MedicationsCard({
         </StatusTag>
         <span className="text-xs text-muted-foreground">{medicationSupportSummary(list)}</span>
       </div>
-      <Tabs defaultValue="medications">
+      <span id="health-mar" />
+      <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
           <TabsTrigger value="medications">Medications</TabsTrigger>
           <TabsTrigger value="mar">MAR</TabsTrigger>
@@ -87,7 +92,9 @@ export function MedicationsCard({
             onEdit={(med) => setForm({ med })}
           />
         </TabsContent>
-        <TabsContent value="mar" className="mt-4" />
+        <TabsContent value="mar" className="mt-4">
+          <MarTab clientId={clientId} canEdit={canEdit} />
+        </TabsContent>
       </Tabs>
       {canEdit ? (
         <MedicationFormSheet
