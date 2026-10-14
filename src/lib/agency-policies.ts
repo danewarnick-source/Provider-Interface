@@ -1,52 +1,17 @@
 /**
  * Agency Policies binder — contractor's own policies (SOW §1.8(4) topic P).
  *
- * One binder per agency. Admin adds a title, an audience, and a file or
- * pasted text. PI turns that into a company obligation. Staff complete
- * it from My Obligations by reading or watching and attesting. This is
- * not a lesson authoring tool and does not replace the 30-day course.
+ * The admin binder was removed in the Nectar rebuild (N4); agency policies
+ * live in the Knowledge base. What is left serves old binder rows: matching a
+ * new team member to a policy's audience, and opening its file from My
+ * Obligations.
  */
 
 export const AGENCY_POLICY_BUCKET = "agency-policies";
-export const AGENCY_POLICY_MAX_BYTES = 100 * 1024 * 1024;
 export const AGENCY_POLICY_SOURCE_SECTION = "SOW §1.8(4) topic P — contractor’s own policies";
-
-export const AGENCY_POLICY_ATTESTATION =
-  "I have read or watched this agency policy and understand that I am expected to follow it.";
 
 export const POLICY_AUDIENCE_KINDS = ["everyone", "drivers", "job_code"] as const;
 export type PolicyAudienceKind = (typeof POLICY_AUDIENCE_KINDS)[number];
-
-export const POLICY_FILE_ACCEPT = [
-  "application/pdf",
-  "application/vnd.ms-powerpoint",
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "video/mp4",
-  "video/webm",
-  "video/quicktime",
-  "image/png",
-  "image/jpeg",
-  "image/webp",
-  "text/plain",
-] as const;
-
-const POLICY_EXT_OK = new Set([
-  ".pdf",
-  ".ppt",
-  ".pptx",
-  ".doc",
-  ".docx",
-  ".mp4",
-  ".webm",
-  ".mov",
-  ".png",
-  ".jpg",
-  ".jpeg",
-  ".webp",
-  ".txt",
-]);
 
 export type AgencyPolicyRow = {
   id: string;
@@ -79,33 +44,9 @@ export type StaffAudienceFacts = {
   isTransporter?: boolean;
 };
 
-export function isPolicyAudienceKind(value: string): value is PolicyAudienceKind {
-  return (POLICY_AUDIENCE_KINDS as readonly string[]).includes(value);
-}
-
-export function audienceLabel(kind: PolicyAudienceKind, jobCode?: string | null): string {
-  if (kind === "everyone") return "Everyone";
-  if (kind === "drivers") return "Drivers";
-  const code = (jobCode ?? "").trim();
-  return code ? `Job code ${code}` : "A job code";
-}
-
 export function policyFileExtension(name: string): string {
   const i = name.lastIndexOf(".");
   return i >= 0 ? name.slice(i).toLowerCase() : "";
-}
-
-export function isAllowedPolicyFile(file: { name: string; type?: string; size: number }): string | null {
-  if (!file.name.trim()) return "Choose a file.";
-  if (file.size <= 0) return "That file is empty.";
-  if (file.size > AGENCY_POLICY_MAX_BYTES) return "Files must be 100 MB or smaller.";
-  const ext = policyFileExtension(file.name);
-  const mime = (file.type ?? "").toLowerCase();
-  const mimeOk = !mime || (POLICY_FILE_ACCEPT as readonly string[]).includes(mime);
-  if (!POLICY_EXT_OK.has(ext) && !mimeOk) {
-    return "Use a PDF, slides, Word doc, image, or video.";
-  }
-  return null;
 }
 
 const DRIVER_KEYS = ["driver", "drivers", "transporter", "transport", "mtp"];
@@ -135,10 +76,6 @@ export function staffMatchesPolicyAudience(
   if (keys.includes(want)) return true;
   const codes = (facts.assignedServiceCodes ?? []).map((c) => c.trim().toUpperCase());
   return codes.includes(want);
-}
-
-export function policyHasContent(input: { bodyText?: string | null; fileName?: string | null }): boolean {
-  return Boolean((input.bodyText ?? "").trim() || (input.fileName ?? "").trim());
 }
 
 export function policyMediaKind(mime: string | null | undefined, fileName?: string | null): "video" | "image" | "pdf" | "other" {

@@ -75,6 +75,9 @@ const OWNER_KINDS = [
   { value: "other", label: "Other" },
 ];
 
+// Agency-wide (company) documents are added in the Knowledge base, not here (N4).
+const UPLOAD_OWNER_KINDS = OWNER_KINDS.filter((t) => t.value !== "all" && t.value !== "company");
+
 type DocRow = {
   id: string;
   owner_kind: string;
@@ -153,8 +156,8 @@ export function NectarDocsPage() {
           Aggregated view of every client and team member document in the workspace. Files uploaded
           on a <span className="font-medium text-foreground">client</span> or{" "}
           <span className="font-medium text-foreground">team member profile</span> appear here
-          automatically — no duplicate upload. Agency-wide documents (Scope of Work, policies) live
-          in <span className="font-medium">Knowledge</span>.
+          automatically — no duplicate upload. Agency-wide documents (policies, procedures) live in
+          the <span className="font-medium">Knowledge base</span>.
         </p>
       </header>
 
@@ -460,7 +463,7 @@ function UploadButton({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {OWNER_KINDS.filter((t) => t.value !== "all").map((t) => (
+                  {UPLOAD_OWNER_KINDS.map((t) => (
                     <SelectItem key={t.value} value={t.value}>
                       {t.label}
                     </SelectItem>

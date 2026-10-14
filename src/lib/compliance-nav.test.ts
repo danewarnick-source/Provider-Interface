@@ -95,13 +95,14 @@ describe("Compliance nav lock", () => {
     assert.doesNotMatch(ext, /tab: "external"/);
   });
 
-  it("keeps Company policies under Agency file", () => {
+  it("replaces Company policies with a link to the Knowledge base (N4)", () => {
     const panel = readFileSync(
       new URL("../components/compliance/agency-file-panel.tsx", import.meta.url),
       "utf8",
     );
-    assert.match(panel, /Company policies/);
-    assert.match(panel, /CompanyPoliciesTab/);
+    assert.doesNotMatch(panel, /CompanyPoliciesTab|TabsTrigger value="company-policies"/);
+    assert.match(panel, /<Link\s+to="\/dashboard\/hub\/knowledge"/);
+    assert.match(panel, /Agency policies are in the Knowledge base/);
     assert.match(panel, /Agency Contract/);
     assert.match(panel, /SowIndexPanel/);
   });

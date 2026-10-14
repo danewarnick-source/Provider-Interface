@@ -417,12 +417,3 @@ export function agencyDocPackHtml(
     .join("");
   return `<!doctype html><html><head><title>Agency file</title></head><body>${body}</body></html>`;
 }
-
-/** Internal templates only — never DSPD-encoded Agency document cards. */
-export const COMPANY_POLICY_TEMPLATES = [
-  { key: "cell_phone", title: "Cell phone use" },
-  { key: "vehicle", title: "Vehicle policy" },
-  { key: "visitor", title: "Visitor rules" },
-] as const;
-
-export type CompanyPolicyTemplateKey = (typeof COMPANY_POLICY_TEMPLATES)[number]["key"];

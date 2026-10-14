@@ -36,6 +36,21 @@ describe("nectar-documents.functions.ts (N1)", () => {
     }
   });
 
+  it("deleteDocument refuses a Knowledge base document before touching storage (N4: archive, never delete)", () => {
+    const del = serverFn("deleteDocument");
+    assert.match(
+      del,
+      /\.select\("storage_path, storage_bucket, organization_id, client_id, library_group"\)/,
+    );
+    const refuse = del.indexOf("if (doc.library_group) {");
+    assert.ok(refuse > 0, "library documents are refused");
+    assert.ok(refuse < del.indexOf(".storage.from("), "before the file is removed");
+    assert.ok(
+      refuse < del.indexOf('.from("nectar_documents").delete()'),
+      "before the row is deleted",
+    );
+  });
+
   it("keeps its exported names and fits the lib size limit", () => {
     for (const name of [
       "ingestDocument",
