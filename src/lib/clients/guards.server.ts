@@ -32,17 +32,22 @@ export async function assertCanManageClient(args: {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const { data, error } = await (supabase as any)
             .from("clients")
-            .select("organization_id, account_status")
+            .select("organization_id, account_status, deleted_at")
             .eq("id", id)
             .maybeSingle();
           if (error) throw new Error(error.message);
-          const row = data as { organization_id: string; account_status: string | null } | null;
+          const row = data as {
+            organization_id: string;
+            account_status: string | null;
+            deleted_at: string | null;
+          } | null;
           if (!row) return null;
           return {
             organizationId: row.organization_id,
             discharged: (DISCHARGED_STATUSES as readonly string[]).includes(
               row.account_status ?? "",
             ),
+            deleted: row.deleted_at != null,
           };
         },
         canSeeClient: async (id) => {

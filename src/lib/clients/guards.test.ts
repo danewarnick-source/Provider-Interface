@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  CLIENT_DELETED_MESSAGE,
   CLIENT_DISCHARGED_MESSAGE,
+  CLIENT_NOT_DELETED_MESSAGE,
   CLIENT_NOT_FOUND_MESSAGE,
   CLIENT_OUT_OF_SCOPE_MESSAGE,
   MANAGE_CLIENT_ACTIONS,
@@ -24,6 +26,8 @@ function fakeDeps(opts: {
   clientOrg?: string | null;
   canSee?: boolean;
   discharged?: boolean;
+  deleted?: boolean;
+  level?: "owner" | "admin" | "staff";
 }) {
   const calls = {
     requireCategory: [] as Array<[string, string]>,
@@ -34,12 +38,14 @@ function fakeDeps(opts: {
     requireCategory: async (category, min) => {
       calls.requireCategory.push([category, min]);
       if (opts.categoryError) throw new Error(opts.categoryError);
-      return { level: "admin", scope: opts.scope ?? "agency" };
+      return { level: opts.level ?? "admin", scope: opts.scope ?? "agency" };
     },
     loadClient: async () => {
       calls.loadClient++;
       const org = opts.clientOrg === undefined ? ORG : opts.clientOrg;
-      return org ? { organizationId: org, discharged: opts.discharged ?? false } : null;
+      return org
+        ? { organizationId: org, discharged: opts.discharged ?? false, deleted: opts.deleted ?? false }
+        : null;
     },
     canSeeClient: async () => {
       calls.canSeeClient++;
@@ -68,6 +74,7 @@ describe("categoryForClientAction", () => {
     edit_hrc: ["hrc", "edit"],
     edit_funds: ["billing", "edit"],
     edit_loans: ["loans", "edit"],
+    restore: ["delete_people", "edit"],
   };
   for (const action of MANAGE_CLIENT_ACTIONS) {
     it(`${action} → ${expected[action].join(":")}`, () => {
@@ -130,6 +137,28 @@ describe("runManageClientGuard", () => {
     await run("view", deps);
     await run("view_medical", deps);
     await run("discharge", deps);
+  });
+
+  it("a deleted client rejects every action, even for an Owner", async () => {
+    const { deps } = fakeDeps({ deleted: true, level: "owner" });
+    for (const action of MANAGE_CLIENT_ACTIONS.filter((a) => a !== "restore")) {
+      await assert.rejects(run(action, deps), new RegExp(CLIENT_DELETED_MESSAGE.slice(0, 25)), action);
+    }
+  });
+
+  it("only an Owner can restore a deleted client", async () => {
+    await run("restore", fakeDeps({ deleted: true, level: "owner" }).deps);
+    await assert.rejects(
+      run("restore", fakeDeps({ deleted: true, level: "admin" }).deps),
+      new RegExp(CLIENT_DELETED_MESSAGE.slice(0, 25)),
+    );
+  });
+
+  it("restore is refused for a client who isn't deleted", async () => {
+    await assert.rejects(
+      run("restore", fakeDeps({ level: "owner" }).deps),
+      new RegExp(CLIENT_NOT_DELETED_MESSAGE),
+    );
   });
 
   it("no client (create) checks only the category", async () => {
