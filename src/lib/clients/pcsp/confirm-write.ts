@@ -2,7 +2,9 @@
 // (plan year, goals, supports, authorizations, blank profile
 // fields, support coordinator and other-provider contacts). Takes the
 // caller's Supabase client; the server function runs assertCanManageClient
-// first. Nothing is deleted:
+// first. Authorizations (client_billing_codes) are written only when the
+// caller also has Billing: Edit (canEditBilling); otherwise everything else
+// is saved and the codes come back in codesHeld. Nothing is deleted:
 // the old current plan becomes 'past' (insertPlan), its goals stay with it,
 // and authorizations are upserted per code.
 
@@ -28,6 +30,8 @@ export interface ConfirmArgs {
   documentId: string;
   review: ReviewedPcsp;
   now: string;
+  /** Billing: Edit for this client. Without it the service codes are not written. */
+  canEditBilling: boolean;
 }
 
 export interface ConfirmResult {
@@ -38,6 +42,18 @@ export interface ConfirmResult {
   contacts: number;
   /** Profile fields filled from the PCSP ("PID", "phone", …). */
   profile: string[];
+  /** Service codes not written because the person has no billing access. */
+  codesHeld: string[];
+}
+
+/** Which reviewed codes are written, and which wait for someone with billing access. */
+export function splitCodesByBilling<T extends { service_code: string }>(
+  codes: readonly T[],
+  canEditBilling: boolean,
+): { write: T[]; held: string[] } {
+  return canEditBilling
+    ? { write: [...codes], held: [] }
+    : { write: [], held: codes.map((c) => c.service_code) };
 }
 
 function fail(error: { message: string } | null | undefined) {
@@ -108,7 +124,10 @@ export async function applyReviewedPcsp(sb: Sb, a: ConfirmArgs): Promise<Confirm
   const otherNeeds = a.review.otherNeeds.filter((x) => x.include && x.support.trim());
   if (otherNeeds.length) await insertGoal({ goal_text: OTHER_NEEDS_GOAL, kind: "other_need" }, otherNeeds);
 
-  const codes = billingRows(a.review, { ...a });
+  const { write: codes, held: codesHeld } = splitCodesByBilling(
+    billingRows(a.review, { ...a }),
+    a.canEditBilling,
+  );
   if (codes.length) {
     const { data, error } = await sb
       .from("client_billing_codes").upsert(codes, { onConflict: "organization_id,client_id,service_code" }).select("id");
@@ -149,5 +168,6 @@ export async function applyReviewedPcsp(sb: Sb, a: ConfirmArgs): Promise<Confirm
 
   return {
     planId, goals, supports, codes: codes.map((x) => x.service_code), contacts: contacts.length, profile: profile.filled,
+    codesHeld,
   };
 }

@@ -66,7 +66,7 @@ export function readReport(parse: PcspResult, agencyName: string): ReadReport {
 
 /** What was saved, e.g. "Saved from the PCSP: plan year …, 4 goals, 9 supports, 3 codes (SLH, DSI, HHS), 1 contact." */
 export function savedReport(
-  saved: { goals: number; supports: number; codes: string[]; contacts: number; profile: string[] },
+  saved: { goals: number; supports: number; codes: string[]; contacts: number; profile: string[]; codesHeld?: string[] },
   plan: { start: string | null; end: string | null },
 ): string {
   const parts: string[] = [];
@@ -75,7 +75,10 @@ export function savedReport(
   parts.push(plural(saved.goals, "goal"), plural(saved.supports, "support"));
   if (saved.codes.length) parts.push(`${plural(saved.codes.length, "code")} (${saved.codes.join(", ")})`);
   if (saved.contacts) parts.push(plural(saved.contacts, "new contact"));
-  return `Saved from the PCSP: ${parts.join(", ")}.`;
+  const held = saved.codesHeld?.length
+    ? ` Service codes (${saved.codesHeld.join(", ")}) weren't saved. Ask someone with billing access to confirm the service codes.`
+    : "";
+  return `Saved from the PCSP: ${parts.join(", ")}.${held}`;
 }
 
 /** How filing the PCSP in the Client file went. */

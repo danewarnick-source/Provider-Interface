@@ -110,3 +110,15 @@ test("uploads are read only from the right folder", () => {
   assert.equal(inFolder("o/c/pcsp/../../x.pdf", pcspFolder("o", "c")), false);
   assert.equal(inFolder("o/new-clients/", newClientPcspFolder("o")), false);
 });
+
+test("savedReport asks for billing access when codes were held back", () => {
+  const line = savedReport(
+    { goals: 1, supports: 2, codes: [], contacts: 0, profile: [], codesHeld: ["SLH", "DSI"] },
+    { start: null, end: null },
+  );
+  assert.match(line, /Service codes \(SLH, DSI\) weren't saved\. Ask someone with billing access to confirm the service codes\./);
+  assert.doesNotMatch(
+    savedReport({ goals: 1, supports: 0, codes: ["SLH"], contacts: 0, profile: [], codesHeld: [] }, { start: null, end: null }),
+    /billing access/,
+  );
+});

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { parsePcsp } from "./parser.ts";
 import { proposeCarryOver } from "./carry-over.ts";
 import { initialReview } from "./review.ts";
-import { applyReviewedPcsp } from "./confirm-write.ts";
+import { applyReviewedPcsp, splitCodesByBilling } from "./confirm-write.ts";
 import { SAMPLE_AGENCY, SAMPLE_PCSP_PAGES } from "./fixture/sample-pages.ts";
 
 type Row = Record<string, unknown>;
@@ -63,6 +63,7 @@ const seed = () => ({
 });
 const args = (review: ReturnType<typeof initialReview>) => ({
   organizationId: "org", clientId: "c1", userId: "u1", documentId: "doc-1", review, now: "2026-08-21T00:00:00Z",
+  canEditBilling: true,
 });
 const review = () => initialReview(parse, proposeCarryOver(parse.goals.map((g) => g.goal), [{ id: "g-cook", goal_text: parse.goals[0].goal }], parse.lastYearGoals));
 
@@ -74,7 +75,7 @@ test("confirm creates the plan, goals, supports, and contacts; must-knows and ab
   const out = await applyReviewedPcsp(db, args(r));
   assert.deepEqual({ ...out, planId: typeof out.planId }, {
     planId: "string", goals: 3, supports: 6, codes: ["DSI", "HHS", "SEI"], contacts: 1,
-    profile: ["PID", "date of birth", "address"],
+    profile: ["PID", "date of birth", "address"], codesHeld: [],
   });
   const plans = db.tables.client_plans;
   assert.equal(plans.find((p) => p.id === "old")!.status, "past");
@@ -121,4 +122,23 @@ test("a new support coordinator from the PCSP is added as the primary coordinato
   assert.equal(out.contacts, 2);
   const sc = db.tables.client_contacts[0];
   assert.deepEqual([sc.role, sc.name, sc.email, sc.is_primary], ["support_coordinator", "Casey Sample", "casey@example.test", true]);
+});
+
+test("without billing access the plan is saved but no service code changes", async () => {
+  const db = fakeDb(seed());
+  const r = review();
+  r.plan.start = "2000-01-01";
+  const codesBefore = JSON.stringify(db.tables.client_billing_codes);
+  const out = await applyReviewedPcsp(db, { ...args(r), canEditBilling: false });
+  assert.deepEqual(out.codes, []);
+  assert.deepEqual(out.codesHeld, ["DSI", "HHS", "SEI"]);
+  assert.equal(JSON.stringify(db.tables.client_billing_codes), codesBefore);
+  assert.equal(out.goals, 3);
+  assert.ok(db.tables.client_plans.some((p) => p.id === out.planId));
+});
+
+test("splitCodesByBilling holds every code back without billing access", () => {
+  const rows = [{ service_code: "SLH" }, { service_code: "DSI" }];
+  assert.deepEqual(splitCodesByBilling(rows, true), { write: rows, held: [] });
+  assert.deepEqual(splitCodesByBilling(rows, false), { write: [], held: ["SLH", "DSI"] });
 });

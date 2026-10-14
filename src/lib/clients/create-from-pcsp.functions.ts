@@ -16,6 +16,7 @@ import { confirmProblems } from "./pcsp/confirm-plan";
 import { applyReviewedPcsp, type ConfirmResult } from "./pcsp/confirm-write";
 import { fileCurrentPcsp, insertPcspDocument } from "./pcsp/file-pcsp.server";
 import type { PcspRead, PcspReadResult } from "./pcsp/import.functions";
+import { canEditClientBilling } from "./billing-access.server";
 import { readUploadedPcsp } from "./pcsp/read-pdf.server";
 import { inFolder, newClientPcspFolder, type FiledOutcome } from "./pcsp/read-report";
 import { reviewedPcspSchema } from "./pcsp/review-schema";
@@ -89,7 +90,13 @@ export const addClientFromPcsp = createServerFn({ method: "POST" })
     const problems = [...formProblems(form), ...confirmProblems(review)];
     if (problems.length) return { status: "invalid", problems };
 
-    const created = await createClientFromForm(sb, userId, organizationId, form);
+    // Service codes need Billing: Edit; without it the client and plan are
+    // saved and the codes wait for someone with billing access.
+    const canEditBilling = await canEditClientBilling(sb, userId, organizationId);
+    const formCodesHeld = canEditBilling ? [] : form.codes.map((c) => c.code.toUpperCase());
+    const created = await createClientFromForm(
+      sb, userId, organizationId, canEditBilling ? form : { ...form, codes: [] },
+    );
     if (created.status !== "created") return created;
     const clientId = created.id;
     try {
@@ -97,9 +104,10 @@ export const addClientFromPcsp = createServerFn({ method: "POST" })
         organizationId, clientId, userId, fileName, storagePath,
         sizeBytes: null, start: review.plan.start, end: review.plan.end,
       });
-      const saved = await applyReviewedPcsp(sb, {
-        organizationId, clientId, userId, documentId, review, now: new Date().toISOString(),
+      const applied = await applyReviewedPcsp(sb, {
+        organizationId, clientId, userId, documentId, review, now: new Date().toISOString(), canEditBilling,
       });
+      const saved = { ...applied, codesHeld: [...new Set([...formCodesHeld, ...applied.codesHeld])] };
       const filed = await fileCurrentPcsp(sb, {
         organizationId, clientId, userId, fileName, storagePath, start: review.plan.start, end: review.plan.end,
       });
