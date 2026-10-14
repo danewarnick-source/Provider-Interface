@@ -9,6 +9,7 @@ import {
   changeRows,
   countRows,
   dayLabel,
+  doseCountCells,
   exceptionRows,
   medicationListRows,
   prnRows,
@@ -134,6 +135,8 @@ export function fixture(): MarMonthData {
         context: "pass",
         expected_count: 20,
         counted_value: 19,
+        count_after: 18,
+        expected_after: 19,
         variance: -1,
         flagged: true,
         staff_id: "s2",
@@ -211,7 +214,64 @@ describe("mar-pdf rows", () => {
     assert.equal(prn[4], "Pacing and yelling");
     assert.equal(prn[6], "Helped");
     assert.equal(prn[7], "4:02p");
-    assert.deepEqual(countRows(data)[0].slice(3), ["20", "19", "-1 (flagged)", "Bo King"]);
+    assert.deepEqual(prn.slice(8), ["19", "18", "Bo King"]);
+    assert.deepEqual(countRows(data)[0], [
+      "Sep 4",
+      "3:00p",
+      "Lorazepam 1 mg",
+      "19",
+      "18",
+      "20",
+      "19",
+      "Flagged",
+      "Bo King",
+    ]);
+  });
+
+  it("count cells: stored counts for controlled doses, Not recorded when missing, blank otherwise", () => {
+    assert.deepEqual(doseCountCells({ controlled: true, before: 12, after: 11 }), ["12", "11"]);
+    assert.deepEqual(doseCountCells({ controlled: true, before: 0, after: 0 }), ["0", "0"]);
+    assert.deepEqual(doseCountCells({ controlled: true, before: 12, after: null }), [
+      "12",
+      "Not recorded",
+    ]);
+    assert.deepEqual(doseCountCells({ controlled: true, before: undefined, after: 4 }), [
+      "Not recorded",
+      "4",
+    ]);
+    assert.deepEqual(doseCountCells({ controlled: false, before: 12, after: 11 }), ["", ""]);
+  });
+
+  it("every controlled dose gets a count row; an older dose without counts says Not recorded", () => {
+    const older = {
+      ...data,
+      doses: [
+        ...data.doses,
+        {
+          id: "p0",
+          medication_id: "m2",
+          scheduled_for: at("2026-09-02", 15),
+          status: "administered",
+          actual_taken_at: at("2026-09-02", 15),
+          documented_at: at("2026-09-02", 15),
+          staff_id: "s1",
+          is_prn: true,
+          is_controlled: true,
+          pill_count_value: 21,
+        },
+      ],
+    };
+    const rows = countRows(older);
+    assert.equal(rows.length, 2);
+    const old = rows.find((r) => r[0] === "Sep 2");
+    assert.deepEqual(old?.slice(3, 8), ["21", "Not recorded", "", "", ""]);
+    // Non-controlled doses never get a count row; their PRN cells stay blank.
+    assert.ok(!rows.some((r) => r[2].startsWith("Sertraline")));
+    const nonControlled = prnRows({
+      ...data,
+      doses: [{ ...data.doses[3], id: "p5", medication_id: "m1", is_controlled: false }],
+    })[0];
+    assert.deepEqual(nonControlled.slice(8, 10), ["", ""]);
   });
 
   it("lists refusals, misses, errors with incident numbers, late entries and corrections", () => {
@@ -287,5 +347,7 @@ describe("renderMarPdf", () => {
     assert.ok(text.includes("TJ 8:04a"));
     assert.ok(text.includes("Jeff Admin"));
     assert.ok(text.includes("IR-2026-014"));
+    assert.ok(text.includes("Count before"));
+    assert.ok(text.includes("Count after"));
   });
 });

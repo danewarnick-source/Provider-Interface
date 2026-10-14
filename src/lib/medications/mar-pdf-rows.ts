@@ -11,7 +11,7 @@ import { isLateEntry, type MarCell } from "./mar-cells.ts";
 import { isTakenStatus } from "./dose-status.ts";
 import { isLateDose, isPrnOverride } from "./give-meds.ts";
 import { longDateTime, shortTime } from "./mar-month.ts";
-import type { MarDose, MarMonthData } from "./mar-data.ts";
+import type { MarCount, MarDose, MarMonthData } from "./mar-data.ts";
 
 export type PdfRow = string[];
 
@@ -126,7 +126,41 @@ export function signatureRows(data: MarMonthData): PdfRow[] {
   return data.staff.map((s) => [s.initials, s.full_name ?? "Unknown", s.title ?? ""]);
 }
 
-/** Date, time, med, dose, reason, tried first, helped, follow-up, staff. */
+export const NOT_RECORDED = "Not recorded";
+
+/**
+ * The "Count before" and "Count after" cells for one dose. A controlled dose
+ * prints the stored counts, or "Not recorded" for a count that wasn't saved
+ * (doses logged before both counts were asked). Never computed or filled in.
+ * Other doses print blank cells so every table keeps the same columns.
+ */
+export function doseCountCells(a: {
+  controlled: boolean;
+  before: number | null | undefined;
+  after: number | null | undefined;
+}): [string, string] {
+  if (!a.controlled) return ["", ""];
+  const cell = (v: number | null | undefined) => (v == null ? NOT_RECORDED : String(v));
+  return [cell(a.before), cell(a.after)];
+}
+
+const isControlledDose = (data: MarMonthData, d: MarDose) =>
+  d.is_controlled ?? !!data.meds.find((m) => m.id === d.medication_id)?.is_controlled;
+
+const doseCount = (data: MarMonthData, d: MarDose): MarCount | undefined =>
+  data.counts.find((c) => c.emar_log_id === d.id);
+
+/** Count before and after for a given dose, from what was stored with it. */
+function countsFor(data: MarMonthData, d: MarDose): [string, string] {
+  const c = doseCount(data, d);
+  return doseCountCells({
+    controlled: isControlledDose(data, d),
+    before: c?.counted_value ?? d.pill_count_value,
+    after: c?.count_after,
+  });
+}
+
+/** Date, time, med, dose, reason, tried first, helped, follow-up, count before, count after, staff. */
 export function prnRows(data: MarMonthData): PdfRow[] {
   return data.doses
     .filter((d) => d.is_prn && isTakenStatus(d.status))
@@ -148,6 +182,7 @@ export function prnRows(data: MarMonthData): PdfRow[] {
         d.prn_tried_first ?? "",
         EFFECT_LABEL[d.prn_effect ?? ""] ?? "",
         followup,
+        ...countsFor(data, d),
         staffName(data, d.staff_id, d.staff_name),
       ];
     });
@@ -229,19 +264,41 @@ export function exceptionRows(data: MarMonthData): PdfRow[] {
   return out;
 }
 
-/** Date, med, when, expected, counted, difference, staff. */
+const flagCell = (c: MarCount | undefined) => (c?.flagged ? "Flagged" : "");
+const numCell = (v: number | null | undefined) => (v == null ? "" : String(v));
+
+/**
+ * Every controlled dose given this month, then any count not tied to one of
+ * them: date, time, med, count before, count after, expected before,
+ * expected after, flag, staff.
+ */
 export function countRows(data: MarMonthData): PdfRow[] {
-  return data.counts.map((c) => {
-    const diff =
-      c.variance ?? (c.expected_count != null ? c.counted_value - c.expected_count : null);
+  const doses = data.doses.filter((d) => isTakenStatus(d.status) && isControlledDose(data, d));
+  const shown = new Set(doses.map((d) => d.id));
+  const doseRows = doses.map((d) => {
+    const c = doseCount(data, d);
     return [
-      dayLabel(denverYmdFromInstant(c.created_at)),
-      medName(data, c.medication_id),
-      c.context,
-      c.expected_count == null ? "" : String(c.expected_count),
-      String(c.counted_value),
-      diff == null ? "" : `${diff > 0 ? "+" : ""}${diff}${c.flagged ? " (flagged)" : ""}`,
-      c.staff_name ?? staffName(data, c.staff_id),
+      doseDay(d),
+      shortTime(d.actual_taken_at ?? d.administered_at),
+      medName(data, d.medication_id),
+      ...countsFor(data, d),
+      numCell(c?.expected_count),
+      numCell(c?.expected_after),
+      flagCell(c),
+      staffName(data, d.staff_id, d.staff_name),
     ];
   });
+  const otherRows = data.counts
+    .filter((c) => !c.emar_log_id || !shown.has(c.emar_log_id))
+    .map((c) => [
+      dayLabel(denverYmdFromInstant(c.created_at)),
+      shortTime(c.created_at),
+      medName(data, c.medication_id),
+      ...doseCountCells({ controlled: true, before: c.counted_value, after: c.count_after }),
+      numCell(c.expected_count),
+      numCell(c.expected_after),
+      flagCell(c),
+      c.staff_name ?? staffName(data, c.staff_id),
+    ]);
+  return [...doseRows, ...otherRows];
 }

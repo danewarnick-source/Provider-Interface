@@ -11,7 +11,7 @@ import { monthStart, parseMonth, staffInitials, type MarPerson } from "./mar-mon
 import type { MarChange, MarLog, MarMed } from "./mar-cells.ts";
 
 export const MAR_LOG_COLUMNS =
-  "id, medication_id, scheduled_for, status, actual_taken_at, administered_at, documented_at, created_at, staff_id, staff_name, route, is_prn, prn_reason, prn_effect, prn_followup_due_at, prn_followup_at, prn_followup_note, prn_tried_first, prescriber_notified, notes, exception_reason, is_medication_error, error_description, pill_count_value";
+  "id, medication_id, scheduled_for, status, actual_taken_at, administered_at, documented_at, created_at, staff_id, staff_name, route, is_prn, prn_reason, prn_effect, prn_followup_due_at, prn_followup_at, prn_followup_note, prn_tried_first, prescriber_notified, notes, exception_reason, is_medication_error, error_description, is_controlled, pill_count_value";
 
 export type MarDose = MarLog & {
   staff_name?: string | null;
@@ -24,6 +24,8 @@ export type MarDose = MarLog & {
   prescriber_notified?: boolean | null;
   notes?: string | null;
   error_description?: string | null;
+  is_controlled?: boolean | null;
+  /** The count before the dose, as the staff member entered it. */
   pill_count_value?: number | null;
 };
 
@@ -43,7 +45,11 @@ export interface MarCount {
   emar_log_id: string | null;
   context: string;
   expected_count: number | null;
+  /** The count before the dose. */
   counted_value: number;
+  /** The count after the dose (null on doses logged before it was asked). */
+  count_after?: number | null;
+  expected_after?: number | null;
   variance: number | null;
   flagged: boolean;
   staff_id: string;
@@ -60,6 +66,9 @@ export type MarMonthChange = MarChange & {
   changes: Record<string, { from: JsonValue; to: JsonValue }>;
   reason: string | null;
 };
+
+const COUNT_COLUMNS =
+  "id, medication_id, emar_log_id, context, expected_count, counted_value, count_after, expected_after, variance, flagged, staff_id, staff_name, created_at";
 
 export interface MarReview {
   id: string;
@@ -147,9 +156,7 @@ export async function loadMarMonth(
     rows<MarCount>(
       sb
         .from("controlled_med_counts")
-        .select(
-          "id, medication_id, emar_log_id, context, expected_count, counted_value, variance, flagged, staff_id, staff_name, created_at",
-        )
+        .select(COUNT_COLUMNS)
         .eq("client_id", a.clientId)
         .gte("created_at", startIso)
         .lt("created_at", endExclusiveIso)
@@ -166,7 +173,7 @@ export async function loadMarMonth(
     ),
   ]);
   const logIds = doses.map((d) => d.id);
-  const [addenda, incidents] = logIds.length
+  const [addenda, incidents, doseCounts] = logIds.length
     ? await Promise.all([
         rows<MarAddendum>(
           sb
@@ -182,8 +189,14 @@ export async function loadMarMonth(
             .eq("organization_id", a.orgId)
             .in("emar_log_id", logIds),
         ),
+        // A dose's count can be saved just past the month's edge.
+        rows<MarCount>(
+          sb.from("controlled_med_counts").select(COUNT_COLUMNS).in("emar_log_id", logIds),
+        ),
       ])
-    : [[], []];
+    : [[], [], []];
+  const countIds = new Set(counts.map((c) => c.id));
+  const allCounts = [...counts, ...doseCounts.filter((c) => !countIds.has(c.id))];
   const review = reviews[0] ?? null;
   const staffIds = [
     ...new Set(
@@ -209,7 +222,7 @@ export async function loadMarMonth(
     changes,
     doses,
     addenda,
-    counts,
+    counts: allCounts,
     incidents: Object.fromEntries(
       incidents.map((i) => [i.emar_log_id, i.report_number || i.id.slice(0, 8)]),
     ),
