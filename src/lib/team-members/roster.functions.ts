@@ -14,7 +14,7 @@ import { requireCategory } from "@/lib/access/require";
 import { hasCategory } from "@/lib/access/can";
 import { denverYmd } from "@/lib/denver-date";
 import { parseIsoDate, resolveHireDate } from "@/lib/evidence/due";
-import { splitPersonName } from "@/lib/team-members/import";
+import { splitPersonName } from "@/lib/team-members/import-columns";
 import {
   EMPTY_EVIDENCE,
   asRosterLevel,
@@ -111,6 +111,7 @@ export async function loadVisibleMembers(args: {
     .select(
       "id, user_id, access_level, access_preset_id, job_title, manager_id, active, created_at",
     )
+    .is("deleted_at", null)
     .eq("organization_id", organizationId);
   if (error) throw new Error(error.message);
   const all = (memberData ?? []) as MemberRow[];
@@ -169,6 +170,7 @@ export const listTeamRoster = createServerFn({ method: "POST" })
     const { data: allMembers, error: allErr } = await admin
       .from("organization_members")
       .select("id, user_id")
+      .is("deleted_at", null)
       .eq("organization_id", orgId);
     if (allErr) throw new Error(allErr.message);
     const userIdByMemberId = new Map(

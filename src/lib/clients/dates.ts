@@ -2,6 +2,8 @@
 // Parsing a bare YYYY-MM-DD with the Date constructor gives UTC midnight, which shows the previous
 // day in Utah. These helpers parse them as LOCAL calendar dates instead.
 
+import { denverYmd } from "../denver-date.ts";
+
 const YMD = /^(\d{4})-(\d{2})-(\d{2})/;
 
 /** Local-midnight Date for a YYYY-MM-DD (or ISO timestamp's date part); null when blank/invalid. */
@@ -55,8 +57,13 @@ export function daysUntil(
   return Math.round(ms / 86_400_000);
 }
 
-/** Today (or `now`) as a local YYYY-MM-DD. */
-export function todayYmd(now: Date = new Date()): string {
+/** A local calendar Date (e.g. from parseLocalDate) as YYYY-MM-DD. Not "today": use todayYmd. */
+export function localYmd(d: Date): string {
   const p = (n: number) => String(n).padStart(2, "0");
-  return `${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}`;
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+/** Today (or `now`) as a Denver (America/Denver) YYYY-MM-DD, wherever the code runs (browser or UTC server). */
+export function todayYmd(now: Date = new Date()): string {
+  return denverYmd(now);
 }

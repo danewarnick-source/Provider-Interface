@@ -5,9 +5,8 @@ import {
   absenceProblem,
   directivePatch,
   directiveStatus,
-  medicationSupportLabel,
+  medicationSupportSummary,
   showsAbsences,
-  splitList,
 } from "./health.ts";
 
 describe("advance directive", () => {
@@ -39,10 +38,12 @@ describe("advance directive", () => {
 });
 
 describe("health helpers", () => {
-  it("labels the medication support level", () => {
-    assert.match(medicationSupportLabel(true), /with staff support/);
-    assert.match(medicationSupportLabel(false), /Staff give/);
-    assert.equal(medicationSupportLabel(null), "Not set");
+  it("summarizes how the client takes their medications", () => {
+    assert.equal(
+      medicationSupportSummary([{ how_taken: "assist" }, { how_taken: "self" }, { how_taken: "assist" }]),
+      "Staff help with 2 · On their own with 1 · Nurse gives 0",
+    );
+    assert.equal(medicationSupportSummary([]), "Staff help with 0 · On their own with 0 · Nurse gives 0");
   });
   it("shows absences for RHS clients only", () => {
     assert.equal(showsAbsences(["rhs", "DSI"]), true);
@@ -54,8 +55,5 @@ describe("health helpers", () => {
     assert.equal(absenceProblem("2026-10-03", "2026-10-01"), "The return date can't be before the first day away.");
     assert.equal(absenceProblem("", null), "Pick the first day away.");
     assert.equal(absenceProblem("2026-10-01", null), null);
-  });
-  it("splits lists", () => {
-    assert.deepEqual(splitList("Peanuts, penicillin\npeanuts\n "), ["Peanuts", "penicillin"]);
   });
 });

@@ -5,7 +5,6 @@ import {
   assignmentCodes,
   assignmentCoversCode,
   buildAssignmentMap,
-  importAssignmentCodes,
   normalizeServiceCodes,
   resolveStaffClientCodes,
   uncoveredCodes,
@@ -124,14 +123,6 @@ describe("explicit assignment code helpers", () => {
     );
     assert.throws(() => resolveStaffClientCodes(["HHS"], []), /not authorized/);
     assert.throws(() => resolveStaffClientCodes([" ", ""], ["HHS"]), /at least one/);
-  });
-
-  it("importAssignmentCodes: source codes ∩ authorized, else all authorized, explicitly", () => {
-    assert.deepEqual(importAssignmentCodes(null, ["HHS", "DSI"]), ["HHS", "DSI"]);
-    assert.deepEqual(importAssignmentCodes([], ["HHS"]), ["HHS"]);
-    assert.deepEqual(importAssignmentCodes(["dsi", "SLH"], ["HHS", "DSI"]), ["DSI"]);
-    assert.deepEqual(importAssignmentCodes(["SLH"], ["HHS"]), []);
-    assert.deepEqual(importAssignmentCodes(null, []), []);
   });
 
   it("uncoveredCodes lists authorized codes with no staff (NULL rows cover nothing)", () => {

@@ -2,8 +2,17 @@
 // (SJD assessments).
 
 import { cn } from "@/lib/utils";
-import { fmtDate } from "./card-shell";
+import { formatDate } from "@/lib/clients/dates";
 import type { DocRow } from "./code-document-cards";
+
+/** Banner colors: satisfied (ok), overdue (danger) or due (gold). */
+export function deadlineToneClass(satisfied: boolean, overdue: boolean): string {
+  return satisfied
+    ? "border-[var(--hive-ok)]/30 bg-[var(--hive-ok-soft)] text-[var(--hive-ok-fg)]"
+    : overdue
+      ? "border-[var(--hive-danger)]/30 bg-[var(--hive-danger-soft)] text-[var(--hive-danger-fg)]"
+      : "border-hive-gold/50 bg-hive-gold-soft text-hive-ink";
+}
 
 /** Due / overdue / satisfied line for a document with a deadline. */
 export function DeadlineBanner({
@@ -19,7 +28,7 @@ export function DeadlineBanner({
 }) {
   if (!due) {
     return (
-      <div className="rounded-md border border-border p-2.5 text-sm text-muted-foreground">
+      <div className="rounded-xl border border-hive-border p-3 text-sm text-muted-foreground">
         {missingHint}
       </div>
     );
@@ -28,19 +37,15 @@ export function DeadlineBanner({
   return (
     <div
       className={cn(
-        "rounded-md border p-2.5 text-sm font-medium",
-        doc
-          ? "border-emerald-300/60 bg-emerald-50/40 text-emerald-800"
-          : isOverdue
-            ? "border-red-300 bg-red-50 text-red-700"
-            : "border-amber-300/60 bg-amber-50/40 text-amber-800",
+        "rounded-xl border p-3 text-sm font-medium",
+        deadlineToneClass(!!doc, isOverdue),
       )}
     >
       {doc
-        ? `Satisfied — deadline was ${fmtDate(due.toISOString().slice(0, 10))}`
+        ? `Satisfied — deadline was ${formatDate(due.toISOString().slice(0, 10))}`
         : isOverdue
-          ? `Overdue — was due ${fmtDate(due.toISOString().slice(0, 10))} (${days} days)`
-          : `Due ${fmtDate(due.toISOString().slice(0, 10))} — ${days} days`}
+          ? `Overdue — was due ${formatDate(due.toISOString().slice(0, 10))} (${days} days)`
+          : `Due ${formatDate(due.toISOString().slice(0, 10))} — ${days} days`}
     </div>
   );
 }

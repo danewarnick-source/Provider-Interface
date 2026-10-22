@@ -15,6 +15,8 @@ import {
   type DeadlineObligationItem,
 } from "@/lib/company-obligations.functions";
 import { isAdminLevel } from "@/lib/access/levels";
+import { denverYmd } from "@/lib/denver-date";
+import { scSendReminder, type ScSendReminder } from "@/lib/progress-summaries";
 
 /**
  * Deadlines is the calendar of open clocks. The compliance register
@@ -48,6 +50,8 @@ export type DeadlineItem = {
   obligationId?: string;
   /** 1st/5th/10th-of-month reminder cadence — notification bell only. */
   cadenceReminder?: boolean;
+  /** Support Coordinator summary not marked sent: reminded from day 10, overdue at due date — bell every day. */
+  scReminder?: ScSendReminder;
   /** company_obligation: SOW vs provider/internal policy. */
   obligationSource?: "sow" | "provider";
   /** company_obligation: cadence sentence from the catalog / due-date engine. */
@@ -130,6 +134,7 @@ export function useDeadlines(opts?: { enabled?: boolean }) {
       const { data, error } = await supabase
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!);
       if (error) throw error;
       return (data ?? []) as Array<{ id: string; first_name: string; last_name: string }>;
@@ -240,8 +245,15 @@ export function useDeadlines(opts?: { enabled?: boolean }) {
           !!s.finalized_at &&
           !s.sc_sent_at &&
           !s.completed_at;
+        const scReminder = scSendReminder(s, denverYmd(now)) ?? undefined;
+        const label =
+          s.period_kind === "quarterly"
+            ? `${s.period_label} quarterly`
+            : `${fmtMonth(s.period_label)} monthly`;
         let title: string;
-        if (finalizedUnattestedUpi) {
+        if (scReminder && !finalizedUnattestedSc) {
+          title = `${label} summary for ${clientName} — not sent to Support Coordinator yet.`;
+        } else if (finalizedUnattestedUpi) {
           title = `${isSjd && !isSei ? "SJD" : "SEI"} monthly summary for ${fmtMonth(s.period_label)} — mark as entered in UPI.`;
         } else if (finalizedUnattestedSc) {
           title = `${s.period_kind === "quarterly" ? s.period_label + " quarterly" : fmtMonth(s.period_label) + " monthly"} summary — mark sent to Support Coordinator.`;
@@ -260,11 +272,12 @@ export function useDeadlines(opts?: { enabled?: boolean }) {
           subject: clientName,
           subjectKind: "client",
           dueAt: due,
-          status: bucketStatus(due, now),
+          status: scReminder === "overdue" ? "overdue" : bucketStatus(due, now),
           href: `/dashboard/summaries?client=${s.client_id}&open=${s.id}`,
           summary: s,
           clientId: s.client_id,
           cadenceReminder: finalizedUnattestedUpi || finalizedUnattestedSc || (isCmpCms && !s.completed_at),
+          scReminder,
         });
       }
 

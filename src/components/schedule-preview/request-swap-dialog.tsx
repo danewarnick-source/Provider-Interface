@@ -41,6 +41,7 @@ export function RequestSwapDialog({
       const { data, error } = await supabase
         .from("organization_members")
         .select("user_id")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .eq("active", true);
       if (error) throw error;

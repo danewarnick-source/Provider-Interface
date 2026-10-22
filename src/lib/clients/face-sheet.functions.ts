@@ -5,6 +5,8 @@
  * - Every visible value is passed through `field()`. Empty / null / undefined
  *   renders literally as "Not on file". No inference, no autofill from
  *   related data — this is a law-enforcement-facing safety document.
+ * - Needs Client medical: View for a client in the caller's scope, and every
+ *   build writes a PHI access log entry.
  * - Data comes only from real records: clients row, the client's contacts
  *   (client_contacts), organizations row, organization_branding row, and the
  *   client's own uploaded photo (client_photo_url).
@@ -12,6 +14,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { logPhiAccess } from "@/lib/phi-access-audit.server";
+import { assertCanManageClient } from "./guards.server";
 import { PDFDocument, StandardFonts, rgb, type PDFPage, type PDFFont, type PDFImage } from "pdf-lib";
 import {
   activeContacts,
@@ -90,6 +94,24 @@ export const generateClientFaceSheet = createServerFn({ method: "POST" })
       .maybeSingle();
     if (clientErr) throw new Error(clientErr.message);
     if (!client) throw new Error("Client not found");
+    // Medicaid ID, SSN last 4, DNR and doctors: Client medical: View, in scope.
+    await assertCanManageClient({
+      supabase,
+      actorId: context.userId,
+      organizationId: client.organization_id,
+      clientId: client.id,
+      action: "view_medical",
+    });
+    void logPhiAccess({
+      supabaseUserClient: supabase,
+      userId: context.userId,
+      organizationId: client.organization_id,
+      resourceType: "client_chart",
+      resourceId: client.id,
+      clientId: client.id,
+      action: "export",
+      detail: "generateClientFaceSheet",
+    });
 
     // 2) Organization + branding.
     const { data: org } = await supabase
@@ -373,9 +395,9 @@ function drawFaceSheet(page: PDFPage, helv: PDFFont, helvB: PDFFont, ctx: Ctx): 
 
   const bandColW = idW / 3 - 6;
   const bandY = y;
-  drawKV(page, "Intake date", fmtDate(client.intake_date as string | null) === NOT_ON_FILE
-    ? fmtDate(client.admission_date as string | null)
-    : fmtDate(client.intake_date as string | null), M, bandY, bandColW, helv, helvB);
+  drawKV(page, "Start date", fmtDate(client.admission_date as string | null) === NOT_ON_FILE
+    ? fmtDate(client.intake_date as string | null)
+    : fmtDate(client.admission_date as string | null), M, bandY, bandColW, helv, helvB);
   const planYear =
     plan && (plan.start_date || plan.end_date)
       ? `${fmtDate(plan.start_date)} – ${fmtDate(plan.end_date)}`
@@ -463,6 +485,13 @@ function drawFaceSheet(page: PDFPage, helv: PDFFont, helvB: PDFFont, ctx: Ctx): 
   let ySF = y;
   ySF = drawKV(page, "Must-knows / health concerns", field(client.special_directions), M, ySF, s2, helv, helvB);
   ySF = drawKV(page, "Allergies", field(client.allergies), M, ySF, s2, helv, helvB);
+  // Same clients columns the Health tab edits.
+  const swallowing = client.dysphagia
+    ? ["Trouble swallowing", ...((client.swallowing_alerts as string[] | null) ?? [])]
+    : [];
+  ySF = drawKV(page, "Diet and swallowing", field([...((client.diets as string[] | null) ?? []), ...swallowing]), M, ySF, s2, helv, helvB);
+  ySF = drawKV(page, "Mobility", field(client.mobility), M, ySF, s2, helv, helvB);
+  ySF = drawKV(page, "Emergency plan", field(client.emergency_plan), M, ySF, s2, helv, helvB);
 
   let ySFR = y;
   const desc = [

@@ -1,6 +1,8 @@
 // Add / change / end a client's extra service locations. Each runs
-// assertCanManageClient first, geocodes the address to a house-level pin
-// (never invents coordinates) and writes with the caller's RLS client.
+// assertCanManageClient first and requires a reason. A row always saves with
+// coordinates: the admin's dropped pin, else the geocoded address — if that
+// fails the save is refused with LOCATION_NEEDS_PIN so the dialog asks for a
+// pin (never invents coordinates). Writes use the caller's RLS client.
 // Ending sets archived_at; rows are never deleted.
 
 import { createServerFn } from "@tanstack/react-start";
@@ -9,19 +11,20 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { geocodeAddress } from "@/lib/geocode";
 import { assertCanManageClient } from "./guards.server";
-import { cleanLocationDraft } from "./locations";
+import { LOCATION_NEEDS_PIN, LOCATION_REASONS, cleanLocationDraft, type LocationDraft } from "./locations";
 import { assertRowsChanged } from "./writes";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = SupabaseClient<any>;
-
-const NOT_FOUND = "We couldn't find that street address. Check it and try again.";
 
 const scope = z.object({ organizationId: z.string().uuid(), clientId: z.string().uuid() });
 const draft = z.object({
   label: z.string().max(200),
   address: z.string().max(400),
   radiusFeet: z.number().int(),
+  reason: z.enum(LOCATION_REASONS.map((r) => r.value) as unknown as [string, ...string[]]),
+  reasonNote: z.string().max(400).nullable(),
+  pin: z.object({ lat: z.number(), lng: z.number() }).nullable(),
 });
 
 async function guard(
@@ -46,9 +49,10 @@ function clean(d: z.infer<typeof draft>) {
   return r.value;
 }
 
-async function pin(address: string) {
-  const hit = await geocodeAddress(address);
-  if (!hit) throw new Error(NOT_FOUND);
+async function coords(v: LocationDraft) {
+  if (v.pin) return { latitude: v.pin.lat, longitude: v.pin.lng };
+  const hit = await geocodeAddress(v.address);
+  if (!hit) throw new Error(LOCATION_NEEDS_PIN);
   return { latitude: hit.lat, longitude: hit.lng };
 }
 
@@ -66,8 +70,10 @@ export const addServiceLocation = createServerFn({ method: "POST" })
         label: v.label,
         address: v.address,
         geofence_radius_feet: v.radiusFeet,
+        reason: v.reason,
+        reason_note: v.reasonNote,
         created_by: userId,
-        ...(await pin(v.address)),
+        ...(await coords(v)),
       })
       .select("id");
     if (error) throw new Error(error.message);
@@ -90,16 +96,18 @@ export const updateServiceLocation = createServerFn({ method: "POST" })
       .maybeSingle();
     if (readErr) throw new Error(readErr.message);
     if (!before) throw new Error("That location isn't on this client.");
-    const moved = (before.address ?? "").trim() !== v.address;
+    const moved = (before.address ?? "").trim() !== v.address || !!v.pin;
     const { data: rows, error } = await sb
       .from("client_approved_locations")
       .update({
         label: v.label,
         address: v.address,
         geofence_radius_feet: v.radiusFeet,
+        reason: v.reason,
+        reason_note: v.reasonNote,
         updated_by: userId,
         updated_at: new Date().toISOString(),
-        ...(moved ? await pin(v.address) : {}),
+        ...(moved ? await coords(v) : {}),
       })
       .eq("id", data.locationId)
       .eq("organization_id", data.organizationId)

@@ -1,18 +1,28 @@
-// Writes a confirmed PCSP review. Takes the caller's Supabase client; the
-// server function runs assertCanManageClient first. Nothing is deleted:
-// the old current plan becomes 'past' (insertPlan), its goals stay with it,
-// and authorizations are upserted per code.
+// Writes a confirmed PCSP review: the one writer for everything a PCSP fills
+// (plan year, goals, supports, authorizations, blank profile
+// fields, support coordinator and other-provider contacts). Takes the
+// caller's Supabase client; the server function runs assertCanManageClient
+// first. Authorizations (client_billing_codes) are written only when the
+// caller also has Billing: Edit (canEditBilling); otherwise everything else
+// is saved and the codes come back in codesHeld. Nothing is deleted:
+// the old current plan becomes 'past', its goals stay with it, and
+// authorizations are upserted per code. Reads and checks happen first; then
+// every write is one database transaction (apply_reviewed_pcsp), so a
+// failure part way leaves the old plan current and nothing half-saved.
 
-import { normalizeCodes } from "../plans.ts";
-import { insertPlan } from "../plans-write.ts";
-import { assertRowsChanged } from "../writes.ts";
+import { normalizeCodes, planStatusOn, type PlanStatus } from "../plans.ts";
+import { todayYmd } from "../dates.ts";
 import {
-  aboutMeLines, billingRows, blockHeading, carriedFrom, confirmProblems, contactRows, mergePcspBlock, riskLines,
+  billingRows, carriedFrom, confirmProblems, contactRows,
 } from "./confirm-plan.ts";
-import type { ReviewedPcsp } from "./review.ts";
+import { coordinatorRow, profilePatch, type ClientProfileRow } from "./confirm-profile.ts";
+import type { ReviewedPcsp, ReviewSupport } from "./review.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Sb = { from: (table: string) => any };
+type Sb = { from: (table: string) => any; rpc: (fn: string, args: Record<string, unknown>) => any };
+
+/** goal_text of the row that holds a plan's non-goal supports (client_goals.kind 'other_need'). */
+export const OTHER_NEEDS_GOAL = "Other needs in the PCSP";
 
 export interface ConfirmArgs {
   organizationId: string;
@@ -21,6 +31,8 @@ export interface ConfirmArgs {
   documentId: string;
   review: ReviewedPcsp;
   now: string;
+  /** Billing: Edit for this client. Without it the service codes are not written. */
+  canEditBilling: boolean;
 }
 
 export interface ConfirmResult {
@@ -29,6 +41,20 @@ export interface ConfirmResult {
   supports: number;
   codes: string[];
   contacts: number;
+  /** Profile fields filled from the PCSP ("PID", "phone", …). */
+  profile: string[];
+  /** Service codes not written because the person has no billing access. */
+  codesHeld: string[];
+}
+
+/** Which reviewed codes are written, and which wait for someone with billing access. */
+export function splitCodesByBilling<T extends { service_code: string }>(
+  codes: readonly T[],
+  canEditBilling: boolean,
+): { write: T[]; held: string[] } {
+  return canEditBilling
+    ? { write: [...codes], held: [] }
+    : { write: [], held: codes.map((c) => c.service_code) };
 }
 
 function fail(error: { message: string } | null | undefined) {
@@ -58,74 +84,125 @@ export async function applyReviewedPcsp(sb: Sb, a: ConfirmArgs): Promise<Confirm
     currentGoalIds = new Set(((g ?? []) as { id: string }[]).map((x) => x.id));
   }
 
-  const { plan } = a.review;
-  const planId = await insertPlan(sb, {
-    organizationId: a.organizationId, clientId: a.clientId, userId: a.userId, source: "pcsp_upload",
-    start_date: plan.start, end_date: plan.end, activated_on: plan.activatedOn, meeting_date: plan.meetingDate,
-    document_id: a.documentId,
+  const { data: client, error: cErr } = await sb
+    .from("clients").select("client_pid, date_of_birth, phone_number, physical_address")
+    .eq("id", a.clientId).maybeSingle();
+  fail(cErr);
+  const { data: existing, error: eErr } = await sb.from("client_contacts").select("name, role, sort").eq("client_id", a.clientId);
+  fail(eErr);
+
+  const w = pcspWrite(a, {
+    currentGoalIds,
+    client: (client ?? {}) as Partial<ClientProfileRow>,
+    contacts: (existing ?? []) as ExistingContact[],
+    today: todayYmd(),
   });
 
-  let goals = 0, supports = 0;
-  for (const g of a.review.goals.filter((x) => x.include && x.goal.trim())) {
-    const clean = (s: string) => s.trim() || null;
-    const { data: rows, error } = await sb.from("client_goals").insert({
-      organization_id: a.organizationId, client_id: a.clientId, plan_id: planId, sort: goals,
-      goal_text: g.goal.trim(), domain: clean(g.domain), current_status: clean(g.currentStatus),
-      strengths: clean(g.strengths), barriers: clean(g.barriers),
-      success_person: clean(g.successPerson), success_team: clean(g.successTeam),
-      carried_from_goal_id: carriedFrom(g, currentGoalIds), created_by: a.userId,
-    }).select("id");
-    fail(error);
-    const goalId = (assertRowsChanged(rows as unknown[])[0] as { id: string }).id;
-    goals++;
-    const supportRows = g.supports.map((s, sort) => ({
-      organization_id: a.organizationId, goal_id: goalId, sort,
+  // One transaction (apply_reviewed_pcsp): a failure anywhere leaves the old plan current.
+  const { data: planId, error } = await sb.rpc("apply_reviewed_pcsp", {
+    _organization_id: a.organizationId,
+    _client_id: a.clientId,
+    _actor: a.userId,
+    _document_id: a.documentId,
+    _plan: w.plan,
+    _goals: w.goals,
+    _codes: w.codes,
+    _client_patch: w.clientPatch,
+    _contacts: w.contacts,
+  });
+  fail(error);
+  if (!planId) throw new Error("The plan wasn't saved. Try again.");
+
+  return {
+    planId: planId as string,
+    goals: w.goals.length,
+    supports: w.goals.reduce((n, g) => n + g.supports.length, 0),
+    codes: w.codes.map((x) => x.service_code),
+    contacts: w.contacts.length,
+    profile: w.profileFilled,
+    codesHeld: w.codesHeld,
+  };
+}
+
+type ExistingContact = { name: string; role: string | null; sort: number };
+
+export interface PcspGoalWrite {
+  goal_text: string;
+  kind?: "other_need";
+  domain?: string | null;
+  current_status?: string | null;
+  strengths?: string | null;
+  barriers?: string | null;
+  success_person?: string | null;
+  success_team?: string | null;
+  carried_from_goal_id?: string | null;
+  supports: {
+    support_text: string;
+    details: string | null;
+    start_date: string | null;
+    end_date: string | null;
+    our_codes: string[];
+    other_providers: { code: string; provider: string }[];
+    health_needs: string[];
+  }[];
+}
+
+export interface PcspWrite {
+  plan: { start_date: string | null; end_date: string | null; activated_on: string | null; meeting_date: string | null; status: PlanStatus };
+  goals: PcspGoalWrite[];
+  codes: ReturnType<typeof billingRows>;
+  codesHeld: string[];
+  clientPatch: Partial<ClientProfileRow>;
+  profileFilled: string[];
+  contacts: Record<string, unknown>[];
+}
+
+/** Everything the confirm writes, worked out before the one database call. Pure. */
+export function pcspWrite(
+  a: ConfirmArgs,
+  read: { currentGoalIds: Set<string>; client: Partial<ClientProfileRow>; contacts: readonly ExistingContact[]; today: string },
+): PcspWrite {
+  const { plan } = a.review;
+  const dates = { start_date: plan.start ?? null, end_date: plan.end ?? null };
+  const status = planStatusOn({ ...dates, status: "current" }, read.today);
+
+  const clean = (s: string) => s.trim() || null;
+  const supportsOf = (list: ReviewSupport[]): PcspGoalWrite["supports"] =>
+    list.map((s) => ({
       support_text: s.support.trim(), details: s.details.trim() || null,
       start_date: s.start, end_date: s.end, our_codes: normalizeCodes(s.ourCodes),
       other_providers: s.providers.filter((p) => !p.ours).map((p) => ({ code: p.code, provider: p.provider })),
       health_needs: s.healthNeeds.map((h) => (h.category ? `${h.category}: ${h.description}` : h.description)).filter(Boolean),
     }));
-    if (supportRows.length) {
-      const { error: sErr } = await sb.from("client_goal_supports").insert(supportRows);
-      fail(sErr);
-      supports += supportRows.length;
-    }
-  }
+  const goals: PcspGoalWrite[] = a.review.goals.filter((x) => x.include && x.goal.trim()).map((g) => ({
+    goal_text: g.goal.trim(), domain: clean(g.domain), current_status: clean(g.currentStatus),
+    strengths: clean(g.strengths), barriers: clean(g.barriers),
+    success_person: clean(g.successPerson), success_team: clean(g.successTeam),
+    carried_from_goal_id: carriedFrom(g, read.currentGoalIds),
+    supports: supportsOf(g.supports),
+  }));
+  // Kept non-goal supports go under one "Other needs in the PCSP" row.
+  const otherNeeds = a.review.otherNeeds.filter((x) => x.include && x.support.trim());
+  if (otherNeeds.length) goals.push({ goal_text: OTHER_NEEDS_GOAL, kind: "other_need", supports: supportsOf(otherNeeds) });
 
-  const codes = billingRows(a.review, { ...a });
-  if (codes.length) {
-    const { data, error } = await sb
-      .from("client_billing_codes").upsert(codes, { onConflict: "organization_id,client_id,service_code" }).select("id");
-    fail(error);
-    assertRowsChanged(data as unknown[]);
-  }
+  const { write: codes, held: codesHeld } = splitCodesByBilling(billingRows(a.review, { ...a }), a.canEditBilling);
+  const profile = profilePatch(a.review.person, read.client);
 
-  const { data: client, error: cErr } = await sb
-    .from("clients").select("special_directions, about_me").eq("id", a.clientId).maybeSingle();
-  fail(cErr);
-  const c = (client ?? {}) as { special_directions?: string | null; about_me?: string | null };
-  const heading = blockHeading(a.review);
-  const patch = {
-    special_directions: mergePcspBlock(c.special_directions, heading, riskLines(a.review)),
-    about_me: mergePcspBlock(c.about_me, heading, aboutMeLines(a.review)),
-  };
-  if (patch.special_directions !== (c.special_directions ?? null) || patch.about_me !== (c.about_me ?? null)) {
-    const { data, error } = await sb.from("clients").update(patch).eq("id", a.clientId).select("id");
-    fail(error);
-    assertRowsChanged(data as unknown[]);
-  }
-
-  const { data: existing, error: eErr } = await sb.from("client_contacts").select("name, sort").eq("client_id", a.clientId);
-  fail(eErr);
-  const ex = (existing ?? []) as { name: string; sort: number }[];
-  const contacts = contactRows(a.review, {
-    organizationId: a.organizationId, clientId: a.clientId,
-    existingNames: ex.map((x) => x.name), startSort: ex.reduce((m, x) => Math.max(m, (x.sort ?? 0) + 1), 0),
+  const ex = read.contacts;
+  const startSort = ex.reduce((m, x) => Math.max(m, (x.sort ?? 0) + 1), 0);
+  const coordinator = coordinatorRow(a.review, {
+    organizationId: a.organizationId, clientId: a.clientId, existing: ex, sort: startSort,
   });
-  if (contacts.length) {
-    const { error } = await sb.from("client_contacts").insert(contacts.map((x) => ({ ...x, created_by: a.userId })));
-    fail(error);
-  }
+  const contacts = [
+    ...(coordinator ? [coordinator] : []),
+    ...contactRows(a.review, {
+      organizationId: a.organizationId, clientId: a.clientId,
+      existingNames: ex.map((x) => x.name), startSort: startSort + (coordinator ? 1 : 0),
+    }),
+  ] as unknown as Record<string, unknown>[];
 
-  return { planId, goals, supports, codes: codes.map((x) => x.service_code), contacts: contacts.length };
+  return {
+    plan: { ...dates, activated_on: plan.activatedOn ?? null, meeting_date: plan.meetingDate ?? null, status },
+    goals, codes, codesHeld, clientPatch: profile.patch, profileFilled: profile.filled, contacts,
+  };
 }

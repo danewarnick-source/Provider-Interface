@@ -461,11 +461,13 @@ export const listOrgSubjectCandidates = createServerFn({ method: "GET" })
         supabase
           .from("organization_members")
           .select("user_id")
+          .is("deleted_at", null)
           .eq("organization_id", data.organizationId)
           .eq("active", true),
         supabase
           .from("clients")
           .select("id, first_name, last_name")
+          .is("deleted_at", null)
           .eq("organization_id", data.organizationId)
           .limit(500),
       ]);

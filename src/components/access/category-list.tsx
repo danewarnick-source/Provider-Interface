@@ -1,4 +1,4 @@
-// The 18 access settings, each with a dropdown whose options explain what the
+// The access settings, each with a dropdown whose options explain what the
 // person can and can't do at that setting.
 
 import { Badge } from "@/components/ui/badge";

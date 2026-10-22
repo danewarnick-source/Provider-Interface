@@ -6,8 +6,10 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Package, Plus, Trash2, History } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Package, Plus, History } from "lucide-react";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
+import { EmptyState } from "@/components/clients/profile/cards/card-parts";
+import { RowMenu } from "@/components/clients/profile/cards/row-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,11 +27,8 @@ import {
   discardClientBelonging,
   type ClientBelongingRow,
 } from "@/lib/clients/belongings.functions";
+import { formatDate } from "@/lib/clients/dates";
 
-function fmtDate(d: string | null): string {
-  if (!d) return "—";
-  return new Date(`${d}T00:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
-}
 function fmtMoney(n: number): string {
   return `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
@@ -102,32 +101,31 @@ export function BelongingsInventoryCard({ clientId, clientName }: { clientId: st
   });
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            <Package className="h-4 w-4" /> Personal Belongings Inventory
-          </CardTitle>
-          <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" onClick={() => setShowHistory((v) => !v)}>
-              <History className="mr-1 h-3.5 w-3.5" /> {showHistory ? "Hide discarded" : "View discarded"}
-            </Button>
-            <Button size="sm" onClick={() => setAddOpen(true)}>
-              <Plus className="mr-1 h-3.5 w-3.5" /> Add item
-            </Button>
-          </div>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          {lastUpdated
-            ? `Last updated ${fmtDate(lastUpdated.updated_at.slice(0, 10))} by ${lastUpdated.inventoried_by_name ?? "staff"}`
-            : "No items inventoried yet."}
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <SectionCard
+      icon={Package}
+      tone="info"
+      title="Personal belongings inventory"
+      description={
+        lastUpdated
+          ? `Last updated ${formatDate(lastUpdated.updated_at.slice(0, 10))} by ${lastUpdated.inventoried_by_name ?? "staff"}`
+          : "What they own, kept up to date. Items $50 or more need a guardian signature to discard."
+      }
+      actions={
+        <>
+          <Button variant="outline" onClick={() => setShowHistory((v) => !v)}>
+            <History className="h-4 w-4" /> {showHistory ? "Hide discarded items" : "Show discarded items"}
+          </Button>
+          <Button onClick={() => setAddOpen(true)}>
+            <Plus className="h-4 w-4" /> Add item
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
         {q.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
         ) : active.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No active belongings on file for {clientName}.</p>
+          <EmptyState>No active belongings on file for {clientName}.</EmptyState>
         ) : (
           <div className="space-y-2">
             {active.map((r) => (
@@ -138,7 +136,7 @@ export function BelongingsInventoryCard({ clientId, clientName }: { clientId: st
 
         {showHistory && (
           <div className="border-t border-border/60 pt-3 space-y-2">
-            <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Discarded items</div>
+            <div className="text-xs font-medium text-muted-foreground">Discarded items</div>
             {discarded.length === 0 ? (
               <p className="text-sm text-muted-foreground">No discarded items.</p>
             ) : (
@@ -146,7 +144,7 @@ export function BelongingsInventoryCard({ clientId, clientName }: { clientId: st
             )}
           </div>
         )}
-      </CardContent>
+      </div>
 
       <AddItemDialog
         open={addOpen}
@@ -161,7 +159,7 @@ export function BelongingsInventoryCard({ clientId, clientName }: { clientId: st
         busy={discardMut.isPending}
         onSubmit={(v) => discardMut.mutate(v)}
       />
-    </Card>
+    </SectionCard>
   );
 }
 
@@ -178,19 +176,20 @@ function BelongingRow({ row, onDiscard, discardedView }: { row: ClientBelongingR
         </div>
         {row.description && <p className="text-xs text-muted-foreground">{row.description}</p>}
         <p className="text-[11px] text-muted-foreground">
-          Inventoried {fmtDate(row.inventoried_on)} by {row.inventoried_by_name ?? "staff"}
+          Inventoried {formatDate(row.inventoried_on)} by {row.inventoried_by_name ?? "staff"}
         </p>
         {discardedView && (
           <p className="text-[11px] text-muted-foreground">
-            Discarded {fmtDate(row.discarded_on)} — {row.discard_reason}
+            Discarded {formatDate(row.discarded_on)} — {row.discard_reason}
             {row.guardian_signature_data_url ? " · guardian signature on file" : ""}
           </p>
         )}
       </div>
       {!discardedView && onDiscard && (
-        <Button size="sm" variant="ghost" className="text-destructive" onClick={onDiscard}>
-          <Trash2 className="mr-1 h-3.5 w-3.5" /> Discard
-        </Button>
+        <RowMenu
+          label={`More actions for ${row.item_name}`}
+          items={[{ label: "Discard item", danger: true, onSelect: onDiscard }]}
+        />
       )}
     </div>
   );
@@ -239,7 +238,7 @@ function AddItemDialog({
           </label>
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button
             disabled={!itemName.trim() || busy}
             onClick={() => {
@@ -292,7 +291,7 @@ function DiscardDialog({
           )}
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button
             disabled={!discardReason.trim() || busy || (needsSignature && !signature)}
             onClick={() => onSubmit({ discardReason: discardReason.trim(), discardedOn, signature })}

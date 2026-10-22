@@ -141,6 +141,7 @@ export const getEmpClients = createServerFn({ method: "POST" })
     const { data: rows, error } = await context.supabase
       .from("clients")
       .select("id, first_name, last_name")
+      .is("deleted_at", null)
       .eq("organization_id", data.organizationId);
     if (error) throw error;
     const map: Record<string, string> = {};
@@ -159,6 +160,7 @@ export const getEmpStaff = createServerFn({ method: "POST" })
     const { data: members, error: e1 } = await context.supabase
       .from("organization_members")
       .select("user_id")
+      .is("deleted_at", null)
       .eq("organization_id", data.organizationId);
     if (e1) throw e1;
     const ids = (members ?? []).map((m: { user_id: string }) => m.user_id);

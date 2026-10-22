@@ -292,10 +292,11 @@ export const askNectarStaff = createServerFn({ method: "POST" })
       _org: orgId,
       _staff: userId,
     });
-    const assignedRows = (assignedRpc.data as Array<{
+    // Deleted clients (made by mistake) are left out.
+    const assignedRows = ((assignedRpc.data as Array<{
       id: string; first_name: string; last_name: string;
-      special_directions: string | null;
-    }> | null) ?? [];
+      special_directions: string | null; deleted_at?: string | null;
+    }> | null) ?? []).filter((r) => !r.deleted_at);
     const allowed = new Set(assignedRows.map((r) => r.id));
     const caseloadPeople: NamedPerson[] = assignedRows.map((r) => ({
       id: r.id,
@@ -542,6 +543,7 @@ export const askNectarStaff = createServerFn({ method: "POST" })
     const memberNamesQ = await supabase
       .from("organization_members")
       .select("organization_id")
+      .is("deleted_at", null)
       .eq("user_id", userId)
       .eq("active", true);
     const memberOrgIds = ((memberNamesQ.data ?? []) as Array<{ organization_id: string }>).map(

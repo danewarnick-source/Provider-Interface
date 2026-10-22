@@ -733,9 +733,9 @@ function MyObligationsPage() {
   );
 
   const { data: clientTrainings } = useQuery({
-    queryKey: ["my-client-training-statuses", user?.id],
-    enabled: !!user,
-    queryFn: () => clientTrainingsFn(),
+    queryKey: ["my-client-training-statuses", orgId, user?.id],
+    enabled: !!user && !!orgId,
+    queryFn: () => clientTrainingsFn({ data: { organizationId: orgId! } }),
     staleTime: 60_000,
   });
 

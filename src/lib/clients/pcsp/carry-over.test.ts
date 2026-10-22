@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { goalSimilarity, proposeCarryOver } from "./carry-over.ts";
+import { goalSimilarity, proposeCarryOver, sameWording } from "./carry-over.ts";
 
 const lastYear = [
   { goal: "Pat will cook a simple meal each week.", ongoing: true, status: "Partially met" },
@@ -24,16 +24,16 @@ test("same goal continues, new goal is new, unmatched old goal ends", () => {
   );
   assert.deepEqual(out, {
     goals: [
-      { index: 0, kind: "continuing", fromGoalId: "g-cook", fromGoalText: current[0].goal_text, similarity: 1, ongoing: true },
+      { index: 0, kind: "carried", fromGoalId: "g-cook", fromGoalText: current[0].goal_text, similarity: 1, ongoing: true },
       { index: 1, kind: "new", fromGoalId: null, fromGoalText: null, similarity: 0, ongoing: null },
     ],
     ended: [{ goalId: "g-bus", goalText: current[1].goal_text, ongoing: false }],
   });
 });
 
-test("a reworded goal marked ongoing is proposed as changed", () => {
+test("a reworded goal marked ongoing is still carried over", () => {
   const out = proposeCarryOver(["Pat will cook dinner twice a week with staff."], current, lastYear);
-  assert.equal(out.goals[0].kind, "changed");
+  assert.equal(out.goals[0].kind, "carried");
   assert.equal(out.goals[0].fromGoalId, "g-cook");
 });
 
@@ -45,4 +45,9 @@ test("each current goal is matched at most once, best match wins", () => {
   );
   assert.equal(out.goals[1].fromGoalId, "g-cook");
   assert.equal(out.goals[0].kind, "new");
+});
+
+test("last year's wording shows only when it differs", () => {
+  assert.equal(sameWording("Pat will cook a meal.", "  pat will cook a   meal"), true);
+  assert.equal(sameWording("Pat will cook a meal.", "Pat will cook dinner."), false);
 });

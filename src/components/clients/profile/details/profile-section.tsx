@@ -1,14 +1,16 @@
-// Profile section: identity, photo (date taken, 5-year warning), service
-// address with the clock-in pin and geofence, extra service locations,
-// mailing address, About me and More details (custom fields).
+// Profile section: "About <first name>" (lead, full width), then Identity |
+// Service address (with any extra service locations) side by side, and More
+// details (custom fields). The photo lives in the header; "Person prefers no photo"
+// (setup) is listed under "Show hidden sections".
 
-import { ClientPhotoCard } from "@/components/clients/profile/client-photo-card";
 import { HomePinCard } from "@/components/clients/profile/home-pin-card";
 import type { ClientProfileData } from "@/components/clients/profile/use-client-profile";
+import { HiddenSections } from "@/components/clients/profile/setup/hidden-sections";
+import { useSupportScope } from "@/components/clients/profile/setup/use-support-scope";
+import { hiddenCards } from "@/lib/clients/support-scope";
+import { AboutCard } from "./about-card";
 import { IdentityCard } from "./identity-card";
 import { MoreDetailsCard } from "./more-details-card";
-import { ServiceLocationsCard } from "./service-locations-card";
-import { TextFieldCard } from "./text-field-card";
 
 export function ProfileSection({
   orgId,
@@ -20,46 +22,22 @@ export function ProfileSection({
   onChanged: () => void;
 }) {
   const clientId = data.client.id;
+  const scope = useSupportScope(clientId).data ?? null;
   return (
-    <div className="space-y-4" data-testid="client-section-profile">
-      <div className="grid items-start gap-4 lg:grid-cols-[1.4fr_1fr]">
+    <div className="flex flex-col gap-5" data-testid="client-section-profile">
+      <AboutCard
+        orgId={orgId}
+        clientId={clientId}
+        firstName={data.client.first_name?.trim() ?? ""}
+        agencyNotes={data.client.about_me}
+        onChanged={onChanged}
+      />
+      <div className="grid items-stretch gap-5 md:grid-cols-2 [&>*]:h-full">
         <IdentityCard key={clientId} orgId={orgId} data={data} onChanged={onChanged} />
-        <div className="space-y-4">
-          <ClientPhotoCard clientId={clientId} />
-          <TextFieldCard
-            orgId={orgId}
-            clientId={clientId}
-            field="about_me"
-            title="About me"
-            subtitle="What matters to them, in their words where possible."
-            value={data.client.about_me}
-            empty="Nothing written yet."
-            rows={5}
-            onChanged={onChanged}
-          />
-        </div>
-      </div>
-      <section aria-label="Service address" className="space-y-2">
-        <h2 className="text-sm font-semibold">Service address</h2>
-        <p className="text-xs text-muted-foreground">
-          Where services happen. Staff clock in within the circle around the pin.
-        </p>
-        <HomePinCard clientId={clientId} />
-      </section>
-      <div className="grid items-start gap-4 lg:grid-cols-2">
-        <ServiceLocationsCard orgId={orgId} clientId={clientId} />
-        <TextFieldCard
-          orgId={orgId}
-          clientId={clientId}
-          field="mailing_address"
-          title="Mailing address"
-          subtitle="Only if mail goes somewhere other than the service address."
-          value={data.client.mailing_address}
-          empty="Same as the service address."
-          onChanged={onChanged}
-        />
+        <HomePinCard orgId={orgId} clientId={clientId} codes={data.codes} />
       </div>
       <MoreDetailsCard clientId={clientId} />
+      <HiddenSections orgId={orgId} clientId={clientId} cards={hiddenCards("profile", scope)} />
     </div>
   );
 }

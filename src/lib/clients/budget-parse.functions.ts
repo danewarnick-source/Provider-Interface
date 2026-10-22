@@ -1,5 +1,6 @@
-// "Fill from 1056" on Services & billing. read1056 saves the PDF to the
-// client's file ('1056_budget'), reads its text, and asks Nectar for every
+// "Fill from 1056" on Services & billing. The browser uploads the PDF to
+// storage (<org>/<client>/1056/); read1056 reads it from there, files it in
+// the client's documents ('1056_budget'), reads its text, and asks Nectar for every
 // field as {value, page, quote}; values whose quote isn't in the PDF are
 // dropped (auth-1056.ts). Nothing else is written until confirm1056, which
 // re-checks codes against the agency's approved codes, real dates and
@@ -14,6 +15,7 @@ import { assertCanManageClient } from "./guards.server";
 import { assertRowsChanged } from "./writes";
 import { pdfToLayout, type UnpdfLike } from "./pcsp/layout";
 import {
+  isBudget1056Path,
   read1056Checks,
   read1056FromReply,
   read1056Messages,
@@ -79,13 +81,13 @@ export const read1056 = createServerFn({ method: "POST" })
       .object({
         ...scope,
         fileName: z.string().min(1).max(255),
-        fileBase64: z.string().min(10).max(21_000_000),
+        storagePath: z.string().min(1).max(1024),
       })
       .parse(d),
   )
   .handler(async ({ data, context }): Promise<Read1056Result> => {
     const { sb, userId } = ctx(context);
-    const { organizationId, clientId } = data;
+    const { organizationId, clientId, storagePath } = data;
     await assertCanManageClient({
       supabase: sb,
       actorId: userId,
@@ -94,7 +96,13 @@ export const read1056 = createServerFn({ method: "POST" })
       action: "edit_billing",
     });
 
-    const bytes = Uint8Array.from(Buffer.from(data.fileBase64, "base64"));
+    // The browser uploaded the PDF to this client's 1056 folder; read it from there.
+    if (!isBudget1056Path(storagePath, organizationId, clientId))
+      throw new Error("That upload isn't in this client's folder. Upload the 1056 again.");
+    const dl = await sb.storage.from("client-documents").download(storagePath);
+    if (dl.error || !dl.data)
+      throw new Error(`The uploaded file couldn't be opened (${dl.error?.message ?? "not found"}).`);
+    const bytes = new Uint8Array(await (dl.data as Blob).arrayBuffer());
     if (bytes.byteLength > MAX_BYTES)
       throw new Error("This PDF is over 15 MB. Upload a smaller copy.");
     if (Buffer.from(bytes.subarray(0, 5)).toString("latin1") !== "%PDF-")
@@ -105,12 +113,6 @@ export const read1056 = createServerFn({ method: "POST" })
         "No text was found in this PDF (is it a scan?). Enter the authorizations by hand.",
       );
 
-    const safe = data.fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const path = `${organizationId}/${clientId}/1056/${Date.now()}_${safe}`;
-    const up = await sb.storage
-      .from("client-documents")
-      .upload(path, bytes, { contentType: "application/pdf", upsert: false });
-    if (up.error) throw new Error(`Upload failed: ${up.error.message}`);
     const { data: docRows, error: docErr } = await sb
       .from("client_documents")
       .insert({
@@ -118,8 +120,8 @@ export const read1056 = createServerFn({ method: "POST" })
         client_id: clientId,
         document_type: "1056_budget",
         file_name: data.fileName,
-        file_url: `storage://client-documents/${path}`,
-        storage_path: path,
+        file_url: `storage://client-documents/${storagePath}`,
+        storage_path: storagePath,
         file_size_bytes: bytes.byteLength,
         uploaded_by: userId,
       })

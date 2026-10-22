@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -12,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { findClientByMedicaidId, loadImportDraft } from "@/lib/clients/create.functions";
+import { findClientsByMedicaidIds } from "@/lib/clients/create.functions";
 import {
   emptyAddClientForm,
   formProblems,
@@ -20,63 +19,87 @@ import {
   type AddClientForm,
   type FilledField,
 } from "@/lib/clients/create";
+import { PcspReview } from "@/components/clients/profile/plans/pcsp-review";
+import { PcspReadFailed, PcspReadSummary } from "@/components/clients/shared/pcsp-read-notes";
+import { AddClientDone, type AddedClient } from "./add-client-done";
+import { AddClientStart } from "./add-client-start";
 import { AddCodesFields } from "./add-codes-fields";
 import { AddContactsFields } from "./add-contacts-fields";
 import { AddIdentityFields } from "./add-identity-fields";
 import { FillFromPcsp } from "./fill-from-pcsp";
 import { useAddClient } from "./use-add-client";
+import { useNewClientPcsp } from "./use-new-client-pcsp";
 
 type Existing = { id: string; name: string };
+type Step = "start" | "form" | "review" | "done";
 
-/** Add client: one page. Imported drafts (draftId) open the same form prefilled. */
+/**
+ * Add client: "Start from their PCSP" (form → PCSP review → one save of the
+ * client and the plan) or "Enter by hand" (one form page), or the link to the
+ * spreadsheet import. After the save: "Finish setting up <first name> now" or
+ * "Later".
+ */
 export function AddClientSheet({
   organizationId,
   open,
-  draftId,
   homes = [],
   onOpenChange,
+  onImportSpreadsheet,
 }: {
   organizationId: string;
   open: boolean;
-  draftId: string | null;
   homes?: { id: string; name: string }[];
   onOpenChange: (open: boolean) => void;
+  onImportSpreadsheet: () => void;
 }) {
+  const [step, setStep] = useState<Step>("start");
   const [form, setForm] = useState<AddClientForm>(emptyAddClientForm);
   const [filled, setFilled] = useState<FilledField[]>([]);
   const [duplicate, setDuplicate] = useState<Existing | null>(null);
+  const [added, setAdded] = useState<AddedClient | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const pcsp = useNewClientPcsp(organizationId);
   const set = (patch: Partial<AddClientForm>) => {
     if ("medicaid_id" in patch) setDuplicate(null);
     setForm((f) => ({ ...f, ...patch }));
   };
 
-  const loadDraftFn = useServerFn(loadImportDraft);
-  const draftQ = useQuery({
-    enabled: open && !!draftId,
-    queryKey: ["clients", "import-draft", draftId],
-    queryFn: () => loadDraftFn({ data: { organizationId, subjectId: draftId! } }),
-  });
   useEffect(() => {
     if (!open) return;
-    setForm(draftQ.data?.form ?? emptyAddClientForm());
+    setStep("start");
+    setForm(emptyAddClientForm());
     setFilled([]);
     setDuplicate(null);
-  }, [open, draftId, draftQ.data]);
+    setAdded(null);
+    pcsp.reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
-  const dupFn = useServerFn(findClientByMedicaidId);
+  async function readPcsp(file: File | null) {
+    const read = file ? await pcsp.pick(file) : await pcsp.retry();
+    if (!read) return;
+    const out = prefillFromPcsp({ ...form, codes: [] }, read.parse);
+    setForm(out.form);
+    setFilled((f) => [...new Set([...f, ...out.filled])]);
+    setStep("form");
+  }
+
+  const dupFn = useServerFn(findClientsByMedicaidIds);
   async function checkDuplicate() {
     if (!form.medicaid_id.trim()) return;
     try {
-      setDuplicate(await dupFn({ data: { organizationId, medicaidId: form.medicaid_id } }));
+      const [hit] = await dupFn({ data: { organizationId, medicaidIds: [form.medicaid_id] } });
+      setDuplicate(hit ? { id: hit.id, name: hit.name } : null);
     } catch {
       /* the save checks again */
     }
   }
 
   const save = useAddClient(organizationId, {
-    draftId,
-    onDone: () => onOpenChange(false),
+    onCreated: (c) => {
+      setAdded({ ...c, pcsp: null });
+      setStep("done");
+    },
     onDuplicate: setDuplicate,
   });
   function submit() {
@@ -85,8 +108,43 @@ export function AddClientSheet({
       toast.error(`Please complete: ${problems.join(", ")}.`);
       return;
     }
-    save.mutate(form);
+    if (pcsp.read) setStep("review");
+    else save.mutate(form);
   }
+  async function saveWithPlan() {
+    const res = await pcsp.save(form);
+    if (res?.status === "duplicate") {
+      setDuplicate(res.existing);
+      setStep("form");
+    } else if (res?.status === "created" && pcsp.review) {
+      setAdded({
+        id: res.id,
+        pinFound: res.pinFound,
+        pcsp: { plan: res.plan, reviewed: pcsp.review.plan },
+      });
+      setStep("done");
+    }
+  }
+
+  if (open && step === "review" && pcsp.read && pcsp.review) {
+    return (
+      <PcspReview
+        read={pcsp.read}
+        review={pcsp.review}
+        onChange={pcsp.setReview}
+        saving={pcsp.saving}
+        error={pcsp.saveError}
+        onConfirm={() => void saveWithPlan()}
+        onClose={() => setStep("form")}
+        confirmLabel="Save client and plan"
+        showPerson={false}
+      />
+    );
+  }
+
+  const failed = pcsp.failed && (
+    <PcspReadFailed message={pcsp.failed} retrying={pcsp.reading} onRetry={() => void readPcsp(null)} />
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -97,37 +155,47 @@ export function AddClientSheet({
         }}
       >
         <DialogHeader>
-          <DialogTitle>
-            {draftId ? `Finish setup — ${draftQ.data?.name ?? "imported client"}` : "Add client"}
-          </DialogTitle>
+          <DialogTitle>{step === "done" ? "Client added" : "Add client"}</DialogTitle>
           <DialogDescription>
-            Fields marked * are required. Everything else can be added later on the profile.
+            {step === "start"
+              ? "How do you want to start?"
+              : step === "done"
+                ? "Here's what was saved."
+                : "Fields marked * are required. Everything else can be added later on the profile."}
           </DialogDescription>
         </DialogHeader>
-        {draftId && draftQ.isLoading ? (
-          <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" /> Loading the imported draft…
+        {step === "done" && added ? (
+          <AddClientDone
+            added={added}
+            firstName={form.first_name.trim()}
+            onClose={() => onOpenChange(false)}
+          />
+        ) : step === "start" ? (
+          <div className="space-y-3">
+            <AddClientStart
+              reading={pcsp.reading}
+              onPcsp={(file) => void readPcsp(file)}
+              onByHand={() => setStep("form")}
+              onSpreadsheet={() => {
+                onOpenChange(false);
+                onImportSpreadsheet();
+              }}
+            />
+            {failed}
           </div>
-        ) : draftQ.isError ? (
-          <p className="py-6 text-sm text-rose-700">{(draftQ.error as Error).message}</p>
         ) : (
           <div className="space-y-5">
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-              <span>Have their PCSP? Fill the form from it, then check each tagged field.</span>
-              <FillFromPcsp
-                organizationId={organizationId}
-                onRead={(p) => {
-                  const out = prefillFromPcsp(form, p);
-                  setForm(out.form);
-                  setFilled((f) => [...new Set([...f, ...out.filled])]);
-                  toast.success(
-                    out.filled.length
-                      ? "Filled from the PCSP. Check the tagged fields."
-                      : "Nothing new to fill from this PCSP.",
-                  );
-                }}
-              />
-            </div>
+            {pcsp.read ? (
+              <PcspReadSummary parse={pcsp.read.parse} agencyName={pcsp.read.agencyName} />
+            ) : (
+              <>
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                  <span>Have their PCSP? Start from it instead, then check each tagged field.</span>
+                  <FillFromPcsp reading={pcsp.reading} onPick={(file) => void readPcsp(file)} />
+                </div>
+                {failed}
+              </>
+            )}
             <AddIdentityFields
               form={form}
               set={set}
@@ -137,22 +205,32 @@ export function AddClientSheet({
               onMedicaidBlur={() => void checkDuplicate()}
             />
             <AddContactsFields form={form} set={set} filled={filled} />
-            <AddCodesFields form={form} set={set} filled={filled} onMenuOpenChange={setMenuOpen} />
+            {pcsp.read ? (
+              <p className="rounded-md bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                Service codes, units, the plan year and goals come from the PCSP. You'll check them next.
+              </p>
+            ) : (
+              <AddCodesFields form={form} set={set} onMenuOpenChange={setMenuOpen} />
+            )}
           </div>
         )}
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button
-            onClick={submit}
-            disabled={save.isPending || !!duplicate || (!!draftId && !draftQ.data)}
-            data-testid="add-client-save"
-          >
-            {save.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save client
-          </Button>
-        </DialogFooter>
+        {step !== "done" && (
+          <DialogFooter>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            {step === "form" && (
+              <Button
+                onClick={submit}
+                disabled={save.isPending || !!duplicate}
+                data-testid="add-client-save"
+              >
+                {save.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {pcsp.read ? "Next: check the PCSP" : "Save client"}
+              </Button>
+            )}
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -5,9 +5,21 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { CLIENT_FORM_LABEL, clientFormKindForTitle } from "@/lib/clients/form-obligations";
 import { isAdminLevel } from "@/lib/access/levels";
+import { requireOrgMembership } from "@/integrations/supabase/require-org";
+import { assertCanManageClient } from "./guards.server";
+import { denverYmd } from "@/lib/denver-date";
 import { todayYmd } from "./dates";
 import { activeGoalViewsOn, type GoalView } from "./plans";
+import { agencySupports, buildStrategySections, carryForward, supportsToDraft, type StrategySupport } from "./support-strategies";
+import { formatBullets } from "./strategy-rules";
+import { approvalContent, editSavePatch } from "./strategies-pull";
+import { STRATEGY_SYSTEM_PROMPT, parseStrategyReply, strategyUserPrompt, type StrategyReply } from "./strategy-prompt";
 import { loadPlanBundle } from "./plans-load";
+import {
+  TRAINING_MED_COLUMNS,
+  trainingMedItems,
+  type StaffMedication,
+} from "@/lib/medications/staff-meds";
 
 /** Active goals (with supports) of the client's plan in effect today. */
 async function planGoals(supabase: AnySupabase, clientId: string): Promise<GoalView[]> {
@@ -23,16 +35,36 @@ function adminGuard(role: string | undefined) {
   }
 }
 
-async function getMembership(supabase: AnySupabase, userId: string) {
-  const { data, error } = await supabase
-    .from("organization_members")
-    .select("organization_id, access_level")
-    .eq("user_id", userId)
-    .eq("active", true)
-    .limit(1)
+/**
+ * The caller's membership in the agency the request names (never "whichever
+ * agency comes first": a person can belong to more than one).
+ */
+async function getMembership(supabase: AnySupabase, userId: string, organizationId: string) {
+  const access = await requireOrgMembership(supabase, userId, organizationId);
+  return { organization_id: organizationId, access_level: access.level as string, access };
+}
+
+/** assertCanManageClient (category, scope, discharged) for this client in this agency. */
+async function guardClient(
+  supabase: AnySupabase,
+  userId: string,
+  organizationId: string,
+  clientId: string,
+  action: "view" | "edit",
+) {
+  await assertCanManageClient({ supabase, actorId: userId, organizationId, clientId, action });
+}
+
+/** A training row by id, in the requested agency; returns its client. */
+async function trainingInOrg(supabase: AnySupabase, id: string, organizationId: string, columns: string) {
+  const { data: row, error } = await supabase
+    .from("client_specific_trainings")
+    .select(`organization_id, client_id, ${columns}`)
+    .eq("id", id)
     .maybeSingle();
-  if (error || !data) throw new Error("No active organization membership.");
-  return data as { organization_id: string; access_level: string };
+  if (error || !row) throw new Error("Training not found.");
+  if (row.organization_id !== organizationId) throw new Error("Forbidden.");
+  return row;
 }
 
 async function assertClientInOrg(supabase: AnySupabase, clientId: string, orgId: string) {
@@ -67,8 +99,23 @@ export type CSTSection = {
   /** Service/job code(s) this strategy section covers (support_strategies
    *  training only — SOW §1.24(5) coverage check reads this). */
   job_codes?: string[];
+  /** Support strategies: the client_goal_supports row this section is for. */
+  support_id?: string;
+  /** Support strategies: a person edited it, so a rebuild keeps it. */
+  edited?: boolean;
+  /** Support strategies: Nectar drafted it (cleared once a person edits it). */
+  nectar?: boolean;
 };
-export type CSTContent = { sections: CSTSection[] };
+export type CSTContent = {
+  sections: CSTSection[];
+  /** Support strategies: why they were approved with supports still lacking one. */
+  approval_note?: string;
+  /**
+   * Support strategies: the uploaded strategies document (client_documents
+   * id), the official copy. Kept when Nectar copies its strategies in.
+   */
+  source_document_id?: string;
+};
 
 // Applied-reasoning prompt shown to staff per tab.
 export type CSTReviewQuestion = {
@@ -98,8 +145,15 @@ const SectionSchema = z.object({
   title: z.string().min(1).max(200),
   items: z.array(ItemSchema).max(50),
   job_codes: z.array(z.string()).optional(),
+  support_id: z.string().max(64).optional(),
+  edited: z.boolean().optional(),
+  nectar: z.boolean().optional(),
 });
-const ContentSchema = z.object({ sections: z.array(SectionSchema).max(30) });
+const ContentSchema = z.object({
+  sections: z.array(SectionSchema).max(60),
+  approval_note: z.string().max(2000).optional(),
+  source_document_id: z.string().uuid().optional(),
+});
 const ReviewQuestionSchema = z.object({
   id: z.string(),
   tab: z.string(),
@@ -191,7 +245,7 @@ async function assembleVerbatim(
       .select("service_code, unit_type, service_end_date")
       .eq("client_id", clientId);
     if (codes && codes.length) {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = denverYmd();
       const active = (codes as Array<{ service_code: string; unit_type: string | null; service_end_date: string | null }>)
         .filter((c) => !c.service_end_date || c.service_end_date >= today);
       if (active.length) {
@@ -212,25 +266,10 @@ async function assembleVerbatim(
   try {
     const { data: meds } = await supabase
       .from("client_medications")
-      .select("medication_name, dosage, frequency, is_prn, choking_risk, is_active")
+      .select(TRAINING_MED_COLUMNS)
       .eq("client_id", clientId);
-    if (meds && meds.length) {
-      const active = (meds as Array<{ medication_name: string; dosage: string | null; frequency: string | null; is_prn: boolean | null; choking_risk: boolean | null; is_active: boolean | null }>)
-        .filter((m) => m.is_active !== false);
-      if (active.length) {
-        const items: CSTItem[] = active.map((m) => ({
-          kind: "kv" as const,
-          label: m.medication_name,
-          pairs: [
-            { label: "Dose", value: m.dosage ?? "—" },
-            { label: "Frequency", value: m.frequency ?? "—" },
-            { label: "PRN", value: m.is_prn ? "Yes" : "No" },
-            { label: "Choking risk flagged", value: m.choking_risk ? "Yes" : "No" },
-          ],
-        }));
-        sections.push({ id: sid(), title: "Medications", items });
-      }
-    }
+    const items: CSTItem[] = trainingMedItems((meds ?? []) as Partial<StaffMedication>[]);
+    if (items.length) sections.push({ id: sid(), title: "Medications", items });
   } catch { /* ignore */ }
 
   // f. Rights & safeguards — SAFETY-CRITICAL — HRC status + restriction_summary, exact
@@ -337,13 +376,14 @@ async function draftTrainingNarrative(facts: string, orgId?: string | null): Pro
 // ── GET current training (admin) ────────────────────────────────────────────
 export const getClientSpecificTraining = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ clientId: z.string().uuid() }).parse(d))
+  .inputValidator((d: unknown) => z.object({ organizationId: z.string().uuid(), clientId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { training: null };
-    const m = await getMembership(supabase, userId);
+    const m = await getMembership(supabase, userId, data.organizationId);
     adminGuard(m.access_level);
     await assertClientInOrg(supabase, data.clientId, m.organization_id);
+    await guardClient(supabase, userId, m.organization_id, data.clientId, "view");
     const { data: row, error } = await supabase
       .from("client_specific_trainings")
       .select("*")
@@ -360,15 +400,17 @@ export const getClientSpecificTraining = createServerFn({ method: "GET" })
 export const draftClientSpecificTrainingWithNectar = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({
+    organizationId: z.string().uuid(),
     clientId: z.string().uuid(),
     rebuild: z.boolean().optional(),
   }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { training: null };
-    const m = await getMembership(supabase, userId);
+    const m = await getMembership(supabase, userId, data.organizationId);
     adminGuard(m.access_level);
     await assertClientInOrg(supabase, data.clientId, m.organization_id);
+    await guardClient(supabase, userId, m.organization_id, data.clientId, "edit");
 
     const content = await assembleVerbatim(supabase, m.organization_id, data.clientId);
 
@@ -417,13 +459,14 @@ export const draftClientSpecificTrainingWithNectar = createServerFn({ method: "P
 // Mirrors draftSupportStrategies mode "blank" but for training_type = "person_specific".
 export const draftClientSpecificTrainingBlank = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ clientId: z.string().uuid() }).parse(d))
+  .inputValidator((d: unknown) => z.object({ organizationId: z.string().uuid(), clientId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { training: null };
-    const m = await getMembership(supabase, userId);
+    const m = await getMembership(supabase, userId, data.organizationId);
     adminGuard(m.access_level);
     await assertClientInOrg(supabase, data.clientId, m.organization_id);
+    await guardClient(supabase, userId, m.organization_id, data.clientId, "edit");
 
     const content: CSTContent = { sections: [
       { id: sid(), title: "Client-specific training", items: [
@@ -475,6 +518,7 @@ export const draftClientSpecificTrainingBlank = createServerFn({ method: "POST" 
 export const attachClientSpecificTrainingDocument = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({
+    organizationId: z.string().uuid(),
     clientId: z.string().uuid(),
     fileName: z.string().min(1).max(300),
     storagePath: z.string().min(1).max(500),
@@ -482,9 +526,10 @@ export const attachClientSpecificTrainingDocument = createServerFn({ method: "PO
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { ok: false, documentId: null };
-    const m = await getMembership(supabase, userId);
+    const m = await getMembership(supabase, userId, data.organizationId);
     adminGuard(m.access_level);
     await assertClientInOrg(supabase, data.clientId, m.organization_id);
+    await guardClient(supabase, userId, m.organization_id, data.clientId, "edit");
 
     const { data: doc, error: dErr } = await supabase
       .from("client_documents")
@@ -541,6 +586,7 @@ export const attachClientSpecificTrainingDocument = createServerFn({ method: "PO
 export const updateClientSpecificTraining = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({
+    organizationId: z.string().uuid(),
     id: z.string().uuid(),
     title: z.string().min(1).max(200).optional(),
     content: ContentSchema.optional(),
@@ -548,20 +594,17 @@ export const updateClientSpecificTraining = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { training: null };
-    const m = await getMembership(supabase, userId);
+    const m = await getMembership(supabase, userId, data.organizationId);
     adminGuard(m.access_level);
-    const { data: row, error } = await supabase
-      .from("client_specific_trainings")
-      .select("organization_id, status")
-      .eq("id", data.id)
-      .maybeSingle();
-    if (error || !row) throw new Error("Training not found.");
-    if (row.organization_id !== m.organization_id) throw new Error("Forbidden.");
-    const patch: Record<string, unknown> = {};
+    const row = await trainingInOrg(supabase, data.id, m.organization_id, "status, draft_content");
+    await guardClient(supabase, userId, m.organization_id, row.client_id, "edit");
+    // A pending draft version (pulled from a document) takes the edit; staff
+    // keep the approved one. Otherwise editing a published version returns it
+    // to draft (requires re-approval).
+    const patch: Record<string, unknown> =
+      data.content !== undefined ? editSavePatch(row, data.content) : {};
     if (data.title !== undefined) patch.title = data.title;
-    if (data.content !== undefined) patch.content = data.content;
-    // Editing a published version returns it to draft (requires re-approval).
-    if (row.status === "published") {
+    if (data.content === undefined && row.status === "published") {
       patch.status = "draft";
       patch.approved_by = null;
       patch.approved_at = null;
@@ -579,25 +622,30 @@ export const updateClientSpecificTraining = createServerFn({ method: "POST" })
 // ── APPROVE & PUBLISH (admin) ──────────────────────────────────────────────
 export const publishClientSpecificTraining = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .inputValidator((d: unknown) => z.object({
+    organizationId: z.string().uuid(),
+    id: z.string().uuid(),
+    /** Support strategies approved with gaps: the person's reason. */
+    note: z.string().trim().min(1).max(2000).optional(),
+  }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { training: null };
-    const m = await getMembership(supabase, userId);
+    const m = await getMembership(supabase, userId, data.organizationId);
     adminGuard(m.access_level);
-    const { data: row, error } = await supabase
-      .from("client_specific_trainings")
-      .select("organization_id")
-      .eq("id", data.id)
-      .maybeSingle();
-    if (error || !row) throw new Error("Training not found.");
-    if (row.organization_id !== m.organization_id) throw new Error("Forbidden.");
+    const row = await trainingInOrg(supabase, data.id, m.organization_id, "content, draft_content, status, version");
+    await guardClient(supabase, userId, m.organization_id, row.client_id, "edit");
+    // A pending draft version is what gets approved (it replaces the approved one).
+    const approval = approvalContent<CSTContent>(row);
+    const content = (approval.content ?? { sections: [] }) as CSTContent;
     const { data: updated, error: uErr } = await supabase
       .from("client_specific_trainings")
       .update({
+        ...approval.patch,
         status: "published",
         approved_by: userId,
         approved_at: new Date().toISOString(),
+        content: { ...content, approval_note: data.note } as unknown,
       })
       .eq("id", data.id)
       .select("*")
@@ -610,21 +658,17 @@ export const publishClientSpecificTraining = createServerFn({ method: "POST" })
 export const saveReviewQuestions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({
+    organizationId: z.string().uuid(),
     id: z.string().uuid(),
     review_questions: z.array(ReviewQuestionSchema),
   }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { ok: false };
-    const m = await getMembership(supabase, userId);
+    const m = await getMembership(supabase, userId, data.organizationId);
     adminGuard(m.access_level);
-    const { data: row, error } = await supabase
-      .from("client_specific_trainings")
-      .select("organization_id, status")
-      .eq("id", data.id)
-      .maybeSingle();
-    if (error || !row) throw new Error("Training not found.");
-    if (row.organization_id !== m.organization_id) throw new Error("Forbidden.");
+    const row = await trainingInOrg(supabase, data.id, m.organization_id, "status");
+    await guardClient(supabase, userId, m.organization_id, row.client_id, "edit");
     const patch: Record<string, unknown> = { review_questions: data.review_questions };
     if (row.status === "published") { patch.status = "draft"; patch.approved_by = null; patch.approved_at = null; }
     const { error: uErr } = await supabase.from("client_specific_trainings").update(patch).eq("id", data.id);
@@ -672,81 +716,76 @@ export const checkAnswerRelevance = createServerFn({ method: "POST" })
 // One row per client (training_type='support_strategies'). Admin-authored:
 // stub from PCSP goals (NECTAR verbatim), blank, or uploaded provider doc.
 
-// NECTAR drafts "Instructions to staff" for each PCSP goal. This is an
-// AI-drafted starting point only — the agency admin MUST review, edit, and
-// attest before publishing. NECTAR never auto-publishes; status stays "draft".
-async function draftSupportStrategyInstructions(goals: string[], orgId?: string | null): Promise<string[]> {
-  if (!goals.length) return [];
+// NECTAR drafts 4–6 bullet points per PCSP support paid to the agency
+// (strategy-prompt.ts holds the prompt, contract rules and the check). An
+// AI-drafted starting point only — the agency admin MUST review, edit and
+// approve. NECTAR never auto-publishes; status stays "draft". Supports whose
+// bullets fail the check are retried once, then left blank and reported.
+async function askNectarForStrategies(supports: StrategySupport[], orgId?: string | null): Promise<StrategyReply> {
   try {
     const { gatewayFetch } = await import("@/lib/ai-bedrock.server");
-    const system = [
-      "You are NECTAR, drafting staff support strategies for a Utah DSPD direct-support worker.",
-      "For each PCSP goal, write clear, practical 'instructions to staff' — what the worker should DO on shift to help the client work toward that goal.",
-      "Ground every instruction in the goal as written; do not invent diagnoses, clinical interventions, behavioral protocols, or medical procedures.",
-      "Write in plain, natural language a support worker can follow. 2–5 sentences per goal.",
-      "This is a DRAFT the agency admin will review, edit, and attest to before it reaches staff.",
-      'Respond ONLY with JSON: { "strategies": [ { "goal": "...", "instructions": "..." } ] } preserving goal order.',
-      "No preamble, no markdown fences.",
-    ].join("\n");
-    const user = `PCSP GOALS (in order):\n${goals.map((g, i) => `${i + 1}. ${g}`).join("\n")}`;
     const res = await gatewayFetch({
       messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
+        { role: "system", content: STRATEGY_SYSTEM_PROMPT },
+        { role: "user", content: strategyUserPrompt(supports) },
       ],
       response_format: { type: "json_object" },
     }, { orgId });
-    if (!res.ok) return goals.map(() => "");
+    if (!res.ok) return parseStrategyReply("", supports);
     const body = await res.json();
-    const content: string = body?.choices?.[0]?.message?.content ?? "{}";
-    const clean = content.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
-    const parsed = JSON.parse(clean || "{}") as {
-      strategies?: Array<{ goal?: string; instructions?: string }>;
-    };
-    const rows = Array.isArray(parsed.strategies) ? parsed.strategies : [];
-    return goals.map((_, i) => String(rows[i]?.instructions ?? "").slice(0, 4000));
+    return parseStrategyReply(String(body?.choices?.[0]?.message?.content ?? ""), supports);
   } catch {
-    return goals.map(() => "");
+    return parseStrategyReply("", supports);
   }
 }
 
+async function draftStrategyBullets(
+  supports: StrategySupport[],
+  orgId?: string | null,
+): Promise<{ drafts: Map<string, string>; missed: string[] }> {
+  if (!supports.length) return { drafts: new Map(), missed: [] };
+  const first = await askNectarForStrategies(supports, orgId);
+  const retry = first.failed.length
+    ? await askNectarForStrategies(first.failed.map((f) => f.support), orgId)
+    : null;
+  const drafts = new Map<string, string>();
+  for (const [id, bullets] of [...first.drafts, ...(retry?.drafts ?? [])]) {
+    drafts.set(id, formatBullets(bullets));
+  }
+  const missed = (retry?.failed ?? []).map((f) => f.support.support || "Support");
+  return { drafts, missed };
+}
+
+/**
+ * One section per support paid to the agency (support-strategies.ts). Edited
+ * sections are kept (with `carry`, a new plan year: every written strategy
+ * whose support carried over); with `nectar`, the others needing a strategy
+ * get a fresh Nectar draft. `missed`: supports Nectar could not draft.
+ */
 async function assembleSupportStrategyStubs(
   supabase: AnySupabase,
   orgId: string,
   clientId: string,
-): Promise<CSTContent> {
-  const goals: string[] = (await planGoals(supabase, clientId)).map((g) => g.goal);
-  if (!goals.length) {
-    void orgId;
-    return { sections: [{ id: sid(), title: "Support strategy", items: [
-      { kind: "text" as const, label: "Goal this supports", value: "" },
-      { kind: "text" as const, label: "Instructions to staff", value: "" },
-    ] }] };
-  }
-  // AI-drafted starting point; admin reviews/edits/attests before publish.
-  const instructions = await draftSupportStrategyInstructions(goals, orgId);
-  const sections: CSTSection[] = goals.map((g, i) => ({
-    id: sid(),
-    title: "Support strategy",
-    items: [
-      { kind: "text" as const, label: "Goal this supports", value: String(g) },
-      { kind: "text" as const, label: "Instructions to staff", value: instructions[i] ?? "" },
-    ],
-  }));
-  void orgId;
-  return { sections };
+  existing: CSTSection[],
+  opts: { nectar: boolean; carry: boolean },
+): Promise<{ content: CSTContent; missed: string[] }> {
+  const supports = agencySupports(await planGoals(supabase, clientId));
+  const kept = opts.carry ? carryForward(supports, existing) : existing.filter((x) => x.edited);
+  const toDraft = opts.nectar ? supportsToDraft(supports, kept) : [];
+  const { drafts, missed } = await draftStrategyBullets(toDraft, orgId);
+  return { content: { sections: buildStrategySections(supports, kept, drafts) }, missed };
 }
-
 
 export const getSupportStrategiesTraining = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ clientId: z.string().uuid() }).parse(d))
+  .inputValidator((d: unknown) => z.object({ organizationId: z.string().uuid(), clientId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { training: null };
-    const m = await getMembership(supabase, userId);
+    const m = await getMembership(supabase, userId, data.organizationId);
     adminGuard(m.access_level);
     await assertClientInOrg(supabase, data.clientId, m.organization_id);
+    await guardClient(supabase, userId, m.organization_id, data.clientId, "view");
     const { data: row, error } = await supabase
       .from("client_specific_trainings")
       .select("*")
@@ -754,33 +793,46 @@ export const getSupportStrategiesTraining = createServerFn({ method: "GET" })
       .eq("training_type", "support_strategies")
       .maybeSingle();
     if (error) throw new Error(error.message);
-    return { training: row };
+    let approverName: string | null = null;
+    if (row?.approved_by) {
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("first_name, last_name")
+        .eq("id", row.approved_by)
+        .maybeSingle();
+      approverName = [p?.first_name, p?.last_name].filter(Boolean).join(" ").trim() || null;
+    }
+    return { training: row, approverName };
   });
 
 export const draftSupportStrategies = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({
+    organizationId: z.string().uuid(),
     clientId: z.string().uuid(),
-    mode: z.enum(["nectar", "blank", "rebuild"]),
+    /** "missing": a new plan year; carried-over strategies stay, the rest are drafted. */
+    mode: z.enum(["nectar", "blank", "rebuild", "missing"]),
   }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
-    if (!supabase || !userId) return { training: null };
-    const m = await getMembership(supabase, userId);
+    if (!supabase || !userId) return { training: null, nectarMissed: [] as string[] };
+    const m = await getMembership(supabase, userId, data.organizationId);
     adminGuard(m.access_level);
     await assertClientInOrg(supabase, data.clientId, m.organization_id);
+    await guardClient(supabase, userId, m.organization_id, data.clientId, "edit");
 
-    let content: CSTContent;
-    if (data.mode === "blank") {
-      content = { sections: [
-        { id: sid(), title: "Support strategy", items: [
-          { kind: "text", label: "Goal this supports", value: "" },
-          { kind: "text", label: "Instructions to staff", value: "" },
-        ] },
-      ] };
-    } else {
-      content = await assembleSupportStrategyStubs(supabase, m.organization_id, data.clientId);
-    }
+    const { data: current } = await supabase
+      .from("client_specific_trainings")
+      .select("content, draft_content")
+      .eq("client_id", data.clientId)
+      .eq("training_type", "support_strategies")
+      .maybeSingle();
+    // Edited strategies are kept from what the editor shows (a pending draft version first).
+    const sections = ((current?.draft_content ?? current?.content) as CSTContent | undefined)?.sections ?? [];
+    const { content, missed } = await assembleSupportStrategyStubs(
+      supabase, m.organization_id, data.clientId, sections,
+      { nectar: data.mode !== "blank", carry: data.mode === "missing" },
+    );
 
     const { data: existing } = await supabase
       .from("client_specific_trainings")
@@ -794,8 +846,9 @@ export const draftSupportStrategies = createServerFn({ method: "POST" })
         .from("client_specific_trainings")
         .update({
           content: content as unknown,
+          draft_content: null,
           status: "draft",
-          version: (existing.version ?? 1) + (data.mode === "rebuild" ? 1 : 0),
+          version: (existing.version ?? 1) + (data.mode === "rebuild" || data.mode === "missing" ? 1 : 0),
           approved_by: null,
           approved_at: null,
         })
@@ -803,7 +856,7 @@ export const draftSupportStrategies = createServerFn({ method: "POST" })
         .select("*")
         .maybeSingle();
       if (uErr) throw new Error(uErr.message);
-      return { training: updated };
+      return { training: updated, nectarMissed: missed };
     }
 
     const { data: inserted, error: iErr } = await supabase
@@ -821,12 +874,13 @@ export const draftSupportStrategies = createServerFn({ method: "POST" })
       .select("*")
       .maybeSingle();
     if (iErr) throw new Error(iErr.message);
-    return { training: inserted };
+    return { training: inserted, nectarMissed: missed };
   });
 
 export const attachSupportStrategyDocument = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({
+    organizationId: z.string().uuid(),
     clientId: z.string().uuid(),
     fileName: z.string().min(1).max(300),
     storagePath: z.string().min(1).max(500),
@@ -834,9 +888,10 @@ export const attachSupportStrategyDocument = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { ok: false, documentId: null };
-    const m = await getMembership(supabase, userId);
+    const m = await getMembership(supabase, userId, data.organizationId);
     adminGuard(m.access_level);
     await assertClientInOrg(supabase, data.clientId, m.organization_id);
+    await guardClient(supabase, userId, m.organization_id, data.clientId, "edit");
 
     const { data: doc, error: dErr } = await supabase
       .from("client_documents")
@@ -857,7 +912,7 @@ export const attachSupportStrategyDocument = createServerFn({ method: "POST" })
       { id: sid(), title: "Uploaded support strategy", items: [
         { kind: "link", label: "Provider document", links: [{ label: data.fileName, href: null }] },
       ] },
-    ] };
+    ], ...(doc?.id ? { source_document_id: doc.id as string } : {}) };
 
     const { data: existing } = await supabase
       .from("client_specific_trainings")
@@ -869,7 +924,7 @@ export const attachSupportStrategyDocument = createServerFn({ method: "POST" })
     if (existing) {
       const { error: uErr } = await supabase
         .from("client_specific_trainings")
-        .update({ content: linkContent as unknown, status: "draft", approved_by: null, approved_at: null })
+        .update({ content: linkContent as unknown, draft_content: null, status: "draft", approved_by: null, approved_at: null })
         .eq("id", existing.id);
       if (uErr) throw new Error(uErr.message);
     } else {
@@ -907,10 +962,17 @@ async function assertStaffMayViewClient(
   supabase: AnySupabase,
   orgId: string,
   userId: string,
-  role: string,
+  access: { level: string; scope: string },
   clientId: string,
 ): Promise<void> {
-  if (isAdminLevel(role)) return;
+  await assertClientInOrg(supabase, clientId, orgId);
+  if (isAdminLevel(access.level)) {
+    // Whole-agency admins see every client; scoped admins only theirs.
+    if (access.scope === "agency") return;
+    const { data: seen, error } = await supabase.rpc("access_can_see_client", { _client: clientId, _user: userId });
+    if (error) throw new Error("Access check failed.");
+    if (seen === true) return;
+  }
   // Direct assignment first (cheap).
   const { data: direct } = await supabase
     .from("staff_assignments")
@@ -922,7 +984,7 @@ async function assertStaffMayViewClient(
   if (direct && direct.length) return;
   // Group-home fallback via the SECURITY DEFINER RPC.
   const { data: scoped, error: rpcErr } = await supabase
-    .rpc("clients_for_staff", { _org: orgId, _staff: userId });
+    .rpc("clients_for_staff", { _org: orgId, _staff: userId }).is("deleted_at", null);
   if (rpcErr) throw new Error("Access check failed.");
   const list = (scoped as Array<{ id: string }> | null) ?? [];
   if (!list.some((c) => c.id === clientId)) {
@@ -992,15 +1054,16 @@ async function ensureClientTrainingRequirementId(
 export const getStaffClientSpecificTraining = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({
+    organizationId: z.string().uuid(),
     clientId: z.string().uuid(),
     trainingType: z.enum(["person_specific", "support_strategies", "person_centered"]).optional(),
   }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { training: null, completion: null, hash: null, pinnedToCurrent: false };
-    const m = await getMembership(supabase, userId);
+    const m = await getMembership(supabase, userId, data.organizationId);
     // HARD scope check — admin/manager bypass; staff must be assigned.
-    await assertStaffMayViewClient(supabase, m.organization_id, userId, m.access_level, data.clientId);
+    await assertStaffMayViewClient(supabase, m.organization_id, userId, m.access, data.clientId);
 
     const trainingType = data.trainingType ?? "person_specific";
 
@@ -1056,6 +1119,7 @@ export const getStaffClientSpecificTraining = createServerFn({ method: "GET" })
 export const completeClientSpecificTraining = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({
+    organizationId: z.string().uuid(),
     clientId: z.string().uuid(),
     trainingType: z.enum(["person_specific", "support_strategies", "person_centered"]).optional(),
     typedSignature: z.string().trim().min(3).max(120),
@@ -1066,9 +1130,9 @@ export const completeClientSpecificTraining = createServerFn({ method: "POST" })
     if (!supabase || !userId) {
       return { ok: false as const, completionId: null, requirementId: null, contentHash: null };
     }
-    const m = await getMembership(supabase, userId);
+    const m = await getMembership(supabase, userId, data.organizationId);
     // Re-verify assignment scope at write time.
-    await assertStaffMayViewClient(supabase, m.organization_id, userId, m.access_level, data.clientId);
+    await assertStaffMayViewClient(supabase, m.organization_id, userId, m.access, data.clientId);
 
     const trainingType = data.trainingType ?? "person_specific";
 
@@ -1151,7 +1215,7 @@ export const completeClientSpecificTraining = createServerFn({ method: "POST" })
       .eq("client_id", data.clientId)
       .limit(1)
       .maybeSingle();
-    const completedDate = new Date().toISOString().slice(0, 10);
+    const completedDate = denverYmd();
     if (existingScc?.id) {
       const { error: uErr } = await supabaseAdmin
         .from("staff_checklist_completion")
@@ -1272,10 +1336,11 @@ async function closeMatchingClientFormObligations(
 // Used by the staff training hub to show "Start" / "Completed" links.
 export const getMyClientTrainingStatuses = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((d: unknown) => z.object({ organizationId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { items: [] as Array<{ clientId: string; clientName: string; trainings: Array<{ type: "person_specific" | "support_strategies"; label: string; setupStatus: "not_setup" | "draft" | "published"; completionStatus: "not_started" | "completed"; completedAt: string | null }> }> };
-    const m = await getMembership(supabase, userId);
+    const m = await getMembership(supabase, userId, data.organizationId);
 
     let clientIds: string[] = [];
     if (isAdminLevel(m.access_level)) {
@@ -1295,7 +1360,7 @@ export const getMyClientTrainingStatuses = createServerFn({ method: "GET" })
       clientIds = [...new Set((assigns ?? []).map((a: { client_id: string }) => a.client_id))] as string[];
       // Group-home fallback via RPC.
       try {
-        const { data: rpcClients } = await supabase.rpc("clients_for_staff", { _org: m.organization_id, _staff: userId });
+        const { data: rpcClients } = await supabase.rpc("clients_for_staff", { _org: m.organization_id, _staff: userId }).is("deleted_at", null);
         if (Array.isArray(rpcClients)) {
           const rpcIds = (rpcClients as Array<{ id: string }>).map((c) => c.id);
           clientIds = [...new Set([...clientIds, ...rpcIds])];
@@ -1308,6 +1373,7 @@ export const getMyClientTrainingStatuses = createServerFn({ method: "GET" })
     const { data: clients } = await supabase
       .from("clients")
       .select("id, first_name, last_name")
+      .is("deleted_at", null)
       .in("id", clientIds);
     const clientMap: Record<string, string> = {};
     for (const c of (clients ?? []) as Array<{ id: string; first_name: string | null; last_name: string | null }>) {

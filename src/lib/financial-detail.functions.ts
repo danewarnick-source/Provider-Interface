@@ -67,6 +67,7 @@ async function loadMonthData(
     supabase
       .from("clients")
       .select("id, first_name, last_name")
+      .is("deleted_at", null)
       .eq("organization_id", organizationId),
     supabase
       .from("client_billing_codes")

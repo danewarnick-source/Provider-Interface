@@ -4,13 +4,15 @@ import { Input } from "@/components/ui/input";
 import { EvidenceStatusChip } from "@/components/evidence/evidence-status-chip.tsx";
 import { dueSubtitleFromItem } from "@/lib/evidence/due.ts";
 import { itemsBySubject, personRowSubtitle, rowSummaryChips } from "@/lib/evidence/matrix.ts";
-import { latestFileForItem, matrixChip } from "@/lib/evidence/status.ts";
+import { latestFileForItem } from "@/lib/evidence/status.ts";
+import { evidenceChip, type StrategySendState } from "@/lib/clients/strategy-sends";
 import type { EvidenceFileRow, EvidenceItemRow, EvidencePerson } from "@/lib/evidence/types.ts";
 
 export function EvidenceRoster({
   people,
   items,
   files,
+  strategyStates,
   today,
   search,
   onSearchChange,
@@ -28,6 +30,8 @@ export function EvidenceRoster({
   people: EvidencePerson[];
   items: EvidenceItemRow[];
   files: EvidenceFileRow[];
+  /** Clients: support strategies send state by client id (strategy-sends.ts). */
+  strategyStates?: Readonly<Record<string, StrategySendState>>;
   today: string;
   search: string;
   onSearchChange: (value: string) => void;
@@ -80,6 +84,7 @@ export function EvidenceRoster({
                 person={person}
                 rows={bySubject.get(person.id) ?? []}
                 files={files}
+                strategyStates={strategyStates}
                 today={today}
                 expanded={selectedId === person.id}
                 onToggle={() => onTogglePerson(person.id)}
@@ -99,6 +104,7 @@ function PersonAccordion({
   person,
   rows,
   files,
+  strategyStates,
   today,
   expanded,
   onToggle,
@@ -109,6 +115,7 @@ function PersonAccordion({
   person: EvidencePerson;
   rows: EvidenceItemRow[];
   files: EvidenceFileRow[];
+  strategyStates?: Readonly<Record<string, StrategySendState>>;
   today: string;
   expanded: boolean;
   onToggle: () => void;
@@ -117,7 +124,7 @@ function PersonAccordion({
   onSend: (person: EvidencePerson, itemIds: string[], titles: string[]) => void;
 }) {
   const chips = rows.map((row) =>
-    matrixChip({ item: row, file: latestFileForItem(files, row.id), today }),
+    evidenceChip({ item: row, file: latestFileForItem(files, row.id), today }, strategyStates),
   );
   const summary = rowSummaryChips(chips);
   const subtitle = personRowSubtitle({
@@ -174,11 +181,10 @@ function PersonAccordion({
             <p className="text-sm text-[var(--hive-text-muted)]">No selected records yet.</p>
           ) : (
             rows.map((row) => {
-              const chip = matrixChip({
-                item: row,
-                file: latestFileForItem(files, row.id),
-                today,
-              });
+              const chip = evidenceChip(
+                { item: row, file: latestFileForItem(files, row.id), today },
+                strategyStates,
+              );
               return (
                 <div
                   key={row.id}

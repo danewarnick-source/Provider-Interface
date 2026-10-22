@@ -96,6 +96,7 @@ function BillingLockedPage() {
       const { data: memberships } = await supabase
         .from("organization_members")
         .select("organization_id, access_level, organizations(name, is_demo, display_acronym)")
+        .is("deleted_at", null)
         .eq("user_id", session.user.id)
         .eq("active", true);
       const ms = (memberships ?? []) as Array<{

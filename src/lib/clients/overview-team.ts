@@ -38,6 +38,28 @@ async function evidenceFor(sb: Sb, orgId: string, staffIds: string[]) {
   return { items, files };
 }
 
+/** "Full Name", falling back to first + last, then "Team member". */
+export function personName(
+  p: { full_name: string | null; first_name: string | null; last_name: string | null } | undefined,
+): string {
+  return (
+    p?.full_name?.trim() || `${p?.first_name ?? ""} ${p?.last_name ?? ""}`.trim() || "Team member"
+  );
+}
+
+/** Names for these user ids (profiles only; never embedded in another query). */
+export async function loadPeopleNames(
+  sb: Sb,
+  ids: readonly string[],
+): Promise<Map<string, string>> {
+  const unique = [...new Set(ids.filter(Boolean))];
+  if (!unique.length) return new Map();
+  const found = await rows<Pick<Profile, "id" | "full_name" | "first_name" | "last_name">>(
+    sb.from("profiles").select("id, full_name, first_name, last_name").in("id", unique),
+  ).catch(() => []);
+  return new Map(found.map((p) => [p.id, personName(p)]));
+}
+
 export async function loadOverviewTeam(
   sb: Sb,
   orgId: string,
@@ -98,10 +120,7 @@ export async function loadOverviewTeam(
   return staffIds
     .map((id) => {
       const p = byId.get(id);
-      const name =
-        p?.full_name?.trim() ||
-        `${p?.first_name ?? ""} ${p?.last_name ?? ""}`.trim() ||
-        "Team member";
+      const name = personName(p);
       const codes = [...new Set((codesBy.get(id) ?? []).flatMap((a) => a.service_codes ?? []))];
       if (!evidence) {
         return { id, name, codes, readyAlone: false, readinessLabel: "Readiness not available" };

@@ -4,7 +4,7 @@
 //
 // Used by:
 //  - per-client document upload (src/lib/nectar-documents.functions.ts)
-//  - Smart Import commit (src/lib/smart-import-commit.functions.ts)
+//  - client upload helpers (src/lib/import-checklist.functions.ts)
 //
 // Behavior:
 //  - Confidence-gated (>= 0.6) for AI-sourced fields.
@@ -14,10 +14,14 @@
 // =============================================================
 
 import { enrichNamesFromFull, firstNameWithMiddle } from "@/lib/person-name";
-import { activeContacts, guardianSatisfied, loadClientContacts } from "./contacts";
+import { denverYmd } from "@/lib/denver-date";
+import { activeContacts, loadClientContacts } from "./contacts";
+import { guardianGap, guardianStatus } from "./guardian";
 import { applyContactMergePlan, planContactMerge } from "./contacts-merge";
 import { loadActiveCodesAsService } from "./codes";
 import { appendGoalsToCurrentPlan } from "./plans-write";
+import { howTakenFromImport, scheduledTimesFromImport } from "@/lib/medications/import-map";
+import { supportLevelForHowTaken } from "@/lib/medications/med-rules";
 import {
   LEGACY_ALERT_KEY,
   LEGACY_CONTACT_KEYS,
@@ -142,14 +146,6 @@ function asString(v: unknown): string | null {
   return s ? s : null;
 }
 
-function timeFromAny(v: unknown): string | null {
-  const s = asString(v);
-  if (!s) return null;
-  const m = s.match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);
-  if (!m) return null;
-  return `${m[1].padStart(2, "0")}:${m[2]}`;
-}
-
 function boolFromAny(v: unknown): boolean {
   if (typeof v === "boolean") return v;
   if (typeof v === "string") return ["true", "yes", "y", "1", "prn"].includes(v.trim().toLowerCase());
@@ -222,9 +218,9 @@ export async function applyExtractedFieldsToClient(
   const { data: client, error: cErr } = await supabase
     .from("clients")
     .select(
-      "id, first_name, last_name, date_of_birth, medicaid_id, phone_number, physical_address, mailing_address, " +
+      "id, first_name, last_name, date_of_birth, medicaid_id, phone_number, physical_address, " +
       "is_own_guardian, " +
-      "special_directions, allergies, dysphagia, swallowing_alerts, self_admin_med_support, " +
+      "special_directions, allergies, dysphagia, swallowing_alerts, diets, mobility, " +
       "team_id, " +
       "bsp_status, insurance, about_me, housing_voucher, " +
       "plan_year, disability_category, staff_ratio, " +
@@ -360,7 +356,6 @@ export async function applyExtractedFieldsToClient(
   setScalarText("medicaid_id", "medicaid_id");
   setScalarText("phone_number", "phone");
   setScalarText("physical_address", "physical_address");
-  setScalarText("mailing_address", "mailing_address");
 
   const isOwn = byKey.get("is_own_guardian");
   const isOwnVal = isOwn ? fieldBool(isOwn) : null;
@@ -389,12 +384,22 @@ export async function applyExtractedFieldsToClient(
   setScalarText("special_directions", LEGACY_ALERT_KEY);
   if (!update.special_directions) setScalarText("special_directions", "special_directions");
   setScalarBool("dysphagia", "dysphagia");
-  setScalarBool("self_admin_med_support", "self_admin_med_support");
 
   const allergiesF = byKey.get("allergies");
   if (allergiesF) mergeArrayColumn("allergies", fieldArray(allergiesF) ?? []);
   const swallowF = byKey.get("swallowing_alerts");
   if (swallowF) mergeArrayColumn("swallowing_alerts", fieldArray(swallowF) ?? []);
+  // Diet and mobility land in the Health tab's columns (adaptive equipment
+  // joins mobility).
+  const dietF = byKey.get("dietary_restrictions");
+  if (dietF) mergeArrayColumn("diets", fieldArray(dietF) ?? []);
+  mergeArrayColumn(
+    "mobility",
+    ["mobility_notes", "adaptive_equipment"].flatMap((k) => {
+      const f = byKey.get(k);
+      return f ? (fieldArray(f) ?? []) : [];
+    }),
+  );
 
   const goals = ok
     .filter((f) => f.field_key === "pcsp_goal")
@@ -632,7 +637,7 @@ export async function applyExtractedFieldsToClient(
     // Close any existing authorization rows for codes NOT in the new doc.
     // Only authoritative documents (PCSP / 1056) ever close stale rows.
     if (isAuthoritative) {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = denverYmd();
       const { data: existingCodeRows } = await supabase
         .from("client_billing_codes")
         .select("id, service_code, service_end_date")
@@ -723,10 +728,8 @@ export async function applyExtractedFieldsToClient(
         const dosage = asString(row.dosage ?? row.dose);
         const key = `${name.toLowerCase()}|${(dosage || "").toLowerCase()}`;
         if (seen.has(key)) continue;
-        const scheduledTime = timeFromAny(row.scheduled_time ?? row.schedule);
-        const scheduledTimes = Array.isArray(row.scheduled_times)
-          ? row.scheduled_times.map(timeFromAny).filter((t): t is string => !!t)
-          : (scheduledTime ? [scheduledTime] : []);
+        const scheduledTimes = scheduledTimesFromImport(row);
+        const howTaken = howTakenFromImport(row.support_level);
         const instructions = asString(row.instructions) ?? asString(row.support_explanation) ?? asString(row.schedule);
         const supportExplanation = asString(row.support_explanation) ?? instructions ?? "Review medication support instructions from the source document.";
         const { error: medErr } = await supabase.from("client_medications").insert({
@@ -736,11 +739,12 @@ export async function applyExtractedFieldsToClient(
           dosage,
           route: asString(row.route),
           frequency: asString(row.frequency ?? row.schedule),
-          scheduled_time: scheduledTime,
+          scheduled_time: scheduledTimes[0] ?? null,
           scheduled_times: scheduledTimes,
           prescriber: asString(row.prescriber),
           instructions,
-          support_level: asString(row.support_level),
+          how_taken: howTaken,
+          support_level: supportLevelForHowTaken(howTaken),
           support_explanation: supportExplanation,
           is_prn: boolFromAny(row.is_prn),
           prn_instructions: asString(row.prn_instructions),
@@ -868,7 +872,7 @@ export async function applyExtractedFieldsToClient(
     if (m) {
       const ratio_staff = parseInt(m[1], 10);
       const ratio_clients = parseInt(m[2], 10);
-      const today = new Date().toISOString().slice(0, 10);
+      const today = denverYmd();
       const { error: rErr } = await supabase.from("client_ratios").insert({
         organization_id: organizationId,
         client_id: clientId,
@@ -929,10 +933,13 @@ export async function applyExtractedFieldsToClient(
   // extracted is lost. Unknown keys are logged once so we can detect future drops.
   const KNOWN_CORE = new Set<string>([
     "first_name", "last_name", "full_name", "dob", "date_of_birth", "medicaid_id", "phone",
-    "physical_address", "mailing_address",
+    "physical_address",
+    // Mailing address is no longer kept: known so it is dropped, not turned into a custom field.
+    "mailing_address",
     // Contacts (→ client_contacts) and the must-knows alert (→ special_directions)
     ...Object.keys(LEGACY_CONTACT_KEYS), LEGACY_ALERT_KEY,
     "is_own_guardian",
+    // self_admin_med_support is known so it is dropped: support is per medication (how_taken).
     "special_directions", "dysphagia", "self_admin_med_support",
     "allergies", "swallowing_alerts", "pcsp_goal",
     "billing_code_row", "service_code", "rate", "max_units", "unit_type",
@@ -1085,10 +1092,10 @@ export async function applyExtractedFieldsToClient(
         dysphagia: cur.dysphagia === true,
         swallowing_alerts: Array.isArray(cur.swallowing_alerts) && cur.swallowing_alerts.length > 0,
         [LEGACY_ALERT_KEY]: !!(cur.special_directions && String(cur.special_directions).trim()),
-        guardian: guardianSatisfied(
-          cur.is_own_guardian,
-          activeContacts(await loadClientContacts(supabase, [clientId])),
-        ),
+        guardian:
+          guardianGap(
+            guardianStatus(cur.is_own_guardian, await loadClientContacts(supabase, [clientId])),
+          ) === null,
       };
       for (const k of customKeys) hasMap[k] = customHas.has(k);
 

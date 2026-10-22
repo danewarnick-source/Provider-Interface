@@ -1,8 +1,10 @@
-// Client Overview: needs-attention cards (click → section), units left per
-// code with today's pace, must-knows, coming up, team and the last notes.
+// Client Overview: the collapsed "Needs attention (N)" button, the support
+// strategies "Sent to …" line once sent, must-knows
+// (lead, full width), then Units left | Coming up, then Team | Last notes.
 // Draws getClientOverview as it is; no counting here.
 
 import type { ClientOverview } from "@/lib/clients/overview";
+import { sentLine } from "@/lib/clients/strategy-sends";
 import type { ClientProfileSection } from "@/lib/clients/profile-sections";
 import type { ClientProfileData } from "@/components/clients/profile/use-client-profile";
 import { AttentionCards } from "./attention-cards";
@@ -26,23 +28,39 @@ export function OverviewSection({
   onSelect: (section: ClientProfileSection) => void;
 }) {
   return (
-    <div className="space-y-4" data-testid="client-section-overview">
+    <div className="flex flex-col gap-5" data-testid="client-section-overview">
       {error ? (
         <p className="text-sm text-destructive">Couldn't load the overview. Please try again.</p>
       ) : (
         <AttentionCards items={overview?.attention ?? []} loading={loading} onSelect={onSelect} />
       )}
-      <div className="grid gap-4 lg:grid-cols-2">
-        <MustKnowsCard
-          orgId={orgId}
-          clientId={data.client.id}
-          text={data.client.special_directions}
+      {overview?.strategies?.kind === "sent" ? (
+        <button
+          type="button"
+          className="self-start text-left text-sm text-muted-foreground hover:underline"
+          onClick={() => onSelect("plans")}
+          data-testid="overview-strategies-sent"
+        >
+          Support strategies: {sentLine(overview.strategies)}
+        </button>
+      ) : null}
+      <MustKnowsCard
+        orgId={orgId}
+        clientId={data.client.id}
+        text={data.client.special_directions}
+      />
+      <div className="grid gap-5 md:grid-cols-2">
+        <UnitsCard
+          paces={overview?.paces ?? []}
+          loading={loading}
+          onOpenServices={() => onSelect("services")}
         />
-        <UnitsCard paces={overview?.paces ?? []} loading={loading} />
         <ComingUpCard items={overview?.comingUp ?? []} onSelect={onSelect} />
-        <TeamCard team={overview?.team ?? []} onSelect={onSelect} />
       </div>
-      <LastNotesCard notes={overview?.lastNotes ?? []} onSelect={onSelect} />
+      <div className="grid gap-5 md:grid-cols-2">
+        <TeamCard team={overview?.team ?? []} onSelect={onSelect} />
+        <LastNotesCard notes={overview?.lastNotes ?? []} onSelect={onSelect} />
+      </div>
     </div>
   );
 }

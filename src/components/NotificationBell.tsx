@@ -194,12 +194,14 @@ export function NotificationBell({
   // UPI attestation cadence reminders (prompts 20/21/25) — SEI monthly
   // summary, SEI employment data, and CMP/CMS monthly summary. These only
   // fire into the bell on the 1st/5th/10th of the month; the Deadlines panel
-  // shows the underlying item every day it's open.
+  // shows the underlying item every day it's open. A Support Coordinator
+  // summary not marked sent is in the bell every day from day 10 after the
+  // period (critical once overdue) until it is marked sent.
   const { items: deadlineItems } = useDeadlines({ enabled: deadlinesEnabled });
   const cadenceSynthetics = useMemo<AppNotification[]>(() => {
-    if (!isUpiReminderFireDay(new Date())) return [];
+    const fireDay = isUpiReminderFireDay(new Date());
     return deadlineItems
-      .filter((i) => i.cadenceReminder)
+      .filter((i) => i.scReminder || (fireDay && i.cadenceReminder))
       .map((i) => ({
         id: `__cadence_${i.key}__`,
         organization_id: org?.organization_id ?? "",

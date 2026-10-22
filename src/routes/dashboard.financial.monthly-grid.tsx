@@ -59,6 +59,7 @@ function MonthlyGridPage() {
         .from("clients")
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .select("id, first_name, last_name" as any)
+        .is("deleted_at", null)
         .eq("organization_id", org!.organization_id)
         .order("last_name");
       if (error) throw error;

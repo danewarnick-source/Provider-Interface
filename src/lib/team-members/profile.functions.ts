@@ -123,6 +123,7 @@ export const getTeamMemberProfile = createServerFn({ method: "POST" })
         admin
           .from("organization_members")
           .select("id, user_id, active")
+          .is("deleted_at", null)
           .eq("organization_id", orgId),
         admin.from("access_presets").select("id, name").eq("organization_id", orgId),
         admin.from("teams").select("id, team_name, active").eq("organization_id", orgId),

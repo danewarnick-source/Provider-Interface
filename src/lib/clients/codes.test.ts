@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import {
   activeCodesForClient,
   activeCodesForClients,
+  authorizationCovers,
   isActiveCodeRow,
   loadActiveCodes,
   loadActiveCodesAsService,
@@ -95,5 +96,22 @@ describe("loadActiveCodesAsService", () => {
     assert.deepEqual(m.get("a"), ["HHS"]);
     assert.deepEqual(m.get("b"), []);
     assert.deepEqual(calls, ["from client_billing_codes", "select client_id, service_code, service_end_date", "in client_id=a,b"]);
+  });
+});
+
+describe("authorizationCovers (end date inclusive)", () => {
+  it("keeps a code on its last authorized day", () => {
+    assert.equal(authorizationCovers("2026-10-14", "2026-10-14"), true);
+  });
+  it("keeps open-ended and future end dates", () => {
+    assert.equal(authorizationCovers(null, "2026-10-14"), true);
+    assert.equal(authorizationCovers(undefined, "2026-10-14"), true);
+    assert.equal(authorizationCovers("2026-10-15", "2026-10-14"), true);
+  });
+  it("drops a code the day after it ends", () => {
+    assert.equal(authorizationCovers("2026-10-13", "2026-10-14"), false);
+  });
+  it("compares only the date part of a timestamp", () => {
+    assert.equal(authorizationCovers("2026-10-14T00:00:00+00:00", "2026-10-14"), true);
   });
 });

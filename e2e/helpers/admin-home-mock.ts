@@ -61,13 +61,6 @@ const ORG = {
   welcome_dismissed_at: null as string | null,
 };
 
-const EMPTY_AUDIT_EVIDENCE = {
-  generated_at: new Date().toISOString(),
-  items: {},
-  people: [],
-  homes: [],
-};
-
 const EMPTY_AUDIT_SUMMARY = {
   generatedAt: new Date().toISOString(),
   scope: {},
@@ -825,7 +818,6 @@ function serverFnName(url: string, postText: string): string | null {
     "getMyEntitlements",
     "checkHiveExecutive",
     "getMyOrgFeatures",
-    "getAuditEvidenceSnapshot",
     "getOrgServiceFootprint",
     "listStaffGroups",
     "getInboxUnreadCount",
@@ -1070,8 +1062,6 @@ function serverFnResult(
       return { isExecutive: mockIsExecutive };
     case "getMyOrgFeatures":
       return orgFeaturesPayload();
-    case "getAuditEvidenceSnapshot":
-      return EMPTY_AUDIT_EVIDENCE;
     case "getOrgServiceFootprint":
       return { codes: ["DSI", "HHS", "SEI", "SLH", "SLN"], hasAbiClients: false };
     case "listStaffGroups":

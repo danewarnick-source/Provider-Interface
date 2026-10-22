@@ -5,7 +5,8 @@
 
 import type { LastYearGoal } from "./parser-shared.ts";
 
-export type CarryKind = "continuing" | "changed" | "new";
+/** "carried": the same goal as last year (its progress history continues); "new": starts fresh. */
+export type CarryKind = "carried" | "new";
 
 export interface CarryProposal {
   /** Index into the new PCSP's goals. */
@@ -42,7 +43,6 @@ export function goalSimilarity(a: string, b: string): number {
   return both / (wa.size + wb.size - both);
 }
 
-const SAME = 0.9;
 const CHANGED = 0.5;
 /** A goal last year's review marked ongoing may match on less overlap. */
 const CHANGED_IF_ONGOING = 0.3;
@@ -87,10 +87,16 @@ export function proposeCarryOver(
       const p = usedNew.get(index);
       if (!p) return { index, kind: "new", fromGoalId: null, fromGoalText: null, similarity: 0, ongoing: null };
       return {
-        index, kind: p.sim >= SAME ? "continuing" : "changed", fromGoalId: p.c.id, fromGoalText: p.c.goal_text,
+        index, kind: "carried", fromGoalId: p.c.id, fromGoalText: p.c.goal_text,
         similarity: round(p.sim), ongoing: ongoing.get(p.c.id) ?? null,
       };
     }),
     ended: current.filter((c) => !usedCur.has(c.id)).map((c) => ({ goalId: c.id, goalText: c.goal_text, ongoing: ongoing.get(c.id) ?? null })),
   };
+}
+
+/** Same wording, ignoring case, spacing and end punctuation ("Last year:" shows only when not). */
+export function sameWording(a: string | null | undefined, b: string | null | undefined): boolean {
+  const n = (s: string | null | undefined) => (s ?? "").toLowerCase().replace(/\s+/g, " ").replace(/[.\s]+$/, "").trim();
+  return n(a) === n(b);
 }

@@ -1,4 +1,4 @@
-// Upload a 1056 → Nectar reads it (every value quoted from the PDF) → hold
+// Upload a 1056 (to storage, then the server reads it) → Nectar reads it (every value quoted from the PDF) → hold
 // the editable review → confirm. Authorizations are written only on confirm.
 
 import { useState } from "react";
@@ -6,8 +6,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { confirm1056, read1056, type Read1056Result } from "@/lib/clients/budget-parse.functions";
-import { initial1056Review, type Review1056 } from "@/lib/clients/auth-1056";
-import { fileToBase64 } from "@/components/clients/shared/file-to-base64";
+import { budget1056Folder, initial1056Review, type Review1056 } from "@/lib/clients/auth-1056";
+import { uploadPdfToFolder } from "@/components/clients/shared/upload-pcsp";
 
 export function use1056Import(orgId: string, clientId: string, onSaved: () => void) {
   const qc = useQueryClient();
@@ -21,13 +21,14 @@ export function use1056Import(orgId: string, clientId: string, onSaved: () => vo
   async function upload(file: File) {
     setReading(true);
     try {
+      // The PDF goes to storage first; the server reads it from there.
+      const storagePath = await uploadPdfToFolder(
+        budget1056Folder(orgId, clientId),
+        file,
+        "Upload the 1056 as a PDF.",
+      );
       const res = await readFn({
-        data: {
-          organizationId: orgId,
-          clientId,
-          fileName: file.name,
-          fileBase64: await fileToBase64(file),
-        },
+        data: { organizationId: orgId, clientId, fileName: file.name, storagePath },
       });
       setRead(res);
       setReview(initial1056Review(res.read, res.agencyCodes));

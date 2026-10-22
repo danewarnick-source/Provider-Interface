@@ -11,11 +11,10 @@ import { assertCanManageClient } from "./guards.server";
 import { assertRowsChanged } from "./writes";
 import {
   authorizationProblems,
-  authorizationState,
   authorizationValues,
   endProblems,
-  normalizeCode,
 } from "./authorizations";
+import { authorizationSaveTarget } from "./authorization-renewal";
 import { todayYmd } from "./dates";
 import {
   loadAgencyCodes,
@@ -58,8 +57,9 @@ const inputSchema = z.object({
 
 /**
  * Add (no id) or edit (id) an authorization. Adding a code the client already
- * has: an ended row is renewed in place (its old rate and dates go to rate
- * history); an open row must be edited or ended first.
+ * has renews an ended row as a new period (authorization-renewal.ts: it must
+ * start after the old one ended; a trigger keeps the old period, 1056 number
+ * included, in history); an open row must be edited or ended first.
  */
 export const saveAuthorization = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -80,18 +80,9 @@ export const saveAuthorization = createServerFn({ method: "POST" })
     if (problems.length) throw new Error(problems.join(" "));
 
     const existing = await loadAuthorizationRows(sb, organizationId, clientId);
-    const code = normalizeCode(data.input.code);
-    const sameCode = existing.find(
-      (r) => normalizeCode(r.service_code) === code && r.id !== data.id,
-    );
-    let targetId = data.id;
-    if (!targetId && sameCode) {
-      if (authorizationState(sameCode, todayYmd()) !== "ended")
-        throw new Error(`${code} already has an open authorization. Edit it, or End it first.`);
-      targetId = sameCode.id;
-    } else if (targetId && sameCode) {
-      throw new Error(`${code} already has an authorization row for this client.`);
-    }
+    const target = authorizationSaveTarget(existing, data.id, data.input, todayYmd());
+    if (target.kind === "error") throw new Error(target.message);
+    const targetId = target.kind === "insert" ? null : target.id;
     const values = {
       ...authorizationValues(data.input),
       rate_source: "Entered by hand",

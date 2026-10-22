@@ -20,7 +20,6 @@ const ID = {
   topicId: process.env.STAGING_TOPIC_ID ?? "00000000-0000-0000-0000-000000000006",
   formId: process.env.STAGING_FORM_ID ?? "00000000-0000-0000-0000-000000000007",
   programId: process.env.STAGING_PROGRAM_ID ?? "00000000-0000-0000-0000-000000000008",
-  jobId: process.env.STAGING_JOB_ID ?? "00000000-0000-0000-0000-000000000009",
   trackSlug: process.env.STAGING_TRACK_SLUG ?? "placeholder-track",
   trainingId: process.env.STAGING_TRAINING_ID ?? "00000000-0000-0000-0000-000000000010",
   stateCode: process.env.STAGING_STATE_CODE ?? "UT",
@@ -55,7 +54,6 @@ const STATIC_ROUTES: string[] = [
   "/dashboard/daily-logs",
   "/dashboard/day-program",
   "/dashboard/deadlines",
-  "/dashboard/emar",
   "/dashboard/evv-archive",
   "/dashboard/external-compliance",
   "/dashboard/help",
@@ -77,9 +75,6 @@ const STATIC_ROUTES: string[] = [
   "/dashboard/summaries",
   "/dashboard/teams",
   "/dashboard/timeclock",
-  // Admin sub-routes
-  "/dashboard/admin/emar-audit",
-
   // Billing
   "/dashboard/billing",
   "/dashboard/billing/form520",
@@ -113,7 +108,6 @@ const STATIC_ROUTES: string[] = [
   "/dashboard/hive-exec",
   "/dashboard/hive-exec/approvals",
   "/dashboard/hive-exec/base-template",
-  "/dashboard/hive-exec/company-migration",
   "/dashboard/hive-exec/health",
   "/dashboard/hive-exec/messages",
   "/dashboard/hive-exec/nectar",
@@ -140,10 +134,6 @@ const STATIC_ROUTES: string[] = [
   "/dashboard/hub/clients",
   "/dashboard/hub/finances",
   "/dashboard/hub/knowledge",
-
-  // Smart import
-  "/dashboard/smart-import",
-  "/dashboard/smart-import/history",
 ];
 
 // Parameterised routes — each entry includes the rendered URL and whether it's
@@ -159,8 +149,6 @@ const PARAM_ROUTES: Array<{ url: string; isDetail: boolean }> = [
   { url: `/dashboard/hive-exec/states/${ID.stateCode}`, isDetail: false },
   { url: `/dashboard/hive-exec/states/${ID.stateCode}/onboarding`, isDetail: true },
   { url: `/dashboard/shift/${ID.shiftId}`, isDetail: true },
-  { url: `/dashboard/smart-import/${ID.jobId}/done`, isDetail: true },
-  { url: `/dashboard/smart-import/${ID.jobId}/review`, isDetail: true },
   { url: `/dashboard/workspace/${ID.clientId}`, isDetail: true },
 ];
 
@@ -250,7 +238,7 @@ async function assertPageHealth(page: Page, url: string, isDetail: boolean): Pro
   }
 
   // eMAR-specific: status badge must follow self-administration model
-  if (url.includes("emar") || url.includes("emar-audit")) {
+  if (url.includes("emar")) {
     const badgeLocator = page.locator(
       '[data-status], .status-badge, [class*="badge"], [class*="status"]',
     );

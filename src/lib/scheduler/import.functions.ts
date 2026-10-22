@@ -55,11 +55,13 @@ export const nectarImportSchedule = createServerFn({ method: "POST" })
       supabase
         .from("organization_members")
         .select("user_id, profiles:profiles!inner(id, first_name, last_name, full_name)")
+        .is("deleted_at", null)
         .eq("organization_id", data.organization_id)
         .eq("active", true),
       supabase
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", data.organization_id),
       supabase
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

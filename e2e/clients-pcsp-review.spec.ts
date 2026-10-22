@@ -24,9 +24,17 @@ test("uploading the sample PCSP shows the review; nothing is written until Confi
   await page.goto(`/dashboard/clients/${CLIENTS.tommy.id}`, { waitUntil: "domcontentloaded" });
   await waitForDashboard(page);
   await page.getByTestId("profile-section-plans").first().click();
-  await expect(page.getByRole("button", { name: /Upload new PCSP/i })).toBeVisible({ timeout: 20_000 });
+  const uploadNew = page.getByRole("button", { name: /Upload new PCSP/i }).first();
+  await expect(uploadNew).toBeVisible({ timeout: 20_000 });
+  // With a plan on file, it explains the new plan year before the file picker.
+  await uploadNew.click();
+  const warn = page.getByTestId("new-pcsp-confirm");
+  await expect(warn.getByText("Upload a new PCSP?")).toBeVisible();
+  await expect(warn.getByText(/within 30 days of the new PCSP's activation date/)).toBeVisible();
+  await warn.getByRole("button", { name: "Cancel" }).click();
+  await expect(warn).toBeHidden();
 
-  await page.getByTestId("pcsp-upload-input").setInputFiles({
+  await page.getByTestId("pcsp-upload-input").first().setInputFiles({
     name: "sample-pcsp.pdf",
     mimeType: "application/pdf",
     buffer: Buffer.from("%PDF-1.4\n% made-up test file\n"),

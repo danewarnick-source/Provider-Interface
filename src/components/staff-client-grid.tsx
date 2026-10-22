@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useCurrentOrg } from "@/hooks/use-org";
 import { useServerFn } from "@tanstack/react-start";
 import { useCaseload, type CaseloadClient } from "@/hooks/use-caseload";
 import { useActiveShift, type ActiveShift } from "@/hooks/use-active-shift";
@@ -444,9 +445,12 @@ export function StaffClientGrid() {
   const { data: todayNotes } = useTodayDailyNoteClients();
   const { data: completedPunches = [] } = useCompletedPunchesToday();
   const fetchCT = useServerFn(getMyClientTrainingStatuses);
+  const { data: currentOrg } = useCurrentOrg();
+  const ctOrgId = currentOrg?.organization_id ?? null;
   const { data: ct } = useQuery({
-    queryKey: ["my-client-training-statuses"],
-    queryFn: () => fetchCT(),
+    queryKey: ["my-client-training-statuses", ctOrgId],
+    enabled: !!ctOrgId,
+    queryFn: () => fetchCT({ data: { organizationId: ctOrgId! } }),
     staleTime: 60_000,
   });
   const trainingsByClient = useMemo(() => {

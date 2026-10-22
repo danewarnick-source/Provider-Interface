@@ -4,5 +4,4 @@
 export * from '../hhs/hhs-attendance-calendar';
 export * from '../hosts/hosts-page';
 export * from '../incidents/admin-incidents-section';
-export * from '../medications/staff-medications-panel';
 export * from '../residential/residential-daily-tab';

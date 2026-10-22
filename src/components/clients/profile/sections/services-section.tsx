@@ -1,18 +1,21 @@
-// Services & billing: authorizations (the 1056) with units used vs. left,
-// pace, dollars and rate history; Fill from 1056; and the monthly budget.
+// Services & billing: the header card, one card per open authorization (the
+// 1056) with units used vs. left and pace, and past authorizations with Renew.
 // Needs Billing: View; changes need Billing: Edit.
 
 import { useAccess } from "@/hooks/use-access";
-import { AuthorizationsCard } from "@/components/clients/profile/services/authorizations-card";
-import { MonthlyBudget } from "@/components/clients/profile/services/monthly-budget";
+import { Authorizations } from "@/components/clients/profile/services/authorizations";
 import type { ClientProfileData } from "@/components/clients/profile/use-client-profile";
 
 export function ServicesSection({ orgId, data }: { orgId: string; data: ClientProfileData }) {
   const canEdit = useAccess().canCategory("billing", "edit");
   return (
-    <div className="space-y-4" data-testid="client-section-services">
-      <AuthorizationsCard orgId={orgId} clientId={data.client.id} canEdit={canEdit} />
-      <MonthlyBudget clientId={data.client.id} clientName={data.name} />
+    <div className="flex flex-col gap-5" data-testid="client-section-services">
+      <Authorizations
+        orgId={orgId}
+        clientId={data.client.id}
+        clientName={data.name}
+        canEdit={canEdit}
+      />
     </div>
   );
 }

@@ -1,57 +1,28 @@
-// Thin server fns used by ImportChecklist + NectarAsk. Each one is
+// Thin server fns used by the client document uploads and NectarAsk. Each one is
 // org-scoped via the user's organization_members row for the client.
-//
-// Honest scope: these fns persist data the admin enters / attaches in the
-// done-page checklist. They do NOT perform document extraction — upload
-// only attaches the file. Extraction is wired in a later prompt.
+import { activeContacts, contactsWithRole, loadClientContacts } from "@/lib/clients/contacts";
 import {
-  CONTACT_ROLE_LABELS,
-  activeContacts,
-  contactsWithRole,
-  isContactRole,
-  loadClientContacts,
-  setContactParts,
-  type ContactRole,
-} from "@/lib/clients/contacts";
-import {
-  LEGACY_ALERT_KEY,
-  LEGACY_CONTACT_KEYS,
-  LEGACY_SINGLE_SOURCE_KEYS,
-  type ContactPart,
-} from "@/lib/clients/legacy-fields";
+  CLIENT_DOCUMENTS_BUCKET,
+  PROFILE_COLUMNS,
+  actionsForReviewedFields,
+  assertReviewableFields,
+  buildProposals,
+  isClientUploadPath,
+  medicationKey,
+  reviewableUploadType,
+  type ProfileFieldMeta,
+  type ReviewField,
+  type ReviewJson,
+} from "@/lib/clients/document-review";
+import { assertCanManageClient, type ManageClientAction } from "@/lib/clients/guards.server";
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { isAdminLevel } from "@/lib/access/levels";
+import { requireOrgMembership } from "@/integrations/supabase/require-org";
+import { denverYmd } from "@/lib/denver-date";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = any;
-
-async function requireAdminForClient(
-  sb: Sb,
-  userId: string,
-  clientId: string,
-): Promise<string> {
-  const { data: client } = await sb
-    .from("clients")
-    .select("organization_id")
-    .eq("id", clientId)
-    .maybeSingle();
-  if (!client) throw new Error("Client not found");
-  const { data: membership } = await sb
-    .from("organization_members")
-    .select("access_level")
-    .eq("organization_id", client.organization_id)
-    .eq("user_id", userId)
-    .eq("active", true)
-    .maybeSingle();
-  if (!membership) throw new Error("Forbidden");
-  const level = (membership as { access_level: string | null }).access_level;
-  if (!isAdminLevel(level)) {
-    throw new Error("Forbidden");
-  }
-  return client.organization_id as string;
-}
 
 // ── End-of-life statuses (DNR / POLST / palliative / hospice) ────────────
 const EOL_FIELDS = ["dnr_status", "polst_status", "palliative_care_status", "hospice_status"] as const;
@@ -72,12 +43,16 @@ export const setEndOfLifeStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as Sb;
     if (!sb || !context.userId) return { ok: false };
-    await requireAdminForClient(sb, context.userId as string, data.clientId);
+    const orgId = await guardClient(sb, context.userId as string, data.clientId, ["edit_medical"]);
     const patch: Record<string, unknown> = { [data.field as EolField]: data.status };
     if (data.field === "dnr_status") {
       patch.dnr_location = data.location ?? null;
     }
-    const { error } = await sb.from("clients").update(patch).eq("id", data.clientId);
+    const { error } = await sb
+      .from("clients")
+      .update(patch)
+      .eq("id", data.clientId)
+      .eq("organization_id", orgId);
     if (error) throw error;
     return { ok: true };
   });
@@ -97,76 +72,79 @@ export const appendClientArrayField = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as Sb;
     if (!sb || !context.userId) return { ok: false, count: 0 };
-    await requireAdminForClient(sb, context.userId as string, data.clientId);
+    const orgId = await guardClient(sb, context.userId as string, data.clientId, ["edit_medical"]);
     const { data: row } = await sb
       .from("clients")
       .select(data.field)
       .eq("id", data.clientId)
+      .eq("organization_id", orgId)
       .maybeSingle();
     const current = (row?.[data.field] as string[] | null) ?? [];
     const next = Array.from(new Set([...current, data.value.trim()]));
     const { error } = await sb
       .from("clients")
       .update({ [data.field]: next })
-      .eq("id", data.clientId);
+      .eq("id", data.clientId)
+      .eq("organization_id", orgId);
     if (error) throw error;
     return { ok: true, count: next.length };
   });
 
-// ── Upsert one client_medications row (manual fill-in path) ──────────────
-export const upsertClientMedication = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) =>
-    z
-      .object({
-        clientId: z.string().uuid(),
-        medicationId: z.string().uuid().optional(),
-        medication_name: z.string().min(1).max(200),
-        dosage: z.string().max(120).optional().nullable(),
-        am_pm: z.string().max(40).optional().nullable(),
-        scheduled_time: z.string().max(80).optional().nullable(),
-        prescriber: z.string().max(120).optional().nullable(),
-        support_level: z.string().max(80).optional().nullable(),
-        support_explanation: z.string().max(2000).optional().nullable(),
-      })
-      .parse(i),
-  )
-  .handler(async ({ data, context }) => {
-    const sb = context.supabase as Sb;
-    if (!sb || !context.userId) return { ok: false, id: null };
-    const orgId = await requireAdminForClient(sb, context.userId as string, data.clientId);
-    const row = {
-      client_id: data.clientId,
-      organization_id: orgId,
-      medication_name: data.medication_name,
-      dosage: data.dosage ?? null,
-      am_pm: data.am_pm ?? null,
-      scheduled_time: data.scheduled_time ?? null,
-      prescriber: data.prescriber ?? null,
-      support_level: data.support_level ?? null,
-      support_explanation: data.support_explanation ?? null,
-    };
-    if (data.medicationId) {
-      const { error } = await sb
-        .from("client_medications")
-        .update(row)
-        .eq("id", data.medicationId);
-      if (error) throw error;
-      return { ok: true, id: data.medicationId };
-    }
-    const { data: ins, error } = await sb
-      .from("client_medications")
-      .insert(row)
-      .select("id")
-      .single();
-    if (error) throw error;
-    return { ok: true, id: ins.id as string };
-  });
+// ── Uploads to the client: attach, then review-then-apply ───────────────
+// attachClientDocument records the file in client_documents straight away, so
+// the upload is kept even when the file can't be read. Nectar's reading of
+// it is only a proposal: previewClientUpdateFromDocument returns a review
+// list and nothing lands in the profile or medications until the person ticks
+// rows and applySelectedClientFields runs. Files are read from the fixed
+// client-documents bucket and must sit in this client's folder.
 
-// ── Attach an uploaded document to the client profile ────────────────────
-// Records the file in client_documents. Extraction is a separate step
-// (extractAndApplyClientUpload below) so the attach succeeds even when the
-// file is a scanned PDF or otherwise unreadable.
+async function clientOrgId(sb: Sb, clientId: string): Promise<string> {
+  const { data: client, error } = await sb
+    .from("clients")
+    .select("organization_id")
+    .eq("id", clientId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!client) throw new Error("Client not found");
+  return client.organization_id as string;
+}
+
+/** assertCanManageClient for each action; returns the client's agency. */
+async function guardClient(
+  sb: Sb,
+  userId: string,
+  clientId: string,
+  actions: readonly ManageClientAction[],
+): Promise<string> {
+  const organizationId = await clientOrgId(sb, clientId);
+  for (const action of actions) {
+    await assertCanManageClient({ supabase: sb, actorId: userId, organizationId, clientId, action });
+  }
+  return organizationId;
+}
+
+/** Whether the caller may also do `action` (no throw). */
+async function mayAlso(
+  sb: Sb,
+  userId: string,
+  organizationId: string,
+  clientId: string,
+  action: ManageClientAction,
+): Promise<boolean> {
+  try {
+    await assertCanManageClient({ supabase: sb, actorId: userId, organizationId, clientId, action });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function assertOwnUpload(path: string, orgId: string, clientId: string) {
+  if (!isClientUploadPath(path, orgId, clientId)) {
+    throw new Error("That file isn't in this client's documents. Upload it again.");
+  }
+}
+
 export const attachClientDocument = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
@@ -182,7 +160,8 @@ export const attachClientDocument = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as Sb;
     if (!sb || !context.userId) return { ok: false, id: null };
-    const orgId = await requireAdminForClient(sb, context.userId as string, data.clientId);
+    const orgId = await guardClient(sb, context.userId as string, data.clientId, ["edit"]);
+    assertOwnUpload(data.storagePath, orgId, data.clientId);
     const { data: ins, error } = await sb
       .from("client_documents")
       .insert({
@@ -200,217 +179,11 @@ export const attachClientDocument = createServerFn({ method: "POST" })
     return { ok: true, id: ins.id as string };
   });
 
-// ── Extract + apply an uploaded document to the client ───────────────────
-// Downloads the file the admin just uploaded via NectarAsk, runs it through
-// the shared NECTAR extractor with a category hint, and writes the results
-// to the right tables. The file is ALREADY attached (via
-// attachClientDocument); this fn only reads + applies content.
-//
-// Honest scope: this is best-effort. If the file is a scanned PDF or
-// otherwise unreadable, the attach already succeeded and the admin can
-// fill values manually — we return { ok: true, applied: false } with a
-// reason instead of throwing.
-const ExtractApplyInput = z.object({
-  clientId: z.string().uuid(),
-  documentType: z.enum([
-    "pcsp", "1056_budget", "mar", "bsp",
-    "immunization", "allergy",
-    "dnr", "polst", "palliative", "hospice",
-    "grievance_acknowledgment", "hrc_approval",
-    "other",
-  ]),
-  storagePath: z.string().min(1).max(500),
-  fileName: z.string().min(1).max(300),
-  bucket: z.string().min(1).max(80).default("client-documents"),
-});
-
-export const extractAndApplyClientUpload = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => ExtractApplyInput.parse(i))
-  .handler(async ({ data, context }) => {
-    const sb = context.supabase as Sb;
-    if (!sb || !context.userId) return { ok: false, applied: false, reason: "Not authenticated." };
-    const orgId = await requireAdminForClient(sb, context.userId as string, data.clientId);
-
-    // 1) Download
-    const { data: file, error: dlErr } = await sb.storage
-      .from(data.bucket)
-      .download(data.storagePath);
-    if (dlErr || !file) {
-      return { ok: true, applied: false, reason: `download failed: ${dlErr?.message ?? "no file"}` };
-    }
-    const buf = Buffer.from(await file.arrayBuffer());
-
-    // 2) Text
-    const { extractTextFromUpload } = await import("@/lib/document-text.server");
-    const text = await extractTextFromUpload(buf, data.fileName);
-    if (!text || text.trim().length < 20) {
-      return {
-        ok: true,
-        applied: false,
-        reason: "NECTAR couldn't read the document text (scanned PDF?). The file is attached; please fill values manually.",
-      };
-    }
-
-    // 3) Extract via the shared NECTAR extractor with a category hint
-    const { parseDocumentWithAI } = await import("@/lib/document-extraction");
-    const parsed = await parseDocumentWithAI(text, `documentType=${data.documentType}`, orgId);
-    const fields = (parsed.fields ?? []).map((f) => ({
-      field_key: f.field_key,
-      value_text: f.value_text ?? null,
-      value_number: f.value_number ?? null,
-      value_date: f.value_date ?? null,
-      value_bool: f.value_bool ?? null,
-      value_array: f.value_array ?? null,
-      value_json: f.value_json ?? null,
-      confidence: f.confidence ?? 0.85,
-    }));
-
-    // 4) Apply, with audit-on-error so nothing vanishes
-    const { applyExtractedFieldsToClient } = await import("@/lib/clients/import-schema");
-    const summary = await applyExtractedFieldsToClient({
-      supabase: sb,
-      organizationId: orgId,
-      clientId: data.clientId,
-      fields,
-      sourceDocumentType: data.documentType,
-      onError: async (action, message) => {
-        try {
-          await sb.from("import_audit").insert({
-            org_id: orgId,
-            item: `[checklist-upload] ${data.documentType} ${data.fileName}: ${message}`,
-            traces_to: "inferred",
-            actor: context.userId,
-            action,
-          });
-        } catch { /* never let audit failure break a save */ }
-      },
-    });
-
-    return {
-      ok: true,
-      applied: true,
-      autofilled: summary.autofilled,
-      suggested: summary.suggested,
-      customCreated: summary.customCreated,
-      fieldCount: fields.length,
-    };
-  });
-
-// ── Profile-tab "Update info from document" (review-then-apply) ──────────
-// Two-step alternative to extractAndApplyClientUpload: previews the diff,
-// then applies only the fields the admin checks. Reuses the same NECTAR
-// extractor + applyExtractedFieldsToClient writer; nothing is written until
-// applySelectedClientFields runs.
-
-// field_key (as emitted by parseDocumentWithAI) → where it lands + label.
-// Matches the mappings in applyExtractedFieldsToClient: a clients column, or a
-// part of a client contact (guardian, emergency, support coordinator, doctors).
-type FieldKind = "text" | "bool" | "date" | "array";
-type ProfileFieldMeta =
-  | { column: string; label: string; kind: FieldKind }
-  | { contact: { role: ContactRole; part: ContactPart; slot: number }; label: string; kind: "text" };
-
-const CONTACT_FIELD_MAP: Record<string, ProfileFieldMeta> = Object.fromEntries(
-  Object.entries(LEGACY_CONTACT_KEYS).map(([key, contact]) => [
-    key,
-    {
-      contact,
-      label: `${CONTACT_ROLE_LABELS[contact.role]}${contact.slot ? " #2" : ""} ${contact.part}`,
-      kind: "text" as const,
-    },
-  ]),
-);
-
-const PROFILE_FIELD_MAP: Record<string, ProfileFieldMeta> = {
-  ...CONTACT_FIELD_MAP,
-  first_name: { column: "first_name", label: "First name", kind: "text" },
-  last_name: { column: "last_name", label: "Last name", kind: "text" },
-  dob: { column: "date_of_birth", label: "Date of birth", kind: "date" },
-  medicaid_id: { column: "medicaid_id", label: "Medicaid ID", kind: "text" },
-  phone: { column: "phone_number", label: "Phone", kind: "text" },
-  physical_address: { column: "physical_address", label: "Physical address", kind: "text" },
-  is_own_guardian: { column: "is_own_guardian", label: "Own guardian", kind: "bool" },
-  [LEGACY_ALERT_KEY]: { column: "special_directions", label: "Must-knows for staff", kind: "text" },
-  special_directions: { column: "special_directions", label: "Special directions", kind: "text" },
-  dysphagia: { column: "dysphagia", label: "Dysphagia", kind: "bool" },
-  self_admin_med_support: { column: "self_admin_med_support", label: "Self-administer med support", kind: "bool" },
-  allergies: { column: "allergies", label: "Allergies", kind: "array" },
-  swallowing_alerts: { column: "swallowing_alerts", label: "Swallowing alerts", kind: "array" },
-  bsp_status: { column: "bsp_status", label: "BSP status", kind: "text" },
-  [LEGACY_SINGLE_SOURCE_KEYS.insurance]: { column: "insurance", label: "Insurance", kind: "text" },
-  housing_voucher: { column: "housing_voucher", label: "Housing voucher", kind: "text" },
-  [LEGACY_SINGLE_SOURCE_KEYS.living]: { column: "about_me", label: "About me (preferred living)", kind: "text" },
-  plan_year: { column: "plan_year", label: "Plan year", kind: "text" },
-  disability_category: { column: "disability_category", label: "Disability category", kind: "text" },
-  staff_ratio: { column: "staff_ratio", label: "Staff ratio", kind: "text" },
-  level_of_need: { column: "level_of_need", label: "Level of need", kind: "text" },
-  dnr_status: { column: "dnr_status", label: "DNR status", kind: "text" },
-  dnr_location: { column: "dnr_location", label: "DNR location", kind: "text" },
-  polst_status: { column: "polst_status", label: "POLST status", kind: "text" },
-  palliative_care_status: { column: "palliative_care_status", label: "Palliative care status", kind: "text" },
-  hospice_status: { column: "hospice_status", label: "Hospice status", kind: "text" },
-  advanced_directives: { column: "advanced_directives", label: "Advanced directives", kind: "bool" },
-  emergency_medical_treatment_authorization: { column: "emergency_medical_treatment_authorization", label: "Emergency medical treatment authorization", kind: "bool" },
-  grievance_acknowledged: { column: "grievance_acknowledged", label: "Grievance acknowledged", kind: "bool" },
-  grievance_signed_date: { column: "grievance_signed_date", label: "Grievance signed date", kind: "date" },
-  diagnoses: { column: "diagnoses", label: "Diagnoses", kind: "array" },
-  chronic_conditions: { column: "chronic_conditions", label: "Chronic conditions", kind: "array" },
-  immunizations: { column: "immunizations", label: "Immunizations", kind: "array" },
-  court_orders: { column: "court_orders", label: "Court orders", kind: "array" },
-  rights_restrictions: { column: "rights_restrictions", label: "Rights restrictions", kind: "array" },
-  [LEGACY_SINGLE_SOURCE_KEYS.activities]: { column: "about_me", label: "About me (activities)", kind: "array" },
-  roommates: { column: "roommates", label: "Roommates", kind: "array" },
-  personal_belongings_inventory: { column: "personal_belongings_inventory", label: "Personal belongings inventory", kind: "array" },
-  admission_date: { column: "admission_date", label: "Admission date", kind: "date" },
-  discharge_date: { column: "discharge_date", label: "Discharge date", kind: "date" },
-  form_1056_number: { column: "form_1056_number", label: "1056 form number", kind: "text" },
-  form_1056_approved_date: { column: "form_1056_approved_date", label: "1056 approved date", kind: "date" },
-};
-
-const CONFIDENCE_THRESHOLD = 0.6;
-
-function displayFromField(meta: { kind: "text" | "bool" | "date" | "array" }, f: {
-  value_text?: string | null;
-  value_number?: number | null;
-  value_date?: string | null;
-  value_bool?: boolean | null;
-  value_array?: string[] | null;
-}): string {
-  if (meta.kind === "bool") {
-    if (f.value_bool === true) return "Yes";
-    if (f.value_bool === false) return "No";
-    return "";
-  }
-  if (meta.kind === "date") {
-    return (f.value_date ?? f.value_text ?? "").toString().slice(0, 10);
-  }
-  if (meta.kind === "array") {
-    return (f.value_array ?? []).filter(Boolean).join(", ");
-  }
-  if (f.value_text) return f.value_text;
-  if (f.value_number !== null && f.value_number !== undefined) return String(f.value_number);
-  return "";
-}
-
-function displayFromCurrent(meta: { kind: "text" | "bool" | "date" | "array" }, cur: unknown): string | null {
-  if (cur === null || cur === undefined || cur === "") return null;
-  if (meta.kind === "bool") return cur === true ? "Yes" : cur === false ? "No" : null;
-  if (meta.kind === "array") {
-    const arr = Array.isArray(cur) ? cur : [];
-    if (!arr.length) return null;
-    return arr.filter(Boolean).join(", ");
-  }
-  if (meta.kind === "date") return String(cur).slice(0, 10);
-  return String(cur);
-}
-
 const PreviewInput = z.object({
   clientId: z.string().uuid(),
   documentType: z.string().min(1).max(80),
   fileName: z.string().min(1).max(300),
   storagePath: z.string().min(1).max(500),
-  bucket: z.string().min(1).max(80).default("client-documents"),
 });
 
 export const previewClientUpdateFromDocument = createServerFn({ method: "POST" })
@@ -419,10 +192,14 @@ export const previewClientUpdateFromDocument = createServerFn({ method: "POST" }
   .handler(async ({ data, context }) => {
     const sb = context.supabase as Sb;
     if (!sb || !context.userId) return { ok: false as const, reason: "Not authenticated." };
-    const orgId = await requireAdminForClient(sb, context.userId as string, data.clientId);
+    const userId = context.userId as string;
+    const orgId = await guardClient(sb, userId, data.clientId, ["edit"]);
+    assertOwnUpload(data.storagePath, orgId, data.clientId);
+    // Medical rows (medications, allergies, DNR…) only for people who may see them.
+    const includeMedical = await mayAlso(sb, userId, orgId, data.clientId, "view_medical");
 
     const { data: file, error: dlErr } = await sb.storage
-      .from(data.bucket)
+      .from(CLIENT_DOCUMENTS_BUCKET)
       .download(data.storagePath);
     if (dlErr || !file) {
       return { ok: false as const, reason: `Could not download file: ${dlErr?.message ?? "no file"}` };
@@ -434,30 +211,27 @@ export const previewClientUpdateFromDocument = createServerFn({ method: "POST" }
     if (!text || text.trim().length < 20) {
       return {
         ok: false as const,
-        reason: "NECTAR couldn't read the document text (scanned PDF?). Try a text-based PDF or fill values manually.",
+        reason: "Nectar couldn't read the document text (scanned PDF?). The file is saved; fill values in yourself.",
       };
     }
 
+    const docType = reviewableUploadType(data.documentType) ?? "other";
     const { parseDocumentWithAI } = await import("@/lib/document-extraction");
-    const parsed = await parseDocumentWithAI(text, `documentType=${data.documentType}`, orgId);
-    const rawFields = (parsed.fields ?? []).map((f) => ({
+    const parsed = await parseDocumentWithAI(text, `documentType=${docType}`, orgId);
+    const rawFields: ReviewField[] = (parsed.fields ?? []).map((f) => ({
       field_key: f.field_key,
       value_text: f.value_text ?? null,
       value_number: f.value_number ?? null,
       value_date: f.value_date ?? null,
       value_bool: f.value_bool ?? null,
       value_array: f.value_array ?? null,
-      value_json: f.value_json ?? null,
+      value_json: (f.value_json ?? null) as ReviewJson,
       confidence: f.confidence ?? 0.85,
     }));
 
-    // Project the columns (and contacts) we might compare against.
-    const columns = Array.from(
-      new Set(Object.values(PROFILE_FIELD_MAP).flatMap((m) => ("column" in m ? [m.column] : []))),
-    );
     const { data: client } = await sb
       .from("clients")
-      .select(["id", ...columns].join(","))
+      .select(["id", ...PROFILE_COLUMNS].join(","))
       .eq("id", data.clientId)
       .maybeSingle();
     const row = (client ?? {}) as Record<string, unknown>;
@@ -467,41 +241,21 @@ export const previewClientUpdateFromDocument = createServerFn({ method: "POST" }
         ? row[meta.column]
         : contactsWithRole(contacts, meta.contact.role)[meta.contact.slot]?.[meta.contact.part];
 
-    type Proposal = {
-      field_key: string;
-      label: string;
-      incomingValue: string;
-      currentValue: string | null;
-      changed: boolean;
-      confidence: number;
-      field: typeof rawFields[number];
-    };
-    const proposals: Proposal[] = [];
-    const seen = new Set<string>();
-    for (const f of rawFields) {
-      if ((f.confidence ?? 0) < CONFIDENCE_THRESHOLD) continue;
-      const meta = PROFILE_FIELD_MAP[f.field_key];
-      if (!meta) continue; // skip complex/structured (billing rows, meds, pcsp_goal)
-      if (seen.has(f.field_key)) continue;
-      seen.add(f.field_key);
-      const incoming = displayFromField(meta, f).trim();
-      if (!incoming) continue;
-      const current = displayFromCurrent(meta, currentOf(meta));
-      const changed = (current ?? "") !== incoming;
-      proposals.push({
-        field_key: f.field_key,
-        label: meta.label,
-        incomingValue: incoming,
-        currentValue: current,
-        changed,
-        confidence: f.confidence ?? 0.85,
-        field: f,
-      });
+    let existingMedicationKeys = new Set<string>();
+    if (includeMedical) {
+      const { data: meds } = await sb
+        .from("client_medications")
+        .select("medication_name, dosage")
+        .eq("organization_id", orgId)
+        .eq("client_id", data.clientId);
+      existingMedicationKeys = new Set(
+        ((meds ?? []) as Array<{ medication_name: string | null; dosage: string | null }>).map((m) =>
+          medicationKey(m.medication_name, m.dosage),
+        ),
+      );
     }
-    // Stable order: changed first, then alphabetical by label.
-    proposals.sort((a, b) =>
-      a.changed === b.changed ? a.label.localeCompare(b.label) : a.changed ? -1 : 1,
-    );
+
+    const proposals = buildProposals({ fields: rawFields, currentOf, existingMedicationKeys, includeMedical });
     return { ok: true as const, proposals };
   });
 
@@ -528,7 +282,15 @@ export const applySelectedClientFields = createServerFn({ method: "POST" })
     const sb = context.supabase as Sb;
     if (!sb || !context.userId)
       return { ok: false, autofilled: 0, suggested: 0, customCreated: 0, appliedCount: 0 };
-    const orgId = await requireAdminForClient(sb, context.userId as string, data.clientId);
+    // Only rows a review can show (profile fields and medications); never
+    // billing codes, goals or home. Medical rows need Client medical: Edit.
+    assertReviewableFields(data.fields);
+    const orgId = await guardClient(
+      sb,
+      context.userId as string,
+      data.clientId,
+      actionsForReviewedFields(data.fields),
+    );
 
     const fields = data.fields.map((f) => ({
       field_key: f.field_key,
@@ -572,107 +334,6 @@ export const applySelectedClientFields = createServerFn({ method: "POST" })
     };
   });
 
-// ── Resolve a merge flag (keep both / merge / replace) ───────────────────
-const ResolveFlag = z.object({
-  flagId: z.string().uuid(),
-  action: z.enum(["keep_both", "merge_into_existing", "replace"]),
-});
-export const resolveMergeFlag = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => ResolveFlag.parse(i))
-  .handler(async ({ data, context }) => {
-    const sb = context.supabase as Sb;
-    if (!sb || !context.userId) return { ok: false };
-    const { data: flag } = await sb
-      .from("import_merge_flags")
-      .select("id, client_id, field, incoming_value, kind")
-      .eq("id", data.flagId)
-      .maybeSingle();
-    if (!flag) throw new Error("Flag not found");
-    await requireAdminForClient(sb, context.userId as string, flag.client_id);
-
-    if (data.action === "replace" && flag.field && flag.incoming_value) {
-      // Only safe to auto-apply on plain text scalar columns on `clients`. We
-      // try the update; if it fails (column doesn't exist / wrong shape) we
-      // still mark the flag resolved so it stops blocking the queue, and the
-      // admin can manually fix the field on the profile page.
-      try {
-        const contactField = /^contact:([a-z_]+)\.([a-z_]+)$/.exec(flag.field);
-        if (contactField && isContactRole(contactField[1])) {
-          const { data: c } = await sb
-            .from("clients")
-            .select("organization_id")
-            .eq("id", flag.client_id)
-            .maybeSingle();
-          if (c) {
-            await setContactParts(sb, {
-              organizationId: c.organization_id,
-              clientId: flag.client_id,
-              role: contactField[1],
-              parts: { [contactField[2]]: flag.incoming_value },
-            });
-          }
-        } else {
-          await sb
-            .from("clients")
-            .update({ [flag.field]: flag.incoming_value })
-            .eq("id", flag.client_id);
-        }
-      } catch { /* best-effort */ }
-    }
-    // keep_both / merge_into_existing don't need a column write; they're
-    // admin acknowledgements that the existing value stays as-is.
-
-    const { error } = await sb
-      .from("import_merge_flags")
-      .update({
-        resolved_action: data.action,
-        resolved_at: new Date().toISOString(),
-        resolved_by: context.userId,
-      })
-      .eq("id", data.flagId);
-    if (error) throw error;
-    return { ok: true };
-  });
-
-// ── Override a validation issue ─────────────────────────────────────────
-const OverrideIssue = z.object({
-  subjectId: z.string().uuid(),
-  issueKey: z.string().min(1).max(120),
-  overridden: z.boolean(),
-});
-export const overrideValidationIssue = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => OverrideIssue.parse(i))
-  .handler(async ({ data, context }) => {
-    const sb = context.supabase as Sb;
-    if (!sb || !context.userId) return { ok: false, overrides: {} };
-    const { data: subj } = await sb
-      .from("import_subjects")
-      .select("id, org_id, import_job_id, validation_overrides")
-      .eq("id", data.subjectId)
-      .maybeSingle();
-    if (!subj) throw new Error("Subject not found");
-    const next = { ...(subj.validation_overrides as Record<string, boolean> ?? {}) };
-    if (data.overridden) next[data.issueKey] = true;
-    else delete next[data.issueKey];
-    const { error } = await sb
-      .from("import_subjects")
-      .update({ validation_overrides: next })
-      .eq("id", data.subjectId);
-    if (error) throw error;
-    await sb.from("import_audit").insert({
-      import_job_id: subj.import_job_id,
-      org_id: subj.org_id,
-      subject_id: data.subjectId,
-      item: `Validation issue ${data.issueKey} ${data.overridden ? "overridden" : "un-overridden"} by admin`,
-      traces_to: "admin_override",
-      actor: context.userId,
-      action: data.overridden ? "validation_override" : "validation_override_removed",
-    });
-    return { ok: true, overrides: next };
-  });
-
 // ── SOW supplemental: level of need ────────────────────────────────────
 export const setLevelOfNeed = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -685,11 +346,12 @@ export const setLevelOfNeed = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as Sb;
     if (!sb || !context.userId) return { ok: false };
-    await requireAdminForClient(sb, context.userId as string, data.clientId);
+    const orgId = await guardClient(sb, context.userId as string, data.clientId, ["edit"]);
     const { error } = await sb
       .from("clients")
       .update({ level_of_need: data.value?.trim() || null })
-      .eq("id", data.clientId);
+      .eq("id", data.clientId)
+      .eq("organization_id", orgId);
     if (error) throw error;
     return { ok: true };
   });
@@ -707,14 +369,16 @@ export const setGrievanceAcknowledgment = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as Sb;
     if (!sb || !context.userId) return { ok: false };
-    await requireAdminForClient(sb, context.userId as string, data.clientId);
+    const orgId = await guardClient(sb, context.userId as string, data.clientId, ["edit"]);
     const patch: Record<string, unknown> = {
       grievance_acknowledged: data.acknowledged,
-      grievance_signed_date: data.acknowledged
-        ? (data.signedDate || new Date().toISOString().slice(0, 10))
-        : null,
+      grievance_signed_date: data.acknowledged ? (data.signedDate || denverYmd()) : null,
     };
-    const { error } = await sb.from("clients").update(patch).eq("id", data.clientId);
+    const { error } = await sb
+      .from("clients")
+      .update(patch)
+      .eq("id", data.clientId)
+      .eq("organization_id", orgId);
     if (error) throw error;
     return { ok: true };
   });
@@ -729,11 +393,12 @@ export const listHrcReviewsForClient = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as Sb;
     if (!sb || !context.userId) return { reviews: [] };
-    await requireAdminForClient(sb, context.userId as string, data.clientId);
+    const orgId = await guardClient(sb, context.userId as string, data.clientId, ["view_hrc"]);
     const { data: rows, error } = await sb
       .from("hrc_reviews")
       .select("id, restriction_summary, status, created_at")
       .eq("client_id", data.clientId)
+      .eq("organization_id", orgId)
       .order("created_at", { ascending: false });
     if (error) throw error;
     return { reviews: rows ?? [] };
@@ -751,7 +416,7 @@ export const createHrcReview = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as Sb;
     if (!sb || !context.userId) return { ok: false, review: null };
-    const orgId = await requireAdminForClient(sb, context.userId as string, data.clientId);
+    const orgId = await guardClient(sb, context.userId as string, data.clientId, ["edit_hrc"]);
     const { data: ins, error } = await sb
       .from("hrc_reviews")
       .insert({
@@ -785,7 +450,9 @@ export const signClientDocument = createServerFn({ method: "POST" })
       .eq("id", data.documentId)
       .maybeSingle();
     if (!doc) throw new Error("Document not found");
-    await requireAdminForClient(sb, context.userId as string, doc.client_id);
+    // Admin level (unchanged) plus the client guard: in this agency and in scope.
+    const docOrg = await guardClient(sb, context.userId as string, doc.client_id as string, ["view"]);
+    await requireOrgMembership(sb, context.userId as string, docOrg, "admin");
     const path = (doc.storage_path as string) || (doc.file_url as string);
     if (!path) throw new Error("Document has no storage path");
     const { data: signed, error } = await sb.storage

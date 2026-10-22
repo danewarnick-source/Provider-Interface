@@ -1,18 +1,11 @@
 // Plan-year dates: the plan years list (current / upcoming / ended and
-// waiting / past), reminders before a plan year ends, the office follow-up
-// once the client has waited 10 days for a new PCSP, and the support
-// strategies due date. Pure (no Supabase), importable by node --test.
-//
-// There is no task or reminder table these fit, so readiness.ts turns them
-// into needs-attention items (Overview, list flag, section badges).
+// waiting / past) and the support strategies due date. The PCSP reminders
+// and their wording live in pcsp-status.ts. Pure (no Supabase), importable
+// by node --test.
 
 import { daysUntil, parseLocalDate, todayYmd } from "./dates.ts";
 import { planInEffectOn, planStatusOn, waitingDays, type ClientPlan, type PlanStatus } from "./plans.ts";
 
-/** Days before a plan year ends that a reminder shows. */
-export const PLAN_REMINDER_DAYS = [60, 30] as const;
-/** Day of waiting for a new PCSP on which the office gets a follow-up task. */
-export const WAITING_TASK_DAY = 10;
 /** Days after the current plan's activation date that support strategies are due. */
 export const STRATEGIES_DUE_DAYS = 30;
 
@@ -66,28 +59,4 @@ export function planYearRows(plans: readonly ClientPlan[], now: Date = new Date(
         daysLeft: kind === "current" ? daysUntil(plan.end_date, now) : null,
       };
     });
-}
-
-export type PlanReminder =
-  | { kind: "ending"; days: number; threshold: (typeof PLAN_REMINDER_DAYS)[number]; endDate: string }
-  | { kind: "waiting"; days: number; officeTask: boolean };
-
-/**
- * The plan-date reminder for today, if any: the plan in effect ends within
- * 60 (then 30) days, or it has ended and the client is waiting — with the
- * office follow-up from day 10 of waiting.
- */
-export function planReminder(plans: readonly ClientPlan[], now: Date = new Date()): PlanReminder | null {
-  const effect = planInEffectOn(plans, todayYmd(now));
-  if (!effect) return null;
-  if (effect.status === "ended") {
-    const days = waitingDays(plans, now);
-    if (days == null || days <= 0) return null;
-    return { kind: "waiting", days, officeTask: days >= WAITING_TASK_DAY };
-  }
-  if (effect.status !== "current" || !effect.plan.end_date) return null;
-  const days = daysUntil(effect.plan.end_date, now);
-  if (days == null || days < 0) return null;
-  const threshold = [...PLAN_REMINDER_DAYS].reverse().find((t) => days <= t);
-  return threshold ? { kind: "ending", days, threshold, endDate: effect.plan.end_date.slice(0, 10) } : null;
 }

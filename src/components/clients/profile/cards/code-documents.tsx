@@ -9,7 +9,11 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { isAdminLevel } from "@/lib/access/levels";
 import { ageOn } from "@/lib/clients/dates";
 import type { ClientProfileData } from "@/components/clients/profile/use-client-profile";
-import { EprInformedChoiceCard, ElsSchoolDocumentationCard, type DocRow } from "./code-document-cards";
+import {
+  EprInformedChoiceCard,
+  ElsSchoolDocumentationCard,
+  type DocRow,
+} from "./code-document-cards";
 import { SjdAssessmentDocumentationCard } from "./sjd-assessment-card";
 import { SjdUsorOutreachCard } from "./sjd-usor-card";
 
@@ -64,7 +68,7 @@ export function CodeDocuments({ orgId, data }: { orgId: string; data: ClientProf
   const showEls = codes.includes("ELS") && (age == null || age < 22);
 
   return (
-    <div className="space-y-4">
+    <>
       {showEls && <ElsSchoolDocumentationCard clientId={clientId} docs={docs} />}
       {codes.includes("EPR") && (
         <EprInformedChoiceCard
@@ -85,6 +89,6 @@ export function CodeDocuments({ orgId, data }: { orgId: string; data: ClientProf
           <SjdUsorOutreachCard clientId={clientId} orgId={orgId} />
         </>
       )}
-    </div>
+    </>
   );
 }

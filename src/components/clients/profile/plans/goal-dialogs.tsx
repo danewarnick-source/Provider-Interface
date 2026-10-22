@@ -53,8 +53,8 @@ export function GoalDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button onClick={save} disabled={busy || !text.trim()}>Save</Button>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={save} disabled={busy || !text.trim()}>Save goal</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -142,8 +142,8 @@ export function SupportDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button onClick={save} disabled={busy}>Save</Button>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={save} disabled={busy}>Save support</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

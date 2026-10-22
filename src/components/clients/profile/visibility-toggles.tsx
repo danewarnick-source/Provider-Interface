@@ -121,7 +121,7 @@ export function FieldVisibilityToggle({
             type="button"
             variant="ghost"
             size="icon"
-            className="h-7 w-7"
+            className="h-10 w-10 max-md:h-11 max-md:w-11"
             aria-label={tooltip}
             disabled={disabled}
             onClick={() => save({ clientId, fieldPatch: { [key]: !visible } })}

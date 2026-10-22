@@ -61,7 +61,14 @@ export function SectionBody({
     case "file":
       return <FileSection orgId={orgId} data={data} />;
     case "team":
-      return <TeamSection clientId={clientId} orgId={orgId} overview={overview} />;
+      return (
+        <TeamSection
+          clientId={clientId}
+          orgId={orgId}
+          firstName={data.client.first_name?.trim() || data.name}
+          overview={overview}
+        />
+      );
     case "activity":
       return <ActivitySection clientId={clientId} orgId={orgId} />;
   }

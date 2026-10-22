@@ -3,6 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
 import { z } from "zod";
 import { useCaseload } from "@/hooks/use-caseload";
+import { useAccess } from "@/hooks/use-access";
 import { useMyAssignments, allowedCodesFor } from "@/hooks/use-my-assignments";
 import { isClockableServiceCode } from "@/lib/service-billing";
 import { resolveGeofenceRadiusFeet } from "@/lib/geo";
@@ -27,7 +28,7 @@ import { ClientQuickInfoSheet } from "@/components/staff-mobile/client-quick-inf
 
 import { toast } from "sonner";
 import { AboutTab } from "@/components/workspace/about-tab";
-import { StaffMedicationsPanel } from "@/components/medications/staff-medications-panel";
+import { GiveMeds } from "@/components/medications/give-meds/give-meds";
 import { FormsHubTab } from "@/components/workspace/forms-hub-tab";
 import { ReimbursementShiftPanel } from "@/components/staff-mobile/reimbursement-shift-panel";
 import { ClientSpendingShiftPanel } from "@/components/staff-mobile/client-spending-shift-panel";
@@ -80,6 +81,7 @@ function ClientWorkspace() {
   const { clientId } = Route.useParams();
   const { data: caseload, isLoading } = useCaseload();
   const { data: assignments } = useMyAssignments();
+  const { canCategory } = useAccess();
   const navigate = useNavigate();
   const {
     tab: tabParam,
@@ -224,7 +226,8 @@ function ClientWorkspace() {
                   {displayFirst} {displayLast}
                 </h1>
                 <div className="flex shrink-0 items-center gap-2">
-                  <FaceSheetButton clientId={client.id} />
+                  {/* The face sheet carries Medicaid ID and medical info: Client medical: View only. */}
+                  {canCategory("client_medical", "view") ? <FaceSheetButton clientId={client.id} /> : null}
                   <ClientQuickInfoSheet
                     client={client}
                     trigger={
@@ -341,11 +344,7 @@ function ClientWorkspace() {
 
           {emarEnabled && (
             <TabsContent value="emar" className="mt-5">
-              <StaffMedicationsPanel
-                clientId={client.id}
-                clientName={`${client.first_name} ${client.last_name}`}
-                serviceContext={effectivePresetCode ?? null}
-              />
+              <GiveMeds clientId={client.id} serviceContext={effectivePresetCode ?? null} />
             </TabsContent>
           )}
 
