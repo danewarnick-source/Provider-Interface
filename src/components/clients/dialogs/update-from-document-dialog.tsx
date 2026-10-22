@@ -23,7 +23,7 @@ import {
   applySelectedClientFields,
   previewClientUpdateFromDocument,
 } from "@/lib/import-checklist.functions";
-import { defaultChecked } from "@/lib/clients/document-review";
+import { defaultChecked } from "@/lib/clients/create/document-review";
 import { UpdateProposalsList, type UpdateProposal } from "./update-proposals-list";
 
 type DocType = "1056_budget" | "other";

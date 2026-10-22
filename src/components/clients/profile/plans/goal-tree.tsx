@@ -3,7 +3,7 @@
 // training page. Each goal's title is bold and a size up so goals scan
 // easily. Supports read "Support: … + codes" / "Support details: …".
 import type { ReactNode } from "react";
-import type { GoalView } from "@/lib/clients/plans";
+import type { GoalView } from "@/lib/clients/plans/plans";
 import { GOAL_BLOCK, GOAL_HEAD, GOAL_TITLE, SupportLines } from "./support-lines";
 
 export function GoalTree({

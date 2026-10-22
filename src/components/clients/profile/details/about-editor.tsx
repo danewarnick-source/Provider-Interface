@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { sourceLabel, type AboutDocInfo, type AboutItem } from "@/lib/clients/about-me";
+import { sourceLabel, type AboutDocInfo, type AboutItem } from "@/lib/clients/about/about-me";
 import { SaveBar } from "@/components/clients/profile/cards/section-card";
 import { EmptyState } from "@/components/clients/profile/cards/card-parts";
 

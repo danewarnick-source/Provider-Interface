@@ -29,7 +29,7 @@
 - PR #458 (https://github.com/danewarnick-source/Provider-Interface/pull/458), squash-merged into clients-rebuild as 02d9d9c6.
 - Checks: build passes (routeTree unchanged); tsc 203 (= baseline); unit 1856 tests, only the 5 baseline failures (13 new tests). E2E not run (runbook). Re-verified tsc/unit before merge.
 - Migrations: none.
-- Added 10: cards/section-card.tsx, cards/card-parts.tsx, cards/row-menu.tsx, profile-shell/tones.ts, header-pills.tsx, plans/pcsp-upload-button.tsx, activity/office-note-composer.tsx, activity/add-note-button.tsx, lib/clients/profile-header.ts (+ .test.ts). Deleted: cards/card-shell.tsx (CardShell, HexMarker, GroupHeader, Row, fmtDate); SkeletonCard, StrategiesTitle removed. Zero remaining imports.
+- Added 10: cards/section-card.tsx, cards/card-parts.tsx, cards/row-menu.tsx, profile-shell/tones.ts, header-pills.tsx, plans/pcsp-upload-button.tsx, activity/office-note-composer.tsx, activity/add-note-button.tsx, lib/clients/profile/profile-header.ts (+ .test.ts). Deleted: cards/card-shell.tsx (CardShell, HexMarker, GroupHeader, Row, fmtDate); SkeletonCard, StrategiesTitle removed. Zero remaining imports.
 - Client-area lines 37,295 → 38,167 (+872; 737 in new files).
 - Blockers: none. Note: e2e/clients-new-client-pcsp.spec.ts:146 expects a link named "Import" (now "Import clients"); e2e not maintained per runbook, and C7 removes Import anyway.
 
@@ -37,7 +37,7 @@
 - PR #459 (https://github.com/danewarnick-source/Provider-Interface/pull/459), squash-merged as 432a227e.
 - Checks: build passes; tsc 203 (= baseline); unit 1868 tests, only the 5 baseline failures (12 new). E2E not run. Re-verified before merge.
 - Migrations: none.
-- Added 3: list/list-shortcut.tsx, lib/clients/list-display.ts (+ .test.ts). Deleted 0. Removed exports rowNeedsAttention, CodeBadges (zero imports). needsAttention now only in Smart Import.
+- Added 3: list/list-shortcut.tsx, lib/clients/list/list-display.ts (+ .test.ts). Deleted 0. Removed exports rowNeedsAttention, CodeBadges (zero imports). needsAttention now only in Smart Import.
 - Client-area lines 38,167 → 38,680 (+513).
 - Blockers: none. Note: list makes one extra best-effort read of the preferred_name custom field for "Goes by".
 
@@ -45,7 +45,7 @@
 - PR #460 (https://github.com/danewarnick-source/Provider-Interface/pull/460), squash-merged as d9d90d9d.
 - Checks: build passes; tsc 203 (= baseline); unit 1889 tests, only the 5 baseline failures. E2E not run. Re-verified before merge.
 - Migrations applied to dhrrukdcigiiqksibdfb: 20261007120000_clients_about_me_summary.sql (client_about_me table, RLS like client_plans); 20261007120100_clients_about_me_strip_pcsp_blocks.sql (UPDATE, 1 row, hand-written text kept). Types regenerated. Nothing NEEDS JEFF.
-- Added 13 code files (lib/clients/about-me*.ts, evv.ts, details/about-card.tsx, about-editor.tsx, agency-notes.tsx, use-about-me.ts, evv-note.tsx, detail-tile.tsx, profile/use-home-pin.ts + tests). Deleted: aboutMeLines, PCSP-review About rows, whenText (no files; client-photo-card.tsx kept, used by workspace/about-tab.tsx).
+- Added 13 code files (lib/clients/about/about-me*.ts, evv.ts, details/about-card.tsx, about-editor.tsx, agency-notes.tsx, use-about-me.ts, evv-note.tsx, detail-tile.tsx, profile/use-home-pin.ts + tests). Deleted: aboutMeLines, PCSP-review About rows, whenText (no files; client-photo-card.tsx kept, used by workspace/about-tab.tsx).
 - Client-area lines 38,680 → 39,970 (+1,290).
 - Blockers: none. Notes: client_about_me FKs have no ON DELETE (C10 is soft-delete only, so fine).
 
@@ -53,7 +53,7 @@
 - PR #461 (https://github.com/danewarnick-source/Provider-Interface/pull/461), squash-merged as 26d87e95.
 - Checks: build passes; tsc 203 (= baseline); unit 1917 tests, only the 5 baseline failures. E2E not run. Re-verified before merge.
 - Migration applied: 20261007130000_clients_goals_other_needs_kind.sql (client_goals.kind text default 'goal', check goal/other_need). Types regenerated (adds kind only). Nothing NEEDS JEFF.
-- Added 20 files incl. lib/clients/pcsp-status.ts (one plan-year wording for Plans card, Overview, header tile, list Next due) and support-strategies.ts (+ tests); summary editor moved to src/components/summaries/ and reused as a profile side panel. Deleted: strategy-coverage.ts.
+- Added 20 files incl. lib/clients/pcsp/pcsp-status.ts (one plan-year wording for Plans card, Overview, header tile, list Next due) and support-strategies.ts (+ tests); summary editor moved to src/components/summaries/ and reused as a profile side panel. Deleted: strategy-coverage.ts.
 - Client-area lines 39,970 → 41,238. dashboard.summaries.tsx 1057 → 444; client-specific-training-card.tsx 895 → 645.
 - Size: plans.ts 301 (+3, old file lightly touched; reported). Already oversized: training.functions.ts 1381, client-specific-training-card.tsx 645, dashboard.summaries.tsx 444.
 - Blockers: none. Non-goal supports stored under one "Other needs in the PCSP" goal row (kind='other_need').
@@ -62,7 +62,7 @@
 - PR #462 (https://github.com/danewarnick-source/Provider-Interface/pull/462), squash-merged as 9dae38e0.
 - Checks: build passes; tsc 203 (= baseline); unit 1937 tests, only the 5 baseline failures (26 new). E2E not run. Re-verified before merge.
 - Migration applied: 20261007140000_evidence_client_packs.sql (evidence_client_packs table, RLS like evidence_items; evidence_items.added_by_hand, .description). 0 rows affected. Nothing NEEDS JEFF.
-- Added 17 (lib/clients/file-packs.ts, file-rows.ts + tests, file-packs.server.ts, file-evidence.functions.ts, evidence/store.server.ts, items.server.ts, 9 components under profile/file/). Deleted 5: file-required.ts (+test, REQUIRED_DOCS), required-documents-card.tsx, document-upload-dialog.tsx, file-documents.functions.ts. evidence.functions.ts 1,398 → 896.
+- Added 17 (lib/clients/file/file-packs.ts, file-rows.ts + tests, file-packs.server.ts, file-evidence.functions.ts, evidence/store.server.ts, items.server.ts, 9 components under profile/file/). Deleted 5: file-required.ts (+test, REQUIRED_DOCS), required-documents-card.tsx, document-upload-dialog.tsx, file-documents.functions.ts. evidence.functions.ts 1,398 → 896.
 - Catalog: medical/dental exams, guardian papers, optional 1056 copy, PPS residence pack, housemate discussion in RHS pack; § cites checked against docs/compliance/dhhs91172/Requirements.json (several fixed).
 - Client-area lines 41,238 → 42,938.
 - Blockers: none. Follow-ups: packs re-sync to code changes when an owner/admin opens the Client file (others see it computed live); the agency Evidence grid doesn't read the new "optional" flag yet (1056 copy may show missing there); catalog.ts 1,643 → 1,737 (already oversized).
@@ -81,7 +81,7 @@
 - Checks: build passes (routeTree regenerated); tsc 203 (= baseline); unit 1963 tests, only the 5 baseline failures. E2E not run. Re-verified before merge.
 - Migrations applied: none. **PHASE B (apply only after this reaches main):** supabase/migrations/20261007160000_smart_import_phase_b_discard_drafts_and_reminders.sql — sets discarded_at on the 1 open client draft and unschedules the smart-import-reminders pg_cron job (production main still runs Smart Import until then). No DELETE.
 - Deleted 32 files (17,346 lines): all Smart Import routes/components (incl. timesheet and daily-note wizards), lib/smart-import*, reminders hook + chip, import-validation, clients/import-template.ts, lifecycle.functions.ts, client-needs-attention.tsx, Company Migration page, Smart Import e2e spec. Net −16,655 lines repo-wide.
-- Added 15: shared lib/spreadsheet-import/ + components/spreadsheet-import/, lib/clients/import-sheet*.ts (+test), add-client-start.tsx, import-clients-dialog.tsx, import-client-row.tsx, use-import-clients.ts, team-members import-columns/import-template/import-member-row.
+- Added 15: shared lib/spreadsheet-import/ + components/spreadsheet-import/, lib/clients/create/import-sheet*.ts (+test), add-client-start.tsx, import-clients-dialog.tsx, import-client-row.tsx, use-import-clients.ts, team-members import-columns/import-template/import-member-row.
 - Client-area lines 44,219 → 44,939 (+720, new spreadsheet import).
 - Blockers: none. Follow-ups: team member template drift fixed (Supervisor, Worker type added; Job title removed); import_merge_flags still written by document upload but nothing resolves them; hireTeamMemberInternal keeps an unused "smart_import" branch; one open employee draft left as is.
 

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Siren } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { cleanEmergencyPlan } from "@/lib/clients/health-options";
+import { cleanEmergencyPlan } from "@/lib/clients/health/health-options";
 import { EditButton, SaveBar, SectionCard } from "@/components/clients/profile/cards/section-card";
 import { EmptyState } from "@/components/clients/profile/cards/card-parts";
 import { useCanEditMedical, useSaveHealth, type ClientHealthRow } from "./use-client-health";

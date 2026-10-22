@@ -7,8 +7,8 @@ import { useEffect, useState } from "react";
 import { ArrowRight, ChevronDown, CircleAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TONE_TAG } from "@/components/profile-shell/tones";
-import { CLIENT_SECTION_LABEL, type ClientProfileSection } from "@/lib/clients/profile-sections";
-import { attentionSummary } from "@/lib/clients/overview";
+import { CLIENT_SECTION_LABEL, type ClientProfileSection } from "@/lib/clients/profile/profile-sections";
+import { attentionSummary } from "@/lib/clients/overview/overview";
 import type { AttentionItem } from "@/lib/clients/readiness";
 
 const OPEN_KEY = "client-overview-attention-open";

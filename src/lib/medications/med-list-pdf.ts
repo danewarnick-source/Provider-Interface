@@ -12,7 +12,7 @@ import {
   pdfSafe,
   stampPageNumbers,
   titleBlock,
-} from "../clients/strategies-pdf-layout.ts";
+} from "../clients/strategies/strategies-pdf-layout.ts";
 import { howTakenLabel } from "./med-rules.ts";
 import {
   medStatus,

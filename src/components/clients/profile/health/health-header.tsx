@@ -10,7 +10,7 @@ import {
   emergencyPlanTile,
   mobilityTile,
   type HealthTile,
-} from "@/lib/clients/health-tiles";
+} from "@/lib/clients/health/health-tiles";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { InfoTile } from "@/components/clients/profile/cards/card-parts";
 import type { ClientHealthRow } from "./use-client-health";

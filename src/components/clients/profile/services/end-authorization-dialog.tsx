@@ -16,9 +16,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { endProblems, type AuthorizationRow } from "@/lib/clients/authorizations";
+import { endProblems, type AuthorizationRow } from "@/lib/clients/services/authorizations";
 import { todayYmd } from "@/lib/clients/dates";
-import { endAuthorization } from "@/lib/clients/services.functions";
+import { endAuthorization } from "@/lib/clients/services/services.functions";
 
 export function EndAuthorizationDialog({
   orgId,

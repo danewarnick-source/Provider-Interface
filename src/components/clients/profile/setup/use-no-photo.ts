@@ -6,7 +6,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { loadClientFile } from "@/lib/clients/file-evidence.functions";
+import { loadClientFile } from "@/lib/clients/file/file-evidence.functions";
 import { removeEvidenceRequirement, restoreEvidenceRequirement } from "@/lib/evidence.functions";
 import { clientFileKey } from "@/components/clients/profile/file/use-client-file";
 import { useSaveSupportScope } from "./use-support-scope";

@@ -66,8 +66,8 @@ async function callLovableAI(documentText: string, hint?: string, orgId?: string
   return parseDocumentWithAI(documentText, hint, orgId);
 }
 
-// Client autofill logic lives in src/lib/clients/import-schema.ts.
-import { applyExtractedFieldsToClient } from "@/lib/clients/import-schema";
+// Client autofill logic lives in src/lib/clients/create/import-schema.ts.
+import { applyExtractedFieldsToClient } from "@/lib/clients/create/import-schema";
 
 
 

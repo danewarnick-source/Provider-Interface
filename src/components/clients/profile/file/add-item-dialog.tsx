@@ -20,7 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { applyEvidenceRequirements, upsertEvidenceRequirement } from "@/lib/evidence.functions";
 import { EVIDENCE_REQUIREMENTS } from "@/lib/evidence/catalog";
-import { RESIDENTIAL_ONLY_KEYS, hasResidentialCode } from "@/lib/clients/file-packs";
+import { RESIDENTIAL_ONLY_KEYS, hasResidentialCode } from "@/lib/clients/file/file-packs";
 import { cn } from "@/lib/utils";
 
 const CUSTOM = "custom";

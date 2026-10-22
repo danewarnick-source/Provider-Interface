@@ -6,7 +6,7 @@ import { ShoppingBag } from "lucide-react";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { ReadOnlyTable } from "@/components/clients/profile/read-only-table";
 import { useProfileNames } from "@/components/clients/shared/hooks/use-org-staff";
-import { formatMoney, moneyTotal } from "@/lib/clients/money";
+import { formatMoney, moneyTotal } from "@/lib/clients/money/money";
 import { formatDate } from "@/lib/clients/dates";
 import { ReceiptLink, SPENDING_RECEIPTS_BUCKET } from "./receipt-link";
 import { useClientSpending } from "./use-client-money";

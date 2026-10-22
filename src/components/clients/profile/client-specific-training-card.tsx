@@ -1,3 +1,6 @@
+// Client-specific training card (Team section): Nectar drafts the training from
+// the client's documents, admins edit and publish it, and add review questions.
+
 import { useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -9,11 +12,13 @@ import {
   updateClientSpecificTraining,
   publishClientSpecificTraining,
   saveReviewQuestions,
+} from "@/lib/clients/team/training.functions";
+import {
   type CSTContent,
   type CSTSection,
   type CSTItem,
   type CSTReviewQuestion,
-} from "@/lib/clients/training.functions";
+} from "@/lib/clients/team/training-content";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { Button } from "@/components/ui/button";
@@ -24,7 +29,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Sparkles, Loader2, CheckCircle2, RefreshCw, Pencil, Trash2, Plus, ArrowUp, ArrowDown, Shield, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { todayYmd } from "@/lib/clients/dates";
-import { activeGoalViewsOn } from "@/lib/clients/plans";
+import { activeGoalViewsOn } from "@/lib/clients/plans/plans";
 import { GoalTree } from "@/components/clients/profile/plans/goal-tree";
 import { useClientPlans } from "@/components/clients/shared/hooks/use-plan-goals";
 import { PublishConfirmDialog } from "@/components/clients/profile/plans/publish-confirm-dialog";

@@ -16,16 +16,16 @@ import { RecordReadOnlyProvider } from "@/hooks/use-record-read-only";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { isRouteUuid } from "@/lib/route-uuid";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
-import { getClientOverview } from "@/lib/clients/overview.functions";
-import { clientOverviewKey } from "@/lib/clients/overview";
+import { getClientOverview } from "@/lib/clients/overview/overview.functions";
+import { clientOverviewKey } from "@/lib/clients/overview/overview";
 import { attentionBySection } from "@/lib/clients/readiness";
-import { armClientListReturn, clientListReturnView } from "@/lib/clients/list-return";
+import { armClientListReturn, clientListReturnView } from "@/lib/clients/list/list-return";
 import {
   clientSectionSearchValue,
   resolveClientSection,
   visibleClientSections,
   type ClientProfileSection,
-} from "@/lib/clients/profile-sections";
+} from "@/lib/clients/profile/profile-sections";
 import { SectionCard } from "./cards/section-card";
 import { ClientProfileShell } from "./profile-shell";
 import { ClientProfileHeader, isDischarged } from "./profile-header";
@@ -128,10 +128,11 @@ export function ClientProfilePage() {
     void qc.invalidateQueries({ queryKey: clientOverviewKey(orgId, clientId) });
   };
   const select = (next: ClientProfileSection) =>
-    // Sections replace the entry: Back leaves the profile in one step.
+    // Sections replace the entry: Back leaves the profile in one step. A
+    // pending ?edit= belongs to the section it came with.
     navigate({
       replace: true,
-      search: (prev) => ({ ...prev, section: clientSectionSearchValue(next) }),
+      search: (prev) => ({ ...prev, section: clientSectionSearchValue(next), edit: undefined }),
     });
 
   return (

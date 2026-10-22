@@ -11,7 +11,7 @@
 import { isEvvLockedCode } from "./evv-codes.ts";
 import { isLikelyBadCoord } from "./geo.ts";
 import type { CompletenessResult } from "./nectar-completeness.ts";
-import { requiresUpiFiling } from "./progress-summaries.ts";
+import { requiresUpiFiling } from "./progress-summaries/progress-summaries.ts";
 
 /** Authorization window status (active / expired / upcoming / end-needed). */
 function authWindowStatus(

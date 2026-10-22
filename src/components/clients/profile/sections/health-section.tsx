@@ -8,7 +8,7 @@
 
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { directiveStatus, showsAbsences } from "@/lib/clients/health";
+import { directiveStatus, showsAbsences } from "@/lib/clients/health/health";
 import { cardShows, hiddenCards, type ScopeFacts } from "@/lib/clients/support-scope";
 import { HealthHeader } from "@/components/clients/profile/health/health-header";
 import { MedicalListsCard } from "@/components/clients/profile/health/medical-lists-card";

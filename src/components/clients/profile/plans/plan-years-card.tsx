@@ -8,15 +8,15 @@ import { Link } from "@tanstack/react-router";
 import { CalendarClock, CalendarRange } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDate, todayYmd } from "@/lib/clients/dates";
-import { planYearRows, strategiesDueOn, type PlanYearRow } from "@/lib/clients/plan-dates";
+import { planYearRows, strategiesDueOn, type PlanYearRow } from "@/lib/clients/plans/plan-dates";
 import {
   codesNeeding1056,
   expiredBadge,
   pcspSentence,
   pcspState,
   pcspWords,
-} from "@/lib/clients/pcsp-status";
-import type { ClientPlan } from "@/lib/clients/plans";
+} from "@/lib/clients/pcsp/pcsp-status";
+import type { ClientPlan } from "@/lib/clients/plans/plans";
 import { useClientBillingCodes } from "@/components/clients/shared/hooks/use-client-billing-codes";
 import { EditButton, SectionCard } from "@/components/clients/profile/cards/section-card";
 import { EmptyState, StatusTag } from "@/components/clients/profile/cards/card-parts";

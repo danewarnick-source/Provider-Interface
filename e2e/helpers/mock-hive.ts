@@ -41,7 +41,13 @@ import { levelForRole, withAccessLevel } from "./access-level";
 import { clientOverviewPayload } from "./client-profile-mock";
 import { clientServicesPayload } from "./client-services-mock";
 import { isPcspServerFn, pcspServerFnPayload } from "./pcsp-mock";
-import { addClientPayload, listClientsPayload } from "./clients-list-mock";
+import {
+  addClientPayload,
+  homeOf,
+  listClientsPayload,
+  recordClientUpdate,
+  savedHomes,
+} from "./clients-list-mock";
 import { staffClientReadiness } from "../../src/lib/team-members/readiness";
 import { buildMemberOverview } from "../../src/lib/team-members/overview";
 
@@ -211,7 +217,7 @@ function clientRow(c: (typeof CLIENT_LIST)[number]): Row {
     is_own_guardian: true,
     feature_config: {},
     intake_status: "complete",
-    team_id: c.team_id,
+    team_id: homeOf(c),
     level_of_need: null,
     form_1056_number: null,
     form_1056_approved_date: null,
@@ -1009,13 +1015,16 @@ function serverFnPayload(url: string, body: string): unknown {
   const fn = inferServerFn(url, body);
   const fnBlob = `${fn}\n${url}\n${body}`;
   // Client writes (src/lib/clients/writes.functions.ts) — echo a made-up id.
-  if (/^updateClient$/.test(fn)) return { id: "00000000-0000-4000-a000-0000000000c1" };
-  // Client list + Add client (src/lib/clients/list.functions.ts, create.functions.ts).
+  if (/^updateClient(?:_|$)/.test(fn)) {
+    recordClientUpdate(body);
+    return { id: "00000000-0000-4000-a000-0000000000c1" };
+  }
+  // Client list + Add client (src/lib/clients/list/list.functions.ts, create.functions.ts).
   if (/^listClients/.test(fn)) return listClientsPayload(body, activeMockOpts);
   const addPayload = addClientPayload(fn, body);
   if (addPayload !== undefined) return addPayload;
   if (/^writeClientRecord$/.test(fn)) return { ids: ["00000000-0000-4000-a000-0000000000c3"] };
-  // Discharge (src/lib/clients/discharge.functions.ts): no open discharge; writes echo.
+  // Discharge (src/lib/clients/discharge/discharge.functions.ts): no open discharge; writes echo.
   if (/^getClientDischarge/.test(fn)) return null;
   if (/^previewDischarge/.test(fn)) {
     return { ended: { authorizations: [], team: [], shifts: [] }, upcoming: [] };
@@ -1024,10 +1033,11 @@ function serverFnPayload(url: string, body: string): unknown {
   if (/^(reactivateClient|saveDischargeSummary|markDischargeSummarySent)/.test(fn)) {
     return { ok: true };
   }
-  // Client profile Overview (src/lib/clients/overview.functions.ts).
+  // Client profile Overview (src/lib/clients/overview/overview.functions.ts).
   if (/^getClientOverview/.test(fn)) return clientOverviewPayload();
   // Services & billing (services.functions.ts).
   if (/^getClientServices/.test(fn)) return clientServicesPayload();
+  if (/^getUnitAlerts/.test(fn)) return [];
   // PCSP import (src/lib/clients/pcsp/import.functions.ts).
   const pcsp = /readPcsp/.test(fn) ? "readPcsp" : /confirmPcsp/.test(fn) ? "confirmPcsp" : isPcspServerFn(body);
   if (pcsp) return pcspServerFnPayload(pcsp);
@@ -1560,6 +1570,7 @@ function isServerFnUrl(url: URL): boolean {
 export async function installHiveMocks(page: Page, opts: MockOptions = {}): Promise<void> {
   const persona = opts.persona ?? "admin";
   activeMockOpts = opts;
+  savedHomes.clear();
   const personaStaff =
     persona === "dsp" ? STAFF.jake : persona === "manager" ? STAFF.harvey : STAFF.admin;
   const personaId = personaStaff.id;

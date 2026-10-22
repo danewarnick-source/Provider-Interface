@@ -22,12 +22,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { denverYmd } from "@/lib/denver-date";
-import { sentLine } from "@/lib/clients/strategy-sends";
+import { sentLine } from "@/lib/clients/strategies/strategy-sends";
 import {
   getStrategySendStatus,
   markStrategiesSent,
   voidStrategiesSent,
-} from "@/lib/clients/strategy-sends.functions";
+} from "@/lib/clients/strategies/strategy-sends.functions";
 import { clientFileKey } from "@/components/clients/profile/file/use-client-file";
 
 export const strategySendKey = (clientId: string) => ["strategy-send", clientId] as const;

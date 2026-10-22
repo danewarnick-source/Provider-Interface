@@ -1,4 +1,4 @@
-// Mocked client list + Add client server functions (src/lib/clients/list.functions.ts,
+// Mocked client list + Add client server functions (src/lib/clients/list/list.functions.ts,
 // create.functions.ts). Rows are built from the made-up roster fixture; search
 // and filters run here the way the server does, so the page's one request per
 // change can be counted.
@@ -12,7 +12,7 @@ import {
   searchTerms,
   sortRows,
   type ClientListRow,
-} from "../../src/lib/clients/list";
+} from "../../src/lib/clients/list/list";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const SAMPLE = path.join(here, "../../src/lib/clients/pcsp/fixture/sample-expected.json");
@@ -22,6 +22,20 @@ export const NEW_CLIENT_ID = "00000000-0000-4000-a000-0000000000c2";
 export const clientListCalls = { list: 0, add: 0, bodies: [] as string[] };
 
 export type ClientListMockOpts = { emptyClients?: boolean };
+
+/** Homes saved through the mocked updateClient, so the profile and list show them. */
+export const savedHomes = new Map<string, string>();
+
+export function homeOf(c: { id: string; team_id: string | null }): string | null {
+  return savedHomes.get(c.id) ?? c.team_id;
+}
+
+/** Remember a home picked in the Identity card (updateClient's patch.team_id). */
+export function recordClientUpdate(body: string) {
+  const clientId = field(body, "clientId");
+  const teamId = field(body, "team_id");
+  if (clientId && teamId) savedHomes.set(clientId, teamId);
+}
 
 type SerovalNode = {
   t?: number;
@@ -67,7 +81,7 @@ function field(body: string, key: string): string | null {
 function rows(opts: ClientListMockOpts): ClientListRow[] {
   if (opts.emptyClients) return [];
   return CLIENT_LIST.map((c) => {
-    const team = TEAMS.find((t) => t.id === c.team_id);
+    const team = TEAMS.find((t) => t.id === homeOf(c));
     const codes = [...c.codes];
     const row: ClientListRow = {
       id: c.id,

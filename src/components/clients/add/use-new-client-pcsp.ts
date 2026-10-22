@@ -11,8 +11,8 @@ import {
   addClientFromPcsp,
   readPcspForNewClient,
   type AddFromPcspResult,
-} from "@/lib/clients/create-from-pcsp.functions";
-import type { AddClientForm } from "@/lib/clients/create";
+} from "@/lib/clients/create/create-from-pcsp.functions";
+import type { AddClientForm } from "@/lib/clients/create/create";
 import type { PcspRead } from "@/lib/clients/pcsp/import.functions";
 import { newClientPcspFolder, readFailure } from "@/lib/clients/pcsp/read-report";
 import { initialReview, type ReviewedPcsp } from "@/lib/clients/pcsp/review";

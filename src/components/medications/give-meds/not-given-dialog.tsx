@@ -1,3 +1,5 @@
+// Give meds: the dialog that logs a scheduled dose as not given, with the reason.
+
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";

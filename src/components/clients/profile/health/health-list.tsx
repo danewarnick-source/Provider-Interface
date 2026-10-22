@@ -2,7 +2,7 @@
 // swallowing alerts, mobility) edited in place: each item is a chip with
 // edit and remove, and "Add" opens a dropdown of common choices plus
 // "Other (type it)". Every change saves the clients column right away
-// (Client medical: Edit). Choices and rules: lib/clients/health-options.ts.
+// (Client medical: Edit). Choices and rules: lib/clients/health/health-options.ts.
 
 import { useState } from "react";
 import { Check, Pencil, Plus, X } from "lucide-react";
@@ -20,7 +20,7 @@ import {
   optionsToAdd,
   removeHealthItem,
   type HealthListKey,
-} from "@/lib/clients/health-options";
+} from "@/lib/clients/health/health-options";
 import { useSaveHealth, type ClientHealthRow } from "./use-client-health";
 
 const SELECT =

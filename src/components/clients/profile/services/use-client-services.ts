@@ -4,7 +4,7 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getClientServices } from "@/lib/clients/services.functions";
+import { getClientServices } from "@/lib/clients/services/services.functions";
 
 export const clientServicesKey = (clientId: string) => ["client-services", clientId] as const;
 

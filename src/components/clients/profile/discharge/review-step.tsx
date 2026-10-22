@@ -1,9 +1,9 @@
 // Discharge step 3: what the discharge will end, before it happens.
 
 import { Loader2 } from "lucide-react";
-import { endedLines } from "@/lib/clients/discharge";
+import { endedLines } from "@/lib/clients/discharge/discharge";
 import { formatDate } from "@/lib/clients/dates";
-import type { DischargePreview } from "@/lib/clients/discharge.functions";
+import type { DischargePreview } from "@/lib/clients/discharge/discharge.functions";
 
 export function ReviewStep({
   preview,

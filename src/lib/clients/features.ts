@@ -1,5 +1,3 @@
-import { useDisabledFeatures, type FeatureKey as TierFeatureKey } from "@/hooks/use-tenant-features";
-
 // ─── Code-driven feature areas (DSPD SOW catalog) ─────────────────────────
 //
 // A client's authorized service codes determine which feature AREAS apply
@@ -8,6 +6,8 @@ import { useDisabledFeatures, type FeatureKey as TierFeatureKey } from "@/hooks/
 // supported-employment codes → no SE surfaces; etc. Per-client
 // `feature_config[<feature>]` overrides the code-derived default in either
 // direction (admin force-on or force-off).
+
+import { useDisabledFeatures, type FeatureKey as TierFeatureKey } from "@/hooks/use-tenant-features";
 
 export const FEATURE_CODES = {
   behavior:             ["BC1", "BC2", "BC3"],
@@ -37,7 +37,7 @@ export function clientHasFeature(
  * Final visibility for a code-driven feature on a given client.
  * Per-client `feature_config[feature]` ALWAYS wins over the code-derived
  * default (true → force on, false → force off). When unset, fall back to
- * whether the client's active codes (src/lib/clients/codes.ts) include the feature.
+ * whether the client's active codes (src/lib/clients/services/codes.ts) include the feature.
  */
 export function clientFeatureVisible(
   client: { feature_config?: Record<string, boolean> | null; codes?: readonly string[] | null } | null | undefined,

@@ -5,7 +5,7 @@
 
 import { GraduationCap } from "lucide-react";
 import { useAccess } from "@/hooks/use-access";
-import type { ClientOverview } from "@/lib/clients/overview";
+import type { ClientOverview } from "@/lib/clients/overview/overview";
 import { ClientSpecificTrainingCard } from "@/components/clients/profile/client-specific-training-card";
 import { TeamMembers } from "@/components/clients/profile/team/team-members";
 import { DoNotScheduleCard } from "@/components/clients/profile/team/do-not-schedule-card";
@@ -32,6 +32,7 @@ export function TeamSection({
         firstName={firstName}
         canEdit={canCategory("staff_roster", "edit")}
         readiness={overview?.team ?? []}
+        shortcut
       />
       <DoNotScheduleCard orgId={orgId} clientId={clientId} canEdit={canEditClients} />
       {canEditClients ? (

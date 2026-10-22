@@ -5,8 +5,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import type { AboutDocInfo } from "@/lib/clients/about-me";
-import { MUST_KNOW_SECTIONS, mustKnowSource, type MustKnowItem } from "@/lib/clients/must-knows";
+import type { AboutDocInfo } from "@/lib/clients/about/about-me";
+import { MUST_KNOW_SECTIONS, mustKnowSource, type MustKnowItem } from "@/lib/clients/about/must-knows";
 import { SaveBar } from "@/components/clients/profile/cards/section-card";
 import { EmptyState } from "@/components/clients/profile/cards/card-parts";
 

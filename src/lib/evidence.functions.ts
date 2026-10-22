@@ -8,8 +8,8 @@
  * Does not write requirement_defs or company_obligations.
  * Reads and writes go through evidence/store.server.ts and items.server.ts.
  */
-import { loadActiveCodes } from "@/lib/clients/codes";
-import { recordClientPacks } from "@/lib/clients/file-packs.server";
+import { loadActiveCodes } from "@/lib/clients/services/codes";
+import { recordClientPacks } from "@/lib/clients/file/file-packs.server";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -46,8 +46,8 @@ import {
   type StoreV1,
 } from "./evidence/store.server.ts";
 import { saveUploadOnItem } from "./evidence/record-upload.server.ts";
-import { loadStrategyStates } from "./clients/strategy-sends.server";
-import type { StrategySendState } from "./clients/strategy-sends";
+import { loadStrategyStates } from "./clients/strategies/strategy-sends.server";
+import type { StrategySendState } from "./clients/strategies/strategy-sends";
 import { latestFileForItem } from "./evidence/status.ts";
 import {
   EVIDENCE_PUSH_BODY,

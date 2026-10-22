@@ -3,7 +3,7 @@
 // when, shown as "✓ Coordinator emailed by …, <date>" with Undo. No
 // coordinator email → a link to Contacts. Only Owners and Admins with Billing
 // edit get the button, the checkbox and Undo; everyone else sees the record.
-// The rule is lib/clients/unit-alerts.ts.
+// The rule is lib/clients/services/unit-alerts.ts.
 
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
@@ -14,15 +14,15 @@ import { Mail, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAccess } from "@/hooks/use-access";
-import type { AuthorizationView } from "@/lib/clients/authorizations";
+import type { AuthorizationView } from "@/lib/clients/services/authorizations";
 import {
   canRecordUnitAlert,
   coordinatorMailto,
   unitAlertLine,
   unitAlertState,
   type UnitAlert,
-} from "@/lib/clients/unit-alerts";
-import { recordUnitAlert, voidUnitAlert } from "@/lib/clients/unit-alerts.functions";
+} from "@/lib/clients/services/unit-alerts";
+import { recordUnitAlert, voidUnitAlert } from "@/lib/clients/services/unit-alerts.functions";
 
 export function CoordinatorEmail({
   orgId,

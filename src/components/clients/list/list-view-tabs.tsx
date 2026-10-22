@@ -1,3 +1,5 @@
+// Active / Discharged tabs on the Clients page, plus the Referrals link.
+
 export type PageView = "active" | "discharged" | "referrals";
 
 /** Active / Discharged tabs, plus a small Referrals link when the org has referrals. */

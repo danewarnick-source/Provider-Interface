@@ -1,3 +1,5 @@
+// Dialog to add or edit one client contact.
+
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,7 +15,7 @@ import {
   type ClientContact,
   type ContactFields,
   type ContactRole,
-} from "@/lib/clients/contacts";
+} from "@/lib/clients/contacts/contacts";
 
 type Draft = Record<Exclude<keyof ContactFields, "role" | "is_primary">, string> & {
   role: ContactRole;

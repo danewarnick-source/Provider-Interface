@@ -18,7 +18,7 @@ import {
   type DailyNoteRow,
 } from "@/lib/daily-log-missing";
 import { selectIn } from "@/lib/team-members/roster.functions";
-import { loadActiveCodes } from "@/lib/clients/codes";
+import { loadActiveCodes } from "@/lib/clients/services/codes";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = SupabaseClient<any>;

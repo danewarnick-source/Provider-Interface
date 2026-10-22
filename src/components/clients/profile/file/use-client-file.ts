@@ -5,7 +5,7 @@
 import { useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { loadClientFile, syncClientFile } from "@/lib/clients/file-evidence.functions";
+import { loadClientFile, syncClientFile } from "@/lib/clients/file/file-evidence.functions";
 
 export const clientFileKey = (clientId: string) => ["client-file", clientId] as const;
 

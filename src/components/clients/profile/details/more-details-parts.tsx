@@ -24,9 +24,9 @@ import type { CustomFieldWithValue } from "@/lib/clients/care-data.functions";
 import {
   createCustomFieldDefinition,
   setCustomFieldValue,
-} from "@/lib/clients/custom-fields.functions";
-import { SECTION_LABEL, SECTION_NAMES, type SectionName } from "@/lib/clients/staff-visibility";
-import { customFieldLabel } from "@/lib/clients/more-details";
+} from "@/lib/clients/profile/custom-fields.functions";
+import { SECTION_LABEL, SECTION_NAMES, type SectionName } from "@/lib/clients/profile/staff-visibility";
+import { customFieldLabel } from "@/lib/clients/profile/more-details";
 import { RowMenu } from "@/components/clients/profile/cards/row-menu";
 
 type DataType = "text" | "number" | "boolean" | "date";

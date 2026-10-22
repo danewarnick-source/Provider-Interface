@@ -18,8 +18,8 @@ import {
   summaryButtonLabel,
   summaryDueRule,
   summaryPeriodName,
-} from "@/lib/clients/plan-summaries";
-import { summariesOwed } from "@/lib/progress-summaries";
+} from "@/lib/clients/plans/plan-summaries";
+import { summariesOwed } from "@/lib/progress-summaries/progress-summaries";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { StatusTag } from "@/components/clients/profile/cards/card-parts";
 import { ReadOnlyTable } from "@/components/clients/profile/read-only-table";

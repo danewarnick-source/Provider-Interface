@@ -1,3 +1,6 @@
+// Clients list toolbar: view tabs, search, home / team member / code filters and
+// Export CSV.
+
 import type { ReactNode } from "react";
 import { Download, Search, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
-import type { ListFilters } from "@/lib/clients/list";
+import type { ListFilters } from "@/lib/clients/list/list";
 
 const ALL = "__all__";
 

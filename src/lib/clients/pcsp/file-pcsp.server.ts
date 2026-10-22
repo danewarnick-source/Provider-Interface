@@ -9,7 +9,7 @@ import {
 } from "@/lib/evidence/store.server";
 import { saveUploadOnItem } from "@/lib/evidence/record-upload.server";
 import type { EvidenceItemRow } from "@/lib/evidence/types";
-import { applyClientPackPlan, loadClientFileView } from "../file-packs.server";
+import { applyClientPackPlan, loadClientFileView } from "../file/file-packs.server";
 import { assertRowsChanged } from "../writes";
 import { PCSP_BUCKET } from "./read-pdf.server";
 import type { FiledOutcome } from "./read-report";

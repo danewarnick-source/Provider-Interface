@@ -8,7 +8,7 @@ import {
   ensureCurrentSummaryPeriods,
   listOpenSummaries,
   type ProgressSummaryRow,
-} from "@/lib/progress-summaries.functions";
+} from "@/lib/progress-summaries/progress-summaries.functions";
 import {
   cadenceDescription,
   listDeadlineObligationInstances,
@@ -16,7 +16,7 @@ import {
 } from "@/lib/company-obligations.functions";
 import { isAdminLevel } from "@/lib/access/levels";
 import { denverYmd } from "@/lib/denver-date";
-import { scSendReminder, type ScSendReminder } from "@/lib/progress-summaries";
+import { scSendReminder, type ScSendReminder } from "@/lib/progress-summaries/progress-summaries";
 
 /**
  * Deadlines is the calendar of open clocks. The compliance register

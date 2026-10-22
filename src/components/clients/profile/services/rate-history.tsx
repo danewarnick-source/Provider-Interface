@@ -2,7 +2,7 @@
 // filled by a database trigger whenever the rate or dates change).
 
 import { formatDate } from "@/lib/clients/dates";
-import type { RateHistoryEntry } from "@/lib/clients/services-load";
+import type { RateHistoryEntry } from "@/lib/clients/services/services-load";
 
 const money = (n: number) =>
   Number(n).toLocaleString("en-US", { style: "currency", currency: "USD" });

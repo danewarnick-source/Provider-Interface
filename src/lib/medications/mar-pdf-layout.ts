@@ -12,7 +12,7 @@ import {
   pdfSafe,
   wrapText,
   type Fonts,
-} from "../clients/strategies-pdf-layout.ts";
+} from "../clients/strategies/strategies-pdf-layout.ts";
 
 export const L_W = 792;
 export const L_H = 612;

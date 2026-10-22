@@ -18,8 +18,8 @@ import { toast } from "sonner";
 import { ClipboardList } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
-import { strategiesDueOn } from "@/lib/clients/plan-dates";
-import type { ClientPlan } from "@/lib/clients/plans";
+import { strategiesDueOn } from "@/lib/clients/plans/plan-dates";
+import type { ClientPlan } from "@/lib/clients/plans/plans";
 import {
   isUploadDoc,
   strategyCoverage,
@@ -27,20 +27,22 @@ import {
   strategyView,
   withStrategy,
   type StrategySupport,
-} from "@/lib/clients/support-strategies";
+} from "@/lib/clients/strategies/support-strategies";
 import {
   attachSupportStrategyDocument,
   draftSupportStrategies,
   getSupportStrategiesTraining,
+} from "@/lib/clients/team/training-strategies.functions";
+import {
   publishClientSpecificTraining,
   updateClientSpecificTraining,
-  type CSTContent,
-} from "@/lib/clients/training.functions";
+} from "@/lib/clients/team/training.functions";
+import { type CSTContent } from "@/lib/clients/team/training-content";
 import {
   discardPulledStrategies,
   pullStrategiesFromDocument,
-} from "@/lib/clients/strategies-pull.functions";
-import { workingStrategies } from "@/lib/clients/strategies-pull";
+} from "@/lib/clients/strategies/strategies-pull.functions";
+import { workingStrategies } from "@/lib/clients/strategies/strategies-pull";
 import { Button } from "@/components/ui/button";
 import { PcspFirstDialog } from "./support-strategies-parts";
 import { StrategiesSendRow, strategySendKey } from "./support-strategies-send";

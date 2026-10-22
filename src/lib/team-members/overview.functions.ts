@@ -14,7 +14,7 @@ import { requireCategory } from "@/lib/access/require";
 import { hasCategory } from "@/lib/access/can";
 import { denverYmd } from "@/lib/denver-date";
 import { dailyLogProgram } from "@/lib/daily-log-missing";
-import { loadActiveCodesAsService } from "@/lib/clients/codes";
+import { loadActiveCodesAsService } from "@/lib/clients/services/codes";
 import { loadDailyNoteFacts } from "@/lib/daily-log-missing.functions";
 import type { EvidenceFileRow } from "@/lib/evidence/types";
 import { inHiveRefUuid } from "@/lib/in-hive-training";

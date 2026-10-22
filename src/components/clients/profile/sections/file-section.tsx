@@ -11,7 +11,7 @@ import { HostHomeCertPanel } from "@/components/clients/profile/file/host-home-c
 import { ClientDocumentsCard } from "@/components/clients/shared/client-documents-card";
 import type { ClientProfileData } from "@/components/clients/profile/use-client-profile";
 import { clientFeatureVisible } from "@/lib/clients/features";
-import { BELONGINGS_CODES, codesHas } from "@/lib/clients/file";
+import { BELONGINGS_CODES, codesHas } from "@/lib/clients/file/file";
 
 export function FileSection({ orgId, data }: { orgId: string; data: ClientProfileData }) {
   const { canCategory, isAgencyAdmin } = useAccess();

@@ -20,8 +20,8 @@ import {
   type ManualIncident,
   type SummaryDoc,
   type SummaryEditorState,
-} from "@/lib/progress-summary-doc";
-import type { FieldKey } from "@/lib/progress-summary-review";
+} from "@/lib/progress-summaries/progress-summary-doc";
+import type { FieldKey } from "@/lib/progress-summaries/progress-summary-review";
 
 export interface DocEditing {
   editor: SummaryEditorState;

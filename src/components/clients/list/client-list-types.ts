@@ -1,5 +1,7 @@
-import type { ClientListRow } from "@/lib/clients/list";
-import type { ListViewer } from "@/lib/clients/list-display";
+// Props and click handling shared by the clients list cards and table.
+
+import type { ClientListRow } from "@/lib/clients/list/list";
+import type { ListViewer } from "@/lib/clients/list/list-display";
 
 /** Shared row props for the phone cards and the desktop table. */
 export type ClientListViewProps = {

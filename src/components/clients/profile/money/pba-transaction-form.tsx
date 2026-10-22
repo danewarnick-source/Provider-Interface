@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { todayYmd } from "@/lib/clients/dates";
-import { PBA_TXN_TYPES, pbaNeedsReceipt } from "@/lib/clients/money";
+import { PBA_TXN_TYPES, pbaNeedsReceipt } from "@/lib/clients/money/money";
 import { writeClientRecord } from "@/lib/clients/writes.functions";
 import { PBA_RECEIPTS_BUCKET } from "./receipt-link";
 import type { PbaAccount } from "./use-client-money";

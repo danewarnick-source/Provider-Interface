@@ -9,14 +9,14 @@
 // (support-scope.ts) never count.
 // Advisory only: it never blocks a save.
 
-import { listReadiness } from "./list.ts";
+import { listReadiness } from "./list/list.ts";
 import { daysUntil, parseLocalDate } from "./dates.ts";
-import { hrrStatusDetail, isHrrDone, type RestrictionRecord } from "./hrc.ts";
-import { addDaysYmd } from "./plan-dates.ts";
-import { pcspState, pcspWords } from "./pcsp-status.ts";
-import type { ClientPlan } from "./plans.ts";
-import type { ClientProfileSection } from "./profile-sections.ts";
-import { strategyAttention, type StrategySendState } from "./strategy-sends.ts";
+import { hrrStatusDetail, isHrrDone, type RestrictionRecord } from "./rights/hrc.ts";
+import { addDaysYmd } from "./plans/plan-dates.ts";
+import { pcspState, pcspWords } from "./pcsp/pcsp-status.ts";
+import type { ClientPlan } from "./plans/plans.ts";
+import type { ClientProfileSection } from "./profile/profile-sections.ts";
+import { strategyAttention, type StrategySendState } from "./strategies/strategy-sends.ts";
 import type { ScopeCard } from "./support-scope.ts";
 
 export type AttentionTone = "bad" | "warn";

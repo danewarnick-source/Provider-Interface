@@ -1,3 +1,6 @@
+// Full-screen preview of a client document (PDF, image, Word or text), with a
+// download fallback for files the browser can't show.
+
 import { useEffect, useState } from "react";
 import { sanitizeHtml } from "@/lib/sanitize-html";
 import { Download, Loader2, X } from "lucide-react";

@@ -22,9 +22,9 @@ import {
   stepCounter,
   type SetupStep,
   type StepOutcome,
-} from "@/lib/clients/client-setup";
-import type { ClientOverview } from "@/lib/clients/overview";
-import type { ClientProfileSection } from "@/lib/clients/profile-sections";
+} from "@/lib/clients/create/client-setup";
+import type { ClientOverview } from "@/lib/clients/overview/overview";
+import type { ClientProfileSection } from "@/lib/clients/profile/profile-sections";
 import type { ClientProfileData } from "@/components/clients/profile/use-client-profile";
 import { SetupSummary } from "./setup-summary";
 import { StepAbout } from "./step-about";

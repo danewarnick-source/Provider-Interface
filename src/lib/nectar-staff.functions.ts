@@ -1,9 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
-import { activeContacts, contactsByClient, contactsWithRole, loadClientContacts } from "@/lib/clients/contacts";
+import { activeContacts, contactsByClient, contactsWithRole, loadClientContacts } from "@/lib/clients/contacts/contacts";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { todayYmd } from "@/lib/clients/dates";
-import { goalLine, goalsOn, supportsForCodes, type ClientPlanBundle } from "@/lib/clients/plans";
-import { loadPlanBundles } from "@/lib/clients/plans-load";
+import { goalLine, goalsOn, supportsForCodes, type ClientPlanBundle } from "@/lib/clients/plans/plans";
+import { loadPlanBundles } from "@/lib/clients/plans/plans-load";
 
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
 import {

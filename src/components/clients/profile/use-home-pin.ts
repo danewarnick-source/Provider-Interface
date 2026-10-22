@@ -9,7 +9,7 @@ import {
   saveClientGeofenceRadius,
   saveClientHomePin,
   saveClientPhysicalAddress,
-} from "@/lib/clients/home-pin.functions";
+} from "@/lib/clients/evv/home-pin.functions";
 
 export type HomePinRow = {
   physical_address: string | null;

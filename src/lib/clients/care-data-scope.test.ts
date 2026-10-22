@@ -130,7 +130,7 @@ describe("wiring", () => {
     assert.match(ws, /canCategory\("client_medical", "view"\)[\s\S]*<FaceSheetButton/);
   });
   it("the face sheet checks view_medical and logs PHI access", () => {
-    const fs = read("./face-sheet.functions.ts");
+    const fs = read("./profile/face-sheet.functions.ts");
     assert.match(fs, /action: "view_medical"/);
     assert.match(fs, /logPhiAccess\(/);
   });

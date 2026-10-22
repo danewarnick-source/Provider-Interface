@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { canVerifyPbaSample } from "@/lib/clients/money";
+import { canVerifyPbaSample } from "@/lib/clients/money/money";
 import { writeClientRecord } from "@/lib/clients/writes.functions";
 import type { PbaAccount, PbaAuditSample } from "./use-client-money";
 

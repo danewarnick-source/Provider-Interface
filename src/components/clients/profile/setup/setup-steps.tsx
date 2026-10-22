@@ -6,8 +6,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAccess } from "@/hooks/use-access";
-import { needsBehaviorSupportPlan } from "@/lib/clients/bsp";
-import type { ClientOverview } from "@/lib/clients/overview";
+import { needsBehaviorSupportPlan } from "@/lib/clients/plans/bsp";
+import type { ClientOverview } from "@/lib/clients/overview/overview";
 import type { SupportScope } from "@/lib/clients/support-scope";
 import { ContactsSection } from "@/components/clients/profile/contacts/contacts-section";
 import { TeamMembers } from "@/components/clients/profile/team/team-members";

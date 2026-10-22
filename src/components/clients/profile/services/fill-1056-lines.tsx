@@ -4,8 +4,8 @@
 import type { ReactNode } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { UNIT_TYPES } from "@/lib/clients/authorizations";
-import type { Review1056, Review1056Line } from "@/lib/clients/auth-1056";
+import { UNIT_TYPES } from "@/lib/clients/services/authorizations";
+import type { Review1056, Review1056Line } from "@/lib/clients/services/auth-1056";
 import type { Review1056Edit } from "./fill-1056-review";
 
 type Hint = (s: { page: number | null; quote: string } | null | undefined) => ReactNode;

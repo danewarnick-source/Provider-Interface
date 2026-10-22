@@ -123,7 +123,7 @@ import { gpsFixFromPosition, HIGH_ACCURACY_GPS_OPTIONS } from "@/lib/gps";
 import { selectedPill, unselectedPill } from "@/components/evv/toggle-styles";
 import { BASELINE_GOAL, GoalSupportChecklist } from "@/components/evv/goal-support-checklist";
 import { ShiftFocus } from "@/components/clients/shared/shift-focus";
-import { goalSupportOptions } from "@/lib/clients/plans";
+import { goalSupportOptions } from "@/lib/clients/plans/plans";
 import { isAdminLevel } from "@/lib/access/levels";
 
 function fmtElapsed(ms: number): string {

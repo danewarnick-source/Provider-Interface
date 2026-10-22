@@ -18,9 +18,9 @@ import {
   withCodeAdded,
   withCodeRemoved,
 } from "@/lib/assignment-codes";
-import { loadActiveCodes } from "@/lib/clients/codes";
-import { exclusionAssignRefusal, exclusionRefusal, findExclusion } from "@/lib/clients/exclusions";
-import { exclusionFor, loadActiveExclusions } from "@/lib/clients/exclusions-check.server";
+import { loadActiveCodes } from "@/lib/clients/services/codes";
+import { exclusionAssignRefusal, exclusionRefusal, findExclusion } from "@/lib/clients/team/exclusions";
+import { exclusionFor, loadActiveExclusions } from "@/lib/clients/team/exclusions-check.server";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Staff ↔ client code assignments — the single write path.

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { CalendarOff } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDate, todayYmd } from "@/lib/clients/dates";
-import { ABSENCE_REASONS, absenceDays, absenceProblem, labelFor } from "@/lib/clients/health";
+import { ABSENCE_REASONS, absenceDays, absenceProblem, labelFor } from "@/lib/clients/health/health";
 import { LabeledInput } from "@/components/clients/profile/cards/card-parts";
 import { RecordList } from "./record-list";
 import { PickField, RecordDialog } from "./record-dialog";

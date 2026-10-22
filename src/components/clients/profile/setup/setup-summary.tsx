@@ -3,8 +3,8 @@
 
 import { CheckCircle2, CircleDashed } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { setupSummary, type SetupStep, type StepOutcome } from "@/lib/clients/client-setup";
-import { CLIENT_SECTION_LABEL, type ClientProfileSection } from "@/lib/clients/profile-sections";
+import { setupSummary, type SetupStep, type StepOutcome } from "@/lib/clients/create/client-setup";
+import { CLIENT_SECTION_LABEL, type ClientProfileSection } from "@/lib/clients/profile/profile-sections";
 
 export function SetupSummary({
   outcomes,

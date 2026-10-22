@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { INITIATED_BY, noticeWarning, type InitiatedBy } from "@/lib/clients/discharge";
+import { INITIATED_BY, noticeWarning, type InitiatedBy } from "@/lib/clients/discharge/discharge";
 
 export type DischargeDetails = {
   dischargeDate: string;

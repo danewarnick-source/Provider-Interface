@@ -30,13 +30,13 @@ import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { logPhiAccess } from "@/lib/phi-access-audit.server";
 import { assignmentCoversCode } from "@/lib/assignment-codes";
 import { queryOptions } from "@tanstack/react-query";
-import { activeContacts, loadClientContacts, type ClientContact } from "./contacts";
+import { activeContacts, loadClientContacts, type ClientContact } from "./contacts/contacts";
 import { careDataReach, scopeCareData, staffContacts } from "./care-data-scope";
-import { currentPlan, goalView, goalsOn, supportsForCode, type GoalView, type PlanStatus } from "./plans";
-import { loadPlanBundle } from "./plans-load";
+import { currentPlan, goalView, goalsOn, supportsForCode, type GoalView, type PlanStatus } from "./plans/plans";
+import { loadPlanBundle } from "./plans/plans-load";
 import { todayYmd } from "./dates";
-import { hasCustomValue } from "./more-details";
-import { authorizationCovers } from "./codes";
+import { hasCustomValue } from "./profile/more-details";
+import { authorizationCovers } from "./services/codes";
 import { STAFF_MED_COLUMNS, staffVisibleMeds, type StaffMedication } from "@/lib/medications/staff-meds";
 import {
   type ClientVisibilityRow,
@@ -44,7 +44,7 @@ import {
   fieldKey,
   isFieldVisible,
   isSectionVisible,
-} from "./staff-visibility";
+} from "./profile/staff-visibility";
 
 // ── Return types ────────────────────────────────────────────────────────────
 

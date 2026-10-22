@@ -15,7 +15,7 @@ import type { CaseloadClient } from "@/hooks/use-caseload";
 import { MedsReadOnlyList } from "@/components/medications/meds-read-only-list";
 import { displayPersonName } from "@/lib/person-name";
 import { useClientContacts } from "@/components/clients/shared/hooks/use-client-contacts";
-import { CONTACT_ROLE_LABELS, contactsWithRole } from "@/lib/clients/contacts";
+import { CONTACT_ROLE_LABELS, contactsWithRole } from "@/lib/clients/contacts/contacts";
 import { formatDate } from "@/lib/clients/dates";
 import { AlertTriangle, Target, Phone, Heart, IdCard, ChevronRight } from "lucide-react";
 

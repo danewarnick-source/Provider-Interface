@@ -1,3 +1,6 @@
+// Add client sheet: start from a PCSP or enter by hand, save the client in one
+// step, then offer "Finish setting up" now or later.
+
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2 } from "lucide-react";
@@ -11,14 +14,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { findClientsByMedicaidIds } from "@/lib/clients/create.functions";
+import { findClientsByMedicaidIds } from "@/lib/clients/create/create.functions";
 import {
   emptyAddClientForm,
   formProblems,
   prefillFromPcsp,
   type AddClientForm,
   type FilledField,
-} from "@/lib/clients/create";
+} from "@/lib/clients/create/create";
 import { PcspReview } from "@/components/clients/profile/plans/pcsp-review";
 import { PcspReadFailed, PcspReadSummary } from "@/components/clients/shared/pcsp-read-notes";
 import { AddClientDone, type AddedClient } from "./add-client-done";

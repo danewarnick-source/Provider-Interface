@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
 import { formatDate } from "@/lib/clients/dates";
 import { writeClientRecord } from "@/lib/clients/writes.functions";
-import { formatMoney, pbaHeadroomPercent, pbaTone, type PbaTone } from "@/lib/clients/money";
+import { formatMoney, pbaHeadroomPercent, pbaTone, type PbaTone } from "@/lib/clients/money/money";
 import { PbaAuditRow } from "./pba-audit-row";
 import { PbaLedgerDialog } from "./pba-ledger-dialog";
 import { pbaAccountKey, useClientPba } from "./use-client-money";

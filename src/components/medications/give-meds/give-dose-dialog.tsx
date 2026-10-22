@@ -1,3 +1,6 @@
+// Give meds: the dialog that logs one dose as given (time, route, PRN reason,
+// controlled count and witness).
+
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";

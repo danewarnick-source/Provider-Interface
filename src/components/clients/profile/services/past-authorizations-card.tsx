@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { StatusTag } from "@/components/clients/profile/cards/card-parts";
 import { formatDate } from "@/lib/clients/dates";
-import type { AuthorizationView } from "@/lib/clients/authorizations";
-import type { PastAuthorization } from "@/lib/clients/authorization-renewal";
+import type { AuthorizationView } from "@/lib/clients/services/authorizations";
+import type { PastAuthorization } from "@/lib/clients/services/authorization-renewal";
 import { codeName } from "./code-name";
 
 function Line({

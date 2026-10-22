@@ -10,12 +10,12 @@ const UTC_TODAY = /toISOString\(\)\.(slice\(0, ?10\)|split\("T"\)\[0\]|substring
 
 describe("Denver today", () => {
   const files: [string, RegExp][] = [
-    ["./import-schema.ts", /const today = denverYmd\(\);/],
-    ["./file-index.ts", /const today = denverYmd\(\);/],
-    ["./file.ts", /liveDocs\(facts\.docs, denverYmd\(now\)\)/],
+    ["./create/import-schema.ts", /const today = denverYmd\(\);/],
+    ["./file/file-index.ts", /const today = denverYmd\(\);/],
+    ["./file/file.ts", /liveDocs\(facts\.docs, denverYmd\(now\)\)/],
     ["../../components/clients/shared/hooks/use-client-billing-codes.tsx", /const today = denverYmd\(\);/],
     ["./care-data.functions.ts", /const today = todayYmd\(\);/],
-    ["./training.functions.ts", /const today = denverYmd\(\);/],
+    ["./team/training.functions.ts", /const today = denverYmd\(\);/],
   ];
   for (const [file, uses] of files) {
     it(`${file} has no UTC "today"`, () => {
@@ -40,6 +40,6 @@ describe("authorization end dates are inclusive", () => {
       read("./care-data.functions.ts"),
       /\.filter\(\(c\) => authorizationCovers\(c\.service_end_date, today\)\)/,
     );
-    assert.match(read("./training.functions.ts"), /c\.service_end_date >= today/);
+    assert.match(read("./team/training.functions.ts"), /c\.service_end_date >= today/);
   });
 });

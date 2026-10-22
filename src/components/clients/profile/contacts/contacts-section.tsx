@@ -24,14 +24,14 @@ import {
   pastContacts,
   type ClientContact,
   type ContactFields,
-} from "@/lib/clients/contacts";
+} from "@/lib/clients/contacts/contacts";
 import {
   addClientContact,
   endClientContact,
   restoreClientContact,
   updateClientContact,
-} from "@/lib/clients/contacts.functions";
-import { guardianStatus } from "@/lib/clients/guardian";
+} from "@/lib/clients/contacts/contacts.functions";
+import { guardianStatus } from "@/lib/clients/contacts/guardian";
 import { updateClient } from "@/lib/clients/writes.functions";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { EmptyState, StatusTag } from "@/components/clients/profile/cards/card-parts";

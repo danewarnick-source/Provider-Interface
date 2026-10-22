@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { CLIENT_PACKS, packTriggerCodes } from "@/lib/clients/file-packs";
+import { CLIENT_PACKS, packTriggerCodes } from "@/lib/clients/file/file-packs";
 
 export function AddPackDialog({
   open,

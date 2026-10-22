@@ -15,8 +15,8 @@ import { FieldVisibilityToggle } from "@/components/clients/profile/visibility-t
 import { clientPlansKey, useClientPlans } from "@/components/clients/shared/hooks/use-plan-goals";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { todayYmd } from "@/lib/clients/dates";
-import { currentPlan, goalView, supportsForCode, type GoalView } from "@/lib/clients/plans";
-import { addClientPlan, endClientGoal, endGoalSupport } from "@/lib/clients/plans.functions";
+import { currentPlan, goalView, supportsForCode, type GoalView } from "@/lib/clients/plans/plans";
+import { addClientPlan, endClientGoal, endGoalSupport } from "@/lib/clients/plans/plans.functions";
 import { GoalTree } from "./goal-tree";
 import { PLAN_CARD } from "./support-lines";
 import { GoalDialog, SupportDialog } from "./goal-dialogs";

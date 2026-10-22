@@ -1,8 +1,11 @@
+// Add client form, Service codes part: each code's dates and yearly units from
+// the 1056, or "waiting on 1056".
+
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import type { AddClientForm, CodeLine } from "@/lib/clients/create";
+import type { AddClientForm, CodeLine } from "@/lib/clients/create/create";
 import { DspdCodesMultiSelect } from "./dspd-codes-multiselect";
 
 const newLine = (code: string): CodeLine => ({

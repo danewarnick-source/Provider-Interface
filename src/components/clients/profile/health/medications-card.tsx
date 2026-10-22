@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { StatusTag } from "@/components/clients/profile/cards/card-parts";
-import { medicationSupportSummary } from "@/lib/clients/health";
+import { medicationSupportSummary } from "@/lib/clients/health/health";
 import type { ClientHealthRow } from "./use-client-health";
 import { MedicationsTab } from "./medications/medications-tab";
 import { MedicationFormSheet } from "./medications/medication-form-sheet";

@@ -4,7 +4,7 @@
 // server only (mar.functions.ts). Pure (no Supabase), node --test.
 
 import { PDFDocument } from "pdf-lib";
-import { MUTED, embedFonts, wrapText } from "../clients/strategies-pdf-layout.ts";
+import { MUTED, embedFonts, wrapText } from "../clients/strategies/strategies-pdf-layout.ts";
 import { formatTime12, nameWithStrength } from "./med-display.ts";
 import { cellCode, summaryLine, type MarCell } from "./mar-cells.ts";
 import type { MarMonthData } from "./mar-data.ts";

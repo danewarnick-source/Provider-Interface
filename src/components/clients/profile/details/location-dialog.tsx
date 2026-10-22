@@ -26,7 +26,7 @@ import {
   type ApprovedLocation,
   type LocationDraft,
   type LocationPin,
-} from "@/lib/clients/locations";
+} from "@/lib/clients/evv/locations";
 
 type PinMapProps = {
   lat: number | null;

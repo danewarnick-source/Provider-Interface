@@ -108,7 +108,7 @@ describe("Compliance nav lock", () => {
 
   it("sends the old client profile Compliance tab to the Plans section", () => {
     const sections = readFileSync(
-      new URL("./clients/profile-sections.ts", import.meta.url),
+      new URL("./clients/profile/profile-sections.ts", import.meta.url),
       "utf8",
     );
     assert.match(sections, /compliance: "plans"/);

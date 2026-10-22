@@ -7,8 +7,8 @@ import {
   photoStatus,
   type ReadinessInput,
 } from "./readiness.ts";
-import type { ClientPlan } from "./plans.ts";
-import type { RestrictionRecord } from "./hrc.ts";
+import type { ClientPlan } from "./plans/plans.ts";
+import type { RestrictionRecord } from "./rights/hrc.ts";
 
 const NOW = new Date(2026, 9, 6); // Oct 6, 2026, local
 

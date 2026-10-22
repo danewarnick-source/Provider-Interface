@@ -1,3 +1,6 @@
+// All documents on file for a client (Client file section): upload, preview,
+// download and retire. A PCSP upload goes through the PCSP review.
+
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";

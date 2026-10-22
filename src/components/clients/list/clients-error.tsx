@@ -1,3 +1,5 @@
+// Error screen for the Clients page, with Reload and Dashboard links.
+
 export function ClientsError({ error }: { error: Error; reset: () => void }) {
   return (
     <div className="flex items-start justify-center p-8">

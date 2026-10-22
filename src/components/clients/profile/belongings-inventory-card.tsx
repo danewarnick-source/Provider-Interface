@@ -26,7 +26,7 @@ import {
   addClientBelonging,
   discardClientBelonging,
   type ClientBelongingRow,
-} from "@/lib/clients/belongings.functions";
+} from "@/lib/clients/money/belongings.functions";
 import { formatDate } from "@/lib/clients/dates";
 
 function fmtMoney(n: number): string {

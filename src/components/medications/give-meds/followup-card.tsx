@@ -1,3 +1,5 @@
+// Give meds: the "Did it help?" follow-up card for an as-needed (PRN) dose.
+
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";

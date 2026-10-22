@@ -1,8 +1,11 @@
+// Hooks for authorized billing codes: one client's current codes, or the whole
+// agency's.
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "../../../../hooks/use-org";
 import { billingCodesForLiveClients } from "@/lib/billing-codes-live-clients";
-import { authorizationCovers } from "@/lib/clients/codes";
+import { authorizationCovers } from "@/lib/clients/services/codes";
 import { denverYmd } from "@/lib/denver-date";
 
 export type ClientBillingCode = {

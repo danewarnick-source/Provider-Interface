@@ -5,7 +5,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import type { ReviewProposal } from "@/lib/clients/document-review";
+import type { ReviewProposal } from "@/lib/clients/create/document-review";
 
 export type UpdateProposal = ReviewProposal;
 

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { contactsByClient, loadClientContacts, primaryContact } from "@/lib/clients/contacts";
+import { contactsByClient, loadClientContacts, primaryContact } from "@/lib/clients/contacts/contacts";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";

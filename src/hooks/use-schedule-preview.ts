@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { loadActiveCodes } from "@/lib/clients/codes";
+import { loadActiveCodes } from "@/lib/clients/services/codes";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "./use-org";
 import { DAILY_SERVICE_CODES, isDailyServiceCode } from "@/lib/service-billing";

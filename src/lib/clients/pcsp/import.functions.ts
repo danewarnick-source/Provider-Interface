@@ -10,7 +10,7 @@ import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertCanManageClient } from "../guards.server";
-import { canEditClientBilling } from "../billing-access.server";
+import { canEditClientBilling } from "../services/billing-access.server";
 import { proposeCarryOver, type CarryOver } from "./carry-over";
 import type { FallbackSection } from "./nectar-fallback";
 import { fileCurrentPcsp, insertPcspDocument } from "./file-pcsp.server";

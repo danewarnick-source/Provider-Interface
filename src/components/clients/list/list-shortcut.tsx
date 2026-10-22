@@ -1,24 +1,31 @@
+// Clients list links that jump into one section of a client's profile, and the
+// empty-cell placeholder.
+
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import type { ClientListRow } from "@/lib/clients/list";
+import type { ClientListRow } from "@/lib/clients/list/list";
 import {
   LIST_SHORTCUTS,
   canFixSection,
   type ListShortcutKey,
   type ListViewer,
-} from "@/lib/clients/list-display";
-import type { ClientProfileSection } from "@/lib/clients/profile-sections";
+} from "@/lib/clients/list/list-display";
+import type { ClientProfileSection } from "@/lib/clients/profile/profile-sections";
+import type { ClientEditTarget } from "@/lib/clients/profile/profile-search";
 
 /** Small link into one section of the client's profile; never also opens the row. */
 export function SectionLink({
   clientId,
   section,
+  edit,
   children,
   className,
 }: {
   clientId: string;
   section: ClientProfileSection;
+  /** Open this editor on arrival (`?edit=`). */
+  edit?: ClientEditTarget;
   children: ReactNode;
   className?: string;
 }) {
@@ -26,7 +33,7 @@ export function SectionLink({
     <Link
       to="/dashboard/clients/$clientId"
       params={{ clientId }}
-      search={{ section }}
+      search={{ section, edit }}
       data-no-row-nav
       onClick={(e) => e.stopPropagation()}
       className={cn(
@@ -59,7 +66,7 @@ export function EmptyCell({
     return <span className="text-xs text-muted-foreground">{fallback}</span>;
   }
   return (
-    <SectionLink clientId={row.id} section={s.section}>
+    <SectionLink clientId={row.id} section={s.section} edit={s.edit}>
       {s.label}
     </SectionLink>
   );

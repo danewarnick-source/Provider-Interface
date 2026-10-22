@@ -11,8 +11,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { newShiftStatus } from "@/lib/scheduling/shift-status";
-import { openExcludedShifts } from "@/lib/clients/exclusions";
-import { loadActiveExclusions } from "@/lib/clients/exclusions-check.server";
+import { openExcludedShifts } from "@/lib/clients/team/exclusions";
+import { loadActiveExclusions } from "@/lib/clients/team/exclusions-check.server";
 import { expandRecurringOccurrences, occurrenceSlotKey } from "@/lib/scheduler/recurrence";
 
 type ShiftRow = {

@@ -1,3 +1,6 @@
+// Give meds, controlled doses: the count before and after, and the witness
+// sign-in when one is needed.
+
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2 } from "lucide-react";

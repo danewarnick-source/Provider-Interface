@@ -1,6 +1,9 @@
+// Add client form, Contacts part: the Support Coordinator and guardian, both
+// saved as client contacts.
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import type { AddClientForm, ContactPerson, FilledField } from "@/lib/clients/create";
+import type { AddClientForm, ContactPerson, FilledField } from "@/lib/clients/create/create";
 import { Field, FromPcspTag } from "./add-identity-fields";
 
 function PersonFields({
