@@ -27,7 +27,7 @@ import {
   clientUploadFolder,
   defaultChecked,
   reviewableUploadType,
-} from "@/lib/clients/document-review";
+} from "@/lib/clients/create/document-review";
 import {
   UpdateProposalsList,
   type UpdateProposal,

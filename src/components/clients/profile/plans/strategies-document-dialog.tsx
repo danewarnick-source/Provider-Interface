@@ -16,8 +16,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getSupportStrategiesDocument } from "@/lib/clients/strategies-doc.functions";
-import { NO_STRATEGY_TEXT, type StrategiesDoc } from "@/lib/clients/strategies-doc";
+import { getSupportStrategiesDocument } from "@/lib/clients/strategies/strategies-doc.functions";
+import { NO_STRATEGY_TEXT, type StrategiesDoc } from "@/lib/clients/strategies/strategies-doc";
 
 function downloadPdf(base64: string, filename: string) {
   const bin = atob(base64);

@@ -6,7 +6,7 @@ import { Plus, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { InfoTile } from "@/components/clients/profile/cards/card-parts";
-import { formatMoney, isOpenLoan, pbaTone, spentThisMonth } from "@/lib/clients/money";
+import { formatMoney, isOpenLoan, pbaTone, spentThisMonth } from "@/lib/clients/money/money";
 import { useClientLoans, useClientPba, useClientSpending } from "./use-client-money";
 
 export function MoneyHeader({

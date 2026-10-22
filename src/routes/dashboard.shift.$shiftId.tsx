@@ -24,7 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ClientPhoto } from "@/components/client-photo";
 import { useClientContacts } from "@/components/clients/shared/hooks/use-client-contacts";
-import { contactLine, primaryContact } from "@/lib/clients/contacts";
+import { contactLine, primaryContact } from "@/lib/clients/contacts/contacts";
 import { useClientCareData } from "@/hooks/use-client-care-data";
 import { ShiftFocus } from "@/components/clients/shared/shift-focus";
 import { MedsReadOnlyList } from "@/components/medications/meds-read-only-list";

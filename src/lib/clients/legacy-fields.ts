@@ -24,7 +24,7 @@
 // Trigger: sync_client_authorized_codes_from_billing (no-op after the Phase B migration
 //   20261006100300_clients_b_codes_copy_trigger_noop.sql).
 
-import { CONTACT_ROLE_LABELS, type ContactFields, type ContactRole } from "./contacts.ts";
+import { CONTACT_ROLE_LABELS, type ContactFields, type ContactRole } from "./contacts/contacts.ts";
 
 /** Extractor key for a staff must-know / safety notice (→ clients.special_directions). */
 export const LEGACY_ALERT_KEY = "clinical_alert";

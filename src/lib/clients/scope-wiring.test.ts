@@ -8,8 +8,8 @@ const read = (p: string) => readFileSync(new URL(p, import.meta.url), "utf8");
 
 describe("client-id writes use the client guard", () => {
   const server = read("./guards.server.ts");
-  const pin = read("./home-pin.functions.ts");
-  const vis = read("./staff-visibility.functions.ts");
+  const pin = read("./evv/home-pin.functions.ts");
+  const vis = read("./profile/staff-visibility.functions.ts");
   const ic = read("../import-checklist.functions.ts");
 
   it("assertCanManageClientById resolves the client's agency, checks a sent agency, then guards", () => {

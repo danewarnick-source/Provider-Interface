@@ -24,12 +24,12 @@ import { useClientCareData } from "@/hooks/use-client-care-data";
 import {
   archiveCustomFieldDefinitions,
   restoreCustomFieldDefinition,
-} from "@/lib/clients/custom-fields.functions";
-import { chunkIds, customFieldArchiveCopy } from "@/lib/clients/custom-fields-archive";
+} from "@/lib/clients/profile/custom-fields.functions";
+import { chunkIds, customFieldArchiveCopy } from "@/lib/clients/profile/custom-fields-archive";
 import { EditButton, SectionCard } from "@/components/clients/profile/cards/section-card";
 import { RowMenu } from "@/components/clients/profile/cards/row-menu";
 import { EmptyState } from "@/components/clients/profile/cards/card-parts";
-import { moreDetailsFields } from "@/lib/clients/more-details";
+import { moreDetailsFields } from "@/lib/clients/profile/more-details";
 import { DetailTile } from "./detail-tile";
 import { AddCustomFieldButton, CustomFieldRow } from "./more-details-parts";
 

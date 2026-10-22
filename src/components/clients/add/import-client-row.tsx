@@ -21,7 +21,7 @@ import {
   type ClientImportColumn,
   type ClientImportDraft,
   type ClientImportIssue,
-} from "@/lib/clients/import-sheet";
+} from "@/lib/clients/create/import-sheet";
 
 const NONE = "__none__";
 const LABEL = Object.fromEntries(CLIENT_IMPORT_COLUMNS.map((c) => [c.key, c.label])) as Record<

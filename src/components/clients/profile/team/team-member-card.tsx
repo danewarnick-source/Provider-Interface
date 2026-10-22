@@ -6,8 +6,8 @@ import { EditButton } from "@/components/clients/profile/cards/section-card";
 import { StatusTag } from "@/components/clients/profile/cards/card-parts";
 import { RowMenu } from "@/components/clients/profile/cards/row-menu";
 import { TONE_TILE } from "@/components/profile-shell/tones";
-import { contactInitials } from "@/lib/clients/contacts";
-import type { TeamCard } from "@/lib/clients/team";
+import { contactInitials } from "@/lib/clients/contacts/contacts";
+import type { TeamCard } from "@/lib/clients/team/team";
 
 export function TeamMemberCard({
   card,

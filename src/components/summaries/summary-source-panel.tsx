@@ -3,9 +3,9 @@
 
 import { CheckCircle2, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { SummarySourceBundle } from "@/lib/progress-summaries.functions";
-import { EVIDENCE_KIND_LABEL, groupEvidence, type SummaryEvidence } from "@/lib/progress-summary-doc";
-import { summaryCadenceLabel } from "@/lib/progress-summaries";
+import type { SummarySourceBundle } from "@/lib/progress-summaries/progress-summaries.functions";
+import { EVIDENCE_KIND_LABEL, groupEvidence, type SummaryEvidence } from "@/lib/progress-summaries/progress-summary-doc";
+import { summaryCadenceLabel } from "@/lib/progress-summaries/progress-summaries";
 import { cn } from "@/lib/utils";
 
 export function PbaPanel({

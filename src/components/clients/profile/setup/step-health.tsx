@@ -4,7 +4,7 @@
 // apply. Needs Client medical: Edit.
 
 import { useState } from "react";
-import { directiveStatus } from "@/lib/clients/health";
+import { directiveStatus } from "@/lib/clients/health/health";
 import type { ScopeAnswer, SupportScope } from "@/lib/clients/support-scope";
 import { AdvanceDirectiveCard } from "@/components/clients/profile/health/advance-directive-card";
 import { DietCard } from "@/components/clients/profile/health/diet-card";

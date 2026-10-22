@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { listClients } from "@/lib/clients/list.functions";
-import { reactivateClient } from "@/lib/clients/discharge.functions";
-import type { ListFilters } from "@/lib/clients/list";
+import { listClients } from "@/lib/clients/list/list.functions";
+import { reactivateClient } from "@/lib/clients/discharge/discharge.functions";
+import type { ListFilters } from "@/lib/clients/list/list";
 
 function useDebounced<T>(value: T, ms: number): T {
   const [v, setV] = useState(value);

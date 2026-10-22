@@ -13,8 +13,8 @@ import {
   showsNectarTag,
   type StrategyStatus,
   type StrategyView,
-} from "@/lib/clients/support-strategies";
-import { MAX_BULLETS, MIN_BULLETS, strategyNeedText } from "@/lib/clients/strategy-rules";
+} from "@/lib/clients/strategies/support-strategies";
+import { MAX_BULLETS, MIN_BULLETS, strategyNeedText } from "@/lib/clients/strategies/strategy-rules";
 import { EditButton, SaveBar } from "@/components/clients/profile/cards/section-card";
 import { StatusTag } from "@/components/clients/profile/cards/card-parts";
 import { GOAL_BLOCK, GOAL_HEAD, GOAL_TITLE, SupportLines } from "./support-lines";

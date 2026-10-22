@@ -13,7 +13,7 @@ import {
   type CSTSection,
   type CSTItem,
   type CSTReviewQuestion,
-} from "@/lib/clients/training.functions";
+} from "@/lib/clients/team/training.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Sparkles, Loader2, CheckCircle2, RefreshCw, Pencil, Trash2, Plus, ArrowUp, ArrowDown, Shield, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { todayYmd } from "@/lib/clients/dates";
-import { activeGoalViewsOn } from "@/lib/clients/plans";
+import { activeGoalViewsOn } from "@/lib/clients/plans/plans";
 import { GoalTree } from "@/components/clients/profile/plans/goal-tree";
 import { useClientPlans } from "@/components/clients/shared/hooks/use-plan-goals";
 import { PublishConfirmDialog } from "@/components/clients/profile/plans/publish-confirm-dialog";

@@ -5,7 +5,7 @@
  * never "all codes" — it grants nothing. A staff member may see and clock
  * into a code only when it is both assigned to them AND currently
  * authorized for the client. Client codes come from client_billing_codes
- * (src/lib/clients/codes.ts).
+ * (src/lib/clients/services/codes.ts).
  */
 
 /** client_id → the codes this staff member is assigned for that client. */

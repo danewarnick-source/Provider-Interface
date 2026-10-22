@@ -5,10 +5,10 @@
 // it, with "Show hidden sections" below).
 
 import { useAccess } from "@/hooks/use-access";
-import { needsBehaviorSupportPlan } from "@/lib/clients/bsp";
+import { needsBehaviorSupportPlan } from "@/lib/clients/plans/bsp";
 import { todayYmd } from "@/lib/clients/dates";
-import { activeGoalViewsOn, goalsOn } from "@/lib/clients/plans";
-import { agencySupports } from "@/lib/clients/support-strategies";
+import { activeGoalViewsOn, goalsOn } from "@/lib/clients/plans/plans";
+import { agencySupports } from "@/lib/clients/strategies/support-strategies";
 import { cardShows, hiddenCards } from "@/lib/clients/support-scope";
 import { useClientPlans } from "@/components/clients/shared/hooks/use-plan-goals";
 import { PlanYearsCard } from "@/components/clients/profile/plans/plan-years-card";

@@ -5,8 +5,8 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { confirm1056, read1056, type Read1056Result } from "@/lib/clients/budget-parse.functions";
-import { budget1056Folder, initial1056Review, type Review1056 } from "@/lib/clients/auth-1056";
+import { confirm1056, read1056, type Read1056Result } from "@/lib/clients/services/budget-parse.functions";
+import { budget1056Folder, initial1056Review, type Review1056 } from "@/lib/clients/services/auth-1056";
 import { uploadPdfToFolder } from "@/components/clients/shared/upload-pcsp";
 
 export function use1056Import(orgId: string, clientId: string, onSaved: () => void) {

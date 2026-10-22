@@ -1,0 +1,798 @@
+import { createServerFn } from "@tanstack/react-start";
+import { loadClientContacts, primaryContact, type ClientContact } from "@/lib/clients/contacts/contacts";
+import type { SummaryGoal } from "@/lib/clients/plans/plan-summaries";
+import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireOrgMembership } from "@/integrations/supabase/require-org";
+import { toIsoDateDay } from "@/lib/iso-date-day";
+import { FINALIZE_COLUMNS, readReopenHistory, reopenPatch, type ReopenEvent } from "@/lib/progress-summaries/progress-summary-reopen";
+import { readReviewState, type SummaryReviewState } from "@/lib/progress-summaries/progress-summary-review";
+import {
+  editorFromLegacyText,
+  readEditorState,
+  type SummaryDoc,
+  type SummaryEditorState,
+  type SummaryEvidence,
+} from "@/lib/progress-summaries/progress-summary-doc";
+import { loadSummarySource } from "@/lib/progress-summaries/progress-summary-source.server";
+import {
+  canFinalizeSummary,
+  clientNeedsGoalProgress,
+  finalizeOpensMessage,
+  filterPeriodsByFloor,
+  recentMonthlyPeriods,
+  recentQuarterlyPeriods,
+  requiresUpiFiling,
+  summaryCadenceForCode,
+  summaryPeriodFloor,
+  type SummaryPeriod,
+} from "./progress-summaries";
+
+export type ProgressSummaryStatus =
+  | "pending"
+  | "draft"
+  | "in_review"
+  | "finalized"
+  | "no_source";
+
+export type ProgressSummaryKind = "narrative" | "financial_statement";
+
+export type ProgressSummaryRow = {
+  id: string;
+  organization_id: string;
+  client_id: string;
+  period_kind: "quarterly" | "monthly";
+  period_label: string;
+  period_start: string;
+  period_end: string;
+  due_date: string;
+  service_codes: string[];
+  requires_upi_attestation: boolean;
+  completed_at: string | null;
+  completed_by: string | null;
+  upi_entered_at: string | null;
+  upi_entered_by: string | null;
+  sc_sent_at: string | null;
+  sc_sent_by: string | null;
+  ai_review_attested_at: string | null;
+  ai_review_attested_by: string | null;
+  summary_kind: ProgressSummaryKind;
+  status: ProgressSummaryStatus;
+  draft_content: string | null;
+  final_content: string | null;
+  drafted_at: string | null;
+  drafted_by: string | null;
+  finalized_at: string | null;
+  finalized_by: string | null;
+  finalized_by_name: string | null;
+  include_goal_progress: boolean;
+};
+
+const SUMMARY_SELECT_CORE =
+  "id, organization_id, client_id, period_kind, period_label, period_start, period_end, due_date, service_codes, requires_upi_attestation, completed_at, completed_by, upi_entered_at, upi_entered_by, summary_kind, status, draft_content, final_content, drafted_at, drafted_by, finalized_at, finalized_by, finalized_by_name, include_goal_progress";
+
+const SUMMARY_SELECT =
+  `${SUMMARY_SELECT_CORE}, sc_sent_at, sc_sent_by, ai_review_attested_at, ai_review_attested_by`;
+
+function normalizeSummaryRow(row: Record<string, unknown>): ProgressSummaryRow {
+  return {
+    ...(row as unknown as ProgressSummaryRow),
+    sc_sent_at: (row.sc_sent_at as string | null | undefined) ?? null,
+    sc_sent_by: (row.sc_sent_by as string | null | undefined) ?? null,
+    ai_review_attested_at: (row.ai_review_attested_at as string | null | undefined) ?? null,
+    ai_review_attested_by: (row.ai_review_attested_by as string | null | undefined) ?? null,
+  };
+}
+
+async function selectSummaries(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  organizationId: string,
+  opts?: { openOnly?: boolean },
+): Promise<ProgressSummaryRow[]> {
+  let q = supabase
+    .from("client_progress_summaries")
+    .select(SUMMARY_SELECT)
+    .eq("organization_id", organizationId)
+    .order("due_date", { ascending: true });
+  if (opts?.openOnly) {
+    q = q.or(
+      [
+        "completed_at.is.null",
+        "and(requires_upi_attestation.eq.true,upi_entered_at.is.null)",
+        "and(requires_upi_attestation.eq.false,sc_sent_at.is.null,status.eq.finalized)",
+      ].join(","),
+    );
+  }
+  const { data, error } = await q;
+  if (error && /sc_sent_at|ai_review_attested/i.test(error.message)) {
+    // Columns not applied yet — degrade to core select + UPI-only open filter.
+    let q2 = supabase
+      .from("client_progress_summaries")
+      .select(SUMMARY_SELECT_CORE)
+      .eq("organization_id", organizationId)
+      .order("due_date", { ascending: true });
+    if (opts?.openOnly) {
+      q2 = q2.or("completed_at.is.null,and(requires_upi_attestation.eq.true,upi_entered_at.is.null)");
+    }
+    const retry = await q2;
+    if (retry.error) throw new Error(retry.error.message);
+    return ((retry.data ?? []) as Record<string, unknown>[]).map(normalizeSummaryRow);
+  }
+  if (error) throw new Error(error.message);
+  return ((data ?? []) as Record<string, unknown>[]).map(normalizeSummaryRow);
+}
+
+/**
+ * Idempotent: ensures progress-summary rows exist for every closed period
+ * each client owes based on their active billing codes. Safe to call on
+ * every page load.
+ *
+ * Three flavors of rows per period:
+ *   - Quarterly narrative (HHS/RHS/DSI/SLH/SLN)
+ *   - Monthly narrative (SEI/PN1/PN2; SEI also flips requires_upi_attestation)
+ *   - Monthly financial statement (PBA) — summary_kind = 'financial_statement'
+ */
+export const ensureCurrentSummaryPeriods = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ organizationId: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) return { ensured: 0 };
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
+
+    const today = new Date().toISOString().slice(0, 10);
+
+    // Org-wide floor: a period that closed before this org actually started
+    // using PI should never be generated. Defaults to created_at when unset.
+    const { data: orgRow, error: orgErr } = await supabase
+      .from("organizations")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .select("go_live_date, created_at" as any)
+      .eq("id", data.organizationId)
+      .maybeSingle();
+    if (orgErr) throw new Error(orgErr.message);
+    const org = orgRow as unknown as { go_live_date: string | Date | null; created_at: string | Date } | null;
+    const orgGoLiveDate = toIsoDateDay(org?.go_live_date) ?? toIsoDateDay(org?.created_at);
+
+    const { data: codes, error: codesErr } = await supabase
+      .from("client_billing_codes")
+      .select("client_id, service_code, service_start_date, service_end_date")
+      .eq("organization_id", data.organizationId);
+    if (codesErr) throw new Error(codesErr.message);
+
+    // Per-client PI start (hive_start_date → created_at) for summaryPeriodFloor.
+    // hive_start_date is optional until SQL handoff runs; fall back to created_at.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let clientRows: Array<{ id: string; hive_start_date: string | null; created_at: string }> | null = null;
+    {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const withHive = await (supabase as any)
+        .from("clients")
+        .select("id, hive_start_date, created_at")
+        .is("deleted_at", null)
+        .eq("organization_id", data.organizationId);
+      if (withHive.error && /hive_start_date/i.test(withHive.error.message)) {
+        const { data: fallback, error: fbErr } = await supabase
+          .from("clients")
+          .select("id, created_at")
+          .is("deleted_at", null)
+          .eq("organization_id", data.organizationId);
+        if (fbErr) throw new Error(fbErr.message);
+        clientRows = (fallback ?? []).map((c) => ({
+          id: c.id,
+          hive_start_date: null,
+          created_at: c.created_at,
+        }));
+      } else if (withHive.error) {
+        throw new Error(withHive.error.message);
+      } else {
+        clientRows = withHive.data as typeof clientRows;
+      }
+    }
+    const clientMeta = new Map<string, { hive_start_date: string | null; created_at: string }>();
+    for (const c of clientRows ?? []) {
+      clientMeta.set(c.id, {
+        hive_start_date: c.hive_start_date ?? null,
+        created_at: c.created_at,
+      });
+    }
+
+    // Per code, keep its service_start_date so period generation below can
+    // skip any period that closed before the client's service for that code
+    // actually began — otherwise a client onboarded this month would get a
+    // full lookback window of periods marked overdue for service they never
+    // received.
+    type CodeEntry = { code: string; start: string | null };
+    const byClient = new Map<string, CodeEntry[]>();
+    for (const row of (codes ?? []) as Array<{
+      client_id: string;
+      service_code: string;
+      service_start_date: string | null;
+      service_end_date: string | null;
+    }>) {
+      if (row.service_start_date && row.service_start_date > today) continue;
+      if (row.service_end_date && row.service_end_date < today) continue;
+      const code = (row.service_code ?? "").toUpperCase();
+      if (!summaryCadenceForCode(code)) continue;
+      const arr = byClient.get(row.client_id) ?? [];
+      arr.push({ code, start: row.service_start_date ?? null });
+      byClient.set(row.client_id, arr);
+    }
+
+    if (byClient.size === 0) return { ensured: 0 };
+
+    const now = new Date();
+    const quarterlyAll = recentQuarterlyPeriods(now);
+    const monthlyAll = recentMonthlyPeriods(now);
+
+    type Insert = {
+      organization_id: string;
+      client_id: string;
+      period_kind: "quarterly" | "monthly";
+      period_label: string;
+      period_start: string;
+      period_end: string;
+      due_date: string;
+      service_codes: string[];
+      requires_upi_attestation: boolean;
+      summary_kind: ProgressSummaryKind;
+      include_goal_progress: boolean;
+    };
+    const inserts: Insert[] = [];
+
+    // Only create a period row for a client if at least one of the bucket's
+    // codes had already started (service_start_date <= period_end) by that
+    // period's close. A client whose service began mid-period still gets
+    // that period generated — nothing before their actual start date does.
+    const startedByPeriodEnd = (entries: CodeEntry[], periodEnd: string) =>
+      entries.filter((e) => !e.start || e.start <= periodEnd);
+
+    for (const [clientId, entries] of byClient) {
+      // Billing rows can outlive a deleted client; skip rather than FK-500
+      // the home-load ensure RPC (that JSON 500 used to be HTML-rewritten
+      // and hang dashboard Loading).
+      if (!clientMeta.has(clientId)) continue;
+      const meta = clientMeta.get(clientId);
+      const floor = summaryPeriodFloor({
+        orgGoLiveDate,
+        clientHiveStartDate: meta?.hive_start_date,
+        clientCreatedAt: meta?.created_at,
+      });
+      const quarterly = filterPeriodsByFloor(quarterlyAll, floor);
+      const monthly = filterPeriodsByFloor(monthlyAll, floor);
+
+      const quarterlyEntries = entries.filter((e) => summaryCadenceForCode(e.code) === "quarterly");
+      const monthlyNarrativeEntries = entries.filter((e) => summaryCadenceForCode(e.code) === "monthly");
+      const monthlyFinancialEntries = entries.filter((e) => summaryCadenceForCode(e.code) === "financial");
+
+      // Quarterly narrative.
+      for (const p of quarterly) {
+        const active = startedByPeriodEnd(quarterlyEntries, p.period_end);
+        if (active.length === 0) continue;
+        const services = [...new Set(active.map((e) => e.code))];
+        inserts.push({
+          organization_id: data.organizationId,
+          client_id: clientId,
+          period_kind: p.period_kind,
+          period_label: `${p.period_label}`,
+          period_start: p.period_start,
+          period_end: p.period_end,
+          due_date: p.due_date,
+          service_codes: services,
+          requires_upi_attestation: false,
+          summary_kind: "narrative",
+          include_goal_progress: clientNeedsGoalProgress(services),
+        });
+      }
+
+      // Monthly narrative (SEI / SJD / PN1 / PN2 / CMP / CMS). Single row per
+      // month; UPI flag set if SEI or SJD is among them.
+      for (const p of monthly) {
+        const active = startedByPeriodEnd(monthlyNarrativeEntries, p.period_end);
+        if (active.length === 0) continue;
+        const services = [...new Set(active.map((e) => e.code))];
+        inserts.push({
+          organization_id: data.organizationId,
+          client_id: clientId,
+          period_kind: p.period_kind,
+          period_label: p.period_label,
+          period_start: p.period_start,
+          period_end: p.period_end,
+          due_date: p.due_date,
+          service_codes: services,
+          requires_upi_attestation: requiresUpiFiling(services),
+          summary_kind: "narrative",
+          include_goal_progress: clientNeedsGoalProgress(services),
+        });
+      }
+
+      // Monthly financial statement (PBA).
+      for (const p of monthly) {
+        const active = startedByPeriodEnd(monthlyFinancialEntries, p.period_end);
+        if (active.length === 0) continue;
+        const services = [...new Set(active.map((e) => e.code))];
+        inserts.push({
+          organization_id: data.organizationId,
+          client_id: clientId,
+          period_kind: p.period_kind,
+          period_label: `${p.period_label}-FS`,
+          period_start: p.period_start,
+          period_end: p.period_end,
+          due_date: p.due_date,
+          service_codes: services,
+          requires_upi_attestation: false,
+          summary_kind: "financial_statement",
+          include_goal_progress: false,
+        });
+      }
+    }
+
+    if (inserts.length === 0) return { ensured: 0 };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
+      .from("client_progress_summaries")
+      .upsert(inserts, { onConflict: "organization_id,client_id,period_kind,period_label", ignoreDuplicates: true });
+    if (error) {
+      if (/client_progress_summaries_client_id_fkey|foreign key constraint/i.test(error.message)) {
+        return { ensured: 0 };
+      }
+      throw new Error(error.message);
+    }
+    return { ensured: inserts.length };
+  });
+
+/** List all open summaries for the org.
+ *
+ * "Open" = not yet completed, OR still awaiting a filing attestation:
+ *   - UPI-required (SEI/SJD): finalized but upi_entered_at is null
+ *   - SC-filed narrative/financial: finalized but sc_sent_at is null
+ * This keeps the post-finalize send/UPI step visible on Deadlines. */
+export const listOpenSummaries = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ organizationId: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) return [] as ProgressSummaryRow[];
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
+    return selectSummaries(supabase, data.organizationId, { openOnly: true });
+  });
+
+
+/** List ALL summaries (open + finalized) for the org — admin Summaries page. */
+export const listAllSummaries = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ organizationId: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) return [] as ProgressSummaryRow[];
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    return selectSummaries(supabase, data.organizationId);
+  });
+
+/** Mark a non-SEI summary complete (legacy callsite — kept for backward compatibility). */
+export const markSummaryCompleted = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({
+    organizationId: z.string().uuid(),
+    summaryId: z.string().uuid(),
+  }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) return { ok: true };
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
+      .from("client_progress_summaries")
+      .update({ completed_at: new Date().toISOString(), completed_by: userId, status: "finalized" })
+      .eq("id", data.summaryId)
+      .eq("organization_id", data.organizationId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/** Attest that an SEI/SJD monthly summary has been typed into the state UPI system. */
+export const attestSummaryUpiEntered = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({
+    organizationId: z.string().uuid(),
+    summaryId: z.string().uuid(),
+  }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) return { ok: true };
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    const ts = new Date().toISOString();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
+      .from("client_progress_summaries")
+      .update({
+        upi_entered_at: ts,
+        upi_entered_by: userId,
+        completed_at: ts,
+        completed_by: userId,
+        status: "finalized",
+      })
+      .eq("id", data.summaryId)
+      .eq("organization_id", data.organizationId)
+      .eq("requires_upi_attestation", true);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/** Attest that a non-UPI summary PDF was emailed/sent to the Support Coordinator. */
+export const attestSummarySentToSc = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({
+    organizationId: z.string().uuid(),
+    summaryId: z.string().uuid(),
+  }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) return { ok: true };
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    const ts = new Date().toISOString();
+    const patch: Record<string, unknown> = {
+      sc_sent_at: ts,
+      sc_sent_by: userId,
+      completed_at: ts,
+      completed_by: userId,
+      status: "finalized",
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let { error } = await (supabase as any)
+      .from("client_progress_summaries")
+      .update(patch)
+      .eq("id", data.summaryId)
+      .eq("organization_id", data.organizationId)
+      .eq("requires_upi_attestation", false);
+    if (error && /sc_sent_at/i.test(error.message)) {
+      // Column not applied yet — still clear deadline via completed_at.
+      delete patch.sc_sent_at;
+      delete patch.sc_sent_by;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ({ error } = await (supabase as any)
+        .from("client_progress_summaries")
+        .update(patch)
+        .eq("id", data.summaryId)
+        .eq("organization_id", data.organizationId)
+        .eq("requires_upi_attestation", false));
+    }
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ─── Source bundle + draft/save/finalize ──────────────────────────────────
+
+/** A plan goal with its supports for the summary's codes (plan in effect at period end). */
+export type SummaryPcspGoal = SummaryGoal;
+
+export type SummarySourceBundle = {
+  summary: ProgressSummaryRow;
+  client: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    /** The client's main support coordinator (client_contacts). */
+    support_coordinator: ClientContact | null;
+  };
+  goals: SummaryPcspGoal[];
+  organization: {
+    name: string | null;
+    legal_name: string | null;
+    address: string | null;
+    phone: string | null;
+    logo_path: string | null;
+  };
+  staffNames: string[];
+  servicesInPeriod: Array<{ service_code: string; service_start_date: string | null; service_end_date: string | null }>;
+  /** Approved daily logs, submitted shift notes / reports and incidents in the period. */
+  evidence: SummaryEvidence[];
+  /** The editor's fields as last saved (older text-only drafts read back into fields). */
+  editor: SummaryEditorState;
+  /** The document as finalized, when it was finalized from this editor. */
+  finalDoc: SummaryDoc | null;
+  /** Nectar's last run: suggestions waiting, reminders and suggestions hidden with the x. */
+  review: SummaryReviewState;
+  /** Each time the summary was reopened after finalizing, newest first. */
+  reopens: ReopenEvent[];
+};
+
+export const getSummaryWithSource = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({
+    organizationId: z.string().uuid(),
+    summaryId: z.string().uuid(),
+  }).parse(i))
+  .handler(async ({ data, context }): Promise<SummarySourceBundle> => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) return null as unknown as SummarySourceBundle;
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let summary: Record<string, unknown> | null = null;
+    {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const full = await (supabase as any)
+        .from("client_progress_summaries")
+        .select(SUMMARY_SELECT)
+        .eq("id", data.summaryId)
+        .eq("organization_id", data.organizationId)
+        .maybeSingle();
+      if (full.error && /sc_sent_at|ai_review_attested/i.test(full.error.message)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const core = await (supabase as any)
+          .from("client_progress_summaries")
+          .select(SUMMARY_SELECT_CORE)
+          .eq("id", data.summaryId)
+          .eq("organization_id", data.organizationId)
+          .maybeSingle();
+        if (core.error) throw new Error(core.error.message);
+        summary = core.data as Record<string, unknown> | null;
+      } else if (full.error) {
+        throw new Error(full.error.message);
+      } else {
+        summary = full.data as Record<string, unknown> | null;
+      }
+    }
+    if (!summary) throw new Error("Summary not found");
+    const summaryRow = normalizeSummaryRow(summary);
+
+    const { data: client, error: cErr } = await supabase
+      .from("clients")
+      .select("id, first_name, last_name")
+      .eq("id", summaryRow.client_id)
+      .eq("organization_id", data.organizationId)
+      .maybeSingle();
+    if (cErr) throw new Error(cErr.message);
+    if (!client) throw new Error("Client not found");
+
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("name, legal_name")
+      .eq("id", data.organizationId)
+      .maybeSingle();
+    const { data: branding } = await supabase
+      .from("organization_branding")
+      .select("logo_path, org_address, org_phone")
+      .eq("organization_id", data.organizationId)
+      .maybeSingle();
+
+    const source = await loadSummarySource(supabase, data.organizationId, summaryRow);
+
+    const { data: services, error: svcErr } = await supabase
+      .from("client_billing_codes")
+      .select("service_code, service_start_date, service_end_date")
+      .eq("organization_id", data.organizationId)
+      .eq("client_id", summaryRow.client_id);
+    if (svcErr) throw new Error(svcErr.message);
+    const inPeriod = (services ?? []).filter((s) => {
+      const startOk = !s.service_start_date || s.service_start_date <= summaryRow.period_end;
+      const endOk = !s.service_end_date || s.service_end_date >= summaryRow.period_start;
+      return startOk && endOk;
+    });
+
+    const draftSource = (await mergedDraftSource(supabase, data.organizationId, data.summaryId, {})) as {
+      editor?: unknown;
+      final_doc?: SummaryDoc;
+      review?: unknown;
+    };
+
+    return {
+      summary: summaryRow,
+      client: {
+        id: client.id,
+        first_name: client.first_name,
+        last_name: client.last_name,
+        support_coordinator: primaryContact(
+          await loadClientContacts(supabase, [client.id]),
+          "support_coordinator",
+        ),
+      },
+      goals: source.goals,
+      organization: {
+        name: org?.name ?? null,
+        legal_name: org?.legal_name ?? null,
+        address: branding?.org_address ?? null,
+        phone: branding?.org_phone ?? null,
+        logo_path: branding?.logo_path ?? null,
+      },
+      staffNames: source.staffNames,
+      servicesInPeriod: inPeriod as SummarySourceBundle["servicesInPeriod"],
+      evidence: source.evidence,
+      editor:
+        readEditorState(draftSource.editor) ??
+        editorFromLegacyText(summaryRow.final_content ?? summaryRow.draft_content, source.goals),
+      finalDoc: draftSource.final_doc ?? null,
+      review: readReviewState(draftSource.review),
+      reopens: readReopenHistory(draftSource),
+    };
+  });
+
+/** The editor's fields as sent by the client (normalized by readEditorState). */
+const editorInput = z
+  .record(z.string(), z.unknown())
+  .refine((v) => JSON.stringify(v).length <= 200_000, "Summary is too long.");
+
+/** draft_source with `patch` merged in (the Nectar provenance stays). */
+async function mergedDraftSource(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  organizationId: string,
+  summaryId: string,
+  patch: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+  const { data, error } = await supabase
+    .from("client_progress_summaries")
+    .select("draft_source")
+    .eq("id", summaryId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return { ...((data?.draft_source ?? {}) as Record<string, unknown>), ...patch };
+}
+
+/** Autosave: the document text and the editor's fields. Never touches a finalized summary. */
+export const saveSummaryDraft = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({
+    organizationId: z.string().uuid(),
+    summaryId: z.string().uuid(),
+    content: z.string().max(50_000),
+    editor: editorInput,
+  }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) return { ok: true };
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    const draftSource = await mergedDraftSource(supabase, data.organizationId, data.summaryId, {
+      editor: readEditorState(data.editor),
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
+      .from("client_progress_summaries")
+      .update({
+        draft_content: data.content,
+        draft_source: draftSource,
+        status: "in_review",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", data.summaryId)
+      .eq("organization_id", data.organizationId)
+      .neq("status", "finalized")
+      .is("completed_at", null);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/**
+ * Finalize gate: the period must have reached its last day (Denver time;
+ * canFinalizeSummary). Nothing else blocks it. Nectar's review is optional.
+ */
+async function assertCanFinalize(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  organizationId: string,
+  summaryId: string,
+): Promise<void> {
+  const { data: row, error } = await supabase
+    .from("client_progress_summaries")
+    .select("period_end")
+    .eq("id", summaryId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!row) throw new Error("Summary not found");
+  if (!canFinalizeSummary(row.period_end)) throw new Error(finalizeOpensMessage(row.period_end));
+}
+
+export const finalizeSummary = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({
+    organizationId: z.string().uuid(),
+    summaryId: z.string().uuid(),
+    content: z.string().min(1).max(50_000),
+    editor: editorInput,
+    /** The document as finalized (SummaryDoc), kept so its PDF never changes. */
+    doc: z.record(z.string(), z.unknown()),
+    finalizedByName: z.string().min(1).max(200),
+    aiReviewAttested: z.boolean(),
+  }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) return { ok: true };
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    if (!data.aiReviewAttested) {
+      throw new Error("Confirm you reviewed this summary and take responsibility for it before finalizing.");
+    }
+    await assertCanFinalize(supabase, data.organizationId, data.summaryId);
+    const ts = new Date().toISOString();
+
+    // Finalize content now; deadline clears only after UPI or SC send attestation.
+    // Keep completed_at null so open-list / Deadlines still show the filing step.
+    const patch: Record<string, unknown> = {
+      final_content: data.content,
+      draft_source: await mergedDraftSource(supabase, data.organizationId, data.summaryId, {
+        editor: readEditorState(data.editor),
+        final_doc: data.doc,
+      }),
+      finalized_at: ts,
+      finalized_by: userId,
+      finalized_by_name: data.finalizedByName,
+      ai_review_attested_at: ts,
+      ai_review_attested_by: userId,
+      completed_at: null,
+      completed_by: null,
+      status: "finalized",
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let { error } = await (supabase as any)
+      .from("client_progress_summaries")
+      .update(patch)
+      .eq("id", data.summaryId)
+      .eq("organization_id", data.organizationId);
+    if (error && /ai_review_attested/i.test(error.message)) {
+      delete patch.ai_review_attested_at;
+      delete patch.ai_review_attested_by;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ({ error } = await (supabase as any)
+        .from("client_progress_summaries")
+        .update(patch)
+        .eq("id", data.summaryId)
+        .eq("organization_id", data.organizationId));
+    }
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/**
+ * Reopen a finalized summary for edits (progress-summary-reopen.ts): the
+ * finalized copy is kept as a superseded version, who / when / why and any
+ * withdrawn filing attestation are recorded, and the row returns to
+ * in_review with every finalize and attestation column cleared — so the
+ * summaries list, deadlines and the client file count it as not done.
+ */
+export const reopenSummary = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({
+    organizationId: z.string().uuid(),
+    summaryId: z.string().uuid(),
+    reason: z.string().max(500).nullable(),
+  }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) throw new Error("Sign in again.");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = supabase as any;
+    const { data: row, error: rErr } = await sb
+      .from("client_progress_summaries")
+      .select(`status, draft_source, ${FINALIZE_COLUMNS.join(", ")}`)
+      .eq("id", data.summaryId)
+      .eq("organization_id", data.organizationId)
+      .maybeSingle();
+    if (rErr) throw new Error(rErr.message);
+    if (!row) throw new Error("Summary not found");
+    const { data: me } = await supabase
+      .from("profiles")
+      .select("first_name, last_name")
+      .eq("id", userId)
+      .maybeSingle();
+    const byName = [me?.first_name, me?.last_name].filter(Boolean).join(" ").trim() || null;
+    const patch = reopenPatch(
+      row,
+      row.draft_source,
+      { by: userId, byName, at: new Date().toISOString() },
+      data.reason,
+    );
+    const { error } = await sb
+      .from("client_progress_summaries")
+      .update(patch)
+      .eq("id", data.summaryId)
+      .eq("organization_id", data.organizationId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export type { SummaryPeriod };

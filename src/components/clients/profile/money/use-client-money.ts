@@ -6,8 +6,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { getLoanFeatureStatus, listClientLoans } from "@/lib/clients/loans.functions";
-import { moneySectionApplies, quarterStart } from "@/lib/clients/money";
+import { getLoanFeatureStatus, listClientLoans } from "@/lib/clients/money/loans.functions";
+import { moneySectionApplies, quarterStart } from "@/lib/clients/money/money";
 
 export type PbaAccount = {
   id: string;

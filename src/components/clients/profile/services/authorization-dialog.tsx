@@ -23,10 +23,10 @@ import {
   inputFromRow,
   type AuthorizationInput,
   type AuthorizationRow,
-} from "@/lib/clients/authorizations";
-import { renewProblems } from "@/lib/clients/authorization-renewal";
+} from "@/lib/clients/services/authorizations";
+import { renewProblems } from "@/lib/clients/services/authorization-renewal";
 import { isDailyServiceCode } from "@/lib/service-billing";
-import { saveAuthorization } from "@/lib/clients/services.functions";
+import { saveAuthorization } from "@/lib/clients/services/services.functions";
 
 const numOrNull = (s: string) => (s.trim() === "" ? null : Number(s));
 

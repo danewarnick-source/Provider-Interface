@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { recordEvidenceAttestation, recordEvidenceUpload } from "@/lib/evidence.functions";
 import { requirementByKey } from "@/lib/evidence/catalog";
-import type { ClientFileRow } from "@/lib/clients/file-rows";
+import type { ClientFileRow } from "@/lib/clients/file/file-rows";
 
 export const EVIDENCE_BUCKET = "evidence-files";
 

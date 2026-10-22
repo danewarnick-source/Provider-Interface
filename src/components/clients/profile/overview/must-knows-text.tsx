@@ -1,7 +1,7 @@
 // Must-knows text (clients.special_directions) drawn as headings and bullet
 // lists. Plain text still shows as written.
 
-import { parseMustKnows } from "@/lib/clients/must-knows";
+import { parseMustKnows } from "@/lib/clients/about/must-knows";
 
 export function MustKnowsText({ text }: { text: string }) {
   const blocks = parseMustKnows(text);

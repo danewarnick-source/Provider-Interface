@@ -1,12 +1,12 @@
 // Mocked Services & billing payload for the client profile e2e (made-up
 // data, no PHI). Built with the real pure helpers so the shapes match
-// src/lib/clients/services-load.ts.
+// src/lib/clients/services/services-load.ts.
 import {
   authorizationView,
   servicesTotals,
   type AuthorizationRow,
-} from "../../src/lib/clients/authorizations";
-import type { ClientServices } from "../../src/lib/clients/services-load";
+} from "../../src/lib/clients/services/authorizations";
+import type { ClientServices } from "../../src/lib/clients/services/services-load";
 
 const row = (over: Partial<AuthorizationRow>): AuthorizationRow => ({
   id: "00000000-0000-4000-a000-0000000009a1",

@@ -9,9 +9,9 @@ import { EditButton, SectionCard } from "@/components/clients/profile/cards/sect
 import { StatusTag } from "@/components/clients/profile/cards/card-parts";
 import { RowMenu } from "@/components/clients/profile/cards/row-menu";
 import { formatDate } from "@/lib/clients/dates";
-import { UNIT_TYPES, type AuthorizationView } from "@/lib/clients/authorizations";
+import { UNIT_TYPES, type AuthorizationView } from "@/lib/clients/services/authorizations";
 import { isVariableRateCode } from "@/lib/variable-rate-codes";
-import type { RateHistoryEntry } from "@/lib/clients/services-load";
+import type { RateHistoryEntry } from "@/lib/clients/services/services-load";
 import { codeName } from "./code-name";
 import { money } from "./money";
 import { UnitsBar } from "./units-bar";

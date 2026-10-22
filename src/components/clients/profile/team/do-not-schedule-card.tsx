@@ -29,8 +29,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { EXCLUSION_REASON_MAX } from "@/lib/clients/exclusions";
-import { addStaffExclusion, endStaffExclusion } from "@/lib/clients/team.functions";
+import { EXCLUSION_REASON_MAX } from "@/lib/clients/team/exclusions";
+import { addStaffExclusion, endStaffExclusion } from "@/lib/clients/team/team.functions";
 import { setStaffClientCodes } from "@/lib/scheduler/setup.functions";
 import { useOrgStaff, useProfileNames } from "@/components/clients/shared/hooks/use-org-staff";
 import { useClientTeam } from "./use-client-team";

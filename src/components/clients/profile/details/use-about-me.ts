@@ -11,8 +11,8 @@ import {
   approveClientAboutMe,
   draftClientAboutMe,
   getClientAboutMe,
-} from "@/lib/clients/about-me.functions";
-import type { AboutDraft, AboutItem } from "@/lib/clients/about-me";
+} from "@/lib/clients/about/about-me.functions";
+import type { AboutDraft, AboutItem } from "@/lib/clients/about/about-me";
 
 export function useAboutMe(orgId: string, clientId: string) {
   const qc = useQueryClient();

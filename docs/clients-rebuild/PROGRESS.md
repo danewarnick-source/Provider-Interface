@@ -53,18 +53,18 @@ One short report per prompt. A new session continues from the first prompt not m
 - **Files:** 9 added, 4 deleted, 64 moved (plus 3 that were moved and then deleted).
 - **Notes for later prompts:**
   - **e2e setup:** Playwright 1.61 expects `chromium_headless_shell-1228`, but only 1194 is preinstalled. Symlink it: `mkdir -p /opt/pw-browsers/chromium_headless_shell-1228/chrome-headless-shell-linux64` and link the files from `chromium_headless_shell-1194/chrome-linux/`, naming `headless_shell` as `chrome-headless-shell`. Then start `npx vite dev --port 8080 --host 127.0.0.1` in the background before running the configs; the config's own webServer start times out.
-  - **Oversized files:** many moved files are still over the size limits; the PR body lists them. The worst are `profile-tab` 1571, `setup-checklist-groups` 1632, `client-specific-training-card` 1153, `billing-codes-detail` 1080, `lib/clients/training.functions.ts` 1531, `import-schema.ts` 1139, and the `dashboard.clients.$clientId.tsx` route at 2553.
+  - **Oversized files:** many moved files are still over the size limits; the PR body lists them. The worst are `profile-tab` 1571, `setup-checklist-groups` 1632, `client-specific-training-card` 1153, `billing-codes-detail` 1080, `lib/clients/team/training.functions.ts` 1531, `import-schema.ts` 1139, and the `dashboard.clients.$clientId.tsx` route at 2553.
   - `dashboard.clients.pending.tsx` (233 lines) is still a real page the runbook doesn't mention.
 
 ## P3
 - **Status:** merged. PR #448 (https://github.com/danewarnick-source/Provider-Interface/pull/448) was squash-merged into `clients-rebuild`.
 - **Branch:** `clients-rebuild-p3-single-sources`.
 - **What was done:**
-  - **Contacts** live in the new `client_contacts` table. The helpers are `src/lib/clients/contacts.ts` and `contacts.functions.ts` (list, add, update, end; never delete).
+  - **Contacts** live in the new `client_contacts` table. The helpers are `src/lib/clients/contacts/contacts.ts` and `contacts.functions.ts` (list, add, update, end; never delete).
     - The profile has one contacts editor: `profile/client-contacts-card.tsx` and `dialogs/contact-dialog.tsx`.
     - These read `client_contacts`: the face sheet, staff quick-info, the shift page, the workspace About tab, care-data, onboarding, the setup checklist, summaries, Nectar staff, the audit, and form prefill.
   - **Photo** is `client_photo_url`. **Must-knows** are `special_directions`. New columns `clients.insurance` and `clients.about_me`.
-  - **Codes** come only from active `client_billing_codes` rows, through `src/lib/clients/codes.ts`.
+  - **Codes** come only from active `client_billing_codes` rows, through `src/lib/clients/services/codes.ts`.
     - `loadActiveCodes` calls the new `client_active_codes(uuid[])` function, which returns codes but no rates and also works for staff. `loadActiveCodesAsService` is for service-role code.
     - `clientAuthorizedCodes` was removed. Nothing in `src/` writes `job_code` / `authorized_dspd_codes`.
   - **Smart import** merges contacts into `client_contacts` (`contacts-merge.ts`). Other agencies' providers become `other_provider` contacts.
@@ -97,7 +97,7 @@ One short report per prompt. A new session continues from the first prompt not m
 - **Branch:** `clients-rebuild-p4-plans-goals`.
 - **What was done:**
   - New tables `client_plans` → `client_goals` → `client_goal_supports`. Supports carry `our_codes`.
-  - Pure helpers in `src/lib/clients/plans.ts`: `planStatusOn`, `planInEffectOn`, `currentPlan`, `waitingDays`, `supportsForCode(s)`, `goalsOn`, `goalView`.
+  - Pure helpers in `src/lib/clients/plans/plans.ts`: `planStatusOn`, `planInEffectOn`, `currentPlan`, `waitingDays`, `supportsForCode(s)`, `goalsOn`, `goalView`.
   - Other new files:
     - `plans-load.ts`: `loadPlanBundle(s)`.
     - `plans-write.ts`: `insertPlan`, `replaceCurrentPlanGoals`, `appendGoalsToCurrentPlan`.
@@ -165,7 +165,7 @@ One short report per prompt. A new session continues from the first prompt not m
 - **Status:** merged. PR #451 (https://github.com/danewarnick-source/Provider-Interface/pull/451) was squash-merged into `clients-rebuild`.
 - **Branch:** `clients-rebuild-p6-list-add`.
 - **What was done:**
-  - **List:** `listClients` (`src/lib/clients/list.functions.ts`, loaded through `list-load.ts` and `list-queries.ts`) returns everything the list needs in one call. Each row has codes, home, the code with the fewest units left, the next due item, team members, readiness and a needs-attention flag. Search, filters and the Active/Discharged views all run on the server. The pure pieces are in `list.ts`.
+  - **List:** `listClients` (`src/lib/clients/list/list.functions.ts`, loaded through `list-load.ts` and `list-queries.ts`) returns everything the list needs in one call. Each row has codes, home, the code with the fewest units left, the next due item, team members, readiness and a needs-attention flag. Search, filters and the Active/Discharged views all run on the server. The pure pieces are in `list.ts`.
   - **Units:** `units.ts` (`usedUnitsForCode`, `worstUnitsLeft`) is the one path for units used, shared with `use-client-budget`.
   - **Referrals:** the existing `ReferralsPage` opens from a small Referrals link in the list. The link only shows when the org has referrals.
   - **CSV export** of the filtered list.
@@ -199,7 +199,7 @@ One short report per prompt. A new session continues from the first prompt not m
 - **Status:** merged. PR #452 (https://github.com/danewarnick-source/Provider-Interface/pull/452) was squash-merged into `clients-rebuild`.
 - **Branch:** `clients-rebuild-p7-profile-shell`.
 - **What was done:**
-  - **Profile shell:** the client profile now has a side menu like Team Members (`components/clients/profile/client-profile-page.tsx`, `profile-shell.tsx`, `profile-header.tsx`, `header-menu.tsx`, `section-body.tsx`). The section is in the URL as `?section=` (`lib/clients/profile-sections.ts`). Old `?tab=` links redirect. The route file is 46 lines.
+  - **Profile shell:** the client profile now has a side menu like Team Members (`components/clients/profile/client-profile-page.tsx`, `profile-shell.tsx`, `profile-header.tsx`, `header-menu.tsx`, `section-body.tsx`). The section is in the URL as `?section=` (`lib/clients/profile/profile-sections.ts`). Old `?tab=` links redirect. The route file is 46 lines.
   - **Header ⋯ menu:** Face sheet PDF, Update from a document (`dialogs/update-from-document-dialog.tsx`), Discharge, Reactivate.
   - **Needs attention:** `lib/clients/readiness.ts` is the one calculation (units pace, documents, photo over 5 years, PCSP waiting, strategies due at plan start + 30 days, summaries, HRC, finish setup).
     - `getClientOverview` (`overview.functions.ts`, `overview-load.ts`, `overview-team.ts`) feeds the Overview, the menu badges and the Smart Import done page (`shared/client-needs-attention.tsx`).
@@ -248,7 +248,7 @@ One short report per prompt. A new session continues from the first prompt not m
     - Support strategies due = `activated_on` + 30 days.
     - Summaries owed per code.
     - The HRC restrictions card is the single editor. `/dashboard/hrc` is read-only and links to the client.
-    - BSP upload only for BC1–BC3 (`lib/clients/bsp.ts`).
+    - BSP upload only for BC1–BC3 (`lib/clients/plans/bsp.ts`).
   - **Reminders:**
     - `plan-dates.ts` holds the 60/30-day reminders and the day-10 office follow-up. There is no task table that fits, so readiness turns these into needs-attention items.
   - **Summary cadence:**
@@ -289,7 +289,7 @@ One short report per prompt. A new session continues from the first prompt not m
 - **What was done:**
   - **Services & billing** (`profile/services/`):
     - The authorizations card shows the unit type, rate, dates, units per year, the 1056 number and approved date, units used vs. left with the pace marker, units per week to use the rest, a run-out date, dollars (budget, used, left) with a total, and rate history.
-    - Add / Edit / Renew / End go through `lib/clients/services.functions.ts` (`edit_billing`). End sets `service_end_date`. Renew re-uses the row for that code, and rate history keeps the old rate and dates.
+    - Add / Edit / Renew / End go through `lib/clients/services/services.functions.ts` (`edit_billing`). End sets `service_end_date`. Renew re-uses the row for that code, and rate history keeps the old rate and dates.
     - The pure rules are in `authorizations.ts`.
   - **Fill from 1056:**
     - `budget-parse.functions.ts` has `read1056`, which saves the PDF as a `1056_budget` document and reads its text with unpdf. Nectar gives `{value, page, quote}` for each field, and unquoted values are dropped (`auth-1056.ts`).
@@ -334,7 +334,7 @@ One short report per prompt. A new session continues from the first prompt not m
     - Each team member shows "ready to work alone" from `overview.team`.
     - The do-not-schedule list can be added to and ended.
     - The person-specific training setup card (`ClientSpecificTrainingCard`) is now mounted here.
-  - **Exclusions:** `lib/clients/exclusions.ts` holds the pure rules and `exclusions-check.server.ts` reads the list through the `active_client_staff_exclusions` RPC.
+  - **Exclusions:** `lib/clients/team/exclusions.ts` holds the pure rules and `exclusions-check.server.ts` reads the list through the `active_client_staff_exclusions` RPC.
     - `saveShift` refuses an excluded team member and says why.
     - The `writeStaffClientCodes` writer refuses to give them codes.
     - `applyDrafts` refuses the whole batch.

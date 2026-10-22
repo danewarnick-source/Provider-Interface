@@ -14,7 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { todayYmd } from "@/lib/clients/dates";
-import { dischargeProblems, type InitiatedBy } from "@/lib/clients/discharge";
+import { dischargeProblems, type InitiatedBy } from "@/lib/clients/discharge/discharge";
 import { DetailsStep, type DischargeDetails } from "./details-step";
 import { ReviewStep } from "./review-step";
 import { SummaryFields, type SummaryDraftState } from "./summary-fields";

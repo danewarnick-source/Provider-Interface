@@ -3,9 +3,9 @@
 // (lead, full width), then Units left | Coming up, then Team | Last notes.
 // Draws getClientOverview as it is; no counting here.
 
-import type { ClientOverview } from "@/lib/clients/overview";
-import { sentLine } from "@/lib/clients/strategy-sends";
-import type { ClientProfileSection } from "@/lib/clients/profile-sections";
+import type { ClientOverview } from "@/lib/clients/overview/overview";
+import { sentLine } from "@/lib/clients/strategies/strategy-sends";
+import type { ClientProfileSection } from "@/lib/clients/profile/profile-sections";
 import type { ClientProfileData } from "@/components/clients/profile/use-client-profile";
 import { AttentionCards } from "./attention-cards";
 import { MustKnowsCard } from "./must-knows-card";

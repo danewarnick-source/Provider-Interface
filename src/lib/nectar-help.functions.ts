@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { activeCodesForClients } from "@/lib/clients/codes";
+import { activeCodesForClients } from "@/lib/clients/services/codes";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 

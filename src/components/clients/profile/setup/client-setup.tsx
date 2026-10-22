@@ -4,8 +4,8 @@
 
 import { useAccess } from "@/hooks/use-access";
 import { setupPending } from "@/lib/clients/support-scope";
-import type { ClientOverview } from "@/lib/clients/overview";
-import type { ClientProfileSection } from "@/lib/clients/profile-sections";
+import type { ClientOverview } from "@/lib/clients/overview/overview";
+import type { ClientProfileSection } from "@/lib/clients/profile/profile-sections";
 import type { ClientProfileData } from "@/components/clients/profile/use-client-profile";
 import { ClientSetupDialog } from "./client-setup-dialog";
 import { SetupBanner } from "./setup-banner";

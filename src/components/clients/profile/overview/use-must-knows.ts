@@ -10,9 +10,9 @@ import {
   approveClientMustKnows,
   draftClientMustKnows,
   getClientMustKnows,
-} from "@/lib/clients/must-knows.functions";
+} from "@/lib/clients/about/must-knows.functions";
 import { updateClient } from "@/lib/clients/writes.functions";
-import type { MustKnowItem, MustKnowsDraft } from "@/lib/clients/must-knows";
+import type { MustKnowItem, MustKnowsDraft } from "@/lib/clients/about/must-knows";
 
 export function useMustKnows(orgId: string, clientId: string) {
   const qc = useQueryClient();

@@ -12,9 +12,9 @@ import { Button } from "@/components/ui/button";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { StatusTag } from "@/components/clients/profile/cards/card-parts";
 import { RowMenu } from "@/components/clients/profile/cards/row-menu";
-import { addClientFilePack, removeClientFilePack } from "@/lib/clients/file-evidence.functions";
-import { clientPack } from "@/lib/clients/file-packs";
-import { packOrigin } from "@/lib/clients/file-rows";
+import { addClientFilePack, removeClientFilePack } from "@/lib/clients/file/file-evidence.functions";
+import { clientPack } from "@/lib/clients/file/file-packs";
+import { packOrigin } from "@/lib/clients/file/file-rows";
 import { AddItemDialog } from "./add-item-dialog";
 import { AddPackDialog } from "./add-pack-dialog";
 

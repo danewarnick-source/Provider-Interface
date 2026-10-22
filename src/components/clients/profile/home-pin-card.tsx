@@ -35,12 +35,12 @@ import {
   locationReasonLabel,
   type ApprovedLocation,
   type LocationDraft,
-} from "@/lib/clients/locations";
+} from "@/lib/clients/evv/locations";
 import {
   addServiceLocation,
   endServiceLocation,
   updateServiceLocation,
-} from "@/lib/clients/locations.functions";
+} from "@/lib/clients/evv/locations.functions";
 import { useAccess } from "@/hooks/use-access";
 import { EditButton, SectionCard } from "@/components/clients/profile/cards/section-card";
 import { RowMenu } from "@/components/clients/profile/cards/row-menu";

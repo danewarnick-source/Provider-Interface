@@ -13,7 +13,7 @@ import { IdCard } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { useAccess } from "@/hooks/use-access";
 import { ageOn, formatDate } from "@/lib/clients/dates";
-import { maskId } from "@/lib/clients/profile-header";
+import { maskId } from "@/lib/clients/profile/profile-header";
 import { updateClient } from "@/lib/clients/writes.functions";
 import { EditButton, SaveBar, SectionCard } from "@/components/clients/profile/cards/section-card";
 import { Field, FieldGrid, LabeledInput } from "@/components/clients/profile/cards/card-parts";

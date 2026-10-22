@@ -31,9 +31,9 @@ import {
   voidLoan,
   voidLoanEntry,
   type LoanInput,
-} from "@/lib/clients/loans.functions";
-import { computeRunningBalance, VOID_REASON_MIN } from "@/lib/clients/loan-ledger";
-import { downloadLoanPdf } from "@/lib/clients/loans-pdf";
+} from "@/lib/clients/money/loans.functions";
+import { computeRunningBalance, VOID_REASON_MIN } from "@/lib/clients/money/loan-ledger";
+import { downloadLoanPdf } from "@/lib/clients/money/loans-pdf";
 import { denverYmd } from "@/lib/denver-date";
 
 /** Ask for a void reason; null when cancelled or too short. */

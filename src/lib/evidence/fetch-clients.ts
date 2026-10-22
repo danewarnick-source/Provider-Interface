@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { loadActiveCodes } from "@/lib/clients/codes";
+import { loadActiveCodes } from "@/lib/clients/services/codes";
 import { loadEvidenceClientPeople } from "./people.ts";
 import type { EvidencePerson } from "./types.ts";
 

@@ -1,6 +1,6 @@
 // Mocked getClientOverview payload for the client profile e2e (made-up data,
-// no PHI). Shape: src/lib/clients/overview.ts ClientOverview.
-import type { ClientOverview } from "../../src/lib/clients/overview";
+// no PHI). Shape: src/lib/clients/overview/overview.ts ClientOverview.
+import type { ClientOverview } from "../../src/lib/clients/overview/overview";
 import { STAFF } from "../fixtures/tns-roster";
 
 export function clientOverviewPayload(): ClientOverview {

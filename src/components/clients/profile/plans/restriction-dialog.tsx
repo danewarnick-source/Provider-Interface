@@ -24,9 +24,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAllClientContacts } from "@/components/clients/shared/hooks/use-client-contacts";
-import { guardianStatus } from "@/lib/clients/guardian";
-import { primaryContact } from "@/lib/clients/contacts";
-import { clientUploadFolder } from "@/lib/clients/document-review";
+import { guardianStatus } from "@/lib/clients/contacts/guardian";
+import { primaryContact } from "@/lib/clients/contacts/contacts";
+import { clientUploadFolder } from "@/lib/clients/create/document-review";
 import {
   CONSENT_CHECKBOX,
   HRR_FIELDS,
@@ -44,9 +44,9 @@ import {
   signaturesClearedBy,
   type HrrField,
   type RestrictionRecord,
-} from "@/lib/clients/hrc";
-import { hrrPdfFilename, renderHrrPdf } from "@/lib/clients/hrr-pdf";
-import { attachHrrDocument, draftHrrFromDocument, saveHrr } from "@/lib/clients/hrr.functions";
+} from "@/lib/clients/rights/hrc";
+import { hrrPdfFilename, renderHrrPdf } from "@/lib/clients/rights/hrr-pdf";
+import { attachHrrDocument, draftHrrFromDocument, saveHrr } from "@/lib/clients/rights/hrr.functions";
 import {
   clientRestrictionsKey,
   hrcDocumentsKey,

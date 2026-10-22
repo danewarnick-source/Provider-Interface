@@ -1,6 +1,6 @@
 // Discharge data for the client profile: the open discharge record, the
 // preview of what a discharge would end, and the writes. Everything goes
-// through lib/clients/discharge.functions.ts.
+// through lib/clients/discharge/discharge.functions.ts.
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -12,8 +12,8 @@ import {
   previewDischarge,
   reactivateClient,
   saveDischargeSummary,
-} from "@/lib/clients/discharge.functions";
-import type { InitiatedBy } from "@/lib/clients/discharge";
+} from "@/lib/clients/discharge/discharge.functions";
+import type { InitiatedBy } from "@/lib/clients/discharge/discharge";
 
 export type DischargeValues = {
   dischargeDate: string;

@@ -2,8 +2,8 @@
 // logo when there is one) in the browser and saves it.
 
 import { supabase } from "@/integrations/supabase/client";
-import { summaryFileName, type SummaryDoc } from "@/lib/progress-summary-doc";
-import { renderSummaryPdf, type PdfLogo } from "@/lib/progress-summary-pdf";
+import { summaryFileName, type SummaryDoc } from "@/lib/progress-summaries/progress-summary-doc";
+import { renderSummaryPdf, type PdfLogo } from "@/lib/progress-summaries/progress-summary-pdf";
 
 async function loadLogo(path: string | null): Promise<PdfLogo | null> {
   if (!path) return null;

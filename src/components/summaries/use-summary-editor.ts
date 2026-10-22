@@ -21,12 +21,12 @@ import {
   reopenSummary,
   saveSummaryDraft,
   type SummarySourceBundle,
-} from "@/lib/progress-summaries.functions";
+} from "@/lib/progress-summaries/progress-summaries.functions";
 import {
   draftSummaryBoxes,
   runSummaryNectar,
   updateSummaryReview,
-} from "@/lib/progress-summary-draft.functions";
+} from "@/lib/progress-summaries/progress-summary-draft.functions";
 import {
   applyDraft,
   blankGoals,
@@ -43,7 +43,7 @@ import {
   type ReviewContext,
   type SummaryReviewState,
   type UndoStacks,
-} from "@/lib/progress-summary-review";
+} from "@/lib/progress-summaries/progress-summary-review";
 import {
   buildSummaryDoc,
   filledIncidents,
@@ -51,8 +51,8 @@ import {
   summaryDocText,
   type SummaryDoc,
   type SummaryEditorState,
-} from "@/lib/progress-summary-doc";
-import { summaryFilingDestination } from "@/lib/progress-summaries";
+} from "@/lib/progress-summaries/progress-summary-doc";
+import { summaryFilingDestination } from "@/lib/progress-summaries/progress-summaries";
 import { downloadSummaryPdf } from "./download-summary";
 
 export type SaveState = "idle" | "saving" | "saved" | "error";

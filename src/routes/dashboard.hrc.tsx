@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Scale, CalendarDays, ClipboardList, Users, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
-import { HRR_STATUS_LABEL, hrrStatus, type RestrictionRecord } from "@/lib/clients/hrc";
+import { HRR_STATUS_LABEL, hrrStatus, type RestrictionRecord } from "@/lib/clients/rights/hrc";
 import { RestrictionDialog } from "@/components/clients/profile/plans/restriction-dialog";
 import { useAccess } from "@/hooks/use-access";
 import { useServerFn } from "@tanstack/react-start";

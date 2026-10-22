@@ -1019,12 +1019,12 @@ function serverFnPayload(url: string, body: string): unknown {
     recordClientUpdate(body);
     return { id: "00000000-0000-4000-a000-0000000000c1" };
   }
-  // Client list + Add client (src/lib/clients/list.functions.ts, create.functions.ts).
+  // Client list + Add client (src/lib/clients/list/list.functions.ts, create.functions.ts).
   if (/^listClients/.test(fn)) return listClientsPayload(body, activeMockOpts);
   const addPayload = addClientPayload(fn, body);
   if (addPayload !== undefined) return addPayload;
   if (/^writeClientRecord$/.test(fn)) return { ids: ["00000000-0000-4000-a000-0000000000c3"] };
-  // Discharge (src/lib/clients/discharge.functions.ts): no open discharge; writes echo.
+  // Discharge (src/lib/clients/discharge/discharge.functions.ts): no open discharge; writes echo.
   if (/^getClientDischarge/.test(fn)) return null;
   if (/^previewDischarge/.test(fn)) {
     return { ended: { authorizations: [], team: [], shifts: [] }, upcoming: [] };
@@ -1033,7 +1033,7 @@ function serverFnPayload(url: string, body: string): unknown {
   if (/^(reactivateClient|saveDischargeSummary|markDischargeSummarySent)/.test(fn)) {
     return { ok: true };
   }
-  // Client profile Overview (src/lib/clients/overview.functions.ts).
+  // Client profile Overview (src/lib/clients/overview/overview.functions.ts).
   if (/^getClientOverview/.test(fn)) return clientOverviewPayload();
   // Services & billing (services.functions.ts).
   if (/^getClientServices/.test(fn)) return clientServicesPayload();

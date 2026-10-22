@@ -4,7 +4,7 @@
 // assertCanManageClient first.
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { directiveStatus } from "./health";
+import { directiveStatus } from "./health/health";
 import {
   SUPPORT_SCOPE_COLUMNS,
   allHiddenCards,

@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
-import type { ListFilters } from "@/lib/clients/list";
+import type { ListFilters } from "@/lib/clients/list/list";
 
 const ALL = "__all__";
 

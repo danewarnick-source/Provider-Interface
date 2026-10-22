@@ -6,7 +6,7 @@
 
 import { Loader2, Sparkles, Undo2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { FieldKey, Reminder } from "@/lib/progress-summary-review";
+import type { FieldKey, Reminder } from "@/lib/progress-summaries/progress-summary-review";
 
 const hideButton =
   "absolute right-1 top-1 inline-flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground";

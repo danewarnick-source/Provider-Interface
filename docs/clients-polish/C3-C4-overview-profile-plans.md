@@ -4,7 +4,7 @@ Read `00-START-HERE.md` first. Use C1's `SectionCard`, `InfoTile`, `FieldGrid`, 
 
 ## C3 — Overview and Profile sections
 
-### Overview (`src/components/clients/profile/overview/`, `src/lib/clients/overview*.ts`)
+### Overview (`src/components/clients/profile/overview/`, `src/lib/clients/overview/overview*.ts`)
 
 1. **Needs attention is collapsed by default.** Replace the always-open list of cards with one button at the top: "Needs attention (N)", danger tone if any item is a block, amber if only warnings, hidden when N = 0. Tapping it expands the existing items; tapping again collapses. Remember open/closed per viewer in the browser only (wrapped in try/catch). Keep `attention-cards.tsx` ≤ 250 lines.
 2. **Layout:** Must-knows full width (lead card), then Units left | Coming up, then Team | Last notes, each a `SectionCard` with a one-line description ("Units left: how much of each authorization is used, and the pace").
@@ -29,7 +29,7 @@ Read `00-START-HERE.md` first. Use C1's `SectionCard`, `InfoTile`, `FieldGrid`, 
    - Has an active EVV code: `StatusTag` ok tone **"EVV required: SLH"** (list the codes) + "Staff on SLH must clock in inside the circle. These visits must meet the state's EVV rules."
    - No EVV code: neutral tag **"No EVV codes"** + "This client's services don't use EVV. The pin is optional; it's used for directions and as a record of where staff clocked in."
    - Use `isEvvLockedCode`; don't make a new list.
-   - **Readiness:** "No home pin" counts only for clients with an active EVV code (`listReadiness` in `src/lib/clients/list.ts`, `clientAttention` in `readiness.ts`). Same tag on the extra service locations card.
+   - **Readiness:** "No home pin" counts only for clients with an active EVV code (`listReadiness` in `src/lib/clients/list/list.ts`, `clientAttention` in `readiness.ts`). Same tag on the extra service locations card.
 
 4. **More details** (custom fields) as small muted tiles in a grid, with the agency's own About text below.
 
@@ -74,7 +74,7 @@ The checks come from the plain-code PCSP reader, not Nectar.
 
 ### 3. Support strategies: one per support, with its code, visible without clicking
 
-SOW: a support strategy is the instructions telling staff how to help the client reach a PCSP goal or meet another need in the PCSP; it goes to the support coordinator within 30 days of the PCSP being activated. Today `assembleSupportStrategyStubs` (`src/lib/clients/training.functions.ts`) builds one section per **goal**, with no code and no support, hidden behind an expand arrow (`StrategiesTitle` in `support-strategies-cards.tsx`).
+SOW: a support strategy is the instructions telling staff how to help the client reach a PCSP goal or meet another need in the PCSP; it goes to the support coordinator within 30 days of the PCSP being activated. Today `assembleSupportStrategyStubs` (`src/lib/clients/team/training.functions.ts`) builds one section per **goal**, with no code and no support, hidden behind an expand arrow (`StrategiesTitle` in `support-strategies-cards.tsx`).
 
 1. **One strategy per support paid to the agency:** a section for every support in the current plan year with at least one of the agency's codes, grouped under its goal; supports paid only to other providers get none. Each shows, read-only: **Goal**, **Support**, **Code** (badges), **Support details** (or "None listed"); and one editable field, **Support strategy** (Nectar drafts; a person edits). Store the plan support's id on each section. Keep sections someone edited; never overwrite them on rebuild.
 2. **Other needs:** also a section for each non-goal support with the agency's code ("Goal: Other need in the PCSP").

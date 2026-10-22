@@ -6,7 +6,7 @@ import { z } from "zod";
 import { Loader2, AlertTriangle, Receipt, Eye, ArrowLeft, ChevronRight } from "lucide-react";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { supabase } from "@/integrations/supabase/client";
-import { contactsByClient, loadClientContacts, primaryContact } from "@/lib/clients/contacts";
+import { contactsByClient, loadClientContacts, primaryContact } from "@/lib/clients/contacts/contacts";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SummaryEditor } from "@/components/summaries/summary-editor";
@@ -14,13 +14,13 @@ import {
   ensureCurrentSummaryPeriods,
   listAllSummaries,
   type ProgressSummaryRow,
-} from "@/lib/progress-summaries.functions";
+} from "@/lib/progress-summaries/progress-summaries.functions";
 import {
   formatPeriodMonthYear,
   isPeriodInProgress,
   summaryCadenceLabel,
   summaryFilingDestination,
-} from "@/lib/progress-summaries";
+} from "@/lib/progress-summaries/progress-summaries";
 import { isAdminLevel } from "@/lib/access/levels";
 
 const searchSchema = z.object({

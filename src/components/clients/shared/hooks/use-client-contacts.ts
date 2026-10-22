@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { isRouteUuid } from "@/lib/route-uuid";
-import { activeContacts, loadClientContacts, type ClientContact } from "@/lib/clients/contacts";
+import { activeContacts, loadClientContacts, type ClientContact } from "@/lib/clients/contacts/contacts";
 
 export const clientContactsKey = (clientId: string | undefined) => ["client-contacts", clientId] as const;
 

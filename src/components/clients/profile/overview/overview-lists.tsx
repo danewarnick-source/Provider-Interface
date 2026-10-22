@@ -12,8 +12,8 @@ import {
   type ComingUpItem,
   type OverviewNote,
   type OverviewTeamMember,
-} from "@/lib/clients/overview";
-import { CLIENT_SECTION_LABEL, type ClientProfileSection } from "@/lib/clients/profile-sections";
+} from "@/lib/clients/overview/overview";
+import { CLIENT_SECTION_LABEL, type ClientProfileSection } from "@/lib/clients/profile/profile-sections";
 import { SectionCard, type CardTone } from "@/components/clients/profile/cards/section-card";
 import { EmptyState, StatusTag } from "@/components/clients/profile/cards/card-parts";
 

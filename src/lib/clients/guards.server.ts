@@ -4,7 +4,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireCategory } from "@/lib/access/require";
-import { DISCHARGED_STATUSES } from "./list";
+import { DISCHARGED_STATUSES } from "./list/list";
 import {
   CLIENT_NOT_FOUND_MESSAGE,
   friendlyGuardError,

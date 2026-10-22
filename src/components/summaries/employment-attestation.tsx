@@ -4,7 +4,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { formatPeriodMonthYear } from "@/lib/progress-summaries";
+import { formatPeriodMonthYear } from "@/lib/progress-summaries/progress-summaries";
 import { listUpiAttestations, recordUpiAttestation } from "@/lib/upi-attestations.functions";
 
 type SummaryFacts = { service_codes: string[] | null; client_id: string; period_label: string };

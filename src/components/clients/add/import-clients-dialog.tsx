@@ -25,11 +25,11 @@ import {
   parseClientImportGrid,
   validateClientImportRows,
   type ClientImportDraft,
-} from "@/lib/clients/import-sheet";
+} from "@/lib/clients/create/import-sheet";
 import {
   downloadClientTemplateCsv,
   downloadClientTemplateXlsx,
-} from "@/lib/clients/import-sheet-template";
+} from "@/lib/clients/create/import-sheet-template";
 import { ImportClientRow } from "./import-client-row";
 import { useExistingMedicaid, useImportClients, type ImportOutcome } from "./use-import-clients";
 

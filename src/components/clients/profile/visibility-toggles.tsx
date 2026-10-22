@@ -21,14 +21,14 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { clientCareDataQueryOptions } from "@/lib/clients/care-data.functions";
-import { setClientStaffVisibility } from "@/lib/clients/staff-visibility.functions";
+import { setClientStaffVisibility } from "@/lib/clients/profile/staff-visibility.functions";
 import {
   SECTION_DEFAULTS,
   SECTION_LABEL,
   isFieldVisible,
   isSectionVisible,
   type SectionName,
-} from "@/lib/clients/staff-visibility";
+} from "@/lib/clients/profile/staff-visibility";
 
 function useVisibility(clientId: string) {
   const qc = useQueryClient();

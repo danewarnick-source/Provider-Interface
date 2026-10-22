@@ -1,15 +1,15 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import type { ClientListRow } from "@/lib/clients/list";
+import type { ClientListRow } from "@/lib/clients/list/list";
 import {
   LIST_SHORTCUTS,
   canFixSection,
   type ListShortcutKey,
   type ListViewer,
-} from "@/lib/clients/list-display";
-import type { ClientProfileSection } from "@/lib/clients/profile-sections";
-import type { ClientEditTarget } from "@/lib/clients/profile-search";
+} from "@/lib/clients/list/list-display";
+import type { ClientProfileSection } from "@/lib/clients/profile/profile-sections";
+import type { ClientEditTarget } from "@/lib/clients/profile/profile-search";
 
 /** Small link into one section of the client's profile; never also opens the row. */
 export function SectionLink({

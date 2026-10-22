@@ -3,8 +3,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { getAgencySetupStatus } from "@/lib/agency-setup-gate.functions";
 import { assertAgencySetupComplete } from "@/lib/agency-setup-gate";
-import { addClient, type AddClientResult } from "@/lib/clients/create.functions";
-import type { AddClientForm } from "@/lib/clients/create";
+import { addClient, type AddClientResult } from "@/lib/clients/create/create.functions";
+import type { AddClientForm } from "@/lib/clients/create/create";
 
 /** Save the Add client form; on success the sheet offers "Finish setting up" or "Later". */
 export function useAddClient(

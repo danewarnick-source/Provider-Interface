@@ -5,7 +5,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import type { RestrictionRecord } from "@/lib/clients/hrc";
+import type { RestrictionRecord } from "@/lib/clients/rights/hrc";
 
 export const HRC_DOC_TYPES = ["hrc_approval", "human_rights"] as const;
 

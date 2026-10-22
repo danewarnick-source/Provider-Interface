@@ -15,7 +15,7 @@ import { requireCategory } from "@/lib/access/require";
 import { hasCategory } from "@/lib/access/can";
 import { isAdminLevel } from "@/lib/access/levels";
 import { assignmentCodes } from "@/lib/assignment-codes";
-import { loadActiveCodesAsService } from "@/lib/clients/codes";
+import { loadActiveCodesAsService } from "@/lib/clients/services/codes";
 import { denverYmd } from "@/lib/denver-date";
 import { parseIsoDate, resolveHireDate } from "@/lib/evidence/due";
 import type { EvidenceFileRow } from "@/lib/evidence/types";

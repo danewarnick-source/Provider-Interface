@@ -1,6 +1,6 @@
 // Thin server fns used by the client document uploads and NectarAsk. Each one is
 // org-scoped via the user's organization_members row for the client.
-import { activeContacts, contactsWithRole, loadClientContacts } from "@/lib/clients/contacts";
+import { activeContacts, contactsWithRole, loadClientContacts } from "@/lib/clients/contacts/contacts";
 import {
   CLIENT_DOCUMENTS_BUCKET,
   PROFILE_COLUMNS,
@@ -13,7 +13,7 @@ import {
   type ProfileFieldMeta,
   type ReviewField,
   type ReviewJson,
-} from "@/lib/clients/document-review";
+} from "@/lib/clients/create/document-review";
 import { assertCanManageClient, type ManageClientAction } from "@/lib/clients/guards.server";
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -303,7 +303,7 @@ export const applySelectedClientFields = createServerFn({ method: "POST" })
       confidence: f.confidence ?? 0.95,
     }));
 
-    const { applyExtractedFieldsToClient } = await import("@/lib/clients/import-schema");
+    const { applyExtractedFieldsToClient } = await import("@/lib/clients/create/import-schema");
     const summary = await applyExtractedFieldsToClient({
       supabase: sb,
       organizationId: orgId,
@@ -311,7 +311,7 @@ export const applySelectedClientFields = createServerFn({ method: "POST" })
       fields,
       // "profile_update" is outside the SourceDocumentType union but the
       // helper only uses it for downstream conflict tagging — cast is safe.
-      sourceDocumentType: "profile_update" as unknown as import("@/lib/clients/import-schema").SourceDocumentType,
+      sourceDocumentType: "profile_update" as unknown as import("@/lib/clients/create/import-schema").SourceDocumentType,
       onError: async (action, message) => {
         try {
           await sb.from("import_audit").insert({

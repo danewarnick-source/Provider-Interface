@@ -4,13 +4,13 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { getAgencySetupStatus } from "@/lib/agency-setup-gate.functions";
 import { assertAgencySetupComplete } from "@/lib/agency-setup-gate";
-import { addClient, findClientsByMedicaidIds } from "@/lib/clients/create.functions";
+import { addClient, findClientsByMedicaidIds } from "@/lib/clients/create/create.functions";
 import {
   clientImportForm,
   type ClientImportAgency,
   type ClientImportDraft,
   type ExistingMedicaid,
-} from "@/lib/clients/import-sheet";
+} from "@/lib/clients/create/import-sheet";
 
 export type ImportOutcome =
   | { status: "created"; id: string; name: string }

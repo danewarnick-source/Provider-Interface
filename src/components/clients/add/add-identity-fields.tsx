@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { GEOFENCE_OPTIONS, type AddClientForm, type FilledField } from "@/lib/clients/create";
+import { GEOFENCE_OPTIONS, type AddClientForm, type FilledField } from "@/lib/clients/create/create";
 
 const NO_HOME = "__none__";
 

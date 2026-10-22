@@ -21,7 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { setStaffClientCodes } from "@/lib/scheduler/setup.functions";
-import { loadActiveCodes } from "@/lib/clients/codes";
+import { loadActiveCodes } from "@/lib/clients/services/codes";
 import { useOrgStaff } from "@/components/clients/shared/hooks/use-org-staff";
 import { invalidateTeam } from "@/components/clients/profile/team/team-changes";
 import { GapsReason, StaffQuestions } from "./publish-confirm-parts";

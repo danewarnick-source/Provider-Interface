@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
 import { CheckCircle2, FileSearch, Loader2, RefreshCw, Sparkles, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/clients/dates";
-import { strategyStatusText, type StrategyStatus } from "@/lib/clients/support-strategies";
+import { strategyStatusText, type StrategyStatus } from "@/lib/clients/strategies/support-strategies";
 import { StatusTag } from "@/components/clients/profile/cards/card-parts";
 import { StrategiesDocumentButton } from "./strategies-document-dialog";
 

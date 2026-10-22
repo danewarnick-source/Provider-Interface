@@ -5,8 +5,8 @@
 
 import { useMemo, useState } from "react";
 import { ChevronDown, ChevronUp, Target } from "lucide-react";
-import type { GoalView } from "@/lib/clients/plans";
-import { shiftFocus } from "@/lib/clients/shift-focus";
+import type { GoalView } from "@/lib/clients/plans/plans";
+import { shiftFocus } from "@/lib/clients/strategies/shift-focus";
 import { useApprovedStrategies } from "./hooks/use-approved-strategies";
 
 export function ShiftFocus({

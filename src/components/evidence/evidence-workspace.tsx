@@ -37,7 +37,7 @@ import {
   peopleForEvidenceTab,
 } from "@/lib/evidence/people.ts";
 import { formatExpiresOn, latestFileForItem } from "@/lib/evidence/status.ts";
-import { evidenceChip } from "@/lib/clients/strategy-sends";
+import { evidenceChip } from "@/lib/clients/strategies/strategy-sends";
 import {
   EVIDENCE_SEND_MESSAGE_UNAVAILABLE,
   EVIDENCE_STORAGE_UNAVAILABLE,

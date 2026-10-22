@@ -21,7 +21,7 @@ import {
   directiveStatus,
   type DirectiveDraft,
   type DirectiveStatus,
-} from "@/lib/clients/health";
+} from "@/lib/clients/health/health";
 import { EditButton, SaveBar, SectionCard } from "@/components/clients/profile/cards/section-card";
 import { Field, FieldGrid, LabeledInput } from "@/components/clients/profile/cards/card-parts";
 import { NectarAsk } from "@/components/clients/shared/nectar-ask";

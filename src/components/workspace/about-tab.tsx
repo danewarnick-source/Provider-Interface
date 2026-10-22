@@ -15,8 +15,8 @@ import { useClientCareData } from "@/hooks/use-client-care-data";
 import { MedsReadOnlyList } from "@/components/medications/meds-read-only-list";
 import type { CustomFieldWithValue } from "@/lib/clients/care-data.functions";
 import { ageOn, daysUntil } from "@/lib/clients/dates";
-import { customFieldLabel } from "@/lib/clients/more-details";
-import { contactLine, contactsWithRole, primaryContact } from "@/lib/clients/contacts";
+import { customFieldLabel } from "@/lib/clients/profile/more-details";
+import { contactLine, contactsWithRole, primaryContact } from "@/lib/clients/contacts/contacts";
 
 function formatCustomValue(f: CustomFieldWithValue): string {
   const v = f.value;

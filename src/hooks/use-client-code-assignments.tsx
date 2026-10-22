@@ -13,7 +13,7 @@ import {
   assignmentCoversCode,
   uncoveredCodes,
 } from "@/lib/assignment-codes";
-import { loadActiveCodes } from "@/lib/clients/codes";
+import { loadActiveCodes } from "@/lib/clients/services/codes";
 
 export type StaffOption = { id: string; name: string };
 

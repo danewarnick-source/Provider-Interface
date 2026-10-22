@@ -19,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatMoney } from "@/lib/clients/money";
+import { formatMoney } from "@/lib/clients/money/money";
 import { PbaTransactionForm } from "./pba-transaction-form";
 import { PBA_RECEIPTS_BUCKET, ReceiptLink } from "./receipt-link";
 import type { PbaAccount } from "./use-client-money";

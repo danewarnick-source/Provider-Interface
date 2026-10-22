@@ -5,7 +5,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/clients/dates";
-import { contactTag, type ClientContact } from "@/lib/clients/contacts";
+import { contactTag, type ClientContact } from "@/lib/clients/contacts/contacts";
 
 export function PastContacts({
   contacts,

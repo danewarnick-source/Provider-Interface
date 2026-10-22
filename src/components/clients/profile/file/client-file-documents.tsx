@@ -14,7 +14,7 @@ import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { EmptyState } from "@/components/clients/profile/cards/card-parts";
 import { removeEvidenceRequirement, restoreEvidenceRequirement } from "@/lib/evidence.functions";
 import { EVIDENCE_LIABILITY_TEXT } from "@/lib/evidence/types";
-import type { ClientFileRow } from "@/lib/clients/file-rows";
+import type { ClientFileRow } from "@/lib/clients/file/file-rows";
 import { ClientPackReview } from "./client-pack-review";
 import { EVIDENCE_BUCKET, EvidenceUploadDialog } from "./evidence-upload-dialog";
 import { FileRow } from "./file-row";

@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import type { ClientEditTarget } from "@/lib/clients/profile-search";
+import type { ClientEditTarget } from "@/lib/clients/profile/profile-search";
 
 export function useEditShortcut({
   clientId,

@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { isRouteUuid } from "@/lib/route-uuid";
-import { loadActiveCodes } from "@/lib/clients/codes";
+import { loadActiveCodes } from "@/lib/clients/services/codes";
 import {
   currentPlan,
   goalSupportOptions,
@@ -11,9 +11,9 @@ import {
   goalsOn,
   supportsForCode,
   type ClientPlanBundle,
-} from "@/lib/clients/plans";
-import { loadPlanBundle } from "@/lib/clients/plans-load";
-import { addClientPlan, endClientGoal, saveClientGoal } from "@/lib/clients/plans.functions";
+} from "@/lib/clients/plans/plans";
+import { loadPlanBundle } from "@/lib/clients/plans/plans-load";
+import { addClientPlan, endClientGoal, saveClientGoal } from "@/lib/clients/plans/plans.functions";
 
 export const clientPlansKey = (clientId: string | undefined) => ["client-plans", clientId] as const;
 

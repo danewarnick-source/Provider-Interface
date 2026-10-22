@@ -5,7 +5,7 @@
 // admin can turn one back on from "Show hidden sections". Pure, importable
 // by node --test.
 
-import type { ClientProfileSection } from "./profile-sections.ts";
+import type { ClientProfileSection } from "./profile/profile-sections.ts";
 
 export type SupportScope = {
   helps_with_medications: boolean | null;

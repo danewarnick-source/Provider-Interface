@@ -1,4 +1,4 @@
-// Mocked client list + Add client server functions (src/lib/clients/list.functions.ts,
+// Mocked client list + Add client server functions (src/lib/clients/list/list.functions.ts,
 // create.functions.ts). Rows are built from the made-up roster fixture; search
 // and filters run here the way the server does, so the page's one request per
 // change can be counted.
@@ -12,7 +12,7 @@ import {
   searchTerms,
   sortRows,
   type ClientListRow,
-} from "../../src/lib/clients/list";
+} from "../../src/lib/clients/list/list";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const SAMPLE = path.join(here, "../../src/lib/clients/pcsp/fixture/sample-expected.json");

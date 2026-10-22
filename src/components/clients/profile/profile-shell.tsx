@@ -24,7 +24,7 @@ import {
   CLIENT_PROFILE_SECTIONS,
   CLIENT_SECTION_LABEL,
   type ClientProfileSection,
-} from "@/lib/clients/profile-sections";
+} from "@/lib/clients/profile/profile-sections";
 
 const SECTION_ICON: Record<ClientProfileSection, LucideIcon> = {
   overview: LayoutDashboard,

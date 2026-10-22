@@ -3,8 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { StatusTag } from "@/components/clients/profile/cards/card-parts";
 import { cn } from "@/lib/utils";
 import { jobCodeLabel } from "@/lib/job-codes";
-import { goesByLine } from "@/lib/clients/profile-header";
-import type { ClientListRow } from "@/lib/clients/list";
+import { goesByLine } from "@/lib/clients/profile/profile-header";
+import type { ClientListRow } from "@/lib/clients/list/list";
 import {
   canFixSection,
   codesCell,
@@ -14,7 +14,7 @@ import {
   unitsLow,
   unitsShortcut,
   type ListViewer,
-} from "@/lib/clients/list-display";
+} from "@/lib/clients/list/list-display";
 import { EmptyCell, SectionLink } from "./list-shortcut";
 
 type CellProps = { row: ClientListRow; viewer: ListViewer };

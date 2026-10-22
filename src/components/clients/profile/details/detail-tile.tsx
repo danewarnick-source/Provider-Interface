@@ -3,7 +3,7 @@
 
 import type { CustomFieldWithValue } from "@/lib/clients/care-data.functions";
 import { formatDate } from "@/lib/clients/dates";
-import { customFieldLabel } from "@/lib/clients/more-details";
+import { customFieldLabel } from "@/lib/clients/profile/more-details";
 
 /** Small muted tile: the field's label and its value (or a dash). */
 export function DetailTile({ field }: { field: CustomFieldWithValue }) {

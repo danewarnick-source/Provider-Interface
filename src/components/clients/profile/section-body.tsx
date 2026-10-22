@@ -1,7 +1,7 @@
 // Draws the active client profile section.
 
-import type { ClientOverview } from "@/lib/clients/overview";
-import type { ClientProfileSection } from "@/lib/clients/profile-sections";
+import type { ClientOverview } from "@/lib/clients/overview/overview";
+import type { ClientProfileSection } from "@/lib/clients/profile/profile-sections";
 import { OverviewSection } from "./overview/overview-section";
 import { ProfileSection } from "./details/profile-section";
 import { ContactsSection } from "./contacts/contacts-section";

@@ -1,4 +1,4 @@
-import { clientListCsv, type ClientListRow } from "@/lib/clients/list";
+import { clientListCsv, type ClientListRow } from "@/lib/clients/list/list";
 import { todayYmd } from "@/lib/clients/dates";
 
 /** Download the list as shown (current view, search and filters). */

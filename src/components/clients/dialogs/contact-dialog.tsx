@@ -13,7 +13,7 @@ import {
   type ClientContact,
   type ContactFields,
   type ContactRole,
-} from "@/lib/clients/contacts";
+} from "@/lib/clients/contacts/contacts";
 
 type Draft = Record<Exclude<keyof ContactFields, "role" | "is_primary">, string> & {
   role: ContactRole;

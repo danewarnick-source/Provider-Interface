@@ -17,7 +17,7 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { FieldRenderer } from "@/components/forms/field-renderer";
 import { type FormField, isFieldVisible } from "@/lib/forms-utils";
 import { supabase } from "@/integrations/supabase/client";
-import { activeContacts, loadClientContacts, primaryContact, type ClientContact } from "@/lib/clients/contacts";
+import { activeContacts, loadClientContacts, primaryContact, type ClientContact } from "@/lib/clients/contacts/contacts";
 import { legacyContactKey } from "@/lib/clients/legacy-fields";
 import { formatPersonName } from "@/lib/person-name";
 import { toast } from "sonner";

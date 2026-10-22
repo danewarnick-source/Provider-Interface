@@ -8,7 +8,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { coerceScheduledShiftStatus } from "@/lib/scheduling/shift-status";
 import { denverWeekUtcBounds } from "@/lib/scheduler/recurrence";
 import { assignmentCoversCode, normalizeServiceCode } from "@/lib/assignment-codes";
-import { assertStaffNotExcluded } from "@/lib/clients/exclusions-check.server";
+import { assertStaffNotExcluded } from "@/lib/clients/team/exclusions-check.server";
 
 const ShiftInput = z.object({
   id: z.string().uuid().optional(),

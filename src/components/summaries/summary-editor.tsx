@@ -35,14 +35,14 @@ import {
   canFinalizeSummary,
   finalizeOpensMessage,
   summaryCadenceLabel,
-} from "@/lib/progress-summaries";
-import type { SummaryDoc } from "@/lib/progress-summary-doc";
-import type { FieldKey } from "@/lib/progress-summary-review";
+} from "@/lib/progress-summaries/progress-summaries";
+import type { SummaryDoc } from "@/lib/progress-summaries/progress-summary-doc";
+import type { FieldKey } from "@/lib/progress-summaries/progress-summary-review";
 import { EmploymentAttestation } from "./employment-attestation";
 import { EditorShell } from "./editor-shell";
 import { FinalizeDialog } from "./finalize-dialog";
 import { SummaryDocument } from "./summary-document";
-import { reopenEventLine } from "@/lib/progress-summary-reopen";
+import { reopenEventLine } from "@/lib/progress-summaries/progress-summary-reopen";
 import { ReopenDialog } from "./reopen-dialog";
 import { BlankGoalsDialog } from "./blank-goals-dialog";
 import { BoxTools, RemindersList } from "./summary-review-panel";

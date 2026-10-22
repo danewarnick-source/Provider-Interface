@@ -8,23 +8,23 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PersonAvatar } from "@/components/person/person-avatar";
-import { armClientListReturn, clientListReturnView } from "@/lib/clients/list-return";
+import { armClientListReturn, clientListReturnView } from "@/lib/clients/list/list-return";
 import { useAccess } from "@/hooks/use-access";
 import { useClientCareData } from "@/hooks/use-client-care-data";
 import { useAllClientContacts } from "@/components/clients/shared/hooks/use-client-contacts";
-import { primaryContact } from "@/lib/clients/contacts";
-import { guardianStatus } from "@/lib/clients/guardian";
+import { primaryContact } from "@/lib/clients/contacts/contacts";
+import { guardianStatus } from "@/lib/clients/contacts/guardian";
 import { ageOn, formatDate } from "@/lib/clients/dates";
-import { DISCHARGED_STATUSES } from "@/lib/clients/list";
+import { DISCHARGED_STATUSES } from "@/lib/clients/list/list";
 import type { AttentionItem } from "@/lib/clients/readiness";
-import type { ClientProfileSection } from "@/lib/clients/profile-sections";
+import type { ClientProfileSection } from "@/lib/clients/profile/profile-sections";
 import {
   goesByLine,
   guardianTile,
   headerReadiness,
   planYearTile,
   preferredNameFrom,
-} from "@/lib/clients/profile-header";
+} from "@/lib/clients/profile/profile-header";
 import { InfoTile } from "./cards/card-parts";
 import type { ClientProfileData } from "./use-client-profile";
 import { HeaderMenu } from "./header-menu";

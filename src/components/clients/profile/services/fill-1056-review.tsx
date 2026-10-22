@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { review1056Problems, type Review1056 } from "@/lib/clients/auth-1056";
-import type { Read1056Result } from "@/lib/clients/budget-parse.functions";
+import { review1056Problems, type Review1056 } from "@/lib/clients/services/auth-1056";
+import type { Read1056Result } from "@/lib/clients/services/budget-parse.functions";
 import { PcspReviewChecks } from "../plans/pcsp-review-checks";
 import { Fill1056Lines } from "./fill-1056-lines";
 

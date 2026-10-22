@@ -18,7 +18,7 @@ import {
   contactTag,
   contactTelHref,
   type ClientContact,
-} from "@/lib/clients/contacts";
+} from "@/lib/clients/contacts/contacts";
 
 function Detail({
   icon: Icon,

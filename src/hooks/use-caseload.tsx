@@ -4,7 +4,7 @@ import { useAuth } from "./use-auth";
 import { useCurrentOrg } from "./use-org";
 import { usePortalView } from "./use-portal-view";
 import { isAdminLevel } from "@/lib/access/levels";
-import { loadActiveCodes } from "@/lib/clients/codes";
+import { loadActiveCodes } from "@/lib/clients/services/codes";
 
 type ClientRow = Omit<CaseloadClient, "codes">;
 

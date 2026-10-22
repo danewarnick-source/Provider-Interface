@@ -5,7 +5,7 @@ import { EvidenceStatusChip } from "@/components/evidence/evidence-status-chip.t
 import { dueSubtitleFromItem } from "@/lib/evidence/due.ts";
 import { itemsBySubject, personRowSubtitle, rowSummaryChips } from "@/lib/evidence/matrix.ts";
 import { latestFileForItem } from "@/lib/evidence/status.ts";
-import { evidenceChip, type StrategySendState } from "@/lib/clients/strategy-sends";
+import { evidenceChip, type StrategySendState } from "@/lib/clients/strategies/strategy-sends";
 import type { EvidenceFileRow, EvidenceItemRow, EvidencePerson } from "@/lib/evidence/types.ts";
 
 export function EvidenceRoster({

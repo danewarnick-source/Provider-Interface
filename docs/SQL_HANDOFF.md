@@ -2771,7 +2771,7 @@ needed — everything else reuses existing infrastructure:
   (`requires_upi_attestation`, `upi_entered_at`, `finalized_at`). No schema
   change.
 - Prompt 24 (CMP/CMS quarterly→monthly) — code-only change in
-  `src/lib/progress-summaries.ts` (`MONTHLY_SUMMARY_CODES`). No schema
+  `src/lib/progress-summaries/progress-summaries.ts` (`MONTHLY_SUMMARY_CODES`). No schema
   change, no data touched — forward-looking only.
 - Prompts 26/27/28 (remove org-level written-BSP-policy requirement,
   healthcare-access-training checklist item, remediation-plan tracking) —
@@ -4453,7 +4453,7 @@ Employment — Job Development) parity with SEI:
   `src/lib/staff-training-requirements.ts`. No schema change — this list
   drives both the staff checklist and compliance matrix automatically.
 - Prompt 13 (SJD → monthly summary cadence + UPI attestation flag) —
-  code-only change in `src/lib/progress-summaries.ts` /
+  code-only change in `src/lib/progress-summaries/progress-summaries.ts` /
   `progress-summaries.functions.ts`. No schema change.
 - Prompt 14 (SJD employment-data + support-strategies UPI attestations,
   mirroring SEI) — widens `upi_attestations.kind` to add

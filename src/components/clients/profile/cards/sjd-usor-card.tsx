@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { listUpiAttestations, recordUpiAttestation } from "@/lib/upi-attestations.functions";
-import { formatPeriodMonthYear } from "@/lib/progress-summaries";
+import { formatPeriodMonthYear } from "@/lib/progress-summaries/progress-summaries";
 import { formatDate } from "@/lib/clients/dates";
 import { Megaphone } from "lucide-react";
 import { SectionCard } from "./section-card";

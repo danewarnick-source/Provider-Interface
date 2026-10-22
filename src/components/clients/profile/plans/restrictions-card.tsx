@@ -18,7 +18,7 @@ import {
   hrrStatus,
   type HrrStatus,
   type RestrictionRecord,
-} from "@/lib/clients/hrc";
+} from "@/lib/clients/rights/hrc";
 import { updateClient, writeClientRecord } from "@/lib/clients/writes.functions";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { StatusTag } from "@/components/clients/profile/cards/card-parts";

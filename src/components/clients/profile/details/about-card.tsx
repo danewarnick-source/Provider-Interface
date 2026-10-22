@@ -6,7 +6,7 @@
 import { Loader2, Smile, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAccess } from "@/hooks/use-access";
-import { boldLead } from "@/lib/clients/about-me";
+import { boldLead } from "@/lib/clients/about/about-me";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { EmptyState } from "@/components/clients/profile/cards/card-parts";
 import { AboutEditor } from "./about-editor";

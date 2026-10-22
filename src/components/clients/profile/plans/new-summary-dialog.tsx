@@ -95,7 +95,7 @@ export function NewSummaryDialog({
       } catch {
         /* column may not exist yet */
       }
-      const { summaryPeriodFloor } = await import("@/lib/progress-summaries");
+      const { summaryPeriodFloor } = await import("@/lib/progress-summaries/progress-summaries");
       const floor = summaryPeriodFloor({
         orgGoLiveDate: org?.go_live_date ?? org?.created_at,
         clientHiveStartDate: hiveStart,

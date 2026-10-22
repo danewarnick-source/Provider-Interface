@@ -4,7 +4,7 @@
 
 import { StatusTag } from "@/components/clients/profile/cards/card-parts";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import type { HeaderReadiness } from "@/lib/clients/profile-header";
+import type { HeaderReadiness } from "@/lib/clients/profile/profile-header";
 
 export function HeaderPills({
   codes,

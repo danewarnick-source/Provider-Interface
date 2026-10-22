@@ -10,7 +10,7 @@
 // every write is one database transaction (apply_reviewed_pcsp), so a
 // failure part way leaves the old plan current and nothing half-saved.
 
-import { normalizeCodes, planStatusOn, type PlanStatus } from "../plans.ts";
+import { normalizeCodes, planStatusOn, type PlanStatus } from "../plans/plans.ts";
 import { todayYmd } from "../dates.ts";
 import {
   billingRows, carriedFrom, confirmProblems, contactRows,

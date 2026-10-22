@@ -11,14 +11,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { findClientsByMedicaidIds } from "@/lib/clients/create.functions";
+import { findClientsByMedicaidIds } from "@/lib/clients/create/create.functions";
 import {
   emptyAddClientForm,
   formProblems,
   prefillFromPcsp,
   type AddClientForm,
   type FilledField,
-} from "@/lib/clients/create";
+} from "@/lib/clients/create/create";
 import { PcspReview } from "@/components/clients/profile/plans/pcsp-review";
 import { PcspReadFailed, PcspReadSummary } from "@/components/clients/shared/pcsp-read-notes";
 import { AddClientDone, type AddedClient } from "./add-client-done";
