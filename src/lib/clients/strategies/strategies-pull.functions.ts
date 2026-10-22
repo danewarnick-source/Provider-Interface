@@ -20,7 +20,7 @@ import { PULL_SYSTEM_PROMPT, parsePullReply, pullSavePatch, pullUserPrompt } fro
 import { editableClient, uploadedStrategiesDoc } from "./strategy-sends.functions";
 import { formatBullets } from "./strategy-rules";
 import { agencySupports, buildStrategySections, supportNeedsStrategy } from "./support-strategies";
-import type { CSTContent } from "../team/training.functions";
+import type { CSTContent } from "../team/training-content";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;

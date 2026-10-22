@@ -4,7 +4,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
-const src = readFileSync(new URL("./training.functions.ts", import.meta.url), "utf8");
+// The training server functions and their shared checks, read as one.
+const src = ["training.functions.ts", "training-guards.server.ts", "training-strategies.functions.ts", "training-staff.functions.ts"]
+  .map((f) => readFileSync(new URL(`./${f}`, import.meta.url), "utf8"))
+  .join("\n");
 const read = (p: string) => readFileSync(new URL(p, import.meta.url), "utf8");
 
 /** Each exported server function's source. */

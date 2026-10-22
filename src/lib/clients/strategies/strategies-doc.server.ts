@@ -8,7 +8,7 @@ import { todayYmd } from "../dates";
 import { currentPlan, type ClientPlan } from "../plans/plans";
 import { buildStrategiesDoc, strategiesFileName, type StrategiesDoc } from "./strategies-doc";
 import { renderStrategiesPdf } from "./strategies-pdf";
-import type { CSTContent } from "../team/training.functions";
+import type { CSTContent } from "../team/training-content";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;

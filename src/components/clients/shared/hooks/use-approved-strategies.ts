@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { isRouteUuid } from "@/lib/route-uuid";
 import { approvedStrategies, type ApprovedStrategy } from "@/lib/clients/strategies/shift-focus";
-import type { CSTContent } from "@/lib/clients/team/training.functions";
+import type { CSTContent } from "@/lib/clients/team/training-content";
 
 /**
  * A client's APPROVED support strategy bullets (RLS: the team who can see the

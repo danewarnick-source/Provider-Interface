@@ -9,7 +9,7 @@
 import { formatDate } from "../dates.ts";
 import type { GoalView } from "../plans/plans.ts";
 import { parseBullets, strategyNeed, type StrategyNeed } from "./strategy-rules.ts";
-import type { CSTContent, CSTSection } from "../team/training.functions.ts";
+import type { CSTContent, CSTSection } from "../team/training-content.ts";
 
 export const STRATEGY_LABEL = {
   goal: "Goal",

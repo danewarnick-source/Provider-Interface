@@ -22,7 +22,7 @@ import { recordSendThenFile, strategiesApprovedFor, type StrategySendState } fro
 import { STRATEGIES_KEY, loadStrategyStates } from "./strategy-sends.server";
 import { isUploadDoc } from "./support-strategies";
 import { assertRowsChanged } from "../writes";
-import type { CSTContent } from "../team/training.functions";
+import type { CSTContent } from "../team/training-content";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;

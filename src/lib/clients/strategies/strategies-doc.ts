@@ -6,7 +6,7 @@
 // footer. Pure (no Supabase), node --test.
 
 import { formatDate } from "../dates.ts";
-import type { CSTContent } from "../team/training.functions.ts";
+import type { CSTContent } from "../team/training-content.ts";
 import { UPI_STRATEGY_CODES, strategyNeedText } from "./strategy-rules.ts";
 import { groupByGoal, isUploadDoc, strategyView } from "./support-strategies.ts";
 

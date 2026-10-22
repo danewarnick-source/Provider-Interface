@@ -9,7 +9,7 @@
 // Pure (no Supabase), node --test.
 
 import type { GoalView } from "../plans/plans.ts";
-import type { CSTContent } from "../team/training.functions.ts";
+import type { CSTContent } from "../team/training-content.ts";
 import { isUploadDoc, strategyView } from "./support-strategies.ts";
 
 /** Approved strategy bullets per support (id and wording, to match after a new PCSP). */

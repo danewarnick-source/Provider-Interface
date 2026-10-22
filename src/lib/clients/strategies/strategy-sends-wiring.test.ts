@@ -69,7 +69,9 @@ describe("one rule everywhere", () => {
 
 describe("new plan year and uploaded documents", () => {
   it("drafts only missing strategies, keeping the ones that carried over", () => {
-    const t = read("../team/training.functions.ts");
+    const t = ["training.functions.ts", "training-strategies.functions.ts"]
+      .map((f) => read(`../team/${f}`))
+      .join("\n");
     assert.match(t, /"missing"/);
     assert.match(t, /opts\.carry \? carryForward\(supports, existing\)/);
   });
@@ -86,7 +88,9 @@ describe("new plan year and uploaded documents", () => {
   });
 
   it("approval and edits use the pending draft version; superseding writes clear it", () => {
-    const t = read("../team/training.functions.ts");
+    const t = ["training.functions.ts", "training-strategies.functions.ts"]
+      .map((f) => read(`../team/${f}`))
+      .join("\n");
     assert.match(t, /editSavePatch\(row, data\.content\)/);
     assert.match(t, /approvalContent<CSTContent>\(row\)/);
     assert.equal((t.match(/draft_content: null/g) ?? []).length, 2);

@@ -8,10 +8,9 @@ import { z } from "zod";
 import {
   getStaffClientSpecificTraining,
   completeClientSpecificTraining,
-  checkAnswerRelevance,
-  type CSTContent,
-  type CSTReviewQuestion,
-} from "@/lib/clients/team/training.functions";
+} from "@/lib/clients/team/training-staff.functions";
+import { checkAnswerRelevance } from "@/lib/clients/team/training.functions";
+import { type CSTContent, type CSTReviewQuestion } from "@/lib/clients/team/training-content";
 import { SectionsView } from "@/components/clients/profile/client-specific-training-card";
 import { GoalTree } from "@/components/clients/profile/plans/goal-tree";
 import type { GoalView } from "@/lib/clients/plans/plans";

@@ -12,11 +12,13 @@ import {
   updateClientSpecificTraining,
   publishClientSpecificTraining,
   saveReviewQuestions,
+} from "@/lib/clients/team/training.functions";
+import {
   type CSTContent,
   type CSTSection,
   type CSTItem,
   type CSTReviewQuestion,
-} from "@/lib/clients/team/training.functions";
+} from "@/lib/clients/team/training-content";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { Button } from "@/components/ui/button";

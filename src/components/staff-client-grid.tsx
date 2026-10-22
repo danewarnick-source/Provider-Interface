@@ -38,7 +38,7 @@ import {
 } from "lucide-react";
 import { ClientQuickInfoSheet } from "@/components/staff-mobile/client-quick-info-sheet";
 import { ClientCapBars } from "@/components/staff-mobile/client-cap-bars";
-import { getMyClientTrainingStatuses } from "@/lib/clients/team/training.functions";
+import { getMyClientTrainingStatuses } from "@/lib/clients/team/training-staff.functions";
 import {
   billingUnitLabel,
   isClockableServiceCode,

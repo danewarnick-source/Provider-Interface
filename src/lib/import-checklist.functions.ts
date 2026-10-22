@@ -311,7 +311,7 @@ export const applySelectedClientFields = createServerFn({ method: "POST" })
       fields,
       // "profile_update" is outside the SourceDocumentType union but the
       // helper only uses it for downstream conflict tagging — cast is safe.
-      sourceDocumentType: "profile_update" as unknown as import("@/lib/clients/create/import-schema").SourceDocumentType,
+      sourceDocumentType: "profile_update" as unknown as import("@/lib/clients/create/import-fields").SourceDocumentType,
       onError: async (action, message) => {
         try {
           await sb.from("import_audit").insert({

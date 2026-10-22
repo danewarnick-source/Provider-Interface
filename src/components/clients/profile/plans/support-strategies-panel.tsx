@@ -32,10 +32,12 @@ import {
   attachSupportStrategyDocument,
   draftSupportStrategies,
   getSupportStrategiesTraining,
+} from "@/lib/clients/team/training-strategies.functions";
+import {
   publishClientSpecificTraining,
   updateClientSpecificTraining,
-  type CSTContent,
 } from "@/lib/clients/team/training.functions";
+import { type CSTContent } from "@/lib/clients/team/training-content";
 import {
   discardPulledStrategies,
   pullStrategiesFromDocument,

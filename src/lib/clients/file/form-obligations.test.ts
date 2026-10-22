@@ -62,10 +62,9 @@ describe("clientFormKindForTitle", () => {
   });
 
   it("has no createPersonCenteredProfile server fn", () => {
-    const fns = readFileSync(
-      new URL("../team/training.functions.ts", import.meta.url),
-      "utf8",
-    );
+    const fns = ["training.functions.ts", "training-strategies.functions.ts", "training-staff.functions.ts"]
+      .map((f) => readFileSync(new URL(`../team/${f}`, import.meta.url), "utf8"))
+      .join("\n");
     assert.doesNotMatch(fns, /export const createPersonCenteredProfile/);
     assert.doesNotMatch(fns, /training_type: "person_centered"/);
     assert.match(fns, /getStaffClientSpecificTraining/);
