@@ -1,3 +1,6 @@
+// Hooks for a client's contacts (client_contacts): active ones, or all of them
+// including past contacts.
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { isRouteUuid } from "@/lib/route-uuid";

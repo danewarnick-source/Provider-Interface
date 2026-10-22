@@ -1,3 +1,5 @@
+// Badge marking timesheet rows imported from a historical spreadsheet.
+
 import { Archive } from "lucide-react";
 
 /** Renders a permanent visual marker for timesheet rows imported from a

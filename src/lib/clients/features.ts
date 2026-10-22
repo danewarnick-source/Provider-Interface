@@ -1,5 +1,3 @@
-import { useDisabledFeatures, type FeatureKey as TierFeatureKey } from "@/hooks/use-tenant-features";
-
 // ─── Code-driven feature areas (DSPD SOW catalog) ─────────────────────────
 //
 // A client's authorized service codes determine which feature AREAS apply
@@ -8,6 +6,8 @@ import { useDisabledFeatures, type FeatureKey as TierFeatureKey } from "@/hooks/
 // supported-employment codes → no SE surfaces; etc. Per-client
 // `feature_config[<feature>]` overrides the code-derived default in either
 // direction (admin force-on or force-off).
+
+import { useDisabledFeatures, type FeatureKey as TierFeatureKey } from "@/hooks/use-tenant-features";
 
 export const FEATURE_CODES = {
   behavior:             ["BC1", "BC2", "BC3"],

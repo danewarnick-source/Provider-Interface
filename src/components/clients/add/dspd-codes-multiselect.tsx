@@ -1,3 +1,5 @@
+// Searchable multi-select of DSPD service codes, used by the Add client form.
+
 import { useMemo, useRef, useState, useEffect } from "react";
 import { Search, X, ChevronDown, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";

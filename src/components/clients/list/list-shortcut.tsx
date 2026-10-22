@@ -1,3 +1,6 @@
+// Clients list links that jump into one section of a client's profile, and the
+// empty-cell placeholder.
+
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";

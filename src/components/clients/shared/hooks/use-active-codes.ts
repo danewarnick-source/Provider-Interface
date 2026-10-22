@@ -1,3 +1,5 @@
+// Hooks for clients' active service codes (from client_billing_codes).
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { loadActiveCodes } from "@/lib/clients/services/codes";

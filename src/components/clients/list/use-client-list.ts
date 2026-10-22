@@ -1,3 +1,5 @@
+// Hook that loads the clients list for the current filters (search is debounced).
+
 import { useEffect, useState } from "react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";

@@ -1,3 +1,6 @@
+// Clients list toolbar: view tabs, search, home / team member / code filters and
+// Export CSV.
+
 import type { ReactNode } from "react";
 import { Download, Search, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";

@@ -1,3 +1,5 @@
+// Export CSV on the Clients page: downloads the list as currently shown.
+
 import { clientListCsv, type ClientListRow } from "@/lib/clients/list/list";
 import { todayYmd } from "@/lib/clients/dates";
 

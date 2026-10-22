@@ -1,3 +1,5 @@
+// Clients list, phone layout: one card per client.
+
 import { ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { isRowControlClick, type ClientListViewProps } from "./client-list-types";

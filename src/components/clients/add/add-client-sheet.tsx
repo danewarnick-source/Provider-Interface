@@ -1,3 +1,6 @@
+// Add client sheet: start from a PCSP or enter by hand, save the client in one
+// step, then offer "Finish setting up" now or later.
+
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2 } from "lucide-react";

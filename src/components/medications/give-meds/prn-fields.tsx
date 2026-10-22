@@ -1,3 +1,6 @@
+// Give meds: the as-needed (PRN) and rescue fields — why it's given, and the
+// too-soon / daily-max warning.
+
 import { AlertTriangle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

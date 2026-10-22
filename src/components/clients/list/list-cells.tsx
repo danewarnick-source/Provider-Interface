@@ -1,3 +1,6 @@
+// Cells shared by the clients list cards and table: photo, name, codes, home,
+// units left and next due.
+
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { StatusTag } from "@/components/clients/profile/cards/card-parts";

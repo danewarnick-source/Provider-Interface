@@ -1,3 +1,6 @@
+// Hooks for authorized billing codes: one client's current codes, or the whole
+// agency's.
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "../../../../hooks/use-org";

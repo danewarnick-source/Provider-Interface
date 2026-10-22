@@ -1,3 +1,5 @@
+// Hook for a client's approved support strategies, as staff see them on shift.
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { isRouteUuid } from "@/lib/route-uuid";

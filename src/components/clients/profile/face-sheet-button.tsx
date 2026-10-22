@@ -1,3 +1,5 @@
+// Face sheet button: builds the client's Face Sheet PDF and opens it.
+
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { generateClientFaceSheet } from "@/lib/clients/profile/face-sheet.functions";

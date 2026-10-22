@@ -1,3 +1,6 @@
+// Hooks for a client's plan years, goals and supports (client_plans,
+// client_goals and client_goal_supports).
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";

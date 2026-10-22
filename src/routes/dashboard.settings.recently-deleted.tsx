@@ -1,3 +1,5 @@
+// Settings → Recently deleted: people deleted by mistake, which Owners can restore.
+
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useCurrentOrg } from "@/hooks/use-org";

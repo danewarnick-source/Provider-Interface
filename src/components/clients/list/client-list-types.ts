@@ -1,3 +1,5 @@
+// Props and click handling shared by the clients list cards and table.
+
 import type { ClientListRow } from "@/lib/clients/list/list";
 import type { ListViewer } from "@/lib/clients/list/list-display";
 

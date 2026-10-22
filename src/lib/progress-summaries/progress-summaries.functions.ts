@@ -1,3 +1,7 @@
+// Server functions for periodic progress summaries: create the periods each
+// client owes, list them, save, finalize, reopen and record UPI / Support
+// Coordinator sends.
+
 import { createServerFn } from "@tanstack/react-start";
 import { loadClientContacts, primaryContact, type ClientContact } from "@/lib/clients/contacts/contacts";
 import type { SummaryGoal } from "@/lib/clients/plans/plan-summaries";

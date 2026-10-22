@@ -1,3 +1,6 @@
+// Server functions for Nectar on a progress summary: draft one box or all boxes,
+// and run or update the review. Advisory only; never blocks Finalize.
+
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";

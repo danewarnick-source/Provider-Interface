@@ -1,3 +1,6 @@
+// The Clients page: view tabs, toolbar and the list (cards on phones, a table on
+// desktop), plus Add client. Restores the list as it was left on "← All clients".
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Contact2, Loader2, UserPlus } from "lucide-react";

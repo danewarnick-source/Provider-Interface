@@ -1,3 +1,6 @@
+// The "Meds" item in the clock-out check: doses due during the shift must be
+// logged before clock-out.
+
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { CheckCircle2, Pill } from "lucide-react";

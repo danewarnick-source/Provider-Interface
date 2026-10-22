@@ -1,3 +1,6 @@
+// Add client form, Identity part: name, dates, Medicaid ID (with the duplicate
+// check), service address and home, plus the shared Field and "From PCSP" tag.
+
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle } from "lucide-react";
 import { Input } from "@/components/ui/input";

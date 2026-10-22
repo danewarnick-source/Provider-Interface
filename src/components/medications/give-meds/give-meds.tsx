@@ -1,3 +1,6 @@
+// Give meds: the one component staff use to log doses (MAR tab, clock-out check
+// and HHS daily note).
+
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle, Pill } from "lucide-react";

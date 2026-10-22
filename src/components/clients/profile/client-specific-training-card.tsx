@@ -1,3 +1,6 @@
+// Client-specific training card (Team section): Nectar drafts the training from
+// the client's documents, admins edit and publish it, and add review questions.
+
 import { useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";

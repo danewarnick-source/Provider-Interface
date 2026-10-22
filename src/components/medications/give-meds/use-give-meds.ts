@@ -1,3 +1,6 @@
+// Hook that loads one client's Give meds data for a day and sorts it into the
+// lists the screen shows.
+
 import { useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";

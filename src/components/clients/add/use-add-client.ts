@@ -1,3 +1,5 @@
+// Hook that saves the Add client form through the addClient server function.
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";

@@ -1,3 +1,6 @@
+// Give meds: one medication's row (name, what it's for, what to watch for, and
+// its Give / Not given buttons).
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatTime12, nameWithStrength } from "@/lib/medications/med-display";
