@@ -1,6 +1,7 @@
 // How every DHHS91172 service code bills: its unit, its modes, and the day-level
-// thresholds that flip an hourly code to a daily rate. Pure. Billing and the
-// burn-down read this; nothing else decides units.
+// thresholds that flip an hourly code to a daily rate. Pure. This owns the
+// day-level mode (daily vs quarter-hour, DSI/SEE tiers); per-entry quarter-hour
+// counts still come from computeEntryUnits() in src/lib/billing-units.ts.
 //
 // Quarter-hour rule (CLAUDE.md): each ENTRY rounds to the nearest quarter hour
 // (Math.round of minutes / 15) and units are summed per entry, never rounded
