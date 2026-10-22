@@ -23,6 +23,20 @@ export const clientListCalls = { list: 0, add: 0, bodies: [] as string[] };
 
 export type ClientListMockOpts = { emptyClients?: boolean };
 
+/** Homes saved through the mocked updateClient, so the profile and list show them. */
+export const savedHomes = new Map<string, string>();
+
+export function homeOf(c: { id: string; team_id: string | null }): string | null {
+  return savedHomes.get(c.id) ?? c.team_id;
+}
+
+/** Remember a home picked in the Identity card (updateClient's patch.team_id). */
+export function recordClientUpdate(body: string) {
+  const clientId = field(body, "clientId");
+  const teamId = field(body, "team_id");
+  if (clientId && teamId) savedHomes.set(clientId, teamId);
+}
+
 type SerovalNode = {
   t?: number;
   s?: unknown;
@@ -67,7 +81,7 @@ function field(body: string, key: string): string | null {
 function rows(opts: ClientListMockOpts): ClientListRow[] {
   if (opts.emptyClients) return [];
   return CLIENT_LIST.map((c) => {
-    const team = TEAMS.find((t) => t.id === c.team_id);
+    const team = TEAMS.find((t) => t.id === homeOf(c));
     const codes = [...c.codes];
     const row: ClientListRow = {
       id: c.id,

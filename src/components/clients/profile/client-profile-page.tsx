@@ -128,10 +128,11 @@ export function ClientProfilePage() {
     void qc.invalidateQueries({ queryKey: clientOverviewKey(orgId, clientId) });
   };
   const select = (next: ClientProfileSection) =>
-    // Sections replace the entry: Back leaves the profile in one step.
+    // Sections replace the entry: Back leaves the profile in one step. A
+    // pending ?edit= belongs to the section it came with.
     navigate({
       replace: true,
-      search: (prev) => ({ ...prev, section: clientSectionSearchValue(next) }),
+      search: (prev) => ({ ...prev, section: clientSectionSearchValue(next), edit: undefined }),
     });
 
   return (

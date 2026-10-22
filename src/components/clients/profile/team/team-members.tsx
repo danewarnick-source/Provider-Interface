@@ -2,6 +2,7 @@
 // which codes, and whether they're ready to work alone (same rules as Team
 // Members). Each change saves that one team member through
 // setStaffClientCodes, the single write path shared with Team Members.
+// On the Team section, ?edit=team opens "Assign a team member".
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -20,6 +21,7 @@ import { TeamCodesDialog, type TeamCodesTarget } from "./team-codes-dialog";
 import { TeamMemberCard } from "./team-member-card";
 import { useClientTeam } from "./use-client-team";
 import { invalidateTeam } from "./team-changes";
+import { useEditShortcut } from "../use-edit-shortcut";
 
 export function TeamMembers({
   orgId,
@@ -27,12 +29,15 @@ export function TeamMembers({
   firstName,
   canEdit,
   readiness,
+  shortcut = false,
 }: {
   orgId: string;
   clientId: string;
   firstName: string;
   canEdit: boolean;
   readiness: readonly OverviewTeamMember[];
+  /** Answer ?edit=team (the Team section; not the setup steps). */
+  shortcut?: boolean;
 }) {
   const qc = useQueryClient();
   const saveFn = useServerFn(setStaffClientCodes);
@@ -53,12 +58,33 @@ export function TeamMembers({
     .filter((s) => !assigned.has(s.id) && !excluded.has(s.id))
     .sort((a, b) => a.name.localeCompare(b.name));
 
+  const shortcutDone = useEditShortcut({
+    clientId,
+    target: "team",
+    canEdit,
+    enabled: shortcut,
+    ready: !!teamQ.data && !!staffQ.data,
+    open: () => {
+      if (codes.length) {
+        setTarget({ staffId: null, name: null, codes: [] });
+        return;
+      }
+      // No codes yet, so nobody can be assigned: show why and drop the flag.
+      document.getElementById("client-team")?.scrollIntoView({ block: "start" });
+      shortcutDone();
+    },
+  });
+  const closeDialog = () => {
+    setTarget(null);
+    shortcutDone();
+  };
+
   const saveM = useMutation({
     mutationFn: (v: { staffId: string; codes: string[] }) =>
       saveFn({ data: { organizationId: orgId, staffId: v.staffId, clientId, codes: v.codes } }),
     onSuccess: (_d, v) => {
       toast.success(v.codes.length ? "Team saved" : "Taken off the team");
-      setTarget(null);
+      closeDialog();
       invalidateTeam(qc);
     },
     onError: (e: Error) => {
@@ -84,6 +110,7 @@ export function TeamMembers({
         title="Team"
         description={`Team members who work with ${firstName}, and on which codes.`}
         testId="client-team-codes"
+        id="client-team"
         actions={canEdit ? assignButton : null}
       >
         {teamQ.isLoading || staffQ.isLoading ? (
@@ -134,7 +161,7 @@ export function TeamMembers({
           clientCodes={codes}
           choices={choices}
           saving={saveM.isPending}
-          onClose={() => setTarget(null)}
+          onClose={closeDialog}
           onSave={(staffId, picked) => saveM.mutate({ staffId, codes: picked })}
         />
       ) : null}

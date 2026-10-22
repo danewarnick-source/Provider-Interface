@@ -36,6 +36,7 @@ export function AuthorizationDialog({
   row,
   renew,
   agencyCodes,
+  focusId,
   onClose,
   onSaved,
 }: {
@@ -46,6 +47,8 @@ export function AuthorizationDialog({
   /** An ended row being renewed: same code, new dates and units. */
   renew: boolean;
   agencyCodes: string[];
+  /** The field to focus on open (default: the first one). */
+  focusId?: string;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -85,7 +88,16 @@ export function AuthorizationDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && !saving && onClose()}>
-      <DialogContent className="max-w-lg" data-testid="authorization-dialog">
+      <DialogContent
+        className="max-w-lg"
+        data-testid="authorization-dialog"
+        onOpenAutoFocus={(e) => {
+          const el = focusId ? document.getElementById(focusId) : null;
+          if (!el) return;
+          e.preventDefault();
+          el.focus();
+        }}
+      >
         <DialogHeader>
           <DialogTitle>
             {renew

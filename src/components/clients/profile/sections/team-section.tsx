@@ -32,6 +32,7 @@ export function TeamSection({
         firstName={firstName}
         canEdit={canCategory("staff_roster", "edit")}
         readiness={overview?.team ?? []}
+        shortcut
       />
       <DoNotScheduleCard orgId={orgId} clientId={clientId} canEdit={canEditClients} />
       {canEditClients ? (

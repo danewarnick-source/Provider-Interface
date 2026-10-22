@@ -90,6 +90,17 @@ describe("shortcuts", () => {
     assert.equal(LIST_SHORTCUTS.units.section, "services");
     assert.equal(LIST_SHORTCUTS.team.section, "team");
   });
+  it("lands each shortcut in the editor that fixes it", () => {
+    const pairs = Object.fromEntries(
+      Object.entries(LIST_SHORTCUTS).map(([k, v]) => [k, [v.section, v.edit]]),
+    );
+    assert.deepEqual(pairs, {
+      codes: ["services", "codes"],
+      home: ["profile", "home"],
+      units: ["services", "units"],
+      team: ["team", "team"],
+    });
+  });
   it("needs the section visible and editable", () => {
     assert.equal(canFixSection("services", all), true);
     assert.equal(canFixSection("services", { ...all, canBilling: false }), false);

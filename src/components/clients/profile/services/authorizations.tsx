@@ -1,6 +1,8 @@
 // Services & billing: the header card (Fill from 1056, Add authorization),
 // one card per open authorization, then Past authorizations (ended codes
 // with Renew, and earlier periods). Authorizations are never deleted.
+// ?edit=codes opens Add authorization; ?edit=units opens the first open
+// authorization with no yearly units, on its Units field.
 
 import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -25,8 +27,9 @@ import { EndAuthorizationDialog } from "./end-authorization-dialog";
 import { Fill1056Review } from "./fill-1056-review";
 import { use1056Import } from "./use-1056-import";
 import { useClientServices, useRefreshServices } from "./use-client-services";
+import { useEditShortcut } from "../use-edit-shortcut";
 
-type Editing = { row: Row | null; renew: boolean } | null;
+type Editing = { row: Row | null; renew: boolean; focusId?: string } | null;
 
 export function Authorizations({
   orgId,
@@ -67,6 +70,32 @@ export function Authorizations({
     all.map((v) => v.row),
     data?.history ?? {},
   );
+  // Same rule as the list's "+ Add units" (list-load.ts needsUnits).
+  const missingUnits = open.find(
+    (v) => !v.row.authorization_pending && !(Number(v.row.annual_unit_authorization) > 0),
+  );
+  const codesDone = useEditShortcut({
+    clientId,
+    target: "codes",
+    canEdit,
+    ready: !!data,
+    open: () => setEditing({ row: null, renew: false, focusId: "auth-code" }),
+  });
+  const unitsDone = useEditShortcut({
+    clientId,
+    target: "units",
+    canEdit,
+    ready: !!data,
+    open: () => {
+      if (missingUnits) {
+        setEditing({ row: missingUnits.row, renew: false, focusId: "auth-units" });
+        return;
+      }
+      // Nothing left to fill in: show the card and drop the flag.
+      document.getElementById("client-authorizations")?.scrollIntoView({ block: "start" });
+      unitsDone();
+    },
+  });
 
   const addButton = (
     <Button onClick={() => setEditing({ row: null, renew: false })}>
@@ -83,6 +112,7 @@ export function Authorizations({
         title="Services & billing"
         description="What the state authorized, and how much is used."
         testId="client-authorizations-card"
+        id="client-authorizations"
         actions={
           canEdit ? (
             <>
@@ -170,7 +200,12 @@ export function Authorizations({
           row={editing.row}
           renew={editing.renew}
           agencyCodes={data?.agencyCodes ?? []}
-          onClose={() => setEditing(null)}
+          focusId={editing.focusId}
+          onClose={() => {
+            setEditing(null);
+            codesDone();
+            unitsDone();
+          }}
           onSaved={refresh}
         />
       ) : null}

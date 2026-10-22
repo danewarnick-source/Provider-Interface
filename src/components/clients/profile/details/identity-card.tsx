@@ -2,8 +2,9 @@
 // (masked), DSPD PID, own guardian, start date, phone and insurance.
 // Name and home are in the header; editing covers them too. Insurance is
 // medical info, so changing it needs Client medical: Edit (on the server).
+// ?edit=home (the list's "+ Set home") opens the editor on the Home field.
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -17,6 +18,7 @@ import { updateClient } from "@/lib/clients/writes.functions";
 import { EditButton, SaveBar, SectionCard } from "@/components/clients/profile/cards/section-card";
 import { Field, FieldGrid, LabeledInput } from "@/components/clients/profile/cards/card-parts";
 import type { ClientProfileData } from "@/components/clients/profile/use-client-profile";
+import { useEditShortcut } from "@/components/clients/profile/use-edit-shortcut";
 
 type Draft = {
   first_name: string;
@@ -70,6 +72,28 @@ export function IdentityCard({
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<Draft>(() => baseline(data));
   const set = (k: keyof Draft) => (v: string) => setDraft((d) => ({ ...d, [k]: v }));
+  const startEditing = () => {
+    setDraft(baseline(data));
+    setEditing(true);
+  };
+  const homeRef = useRef<HTMLSelectElement>(null);
+  const focusHome = useRef(false);
+  const shortcutDone = useEditShortcut({
+    clientId: c.id,
+    target: "home",
+    canEdit,
+    ready: true,
+    open: () => {
+      focusHome.current = true;
+      startEditing();
+    },
+  });
+  useEffect(() => {
+    if (!editing || !focusHome.current) return;
+    focusHome.current = false;
+    document.getElementById("client-identity-card")?.scrollIntoView({ block: "start" });
+    homeRef.current?.focus();
+  }, [editing]);
   const homesQ = useQuery({
     enabled: editing,
     queryKey: ["org-homes", orgId],
@@ -95,6 +119,7 @@ export function IdentityCard({
     onSuccess: () => {
       toast.success("Saved.");
       setEditing(false);
+      shortcutDone();
       onChanged();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -107,17 +132,10 @@ export function IdentityCard({
       icon={IdCard}
       tone="profile"
       title="Identity"
+      id="client-identity-card"
       description="Birthday and the IDs used for billing."
       actions={
-        canEdit && !editing ? (
-          <EditButton
-            label="Edit identity"
-            onClick={() => {
-              setDraft(baseline(data));
-              setEditing(true);
-            }}
-          />
-        ) : null
+        canEdit && !editing ? <EditButton label="Edit identity" onClick={startEditing} /> : null
       }
     >
       {!editing ? (
@@ -168,6 +186,7 @@ export function IdentityCard({
             </Label>
             <select
               id="client-home"
+              ref={homeRef}
               className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm"
               value={draft.team_id}
               onChange={(e) => set("team_id")(e.target.value)}
@@ -184,7 +203,10 @@ export function IdentityCard({
       )}
       {editing ? (
         <SaveBar
-          onCancel={() => setEditing(false)}
+          onCancel={() => {
+            setEditing(false);
+            shortcutDone();
+          }}
           onSave={() => save.mutate()}
           saving={save.isPending}
           saveLabel="Save identity"

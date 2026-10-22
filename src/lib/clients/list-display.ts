@@ -7,16 +7,20 @@ import { pcspDueHeadline } from "./pcsp-status.ts";
 import type { ClientListRow, DueItem } from "./list.ts";
 import { DUE_SOON_DAYS, LOW_UNITS_PCT } from "./list.ts";
 import { visibleClientSections, type ClientProfileSection } from "./profile-sections.ts";
+import type { ClientEditTarget } from "./profile-search.ts";
 
 const shortDate = (ymd: string) => formatDate(ymd, { month: "short", day: "numeric" });
 
-/** The empty-cell fixes and the profile section each opens. */
+/** The empty-cell fixes: the profile section each opens, and the editor (`?edit=`) it lands in. */
 export const LIST_SHORTCUTS = {
-  codes: { label: "+ Add codes", section: "services" },
-  home: { label: "+ Set home", section: "profile" },
-  units: { label: "+ Add units", section: "services" },
-  team: { label: "+ Assign team", section: "team" },
-} as const satisfies Record<string, { label: string; section: ClientProfileSection }>;
+  codes: { label: "+ Add codes", section: "services", edit: "codes" },
+  home: { label: "+ Set home", section: "profile", edit: "home" },
+  units: { label: "+ Add units", section: "services", edit: "units" },
+  team: { label: "+ Assign team", section: "team", edit: "team" },
+} as const satisfies Record<
+  string,
+  { label: string; section: ClientProfileSection; edit: ClientEditTarget }
+>;
 export type ListShortcutKey = keyof typeof LIST_SHORTCUTS;
 
 /** What the viewer may open and edit (from useAccess). */
