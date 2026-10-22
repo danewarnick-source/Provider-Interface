@@ -21,7 +21,7 @@
 | A3 default preset for new Staff/Admin members; invitations `access_level` backfill; `accept_invitation` maps old role-only invites | `20260925100200_access_levels_a3_default_preset.sql` | Applied |
 | A4 demo-requirements wipe checks Owner instead of `role` | `20260925100300_access_levels_a4_demo_wipe_owner_check.sql` | Applied |
 | App code switched to levels, presets and categories (PR #389) | — | Ships with the PR |
-| **B** drop `role` columns, `app_role`, `has_org_role`, `has_permission`, the role-permission seed, compat views, and 4 legacy tables; `access_level`/`access_scope` NOT NULL | `20260926000000_access_levels_b_drop_legacy_roles.sql` | **Not applied.** Apply after PR #389 is deployed. Dry-run on live succeeded (rolled back). Then regenerate `types.ts`. |
+| **B** drop `role` columns, `app_role`, `has_org_role`, `has_permission`, the role-permission seed, compat views, and 4 legacy tables; `access_level`/`access_scope` NOT NULL | `20260926000000_access_levels_b_drop_legacy_roles.sql` | Applied 2026-09-25 (live version `20260925090443`). |
 
 ## 1. The short answer
 

@@ -1,8 +1,7 @@
 -- Access levels Phase B: remove the legacy role system.
 --
--- NOT APPLIED YET. Apply only after the access-levels app code (PR #389) is merged
--- AND deployed. Until then production code still writes organization_members.role /
--- invitations.role, and dropping them would break hiring and invites.
+-- APPLIED to live on 2026-09-25 (recorded as version 20260925090443,
+-- access_levels_b_drop_legacy_roles). Do NOT apply this file again.
 --
 -- Removes: organization_members.role, invitations.role, the app_role type,
 -- has_org_role(), has_permission(), seed_org_role_permissions(), the role_permissions
