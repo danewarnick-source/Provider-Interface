@@ -38,7 +38,6 @@ are not liable for use of this feature.
 I confirm I have authority to make this attestation for my organization.`;
 
 const orgOnly = z.object({ organization_id: z.string().uuid() });
-const orgClient = orgOnly.extend({ client_id: z.string().uuid() });
 
 // ─── Settings / attestation ────────────────────────────────────
 
@@ -213,30 +212,6 @@ export const listClientLoans = createServerFn({ method: "GET" })
       .order("updated_at", { ascending: false });
     if (error) throw new Error(error.message);
     return rows ?? [];
-  });
-
-export const getClientLoanMarkers = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d) => orgOnly.parse(d))
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
-    if (!supabase || !userId) return [] as { client_id: string; loan_count: number }[];
-    // Admin-only; staff never sees these markers.
-    try {
-      await requireOrgMembership(supabase, userId, data.organization_id, "owner");
-    } catch {
-      return [] as { client_id: string; loan_count: number }[];
-    }
-    const { data: rows } = await (supabase as any)
-      .from("client_loans")
-      .select("client_id")
-      .eq("organization_id", data.organization_id)
-      .is("voided_at", null);
-    const counts = new Map<string, number>();
-    for (const r of rows ?? []) {
-      counts.set(r.client_id, (counts.get(r.client_id) ?? 0) + 1);
-    }
-    return Array.from(counts.entries()).map(([client_id, loan_count]) => ({ client_id, loan_count }));
   });
 
 export const getLoan = createServerFn({ method: "GET" })
