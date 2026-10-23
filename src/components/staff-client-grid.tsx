@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useCurrentOrg } from "@/hooks/use-org";
 import { useServerFn } from "@tanstack/react-start";
 import { useCaseload, type CaseloadClient } from "@/hooks/use-caseload";
 import { useActiveShift, type ActiveShift } from "@/hooks/use-active-shift";
@@ -10,7 +11,6 @@ import {
   allowedCodesFor,
   caseloadCardActions,
   caseloadDailyNoteLabel,
-  clientAuthorizedCodes,
   defaultCaseloadCode,
   hasHostHomeDailyCode,
   hostHomeDailyNoteCode,
@@ -38,7 +38,7 @@ import {
 } from "lucide-react";
 import { ClientQuickInfoSheet } from "@/components/staff-mobile/client-quick-info-sheet";
 import { ClientCapBars } from "@/components/staff-mobile/client-cap-bars";
-import { getMyClientTrainingStatuses } from "@/lib/client-specific-training.functions";
+import { getMyClientTrainingStatuses } from "@/lib/clients/team/training-staff.functions";
 import {
   billingUnitLabel,
   isClockableServiceCode,
@@ -102,7 +102,7 @@ function ClientDetail({
   cardActionsVisible: boolean;
   dailyNoteDone: boolean;
 }) {
-  const allCodes = clientAuthorizedCodes(c);
+  const allCodes = c.codes;
   const codes = allowedCodesFor(assignments, c.id, allCodes);
   const isOnTheClock = !!activeShift && activeShift.client_id === c.id;
 
@@ -286,7 +286,7 @@ function ClientRow({
   const isOnTheClock = !!activeShift && activeShift.client_id === c.id;
   useTick(isOnTheClock);
   const navigate = useNavigate();
-  const allCodes = clientAuthorizedCodes(c);
+  const allCodes = c.codes;
   // Assigned ∩ authorized only — no fallback to every client code.
   const effectiveCodes = allowedCodesFor(assignments, c.id, allCodes);
   const hasHhs = hasHostHomeDailyCode(effectiveCodes);
@@ -445,9 +445,12 @@ export function StaffClientGrid() {
   const { data: todayNotes } = useTodayDailyNoteClients();
   const { data: completedPunches = [] } = useCompletedPunchesToday();
   const fetchCT = useServerFn(getMyClientTrainingStatuses);
+  const { data: currentOrg } = useCurrentOrg();
+  const ctOrgId = currentOrg?.organization_id ?? null;
   const { data: ct } = useQuery({
-    queryKey: ["my-client-training-statuses"],
-    queryFn: () => fetchCT(),
+    queryKey: ["my-client-training-statuses", ctOrgId],
+    enabled: !!ctOrgId,
+    queryFn: () => fetchCT({ data: { organizationId: ctOrgId! } }),
     staleTime: 60_000,
   });
   const trainingsByClient = useMemo(() => {

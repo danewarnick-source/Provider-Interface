@@ -39,6 +39,7 @@ function useClientMap(orgId?: string) {
       const { data } = await supabase
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!);
       const map = new Map<string, ClientLite>();
       (data ?? []).forEach((c) => map.set(c.id, c as ClientLite));

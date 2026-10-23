@@ -1,0 +1,129 @@
+// Shared types and small helpers for the USTEPS PCSP reader (parser*.ts).
+// Plain code, no AI. Anything the reader can't place is reported as an
+// issue, never guessed.
+
+export type Issue = { level: "error" | "warn" | "info"; page?: number; message: string };
+export type Provider = { code: string; provider: string; ours: boolean };
+export type HealthNeed = { category: string; description: string };
+export type Support = {
+  support: string; details: string; start: string | null; end: string | null;
+  providers: Provider[]; ourCodes: string[]; naturalSupport: string; otherSupport: string;
+  healthNeeds: HealthNeed[]; page: number;
+};
+export type Goal = {
+  goal: string; domain: string; currentStatus: string; strengths: string; barriers: string;
+  successPerson: string; successTeam: string; supports: Support[]; page: number;
+};
+export type NonGoalSupport = {
+  support: string; details: string; start: string | null; end: string | null; providers: Provider[]; ourCodes: string[];
+};
+export type PurchasedService = {
+  code: string; name: string; unitType: string; units: number | null; start: string | null; end: string | null; page: number;
+};
+export type BudgetLine = {
+  code: string; kind: string; provider: string; ours: boolean; start: string; end: string;
+  rate: number; maxMonthlyUnits: number; annualUnits: number; total: number;
+};
+export type Risk = { risk: string; response: string; responseTime: string; notes: string };
+export type AboutMeRow = { domain: string; label: string; note: string; source: string };
+export type LastYearGoal = { goal: string; ongoing: boolean | null; status: string };
+
+export type PcspResult = {
+  plan: { start: string | null; end: string | null; activatedOn: string | null; status: string | null; meetingDate: string | null };
+  person: { name: string; pid: string; dob: string | null; residentialAddress: string; phone: string;
+    supportCoordinator: { name: string; email: string; phone: string; company: string } };
+  goals: Goal[];
+  nonGoalSupports: NonGoalSupport[];
+  purchasedServices: PurchasedService[];
+  budget: BudgetLine[];
+  risks: Risk[];
+  aboutMe: AboutMeRow[];
+  lastYearGoals: LastYearGoal[];
+  issues: Issue[];
+};
+
+export type PcspOptions = {
+  /** The agency's legal name (Settings); also used in "no purchased services for …". */
+  agencyName: string;
+  /** Other names the agency goes by; a provider matching any of them is "ours". */
+  otherNames?: string[];
+  agencyCodes: string[];
+};
+
+/** One body line with the page it came from. */
+export type L = { page: number; y: number; text: string };
+
+export const SECTIONS = [
+  "Personal Information", "Pre-Planning", "Annual Review for Goals", "Annual Review for Non Goal Supports",
+  "Annual Review for Provider Services", "Planning Tools", "Plan Meeting Minutes", "Action Plan",
+  "Goals and Supports", "Non Goal Supports", "DSPD Purchased Services", "Plan Budget", "Scope of Services",
+  "Backup Data", "List of Identified Risks", "Emergency Contacts", "Signatures", "Plan Activation Comments",
+];
+export const DOMAINS = ["Daily Life Employment", "Community Living", "Safety & Security", "Healthy Living",
+  "Social Spirituality", "Citizenship & Advocacy"];
+export const LABEL = /^(\s*)([A-Z][A-Za-z ()/&'?-]{1,40}?):(\s+(.*))?$/;
+
+export const squash = (s: string) => s.replace(/\s+/g, " ").trim();
+export const usDate = (s: string | undefined | null) => {
+  const m = s && s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  return m ? `${m[3]}-${m[1]}-${m[2]}` : null;
+};
+const MONTHS: Record<string, string> = {
+  Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06", Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12",
+};
+export const longDate = (s: string) => {
+  const m = s.match(/([A-Z][a-z]{2})\s+(\d{1,2}),\s*(\d{4})/);
+  return m && MONTHS[m[1]] ? `${m[3]}-${MONTHS[m[1]]}-${m[2].padStart(2, "0")}` : null;
+};
+export const indent = (t: string) => t.length - t.trimStart().length;
+
+/** "DSI  Example Supports, LLC" → the paid provider; null when the line isn't one. */
+export function parseProvider(v: string, isOurs: (provider: string) => boolean): Provider | null {
+  const pm = v.trim().match(/^([A-Z0-9]{2,4})\s+(.+)$/);
+  return pm ? { code: pm[1], provider: squash(pm[2]), ours: isOurs(pm[2]) } : null;
+}
+
+/** Add a provider to a support, and its code to ourCodes when it's the agency. */
+export function addProviderTo(s: { providers: Provider[]; ourCodes: string[] }, p: Provider): void {
+  s.providers.push(p);
+  if (p.ours && !s.ourCodes.includes(p.code)) s.ourCodes.push(p.code);
+}
+
+/** Words in capitals that aren't service codes. */
+const NOT_CODES = new Set(["THE", "AND", "FOR", "ARE", "NOT", "NOW", "ALL", "ANY", "HAS", "WAS", "ITS", "USE", "SEE"]);
+
+/**
+ * USTEPS prints a standard "now obsolete" line on the Purchased Services and
+ * Plan Budget pages of every PCSP; that says nothing about this client. Only
+ * a line naming a code is worth a warning (once per code).
+ */
+export function noteObsolete(text: string, page: number, issues: Issue[]): void {
+  const code = (text.match(/\b[A-Z][A-Z0-9]{2}\b/g) ?? []).find((c) => !NOT_CODES.has(c));
+  if (!code) return;
+  const message = `The PCSP says ${code} is obsolete. Check whether this client still has ${code}.`;
+  if (!issues.some((i) => i.message === message)) issues.push({ level: "warn", page, message });
+}
+
+export type Field = { label: string; value: string; page: number; y: number; idx: number };
+
+/** Generic "Label: value" reader with multi-line values. */
+export function readFields(lines: L[]): Field[] {
+  const out: Field[] = [];
+  let last: (Field & { col: number }) | null = null;
+  lines.forEach((l, idx) => {
+    const m = l.text.match(LABEL);
+    if (m && indent(l.text) < 14) {
+      const col = m[4] ? l.text.indexOf(m[4], m[1].length + m[2].length) : 99;
+      last = { label: m[2].trim(), value: (m[4] || "").trim(), page: l.page, y: l.y, idx, col };
+      out.push(last);
+    } else if (last && indent(l.text) >= Math.min(last.col, 24) - 3) {
+      last.value = (last.value + " " + l.text.trim()).trim();
+    } else last = null;
+  });
+  return out;
+}
+
+/** "Start Date: 09/01/2026   End Date: 08/31/2027" → ISO dates. */
+export function supportDates(v: string): { start: string | null; end: string | null } {
+  return { start: usDate(v.match(/Start Date:\s*(\S+)/)?.[1]), end: usDate(v.match(/End Date:\s*(\S+)/)?.[1]) };
+}

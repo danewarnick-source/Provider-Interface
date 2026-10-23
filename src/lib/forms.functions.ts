@@ -8,6 +8,7 @@ import { periodKeyFor } from "./forms-utils";
 
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
 import { isAdminLevel } from "@/lib/access/levels";
+import { legacyContactKey } from "@/lib/clients/legacy-fields";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
@@ -285,8 +286,8 @@ const INTAKE_FORM_SEEDS: ReadonlyArray<{
       { id: "ssn_last4", type: "short_text", label: "SSN (last 4)" },
       { id: "home_address", type: "short_text", label: "Home address", required: true },
       { id: "phone", type: "short_text", label: "Phone" },
-      { id: "emergency_contact_name", type: "short_text", label: "Emergency contact name", required: true },
-      { id: "emergency_contact_phone", type: "short_text", label: "Emergency contact phone", required: true },
+      { id: legacyContactKey("emergency", "name"), type: "short_text", label: "Emergency contact name", required: true },
+      { id: legacyContactKey("emergency", "phone"), type: "short_text", label: "Emergency contact phone", required: true },
       { id: "primary_diagnosis", type: "short_text", label: "Primary diagnosis" },
       { id: "guardian_status", type: "dropdown", label: "Guardian status", required: true, options: ["self", "parent", "legal_guardian"] },
     ],
@@ -534,6 +535,7 @@ export const publishForm = createServerFn({ method: "POST" })
     if ((form.assigned_groups ?? []).includes("all_staff")) {
       const { data: members } = await supabase
         .from("organization_members").select("user_id")
+        .is("deleted_at", null)
         .eq("organization_id", m.organization_id).eq("active", true);
       for (const u of members ?? []) targetUserIds.add(u.user_id);
     } else if ((form.assigned_groups ?? []).length) {
@@ -1012,6 +1014,7 @@ export async function unmetStaffMandatesInternal(
         const { data: clientRows } = await supabase
           .from("clients")
           .select("id, first_name, last_name")
+          .is("deleted_at", null)
           .in("id", unmetClientIds);
         const nameByClient = new Map<string, string>();
         for (const c of (clientRows ?? []) as Array<{ id: string; first_name: string | null; last_name: string | null }>) {
@@ -1118,7 +1121,7 @@ export const recordStaffMandateOverride = createServerFn({ method: "POST" })
     // Resolve staffer + client + overriding-user display names (best-effort).
     const [{ data: staffProfile }, { data: clientRows }, { data: actorProfile }] = await Promise.all([
       supabase.from("profiles").select("id, first_name, last_name, email").eq("id", data.staffId).maybeSingle(),
-      supabase.from("clients").select("id, first_name, last_name").in("id", data.clientIds),
+      supabase.from("clients").select("id, first_name, last_name").is("deleted_at", null).in("id", data.clientIds),
       supabase.from("profiles").select("id, first_name, last_name, email").eq("id", userId).maybeSingle(),
     ]);
     const staffName = staffProfile
@@ -1229,6 +1232,7 @@ export const getAssignDirectory = createServerFn({ method: "GET" })
     adminGuard(m.access_level);
     const { data: members } = await supabase
       .from("organization_members").select("user_id, access_level, job_title")
+      .is("deleted_at", null)
       .eq("organization_id", m.organization_id).eq("active", true);
     const uids = (members ?? []).map((m: { user_id: string }) => m.user_id);
     let profiles: Array<{ id: string; full_name: string | null; email: string | null; staff_type_keys: string[] }> = [];
@@ -1242,6 +1246,7 @@ export const getAssignDirectory = createServerFn({ method: "GET" })
       .eq("organization_id", m.organization_id);
     const { data: clients } = await supabase
       .from("clients").select("id, first_name, last_name")
+      .is("deleted_at", null)
       .eq("organization_id", m.organization_id)
       .order("last_name", { ascending: true });
     return { members: members ?? [], profiles, staffTypes: staffTypes ?? [], clients: clients ?? [] };
@@ -1281,57 +1286,6 @@ export const listClientForms = createServerFn({ method: "GET" })
       subs = s ?? [];
     }
     return { forms: forms ?? [], submissions: subs };
-  });
-
-// ─── ADMIN/MANAGER: intake-runner — published `intake` forms for this client,
-// plus any existing form_submissions tied to (form, client). Reuses the same
-// forms table / form_submissions store as the rest of the engine. Read-only;
-// does not create or advance submissions.
-export const listIntakeFormsForClient = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({ clientId: z.string().uuid() }).parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
-    if (!supabase || !userId) return { forms: [], submissions: [] };
-    const m = await getMembership(supabase, userId);
-    adminGuard(m.access_level);
-
-    const { data: forms, error } = await supabase
-      .from("forms")
-      .select("id, name, description, category, settings, all_clients, assigned_clients, updated_at, created_at")
-      .eq("organization_id", m.organization_id)
-      .eq("status", "published")
-      .eq("category", "intake")
-      .order("created_at", { ascending: true });
-    if (error) throw new Error(error.message);
-
-    const eligible = (forms ?? []).filter(
-      (f: { all_clients: boolean; assigned_clients: string[] | null }) =>
-        f.all_clients || (f.assigned_clients ?? []).includes(data.clientId),
-    );
-
-    const formIds = eligible.map((f: { id: string }) => f.id);
-    let submissions: Array<{
-      id: string;
-      form_id: string;
-      status: string;
-      submitted_at: string;
-      submitted_by: string | null;
-    }> = [];
-    if (formIds.length) {
-      const { data: subs, error: subErr } = await supabase
-        .from("form_submissions")
-        .select("id, form_id, status, submitted_at, submitted_by")
-        .eq("organization_id", m.organization_id)
-        .eq("client_id", data.clientId)
-        .in("form_id", formIds)
-        .order("submitted_at", { ascending: false });
-      if (subErr) throw new Error(subErr.message);
-      submissions = subs ?? [];
-    }
-    return { forms: eligible, submissions };
   });
 
 // ─── ADMIN/MANAGER: per-shift tracking forms for a client (Stage 3, display).

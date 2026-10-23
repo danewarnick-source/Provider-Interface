@@ -50,17 +50,6 @@ async function loadOrgCodes(supabase: AnySupabase, organizationId: string): Prom
     }
   }
 
-  const clientAttempt = await supabase
-    .from("clients")
-    .select("authorized_dspd_codes")
-    .eq("organization_id", organizationId)
-    .eq("account_status", "active");
-  if (!clientAttempt.error) {
-    for (const c of (clientAttempt.data ?? []) as Array<{ authorized_dspd_codes: string[] | null }>) {
-      for (const code of c.authorized_dspd_codes ?? []) codes.add(code.toUpperCase());
-    }
-  }
-
   const cbcAttempt = await supabase
     .from("client_billing_codes")
     .select("service_code, service_end_date")

@@ -10,6 +10,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { CLIENTS, STAFF } from "./fixtures/tns-roster";
 import { assertPageNotBlank, installHiveMocks, waitForDashboard } from "./helpers/mock-hive";
+import { clientListCalls } from "./helpers/clients-list-mock";
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -47,6 +48,15 @@ test.describe("Clients + Staff roster — mocked admin", () => {
   });
 
   test("1. Clients list loads; search/filter; open a chart without crash", async ({ page }) => {
+    // The list loads in one request: one listClients call, no per-row reads.
+    const perRowReads: string[] = [];
+    page.on("request", (req) => {
+      const url = req.url();
+      if (/rest\/v1\/(client_billing_codes|staff_assignments|client_contacts)|rpc\/client_active_codes/.test(url)) {
+        perRowReads.push(url);
+      }
+    });
+    clientListCalls.list = 0;
     await gotoAdmin(page, "/dashboard/clients");
     await expect(page.getByRole("heading", { name: /Client Directory/i })).toBeVisible({
       timeout: 20_000,
@@ -56,8 +66,11 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(rosterName(page, "Stephen Prince")).toBeVisible();
     await expect(rosterName(page, "Marcus Rivera")).toBeVisible();
     await expect(page.locator("table").getByText("DSI").first()).toBeVisible();
+    await expect(page.locator("table").getByText("Maple House").first()).toBeVisible();
+    expect(clientListCalls.list).toBe(1);
+    expect(perRowReads).toHaveLength(0);
 
-    const search = page.getByPlaceholder(/Search by name or Medicaid ID/i);
+    const search = page.getByPlaceholder(/Search by name, Medicaid ID or PID/i);
     await expect(search).toBeVisible();
     await search.fill("Jones");
     await expect(rosterName(page, "Tommy Jones")).toBeVisible();
@@ -80,28 +93,25 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await shot(page, "clients_list_and_chart");
   });
 
-  test("2. Client chart shows DSPD codes, home, and key care tabs", async ({ page }) => {
+  test("2. Client chart shows DSPD codes, home, and the profile sections", async ({ page }) => {
     await gotoAdmin(page, `/dashboard/clients/${CLIENTS.tommy.id}`);
     await expect(page.getByRole("heading", { name: /Tommy Jones/i })).toBeVisible({
       timeout: 20_000,
     });
-    await expect(page.getByText(/Host home/i).first()).toBeVisible();
-    await expect(page.getByRole("tab", { name: /^Identity$/i })).toBeVisible();
-    await expect(page.getByRole("tab", { name: /Care plan/i })).toBeVisible();
-    await expect(page.getByRole("tab", { name: /^Billing$/i })).toBeVisible();
-    await expect(page.getByRole("tab", { name: /^Client file$/i })).toBeVisible();
-    await expect(page.getByRole("tab", { name: /Operations/i })).toBeVisible();
+    const menu = page.getByTestId("profile-section-menu");
+    for (const key of ["overview", "profile", "contacts", "plans", "services", "file", "team"]) {
+      await expect(menu.getByTestId(`profile-section-${key}`)).toBeVisible();
+    }
+    for (const code of ["DSI", "HHS", "SEI", "SLH"]) {
+      await expect(page.getByTestId("client-profile-code").filter({ hasText: code })).toBeVisible();
+    }
 
-    await page.getByRole("tab", { name: /^Billing$/i }).click();
+    await menu.getByTestId("profile-section-services").click();
+    await expect(page.getByTestId("client-section-services")).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText("DSI").first()).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText("HHS").first()).toBeVisible();
-    await expect(page.getByText("SEI").first()).toBeVisible();
-    await expect(page.getByText("SLH").first()).toBeVisible();
 
-    await page.getByRole("tab", { name: /Care plan/i }).click();
-    await expect(page.getByRole("tab", { name: /^Goals$/i })).toBeVisible();
-    await expect(page.getByRole("tab", { name: /Target Behaviors/i })).toBeVisible();
-    await expect(page.getByRole("tab", { name: /Medications/i })).toBeVisible();
+    await menu.getByTestId("profile-section-health").click();
+    await expect(page.getByTestId("client-section-health")).toBeVisible({ timeout: 10_000 });
 
     await gotoAdmin(page, "/dashboard/homes");
     await expect(page.getByRole("heading", { name: /Homes & Teams/i }).first()).toBeVisible({
@@ -113,16 +123,40 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await shot(page, "client_chart_codes_and_homes");
   });
 
-  test("3. Pending clients page loads", async ({ page }) => {
-    await gotoAdmin(page, "/dashboard/clients/pending");
-    await expect(page.getByRole("heading", { name: /Pending Clients/i })).toBeVisible({
-      timeout: 20_000,
-    });
-    await expect(
-      page.getByText(/haven't joined your directory|All imported clients are finalized/i).first(),
-    ).toBeVisible();
-    await assertPageNotBlank(page, "pending clients");
-    await shot(page, "pending_clients");
+  test("Add client: duplicate Medicaid ID blocks save with a link to the existing client", async ({ page }) => {
+    await gotoAdmin(page, "/dashboard/clients");
+    await page.getByTestId("add-client-button").click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog.getByRole("heading", { name: /^Add client$/ })).toBeVisible();
+    await dialog.getByLabel(/First name/i).fill("Pat");
+    await dialog.getByLabel(/Last name/i).fill("Example");
+    await dialog.getByLabel(/Service address/i).fill("100 Sample St, Exampleville, UT 84000");
+    await dialog.getByLabel(/Medicaid ID/i).fill(CLIENTS.tommy.medicaid_id);
+    await dialog.getByLabel(/DSPD PID/i).click();
+    const alert = dialog.getByRole("alert");
+    await expect(alert).toContainText(/already used by/i);
+    await expect(alert.getByRole("link", { name: /Tommy Jones/i })).toHaveAttribute(
+      "href",
+      new RegExp(`/dashboard/clients/${CLIENTS.tommy.id}`),
+    );
+    await expect(dialog.getByTestId("add-client-save")).toBeDisabled();
+    await shot(page, "clients_add_duplicate_medicaid");
+
+    await dialog.getByLabel(/Medicaid ID/i).fill("MOCK-NEW-999");
+    await expect(dialog.getByRole("alert")).toHaveCount(0);
+    await expect(dialog.getByTestId("add-client-save")).toBeEnabled();
+  });
+
+  test("Add client: Fill from PCSP fills and tags fields", async ({ page }) => {
+    await gotoAdmin(page, "/dashboard/clients?add=1");
+    const dialog = page.getByRole("dialog");
+    await expect(dialog.getByRole("heading", { name: /^Add client$/ })).toBeVisible({ timeout: 20_000 });
+    await dialog.getByTestId("fill-from-pcsp-input").setInputFiles(path.join(process.cwd(), "e2e/fixtures/sample-pcsp.pdf"));
+    await expect(dialog.getByLabel(/First name/i)).toHaveValue("Pat");
+    await expect(dialog.getByLabel(/DSPD PID/i)).toHaveValue("0000000");
+    await expect(dialog.getByText("From PCSP").first()).toBeVisible();
+    await expect(dialog.getByTestId("code-line-DSI")).toBeVisible();
+    await shot(page, "clients_add_fill_from_pcsp");
   });
 
   test("4. Team Members list loads; staff profile shows role at a glance", async ({ page }) => {
@@ -300,7 +334,7 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page).toHaveURL(/\/dashboard\/team-members\/?\?.*filter=missing/);
     await expect(page.getByTestId("roster-filter-missing")).toHaveAttribute("aria-pressed", "true");
     await nameLink(page, "Harvey Alisa").click();
-    await page.getByTestId("profile-back").click();
+    await page.locator("aside").getByTestId("profile-sidebar-back").click();
     await expect(page).toHaveURL(/\/dashboard\/team-members\/?\?.*filter=missing/);
     await expect(page).toHaveURL(/sort=-?evidence/);
     await page.getByRole("button", { name: "Clear filter" }).click();
@@ -328,6 +362,13 @@ test.describe("Clients + Staff roster — mocked admin", () => {
       await expect(menu.getByRole("button", { name: new RegExp(`^${label}`) })).toBeVisible();
     }
     await expect(page.getByRole("tab")).toHaveCount(0);
+    // Desktop: the menu is the dark sidebar (one menu only), with the person on top.
+    await expect(menu).toHaveCount(1);
+    await expect(page.locator("aside").getByTestId("profile-section-menu")).toBeVisible();
+    await expect(page.locator("aside").getByTestId("profile-sidebar-person")).toContainText(
+      "Jake Probert",
+    );
+    await expect(page.getByTestId("profile-back")).toBeHidden();
     await expect(page.getByTestId("profile-section-overview")).toHaveAttribute(
       "aria-current",
       "page",
@@ -415,6 +456,8 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await shot(page, "team_member_face_sheet_desktop");
     await page.setViewportSize({ width: 390, height: 844 });
     // Phone: the section menu is one horizontal scroll row above the content.
+    await expect(page.getByTestId("profile-section-menu")).toHaveCount(1);
+    await expect(page.locator("aside").getByTestId("profile-section-menu")).toHaveCount(0);
     const menuList = page.getByTestId("profile-section-menu").locator("ul");
     await expect(menuList).toHaveCSS("flex-direction", "row");
     await expect(menuList).toHaveCSS("overflow-x", "auto");

@@ -42,6 +42,7 @@ async function matchStaffByEmail(
   const { data: mems, error: memErr } = await sb
     .from("organization_members")
     .select("user_id, role:access_level")
+    .is("deleted_at", null)
     .eq("organization_id", organizationId)
     .eq("active", true);
   if (memErr) throw new Error(memErr.message);

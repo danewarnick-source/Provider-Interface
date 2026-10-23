@@ -112,6 +112,7 @@ export function HostCertificationPanel({
       const { data, error } = await supabase
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", orgId)
         .in("id", clientIds);
       if (error) throw error;
@@ -365,6 +366,7 @@ function CertificationFormDialog({
       const { data, error: cErr } = await supabase
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", orgId)
         .in("id", activeIds)
         .order("last_name");

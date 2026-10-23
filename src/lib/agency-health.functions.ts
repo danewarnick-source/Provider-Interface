@@ -209,6 +209,7 @@ export const getAgencyHealthSnapshot = createServerFn({ method: "POST" })
       const { data: rows } = await sb
         .from("clients")
         .select("id")
+        .is("deleted_at", null)
         .eq("organization_id", orgId)
         .neq("account_status", "archived");
       return ((rows ?? []) as Array<{ id: string }>).map((r) => r.id);
@@ -512,6 +513,7 @@ export const getAgencyHealthSnapshot = createServerFn({ method: "POST" })
       const { data: rows } = await sb
         .from("clients")
         .select("id, intake_status")
+        .is("deleted_at", null)
         .eq("organization_id", orgId)
         .neq("account_status", "archived");
       const list = (rows ?? []) as Array<{ intake_status: string | null }>;
@@ -590,6 +592,7 @@ export const getAgencyHealthSnapshot = createServerFn({ method: "POST" })
       const { data: members } = await sb
         .from("organization_members")
         .select("user_id")
+        .is("deleted_at", null)
         .eq("organization_id", orgId)
         .eq("active", true);
       const staffIds = ((members ?? []) as Array<{ user_id: string }>).map((m) => m.user_id);
@@ -699,6 +702,7 @@ export const getAgencyHealthSnapshot = createServerFn({ method: "POST" })
       const { data: members } = await sb
         .from("organization_members")
         .select("user_id")
+        .is("deleted_at", null)
         .eq("organization_id", orgId)
         .eq("active", true);
       const staffIds = ((members ?? []) as Array<{ user_id: string }>).map((m) => m.user_id);

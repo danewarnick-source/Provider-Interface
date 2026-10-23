@@ -108,7 +108,11 @@ export function RepeatShiftsDialog({
       },
     }),
     onSuccess: (r) => {
-      toast.success(`Copied — ${r.inserted} shifts created${r.skipped ? `, ${r.skipped} skipped` : ""}.`);
+      toast.success(
+        `Copied — ${r.inserted} shifts created${r.skipped ? `, ${r.skipped} skipped` : ""}${
+          "opened" in r && r.opened ? `, ${r.opened} left open (do-not-schedule list)` : ""
+        }.`,
+      );
       qc.invalidateQueries({ queryKey: ["scheduler-data"] });
       onClose();
     },

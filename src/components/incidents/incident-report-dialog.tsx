@@ -44,6 +44,10 @@ type Props = {
   defaultDiscoveredAt?: string;
   triggeredByNoteId?: string | null;
   triggeredByNoteType?: string | null;
+  /** Category picked when the form opens (staff can change it). */
+  defaultCategory?: IncidentCategory;
+  /** The logged dose this report is about ("Wrong or missed dose?" in Give meds). */
+  emarLogId?: string | null;
   onSubmitted?: (incidentId: string) => void;
 };
 
@@ -210,7 +214,7 @@ type AiIssue = {
 
 export function IncidentReportDialog({
   open, onOpenChange, clientId, clientName, defaultDiscoveredAt,
-  triggeredByNoteId, triggeredByNoteType, onSubmitted,
+  triggeredByNoteId, triggeredByNoteType, defaultCategory, emarLogId, onSubmitted,
 }: Props) {
   const qc = useQueryClient();
   const { user } = useAuth();
@@ -379,7 +383,7 @@ export function IncidentReportDialog({
     if (!open) return;
     setPickedClientId(clientId ?? "");
     setOccurredAt(""); setDiscoveredAt(initialDiscovered);
-    setLocation(""); setCategory(""); setDescription("");
+    setLocation(""); setCategory(defaultCategory ?? ""); setDescription("");
     setPeopleInvolved(""); setWitnesses(""); setInjuries("");
     setMedicalAttention(""); setImmediateActions(""); setPreventionStrategies("");
     setWitnessedDirectly(""); setReportedBy("");
@@ -391,7 +395,7 @@ export function IncidentReportDialog({
     setCompletenessIssues(null); setCompletenessBusy(false);
     setCompletenessAnswers({}); setCompletenessItemStatus({}); setCompletenessApproved([]);
     setStep(0); setStepError(null);
-  }, [open, clientId, initialDiscovered]);
+  }, [open, clientId, initialDiscovered, defaultCategory]);
 
   const isAbuse = category === ABUSE_CATEGORY;
   const isFatality = category === FATALITY_CATEGORY;
@@ -1087,6 +1091,7 @@ export function IncidentReportDialog({
           is_fatality: isFatality,
           triggered_by_note_id: triggeredByNoteId ?? null,
           triggered_by_note_type: triggeredByNoteType ?? null,
+          emar_log_id: emarLogId ?? null,
           details: detailsOut,
           witnessed_directly: witnessedDirectly === "yes",
           reported_to_reporter_by: witnessedDirectly === "no" ? reportedBy.trim() : null,

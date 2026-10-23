@@ -9,12 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import {
-  listOrgClientFileMatrix,
-  listOrgClientFilePack,
-  type ClientFileMatrixRow,
-} from "@/lib/client-file.functions";
-import { missingClientFileCsv } from "@/lib/client-file";
+import { listOrgClientFileMatrix, listOrgClientFilePack } from "@/lib/clients/file/file.functions";
+import type { ClientFileMatrixRow } from "@/lib/clients/file/file-index";
+import { missingClientFileCsv } from "@/lib/clients/file/file-csv";
 import { personnelPackHtml } from "@/lib/team-members/file";
 
 async function signedEvidenceUrl(
@@ -274,7 +271,7 @@ function MatrixRow({
         <Link
           to="/dashboard/clients/$clientId"
           params={{ clientId: row.client_id }}
-          search={{ tab: "client-file" }}
+          search={{ section: "file" }}
           className="font-medium text-[var(--hive-ink)] hover:underline"
           onClick={(e) => e.stopPropagation()}
         >

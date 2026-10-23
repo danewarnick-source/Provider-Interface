@@ -3,7 +3,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
 import { z } from "zod";
 import { useCaseload } from "@/hooks/use-caseload";
-import { useMyAssignments, allowedCodesFor, clientAuthorizedCodes } from "@/hooks/use-my-assignments";
+import { useAccess } from "@/hooks/use-access";
+import { useMyAssignments, allowedCodesFor } from "@/hooks/use-my-assignments";
 import { isClockableServiceCode } from "@/lib/service-billing";
 import { resolveGeofenceRadiusFeet } from "@/lib/geo";
 
@@ -27,15 +28,16 @@ import { ClientQuickInfoSheet } from "@/components/staff-mobile/client-quick-inf
 
 import { toast } from "sonner";
 import { AboutTab } from "@/components/workspace/about-tab";
-import { StaffMedicationsPanel } from "@/components/medications/staff-medications-panel";
+import { GiveMeds } from "@/components/medications/give-meds/give-meds";
 import { FormsHubTab } from "@/components/workspace/forms-hub-tab";
 import { ReimbursementShiftPanel } from "@/components/staff-mobile/reimbursement-shift-panel";
 import { ClientSpendingShiftPanel } from "@/components/staff-mobile/client-spending-shift-panel";
 import { useActiveShift } from "@/hooks/use-active-shift";
 import { useTodayShifts } from "@/hooks/use-today-shifts";
 import { ClientPhoto } from "@/components/client-photo";
-import { FaceSheetButton } from "@/components/clients/face-sheet-button";
-import { useClientFeature, clientFeatureVisible } from "@/lib/client-features";
+import { FaceSheetButton } from "@/components/clients/profile/face-sheet-button";
+import { useClientFeature, clientFeatureVisible } from "@/lib/clients/features";
+import { ClientAccessGate } from "@/components/clients/shared/client-access-gate";
 
 function ActiveShiftReimbursementSlot({ clientId }: { clientId: string }) {
   const { data: active } = useActiveShift();
@@ -63,13 +65,23 @@ export const Route = createFileRoute("/dashboard/workspace/$clientId")({
       fallbackTo: "/dashboard/clients",
     });
   },
-  component: ClientWorkspace,
+  component: ClientWorkspaceRoute,
 });
+
+function ClientWorkspaceRoute() {
+  const { clientId } = Route.useParams();
+  return (
+    <ClientAccessGate clientId={clientId}>
+      <ClientWorkspace />
+    </ClientAccessGate>
+  );
+}
 
 function ClientWorkspace() {
   const { clientId } = Route.useParams();
   const { data: caseload, isLoading } = useCaseload();
   const { data: assignments } = useMyAssignments();
+  const { canCategory } = useAccess();
   const navigate = useNavigate();
   const {
     tab: tabParam,
@@ -109,10 +121,7 @@ function ClientWorkspace() {
     if (requestedTab) setTab(requestedTab);
   }, [requestedTab]);
 
-  const clientCodes = useMemo(
-    () => (client ? clientAuthorizedCodes(client) : []),
-    [client],
-  );
+  const clientCodes = useMemo(() => client?.codes ?? [], [client]);
   const allowedCodes = useMemo(
     () => (client ? allowedCodesFor(assignments, client.id, clientCodes) : []),
     [client, assignments, clientCodes],
@@ -160,7 +169,7 @@ function ClientWorkspace() {
   const planFeatureClient = client
     ? {
         feature_config: client.feature_config ?? null,
-        authorized_dspd_codes: client.authorized_dspd_codes ?? client.job_code ?? null,
+        codes: client.codes,
       }
     : null;
   const hasMedMonitoringCode = clientFeatureVisible(planFeatureClient, "med_monitoring");
@@ -200,7 +209,7 @@ function ClientWorkspace() {
           </Link>
           <div className="mt-2 flex flex-col items-start gap-4 sm:flex-row">
             <ClientPhoto
-              path={client.profile_photo_url}
+              path={client.client_photo_url}
               alt={`${client.first_name} ${client.last_name}`}
               className="h-10 w-10 rounded-full object-cover border-2 border-border"
               fallback={
@@ -217,7 +226,8 @@ function ClientWorkspace() {
                   {displayFirst} {displayLast}
                 </h1>
                 <div className="flex shrink-0 items-center gap-2">
-                  <FaceSheetButton clientId={client.id} />
+                  {/* The face sheet carries Medicaid ID and medical info: Client medical: View only. */}
+                  {canCategory("client_medical", "view") ? <FaceSheetButton clientId={client.id} /> : null}
                   <ClientQuickInfoSheet
                     client={client}
                     trigger={
@@ -320,13 +330,10 @@ function ClientWorkspace() {
                 facility: client.physical_address,
                 authorizedCodes: allowedHourly.length
                   ? allowedHourly
-                  : (clientAuthorizedCodes(client).length
-                    ? clientAuthorizedCodes(client)
-                    : undefined),
+                  : (client.codes.length ? client.codes : undefined),
                 homeLat: client.home_latitude,
                 homeLng: client.home_longitude,
                 geofenceRadiusFeet: resolveGeofenceRadiusFeet(client.geofence_radius_feet),
-                pcspGoals: client.pcsp_goals ?? [],
               }}
               presetServiceCode={effectivePresetCode}
               lockServiceCode={!!effectivePresetCode}
@@ -337,11 +344,7 @@ function ClientWorkspace() {
 
           {emarEnabled && (
             <TabsContent value="emar" className="mt-5">
-              <StaffMedicationsPanel
-                clientId={client.id}
-                clientName={`${client.first_name} ${client.last_name}`}
-                serviceContext={effectivePresetCode ?? null}
-              />
+              <GiveMeds clientId={client.id} serviceContext={effectivePresetCode ?? null} />
             </TabsContent>
           )}
 

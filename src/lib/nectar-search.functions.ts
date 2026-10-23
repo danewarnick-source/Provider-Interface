@@ -51,12 +51,14 @@ export const searchOrgEntities = createServerFn({ method: "POST" })
       (supabase as any)
         .from("clients")
         .select("id, first_name, last_name, account_status")
+        .is("deleted_at", null)
         .eq("organization_id", data.organizationId)
         .or(`first_name.ilike.${like},last_name.ilike.${like}`)
         .limit(8),
       (supabase as any)
         .from("organization_members")
         .select("user_id, role:access_level, active")
+        .is("deleted_at", null)
         .eq("organization_id", data.organizationId)
         .eq("active", true),
     ]);

@@ -2,7 +2,7 @@
  * Employee Face Sheet — printable, professional PDF that aggregates the
  * full staffer record into one document.
  *
- * Parallel to `client-face-sheet.functions.ts` / the client Face Sheet, but
+ * Parallel to `clients/face-sheet.functions.ts` / the client Face Sheet, but
  * scoped to staff and stored in the employee HR bucket.
  *
  * Pulled together on demand from the same tables the profile UI reads:

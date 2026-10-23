@@ -36,7 +36,7 @@ import {
 } from "./sow-obligation-catalog";
 import { obligationAppliesToFootprint } from "./dspd-audit-tool";
 import { STANDING_SOW_DUTIES } from "./standing-sow-duties";
-import { isRetiredPerClientPctTitle } from "./client-form-obligations";
+import { isRetiredPerClientPctTitle } from "./clients/file/form-obligations";
 import { homePeriodKey, obligationDutyKey, perHomeServiceCode } from "./obligation-assignee-rules";
 import { loadOrgFacts, type OrgFacts } from "./obligations/applicability";
 import {
@@ -197,9 +197,11 @@ async function orgServiceFootprintInternal(
     }
   }
 
+  // Service codes come from client_billing_codes below (the one source).
   const clientAttempt = await supabase
     .from("clients")
-    .select("authorized_dspd_codes, disability_category, has_abi")
+    .select("disability_category, has_abi")
+    .is("deleted_at", null)
     .eq("organization_id", organizationId)
     .eq("account_status", "active");
   const clientRows = !clientAttempt.error
@@ -207,17 +209,16 @@ async function orgServiceFootprintInternal(
     : (
         await supabase
           .from("clients")
-          .select("authorized_dspd_codes, disability_category")
+          .select("disability_category")
+          .is("deleted_at", null)
           .eq("organization_id", organizationId)
           .eq("account_status", "active")
       ).data;
   if (clientRows) {
     for (const c of clientRows as Array<{
-      authorized_dspd_codes: string[] | null;
       disability_category: string | null;
       has_abi?: boolean | null;
     }>) {
-      for (const code of c.authorized_dspd_codes ?? []) codes.add(code.toUpperCase());
       if (c.has_abi) hasAbiClients = true;
       const cat = (c.disability_category ?? "").toLowerCase();
       if (cat.includes("abi") || cat.includes("brain injury") || cat.includes("acquired brain")) {
@@ -366,6 +367,7 @@ export async function snapshotAssigneesInternal(
       supabase
         .from("organization_members")
         .select("user_id, access_level")
+        .is("deleted_at", null)
         .eq("organization_id", organizationId)
         .eq("active", true)
         .in("user_id", directUserIds),
@@ -561,6 +563,7 @@ async function resolveAllAssigneesInternal(
       supabase
         .from("organization_members")
         .select("user_id, access_level")
+        .is("deleted_at", null)
         .eq("organization_id", organizationId)
         .eq("active", true)
         .in("user_id", directUserIds),
@@ -780,6 +783,7 @@ async function fetchClientNamesInternal(
   const { data, error } = await supabase
     .from("clients")
     .select("id, first_name, last_name")
+    .is("deleted_at", null)
     .in("id", clientIds);
   if (error) throw new Error(error.message);
   for (const c of (data ?? []) as Array<{
@@ -1051,6 +1055,7 @@ async function listHomesForServiceInternal(
   const { data: clients, error: clErr } = await supabase
     .from("clients")
     .select("id, team_id")
+    .is("deleted_at", null)
     .eq("organization_id", organizationId)
     .eq("account_status", "active")
     .in("id", clientIds);
@@ -1304,6 +1309,7 @@ export async function notifyObligationManagersInternal(
     const { data: admins, error: adErr } = await supabase
       .from("organization_members")
       .select("user_id, access_level")
+      .is("deleted_at", null)
       .eq("organization_id", organizationId)
       .eq("active", true)
       .eq("access_level", "owner");
@@ -2117,7 +2123,7 @@ export const listDeadlineObligationInstances = createServerFn({ method: "POST" }
 
 /** Service codes this program actually provides: Company Profile
  *  services_offered + provider_interest_outline.codes_held + active client
- *  authorizations (authorized_dspd_codes and client_billing_codes / 1056).
+ *  authorizations (client_billing_codes / 1056).
  *  Does not use the service_codes registry (that table is the full DSPD
  *  master list). Drives N/A on the DSPD review-tool register. */
 export const getOrgServiceFootprint = createServerFn({ method: "POST" })
@@ -2411,6 +2417,7 @@ export const pauseObligationsForArchivedForm = createServerFn({ method: "POST" }
     const { data: admins, error: adErr } = await supabase
       .from("organization_members")
       .select("user_id")
+      .is("deleted_at", null)
       .eq("organization_id", data.organizationId)
       .eq("active", true)
       .eq("access_level", "owner");
@@ -2959,6 +2966,7 @@ async function resolveAdminRecipients(
     const { data: admins, error: adErr } = await supabase
       .from("organization_members")
       .select("user_id, access_level")
+      .is("deleted_at", null)
       .eq("organization_id", organizationId)
       .eq("active", true)
       .eq("access_level", "owner");

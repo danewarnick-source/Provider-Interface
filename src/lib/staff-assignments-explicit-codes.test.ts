@@ -64,9 +64,9 @@ describe("setStaffClientCodes — the single write path", () => {
     assert.doesNotMatch(setup, /setClientCaseload/);
   });
 
-  it("validates codes ⊆ clientAuthorizedCodes and gates on staff_roster edit + access_can_see_staff", () => {
+  it("validates codes ⊆ the client's active codes and gates on staff_roster edit + access_can_see_staff", () => {
     assert.match(setup, /resolveStaffClientCodes\(data\.codes, authorized\)/);
-    assert.match(setup, /clientAuthorizedCodes\(/);
+    assert.match(setup, /loadActiveCodes\(supabase, \[clientId\]\)/);
     assert.match(setup, /action: "edit_caseload"/);
   });
 
@@ -111,7 +111,7 @@ describe("scheduler — shifts only for an assigned code", () => {
 
 describe("readers never treat NULL / [] as all codes", () => {
   it("client-care-data: staff see only codes on their assignment row", () => {
-    const s = src("./client-care-data.functions.ts");
+    const s = src("./clients/care-data.functions.ts");
     assert.match(s, /assignmentCoversCode\(myCodeScope\?\.service_codes, c\.service_code\)/);
     assert.doesNotMatch(s, /service_codes === null\s*\?\s*authorized_codes/);
   });
@@ -119,19 +119,6 @@ describe("readers never treat NULL / [] as all codes", () => {
   it("company-obligations: a no-code row never qualifies for a per-client obligation", () => {
     const s = src("./company-obligations.functions.ts");
     assert.match(s, /codes\.length > 0 && arraysOverlapCaseInsensitive/);
-  });
-
-  it("smart-import commit writes explicit codes (client's authorized codes when the source has none)", () => {
-    const s = src("./smart-import-commit.functions.ts");
-    assert.match(s, /importAssignmentCodes\(\s*r\.service_codes,/);
-    assert.doesNotMatch(s, /NULL = all of the client's authorized/);
-    assert.doesNotMatch(s, /codes \?\? \[\]\)/);
-  });
-
-  it("smart-import review never stages [] as all codes", () => {
-    const s = src("./smart-import-review.functions.ts");
-    assert.match(s, /Pick at least one code, or remove this staff from the client\./);
-    assert.doesNotMatch(s, /serviceCodes\.length === 0 \? null/);
   });
 
   it("financial HHP detection reads explicit CMP/CMS codes only", () => {

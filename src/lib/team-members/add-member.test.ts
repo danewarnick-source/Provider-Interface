@@ -187,22 +187,6 @@ describe("createTeamMember source lock", () => {
   });
 });
 
-describe("Smart Import uses the shared hire path unchanged", () => {
-  it("calls hireTeamMemberInternal with the same flags and no client password", () => {
-    const src = readFileSync(
-      new URL("../smart-import-commit.functions.ts", import.meta.url),
-      "utf8",
-    );
-    const call = src.slice(src.indexOf("await hireTeamMemberInternal("));
-    const args = call.slice(0, call.indexOf('"smart_import"') + 14);
-    assert.match(args, /requiresDeescalation: true/);
-    assert.match(args, /requiresAbi: true/);
-    assert.match(args, /staffType:/);
-    assert.match(args, /"smart_import"/);
-    assert.doesNotMatch(src, /temporaryPassword|temp-password|hireEmployeeInternal/);
-  });
-});
-
 describe("supervisor is saved as the membership id (manager_id → organization_members.id)", () => {
   const ACTIVE = [
     { id: "mem-harvey", user_id: "user-harvey" },

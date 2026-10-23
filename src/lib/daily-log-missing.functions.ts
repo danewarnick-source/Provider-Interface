@@ -18,6 +18,7 @@ import {
   type DailyNoteRow,
 } from "@/lib/daily-log-missing";
 import { selectIn } from "@/lib/team-members/roster.functions";
+import { loadActiveCodes } from "@/lib/clients/services/codes";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = SupabaseClient<any>;
@@ -110,11 +111,13 @@ export const listMyMissingDailyNotes = createServerFn({ method: "POST" })
     const { data: caseload, error } = await (supabase as Sb).rpc("clients_for_staff", {
       _org: data.organizationId,
       _staff: userId,
-    });
+    }).is("deleted_at", null);
     if (error) throw new Error(error.message);
-    const clients = ((caseload ?? []) as Array<{ id: string; job_code: string[] | null }>).filter(
-      (c) => dailyLogProgram(c) !== null,
-    );
+    const rows = (caseload ?? []) as Array<{ id: string }>;
+    const codes = await loadActiveCodes(supabase as Sb, rows.map((c) => c.id));
+    const clients = rows
+      .map((c) => ({ id: c.id, codes: codes.get(c.id) ?? [] }))
+      .filter((c) => dailyLogProgram(c) !== null);
     if (!clients.length) return [];
     const since = [...data.dates].sort()[0]!;
     const facts = await loadDailyNoteFacts(

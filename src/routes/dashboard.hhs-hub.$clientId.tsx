@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef, useEffect } from "react";
+import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
 import { z } from "zod";
@@ -9,7 +9,6 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import {
   useMyAssignments,
   allowedCodesFor,
-  clientAuthorizedCodes,
 } from "@/hooks/use-my-assignments";
 import { isDailyServiceCode } from "@/lib/service-billing";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,17 +27,16 @@ import {
 } from "lucide-react";
 import { HhsMonthlyAttendanceTab } from "@/components/workspace/hhs-monthly-attendance-tab";
 import { HhsAttendanceCalendar } from "@/components/hhs/hhs-attendance-calendar";
-import { HhsMarOverviewCalendar } from "@/components/hhs/hhs-mar-overview-calendar";
 
 import { toast } from "sonner";
 import { evaluateShiftNote } from "@/lib/ai-coach.functions";
 import { saveDailyRecord, savePrnForm, saveIncidentReport } from "@/lib/hhs.functions";
 import { denverYmd } from "@/lib/denver-date";
 import { invalidateStaffCaseloadWork } from "@/lib/staff-caseload-cache";
-import { useClientFeature } from "@/lib/client-features";
+import { useClientFeature } from "@/lib/clients/features";
+import { useClientActiveCodes } from "@/components/clients/shared/hooks/use-active-codes";
 import { NoteTriggerPrompt } from "@/components/residential/note-trigger-prompt";
-import { DailyNoteMedsBlock, type DailyNoteMedication } from "@/components/medications/daily-note-meds-block";
-import { type PendingMedDose } from "@/components/medications/shift-med-due-check";
+import { GiveMeds, type GiveMedsStatus } from "@/components/medications/give-meds/give-meds";
 import { NectarShiftNoteDraft } from "@/components/nectar/nectar-shift-note-draft";
 import { NectarCompletenessErrors } from "@/components/nectar/nectar-completeness-errors";
 import { NECTAR_DRAFT_MIN_WORDS, countNoteWords } from "@/lib/nectar-note-gate";
@@ -47,6 +45,9 @@ import {
   COMPLETENESS_PASS_FEEDBACK,
   localWordCountCheck,
 } from "@/lib/nectar-completeness";
+import { ClientAccessGate } from "@/components/clients/shared/client-access-gate";
+import { useSupportsForCode } from "@/components/clients/shared/hooks/use-plan-goals";
+import { ShiftFocus } from "@/components/clients/shared/shift-focus";
 
 const hhsSearch = z.object({
   tab: z.string().optional(),
@@ -68,13 +69,10 @@ interface ClientFull {
   id: string;
   first_name: string;
   last_name: string;
-  pcsp_goals: string[] | null;
   physical_address: string | null;
   special_directions: string | null;
-  profile_photo_url: string | null;
+  client_photo_url: string | null;
   geofence_radius_feet: number | null;
-  authorized_dspd_codes: string[] | null;
-  job_code?: string[] | null;
   feature_config: Record<string, boolean> | null;
   allergies: string[] | null;
   dysphagia: boolean | null;
@@ -83,7 +81,11 @@ interface ClientFull {
 
 function HhsClientHubRoute() {
   const { clientId } = Route.useParams();
-  return <HhsClientHub clientId={clientId} />;
+  return (
+    <ClientAccessGate clientId={clientId}>
+      <HhsClientHub clientId={clientId} />
+    </ClientAccessGate>
+  );
 }
 
 export function HhsClientHub({ clientId }: { clientId: string }) {
@@ -102,31 +104,19 @@ export function HhsClientHub({ clientId }: { clientId: string }) {
     queryFn: async () => {
       const { data } = await supabase
         .from("clients")
-        .select("id, first_name, last_name, pcsp_goals, physical_address, special_directions, profile_photo_url, geofence_radius_feet, authorized_dspd_codes, job_code, feature_config, allergies, dysphagia, swallowing_alerts" as any)
+        .select("id, first_name, last_name, physical_address, special_directions, client_photo_url, geofence_radius_feet, feature_config, allergies, dysphagia, swallowing_alerts" as any)
         .eq("id", clientId)
         .maybeSingle();
       return data as ClientFull | null;
     },
   });
 
-  const { data: meds = [] } = useQuery({
-    enabled: isRouteUuid(clientId),
-    queryKey: ["hhs-meds", clientId],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("client_medications")
-        .select("*")
-        .eq("client_id", clientId)
-        .eq("is_active", true);
-      return data ?? [];
-    },
-  });
-
   const { data: assignments } = useMyAssignments();
+  const clientCodes = useClientActiveCodes(client?.id);
   const allowedCodes = useMemo(() => {
     if (!client) return [];
-    return allowedCodesFor(assignments, client.id, clientAuthorizedCodes(client));
-  }, [client, assignments]);
+    return allowedCodesFor(assignments, client.id, clientCodes);
+  }, [client, assignments, clientCodes]);
   const allowedDaily = useMemo(
     () => allowedCodes.filter(isDailyServiceCode),
     [allowedCodes],
@@ -159,6 +149,17 @@ export function HhsClientHub({ clientId }: { clientId: string }) {
       <div className="flex flex-wrap items-center gap-2">
         <h1 className="text-base font-semibold">{fullName}</h1>
         <Badge className="bg-amber-500 text-[10px]">HHS</Badge>
+        {emarEnabled && (
+          <Link
+            to="/dashboard/clients/$clientId"
+            params={{ clientId: client.id }}
+            search={{ section: "health" }}
+            hash="health-mar"
+            className="ml-auto inline-flex h-8 items-center gap-1 text-xs font-medium text-primary hover:underline"
+          >
+            <Pill className="h-3.5 w-3.5" /> MAR
+          </Link>
+        )}
       </div>
 
       {client.special_directions && (
@@ -179,11 +180,8 @@ export function HhsClientHub({ clientId }: { clientId: string }) {
         value={tabParam ?? "note"}
         onValueChange={(val) => navigate({ to: ".", search: { tab: val }, replace: true })}
       >
-        <TabsList className={`grid h-auto w-full ${emarEnabled ? "grid-cols-5" : "grid-cols-4"} gap-1 p-1`}>
+        <TabsList className="grid h-auto w-full grid-cols-4 gap-1 p-1">
           <TabsTrigger value="note" className="h-11 text-[11px] sm:text-sm"><FileText className="mr-1 h-4 w-4" />Daily Note</TabsTrigger>
-          {emarEnabled && (
-            <TabsTrigger value="emar" className="h-11 text-[11px] sm:text-sm"><Pill className="mr-1 h-4 w-4" />MAR</TabsTrigger>
-          )}
           <TabsTrigger value="att" className="h-11 text-[11px] sm:text-sm"><Calendar className="mr-1 h-4 w-4" />Attendance</TabsTrigger>
           <TabsTrigger value="month" className="h-11 text-[11px] sm:text-sm"><CalendarRange className="mr-1 h-4 w-4" />Monthly</TabsTrigger>
           <TabsTrigger value="prn" className="h-11 text-[11px] sm:text-sm"><ClipboardList className="mr-1 h-4 w-4" />PRN Forms</TabsTrigger>
@@ -193,14 +191,8 @@ export function HhsClientHub({ clientId }: { clientId: string }) {
           <DailyNoteTab
             orgId={orgId}
             client={client}
-            medications={(meds as DailyNoteMedication[]) ?? []}
           />
         </TabsContent>
-        {emarEnabled && (
-          <TabsContent value="emar" className="mt-3">
-            <HhsMarOverviewCalendar orgId={orgId} clientId={client.id} />
-          </TabsContent>
-        )}
         <TabsContent value="att" className="mt-3">
           <HhsAttendanceCalendar orgId={orgId} clientId={client.id} />
         </TabsContent>
@@ -226,11 +218,9 @@ const today = () => denverYmd();
 function DailyNoteTab({
   orgId,
   client,
-  medications,
 }: {
   orgId: string;
   client: ClientFull;
-  medications: DailyNoteMedication[];
 }) {
   const navigate = useNavigate();
   const [note, setNote] = useState("");
@@ -243,8 +233,12 @@ function DailyNoteTab({
   const [triggersResolved, setTriggersResolved] = useState(true);
   // Final attestation — "I attest this note accurately reflects today's support".
   const [finalAttest, setFinalAttest] = useState(false);
+  // Doses due so far on the note's day must be logged in Give meds first.
   const [medDosesResolved, setMedDosesResolved] = useState(true);
-  const [pendingMedDoses, setPendingMedDoses] = useState<PendingMedDose[]>([]);
+  const onMedStatus = useCallback(
+    (st: GiveMedsStatus) => setMedDosesResolved(!st.loading && st.dueByNow === 0),
+    [],
+  );
   const [nectarUsed, setNectarUsed] = useState(false);
   const [nectarAssistChecked, setNectarAssistChecked] = useState(false);
   const [recordDate, setRecordDate] = useState(() => denverYmd());
@@ -258,12 +252,15 @@ function DailyNoteTab({
   const qc = useQueryClient();
   const evalFn = useServerFn(evaluateShiftNote);
   const saveFn = useServerFn(saveDailyRecord);
-  const pcsp   = client.pcsp_goals ?? [];
+  // HHS supports from the plan in effect on the note's date, grouped by goal.
+  const supports = useSupportsForCode(client.id, "HHS", recordDate);
+  const picked = supports.options.filter((o) => goals.includes(o.supportId));
+  const goalLabels = picked.map((o) => o.label);
 
   const MIN_WORDS = NECTAR_DRAFT_MIN_WORDS;
   const words     = countNoteWords(note);
   const narrativeOk = words >= MIN_WORDS;
-  const hasGoal     = goals.length > 0;
+  const hasGoal     = picked.length > 0;
 
   useEffect(() => {
     setTimeout(() => clearCanvas(), 0);
@@ -331,7 +328,7 @@ function DailyNoteTab({
       return;
     }
     if (!medDosesResolved) {
-      toast.error("Confirm medications on this daily note before submitting.");
+      toast.error("Log every dose due so far today in Give meds (given or not given) before saving the note.");
       return;
     }
     if (!incidentAnswer) {
@@ -344,7 +341,7 @@ function DailyNoteTab({
     setAiBusy(true);
     try {
       const result = await evalFn({
-        data: { narrative: note, goals, clientFirstName: client.first_name, serviceCode: "HHS" },
+        data: { narrative: note, goals: goalLabels, clientFirstName: client.first_name, serviceCode: "HHS" },
       });
       if (result.status !== "Verified") {
         setCompletenessErrors(result.checks.filter((c) => !c.passed));
@@ -370,19 +367,6 @@ function DailyNoteTab({
 
     const signature = canvasRef.current?.toDataURL("image/png") ?? null;
 
-    if (pendingMedDoses.length > 0) {
-      try {
-        const { logMedicationPass } = await import("@/lib/emar-pass.functions");
-        for (const dose of pendingMedDoses) {
-          await logMedicationPass({ data: dose });
-        }
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        toast.error(`Medication log failed: ${msg}`);
-        return;
-      }
-    }
-
     try {
       const denverToday = denverYmd();
       await saveFn({
@@ -391,7 +375,9 @@ function DailyNoteTab({
           clientId: client.id,
           recordDate,
           narrative: note,
-          pcspGoalsAddressed: goals,
+          pcspGoalsAddressed: goalLabels,
+          goalIds: [...new Set(picked.map((o) => o.goalId))],
+          supportIds: picked.map((o) => o.supportId),
           aiStatus: "Verified",
           aiFeedback,
           signatureDataUrl: signature,
@@ -433,34 +419,44 @@ function DailyNoteTab({
           </p>
         </div>
 
-        {/* PCSP Goals — phone-friendly tap rows (≥44px), full-width, easy to check */}
+        {/* Goals → HHS supports — phone-friendly tap rows (≥44px), full-width, easy to check */}
         <div>
-          <Label>PCSP Goals Addressed Today</Label>
-          <div className="mt-2 space-y-1.5">
-            {pcsp.length === 0 && <p className="text-xs text-muted-foreground">No PCSP goals on file.</p>}
-            {pcsp.map((g) => {
-              const checked = goals.includes(g);
-              return (
-                <label
-                  key={g}
-                  className={`flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border px-3 py-2.5 text-sm transition ${
-                    checked
-                      ? "border-accent/40 bg-accent/10"
-                      : "border-border bg-card hover:bg-secondary/60"
-                  }`}
-                >
-                  <Checkbox
-                    className="mt-0.5"
-                    checked={checked}
-                    onCheckedChange={(c) => {
-                      setGoals(c ? [...goals, g] : goals.filter((x) => x !== g));
-                      if (completenessErrors.length) setCompletenessErrors([]);
-                    }}
-                  />
-                  <span className="min-w-0 flex-1 leading-snug">{g}</span>
-                </label>
-              );
-            })}
+          <ShiftFocus clientId={client.id} groups={supports.groups} serviceCode="HHS" className="mb-3" />
+          <Label>Goals worked on today</Label>
+          <div className="mt-2 space-y-3">
+            {supports.groups.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                {supports.isLoading ? "Loading goals…" : "No supports on this person's plan list HHS. Ask your supervisor to add them."}
+              </p>
+            )}
+            {supports.groups.map((g) => (
+              <div key={g.id} className="space-y-1.5">
+                <p className="text-xs font-semibold text-foreground">{g.goal}</p>
+                {g.supports.map((s) => {
+                  const checked = goals.includes(s.id);
+                  return (
+                    <label
+                      key={s.id}
+                      className={`flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border px-3 py-2.5 text-sm transition ${
+                        checked
+                          ? "border-accent/40 bg-accent/10"
+                          : "border-border bg-card hover:bg-secondary/60"
+                      }`}
+                    >
+                      <Checkbox
+                        className="mt-0.5"
+                        checked={checked}
+                        onCheckedChange={(c) => {
+                          setGoals(c ? [...goals, s.id] : goals.filter((x) => x !== s.id));
+                          if (completenessErrors.length) setCompletenessErrors([]);
+                        }}
+                      />
+                      <span className="min-w-0 flex-1 leading-snug">{s.support_text.trim() || "Worked on this goal"}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
 
@@ -495,7 +491,7 @@ function DailyNoteTab({
         {/* Nectar deterministic trigger prompt — runs on-device, blocks submit. */}
         <NectarShiftNoteDraft
           narrative={note}
-          goals={goals}
+          goals={goalLabels}
           clientFirstName={client.first_name}
           onApplyDraft={(draft) => {
             setNote(draft);
@@ -596,14 +592,10 @@ function DailyNoteTab({
           ) : null}
         </div>
 
-        <DailyNoteMedsBlock
-          clientId={client.id}
-          clientName={client.first_name}
-          medications={medications}
-          recordDate={recordDate}
-          onPendingDosesChange={setPendingMedDoses}
-          onResolvedChange={setMedDosesResolved}
-        />
+        <div className="space-y-2 rounded-lg border border-border p-3">
+          <p className="text-sm font-semibold">Medications</p>
+          <GiveMeds clientId={client.id} day={recordDate} serviceContext="HHS" onStatus={onMedStatus} />
+        </div>
 
 
         {/* Action buttons */}
