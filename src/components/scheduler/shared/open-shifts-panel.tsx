@@ -57,7 +57,11 @@ export function OpenShiftsPanel({
   });
   const claim = useMutation({
     mutationFn: (shiftId: string) => claimFn({ data: { shiftId } }),
-    onSuccess: (d) => { invalidate(); toast.success("Requested, waiting for approval"); toastRuleWarnings(d); },
+    onSuccess: (d) => {
+      invalidate();
+      toast.success(d.assigned ? "Shift picked up. It's on your schedule." : "Requested, waiting for approval");
+      toastRuleWarnings(d);
+    },
     onError: (e: any) => toast.error(e?.message ?? "Failed"),
   });
 

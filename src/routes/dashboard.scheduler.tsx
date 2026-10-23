@@ -53,6 +53,7 @@ import type { SoloLapse } from "@/lib/obligations/solo-lapse";
 import { denverYmd } from "@/lib/denver-date";
 import { layoutShiftBars } from "@/lib/scheduler/recurrence";
 import { toastRuleWarnings } from "@/components/scheduler/shared/rule-warnings";
+import { SchedulingSettingsLink } from "@/components/scheduler/settings/place-settings-card";
 
 export const Route = createFileRoute("/dashboard/scheduler")({
   head: () => ({
@@ -195,6 +196,7 @@ function SchedulerPage() {
           <TabBtn label="Staff view" active={tab === "staff-view"} onClick={() => setTab("staff-view")} />
         </div>
         <div className="flex-1" />
+        <SchedulingSettingsLink />
         {tab === "schedule" && canEditSchedule && (
           <button
             onClick={() => publishMut.mutate()}
