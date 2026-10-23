@@ -1,0 +1,692 @@
+<title>Daily Notes & Attendance</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: demo bar on top; Staff phone = one centered phone column; Office = nav rail + work area. Same tokens as the scheduler demo. */
+:root{
+  --bg:#F4F3EF; --panel:#FFFFFF; --panel2:#ECEAE3; --ink:#16213A; --ink2:#3C4660; --muted:#6B7385;
+  --line:#DDDBD3; --line2:#C6C3B8;
+  --accent:#16213A; --accent-ink:#FFFFFF; --accent-soft:#E4E7EF;
+  --gold:#B8901F; --gold-soft:#F6EFD8; --gold-ink:#5E4708;
+  --ok:#237A47; --ok-soft:#DFF1E4; --warn:#9A6208; --warn-soft:#FBF0D6; --crit:#B23A2E; --crit-soft:#F9E2DE;
+  --info:#2D5A9B; --info-soft:#E2EAF7;
+  --rhs:#5B4B8A; --rhs-soft:#EBE6F5; --dsg:#1F6F8B; --dsg-soft:#DFEEF3; --mtp:#8A5A1F; --mtp-soft:#F5E9D8;
+  --demo:#0E1320; --demo-ink:#E8E6DC; --demo-line:#3A4254; --demo-btn:#1B2232;
+  --shadow:0 1px 2px rgba(22,33,58,.06),0 10px 30px rgba(22,33,58,.06);
+  --sans:'Plus Jakarta Sans',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#12161F; --panel:#1A2029; --panel2:#232B37; --ink:#ECEEF3; --ink2:#C4CAD6; --muted:#8E97A8;
+    --line:#2C3542; --line2:#3E4857;
+    --accent:#D9C27A; --accent-ink:#1A1A10; --accent-soft:#2E2F2A;
+    --gold:#D9C27A; --gold-soft:#332E1C; --gold-ink:#F0E3B0;
+    --ok:#6FC48E; --ok-soft:#173224; --warn:#E3B457; --warn-soft:#352A12; --crit:#F08A7E; --crit-soft:#3E1D19;
+    --info:#8FB3EC; --info-soft:#1C2A42;
+    --rhs:#B9A8E8; --rhs-soft:#2A2440; --dsg:#7CC3DB; --dsg-soft:#15303A; --mtp:#E0B57A; --mtp-soft:#3A2B17;
+    --demo:#0B0F18; --demo-ink:#E8E6DC; --demo-line:#2C3542; --demo-btn:#171D2A;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#12161F; --panel:#1A2029; --panel2:#232B37; --ink:#ECEEF3; --ink2:#C4CAD6; --muted:#8E97A8;
+  --line:#2C3542; --line2:#3E4857;
+  --accent:#D9C27A; --accent-ink:#1A1A10; --accent-soft:#2E2F2A;
+  --gold:#D9C27A; --gold-soft:#332E1C; --gold-ink:#F0E3B0;
+  --ok:#6FC48E; --ok-soft:#173224; --warn:#E3B457; --warn-soft:#352A12; --crit:#F08A7E; --crit-soft:#3E1D19;
+  --info:#8FB3EC; --info-soft:#1C2A42;
+  --rhs:#B9A8E8; --rhs-soft:#2A2440; --dsg:#7CC3DB; --dsg-soft:#15303A; --mtp:#E0B57A; --mtp-soft:#3A2B17;
+  --demo:#0B0F18; --demo-ink:#E8E6DC; --demo-line:#2C3542; --demo-btn:#171D2A;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:14.5px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+h1,h2,h3{margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1{font-size:22px;line-height:1.2;font-weight:800}
+h2{font-size:16px;line-height:1.25;font-weight:700}
+h3{font-size:13.5px;font-weight:700}
+p{margin:0}
+.mono{font-family:var(--mono)}.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}.small{font-size:13px}.xs{font-size:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.between{justify-content:space-between}
+.col{display:flex;flex-direction:column;gap:10px}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+.demo{background:var(--demo);color:var(--demo-ink);padding-block:8px;display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;font-size:13px}
+.demo b{letter-spacing:.08em;font-size:11px;opacity:.7}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:9px;overflow:hidden;background:var(--panel);max-width:100%;overflow-x:auto}
+.seg button{border:0;background:transparent;padding:6px 12px;font-size:13px;font-weight:600;color:var(--ink2);white-space:nowrap}
+.seg button+button{border-left:1px solid var(--line2)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.demo .seg{border-color:var(--demo-line);background:var(--demo-btn)}
+.demo .seg button{color:#C9CDD8}
+.demo .seg button+button{border-left-color:var(--demo-line)}
+.demo .seg button[aria-pressed="true"]{background:#D9C27A;color:#1A1A10}
+
+.btn{border:1px solid var(--line2);background:var(--panel);border-radius:9px;padding:7px 12px;font-weight:700;font-size:13px;display:inline-flex;gap:6px;align-items:center;justify-content:center;white-space:nowrap;line-height:1.3}
+.btn:hover{border-color:var(--ink)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.sm{padding:4px 9px;font-size:12.5px;border-radius:8px}
+.btn.big{padding:12px 14px;font-size:14.5px;border-radius:12px;width:100%}
+.btn.ok{color:var(--ok);border-color:var(--ok)}
+.btn.link{border:0;background:transparent;color:var(--info);padding:2px 4px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);min-width:0}
+.ph{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:14px 16px 10px;flex-wrap:wrap}
+.ph .sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+.pb{padding:0 16px 16px}
+.pill{display:inline-flex;align-items:center;gap:5px;font-weight:700;font-size:11.5px;border-radius:6px;padding:1px 7px;white-space:nowrap;line-height:18px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.warn{background:var(--warn-soft);color:var(--warn)}.pill.crit{background:var(--crit-soft);color:var(--crit)}.pill.info{background:var(--info-soft);color:var(--info)}.pill.na{background:var(--panel2);color:var(--muted)}.pill.gold{background:var(--gold-soft);color:var(--gold-ink)}
+.code{font-family:var(--mono);font-size:11px;font-weight:600;border-radius:5px;padding:0 5px;line-height:17px;display:inline-block;background:var(--panel2);color:var(--ink2)}
+.code.RHS{background:var(--rhs-soft);color:var(--rhs)}.code.DSG,.code.DSP{background:var(--dsg-soft);color:var(--dsg)}.code.MTP{background:var(--mtp-soft);color:var(--mtp)}
+.av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:11.5px;background:var(--accent-soft);color:var(--ink);flex:none}
+.ref{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.goal{display:inline-flex;gap:4px;align-items:center;font-size:11.5px;font-weight:700;color:var(--gold-ink);background:var(--gold-soft);border-radius:6px;padding:1px 7px;line-height:18px}
+
+/* ---------- phone ---------- */
+.phonewrap{display:flex;justify-content:center;padding-block:18px 60px}
+.phone{width:100%;max-width:420px;display:flex;flex-direction:column;gap:12px}
+.shiftcard{background:var(--accent);color:var(--accent-ink);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.shiftcard .t{font-size:20px;font-weight:800;line-height:1.15}
+.shiftcard .m{font-size:13px;opacity:.85}
+.shiftcard .btn{background:var(--panel);color:var(--ink);border-color:var(--panel)}
+.who{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.who:first-child{border-top:0}
+.who .nm{flex:1;min-width:0}
+.who .nm b{display:block;line-height:1.25}
+.who .nm span{display:block;font-size:12px;color:var(--muted)}
+.entry{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--panel);display:flex;flex-direction:column;gap:6px}
+.entry .meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted)}
+.entry p{font-size:13.5px}
+.tag{font-size:11.5px;font-weight:700;border-radius:99px;padding:0 8px;line-height:19px;background:var(--panel2);color:var(--ink2)}
+.tag.house{background:var(--warn-soft);color:var(--warn)}
+
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgba(10,14,24,.45);z-index:40}
+.sheet{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(560px,100%);max-height:88%;overflow:auto;background:var(--panel);border-radius:18px 18px 0 0;z-index:41;padding:10px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow)}
+.sheet .handle{width:40px;height:4px;border-radius:9px;background:var(--line2);align-self:center}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field>label,.lab{font-size:12.5px;font-weight:700}
+.hint{font-size:12px;color:var(--muted)}
+.inp{border:1px solid var(--line2);border-radius:10px;padding:9px 11px;background:var(--panel);width:100%;min-width:0}
+textarea.inp{resize:vertical;line-height:1.45}
+.choice{display:flex;flex-wrap:wrap;gap:6px}
+.choice button{border:1px solid var(--line2);background:var(--panel);border-radius:99px;padding:5px 11px;font-size:13px;font-weight:600;color:var(--ink2)}
+.choice button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.choice.g button[aria-pressed="true"]{background:var(--gold-soft);border-color:var(--gold);color:var(--gold-ink)}
+.gate{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;font-size:13.5px;z-index:60;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+
+/* ---------- office ---------- */
+.shell{display:grid;grid-template-columns:210px minmax(0,1fr);min-height:calc(100% - 44px)}
+.nav{background:var(--panel);border-right:1px solid var(--line);padding:16px 10px;display:flex;flex-direction:column;gap:3px}
+.nav .logo{font-weight:800;padding:2px 10px 12px;font-size:14.5px}
+.nav button{border:0;background:transparent;text-align:left;display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 10px;border-radius:9px;color:var(--ink2);font-weight:600;font-size:13.5px}
+.nav button[aria-current="page"]{background:var(--accent-soft);color:var(--ink)}
+.cnt{font-family:var(--mono);font-size:11px;padding:0 6px;border-radius:99px;line-height:17px;background:var(--panel2);color:var(--muted)}
+.cnt.warn{background:var(--warn-soft);color:var(--warn)}
+main.om{padding-block:20px 80px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.pagehead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.pagehead .sub{color:var(--muted);font-size:13px;margin-top:4px;max-width:70ch}
+.tw{overflow-x:auto}
+table.t{border-collapse:collapse;width:100%;min-width:560px}
+table.t th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.t td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle;font-size:13.5px}
+table.t tr:last-child td{border-bottom:0}
+.flag{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;padding:11px 14px;border-radius:12px;background:var(--crit-soft);color:var(--crit)}
+.flag p{color:var(--ink2);font-size:13px}
+.noteGrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+.summary{font-size:15px;line-height:1.6;max-width:68ch}
+.chk{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.chk li{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
+.chk li:first-child{border-top:0}
+.chk .ic{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;flex:none}
+.chk .ic.y{background:var(--ok-soft);color:var(--ok)}.chk .ic.n{background:var(--crit-soft);color:var(--crit)}
+.chk .v{color:var(--muted);font-size:12px;display:block}
+.tl{display:flex;flex-direction:column;gap:10px}
+.tl .entry{border-left:4px solid var(--line2)}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px 16px;font-size:13.5px}
+.kv .k{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block}
+.bar{height:8px;border-radius:99px;background:var(--panel2);overflow:hidden;width:120px}
+.bar i{display:block;height:100%;background:var(--rhs);border-radius:99px}
+.explain{font-size:12.5px;color:var(--muted);background:var(--panel2);border-radius:10px;padding:9px 12px;max-width:80ch}
+@media (max-width:860px){
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .nav{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding-block:8px}
+  .nav .logo{display:none}
+  .nav button{white-space:nowrap}
+  .noteGrid{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div id="app"></div>
+
+<script>
+/* ================= helpers ================= */
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm=t=>((t%24)+24)%24;
+const hm=t=>{t=norm(t);let h=Math.floor(t+1e-6),m=Math.round((t-h)*60);if(m===60){h++;m=0}const ap=h%24>=12?'PM':'AM';return ((h%12)||12)+':'+String(m).padStart(2,'0')+' '+ap};
+const hs=t=>{const raw=t;t=norm(t);let h=Math.floor(t+1e-6),m=Math.round((t-h)*60);const ap=h>=12?'p':'a';return ((h%12)||12)+(m?':'+String(m).padStart(2,'0'):'')+ap};
+const words=s=>String(s||'').trim().split(/\s+/).filter(Boolean).length;
+const pill=(k,t)=>`<span class="pill ${k}">${t}</span>`;
+const code=c=>`<span class="code ${c}">${c}</span>`;
+
+/* ================= data ================= */
+const DAYS={wed:{n:'Wed, Oct 21',s:'Wed'},thu:{n:'Thu, Oct 22',s:'Thu'}};
+const NEXT={wed:'thu'};
+const STAFF={sara:{n:'Sara Lund'},johnny:{n:'Johnny Reyes'},kai:{n:'Kai Brooks'},priya:{n:'Priya Shah'},sofia:{n:'Sofia Ortiz'},rosa:{n:'Rosa Martinez',t:'Maple House lead'},dana:{n:'Dana Whit',t:'Lehi program lead'}};
+const first=id=>STAFF[id].n.split(' ')[0];
+const ini=n=>n.split(' ').map(x=>x[0]).join('').slice(0,2);
+const PLACES={maple:{n:'Maple House',kind:'RHS',lead:'rosa'},lehi:{n:'Lehi Day Program',kind:'DSG',lead:'dana'}};
+const CL={
+ riley:{n:'Riley Park',pr:['He','he','his'],home:'maple',codes:['RHS'],goals:{cook:'Cook a simple meal with fewer prompts',laundry:'Do his own laundry start to finish'},absUsed:1},
+ sam:{n:'Sam Kimura',pr:['He','he','his'],home:'maple',codes:['RHS'],goals:{bus:'Ride the 850 bus to work on his own',choose:'Plan his own weekend activities'},absUsed:0},
+ jo:{n:'Jo Mendez',pr:['She','she','her'],home:'maple',prog:'lehi',codes:['RHS','DSG','MTP'],goals:{device:'Use her talker to make requests',routine:'Do her evening routine with less help'},absUsed:3,ws:{code:'DSG',h:6},avg:6.5,homeAddr:'Maple House'},
+ hazel:{n:'Hazel Price',pr:['She','she','her'],prog:'lehi',codes:['DSG','MTP'],goals:{community:'Join a community group she chooses'},ws:{code:'DSG',h:6},avg:6.6,homeAddr:'Home (American Fork)'},
+ casey:{n:'Casey Lowe',pr:['He','he','his'],prog:'lehi',codes:['DSG','MTP'],homeAddr:'Home (Lehi)',goals:{money:'Pay for purchases and check his change'},ws:{code:'DSG',h:6},avg:6.4}
+};
+const ABS_YEAR=12;
+const fn=c=>CL[c].n.split(' ')[0];
+
+const SHIFTS=[
+ {id:'s1',staff:'sara',place:'maple',day:'wed',a:9,b:15},
+ {id:'s2',staff:'johnny',place:'maple',day:'wed',a:15,b:24},
+ {id:'s3',staff:'kai',place:'maple',day:'wed',a:23,b:31},
+ {id:'s4',staff:'priya',place:'lehi',day:'wed',a:9,b:15},
+ {id:'s5',staff:'sofia',place:'lehi',day:'wed',a:9,b:15},
+ {id:'s6',staff:'sara',place:'maple',day:'thu',a:9,b:15},
+ {id:'s7',staff:'johnny',place:'maple',day:'thu',a:15,b:24},
+ {id:'s8',staff:'priya',place:'lehi',day:'thu',a:8.25,b:15.75},
+];
+const SH=id=>SHIFTS.find(s=>s.id===id);
+
+// RHS attendance per person per day
+const RA={
+ 'wed|riley':{st:'home'},'wed|sam':{st:'home'},
+ 'wed|jo':{st:'home',away:[8.83,15.42],why:'Lehi Day Program'},
+ 'thu|riley':{st:'home'},'thu|sam':{st:'home'},
+ 'thu|jo':{st:'absent',why:'Sick, temperature 100.4°F',by:'kai'},
+};
+// Day program attendance: per person arrive/leave + van legs
+const DG={
+ 'wed|jo':{in:8.83,out:15.42,am:['Maple House',8.83,'Lehi Day Program',9.2],pm:['Lehi Day Program',15.08,'Maple House',15.42],driver:'priya'},
+ 'wed|hazel':{in:8.5,out:15.4,am:['Home (American Fork)',8.5,'Lehi Day Program',9.2],pm:['Lehi Day Program',15.08,'Home (American Fork)',15.4],driver:'priya'},
+ 'wed|casey':{in:8.75,out:15.2,am:['Home (Lehi)',8.75,'Lehi Day Program',9.0],pm:['Lehi Day Program',14.92,'Home (Lehi)',15.2],driver:'sofia'},
+ 'thu|jo':{absent:true,why:'Sick (reported by Maple House)'},
+ 'thu|hazel':{in:null,out:null},
+ 'thu|casey':{in:null,out:null},
+};
+
+// Day program: standing groups set by the lead; day-of moves when a staff member is off
+const GROUPS={priya:['jo','hazel'],sofia:['casey']}; // van = group
+const ROUTE=['hazel','jo','casey']; // pickup order; drop-offs run in reverse
+const assigned=(day,c)=>(S.move[day+'|'+c]||{}).to||Object.keys(GROUPS).find(k=>GROUPS[k].includes(c));
+let EID=100;
+const E=[
+ // ---- Wed, Maple House (RHS) ----
+ {id:'e1',place:'maple',day:'wed',t:9.67,staff:'sara',shift:'s1',about:['riley'],goals:{riley:'cook'},text:'Riley planned lunch and made grilled cheese for himself and Sam. Needed 2 verbal prompts to turn the burner down.',phr:{riley:'He planned lunch and made grilled cheese for himself and Sam, needing two verbal prompts to turn the burner down.'}},
+ {id:'e2',place:'maple',day:'wed',t:11.25,staff:'sara',shift:'s1',about:['riley','sam'],goals:{},text:'Walked with Riley and Sam to Holbrook Park, about 20 minutes each way. Both chose to stop at the library on the way back.',phr:{riley:'He walked to Holbrook Park with Sam and chose to stop at the library on the way back.',sam:'He walked to Holbrook Park with Riley and chose to stop at the library on the way back.'}},
+ {id:'e3',place:'maple',day:'wed',t:13.5,staff:'sara',shift:'s1',about:['sam'],goals:{sam:'bus'},text:'Practiced the 850 bus route with Sam using his route card. He found the right stop on his own and paid with his FarePay card.',phr:{sam:'He practiced the 850 bus route using his route card, found the right stop on his own and paid with his FarePay card.'}},
+ {id:'e4',place:'maple',day:'wed',t:14.33,staff:'sara',shift:'s1',about:'house',text:'Mopped the kitchen, ran the house laundry, restocked gloves and paper towels.'},
+ {id:'e5',place:'maple',day:'wed',t:15.6,staff:'johnny',shift:'s2',about:['jo'],goals:{jo:'device'},text:'Jo got off the van at 3:25. Used her talker to ask for a snack and to pick a show.',phr:{jo:'After the van dropped her off at 3:25 PM, she used her talker to ask for a snack and to pick a show.'}},
+ {id:'e6',place:'maple',day:'wed',t:17.5,staff:'johnny',shift:'s2',about:['riley','sam','jo'],goals:{riley:'cook'},text:'Riley led dinner (tacos) and browned the meat himself. Sam set the table. Jo chose the music for dinner.',phr:{riley:'At dinner he led the cooking (tacos) and browned the meat himself.',sam:'He set the table for dinner.',jo:'She chose the music for dinner.'}},
+ {id:'e7',place:'maple',day:'wed',t:19.75,staff:'johnny',shift:'s2',about:['riley'],goals:{riley:'laundry'},text:'Riley moved his laundry to the dryer and folded it with one reminder.',phr:{riley:'He moved his laundry to the dryer and folded it with one reminder.'}},
+ {id:'e8',place:'maple',day:'wed',t:21.17,staff:'johnny',shift:'s2',about:['sam'],goals:{sam:'choose'},text:'Sam called his mom and picked bowling for Saturday\'s outing.',phr:{sam:'He called his mom and picked bowling for Saturday\'s outing.'}},
+ {id:'e9',place:'maple',day:'wed',t:21.5,staff:'johnny',shift:'s2',about:['jo'],goals:{jo:'routine'},text:'Helped Jo with her evening routine. She brushed her teeth on her own; needed hand-over-hand help brushing her hair.',phr:{jo:'During her evening routine she brushed her teeth on her own and needed hand-over-hand help brushing her hair.'}},
+ {id:'e10',place:'maple',day:'wed',t:23.67,staff:'kai',shift:'s3',about:['riley','sam','jo'],goals:{},text:'All three in bed and asleep by 11:40 PM. Doors locked, first night check done.',phr:{riley:'He was asleep by 11:40 PM.',sam:'He was asleep by 11:40 PM.',jo:'She was asleep by 11:40 PM.'}},
+ // ---- Thu, Maple House (after midnight split from Kai's shift) ----
+ {id:'e11',place:'maple',day:'thu',t:6.25,staff:'kai',shift:'s3',about:['jo'],goals:{},text:'Jo woke at 6:00 with a warm forehead, 100.4°F. Called Rosa; Jo is staying home from day program today.',phr:{jo:'She woke at 6:00 AM with a temperature of 100.4°F; after a call with Rosa she stayed home from day program.'}},
+ {id:'e12',place:'maple',day:'thu',t:6.75,staff:'kai',shift:'s3',about:['riley','sam'],goals:{},text:'Riley and Sam up at 6:30, both showered and dressed without prompts.',phr:{riley:'He was up at 6:30 AM and showered and dressed without prompts.',sam:'He was up at 6:30 AM and showered and dressed without prompts.'}},
+ {id:'e13',secKey:'s6|jo|other',place:'maple',day:'thu',t:9.5,staff:'sara',shift:'s6',about:['jo'],goals:{},text:'Jo resting on the couch. Temp 99.6°F at 9:30. Drank a full cup of water and ate toast.',phr:{jo:'She rested on the couch; her temperature was 99.6°F at 9:30 AM, and she drank a full cup of water and ate toast.'}},
+ // ---- Wed, Lehi Day Program (DSG / DSP) ----
+ {id:'d1',place:'lehi',day:'wed',t:10.5,staff:'priya',shift:'s4',about:['jo','hazel'],goals:{jo:'device',hazel:'community'},text:'Group art class at the Lehi rec center. Jo used her talker to pick her paint colors. Hazel introduced herself to the instructor.',phr:{jo:'At the Lehi rec center art class she used her talker to pick her paint colors.',hazel:'At the Lehi rec center art class she introduced herself to the instructor.'}},
+ {id:'d2',place:'lehi',day:'wed',t:12.75,staff:'sofia',shift:'s5',about:['casey'],goals:{casey:'money'},text:'Casey paid for his lunch at Subway with a $10 bill and checked his change.',phr:{casey:'He paid for his lunch at Subway with a $10 bill and checked his change.'}},
+ {id:'d3',place:'lehi',day:'wed',t:13.5,staff:'sofia',shift:'s5',about:['casey'],goals:{},text:'Casey sorted recycling with the group and chose the next outing, the bowling alley.',phr:{casey:'He sorted recycling with the group and chose the next outing, the bowling alley.'}},
+ {id:'d4',place:'lehi',day:'wed',t:13.75,staff:'priya',shift:'s4',about:['hazel'],goals:{},text:'Hazel wiped tables after lunch and asked to join the Thursday walking group.',phr:{hazel:'She wiped tables after lunch and asked to join the Thursday walking group.'}},
+ {id:'d5',place:'lehi',day:'wed',t:14.25,staff:'priya',shift:'s4',about:['jo'],goals:{},text:'Jo rested in the quiet room for 20 minutes after lunch, then played Uno with two peers.',phr:{jo:'She rested in the quiet room for 20 minutes after lunch, then played Uno with two peers.'}},
+];
+
+/* ================= state ================= */
+const S={mode:'phone',me:'sara',sheet:null,sheetArg:null,
+ draft:{text:'',about:[],goals:{}},
+ clock:{s1:{in:8.97,out:15.02},s2:{in:14.95,out:24.03},s3:{in:22.98,out:31},s4:{in:8.9,out:15.1},s5:{in:8.95,out:15.05},s6:{in:8.95,out:null},s7:{in:null,out:null},s8:{in:8.22,out:null}},
+ now:{sara:14.6,johnny:15.25,priya:8.4},
+ skip:{},opage:'review',oday:'wed',oc:'riley',ocode:'RHS',approved:{},edited:{},editing:false,toast:null,
+ statDraft:null,skipDraft:null,fixDraft:null,dtDraft:null,
+ dsgMode:'arrive', // agency setting: 'arrive' = DSG from arriving at the program to heading home (default); 'van' = pickup to drop-off
+ ovDraft:null,sbDraft:null,
+ run:{stage:'am',dest:null,arrive:null,leave:null},
+ move:{'thu|casey':{to:'priya',why:'Sofia is off today. Casey rides Priya\'s van.'}},
+ sec:{s6:{jo:{picked:[],txt:{other:'Jo resting on the couch. Temp 99.6°F at 9:30. Drank a full cup of water and ate toast.'}}}}};
+let MIN=20; // agency setting (agency-wide): minimum words per client, per shift
+let MIN_R=12; // agency setting: day program, minimum words per client response
+/* ================= model ================= */
+// Each client's own DSG start and end, per the agency's DSG time setting. Walk-ins (no van) use their own times.
+function dsgSpan(d){if(!d||d.absent)return [null,null];if(S.dsgMode==='van'||!d.am)return [d.in,d.out];return [d.am[3]??null,d.pm?d.pm[1]:null]}
+const dsgLbl=()=>S.dsgMode==='van'?['van pickup','van drop-off']:['arrived at program','left program'];
+const entriesFor=(day,c,place)=>E.filter(e=>e.day===day&&e.place===place&&Array.isArray(e.about)&&e.about.includes(c)).sort((a,b)=>a.t-b.t);
+const houseFor=(day,place)=>E.filter(e=>e.day===day&&e.place===place&&e.about==='house').sort((a,b)=>a.t-b.t);
+const todayShift=me=>SHIFTS.find(s=>s.staff===me&&s.day==='thu');
+const phrase=(e,c)=>{const p=e.phr&&e.phr[c];if(p)return p;const g=e.goals&&e.goals[c];if(e.resp)return `How ${fn(c)} responded${g?` (${CL[c].goals[g]})`:''}, per ${first(e.staff)}: “${e.text.trim()}”`;return g?`On “${CL[c].goals[g]}”, ${first(e.staff)} wrote: “${e.text.trim()}”`:`${first(e.staff)} wrote${e.group?' (group activity)':''}: “${e.text.trim()}”`};
+function shiftLabel(s){return `${hs(s.a)}–${hs(s.b)}`}
+function presentDuring(c,day,s){ // RHS: was the Person home during any part of this shift (this calendar day)?
+ const a=RA[day+'|'+c];if(!a)return false;if(a.st==='absent'||!a.away)return true;
+ const from=Math.max(s.a,0),to=Math.min(s.b,24);return from<a.away[0]-1e-6||to>a.away[1]+1e-6;
+}
+function required(s){
+ if(s.place==='maple')return Object.keys(CL).filter(c=>CL[c].home==='maple'&&presentDuring(c,s.day,s));
+ return Object.keys(CL).filter(c=>CL[c].prog==='lehi'&&assigned(s.day,c)===s.staff&&DG[s.day+'|'+c]&&!DG[s.day+'|'+c].absent&&DG[s.day+'|'+c].in!=null);
+}
+const myEntries=(s,c)=>E.filter(e=>e.shift===s.id&&Array.isArray(e.about)&&e.about.includes(c));
+const secOf=(s,c)=>{S.sec[s.id]=S.sec[s.id]||{};return S.sec[s.id][c]=S.sec[s.id][c]||{picked:[],txt:{}}};
+const secWords=(s,c)=>{const x=secOf(s,c);return x.picked.reduce((n,g)=>n+words(x.txt[g]),0)+words(x.txt.other)};
+const emptyGoals=(s,c)=>{const x=secOf(s,c);return x.picked.filter(g=>!(x.txt[g]||'').trim())};
+const groupCovers=(s,c)=>E.some(e=>e.shift===s.id&&e.group&&e.about.includes(c));
+function secState(s,c){
+ if(s.place==='lehi'){const w=words(secOf(s,c).txt.other);return w>=MIN_R?{ok:true,lab:`✓ ${w} words`}:S.skip[s.id+'|'+c]?{ok:true,lab:S.skip[s.id+'|'+c].startsWith('Supervisor')?'Supervisor override':'Reason given'}:{ok:false,lab:`${w} of ${MIN_R} words`}}
+ const w=secWords(s,c),eg=emptyGoals(s,c),sk=S.skip[s.id+'|'+c];
+ if(eg.length)return {ok:false,lab:`Empty goal box: fill it or unpick it`};
+ if(w>=MIN)return {ok:true,lab:`✓ ${w} words`};
+ if(groupCovers(s,c))return {ok:true,lab:'Covered by a group activity'};
+ if(sk)return {ok:true,lab:sk.startsWith('Supervisor')?'Supervisor override':'Reason given'};
+ return {ok:false,lab:`${w} of ${MIN} words`};
+}
+function gateItems(s){
+ return required(s).map(c=>{
+  const st=secState(s,c),it={c,st,sk:S.skip[s.id+'|'+c],need:[]};
+  if(!st.ok)it.need.push('entry');
+  if(s.place==='lehi'&&DG[s.day+'|'+c].out==null)it.need.push('drop');
+  return it;});
+}
+function upsert(s,c,slot,text){
+ const key=`${s.id}|${c}|${slot}`;let e=E.find(x=>x.secKey===key);
+ if(!text.trim()){if(e)E.splice(E.indexOf(e),1);return}
+ if(!e){e={id:'n'+(EID++),secKey:key,place:s.place,day:'thu',t:S.now[S.me],staff:S.me,shift:s.id,about:c==='house'?'house':c==='group'?required(s):[c],goals:(slot==='other'||slot==='act'||c==='house')?{}:{[c]:slot}};S.now[S.me]=Math.min(S.now[S.me]+0.1,s.b-0.05);E.push(e)}
+ e.text=text;
+ if(s.place==='lehi'&&slot==='other'){e.resp=true;const g=secOf(s,c).tagGoal;e.goals=g?{[c]:g}:{}}
+ if(slot==='act'){e.group=true;e.about=required(s)}
+}
+function notesOf(place){
+ return Object.keys(CL).flatMap(c=>{
+  if(place==='maple'&&CL[c].home==='maple')return [{c,code:'RHS',place}];
+  if(place==='lehi'&&CL[c].prog==='lehi')return [{c,code:CL[c].codes.includes('DSP')?'DSP':'DSG',place}];
+  return [];});
+}
+function checks(day,c,code,place){
+ const es=entriesFor(day,c,place),authors=[...new Set(es.map(e=>e.staff))];const L=[];
+ L.push({l:'Person',ok:true,v:CL[c].n});
+ L.push({l:'Date',ok:true,v:DAYS[day].n});
+ L.push({l:'Service code',ok:true,v:code});
+ if(code==='RHS'){
+  const a=RA[day+'|'+c];
+  L.push({l:'Staff name',ok:authors.length>0,v:authors.length?authors.map(x=>STAFF[x].n).join(', '):'No staff wrote about '+fn(c),ref:'§21.3(9)(D)'});
+  L.push({l:'Daily summary note',ok:es.length>0,v:es.length?`From ${es.length} signed ${es.length===1?'entry':'entries'}`:'No entries yet',ref:'§21.3(9)(E)'});
+  if(a&&a.st==='absent')L.push({l:'Absence day, date and reason',ok:!!a.why,v:a.why,ref:'§21.3(3)'});
+ } else {
+  const d=DG[day+'|'+c]||{};
+  if(d.absent){L.push({l:'Absent from program',ok:true,v:d.why+' · not billed'});return L;}
+  const [ds,de]=dsgSpan(d),lb=dsgLbl();
+  L.push({l:'Start time',ok:ds!=null,v:ds!=null?hm(ds)+' ('+lb[0]+')':'Not yet',ref:'§7.3(6)(C)'});
+  L.push({l:'End time',ok:de!=null,v:de!=null?hm(de)+' ('+lb[1]+')':'Not yet',ref:'§7.3(6)(C)'});
+  L.push({l:'Assigned staff',ok:true,v:STAFF[assigned(day,c)].n});
+  L.push({l:'Staff name',ok:authors.length>0,v:authors.length?authors.map(x=>STAFF[x].n).join(', '):'None',ref:'§7.3(6)(E)'});
+  L.push({l:'Summary note',ok:es.length>0,v:es.length?`From ${es.length} signed ${es.length===1?'entry':'entries'}`:'No entries yet',ref:'§7.3(6)(F)'});
+  if(CL[c].codes.includes('MTP')&&d.in!=null){
+   const ok=!!(d.am&&d.am[3]!=null&&d.pm&&d.pm[3]!=null);L.push({l:'Van record (MTP)',ok,v:ok?`Pickup ${hm(d.am[1])}, drop-off ${hm(d.pm[2+1])}`:'Afternoon pickup and drop-off missing',ref:'§13.3(3)'});
+  }
+ }
+ return L;
+}
+const nkey=(day,c,code)=>day+'|'+c+'|'+code;
+function status(day,c,code,place){
+ if(code!=='RHS'&&DG[day+'|'+c]&&DG[day+'|'+c].absent)return 'absent';
+ if(day==='thu')return 'open';
+ if(S.approved[nkey(day,c,code)])return 'approved';
+ if(entriesFor(day,c,place).some(e=>e.sb))return 'sentback';
+ return checks(day,c,code,place).every(x=>x.ok)?'ready':'missing';
+}
+const STAT={ready:['ok','Ready to approve'],missing:['crit','Missing info'],approved:['info','Approved'],open:['na','Day still open'],absent:['na','Absent'],sentback:['warn','Sent back']};
+function staffLine(day,c,place){
+ const es=entriesFor(day,c,place);const ids=[...new Set(es.map(e=>e.shift))];
+ const parts=ids.map(id=>{const s=SH(id);return `${STAFF[s.staff].n} (${shiftLabel(s)})`});
+ if(parts.length<2)return parts.join('');return parts.slice(0,-1).join(', ')+' and '+parts[parts.length-1];
+}
+function summaryText(day,c,code,place){
+ const k=nkey(day,c,code);if(S.edited[k])return S.edited[k].text;
+ const P=CL[c],es=entriesFor(day,c,place),nm=fn(c);let out=[];
+ if(code==='RHS'){
+  const a=RA[day+'|'+c];
+  if(a&&a.st==='absent')out.push(`${nm} stayed home at ${PLACES[place].n} and missed day program (absence day: ${a.why.toLowerCase()}).`);
+  else if(a&&a.away)out.push(`${nm} was home at ${PLACES[place].n} except ${hs(a.away[0])}–${hs(a.away[1])}, when ${P.pr[1]} was at ${a.why}.`);
+  else out.push(`${nm} was home at ${PLACES[place].n}.`);
+ } else {
+  const d=DG[day+'|'+c]||{};
+  if(d.absent)return `${nm} was absent: ${d.why}.`;
+  const [ds,de]=dsgSpan(d),lb=dsgLbl();out.push(`${nm} attended ${PLACES[place].n}${ds!=null?` from ${hm(ds)} (${lb[0]})`:''}${de!=null?` to ${hm(de)} (${lb[1]})`:''}.`);
+ }
+ if(es.length)out.push(`${P.pr[0]} was supported by ${staffLine(day,c,place)}.`);
+ es.forEach(e=>out.push(phrase(e,c)));
+ const g={};es.forEach(e=>{const gk=e.goals&&e.goals[c];if(gk)g[gk]=(g[gk]||0)+1});
+ const gl=Object.entries(g).map(([k,n])=>`${P.goals[k]} (${n})`);
+ if(gl.length)out.push(`Goals worked on: ${gl.join('; ')}.`);
+ return out.join(' ');
+}
+
+/* ================= phone ================= */
+function vPhone(){
+ const s=todayShift(S.me),pl=PLACES[s.place],ck=S.clock[s.id];const isR=s.place==='maple';
+ const clockedIn=ck.in!=null&&ck.out==null,done=ck.out!=null;
+ let card=`<div class="shiftcard"><span class="xs" style="opacity:.75;font-weight:700;letter-spacing:.06em;text-transform:uppercase">Today · ${DAYS.thu.n}</span>
+  <div class="t">${pl.n}</div><div class="m">${code(pl.kind)} &nbsp;${shiftLabel(s)} · ${isR?'Residential home, 3 people live here':'Day program, ratios from each person\'s Worksheet'}</div>
+  <div class="row between" style="margin-top:4px"><span class="small">${done?`Clocked out ${hm(ck.out)}`:clockedIn?`Clocked in ${hm(ck.in)}`:'Not clocked in'}</span>
+  ${!clockedIn&&!done?`<button class="btn" data-act="clockin:${s.id}">Clock in</button>`:''}</div></div>`;
+ const sbs=E.filter(e=>e.sb&&e.staff===S.me);const sbBox=sbs.length?`<div class="panel" style="border-color:var(--warn)"><div class="ph"><div><h2>Sent back to you (${sbs.length})</h2><p class="sub">Fix these and they go back to the lead. Your original stays on record.</p></div></div><div class="pb col">${sbs.map(e=>`<div class="gate"><span class="xs muted">${DAYS[e.day].n} · ${esc(e.about.map(fn).join(', '))}</span><p class="small">“${esc(e.text)}”</p><span class="xs" style="color:var(--warn);font-weight:700">${esc(first(e.sb.by))}: ${esc(e.sb.why)}</span><div><button class="btn sm pri" data-sheet="fixentry:${e.id}">Fix entry</button></div></div>`).join('')}</div></div>`:'';
+ card=sbBox+card;
+ if(!clockedIn&&!done)return `<div class="phone">${card}<div class="panel"><div class="ph"><div><h2>Clock in to start writing</h2><p class="sub">Your punch is the timesheet that proves the home was staffed. RHS has no GPS check.</p></div></div></div></div>`;
+ const people=isR?vWhoHome(s):vRoster(s);
+ const mine=E.filter(e=>e.shift===s.id).sort((a,b)=>a.t-b.t);
+ return `<div class="phone">${card}${people}
+  ${done?`<div class="panel"><div class="ph"><div><h2>What you filed</h2><p class="sub">Each box became an entry in that person's daily note.</p></div></div><div class="pb col">${mine.length?mine.map(e=>vEntry(e,true)).join(''):'<p class="small muted">Nothing filed.</p>'}</div></div>`:`
+  <div class="panel"><div class="ph"><div><h2>My notes</h2><p class="sub">${isR?`A section for each person here during your shift. Pick the goals you worked on and each gets its own box. Agency minimum: ${MIN} words per person.`:`One description of the day for your whole van, then how each person responded (${MIN_R}+ words each).`} Saves as you type.</p></div></div>
+   <div class="pb col">${!isR&&required(s).length?vActBox(s):''}${required(s).map(c=>vSection(s,c)).join('')||'<p class="small muted">No one has been picked up yet.</p>'}</div></div>
+  ${isR?`<div class="panel"><div class="ph"><div><h2>Group activities</h2><p class="sub">One activity with two or more people. Counts for everyone you tag.</p></div><button class="btn sm" data-sheet="entry">Add</button></div>
+   <div class="pb col">${mine.filter(e=>e.group).map(e=>vEntry(e,true)).join('')||'<p class="small muted">None yet.</p>'}</div></div>`:''}
+  <div class="panel"><div class="ph"><div><h2>${isR?'House log':'Program log'}</h2><p class="sub">Chores, supplies, upkeep. Kept for the ${isR?'house':'program'}; never counted for a person.</p></div></div>
+   <div class="pb"><textarea class="inp" id="housebox" rows="3" placeholder="Mopped the kitchen, took out trash, restocked gloves">${esc((E.find(e=>e.secKey===s.id+'|house|house')||{}).text||'')}</textarea></div></div>`}
+  ${done?`<div class="explain">You're clocked out. Rosa reviews Maple House notes by noon tomorrow.</div>`:`<button class="btn big" data-sheet="clockout">Clock out</button>`}
+ </div>`;
+}
+function vSection(s,c){
+ if(s.place==='lehi')return vResp(s,c);
+ const x=secOf(s,c),st=secState(s,c),P=CL[c];
+ return `<div class="gate" id="sec-${c}"><div class="row between"><b>${esc(P.n)}</b><span id="st-${c}">${pill(st.ok?'ok':'warn',st.lab)}</span></div>
+  <span class="lab">Goals you worked on</span><div class="choice g">${Object.entries(P.goals).map(([k,g])=>`<button data-sg="${c}|${k}" aria-pressed="${x.picked.includes(k)}">◎ ${esc(g)}</button>`).join('')}</div>
+  ${x.picked.map(g=>`<div class="field"><label for="t-${c}-${g}">◎ ${esc(P.goals[g])}</label><textarea class="inp" id="t-${c}-${g}" data-sec="${c}|${g}" rows="3" placeholder="What you did on this goal and how ${P.pr[1]} responded">${esc(x.txt[g]||'')}</textarea></div>`).join('')}
+  <div class="field"><label for="t-${c}-other">Other support</label><textarea class="inp" id="t-${c}-other" data-sec="${c}|other" rows="3" placeholder="Meals, health, mood, outings, anything not tied to a goal">${esc(x.txt.other||'')}</textarea></div>
+ </div>`;
+}
+function vResp(s,c){
+ const x=secOf(s,c),st=secState(s,c),P=CL[c];
+ return `<div class="gate" id="sec-${c}"><div class="row between"><b>How did ${esc(fn(c))} respond?</b><span id="st-${c}">${pill(st.ok?'ok':'warn',st.lab)}</span></div>
+  <textarea class="inp" id="t-${c}-other" data-sec="${c}|other" rows="3" placeholder="What ${P.pr[1]} did during the activity, how ${P.pr[1]} took part, mood, anything new">${esc(x.txt.other||'')}</textarea>
+  <span class="lab">Goal it tied to <span class="muted" style="font-weight:500">(optional)</span></span><div class="choice g">${Object.entries(P.goals).map(([k,g])=>`<button data-sgt="${c}|${k}" aria-pressed="${x.tagGoal===k}">◎ ${esc(g)}</button>`).join('')}</div>
+ </div>`;
+}
+function vActBox(s){
+ const e=E.find(x=>x.secKey===s.id+'|group|act'),w=words(e&&e.text);
+ return `<div class="gate" id="sec-act"><div class="row between"><b>What did the group do today?</b><span id="st-act">${pill(w>=MIN?'ok':'warn',w>=MIN?`✓ ${w} words`:`${w} of ${MIN} words`)}</span></div>
+  <textarea class="inp" id="actbox" rows="4" placeholder="Where you went, what the activity was, how the day ran. Written once for everyone on your van.">${esc((e&&e.text)||'')}</textarea>
+  <span class="xs muted">Goes into every rider's daily note. Each person still needs their own response below.</span></div>`;
+}
+function vWhoHome(s){
+ const req=required(s);
+ return `<div class="panel"><div class="ph"><div><h2>Who's home</h2><p class="sub">Mark anyone away or out sick. An absence day needs a reason (§21.3(3)).</p></div></div><div class="pb">
+ ${Object.keys(CL).filter(c=>CL[c].home===s.place).map(c=>{
+  const a=RA['thu|'+c],st2=secState(s,c);
+  const st=a.st==='absent'?pill('warn','Home · absence day'):a.away?pill('na',`Away ${hs(a.away[0])}–${hs(a.away[1])}`):pill('ok','Home');
+  const sub=a.st==='absent'?esc(a.why):'';
+  const wr=!req.includes(c)?'Not home during your shift':'Your notes: '+st2.lab;
+  return `<div class="who"><div class="av">${ini(CL[c].n)}</div><div class="nm"><b>${esc(CL[c].n)}</b><span>${wr}${sub?' · '+sub:''}</span></div>${st}<button class="btn sm" data-sheet="status:${c}">Change</button></div>`}).join('')}
+ </div></div>`;
+}
+function vRoster(s){
+ const R=S.run,riders=ROUTE.filter(c=>assigned('thu',c)===s.staff);const d=c=>DG['thu|'+c];
+ const steps=[['am','Pickups'],['day','Program'],['pm','Drop-offs']];const si=['am','day','pm','done'].indexOf(R.stage);
+ const bar=`<div class="row" style="gap:6px">${steps.map(([k,l],i)=>`<span class="pill ${i<si?'ok':i===si?'gold':'na'}">${i<si?'✓ ':''}${l}</span>`).join('')}</div>`;
+ const addr=c=>CL[c].homeAddr;
+ const stop=(c,leg)=>{const x=d(c),mv=S.move['thu|'+c];
+  if(x.absent)return `<div class="who"><div class="av">${ini(CL[c].n)}</div><div class="nm"><b>${esc(CL[c].n)}</b><span>${esc(addr(c))}</span><span>Not coming: ${esc(x.why)}</span></div>${pill('warn','Absent')}</div>`;
+  const done=leg==='am'?x.in!=null:x.out!=null;
+  const sub=leg==='am'?(done?`Picked up ${hm(x.in)}${S.dsgMode==='van'?' · DSG started':''}`:'Waiting'):(done?`Dropped off ${hm(x.out)}${S.dsgMode==='van'?' · DSG ended':''}`:'On the van');
+  const btns=done?pill('ok','✓'):leg==='am'?`<span class="row" style="gap:6px"><button class="btn sm pri" data-act="pick:${c}">Picked up</button><button class="btn sm" data-sheet="nocome:${c}">Not coming</button></span>`:`<button class="btn sm pri" data-act="drop:${c}">Dropped off</button>`;
+  return `<div class="who"><div class="av">${ini(CL[c].n)}</div><div class="nm"><b>${esc(CL[c].n)}</b><span>${esc(addr(c))}</span><span>${sub}</span>${mv&&leg==='am'?`<span style="color:var(--info)">${esc(mv.why)}</span>`:''}</div>${btns}</div>`};
+ let body='';
+ if(R.stage==='am'){const left=riders.filter(c=>!d(c).absent&&d(c).in==null).length;
+  body=`${riders.map(c=>stop(c,'am')).join('')}<div class="field" style="margin-top:10px"><span class="lab">Then drop everyone at</span><div class="choice">${['Lehi Day Program','Community outing: Lehi Rec Center'].map(x=>`<button data-dest="${x}" aria-pressed="${R.dest===x}">${x}</button>`).join('')}</div></div>
+  <button class="btn pri big" data-act="arrive" ${left||!R.dest?'disabled':''} style="margin-top:8px">${left?`${left} stop${left>1?'s':''} left`:`Arrived at ${R.dest?esc(R.dest.replace('Community outing: ','')):'…'}`}</button>`;}
+ if(R.stage==='day'){const on=riders.filter(c=>d(c).in!=null&&!d(c).absent);
+  body=`<p class="small">At <b>${esc(R.dest)}</b> since ${hm(R.arrive)}. ${on.map(c=>`${esc(fn(c))} (since ${hm(d(c).in)})`).join(', ')}.</p><p class="xs muted">Write your notes below during the day. When you load the van:</p><button class="btn pri big" data-act="leave" style="margin-top:8px">Heading home: start drop-offs</button>`;}
+ if(R.stage==='pm')body=riders.filter(c=>!d(c).absent).slice().reverse().map(c=>stop(c,'pm')).join('');
+ if(R.stage==='done')body=`<p class="small">Route done. Every pickup and drop-off is on the van record (§13.3(3)).</p>`;
+ return `<div class="panel"><div class="ph"><div><h2>My van today</h2><p class="sub">Your riders are your group. Each tap saves the time and place. ${S.dsgMode==='van'?'DSG runs from each person\'s pickup to their drop-off':'DSG runs from Arrived to Heading home'} (agency setting).</p></div></div><div class="pb col" style="gap:10px">${bar}<div>${body}</div></div></div>`;
+}
+function vEntry(e,mineView){
+ const tags=e.about==='house'?`<span class="tag house">${e.place==='maple'?'House log':'Program log'}</span>`:e.about.map(c=>`<span class="tag">${esc(fn(c))}</span>`).join('');
+ const gl=e.about==='house'?'':Object.entries(e.goals||{}).map(([c,g])=>`<span class="goal">◎ ${esc(CL[c].goals[g])}</span>`).join('');
+ const nb=e.group?`<span class="tag">Group activity</span>`:'';
+ const sh=SH(e.shift);const split=sh&&sh.day!==e.day?` · from ${first(sh.staff)}'s ${DAYS[sh.day].s} overnight, filed to ${DAYS[e.day].s} after midnight`:'';
+ const canSend=!mineView&&e.day!=='thu'&&e.about!=='house'&&!e.sb&&!(Array.isArray(e.about)&&e.about.some(c=>S.approved[nkey(e.day,c,e.place==='maple'?'RHS':(CL[c].codes.includes('DSP')?'DSP':'DSG'))]));
+ const sbx=e.sb?`<div class="explain" style="color:var(--warn)"><b>Sent back to ${esc(first(e.staff))}</b> by ${esc(first(e.sb.by))}: ${esc(e.sb.why)}</div>`:'';
+ const ed=e.orig?`<div class="xs muted">Fixed after send-back. Original: “${esc(e.orig)}”</div>`:'';
+ return `<div class="entry"><div class="meta"><b style="color:var(--ink)">${mineView?'':esc(STAFF[e.staff].n)+' · '}${hm(e.t)}</b>${tags}${nb}${split?`<span>${split}</span>`:''}</div><p>${esc(e.text)}</p>${gl?`<div class="row">${gl}</div>`:''}${ed}${sbx}${canSend?`<div><button class="btn sm" data-sheet="sendback:${e.id}">Send back to ${esc(first(e.staff))}</button></div>`:''}</div>`;
+}
+
+/* ================= sheets ================= */
+function vSheet(){
+ if(!S.sheet)return '';const s=todayShift(S.me);let b='';
+ if(S.sheet==='entry'){
+  const avail=required(s);const d=S.draft,w=words(d.text);
+  const okSave=d.about.length>=2&&w>=MIN;
+  b=`<h2>Group activity</h2>
+  <div class="field"><label for="etext">What did you do together, and how did each person take part?</label><textarea class="inp" id="etext" rows="5" placeholder="Cooked tacos together. Riley browned the meat, Sam set the table, Jo picked the music.">${esc(d.text)}</textarea>
+  <span class="hint" id="wc">${w<MIN?`${w} of ${MIN} words.`:'Good.'}</span></div>
+  <div class="field"><span class="lab">Who took part? (2 or more)</span><div class="choice">${avail.map(c=>`<button data-tag="${c}" aria-pressed="${d.about.includes(c)}">${esc(fn(c))}</button>`).join('')}</div>
+  <span class="hint">This counts as a note for everyone you tag. It goes into each of their daily notes.</span></div>
+  ${d.about.map(c=>`<div class="field"><span class="lab">${esc(fn(c))}'s goal <span class="muted" style="font-weight:500">(optional)</span></span><div class="choice g">${Object.entries(CL[c].goals).map(([k,g])=>`<button data-goal="${c}|${k}" aria-pressed="${d.goals[c]===k}">◎ ${esc(g)}</button>`).join('')}</div></div>`).join('')}
+  <div class="row"><button class="btn pri" data-act="save" ${okSave?'':'disabled'}>Save group activity</button><button class="btn" data-act="close">Cancel</button></div>`;
+ }
+ if(S.sheet==='sendback'){
+  const e=E.find(x=>x.id===S.sheetArg),d=S.sbDraft||(S.sbDraft={why:''});const lead=PLACES[e.place].lead;
+  b=`<h2>Send back to ${esc(STAFF[e.staff].n)}</h2><p class="small">“${esc(e.text)}”</p>
+  <div class="field"><span class="lab">What needs fixing (required)</span><div class="choice">${['Too thin: say what they did and how they responded','Missing how the client responded','Wrong client tagged','Unclear wording'].map(r=>`<button data-sbw="${r}" aria-pressed="${d.why===r}">${r}</button>`).join('')}</div><input class="inp" id="sbx" value="${esc(d.why)}" placeholder="Or write your own"></div>
+  <span class="hint">${esc(first(e.staff))} sees it on their phone. The note stays out of billing until it's fixed and you approve it.</span>
+  <div class="row"><button class="btn pri" data-act="sendback:${e.id}" ${d.why.trim()?'':'disabled'}>Send back as ${esc(first(lead))}</button><button class="btn" data-act="close">Cancel</button></div>`;
+ }
+ if(S.sheet==='fixentry'){
+  const e=E.find(x=>x.id===S.sheetArg);
+  b=`<h2>Fix your entry</h2><p class="xs muted">${DAYS[e.day].n} · ${esc(e.about.map(fn).join(', '))} · ${esc(first(e.sb.by))}: ${esc(e.sb.why)}</p>
+  <div class="field"><label for="fxtext">Your entry</label><textarea class="inp" id="fxtext" rows="5">${esc(e.text)}</textarea><span class="hint" id="fxwc">${words(e.text)} words</span></div>
+  <div class="row"><button class="btn pri" data-act="fixentry:${e.id}" id="fxsave" disabled>Send to ${esc(first(e.sb.by))}</button><button class="btn" data-act="close">Cancel</button></div>`;
+ }
+ if(S.sheet==='settings'){}
+ if(S.sheet==='status'){
+  const c=S.sheetArg,a=RA['thu|'+c],sd=S.statDraft||(S.statDraft={st:a.st==='absent'?'absent':a.away?'away':'home',why:a.why||'',away:a.away||[12,14]});
+  b=`<h2>${esc(CL[c].n)} today</h2>
+  <div class="choice">${[['home','Home'],['away','Away part of the day'],['absent','Absence day']].map(([k,l])=>`<button data-st="${k}" aria-pressed="${sd.st===k}">${l}</button>`).join('')}</div>
+  ${sd.st==='away'?`<div class="field"><span class="lab">Away from</span><div class="choice">${[10,11,12,13].map(t=>`<button data-aw="0|${t}" aria-pressed="${sd.away[0]===t}">${hm(t)}</button>`).join('')}</div><span class="lab">Back at</span><div class="choice">${[13,14,15,16].map(t=>`<button data-aw="1|${t}" aria-pressed="${sd.away[1]===t}">${hm(t)}</button>`).join('')}</div><span class="hint">Staff on shift only write about ${esc(fn(c))} for the time ${CL[c].pr[1]}'s home.</span></div>`:''}
+  ${sd.st==='absent'?`<div class="field"><span class="lab">Reason (required)</span><div class="choice">${['Sick','Medical appointment','Family visit','Program closed'].map(r=>`<button data-why="${r}" aria-pressed="${sd.why.startsWith(r)}">${r}</button>`).join('')}</div><input class="inp" id="whyx" value="${esc(sd.why)}" placeholder="Add detail"><span class="hint">Uses 1 of ${ABS_YEAR} absence days this plan year (${CL[c].absUsed} used). ${CL[c].prog?'Lehi Day Program sees this right away.':''}</span></div>`:''}
+  <div class="row"><button class="btn pri" data-act="savestat:${c}" ${sd.st==='absent'&&!sd.why.trim()?'disabled':''}>Save</button><button class="btn" data-act="close">Cancel</button></div>`;
+ }
+ if(S.sheet==='nocome'){
+  const c=S.sheetArg,dd=S.dtDraft||(S.dtDraft={why:''});
+  b=`<h2>${esc(CL[c].n)} isn't coming</h2><div class="field"><span class="lab">Reason (required)</span><div class="choice">${['Sick','Appointment','Family plans','Not home, no answer'].map(r=>`<button data-dw="${r}" aria-pressed="${dd.why===r}">${r}</button>`).join('')}</div><span class="hint">Marks ${esc(fn(c))} absent today, skips the drop-off, and no note is owed.</span></div>
+  <div class="row"><button class="btn pri" data-act="nocome:${c}" ${dd.why?'':'disabled'}>Save</button><button class="btn" data-act="close">Cancel</button></div>`;
+ }
+ if(S.sheet==='clockout'){
+  const g=gateItems(s),actW=s.place==='lehi'?words((E.find(e=>e.secKey===s.id+'|group|act')||{}).text):MIN,ok=actW>=MIN&&g.every(x=>!x.need.length);
+  b=`<h2>Before you clock out</h2><p class="small muted">${s.place==='maple'?'Everyone who was home during your shift needs an entry from you, or a reason you didn\'t support them.':'Everyone who came today needs a departure time and an entry.'}</p>
+  ${actW<MIN?`<div class="gate" style="border-color:var(--crit)"><div class="row between"><b>Today's activity</b>${pill('crit',actW+' of '+MIN+' words')}</div><div class="row"><button class="btn sm pri" data-act="gosec:act">Go to it</button></div></div>`:''}
+  ${g.map(x=>`<div class="gate"><div class="row between"><b>${esc(CL[x.c].n)}</b>${x.need.length?pill('crit',x.need.map(n=>n==='entry'?x.st.lab:'Not dropped off yet').join(' · ')):pill('ok',x.st.lab)}</div>
+   ${x.sk?`<span class="xs muted">Didn't support: ${esc(x.sk)}</span>`:''}
+   ${x.need.length?`<div class="row">${x.need.includes('entry')?`<button class="btn sm pri" data-act="gosec:${x.c}">Go to ${esc(fn(x.c))}'s section</button>${s.place==='maple'?`<button class="btn sm" data-act="skipask:${x.c}">I didn't support ${esc(fn(x.c))}</button>`:''}`:''}${x.need.includes('left')?`<button class="btn sm" data-sheet="time:${x.c}|out">Mark left</button>`:''}</div>`:''}
+   ${x.need.includes('entry')?`<button class="btn sm" data-act="ovask:${x.c}">Supervisor override</button>`:''}
+   ${S.ovDraft===x.c?`<div class="field"><label for="ovwhy">Supervisor's reason (required)</label><input class="inp" id="ovwhy" placeholder="Ella's mom picked her up at noon; no time with her"><div><button class="btn sm pri" data-act="ovok:${x.c}">Approve as ${esc(STAFF[PLACES[s.place].lead].n)}</button></div><span class="hint">Needs someone who can edit timesheets. Saved to the audit log and shown on the timesheet.</span></div>`:''}
+   ${S.skipDraft===x.c?`<div class="choice">${['Asleep my whole shift','With family or a visitor','Refused support','Another staff supported them'].map(r=>`<button data-act="skip:${x.c}|${r}">${r}</button>`).join('')}</div>`:''}
+  </div>`).join('')}
+  <div class="row"><button class="btn pri" data-act="clockout:${s.id}" ${ok?'':'disabled'}>Clock out at ${hm(s.b)}</button><button class="btn" data-act="close">Not yet</button></div>`;
+ }
+ if(S.sheet==='fix'){
+  const fd=S.fixDraft||(S.fixDraft={t:14.92,why:''});
+  b=`<h2>Add Hazel's departure</h2><p class="small muted">Priya didn't mark when Hazel left on Wed. Adding it as the lead keeps both the gap and the fix on record.</p>
+  <div class="field"><span class="lab">Left at</span><div class="choice">${[14.75,14.92,15].map(t=>`<button data-fx="${t}" aria-pressed="${fd.t===t}">${hm(t)}</button>`).join('')}</div></div>
+  <div class="field"><label for="fxwhy">How you know</label><input class="inp" id="fxwhy" value="${esc(fd.why)}" placeholder="Priya confirmed by text; van log shows 3:18 PM drop-off"></div>
+  <div class="row"><button class="btn pri" data-act="savefix" ${fd.why.trim()?'':'disabled'}>Save</button><button class="btn" data-act="close">Cancel</button></div>`;
+ }
+ return `<div class="scrim" data-act="close"></div><div class="sheet" role="dialog" aria-modal="true"><div class="handle"></div>${b}</div>`;
+}
+
+/* ================= office ================= */
+function vOffice(){
+ const wedPending=['maple','lehi'].flatMap(p=>notesOf(p).map(n=>status('wed',n.c,n.code,p))).filter(x=>x==='ready'||x==='missing'||x==='sentback').length;
+ const navs=[['review','Review notes',wedPending],['note','Daily note',0],['house','House log',0],['settings','Note settings',0]];
+ const P={review:oReview,note:oNote,house:oHouse,settings:oSettings}[S.opage];
+ return `<div class="shell"><nav class="nav" aria-label="Office"><div class="logo">True North Supports</div>${navs.map(([k,l,n])=>`<button data-op="${k}" ${S.opage===k?'aria-current="page"':''}>${l}${n?`<span class="cnt warn">${n}</span>`:''}</button>`).join('')}</nav><main class="om gut">${P()}</main></div>`;
+}
+function dayTabs(){return `<div class="seg">${['wed','thu'].map(d=>`<button data-oday="${d}" aria-pressed="${S.oday===d}">${DAYS[d].n}${d==='wed'?' · due noon':' · today'}</button>`).join('')}</div>`}
+function oReview(){
+ const day=S.oday;
+ const flags=[];
+ const blocks=['maple','lehi'].map(p=>{
+  const ns=notesOf(p),lead=PLACES[p].lead,readyN=ns.filter(n=>status(day,n.c,n.code,p)==='ready').length;
+  return `<section class="panel"><div class="ph"><div><h2>${PLACES[p].n} ${code(PLACES[p].kind)}</h2><p class="sub">Reviewer: ${STAFF[lead].n}, ${STAFF[lead].t.toLowerCase()} · ${day==='wed'?'due today at noon':'notes keep filling in until midnight'}</p></div>${day==='wed'?`<button class="btn sm pri" data-act="approveall:${p}" ${readyN?'':'disabled'}>Approve ${readyN} ready</button>`:''}</div>
+  <div class="tw"><table class="t"><thead><tr><th>Person</th><th>Code</th><th>Writes the note</th><th>Written by</th><th>Entries</th><th>Status</th><th></th></tr></thead><tbody>
+  ${ns.map(n=>{const es=entriesFor(day,n.c,p),st=status(day,n.c,n.code,p),au=[...new Set(es.map(e=>first(e.staff)))];
+   return `<tr><td><b>${esc(CL[n.c].n)}</b></td><td>${code(n.code)}${CL[n.c].codes.includes('MTP')&&p==='lehi'?' '+code('MTP'):''}</td><td class="small">${p==='maple'?'Everyone on shift':esc(first(assigned(day,n.c)))+(S.move[day+'|'+n.c]?' (moved today)':'')}</td><td class="small">${au.join(', ')||'<span class="muted">—</span>'}</td><td class="num">${es.length}</td><td>${pill(...STAT[st])}</td><td><button class="btn sm" data-open="${day}|${n.c}|${n.code}">Open</button></td></tr>`}).join('')}
+  </tbody></table></div>${p==='lehi'?vGroups(day):''}</section>`});
+ return `<div class="pagehead"><div><h1>Review notes</h1><p class="sub">One daily note per person, built from every staff entry that day. Leads check yesterday's notes by noon. Today's notes stay open until midnight.</p></div>${dayTabs()}</div>${flags.join('')}${blocks.join('')}`;
+}
+function vGroups(day){
+ const on=SHIFTS.filter(x=>x.day===day&&x.place==='lehi').map(x=>x.staff);
+ const cs=Object.keys(CL).filter(c=>CL[c].prog==='lehi');
+ return `<div class="pb" style="border-top:1px solid var(--line);padding-top:12px"><h3>Groups</h3><p class="xs muted" style="margin:2px 0 8px">Van groups: ${Object.entries(GROUPS).map(([k,v])=>`${first(k)}: ${v.map(fn).join(', ')}`).join(' · ')}. When a driver is off, move their riders to a van that's running. 1:1 people always have a named staff (§7.3(2)).</p>
+  ${cs.map(c=>{const a=assigned(day,c),mv=S.move[day+'|'+c],off=!on.includes(a);return `<div class="row between" style="padding:6px 0;border-top:1px solid var(--line)"><span class="small"><b>${esc(CL[c].n)}</b> → ${esc(first(a))}${mv?` <span class="muted">· ${esc(mv.why)}</span>`:''}${off?` ${pill('crit',first(a)+' is not on shift')}`:''}</span><span class="choice">${on.map(st=>`<button data-mv="${day}|${c}|${st}" aria-pressed="${a===st}">${first(st)}</button>`).join('')}</span></div>`}).join('')}</div>`;
+}
+function oNote(){
+ const day=S.oday,c=S.oc;
+ const codes=[];if(CL[c].home)codes.push(['RHS','maple']);if(CL[c].prog)codes.push([CL[c].codes.includes('DSP')?'DSP':'DSG','lehi']);
+ if(!codes.find(x=>x[0]===S.ocode))S.ocode=codes[0][0];
+ const [cd,place]=codes.find(x=>x[0]===S.ocode);
+ const k=nkey(day,c,cd),st=status(day,c,cd,place),L=checks(day,c,cd,place),es=entriesFor(day,c,place);
+ const ed=S.edited[k];
+ const picker=`<div class="row"><div class="seg">${Object.keys(CL).map(x=>`<button data-oc="${x}" aria-pressed="${x===c}">${esc(fn(x))}</button>`).join('')}</div>${dayTabs()}</div>`;
+ const codeTabs=codes.length>1?`<div class="seg">${codes.map(([x,p])=>`<button data-ocode="${x}" aria-pressed="${x===cd}">${x} · ${PLACES[p].n}</button>`).join('')}</div>`:'';
+ const d=DG[day+'|'+c];
+ const mtp=cd!=='RHS'&&CL[c].codes.includes('MTP')&&d&&!d.absent&&d.in!=null?`<section class="panel"><div class="ph"><div><h2>Van record ${code('MTP')}</h2><p class="sub">Separate MTP record, kept with the day program note (§13.3(3)).</p></div></div><div class="pb tw"><table class="t" style="min-width:420px"><thead><tr><th>Leg</th><th>Pickup</th><th>Drop-off</th><th>Driver</th></tr></thead><tbody>
+  ${[['Morning',d.am],['Afternoon',d.pm]].map(([l,v])=>`<tr><td>${l}</td><td>${v?`${esc(v[0])} · ${hm(v[1])}`:'<span style="color:var(--crit);font-weight:700">Missing</span>'}</td><td>${v?`${esc(v[2])} · ${hm(v[3])}`:'—'}</td><td>${d.driver?first(d.driver):'—'}</td></tr>`).join('')}</tbody></table></div></section>`:'';
+ return `<div class="pagehead"><div><h1>${esc(CL[c].n)} · ${DAYS[day].n}</h1><p class="sub">${cd==='RHS'?'Residential daily note: one per person per day, any number of staff. No start or end time is required for RHS.':'Day program note: one per person per day, with the person\'s own arrival and departure times.'}</p></div>${pill(...STAT[st])}</div>
+ ${picker}${codeTabs}
+ <div class="noteGrid">
+  <div class="col" style="gap:16px">
+   <section class="panel"><div class="ph"><div><h2>How ${esc(fn(c))} was supported</h2><p class="sub">${ed?`Edited by ${STAFF[ed.by].n}. Original entries stay below unchanged.`:`Written from ${es.length} signed ${es.length===1?'entry':'entries'}. In the product this summary is AI-written; every sentence traces to an entry below.`}</p></div>
+    ${st==='absent'?'':`<button class="btn sm" data-act="edit">${S.editing?'Cancel':'Edit'}</button>`}</div>
+    <div class="pb">${S.editing?`<textarea class="inp" id="sumedit" rows="7">${esc(summaryText(day,c,cd,place))}</textarea><div class="row" style="margin-top:8px"><button class="btn pri sm" data-act="saveedit:${k}">Save summary</button></div>`:`<p class="summary">${esc(summaryText(day,c,cd,place))}</p>`}</div></section>
+   ${mtp}
+   <section class="panel"><div class="ph"><div><h2>Signed entries</h2><p class="sub">What each staff member wrote, in time order. Group entries show who else was tagged.</p></div></div>
+    <div class="pb tl">${es.length?es.map(e=>vEntry(e,false)).join(''):'<p class="small muted">No entries yet.</p>'}</div></section>
+   ${(()=>{const hl=houseFor(day,place);return hl.length?`<section class="panel"><div class="ph"><div><h2>${place==='maple'?'Around the house':'Around the program'} that day</h2><p class="sub">From the ${place==='maple'?'house':'program'} log. Shown for context; not counted as ${esc(fn(c))}'s support.</p></div></div><div class="pb tl">${hl.map(e=>vEntry(e,false)).join('')}</div></section>`:''})()}
+  </div>
+  <aside class="col" style="gap:16px">
+   <section class="panel"><div class="ph"><div><h2>Contract check</h2><p class="sub">${cd==='RHS'?'SOW §21.3(9)':'SOW §7.3(6)'} fields for this note</p></div></div>
+    <div class="pb"><ul class="chk">${L.map(x=>`<li><span class="ic ${x.ok?'y':'n'}">${x.ok?'✓':'!'}</span><span><b>${x.l}</b><span class="v">${esc(x.v)}${x.ref?' · '+x.ref:''}</span></span></li>`).join('')}</ul></div></section>
+   ${st==='ready'?`<button class="btn pri big" data-act="approve:${k}">Approve as ${STAFF[PLACES[place].lead].n}</button>`:st==='approved'?`<div class="explain">Approved by ${STAFF[PLACES[place].lead].n}. Locked for billing; later changes are added as amendments.</div>`:st==='open'?`<div class="explain">Today's note keeps filling in as staff write. It locks for review at midnight.</div>`:st==='missing'?`<div class="explain">Can't approve until the items marked ! are fixed.</div>`:''}
+  </aside>
+ </div>`;
+}
+function oHouse(){
+ const day=S.oday;
+ return `<div class="pagehead"><div><h1>House log</h1><p class="sub">Chores, supplies and upkeep that aren't about one person. Kept for the house, never counted as a person's daily note.</p></div>${dayTabs()}</div>
+ ${['maple','lehi'].map(p=>{const hs_=houseFor(day,p);return `<section class="panel"><div class="ph"><h2>${PLACES[p].n}</h2></div><div class="pb tl">${hs_.length?hs_.map(e=>vEntry(e,false)).join(''):'<p class="small muted">Nothing logged.</p>'}</div></section>`}).join('')}`;
+}
+function oSettings(){
+ return `<div class="pagehead"><div><h1>Note settings</h1><p class="sub">Agency-wide. Changes apply to shifts that start after you save. Absence days now show on each home's page, and day program hours on the program's page, in the scheduler.</p></div></div>
+ <section class="panel"><div class="ph"><div><h2>Note minimums</h2><p class="sub">Staff can't clock out until each client's section reaches the minimum, or they give a reason, or a supervisor overrides.</p></div></div><div class="pb col">
+  <div class="field"><label for="setmin">Homes: words per client, per shift</label><input class="inp" id="setmin" type="number" min="5" max="200" value="${MIN}" style="max-width:120px"></div>
+  <div class="field"><label for="setminr">Day programs: words per client response (the shared activity box uses the homes number)</label><input class="inp" id="setminr" type="number" min="5" max="200" value="${MIN_R}" style="max-width:120px"></div>
+  <div><button class="btn pri" data-act="savemin">Save minimums</button></div></div></section>
+ <section class="panel"><div class="ph"><div><h2>Day program start and end times</h2><p class="sub">Each client's own DSG/DSP start and end time (§7.3(6)). Van pickups and drop-offs are always kept as the MTP record (§13.3(3)).</p></div></div><div class="pb col">
+  <div class="choice">${[['arrive','Arrived at program → Heading home (default)'],['van','Van pickup → van drop-off']].map(([k,l])=>`<button data-dsgm="${k}" aria-pressed="${S.dsgMode===k}">${l}</button>`).join('')}</div>
+  <span class="hint">Van pickup → drop-off overlaps MTP transport time. Check with DSPD before choosing it (§2.1(5)(G)).</span></div></section>`;
+}
+
+/* ================= render & events ================= */
+function render(){
+ const st=S.mode==='phone';
+ document.getElementById('app').innerHTML=`<div class="demo gut"><b>DEMO</b>
+  <div class="seg">${[['phone','Staff phone'],['office','Office']].map(([k,l])=>`<button data-mode="${k}" aria-pressed="${S.mode===k}">${l}</button>`).join('')}</div>
+  ${st?`<div class="seg">${[['sara','Sara · Maple 9a–3p'],['johnny','Johnny · Maple 3p–12a'],['priya','Priya · Lehi DSG']].map(([k,l])=>`<button data-me="${k}" aria-pressed="${S.me===k}">${l}</button>`).join('')}</div>`:''}
+  <span class="xs" style="opacity:.7">Reload to reset</span></div>
+  ${st?`<div class="phonewrap gut">${vPhone()}</div>`:vOffice()}${(st||S.sheet==='sendback')?vSheet():''}${S.toast?`<div class="toast" role="status">${esc(S.toast)}</div>`:''}`;
+}
+let tt;function toast(m){S.toast=m;render();clearTimeout(tt);tt=setTimeout(()=>{S.toast=null;render()},3200)}
+function close(){S.sheet=null;S.sheetArg=null;S.statDraft=null;S.skipDraft=null;S.fixDraft=null;S.dtDraft=null;S.sbDraft=null;render()}
+
+document.addEventListener('click',ev=>{
+ const t=ev.target.closest('button,[data-act]');if(!t)return;const d=t.dataset;
+ if(d.mode){S.mode=d.mode;S.sheet=null;render();return}
+ if(d.me){S.me=d.me;S.sheet=null;render();return}
+ if(d.op){S.opage=d.op;S.editing=false;render();return}
+ if(d.oday){S.oday=d.oday;S.editing=false;render();return}
+ if(d.oc){S.oc=d.oc;S.editing=false;render();return}
+ if(d.ocode){S.ocode=d.ocode;S.editing=false;render();return}
+ if(d.open){const [dy,c,cd]=d.open.split('|');S.oday=dy;S.oc=c;S.ocode=cd;S.opage='note';S.editing=false;render();window.scrollTo(0,0);return}
+ if(d.sheet!==undefined){const [k,a]=d.sheet.split(/:(.*)/s);if(k==='entry'&&S.sheet!=='entry')S.draft={text:'',about:[],goals:{}};S.sheet=k||null;S.sheetArg=a||null;if(k==='status')S.statDraft=null;if(k==='nocome')S.dtDraft=null;render();if(k==='entry')focusText();return}
+ if(d.tag){const dr=S.draft;const i=dr.about.indexOf(d.tag);if(i>=0){dr.about.splice(i,1);delete dr.goals[d.tag]}else dr.about.push(d.tag);render();return}
+ if(d.goal){const [c,g]=d.goal.split('|');S.draft.goals[c]=S.draft.goals[c]===g?undefined:g;if(!S.draft.goals[c])delete S.draft.goals[c];render();return}
+ if(d.st){S.statDraft.st=d.st;render();return}
+ if(d.aw){const [i,v]=d.aw.split('|');S.statDraft.away[+i]=+v;render();return}
+ if(d.why){S.statDraft.why=d.why;render();return}
+ if(d.fx){S.fixDraft.t=+d.fx;render();return}
+ if(d.dw){S.dtDraft.why=d.dw;render();return}
+ if(d.dest){S.run.dest=d.dest;render();return}
+ if(d.mv){const [dy,c,st]=d.mv.split('|');const std=Object.keys(GROUPS).find(k=>GROUPS[k].includes(c));if(st===std)delete S.move[dy+'|'+c];else S.move[dy+'|'+c]={to:st,why:`Moved from ${first(std)} by Dana Whit.`};toast(`${fn(c)} is with ${first(st)}`);return}
+ if(d.sbw){S.sbDraft.why=d.sbw;render();return}
+ if(d.dsgm){S.dsgMode=d.dsgm;toast(d.dsgm==='van'?'DSG now runs pickup to drop-off':'DSG now runs Arrived to Heading home');return}
+ if(d.sgt){const [c,g]=d.sgt.split('|');const s=todayShift(S.me),x=secOf(s,c);x.tagGoal=x.tagGoal===g?null:g;upsert(s,c,'other',x.txt.other||'');render();return}
+ if(d.sg){const [c,g]=d.sg.split('|');const s=todayShift(S.me),x=secOf(s,c);if(x.picked.includes(g)){x.picked=x.picked.filter(y=>y!==g);delete x.txt[g];upsert(s,c,g,'')}else x.picked.push(g);render();const t=document.getElementById(`t-${c}-${g}`);if(t)t.focus();return}
+ const act=d.act;if(!act)return;const [a,arg]=act.split(/:(.*)/s);
+ if(a==='close')return close();
+ if(a==='clockin'){const s=SH(arg);S.clock[arg].in=s.a-0.03;toast(`Clocked in at ${hm(s.a-0.03)}`);return}
+ if(a==='save'){
+  const s=todayShift(S.me),dr=S.draft;const t=S.now[S.me];S.now[S.me]=Math.min(t+0.15,s.b-0.05);
+  E.push({id:'n'+(EID++),place:s.place,day:'thu',t,staff:S.me,shift:s.id,about:[...dr.about],goals:{...dr.goals},text:dr.text.trim(),group:true});
+  const who=dr.about.map(fn).join(', ');S.draft={text:'',about:[],goals:{}};S.sheet=null;toast(`Saved to ${who}'s daily notes`);return}
+ if(a==='sendback'){const e=E.find(x=>x.id===arg),why=((document.getElementById('sbx')||{}).value||S.sbDraft.why).trim();e.sb={why,by:PLACES[e.place].lead};close();toast(`Sent back to ${first(e.staff)}`);return}
+ if(a==='fixentry'){const e=E.find(x=>x.id===arg),v=document.getElementById('fxtext').value.trim();e.orig=e.orig||e.text;e.text=v;if(e.phr)e.phr={};const to=first(e.sb.by);delete e.sb;close();toast(`Sent to ${to} for review`);return}
+ if(a==='ovask'){S.ovDraft=S.ovDraft===arg?null:arg;S.skipDraft=null;render();return}
+ if(a==='ovok'){const why=(document.getElementById('ovwhy')||{}).value||'';if(!why.trim()){toast('Add the supervisor\'s reason first');return}const s=todayShift(S.me);S.skip[s.id+'|'+arg]=`Supervisor override by ${STAFF[PLACES[s.place].lead].n}: ${why.trim()}`;S.ovDraft=null;render();return}
+ if(a==='savemin'){const a1=+document.getElementById('setmin').value,a2=+document.getElementById('setminr').value;if(!(a1>=5&&a2>=5)){toast('Minimums must be at least 5 words');return}MIN=a1;MIN_R=a2;toast('Minimums saved');return}
+ if(a==='gosec'){S.sheet=null;S.skipDraft=null;render();const el=document.getElementById('sec-'+arg);if(el){el.scrollIntoView({block:'start'});const t=el.querySelector('textarea');if(t)t.focus({preventScroll:true})}return}
+ if(a==='skipask'){S.skipDraft=S.skipDraft===arg?null:arg;render();return}
+ if(a==='skip'){const [c,r]=arg.split('|');S.skip[todayShift(S.me).id+'|'+c]=r;S.skipDraft=null;render();return}
+ if(a==='clockout'){const s=SH(arg);S.clock[arg].out=s.b;S.sheet=null;const cs=[...new Set(E.filter(e=>e.shift===arg&&Array.isArray(e.about)).flatMap(e=>e.about))].map(fn);toast(`Clocked out. Your entries are in ${cs.join(', ')||'the'} daily notes.`);return}
+ if(a==='savestat'){const c=arg,sd=S.statDraft;const why=(document.getElementById('whyx')||{}).value||sd.why;
+  RA['thu|'+c]=sd.st==='home'?{st:'home'}:sd.st==='away'?{st:'home',away:[...sd.away],why:'an outing'}:{st:'absent',why:why.trim(),by:S.me};
+  if(CL[c].prog){const dg=DG['thu|'+c];if(sd.st==='absent')DG['thu|'+c]={absent:true,why:why.trim()+' (reported by Maple House)'};else if(dg&&dg.absent)DG['thu|'+c]={in:null,out:null};}
+  close();toast(`${fn(c)} updated`);return}
+ if(a==='pick'){const c=arg,t=S.now.priya;S.now.priya+=0.2;DG['thu|'+c]={in:t,out:null,am:[CL[c].homeAddr,t,null,null],pm:null,driver:'priya'};toast(`${fn(c)} picked up at ${hm(t)}`);return}
+ if(a==='nocome'){DG['thu|'+arg]={absent:true,why:S.dtDraft.why};close();toast(`${fn(arg)} marked absent`);return}
+ if(a==='arrive'){const t=S.now.priya;S.run.stage='day';S.run.arrive=t;const dest=S.run.dest.replace('Community outing: ','');ROUTE.forEach(c=>{const x=DG['thu|'+c];if(x&&x.am){x.am[2]=dest;x.am[3]=t}});S.now.priya=Math.max(t+0.1,10);toast(`Arrived at ${dest} at ${hm(t)}`);return}
+ if(a==='leave'){const t=14.75;S.run.stage='pm';S.run.leave=t;S.now.priya=t+0.25;const dest=S.run.dest.replace('Community outing: ','');ROUTE.forEach(c=>{const x=DG['thu|'+c];if(x&&x.in!=null&&!x.absent)x.pm=[dest,t,CL[c].homeAddr,null]});toast(`Left ${dest} at ${hm(t)}. Demo clock jumped ahead.`);return}
+ if(a==='drop'){const c=arg,t=S.now.priya;S.now.priya+=0.25;const x=DG['thu|'+c];x.out=t;x.pm[3]=t;if(ROUTE.every(r=>{const y=DG['thu|'+r];return assigned('thu',r)!=='priya'||y.absent||y.out!=null}))S.run.stage='done';toast(`${fn(c)} dropped off at ${hm(t)}`);return}
+ if(a==='approve'){S.approved[arg]=true;toast('Approved');return}
+ if(a==='approveall'){const p=arg;let n=0;notesOf(p).forEach(x=>{if(status('wed',x.c,x.code,p)==='ready'){S.approved[nkey('wed',x.c,x.code)]=true;n++}});toast(`Approved ${n} notes`);return}
+ if(a==='edit'){S.editing=!S.editing;render();return}
+ if(a==='saveedit'){const v=document.getElementById('sumedit').value;const [dy,c,cd]=arg.split('|');S.edited[arg]={text:v,by:PLACES[cd==='RHS'?'maple':'lehi'].lead};S.editing=false;toast('Summary saved');return}
+ if(a==='savefix'){const fd=S.fixDraft;const dg=DG['wed|hazel'];dg.out=fd.t;dg.pm=['Lehi Day Program',fd.t,'Home (American Fork)',fd.t+0.4];dg.fix={by:'dana',why:fd.why};close();toast('Departure time added by Dana');return}
+});
+let gateOpenAfter=false;function reopenGate(){}
+document.addEventListener('input',ev=>{
+ if(ev.target.dataset&&ev.target.dataset.sec){const [c,slot]=ev.target.dataset.sec.split('|');const s=todayShift(S.me),x=secOf(s,c);x.txt[slot]=ev.target.value;upsert(s,c,slot,ev.target.value);const st=secState(s,c),el=document.getElementById('st-'+c);if(el)el.innerHTML=pill(st.ok?'ok':'warn',st.lab);return}
+ if(ev.target.id==='actbox'){const s=todayShift(S.me);upsert(s,'group','act',ev.target.value);const w=words(ev.target.value),el=document.getElementById('st-act');if(el)el.innerHTML=pill(w>=MIN?'ok':'warn',w>=MIN?`✓ ${w} words`:`${w} of ${MIN} words`);return}
+ if(ev.target.id==='housebox'){upsert(todayShift(S.me),'house','house',ev.target.value);return}
+ if(ev.target.id==='etext'){S.draft.text=ev.target.value;const w=words(S.draft.text),isH=false;
+  const wc=document.getElementById('wc');if(wc)wc.textContent=w<MIN?`${w} of ${MIN} words.`:'Good.';
+  const sv=document.querySelector('[data-act="save"]');if(sv)sv.disabled=!(S.draft.about.length>=2&&w>=MIN);}
+ if(ev.target.id==='sbx'&&S.sbDraft){S.sbDraft.why=ev.target.value;const b=document.querySelector('[data-act^="sendback:"]');if(b)b.disabled=!ev.target.value.trim();}
+ if(ev.target.id==='fxtext'){const b=document.getElementById('fxsave'),w=words(ev.target.value);document.getElementById('fxwc').textContent=w+' words';if(b)b.disabled=!ev.target.value.trim();}
+ if(ev.target.id==='whyx'&&S.statDraft){S.statDraft.why=ev.target.value;const b=document.querySelector('[data-act^="savestat"]');if(b)b.disabled=S.statDraft.st==='absent'&&!ev.target.value.trim();}
+ if(ev.target.id==='fxwhy'&&S.fixDraft){S.fixDraft.why=ev.target.value;const b=document.querySelector('[data-act="savefix"]');if(b)b.disabled=!ev.target.value.trim();}
+});
+function focusText(){const t=document.getElementById('etext');if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length)}}
+render();
+</script>
