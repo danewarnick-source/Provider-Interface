@@ -280,11 +280,11 @@ describe("one rule set", () => {
   const read = (p: string) => readFileSync(new URL(p, import.meta.url), "utf8");
 
   it("rankStaffForShift scores readiness through staffClientReadiness", () => {
-    const fn = read("../scheduling/eligibility.functions.ts");
+    const fn = read("../scheduler/eligibility.functions.ts");
     assert.match(fn, /staffClientReadiness\(/);
     assert.match(fn, /readinessWarnings\(/);
     assert.match(fn, /isCprQualificationKey/);
-    const pure = read("../scheduling/eligibility.ts");
+    const pure = read("../scheduler/eligibility.ts");
     assert.doesNotMatch(pure, /No client-specific training/);
     assert.doesNotMatch(pure, /completedClientTrainings/);
   });

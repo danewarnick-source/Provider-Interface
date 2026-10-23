@@ -129,6 +129,8 @@ export function staffClientReadiness(input: ReadinessInput): Readiness {
     ["person_training", personTrainingRule(input)],
   ];
   if (input.client.hasAbi) checks.push(["abi", evidenceRule(input, ABI_KEY, null)]);
+  // S4-REPOINT (Scheduler rebuild S3): the scheduler asks qualificationsOnDate() for CPR (same 90-day
+  // grace, shift-date aware). This rule stays for the caseload tab until S4.
   checks.push(["cpr", evidenceRule(input, CPR_KEY, CPR_GRACE_DAYS)]);
   if (input.client.behaviorSupport) {
     checks.push(["behavior", evidenceRule(input, BEHAVIOR_KEY, BEHAVIOR_GRACE_DAYS)]);
@@ -201,6 +203,7 @@ export function readinessWarnings(r: Readiness): string[] {
 }
 
 /**
+ * S4-REPOINT (Scheduler rebuild S3): goes with the scheduler's per-code cert list in S4.
  * Qualification keys the readiness CPR rule already covers. rankStaffForShift
  * drops these from its per-code cert list so CPR is checked once.
  */

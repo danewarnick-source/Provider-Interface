@@ -4529,8 +4529,8 @@ export type Database = {
           attestation_statement: string
           client_id: string
           content: Json
-          draft_content: Json | null
           created_at: string
+          draft_content: Json | null
           goals: Json
           id: string
           organization_id: string
@@ -4547,8 +4547,8 @@ export type Database = {
           attestation_statement?: string
           client_id: string
           content?: Json
-          draft_content?: Json | null
           created_at?: string
+          draft_content?: Json | null
           goals?: Json
           id?: string
           organization_id: string
@@ -4565,8 +4565,8 @@ export type Database = {
           attestation_statement?: string
           client_id?: string
           content?: Json
-          draft_content?: Json | null
           created_at?: string
+          draft_content?: Json | null
           goals?: Json
           id?: string
           organization_id?: string

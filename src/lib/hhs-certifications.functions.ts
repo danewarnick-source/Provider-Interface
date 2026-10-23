@@ -5,7 +5,7 @@ import { z } from "zod";
 
 // Read-model + month-end certification for the HHS Monthly Attendance roll-up.
 // Reads only (attendance + the billable view); the daily WRITER stays in
-// src/lib/hhs.functions.ts. The certification table is a human SQL handoff —
+// src/lib/scheduler/hhs.functions.ts. The certification table is a human SQL handoff —
 // everything here degrades gracefully (tableReady=false) until it exists, so
 // the hub never crashes pre-migration.
 

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 /**
- * Mirror of assertLaunchpadPassed in src/lib/scheduling/shifts.functions.ts.
+ * Mirror of assertLaunchpadPassed in src/lib/scheduler/shifts.functions.ts.
  * The live function lives next to createServerFn and cannot be imported from
  * node:test without TanStack Start. The production copy still uses
  * has_passed_launchpad with no tester bypass.

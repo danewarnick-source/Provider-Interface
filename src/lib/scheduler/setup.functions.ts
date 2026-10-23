@@ -9,6 +9,9 @@ import {
   onStaffAssignmentRemovedInternal,
 } from "@/lib/staff-assignment-hooks.functions";
 import { gatewayFetch, assertBedrockConfigured } from "@/lib/ai-bedrock.server";
+import { loadActiveStaffNames } from "@/lib/scheduler/staff-lookup";
+import { assertShiftAllowed } from "@/lib/scheduler/shift-checks";
+import { requireCategory } from "@/lib/access/require";
 import { assertCanManageMember } from "@/lib/team-members/guards.server";
 import { waiveRemovedClientItemsInternal } from "@/lib/team-members/caseload.functions";
 import {
@@ -281,13 +284,8 @@ export const nectarDraftShifts = createServerFn({ method: "POST" })
     await requireOrgMembership(supabase, userId, data.organization_id, "staff");
     assertBedrockConfigured();
 
-    const [staffRes, clientsRes, authsRes] = await Promise.all([
-      supabase
-        .from("organization_members")
-        .select("user_id, profiles:profiles!inner(id, first_name, last_name, full_name)")
-        .is("deleted_at", null)
-        .eq("organization_id", data.organization_id)
-        .eq("active", true),
+    const [staffList, clientsRes, authsRes] = await Promise.all([
+      loadActiveStaffNames(supabase, data.organization_id),
       supabase
         .from("clients")
         .select("id, first_name, last_name")
@@ -300,24 +298,6 @@ export const nectarDraftShifts = createServerFn({ method: "POST" })
         .eq("organization_id", data.organization_id),
     ]);
 
-    type StaffRow = {
-      profiles: {
-        id: string;
-        first_name: string | null;
-        last_name: string | null;
-        full_name: string | null;
-      };
-    };
-    const staffList = ((staffRes.data ?? []) as unknown as StaffRow[])
-      .map((m) => m.profiles)
-      .filter(Boolean)
-      .map((p) => ({
-        id: p.id,
-        name:
-          p.full_name?.trim() ||
-          [p.first_name, p.last_name].filter(Boolean).join(" ").trim() ||
-          "Staff",
-      }));
     const clientList = (
       (clientsRes.data ?? []) as Array<{
         id: string;
@@ -622,12 +602,28 @@ export const applyDrafts = createServerFn({ method: "POST" })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { supabase, userId } = context as any;
     if (!supabase || !userId) return { created: 0, assigned: 0 };
+    await requireCategory(supabase, userId, data.organization_id, "scheduling", "edit");
     await assertDraftsNotExcluded(supabase, data.organization_id, data.drafts);
     let created = 0;
     let assigned = 0;
     for (const d of data.drafts) {
       if (d.assign_to_shift_id) {
         if (!d.staff_id) continue;
+        const { data: target, error: tErr } = await supabase
+          .from("scheduled_shifts")
+          .select("client_id, service_code, starts_at")
+          .eq("id", d.assign_to_shift_id)
+          .eq("organization_id", data.organization_id)
+          .maybeSingle();
+        if (tErr) throw tErr;
+        if (!target) throw new Error("That open shift no longer exists.");
+        await assertShiftAllowed(supabase, {
+          organization_id: data.organization_id,
+          staff_id: d.staff_id,
+          client_id: target.client_id,
+          code: target.service_code,
+          starts_at: target.starts_at,
+        });
         const { error } = await supabase
           .from("scheduled_shifts")
           .update({ staff_id: d.staff_id, status: "draft" })
@@ -653,11 +649,15 @@ export const applyDrafts = createServerFn({ method: "POST" })
           created_by: userId,
           created_from: "nectar",
         };
-        const { gateScheduledShiftInsert } = await import("@/lib/scheduling/shift-commit");
-        await gateScheduledShiftInsert(supabase, [insertRow as never], {
-          mode: "bulk_auto",
-          userId,
+        await assertShiftAllowed(supabase, {
+          organization_id: data.organization_id,
+          staff_id: insertRow.staff_id,
+          client_id: insertRow.client_id,
+          code,
+          starts_at: insertRow.starts_at,
         });
+        const { assertNoBillingConflict } = await import("@/lib/scheduler/shift-commit");
+        await assertNoBillingConflict(supabase, insertRow as never);
         const { error } = await supabase.from("scheduled_shifts").insert(insertRow);
         if (error) throw error;
         created++;

@@ -13,10 +13,11 @@ import {
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { startOfWeek as schedulerStartOfWeek } from "@/lib/scheduler/time";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useTimePaySettings } from "@/hooks/use-time-pay-settings";
-import { respondToShift } from "@/lib/scheduling/workflow.functions";
-import { OpenShiftsPanel } from "@/components/scheduling/open-shifts-panel";
+import { respondToShift } from "@/lib/scheduler/workflow.functions";
+import { OpenShiftsPanel } from "@/components/scheduler/shared/open-shifts-panel";
 import { useActiveShift } from "@/hooks/use-active-shift";
 import { useGeneralShift } from "@/hooks/use-general-shift";
 import { fmtElapsed } from "@/components/staff-mobile/general-time-clock";
@@ -26,7 +27,7 @@ import {
   SCHEDULE_NON_CLIENT_SECTION,
   scheduleNonClientClockInAllowed,
   scheduleStaffHidesStatusBadge,
-} from "@/lib/schedule-staff-clock";
+} from "@/lib/scheduler/staff-clock";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -36,13 +37,13 @@ import {
 import { StaffPageHeader } from "@/components/staff-mobile/staff-page-header";
 import { GeneralTimeClock } from "@/components/staff-mobile/general-time-clock";
 import { isDailyServiceCode } from "@/lib/service-billing";
-import { RequestTimeOffDialog } from "@/components/schedule-preview/request-time-off-dialog";
-import { RequestSwapDialog } from "@/components/schedule-preview/request-swap-dialog";
-import { useMyScheduleRequests } from "@/lib/schedule-requests";
+import { RequestTimeOffDialog } from "@/components/scheduler/shared/request-time-off-dialog";
+import { RequestSwapDialog } from "@/components/scheduler/shared/request-swap-dialog";
+import { useMyScheduleRequests } from "@/lib/scheduler/requests";
 import { CalendarOff, ArrowLeftRight } from "lucide-react";
-import { hhsVisitLabel, hostHomeRowLabel } from "@/lib/scheduling/hhs-visit";
-import { HhsInfoTooltip } from "@/components/scheduling/hhs-info-tooltip";
-import { HhsExplainerBanner } from "@/components/scheduling/hhs-explainer-banner";
+import { hhsVisitLabel, hostHomeRowLabel } from "@/lib/scheduler/hhs-visit";
+import { HhsInfoTooltip } from "@/components/scheduler/shared/hhs-info-tooltip";
+import { HhsExplainerBanner } from "@/components/scheduler/shared/hhs-explainer-banner";
 
 export const Route = createFileRoute("/dashboard/schedule")({
   head: () => ({ meta: [{ title: "My Schedule — Provider Interface" }] }),
@@ -94,10 +95,7 @@ function endOfDay(d: Date) {
   return x;
 }
 function startOfWeek(d: Date) {
-  // Sunday start to match common US scheduling UX
-  const x = startOfDay(d);
-  x.setDate(x.getDate() - x.getDay());
-  return x;
+  return schedulerStartOfWeek(d);
 }
 function endOfWeek(d: Date) {
   const s = startOfWeek(d);
@@ -181,8 +179,8 @@ function useMyScheduledShifts(view: ViewMode, anchor: Date) {
         .eq("organization_id", org!.organization_id)
         .gte("starts_at", from.toISOString())
         .lte("starts_at", to.toISOString())
-        // Assigned to this staff — drafts included. Publish still drives
-        // accept/decline + notifications; cancelled stays hidden.
+        // Team members only see published shifts; drafts stay with the scheduler.
+        .eq("published", true)
         .neq("status", "cancelled")
         .order("starts_at", { ascending: true });
       if (error) throw error;
