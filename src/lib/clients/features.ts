@@ -124,11 +124,3 @@ export function useClientFeature(
     loading: isLoading,
   };
 }
-
-/**
- * Hook variant that returns the raw disabled-tier set so a component can check
- * multiple features without re-subscribing.
- */
-export function useDisabledTierFeatures() {
-  return useDisabledFeatures();
-}

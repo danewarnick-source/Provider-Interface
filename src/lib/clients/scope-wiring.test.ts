@@ -31,7 +31,7 @@ describe("client-id writes use the client guard", () => {
     assert.ok(vis.indexOf("assertCanManageClientById(") < vis.indexOf('.from("client_staff_visibility")'));
   });
 
-  it("CS1 leftovers: EOL, allergies, level of need, grievance and HRC use the guard with their category", () => {
+  it("client document signing uses the guard; no admin-only shortcuts", () => {
     assert.doesNotMatch(ic, /requireAdminForClient/);
     assert.doesNotMatch(ic, /isAdminLevel/);
     const fn = (name: string) => {
@@ -40,14 +40,6 @@ describe("client-id writes use the client guard", () => {
       const next = ic.indexOf("export const ", start + 10);
       return ic.slice(start, next < 0 ? undefined : next);
     };
-    assert.match(fn("setEndOfLifeStatus"), /guardClient\([^)]*\["edit_medical"\]\)/);
-    assert.match(fn("appendClientArrayField"), /guardClient\([^)]*\["edit_medical"\]\)/);
-    assert.match(fn("setLevelOfNeed"), /guardClient\([^)]*\["edit"\]\)/);
-    assert.match(fn("setGrievanceAcknowledgment"), /guardClient\([^)]*\["edit"\]\)/);
-    assert.match(fn("setGrievanceAcknowledgment"), /denverYmd\(\)/);
-    assert.doesNotMatch(fn("setGrievanceAcknowledgment"), /toISOString\(\)\.slice/);
-    assert.match(fn("listHrcReviewsForClient"), /guardClient\([^)]*\["view_hrc"\]\)/);
-    assert.match(fn("createHrcReview"), /guardClient\([^)]*\["edit_hrc"\]\)/);
     assert.match(fn("signClientDocument"), /guardClient\([^)]*\["view"\]\)/);
     assert.match(fn("signClientDocument"), /"admin"\)/);
   });

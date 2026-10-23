@@ -13,7 +13,6 @@ import {
   CLIENT_CONTACT_COLUMNS,
   CONTACT_ROLES,
   cleanContactFields,
-  loadClientContacts,
   restoreContactPatch,
   type ClientContact,
 } from "./contacts";
@@ -41,16 +40,6 @@ const fieldsSchema = z.object({
 });
 
 const scope = { organizationId: z.string().uuid(), clientId: z.string().uuid() };
-
-/** Every contact for one client, ended ones included (the UI hides them). */
-export const listClientContacts = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object(scope).parse(d))
-  .handler(async ({ data, context }): Promise<ClientContact[]> => {
-    const { sb, userId } = ctx(context);
-    await assertCanManageClient({ supabase: sb, actorId: userId, ...data, action: "view" });
-    return loadClientContacts(sb, [data.clientId]);
-  });
 
 /** Only one primary per role: clear the flag on the client's other contacts with that role. */
 async function clearOtherPrimary(sb: Sb, clientId: string, role: string, keepId: string) {
