@@ -7,12 +7,6 @@ import { addDaysKey } from "./time.ts";
 const run = (s = shift(), c = ctx()) => evaluateShift(s, c);
 const NEXT = addDaysKey(DAY, 1);
 
-test("DSI over 6 h a day warns, 6 h does not", () => {
-  const dsi = (h: number) => shift({ code: "DSI", startsAt: at(7), endsAt: at(7 + h) });
-  assert.ok(has(run(dsi(7), ctx({ codes: ["DSI"] })), "dsi_over_6h", "warn"));
-  assert.ok(!has(run(dsi(6), ctx({ codes: ["DSI"] })), "dsi_over_6h"));
-});
-
 test("weekly hours below the Worksheet warn", () => {
   const c = (t: number) => ctx({ client: { authorizations: [auth("SLH", { weeklyHoursTarget: t })] } });
   assert.ok(has(run(shift(), c(10)), "below_worksheet_hours", "warn"));
@@ -24,9 +18,9 @@ test("under 8 hours of rest warns (Agency), and the agency can turn it off or ma
   assert.ok(has(run(shift(), ctx({ shifts: [prev] })), "under_rest", "warn"));
   const ok = shift({ id: "p", startsAt: at(0), endsAt: at(1) });
   assert.ok(!has(run(shift(), ctx({ shifts: [ok] })), "under_rest"));
-  const off = ctx({ shifts: [prev], settings: { rules: { under_rest: { enabled: false, level: "warn" } } } });
+  const off = ctx({ shifts: [prev], settings: { rules: { under_rest: "off" } } });
   assert.ok(!has(run(shift(), off), "under_rest"));
-  const blk = ctx({ shifts: [prev], settings: { rules: { under_rest: { enabled: true, level: "block" } } } });
+  const blk = ctx({ shifts: [prev], settings: { rules: { under_rest: "block" } } });
   assert.ok(has(run(shift(), blk), "under_rest", "block"));
 });
 

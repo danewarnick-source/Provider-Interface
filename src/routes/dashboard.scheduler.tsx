@@ -34,9 +34,10 @@ import {
 } from "@/components/scheduler/shared/hooks/use-scheduler-data";
 import { useDayProgramData } from "@/components/scheduler/shared/hooks/use-day-program-data";
 import {
-  saveShift, deleteShift, publishWeek, setAdminTimeOff,
+  saveShift, deleteShift, setAdminTimeOff,
   saveDayProgramSession, markAttendance, addSessionStaff,
 } from "@/lib/scheduler/scheduler.functions";
+import { publishWeek } from "@/lib/scheduler/publish.functions";
 import { isClockableServiceCode } from "@/lib/service-billing";
 import { addStaffToClientCode } from "@/lib/scheduler/setup.functions";
 import { assignmentCoversCode } from "@/lib/assignment-codes";
@@ -51,6 +52,7 @@ import { listSoloLapsesForStaff } from "@/lib/obligations/remediation.functions"
 import type { SoloLapse } from "@/lib/obligations/solo-lapse";
 import { denverYmd } from "@/lib/denver-date";
 import { layoutShiftBars } from "@/lib/scheduler/recurrence";
+import { toastRuleWarnings } from "@/components/scheduler/shared/rule-warnings";
 
 export const Route = createFileRoute("/dashboard/scheduler")({
   head: () => ({
@@ -167,6 +169,7 @@ function SchedulerPage() {
       }
       setPublishFailures([]);
       toast.success(`Published — ${r.shifts} shifts sent to ${r.staff} staff.`);
+      toastRuleWarnings(r);
       qc.invalidateQueries({ queryKey: ["scheduler-data"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -689,7 +692,7 @@ function DayView({
 }) {
   const shiftsForDay = useMemo(() => {
     return data.shifts.filter((s) => {
-      if ((s.service_code ?? s.job_code) !== code) return false;
+      if (s.service_code !== code) return false;
       return sameDay(new Date(s.starts_at), anchor);
     });
   }, [data.shifts, code, anchor]);
@@ -829,7 +832,7 @@ function WeekView({
             <div className="flex-1 grid" style={{ gridTemplateColumns: "repeat(7, 1fr)" }}>
               {days.map((d) => {
                 const dayShifts = data.shifts.filter(
-                  (s) => s.client_id === c.id && (s.service_code ?? s.job_code) === code && sameDay(new Date(s.starts_at), d),
+                  (s) => s.client_id === c.id && s.service_code === code && sameDay(new Date(s.starts_at), d),
                 );
                 return (
                   <button
@@ -895,7 +898,7 @@ function MonthView({
         {cells.map((d) => {
           const isMonth = d.getMonth() === anchor.getMonth();
           const dayShifts = data.shifts.filter(
-            (s) => clientIds.has(s.client_id) && (s.service_code ?? s.job_code) === code && sameDay(new Date(s.starts_at), d),
+            (s) => clientIds.has(s.client_id) && s.service_code === code && sameDay(new Date(s.starts_at), d),
           );
           return (
             <div key={d.toISOString()} className="bg-white p-1 min-h-[78px]" style={{ opacity: isMonth ? 1 : 0.5 }}>
@@ -1059,7 +1062,7 @@ function AddShiftDialog({
         data: {
           organization_id: org!.organization_id,
           client_id: clientId,
-          job_code: code,
+          service_code: code,
           staff_id: assignedStaff,
           starts_at: starts,
           ends_at: ends,
@@ -1085,8 +1088,9 @@ function AddShiftDialog({
       }
       return res;
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
       toast.success(repeatOn ? "Shift + recurring series saved." : "Shift saved.");
+      toastRuleWarnings(res);
       qc.invalidateQueries({ queryKey: ["scheduler-data"] });
       onClose();
     },
@@ -1368,7 +1372,7 @@ function ShiftDetailPanel({
   );
   const client = sched.clients.find((c) => c.id === shift.client_id);
   const staffById = new Map(sched.staff.map((s) => [s.id, s]));
-  const code = shift.service_code ?? shift.job_code ?? "";
+  const code = shift.service_code ?? "";
   const start = new Date(shift.starts_at);
   const end = new Date(shift.ends_at);
   const [search, setSearch] = useState("");
@@ -1400,7 +1404,7 @@ function ShiftDetailPanel({
           id: shift.id,
           organization_id: org!.organization_id,
           client_id: shift.client_id,
-          job_code: code,
+          service_code: code,
           staff_id: newStaffId,
           starts_at: shift.starts_at,
           ends_at: shift.ends_at,
@@ -1410,8 +1414,9 @@ function ShiftDetailPanel({
         },
       });
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
       toast.success("Updated.");
+      toastRuleWarnings(res);
       qc.invalidateQueries({ queryKey: ["scheduler-data"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -1450,7 +1455,7 @@ function ShiftDetailPanel({
         data: {
           organization_id: org!.organization_id,
           client_id: shift.client_id,
-          job_code: code,
+          service_code: code,
           staff_id: shift.staff_id,
           starts_at: shift.starts_at,
           ends_at: shift.ends_at,
@@ -1460,8 +1465,9 @@ function ShiftDetailPanel({
         },
       });
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
       toast.success("Duplicated.");
+      toastRuleWarnings(res);
       qc.invalidateQueries({ queryKey: ["scheduler-data"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -1996,7 +2002,7 @@ function StaffViewPreview({
                     {dayShifts.map((s) => {
                       const c = sched.clients.find((x) => x.id === s.client_id);
                       const draft = !s.published ? " · Draft" : "";
-                      return <div key={s.id}>{c?.first_name} {c?.last_name} · {s.service_code ?? s.job_code} · {fmtTime(new Date(s.starts_at))}–{fmtTime(new Date(s.ends_at))}{draft}</div>;
+                      return <div key={s.id}>{c?.first_name} {c?.last_name} · {s.service_code} · {fmtTime(new Date(s.starts_at))}–{fmtTime(new Date(s.ends_at))}{draft}</div>;
                     })}
                   </div>
                 )}

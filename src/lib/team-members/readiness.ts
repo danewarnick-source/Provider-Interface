@@ -3,8 +3,9 @@
 // their hire date, the client's flags and person-specific training
 // completion. Readiness warns; it never blocks a save or a shift.
 //
-// One set of rules. The caseload tab and rankStaffForShift both call
-// staffClientReadiness — never re-state these rules elsewhere.
+// One set of rules for the caseload: the loader and the caseload tab call
+// staffClientReadiness — never re-state these rules elsewhere. The scheduler's
+// own question ("may this shift exist?") is qualificationsOnDate in rules.ts.
 
 import { addDaysYmd } from "./profile.ts";
 import { evidenceItemDone, formatLocalDate, type BadgeEvidenceItem } from "./badges.ts";
@@ -129,8 +130,7 @@ export function staffClientReadiness(input: ReadinessInput): Readiness {
     ["person_training", personTrainingRule(input)],
   ];
   if (input.client.hasAbi) checks.push(["abi", evidenceRule(input, ABI_KEY, null)]);
-  // S4-REPOINT (Scheduler rebuild S3): the scheduler asks qualificationsOnDate() for CPR (same 90-day
-  // grace, shift-date aware). This rule stays for the caseload tab until S4.
+  // Same 90-day grace as the scheduler's qualificationsOnDate (which is shift-date aware).
   checks.push(["cpr", evidenceRule(input, CPR_KEY, CPR_GRACE_DAYS)]);
   if (input.client.behaviorSupport) {
     checks.push(["behavior", evidenceRule(input, BEHAVIOR_KEY, BEHAVIOR_GRACE_DAYS)]);
@@ -189,30 +189,4 @@ export function readyAloneLabel(readiness: readonly Readiness[]): string | null 
   if (!readiness.length) return null;
   const ready = readiness.filter(isReadyAlone).length;
   return `Ready alone: ${ready} of ${readiness.length} client${readiness.length === 1 ? "" : "s"}`;
-}
-
-/**
- * Scheduler warning chips for one staff × client. Same rules as the caseload
- * badge; the picker never blocks on readiness.
- */
-export function readinessWarnings(r: Readiness): string[] {
-  const out: string[] = [];
-  if (r.missing.length) out.push(`Not ready: ${r.missing.map((m) => m.label).join(", ")}`);
-  for (const d of r.deadlines) out.push(`${d.label} due by ${d.dueBy}`);
-  return out;
-}
-
-/**
- * S4-REPOINT (Scheduler rebuild S3): goes with the scheduler's per-code cert list in S4.
- * Qualification keys the readiness CPR rule already covers. rankStaffForShift
- * drops these from its per-code cert list so CPR is checked once.
- */
-export function isCprQualificationKey(key: string): boolean {
-  const k = key.trim().toLowerCase();
-  return (
-    k === "cpr-fa" ||
-    k.endsWith(":cpr-fa") ||
-    k.endsWith(":cpr_first_aid") ||
-    k.endsWith(":cpr_first_aid_bbp")
-  );
 }

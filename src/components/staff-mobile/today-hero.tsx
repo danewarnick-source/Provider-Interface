@@ -186,11 +186,11 @@ export function TodayHero() {
   }
 
   const clockableShifts = openClockableShifts(
-    shifts.filter((s) => !isDailyCode(s.job_code)),
+    shifts.filter((s) => !isDailyCode(s.service_code)),
     completedPunches,
   );
   const dailyShifts = shifts.filter(
-    (s) => isDailyCode(s.job_code) && !todayNotes?.has(s.client_id),
+    (s) => isDailyCode(s.service_code) && !todayNotes?.has(s.client_id),
   );
   const openClockableClientIds = new Set(clockableShifts.map((s) => s.client_id));
   const extraHhs = hhsPeople.filter(
@@ -227,9 +227,9 @@ export function TodayHero() {
     null;
 
   const others = clockableShifts.filter((s) => s.id !== primary?.id);
-  const state = primary && !isDailyCode(primary.job_code) ? categorize(primary, now) : "later";
-  const code = primary?.job_code ?? "";
-  const primaryDaily = primary ? isDailyCode(primary.job_code) : false;
+  const state = primary && !isDailyCode(primary.service_code) ? categorize(primary, now) : "later";
+  const code = primary?.service_code ?? "";
+  const primaryDaily = primary ? isDailyCode(primary.service_code) : false;
 
   const leadDailyNoteCode = (() => {
     const lead = (caseload ?? []).find((c) => c.id === (primary?.client_id ?? extraHhs[0]?.id));
@@ -378,9 +378,9 @@ export function TodayHero() {
               <li key={s.id} className="flex items-center justify-between gap-3 text-sm">
                 <div className="min-w-0 truncate">
                   <span className="font-medium">{s.client_name}</span>
-                  {s.job_code ? (
+                  {s.service_code ? (
                     <span className="ml-1.5 font-mono text-xs text-muted-foreground">
-                      {s.job_code}
+                      {s.service_code}
                     </span>
                   ) : null}
                   <span className="ml-2 text-xs text-muted-foreground">
@@ -390,7 +390,7 @@ export function TodayHero() {
                 <Link
                   to="/dashboard/workspace/$clientId"
                   params={{ clientId: s.client_id }}
-                  search={{ tab: "clock-in", ...(s.job_code ? { code: s.job_code } : {}) }}
+                  search={{ tab: "clock-in", ...(s.service_code ? { code: s.service_code } : {}) }}
                   className="shrink-0 text-xs font-semibold text-primary hover:underline"
                 >
                   Open
@@ -400,7 +400,7 @@ export function TodayHero() {
             {dailyShifts
               .filter((s) => s.id !== primary?.id)
               .map((s) => {
-                const noteCode = String(s.job_code ?? "").trim() || "HHS";
+                const noteCode = String(s.service_code ?? "").trim() || "HHS";
                 const noteLabel = caseloadDailyNoteLabel({
                   code: noteCode,
                   alreadyDoneToday: !!todayNotes?.has(s.client_id),

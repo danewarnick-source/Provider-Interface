@@ -2,7 +2,11 @@
 // nothing here touches the database. Callers (server functions, S4+) load the
 // facts and build a RuleContext; the rules only read it.
 
-export type Level = "block" | "warn";
+/** "reason" = the action may go ahead only with a typed reason (Decision 4). */
+export type Level = "block" | "reason" | "warn";
+
+/** An agency's choice per rule (Decision 4). Contract rules have no "off". */
+export type Strength = "off" | "warn" | "reason" | "block";
 
 /** A suggested next step. `href` is an in-app link (e.g. a person's Evidence row). */
 export type Fix = { label: string; href?: string; code?: string };
@@ -64,6 +68,8 @@ export type RuleShift = {
   staffingRatio?: { staff: number; clients: number } | null;
   /** Time-window staffing requirements for a home slot or session. */
   windowRequirements?: readonly WindowRequirement[];
+  /** Set on van run shifts (Decision 17); the driver needs 18+ and a driver file. */
+  vanRouteId?: string | null;
 };
 
 export type WindowRequirement = {
@@ -124,7 +130,11 @@ export type ClientFacts = {
   authorizations: readonly Authorization[];
   ratios?: readonly ClientRatioEntry[];
   teamStaffIds: readonly string[];
+  /** Codes each team member is assigned for this client (staff_assignments.service_codes). */
+  teamCodes?: Readonly<Record<string, readonly string[]>>;
   doNotScheduleStaffIds: readonly string[];
+  /** Why each person is on the do-not-schedule list, when a reason was given. */
+  doNotScheduleReasons?: Readonly<Record<string, string>>;
   absences?: readonly Absence[];
   hasForm930?: boolean;
   hasRightsModification?: boolean;
@@ -196,13 +206,9 @@ export type StaffFacts = {
 
 export type Place = { id: string; name: string; licensedCapacity?: number | null };
 
-export type AgencyRuleKey =
-  | "over_16h_straight" | "under_rest" | "overtime" | "fatigue_16_in_24"
-  | "travel_gap" | "client_preference" | "min_age_18";
-
 export type AgencySettings = {
-  /** Agency rules: on/off plus level. A missing key means the default. */
-  rules?: Partial<Record<AgencyRuleKey, { enabled: boolean; level: Level }>>;
+  /** Strength per rule name (rules-strength.ts). A missing key means the rule's default. */
+  rules?: Readonly<Record<string, Strength>>;
   overtimeThresholdHours?: number;
   minRestHours?: number;
   travelGapMinutes?: number;

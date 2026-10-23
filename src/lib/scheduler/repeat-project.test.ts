@@ -5,7 +5,7 @@ import { dayKey, weekdayOf } from "./time.ts";
 
 function shift(id: string, startsAt: string, endsAt: string): ShiftRow {
   return {
-    id, staff_id: "s1", client_id: "c1", service_code: "SLH", job_code: "SLH",
+    id, staff_id: "s1", client_id: "c1", service_code: "SLH",
     starts_at: startsAt, ends_at: endsAt, shift_type: "hourly", is_awake_overnight: null, notes: null,
   };
 }

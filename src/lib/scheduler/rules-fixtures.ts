@@ -85,6 +85,6 @@ export function ctx(o: CtxOver = {}): RuleContext {
   };
 }
 
-export function has(findings: readonly Finding[], rule: string, level?: "block" | "warn"): boolean {
+export function has(findings: readonly Finding[], rule: string, level?: Finding["level"]): boolean {
   return findings.some((f) => f.rule === rule && (!level || f.level === level));
 }
