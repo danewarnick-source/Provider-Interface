@@ -4,9 +4,8 @@
 //   - createRecurringShifts: expand a single (just-saved) shift into N occurrences
 //
 // All writes go through requireSupabaseAuth so RLS enforces tenant scope and
-// per-row org scoping. Reuses the same insert path as scheduled_shifts so
-// downstream invariants (status, created_by, service_code/job_code mirror)
-// stay consistent with saveShift / applyDrafts. No schema changes.
+// per-row org scoping. Every insert runs the rule engine first
+// (shift-guard.server.ts), the same as saveShift and applyDrafts.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -15,6 +14,7 @@ import { projectShifts, type ShiftRow } from "@/lib/scheduler/repeat-project";
 import { openExcludedShifts } from "@/lib/clients/team/exclusions";
 import { loadActiveExclusions } from "@/lib/clients/team/exclusions-check.server";
 import { expandRecurringOccurrences, occurrenceSlotKey } from "@/lib/scheduler/recurrence";
+import { guardShiftRows } from "@/lib/scheduler/shift-guard.server";
 
 async function loadSourceShifts(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -25,7 +25,7 @@ async function loadSourceShifts(
 ): Promise<ShiftRow[]> {
   const { data, error } = await supabase
     .from("scheduled_shifts")
-    .select("id, staff_id, client_id, service_code, job_code, starts_at, ends_at, shift_type, is_awake_overnight, notes")
+    .select("id, staff_id, client_id, service_code, starts_at, ends_at, shift_type, is_awake_overnight, notes")
     .eq("organization_id", orgId)
     .gte("starts_at", sourceStartIso)
     .lt("starts_at", sourceEndIso)
@@ -102,7 +102,7 @@ export const applyRepeat = createServerFn({ method: "POST" })
     const projected = projectShifts(filtered, data.target_week_start_iso);
 
     // Optionally skip if the same client/code/start already exists on the target day.
-    let existing: Array<{ client_id: string; service_code: string | null; job_code: string | null; starts_at: string }> = [];
+    let existing: Array<{ client_id: string; service_code: string | null; starts_at: string }> = [];
     if (data.skip_if_exists && projected.length > 0) {
       const days = Array.from(new Set(projected.map((p) => p.target_day))).sort();
       const dayMin = days[0];
@@ -110,7 +110,7 @@ export const applyRepeat = createServerFn({ method: "POST" })
       dayMax.setDate(dayMax.getDate() + 1);
       const { data: ex, error } = await supabase
         .from("scheduled_shifts")
-        .select("client_id, service_code, job_code, starts_at")
+        .select("client_id, service_code, starts_at")
         .eq("organization_id", data.organization_id)
         .gte("starts_at", `${dayMin}T00:00:00.000Z`)
         .lt("starts_at", dayMax.toISOString());
@@ -121,7 +121,7 @@ export const applyRepeat = createServerFn({ method: "POST" })
       `${clientId}|${(code ?? "").toUpperCase()}|${startsAt}`;
     const existingKeys = new Set(
       existing.map((e) =>
-        exKey(e.client_id, e.service_code ?? e.job_code, e.starts_at),
+        exKey(e.client_id, e.service_code, e.starts_at),
       ),
     );
 
@@ -129,7 +129,7 @@ export const applyRepeat = createServerFn({ method: "POST" })
     let skipped = 0;
     const rows: Record<string, unknown>[] = [];
     for (const p of projected) {
-      const code = (p.service_code ?? p.job_code ?? "").toUpperCase();
+      const code = (p.service_code ?? "").toUpperCase();
       if (!code) { skipped++; continue; }
       if (data.skip_if_exists && existingKeys.has(exKey(p.client_id, code, p.target_starts_at))) {
         skipped++; continue;
@@ -139,7 +139,6 @@ export const applyRepeat = createServerFn({ method: "POST" })
         staff_id: data.keep_staff ? p.staff_id : null,
         client_id: p.client_id,
         service_code: code,
-        job_code: code,
         shift_type: p.shift_type ?? "hourly",
         starts_at: p.target_starts_at,
         ends_at: p.target_ends_at,
@@ -160,14 +159,14 @@ export const applyRepeat = createServerFn({ method: "POST" })
       opened = r.opened;
       rows.splice(0, rows.length, ...r.rows.map((x) => ({ ...x, status: newShiftStatus(x.staff_id) })));
     }
+    let warnings: string[] = [];
     if (rows.length > 0) {
-      const { assertNoBillingConflict } = await import("@/lib/scheduler/shift-commit");
-      await assertNoBillingConflict(supabase, rows as never);
+      warnings = await guardShiftRows(supabase, data.organization_id, rows as never);
       const { error } = await supabase.from("scheduled_shifts").insert(rows);
       if (error) throw error;
       inserted = rows.length;
     }
-    return { inserted, skipped, opened };
+    return { inserted, skipped, opened, warnings };
   });
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -208,7 +207,7 @@ export const createRecurringShifts = createServerFn({ method: "POST" })
 
     const { data: seed, error: sErr } = await supabase
       .from("scheduled_shifts")
-      .select("id, staff_id, client_id, service_code, job_code, starts_at, ends_at, shift_type, is_awake_overnight, notes")
+      .select("id, staff_id, client_id, service_code, starts_at, ends_at, shift_type, is_awake_overnight, notes")
       .eq("id", data.seed_shift_id)
       .eq("organization_id", data.organization_id)
       .maybeSingle();
@@ -231,13 +230,12 @@ export const createRecurringShifts = createServerFn({ method: "POST" })
     });
     if (occurrences.length === 0) return { inserted: 0 };
 
-    const code = (seed.service_code ?? seed.job_code ?? "").toUpperCase();
+    const code = (seed.service_code ?? "").toUpperCase();
     const rows = occurrences.map((occ) => ({
       organization_id: data.organization_id,
       staff_id: seed.staff_id,
       client_id: seed.client_id,
       service_code: code,
-      job_code: code,
       shift_type: seed.shift_type ?? "hourly",
       starts_at: occ.startsAt,
       ends_at: occ.endsAt,
@@ -271,9 +269,8 @@ export const createRecurringShifts = createServerFn({ method: "POST" })
     );
     if (toInsert.length === 0) return { inserted: 0 };
 
-    const { assertNoBillingConflict } = await import("@/lib/scheduler/shift-commit");
-    await assertNoBillingConflict(supabase, toInsert as never);
+    const warnings = await guardShiftRows(supabase, data.organization_id, toInsert as never);
     const { error } = await supabase.from("scheduled_shifts").insert(toInsert);
     if (error) throw error;
-    return { inserted: toInsert.length };
+    return { inserted: toInsert.length, warnings };
   });

@@ -8,7 +8,7 @@ import {
 const stephenShift = {
   id: "sched-stephen-slh",
   client_id: "client-stephen",
-  job_code: "SLH",
+  service_code: "SLH",
   starts_at: "2026-09-01T16:00:00.000Z", // 10:00 AM MT
   ends_at: "2026-09-01T21:00:00.000Z", // 3:00 PM MT
 };
@@ -16,7 +16,7 @@ const stephenShift = {
 const eveningShift = {
   id: "sched-stephen-evening",
   client_id: "client-stephen",
-  job_code: "SLH",
+  service_code: "SLH",
   starts_at: "2026-09-02T00:00:00.000Z", // 6:00 PM MT Sep 1
   ends_at: "2026-09-02T03:00:00.000Z",
 };
@@ -24,7 +24,7 @@ const eveningShift = {
 const tomorrowShift = {
   id: "sched-stephen-tomorrow",
   client_id: "client-stephen",
-  job_code: "SLH",
+  service_code: "SLH",
   starts_at: "2026-09-02T16:00:00.000Z",
   ends_at: "2026-09-02T21:00:00.000Z",
 };

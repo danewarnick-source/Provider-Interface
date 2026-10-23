@@ -67,6 +67,7 @@ import { AlertTriangle as AlertTriangleIcon } from "lucide-react";
 import { useActiveCodes } from "@/components/clients/shared/hooks/use-active-codes";
 import { useClientCareData } from "@/hooks/use-client-care-data";
 import { ClockOutMeds } from "@/components/medications/give-meds/clock-out-meds";
+import { useClockInRules } from "@/components/evv/clock-in-rules";
 import { useComplianceGate } from "@/hooks/use-compliance-gate";
 import { useAccess } from "@/hooks/use-access";
 import { useServerFn } from "@tanstack/react-start";
@@ -615,6 +616,11 @@ export function PunchPad({
       toast.error(LAUNCHPAD_CLOCK_IN_BLOCKED_MESSAGE);
       return;
     }
+    // Scheduler rules (rules.ts): refuse, ask for a reason, or link the punch to its shift.
+    const rules = await clockInRules.check({
+      organizationId: org.organization_id, clientId: clientForPunch.id, serviceCode,
+    });
+    if (!rules) return;
     const nowIso = new Date().toISOString();
     const isOutOfBounds = !!args.outsideReason;
     const isGpsBypass = !!args.gpsBypassReason;
@@ -653,6 +659,8 @@ export function PunchPad({
       // evidence (Utah UEVV accepts address OR GPS at begin/end of visit).
       gps_in_bypassed:                 isGpsBypass,
       gps_in_bypass_reason:            args.gpsBypassReason ?? null,
+      scheduled_shift_id:              rules.scheduledShiftId,
+      override_reason:                 rules.reason,
     };
 
     // ── Staff-prerequisite gate: block clock-in if the staff lacks a required
@@ -1304,6 +1312,7 @@ export function PunchPad({
     serviceCodes: string[];
     at: string;
   };
+  const clockInRules = useClockInRules();
   const { gate: evvClockInGate, dialogElement: clockInComplianceDialogEl } =
     useComplianceGate<EvvClockInGatePayload>({
       organizationId: org?.organization_id ?? "",
@@ -3193,6 +3202,7 @@ export function PunchPad({
         {/* NECTAR compliance flag dialog (admin/manager only; staff is restricted upstream). */}
         {complianceDialogEl}
         {clockInComplianceDialogEl}
+        {clockInRules.dialogElement}
       </section>
     </EvvConsentGate>
   );

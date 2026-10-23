@@ -19,7 +19,7 @@ export type CompletedPunch = RecordPunchTimes & {
 export type ScheduledWindow = {
   id: string;
   client_id: string;
-  job_code: string | null;
+  service_code: string | null;
   starts_at: string;
   ends_at: string;
 };
@@ -45,7 +45,7 @@ export function scheduledShiftIsClockedOut(
   return punches.some((punch) => {
     if (!punch.clock_out_timestamp) return false;
     if (punch.client_id !== shift.client_id) return false;
-    if (!codesMatch(shift.job_code, punch.service_type_code)) return false;
+    if (!codesMatch(shift.service_code, punch.service_type_code)) return false;
     const pair = staffDisplayPunchPair(punch);
     if (!pair.in || !pair.out) return false;
     const pin = Date.parse(pair.in);

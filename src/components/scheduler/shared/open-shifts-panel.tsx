@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useAccess } from "@/hooks/use-access";
+import { toastRuleWarnings } from "@/components/scheduler/shared/rule-warnings";
 
 function fmtWhen(iso: string) {
   const d = new Date(iso);
@@ -51,12 +52,12 @@ export function OpenShiftsPanel({
 
   const decide = useMutation({
     mutationFn: (vars: { shiftId: string; approve: boolean }) => decideFn({ data: vars }),
-    onSuccess: (_d, v) => { invalidate(); toast.success(v.approve ? "Claim approved" : "Claim denied"); },
+    onSuccess: (d, v) => { invalidate(); toast.success(v.approve ? "Claim approved" : "Claim denied"); toastRuleWarnings(d); },
     onError: (e: any) => toast.error(e?.message ?? "Failed"),
   });
   const claim = useMutation({
     mutationFn: (shiftId: string) => claimFn({ data: { shiftId } }),
-    onSuccess: () => { invalidate(); toast.success("Requested, waiting for approval"); },
+    onSuccess: (d) => { invalidate(); toast.success("Requested, waiting for approval"); toastRuleWarnings(d); },
     onError: (e: any) => toast.error(e?.message ?? "Failed"),
   });
 
@@ -92,7 +93,7 @@ export function OpenShiftsPanel({
                   {s.service_code ?? "Shift"} · {fmtWhen(s.starts_at)}
                 </div>
                 <div className="text-[11px] text-muted-foreground">
-                  {clientNames?.get(s.client_id) ?? "Client"}
+                  {(s.client_id && clientNames?.get(s.client_id)) || "Client"}
                   {mode === "admin" && pending ? " · waiting for approval" : ""}
                 </div>
               </button>

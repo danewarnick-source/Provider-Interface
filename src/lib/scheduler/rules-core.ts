@@ -2,6 +2,7 @@
 // booking, age, segments, 1:1 and 2:1 staffing, group size, and the hour caps.
 // Each rule is a small pure function returning findings (Decision 18: SOW rules
 // are always on). Sections cite DHHS91172.
+import { assignmentCoversCode } from "../assignment-codes.ts";
 import { billingFor, DAILY_UNIT_CODES } from "./billing-mode.ts";
 import { defaultRatio, staffNeeded, type Ratio } from "./ratios.ts";
 import type { Finding, RuleContext, RuleShift } from "./rules-types.ts";
@@ -53,10 +54,15 @@ export function teamRules(s: RuleShift, ctx: RuleContext): Finding[] {
   if (!client || !staff) return [];
   const out: Finding[] = [];
   if (client.doNotScheduleStaffIds.includes(staff.id)) {
-    out.push(find("do_not_schedule", "block", `${firstName(staff.name)} is on ${firstName(client.name)}'s do-not-schedule list`));
+    const why = client.doNotScheduleReasons?.[staff.id]?.trim();
+    out.push(find("do_not_schedule", "block",
+      `${firstName(staff.name)} is on ${firstName(client.name)}'s do-not-schedule list${why ? `: ${why}` : ""}`));
   }
   if (!client.teamStaffIds.includes(staff.id)) {
     out.push(find("not_on_team", "block", `${firstName(staff.name)} isn't on ${firstName(client.name)}'s team`));
+  } else if (client.teamCodes && !assignmentCoversCode(client.teamCodes[staff.id], s.code)) {
+    out.push(find("code_not_assigned", "block",
+      `${firstName(staff.name)} isn't assigned ${up(s.code)} for ${firstName(client.name)}`));
   }
   return out;
 }

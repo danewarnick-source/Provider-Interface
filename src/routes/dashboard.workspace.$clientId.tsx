@@ -10,6 +10,7 @@ import { resolveGeofenceRadiusFeet } from "@/lib/geo";
 
 import { Badge } from "@/components/ui/badge";
 import { PunchPad } from "@/components/evv/punch-pad";
+import { pickShiftForClockIn } from "@/lib/scheduler/staff-clock";
 import { padMemberId } from "@/lib/evv-codes";
 import { bindSpecialDirections } from "@/lib/bind-special-directions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -136,16 +137,8 @@ function ClientWorkspace() {
   const { data: todayShifts } = useTodayShifts();
   const scheduledCode = useMemo(() => {
     if (presetCode) return undefined; // URL wins
-    const mine = (todayShifts ?? []).filter((s) => s.client_id === clientId && !!s.job_code);
-    if (mine.length === 0) return undefined;
-    const now = Date.now();
-    const current = mine.find(
-      (s) => new Date(s.starts_at).getTime() <= now && new Date(s.ends_at).getTime() >= now,
-    );
-    const upcoming = mine
-      .filter((s) => new Date(s.starts_at).getTime() >= now)
-      .sort((a, b) => +new Date(a.starts_at) - +new Date(b.starts_at))[0];
-    return (current ?? upcoming ?? mine[0]).job_code ?? undefined;
+    const mine = (todayShifts ?? []).filter((s) => s.client_id === clientId && !!s.service_code);
+    return pickShiftForClockIn(mine, new Date())?.service_code ?? undefined;
   }, [todayShifts, clientId, presetCode]);
   const effectivePresetCode = presetCode ?? scheduledCode;
 

@@ -8,7 +8,7 @@ export type TodayShiftRow = {
   id: string;
   client_id: string;
   client_name: string;
-  job_code: string | null;
+  service_code: string | null;
   starts_at: string;
   ends_at: string;
 };
@@ -30,7 +30,7 @@ export function useTodayShifts() {
 
       const { data, error } = await supabase
         .from("scheduled_shifts")
-        .select("id, client_id, job_code, starts_at, ends_at, status, published, clients:client_id(first_name, last_name)")
+        .select("id, client_id, service_code, starts_at, ends_at, status, published, clients:client_id(first_name, last_name)")
         .eq("staff_id", user!.id)
         .eq("organization_id", org!.organization_id)
         .gte("starts_at", startIso)
@@ -41,7 +41,7 @@ export function useTodayShifts() {
       if (error) throw error;
 
       const rows = (data ?? []) as Array<{
-        id: string; client_id: string; job_code: string | null;
+        id: string; client_id: string; service_code: string | null;
         starts_at: string; ends_at: string;
         clients: { first_name: string; last_name: string } | null;
       }>;
@@ -51,7 +51,7 @@ export function useTodayShifts() {
         client_name: r.clients
           ? `${r.clients.first_name} ${r.clients.last_name}`.trim()
           : "Client",
-        job_code: r.job_code,
+        service_code: r.service_code,
         starts_at: r.starts_at,
         ends_at: r.ends_at,
       }));

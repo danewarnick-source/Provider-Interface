@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { previewRepeat, applyRepeat } from "@/lib/scheduler/repeat.functions";
 import { addDaysKey, dayKey, parseLocalDate, startOfWeek } from "@/lib/scheduler/time";
+import { toastRuleWarnings } from "@/components/scheduler/shared/rule-warnings";
 
 type SourceMode = "prev_week" | "prev_month" | "pick_week";
 
@@ -108,6 +109,7 @@ export function RepeatShiftsDialog({
           "opened" in r && r.opened ? `, ${r.opened} left open (do-not-schedule list)` : ""
         }.`,
       );
+      toastRuleWarnings(r);
       qc.invalidateQueries({ queryKey: ["scheduler-data"] });
       onClose();
     },
@@ -197,7 +199,7 @@ export function RepeatShiftsDialog({
                   {projected.slice(0, 200).map((p) => {
                     const start = new Date(p.target_starts_at);
                     const end = new Date(p.target_ends_at);
-                    const code = p.service_code ?? p.job_code ?? "—";
+                    const code = p.service_code ?? "—";
                     const checked = !excluded.has(p.id);
                     return (
                       <tr key={p.id} className="border-t">
