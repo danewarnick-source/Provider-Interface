@@ -4,8 +4,8 @@
  * Every `staff_assignments` row lists its codes explicitly. NULL or [] is
  * never "all codes" — it grants nothing. A staff member may see and clock
  * into a code only when it is both assigned to them AND currently
- * authorized for the client. Client codes come from `authorized_dspd_codes`
- * first, then `job_code` (legacy).
+ * authorized for the client. Client codes come from client_billing_codes
+ * (src/lib/clients/services/codes.ts).
  */
 
 /** client_id → the codes this staff member is assigned for that client. */
@@ -29,21 +29,6 @@ export function normalizeServiceCodes(raw: readonly unknown[] | null | undefined
     out.push(code);
   }
   return out;
-}
-
-/**
- * The client's currently authorized codes: union of authorized_dspd_codes and
- * job_code, trimmed, upper-cased, de-duplicated. The staff_assignments
- * explicit-codes backfill migration computes exactly this in SQL.
- */
-export function clientAuthorizedCodes(client: {
-  job_code?: string[] | null;
-  authorized_dspd_codes?: string[] | null;
-}): string[] {
-  return normalizeServiceCodes([
-    ...(Array.isArray(client.authorized_dspd_codes) ? client.authorized_dspd_codes : []),
-    ...(Array.isArray(client.job_code) ? client.job_code : []),
-  ]);
 }
 
 /** The explicit codes on one staff_assignments row. NULL / [] → empty (grants nothing). */
@@ -133,23 +118,6 @@ export function withCodeRemoved(
 ): string[] {
   const drop = normalizeServiceCode(code);
   return assignmentCodes(current).filter((c) => c !== drop);
-}
-
-/**
- * Codes a Smart Import assignment commits: the source's codes that the client
- * is authorized for, or — when the source lists none — all of the client's
- * authorized codes, written out explicitly. [] means nothing can be written
- * (client has no authorized codes, or none of the source codes are).
- */
-export function importAssignmentCodes(
-  sourceCodes: readonly unknown[] | null | undefined,
-  authorized: string[],
-): string[] {
-  const auth = normalizeServiceCodes(authorized);
-  const source = normalizeServiceCodes(sourceCodes);
-  if (source.length === 0) return auth;
-  const allowed = new Set(auth);
-  return source.filter((c) => allowed.has(c));
 }
 
 /** Authorized codes nobody is assigned to yet (for "No staff assigned to {code} yet"). */

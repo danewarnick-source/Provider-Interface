@@ -1,0 +1,586 @@
+// All documents on file for a client (Client file section): upload, preview,
+// download and retire. A PCSP upload goes through the PCSP review.
+
+import { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
+import {
+  FileText,
+  FileUp,
+  FolderOpen,
+  Loader2,
+  Sparkles,
+  Upload,
+  ExternalLink,
+} from "lucide-react";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
+import { EmptyState } from "@/components/clients/profile/cards/card-parts";
+import { RowMenu } from "@/components/clients/profile/cards/row-menu";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useCurrentOrg } from "@/hooks/use-org";
+import { formatDate } from "@/lib/clients/dates";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  ingestDocument,
+  queryDocuments,
+  getDocument,
+} from "@/lib/nectar-documents.functions";
+import { retireDocument } from "@/lib/document-effective-dating.functions";
+import { NectarDocumentActionsDialog } from "@/components/nectar/document-actions-dialog";
+import { DocumentPreviewDialog } from "../dialogs/document-preview-dialog";
+import { DocumentEffectiveDatingDialog } from "@/components/documents/document-effective-dating-dialog";
+import { OutdatedDocumentsSection } from "@/components/documents/outdated-documents-section";
+import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
+import { usePcspUploadFlow } from "@/components/clients/profile/plans/pcsp-upload-button";
+
+const CLIENT_DOC_TYPES = [
+  { value: "pcsp", label: "PCSP" },
+  { value: "1056_budget", label: "1056 Budget" },
+  { value: "referral", label: "Referral" },
+  { value: "intake", label: "Intake form" },
+  { value: "assessment", label: "Assessment" },
+  { value: "contract", label: "Guardian / legal papers" },
+  { value: "hrc_approval", label: "HRR / HRC / Rights Restriction" },
+  { value: "certification", label: "Consent" },
+  { value: "room_board_agreement", label: "Room and Board Agreement (HHS)" },
+  { value: "lease_agreement", label: "Lease agreement (RHS)" },
+  { value: "medical_exam", label: "Medical examination record" },
+  { value: "dental_exam", label: "Dental examination record" },
+  { value: "other", label: "Other" },
+];
+
+type DocRow = {
+  id: string;
+  document_type: string;
+  title: string;
+  version: number;
+  fiscal_year: string | null;
+  file_name: string;
+  mime_type?: string | null;
+  parse_status: string;
+  uploaded_by_name: string | null;
+  created_at: string;
+  source: "nectar" | "client";
+  storage_path?: string;
+};
+
+async function fileToBase64(file: File): Promise<string> {
+  const buf = await file.arrayBuffer();
+  const bytes = new Uint8Array(buf);
+  let str = "";
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    str += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)));
+  }
+  return btoa(str);
+}
+
+export function ClientDocumentsCard({
+  clientId,
+  clientName,
+}: {
+  clientId: string;
+  clientName: string;
+}) {
+  const { data: org } = useCurrentOrg();
+  const orgId = org?.organization_id;
+  const qc = useQueryClient();
+  const queryFn = useServerFn(queryDocuments);
+  const retireFn = useServerFn(retireDocument);
+  const getDocFn = useServerFn(getDocument);
+  const recordAccessFn = useServerFn(recordPhiAccess);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  // A PCSP goes through the same review → Confirm as "Upload PCSP".
+  const pcspFlow = usePcspUploadFlow(clientId, orgId, "documents-pcsp-upload-input");
+  const [offerDocId, setOfferDocId] = useState<string | null>(null);
+  const [preview, setPreview] = useState<{
+    fileName: string;
+    mimeType: string | null;
+    signedUrl: string;
+  } | null>(null);
+  const [dating, setDating] = useState<{
+    id: string;
+    kind: "client" | "nectar";
+    documentType: string;
+    documentTypeLabel: string;
+  } | null>(null);
+
+  const invalidateAll = () => {
+    qc.invalidateQueries({ queryKey: ["client-docs", orgId, clientId] });
+    qc.invalidateQueries({ queryKey: ["nectar-docs"] });
+    qc.invalidateQueries({ queryKey: ["client-has-pcsp", clientId] });
+    qc.invalidateQueries({ queryKey: ["client-specific-training", clientId] });
+    qc.invalidateQueries({ queryKey: ["outdated-docs"] });
+  };
+
+  const auditDocumentOpen = (docId: string, detail?: string | null) => {
+    if (!orgId) return;
+    void recordAccessFn({
+      data: {
+        organizationId: orgId,
+        resourceType: "client_document",
+        resourceId: docId,
+        clientId,
+        action: "download",
+        detail: detail ?? undefined,
+        userAgent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+      },
+    });
+  };
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["client-docs", orgId, clientId],
+    enabled: !!orgId && !!clientId,
+    queryFn: async () => {
+      const [nectarRes, clientRes] = await Promise.all([
+        queryFn({
+          data: {
+            organizationId: orgId!,
+            clientId,
+            ownerKind: "client",
+            currentOnly: true,
+            limit: 100,
+          },
+        }),
+        supabase
+          .from("client_documents")
+          .select("id, document_type, file_name, storage_path, file_url, uploaded_at")
+          .eq("client_id", clientId)
+          .is("archived_at", null)
+          .order("uploaded_at", { ascending: false }),
+      ]);
+      const nectarDocs: DocRow[] = (nectarRes?.documents ?? []).map(
+        (d: Record<string, unknown>) => ({
+          id: d.id as string,
+          document_type: (d.document_type as string) ?? "other",
+          title: (d.title as string) ?? (d.file_name as string) ?? "Document",
+          version: (d.version as number) ?? 1,
+          fiscal_year: (d.fiscal_year as string | null) ?? null,
+          file_name: (d.file_name as string) ?? "",
+          parse_status: (d.parse_status as string) ?? "",
+          mime_type: (d.mime_type as string | null) ?? null,
+          uploaded_by_name: (d.uploaded_by_name as string | null) ?? null,
+          created_at: (d.created_at as string) ?? new Date().toISOString(),
+          source: "nectar",
+        }),
+      );
+      const clientDocs: DocRow[] = ((clientRes.data ?? []) as Array<Record<string, unknown>>).map(
+        (d) => ({
+          id: d.id as string,
+          document_type: ((d.document_type as string) ?? "other").toLowerCase(),
+          title: ((d.document_type as string) ?? "Document").toUpperCase() + " — " + clientName,
+          version: 1,
+          fiscal_year: null,
+          file_name: (d.file_name as string) ?? "",
+          parse_status: "",
+          uploaded_by_name: null,
+          created_at:
+            (d.uploaded_at as string) ?? (d.created_at as string) ?? new Date().toISOString(),
+          source: "client",
+          storage_path: (d.storage_path as string) ?? (d.file_url as string) ?? "",
+        }),
+      );
+      const merged = [...nectarDocs, ...clientDocs].sort((a, b) =>
+        (b.created_at ?? "").localeCompare(a.created_at ?? ""),
+      );
+      return { documents: merged };
+    },
+  });
+
+  const docs = (data?.documents ?? []) as DocRow[];
+
+  const del = useMutation({
+    mutationFn: async (row: DocRow) => {
+      if (!orgId) throw new Error("No organization selected.");
+      await retireFn({
+        data: { organization_id: orgId, kind: row.source, document_id: row.id },
+      });
+    },
+    onSuccess: () => {
+      toast.success("Document moved to Outdated — the file is kept for audits.");
+      invalidateAll();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <SectionCard
+      icon={FolderOpen}
+      tone="info"
+      title="Client documents"
+      description={`Every file on record for ${clientName}. Nectar reads each upload; the file stays here and in Company Docs.`}
+      actions={
+        <>
+          <UploadDocDialog
+            orgId={orgId}
+            clientId={clientId}
+            clientName={clientName}
+            open={uploadOpen}
+            onOpenChange={setUploadOpen}
+            pcspLabel={pcspFlow.label}
+            onPcsp={() => {
+              setUploadOpen(false);
+              pcspFlow.start();
+            }}
+            onUploaded={(docId, sourceKind, docType) => {
+              invalidateAll();
+              if (docId && docType) {
+                const label = CLIENT_DOC_TYPES.find((t) => t.value === docType)?.label ?? docType;
+                setDating({
+                  id: docId,
+                  kind: sourceKind === "client" ? "client" : "nectar",
+                  documentType: docType,
+                  documentTypeLabel: label,
+                });
+              }
+              if (docId && sourceKind === "nectar") setOfferDocId(docId);
+            }}
+          />
+          {pcspFlow.element}
+          <NectarDocumentActionsDialog
+            documentId={offerDocId}
+            open={!!offerDocId}
+            onOpenChange={(v) => {
+              if (!v) setOfferDocId(null);
+            }}
+          />
+          <DocumentEffectiveDatingDialog
+            open={!!dating}
+            onOpenChange={(v) => {
+              if (!v) setDating(null);
+            }}
+            organizationId={orgId}
+            kind={dating?.kind ?? "client"}
+            documentId={dating?.id ?? null}
+            documentType={dating?.documentType ?? "other"}
+            documentTypeLabel={dating?.documentTypeLabel}
+            clientId={clientId}
+            onDone={invalidateAll}
+          />
+          <DocumentPreviewDialog
+            open={!!preview}
+            onOpenChange={(v) => {
+              if (!v) setPreview(null);
+            }}
+            doc={preview}
+          />
+        </>
+      }
+    >
+      <div className="space-y-2">
+        {isLoading && (
+          <div className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-border/60 bg-card/30 p-4 text-xs text-muted-foreground">
+            <Loader2 className="h-3 w-3 animate-spin" /> Loading…
+          </div>
+        )}
+        {!isLoading && docs.length === 0 && (
+          <EmptyState>
+            No client documents yet. Upload a PCSP, 1056 or intake so Nectar knows {clientName}.
+          </EmptyState>
+        )}
+        {docs.map((d) => (
+          <div
+            key={d.id}
+            className="flex flex-col gap-2 rounded-lg border border-border/60 bg-card/40 p-3 backdrop-blur-md md:flex-row md:items-center md:justify-between"
+          >
+            <div className="flex min-w-0 items-start gap-2">
+              <FileText className="mt-0.5 h-4 w-4 shrink-0 text-primary/70" />
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="truncate text-sm font-medium">{d.title}</span>
+                  <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
+                    {d.document_type.replace(/_/g, " ")}
+                  </Badge>
+                  {d.fiscal_year && (
+                    <Badge variant="outline" className="text-[10px]">
+                      {d.fiscal_year}
+                    </Badge>
+                  )}
+                  {d.version > 1 && (
+                    <Badge variant="outline" className="text-[10px]">
+                      v{d.version}
+                    </Badge>
+                  )}
+                  <ParseStatus status={d.parse_status} />
+                </div>
+                <div className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                  {d.file_name} · {formatDate(d.created_at)}
+                  {d.uploaded_by_name ? ` · ${d.uploaded_by_name}` : ""}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  if (d.source === "client" && d.storage_path) {
+                    const { data: signed } = await supabase.storage
+                      .from("client-documents")
+                      .createSignedUrl(d.storage_path, 300);
+                    if (signed?.signedUrl) {
+                      auditDocumentOpen(d.id, d.file_name);
+                      setPreview({
+                        fileName: d.file_name,
+                        mimeType: d.mime_type ?? null,
+                        signedUrl: signed.signedUrl,
+                      });
+                    } else toast.error("Could not generate a link for this file.");
+                    return;
+                  }
+                  try {
+                    const res = await getDocFn({ data: { documentId: d.id } });
+                    const url = (res as { signedUrl?: string | null })?.signedUrl;
+                    const mime =
+                      (res as { document?: { mime_type?: string | null } })?.document?.mime_type ??
+                      d.mime_type ??
+                      null;
+                    if (url) {
+                      auditDocumentOpen(d.id, d.file_name);
+                      setPreview({ fileName: d.file_name, mimeType: mime, signedUrl: url });
+                    } else toast.error("Could not generate a link for this file.");
+                  } catch (e) {
+                    toast.error((e as Error).message);
+                  }
+                }}
+              >
+                <ExternalLink className="h-4 w-4" /> Open file
+              </Button>
+              <RowMenu
+                label={`More actions for ${d.title}`}
+                items={[
+                  {
+                    label: "Move to Outdated",
+                    danger: true,
+                    onSelect: () => {
+                      if (confirm(`Move "${d.title}" to Outdated? The file is kept for audits.`))
+                        del.mutate(d);
+                    },
+                  },
+                ]}
+              />
+            </div>
+          </div>
+        ))}
+        <OutdatedDocumentsSection
+          organizationId={orgId}
+          kind="nectar"
+          clientId={clientId}
+          title="Outdated / Superseded (Company Docs)"
+        />
+        <OutdatedDocumentsSection
+          organizationId={orgId}
+          kind="client"
+          clientId={clientId}
+          title="Outdated / Superseded (PCSP & files)"
+        />
+      </div>
+    </SectionCard>
+  );
+}
+
+function ParseStatus({ status }: { status: string }) {
+  if (status === "parsed")
+    return (
+      <Badge className="bg-emerald-500/15 text-[10px] text-emerald-700 hover:bg-emerald-500/15 dark:text-emerald-300">
+        <Sparkles className="mr-1 h-2.5 w-2.5" /> parsed
+      </Badge>
+    );
+  if (status === "parsing" || status === "pending")
+    return (
+      <Badge className="bg-amber-500/15 text-[10px] text-amber-700 hover:bg-amber-500/15 dark:text-amber-300">
+        <Loader2 className="mr-1 h-2.5 w-2.5 animate-spin" /> {status}
+      </Badge>
+    );
+  if (status === "failed")
+    return (
+      <Badge variant="destructive" className="text-[10px]">
+        parse failed
+      </Badge>
+    );
+  return null;
+}
+
+function UploadDocDialog({
+  orgId,
+  clientId,
+  clientName,
+  open,
+  onOpenChange,
+  pcspLabel,
+  onPcsp,
+  onUploaded,
+}: {
+  orgId: string | undefined;
+  clientId: string;
+  clientName: string;
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  /** "Upload PCSP" or "Upload new PCSP". */
+  pcspLabel: string;
+  /** Type PCSP: close this and start the PCSP review flow. */
+  onPcsp: () => void;
+  onUploaded: (docId?: string, sourceKind?: "nectar" | "client", docType?: string) => void;
+}) {
+  const ingest = useServerFn(ingestDocument);
+  const [title, setTitle] = useState("");
+  const [docType, setDocType] = useState("pcsp");
+  const [fiscalYear, setFiscalYear] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const isPcsp = docType === "pcsp";
+
+  const defaultTitle = useMemo(() => {
+    const t = CLIENT_DOC_TYPES.find((x) => x.value === docType)?.label ?? "Document";
+    return `${t} — ${clientName}`;
+  }, [docType, clientName]);
+
+  const mut = useMutation({
+    mutationFn: async () => {
+      if (!orgId || !file) throw new Error("Pick a file first");
+      const b64 = await fileToBase64(file);
+      return ingest({
+        data: {
+          organizationId: orgId,
+          ownerKind: "client",
+          clientId,
+          documentType: docType as never,
+          title: title || defaultTitle,
+          fileName: file.name,
+          mimeType: file.type || "application/octet-stream",
+          fileBase64: b64,
+          fiscalYear: fiscalYear || null,
+          tags: [],
+          autoParse: true,
+        },
+      });
+    },
+    onSuccess: (res) => {
+      const r = res as {
+        document?: { id?: string };
+        extracted?: unknown[];
+        autofilled?: string[];
+        suggested?: string[];
+      };
+      const extractedN = r.extracted?.length ?? 0;
+      const autoN = r.autofilled?.length ?? 0;
+      const sugN = r.suggested?.length ?? 0;
+      toast.success(
+        autoN > 0
+          ? `NECTAR autofilled ${autoN} field${autoN === 1 ? "" : "s"} on ${clientName}'s profile${sugN > 0 ? ` · ${sugN} need review` : ""}`
+          : `Uploaded — NECTAR extracted ${extractedN} field${extractedN === 1 ? "" : "s"}${sugN > 0 ? ` · ${sugN} need review` : ""}`,
+      );
+      const chosenType = docType;
+      setTitle("");
+      setFile(null);
+      setFiscalYear("");
+      onOpenChange(false);
+      onUploaded(r.document?.id, "nectar", chosenType);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogTrigger asChild>
+        <Button>
+          <Upload className="h-4 w-4" /> Upload document
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Upload to {clientName}'s record</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <Label>Document type</Label>
+            <Select value={docType} onValueChange={setDocType}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CLIENT_DOC_TYPES.map((t) => (
+                  <SelectItem key={t.value} value={t.value}>
+                    {t.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {isPcsp ? (
+            <p className="text-sm text-muted-foreground" data-testid="documents-pcsp-hint">
+              A PCSP is read and checked before it's saved: Nectar reads the plan, you review it,
+              then Confirm.
+            </p>
+          ) : (
+            <>
+              <div className="space-y-1">
+                <Label>File (PDF, Word, text, CSV)</Label>
+                <Input
+                  type="file"
+                  accept=".pdf,.doc,.docx,.txt,.csv,.md,.json,.html,.htm,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>Title (optional)</Label>
+                  <Input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder={defaultTitle}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Fiscal year</Label>
+                  <Input
+                    value={fiscalYear}
+                    onChange={(e) => setFiscalYear(e.target.value)}
+                    placeholder="FY26"
+                  />
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          {isPcsp ? (
+            <Button disabled={!orgId} onClick={onPcsp}>
+              <FileUp className="mr-2 h-4 w-4" />
+              {pcspLabel}
+            </Button>
+          ) : (
+            <Button disabled={!file || mut.isPending} onClick={() => mut.mutate()}>
+              {mut.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="mr-2 h-4 w-4" />
+              )}
+              Upload &amp; parse
+            </Button>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

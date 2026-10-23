@@ -19,7 +19,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus } from "lucide-react";
 import { LoanFeatureGate } from "@/components/loans/loan-feature-gate";
 import { LoanEditor } from "@/components/loans/loan-editor";
-import { listOrgLoans } from "@/lib/client-loans.functions";
+import { listOrgLoans } from "@/lib/clients/money/loans.functions";
 
 export const Route = createFileRoute("/dashboard/client-loans")({
   head: () => ({ meta: [{ title: "Client Loan Ledger — Provider Interface" }] }),
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/dashboard/client-loans")({
   ),
 });
 
-export function ClientLoansPage() {
+function ClientLoansPage() {
   const { data: org } = useCurrentOrg();
   if (!org?.organization_id) {
     return <div className="p-6 text-sm text-muted-foreground">Loading…</div>;
@@ -67,6 +67,7 @@ function LoanArea({ organizationId, lenderName }: { organizationId: string; lend
       const { data, error } = await (supabase as any)
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", organizationId)
         .order("last_name");
       if (error) throw new Error(error.message);
@@ -137,11 +138,23 @@ function LoanArea({ organizationId, lenderName }: { organizationId: string; lend
               </TableHeader>
               <TableBody>
                 {(loans.data ?? []).map((l: any) => (
-                  <TableRow key={l.id}>
-                    <TableCell>{clientLabel.get(l.client_id) ?? l.client_id}</TableCell>
-                    <TableCell>{l.borrower_name}</TableCell>
-                    <TableCell>{l.agreement_date}</TableCell>
-                    <TableCell className="capitalize">{l.status}</TableCell>
+                  <TableRow key={l.id} data-voided={l.voided_at ? "true" : undefined}>
+                    <TableCell className={l.voided_at ? "line-through text-muted-foreground" : ""}>
+                      {clientLabel.get(l.client_id) ?? l.client_id}
+                    </TableCell>
+                    <TableCell className={l.voided_at ? "line-through text-muted-foreground" : ""}>
+                      {l.borrower_name}
+                    </TableCell>
+                    <TableCell className={l.voided_at ? "line-through text-muted-foreground" : ""}>
+                      {l.agreement_date}
+                    </TableCell>
+                    <TableCell className="capitalize">
+                      {l.voided_at ? (
+                        <span className="normal-case text-destructive">Voided: {l.void_reason}</span>
+                      ) : (
+                        l.status
+                      )}
+                    </TableCell>
                     <TableCell className="text-right">
                       <Button size="sm" variant="outline" onClick={() => setEditing({ loanId: l.id, clientId: l.client_id, borrower: l.borrower_name })}>
                         Open

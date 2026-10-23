@@ -27,6 +27,7 @@ export const getMyEntitlements = createServerFn({ method: "GET" })
     const { data: memberships } = await supabase
       .from("organization_members")
       .select("organization_id, access_level")
+      .is("deleted_at", null)
       .eq("user_id", userId)
       .eq("active", true);
 

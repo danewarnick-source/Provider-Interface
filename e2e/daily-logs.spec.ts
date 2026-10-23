@@ -110,7 +110,7 @@ test.describe("Daily Logs — staff submit (mocked DSP)", () => {
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible({ timeout: 10_000 });
     await expect(dialog.getByText(/Tommy Jones/i).first()).toBeVisible();
-    await expect(dialog.getByText(/PCSP Goals Addressed Today/i)).toBeVisible();
+    await expect(dialog.getByText(/Goals worked on today/i)).toBeVisible();
     await expect(dialog.getByText(/Community integration/i).first()).toBeVisible();
     await expect(dialog.getByText(/Daily Summary Narrative/i)).toBeVisible();
     await expect(dialog.locator("#narrative")).toBeVisible();

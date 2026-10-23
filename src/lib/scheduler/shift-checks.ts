@@ -1,8 +1,10 @@
 // The checks every path that puts a staff member on a client's shift must run:
-// the client is authorized for the code, the staff member is assigned that code
-// for the client, and the staff member is not on approved time off.
+// the client is authorized for the code, the staff member is not on the
+// client's do-not-schedule list, is assigned that code for the client, and is
+// not on approved time off.
 // Used by saveShift, applyDrafts, decideClaim and publishWeek.
 import { assignmentCoversCode, normalizeServiceCode } from "../assignment-codes.ts";
+import { assertStaffNotExcluded } from "../clients/team/exclusions-check.server.ts";
 import { dayKey } from "./time.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -114,6 +116,14 @@ export async function assertShiftAllowed(supabase: Db, shift: ShiftToCheck) {
   await assertClientAuthorizedForCode(supabase, shift.organization_id, shift.client_id, shift.code);
   if (!shift.staff_id) return;
   const { staffName, clientName } = await loadShiftNames(supabase, shift.staff_id, shift.client_id);
+  // Do-not-schedule list first: it says why, even if still on the caseload.
+  await assertStaffNotExcluded(supabase, {
+    organizationId: shift.organization_id,
+    clientId: shift.client_id,
+    staffId: shift.staff_id,
+    staffName,
+    clientName,
+  });
   await assertStaffOnCaseload(
     supabase, shift.organization_id, shift.staff_id, shift.client_id, shift.code, staffName, clientName,
   );

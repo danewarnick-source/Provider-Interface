@@ -1,5 +1,6 @@
 import { TOMMY_GOALS } from "../fixtures";
 
+/** Clock-out supports for the shift's code, grouped by goal (GoalView shape). */
 export function useClientCareData() {
   return {
     data: {
@@ -7,8 +8,8 @@ export function useClientCareData() {
         goalsForStaff: TOMMY_GOALS.map((goal, i) => ({
           id: `goal-${i}`,
           goal,
-          job_codes: ["SEI"],
-          is_complete: true,
+          domain: null,
+          supports: [{ id: `support-${i}`, support_text: goal, details: null, our_codes: ["SEI"] }],
         })),
       },
     },

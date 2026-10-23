@@ -3,16 +3,17 @@ import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useCurrentOrg } from "@/hooks/use-org";
 import { z } from "zod";
 import {
   getStaffClientSpecificTraining,
   completeClientSpecificTraining,
-  checkAnswerRelevance,
-  type CSTContent,
-  type CSTReviewQuestion,
-  type CSTGoal,
-} from "@/lib/client-specific-training.functions";
-import { SectionsView, GoalsView } from "@/components/clients/client-specific-training-card";
+} from "@/lib/clients/team/training-staff.functions";
+import { checkAnswerRelevance } from "@/lib/clients/team/training.functions";
+import { type CSTContent, type CSTReviewQuestion } from "@/lib/clients/team/training-content";
+import { SectionsView } from "@/components/clients/profile/client-specific-training-card";
+import { GoalTree } from "@/components/clients/profile/plans/goal-tree";
+import type { GoalView } from "@/lib/clients/plans/plans";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, CheckCircle2, Shield, Loader2, AlertTriangle, BookOpen, Users, FileSignature } from "lucide-react";
 import { TrainingCertificateDialog, type TrainingCertificateRecord } from "@/components/training/training-certificate-dialog";
 import { toast } from "sonner";
+import { ClientAccessGate } from "@/components/clients/shared/client-access-gate";
 
 const searchSchema = z.object({
   trainingType: z.enum(["person_specific", "support_strategies", "person_centered"]).optional(),
@@ -35,8 +37,17 @@ export const Route = createFileRoute("/dashboard/client-training/$clientId")({
       fallbackTo: "/dashboard/clients",
     });
   },
-  component: ClientTrainingViewer,
+  component: ClientTrainingRoute,
 });
+
+function ClientTrainingRoute() {
+  const { clientId } = Route.useParams();
+  return (
+    <ClientAccessGate clientId={clientId}>
+      <ClientTrainingViewer />
+    </ClientAccessGate>
+  );
+}
 
 // ── Question answer state ────────────────────────────────────────────────────
 type QAnswer = { question: string; answer: string; tab: string; relevant: boolean | null; hint: string; checking: boolean };
@@ -53,6 +64,8 @@ function ClientTrainingViewer() {
   const getFn = useServerFn(getStaffClientSpecificTraining);
   const completeFn = useServerFn(completeClientSpecificTraining);
   const checkFn = useServerFn(checkAnswerRelevance);
+  const { data: org } = useCurrentOrg();
+  const organizationId = org?.organization_id ?? null;
   const [signature, setSignature] = useState("");
   const [answers, setAnswers] = useState<QAnswer[]>([]);
   const [lastTrainingId, setLastTrainingId] = useState<string | null>(null);
@@ -61,11 +74,11 @@ function ClientTrainingViewer() {
   const [certOpen, setCertOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  const queryKey = ["staff-client-training", clientId, trainingType, obligationInstance ?? null];
+  const queryKey = ["staff-client-training", organizationId, clientId, trainingType, obligationInstance ?? null];
   const { data, isLoading, error } = useQuery({
-    enabled: isRouteUuid(clientId),
+    enabled: isRouteUuid(clientId) && !!organizationId,
     queryKey,
-    queryFn: () => getFn({ data: { clientId, trainingType } }),
+    queryFn: () => getFn({ data: { organizationId: organizationId!, clientId, trainingType } }),
     retry: false,
   });
 
@@ -120,8 +133,10 @@ function ClientTrainingViewer() {
       const ok = await checkAllRelevance(questions, answers);
       if (!ok) throw new Error("Please address the flagged questions before submitting.");
       // 2. Submit completion
+      if (!organizationId) throw new Error("Your agency is still loading. Try again.");
       return completeFn({
         data: {
+          organizationId,
           clientId,
           trainingType,
           typedSignature: signature.trim(),
@@ -185,7 +200,7 @@ function ClientTrainingViewer() {
   }
 
   const alreadyCurrent = (completion?.is_current && pinned) || justCompleted;
-  const goals = (training as { goals?: CSTGoal[] | null }).goals ?? null;
+  const goals = (training as { goals?: GoalView[] | null }).goals ?? null;
 
   const allAnswered = questions.length === 0 || answers.every((a) => wordCount(a.answer) >= MIN_WORDS);
   const anyChecking = answers.some((a) => a.checking);
@@ -284,7 +299,7 @@ function ClientTrainingViewer() {
                   <h3 className="text-sm font-semibold">Goals</h3>
                   <Badge variant="outline" className="text-xs">{goals.length}</Badge>
                 </div>
-                <GoalsView goals={goals} />
+                <GoalTree goals={goals} />
               </div>
             )}
 

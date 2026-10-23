@@ -25,6 +25,7 @@ async function otherActiveMemberships(userId: string, organizationId: string): P
   const { count, error } = await supabaseAdmin
     .from("organization_members")
     .select("id", { count: "exact", head: true })
+    .is("deleted_at", null)
     .eq("user_id", userId)
     .eq("active", true)
     .neq("organization_id", organizationId);

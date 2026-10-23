@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { useAllClientBillingCodes } from "@/hooks/use-client-billing-codes";
+import { useAllClientBillingCodes } from "@/components/clients/shared/hooks/use-client-billing-codes";
 import { NectarHeader, NectarBadge } from "@/components/nectar/nectar-brand";
 import { NectarInfusionLock } from "@/components/nectar/nectar-infusion-lock";
 import {
@@ -127,6 +127,7 @@ function ReadinessBarInner() {
       const { data, error } = await supabase
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!);
       if (error) throw error;
       return (data ?? []) as Array<{ id: string; first_name: string; last_name: string }>;

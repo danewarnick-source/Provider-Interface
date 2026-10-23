@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { useAllClientBillingCodes } from "@/hooks/use-client-billing-codes";
+import { useAllClientBillingCodes } from "@/components/clients/shared/hooks/use-client-billing-codes";
 import { ChevronRight, AlertTriangle, CheckCircle2, CalendarX2 } from "lucide-react";
 import { fmtHours, fmtUnits, unitsToHours, computeEntryUnits, effectiveBillingTimes, rollupClientUsage } from "@/lib/billing-units";
 import { isDailyServiceCode } from "@/lib/service-billing";
@@ -28,6 +28,7 @@ function BillingOverviewPage() {
         .from("clients")
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .select("id, first_name, last_name, medicaid_id" as any)
+        .is("deleted_at", null)
         .eq("organization_id", org!.organization_id)
         .order("last_name");
       if (error) throw error;

@@ -96,6 +96,7 @@ export const getMemberActivity = createServerFn({ method: "POST" })
       const { data: cs, error } = await admin
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", orgId)
         .in("id", clientIds);
       if (error) throw new Error(error.message);

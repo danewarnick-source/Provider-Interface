@@ -7,7 +7,6 @@ import {
   sumClockedHours,
   usageCounts,
 } from "./exec-aggregates.ts";
-import { findDuplicateClientInOrg, mayRunOrgWideClientDedup } from "./smart-import-dedup.ts";
 
 describe("executive aggregate counts (item 9)", () => {
   it("allows service-role totals only after a successful is_hive_executive check", () => {
@@ -67,80 +66,5 @@ describe("executive aggregate counts (item 9)", () => {
     assert.match(loader, /from\("evv_timesheets"\)/);
     assert.match(loader, /head: true/);
     assert.doesNotMatch(loader, /first_name|last_name|narrative/);
-  });
-});
-
-describe("smart-import duplicate clients (item 9)", () => {
-  const orgA = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
-  const orgB = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb";
-
-  it("fails closed unless the caller is an executive or an org admin", () => {
-    assert.equal(
-      mayRunOrgWideClientDedup({ isExec: true, execRpcFailed: false, isOrgAdmin: false, adminRpcFailed: false }),
-      true,
-    );
-    assert.equal(
-      mayRunOrgWideClientDedup({ isExec: false, execRpcFailed: false, isOrgAdmin: true, adminRpcFailed: false }),
-      true,
-    );
-    assert.equal(
-      mayRunOrgWideClientDedup({ isExec: false, execRpcFailed: false, isOrgAdmin: false, adminRpcFailed: false }),
-      false,
-    );
-    assert.equal(
-      mayRunOrgWideClientDedup({ isExec: null, execRpcFailed: true, isOrgAdmin: true, adminRpcFailed: false }),
-      true,
-    );
-    assert.equal(
-      mayRunOrgWideClientDedup({ isExec: null, execRpcFailed: true, isOrgAdmin: null, adminRpcFailed: true }),
-      false,
-    );
-    assert.equal(
-      mayRunOrgWideClientDedup({ isExec: false, execRpcFailed: false, isOrgAdmin: null, adminRpcFailed: true }),
-      false,
-    );
-  });
-
-  it("matches inside the target org and ignores the same person in another org", () => {
-    const rows = [
-      {
-        id: "other",
-        organization_id: orgB,
-        medicaid_id: "UT100",
-        first_name: "Ada",
-        last_name: "Lovelace",
-      },
-      {
-        id: "here",
-        organization_id: orgA,
-        medicaid_id: "UT100",
-        first_name: "Ada",
-        last_name: "Lovelace",
-      },
-    ];
-    assert.deepEqual(
-      findDuplicateClientInOrg(rows, orgA, { medicaid_id: "UT100" }),
-      { matchedId: "here", ambiguous: false },
-    );
-    assert.deepEqual(
-      findDuplicateClientInOrg(
-        rows.filter((row) => row.organization_id === orgB),
-        orgA,
-        { medicaid_id: "UT100", first_name: "Ada", last_name: "Lovelace", date_of_birth: "1990-01-01" },
-      ),
-      { matchedId: null, ambiguous: false },
-    );
-  });
-
-  it("marks two name matches in the org as ambiguous", () => {
-    const result = findDuplicateClientInOrg(
-      [
-        { id: "1", organization_id: orgA, medicaid_id: null, first_name: "Ada", last_name: "Lovelace" },
-        { id: "2", organization_id: orgA, medicaid_id: null, first_name: "ada", last_name: "lovelace" },
-      ],
-      orgA,
-      { first_name: "Ada", last_name: "Lovelace", date_of_birth: "1990-01-01" },
-    );
-    assert.deepEqual(result, { matchedId: null, ambiguous: true });
   });
 });

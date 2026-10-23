@@ -126,8 +126,6 @@ export const SETUP_CREATE_APIS = [
   "hireTeamMemberInternal",
   "createInvitation",
   "clients.insert",
-  "smartImportCommitClient",
-  "smartImportCommitStaff",
 ] as const;
 
 export function computeAgencySetupStatus(

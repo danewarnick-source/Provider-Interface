@@ -11,16 +11,17 @@ export async function loadActiveStaffNames(supabase: Db, organizationId: string)
   const { data: members, error } = await supabase
     .from("organization_members")
     .select("user_id")
+    .is("deleted_at", null)
     .eq("organization_id", organizationId)
     .eq("active", true);
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   const ids = ((members ?? []) as Array<{ user_id: string }>).map((m) => m.user_id);
   if (ids.length === 0) return [];
   const { data: profiles, error: pErr } = await supabase
     .from("profiles")
     .select("id, first_name, last_name, full_name")
     .in("id", ids);
-  if (pErr) throw pErr;
+  if (pErr) throw new Error(pErr.message);
   return ((profiles ?? []) as Array<{
     id: string;
     first_name: string | null;

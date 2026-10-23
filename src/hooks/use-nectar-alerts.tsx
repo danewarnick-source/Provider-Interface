@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "./use-org";
-import { useAllClientBillingCodes, type ClientBillingCode } from "./use-client-billing-codes";
+import { useAllClientBillingCodes, type ClientBillingCode } from "@/components/clients/shared/hooks/use-client-billing-codes";
 import { computeEntryUnits, unitsToHours } from "@/lib/billing-units";
 import { isDailyServiceCode } from "@/lib/service-billing";
 
@@ -61,6 +61,7 @@ export function useNectarAlerts(settings: NectarAlertSettings = DEFAULT_NECTAR_A
       const { data, error } = await supabase
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", org!.organization_id);
       if (error) throw error;
       return (data ?? []) as Array<{ id: string; first_name: string; last_name: string }>;

@@ -45,13 +45,6 @@ export type InstanceRow = {
   company_obligation_completions: CompletionEmbed[] | CompletionEmbed | null;
 };
 
-export type ClientRow = {
-  id: string;
-  first_name: string;
-  last_name: string;
-  authorized_dspd_codes: string[] | null;
-};
-
 export type StaffRow = {
   id: string;
   name: string;

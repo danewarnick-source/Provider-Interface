@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg, useOrgDisplayName } from "@/hooks/use-org";
-import { useAllClientBillingCodes } from "@/hooks/use-client-billing-codes";
+import { useAllClientBillingCodes } from "@/components/clients/shared/hooks/use-client-billing-codes";
 import { fmtHours, fmtUSD, fmtUnits, unitsToHours, computeEntryUnits, UNITS_PER_HOUR } from "@/lib/billing-units";
 import { isDailyServiceCode } from "@/lib/service-billing";
 import { Button } from "@/components/ui/button";
@@ -59,6 +59,7 @@ function MonthlyGridPage() {
         .from("clients")
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .select("id, first_name, last_name" as any)
+        .is("deleted_at", null)
         .eq("organization_id", org!.organization_id)
         .order("last_name");
       if (error) throw error;

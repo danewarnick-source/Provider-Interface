@@ -1,16 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
-import { ClientsPage } from "./dashboard.clients";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+/** Permanent redirect: the directory opens Add client from `?add=1`. */
 export const Route = createFileRoute("/dashboard/clients/new")({
-  head: () => ({ meta: [{ title: "Add client — Provider Interface" }] }),
-  component: AddClientRoute,
+  beforeLoad: ({ location: { hash } }) => {
+    throw redirect({ to: "/dashboard/clients", search: { add: 1 }, hash, replace: true });
+  },
 });
-
-function AddClientRoute() {
-  return (
-    <AgencySetupCreateGate>
-      <ClientsPage startWithAddOpen />
-    </AgencySetupCreateGate>
-  );
-}

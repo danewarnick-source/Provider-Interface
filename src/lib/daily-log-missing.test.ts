@@ -27,10 +27,10 @@ const assign = (
 
 describe("dailyLogProgram / host position", () => {
   it("HHS and RP5 are daily-note programs", () => {
-    assert.equal(dailyLogProgram({ job_code: ["HHS"] }), "HHS");
-    assert.equal(dailyLogProgram({ job_code: ["RP5", "SLN"] }), "RP5");
-    assert.equal(dailyLogProgram({ job_code: ["SLN"] }), null);
-    assert.equal(dailyLogProgram({ job_code: null }), null);
+    assert.equal(dailyLogProgram({ codes: ["HHS"] }), "HHS");
+    assert.equal(dailyLogProgram({ codes: ["RP5", "SLN"] }), "RP5");
+    assert.equal(dailyLogProgram({ codes: ["SLN"] }), null);
+    assert.equal(dailyLogProgram({ codes: null }), null);
   });
 
   it("Host Home Provider by key or label", () => {

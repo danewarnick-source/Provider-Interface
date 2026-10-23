@@ -33,15 +33,11 @@ async function gatherOrgFacts(
   supabase: any,
   organizationId: string,
 ): Promise<OrgEntityFacts> {
-  const [billingCodesRes, clientAuthRes, authorizedRes, staffRes, clientsRes] =
+  const [billingCodesRes, authorizedRes, staffRes, clientsRes] =
     await Promise.all([
       supabase
         .from("client_billing_codes")
         .select("service_code")
-        .eq("organization_id", organizationId),
-      supabase
-        .from("clients")
-        .select("authorized_dspd_codes, job_code")
         .eq("organization_id", organizationId),
       supabase
         .from("provider_authorized_codes")
@@ -50,11 +46,13 @@ async function gatherOrgFacts(
       supabase
         .from("organization_members")
         .select("job_title")
+        .is("deleted_at", null)
         .eq("organization_id", organizationId)
         .eq("active", true),
       supabase
         .from("clients")
         .select("id", { count: "exact", head: true })
+        .is("deleted_at", null)
         .eq("organization_id", organizationId),
     ]);
 
@@ -65,19 +63,6 @@ async function gatherOrgFacts(
   for (const r of (billingCodesRes.data ?? []) as Array<{ service_code: string | null }>) {
     const c = norm(r.service_code);
     if (c) activeSet.add(c);
-  }
-  for (const r of (clientAuthRes.data ?? []) as Array<{
-    authorized_dspd_codes: string[] | null;
-    job_code: string[] | null;
-  }>) {
-    for (const c of r.authorized_dspd_codes ?? []) {
-      const v = norm(c);
-      if (v) activeSet.add(v);
-    }
-    for (const c of r.job_code ?? []) {
-      const v = norm(c);
-      if (v) activeSet.add(v);
-    }
   }
 
   // Provider-level authorized set (contract/SOW/addendum/manual entries).

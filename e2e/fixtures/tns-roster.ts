@@ -75,7 +75,7 @@ export const CLIENTS = {
     codes: ["DSI", "HHS", "SEI", "SLH"],
     team_id: MAPLE_HOME_ID,
     medicaid_id: "MOCK-TJ-001",
-    pcsp_goals: [...TOMMY_GOALS],
+    goals: [...TOMMY_GOALS],
   },
   blake: {
     id: "00000000-0000-4000-a000-000000000102",
@@ -84,7 +84,7 @@ export const CLIENTS = {
     codes: ["DSI", "HHS"],
     team_id: MAPLE_HOME_ID,
     medicaid_id: "MOCK-BS-002",
-    pcsp_goals: [...BLAKE_GOALS],
+    goals: [...BLAKE_GOALS],
   },
   stephen: {
     id: "00000000-0000-4000-a000-000000000103",
@@ -93,7 +93,7 @@ export const CLIENTS = {
     codes: ["SLH"],
     team_id: OAK_SLH_ID,
     medicaid_id: "MOCK-SP-003",
-    pcsp_goals: [] as string[],
+    goals: [] as string[],
   },
   marcus: {
     id: "00000000-0000-4000-a000-000000000104",
@@ -102,7 +102,7 @@ export const CLIENTS = {
     codes: [] as string[],
     team_id: null as string | null,
     medicaid_id: "MOCK-MR-004",
-    pcsp_goals: [] as string[],
+    goals: [] as string[],
   },
 } as const;
 
@@ -199,6 +199,37 @@ export const LAST_SIGN_IN: Record<string, string | null> = {
   [STAFF.dane.id]: "2026-08-27T12:00:00.000Z",
 };
 export const CLIENT_LIST = [CLIENTS.tommy, CLIENTS.blake, CLIENTS.stephen, CLIENTS.marcus];
+
+/**
+ * Plan rows for the mocks: each client with goals gets one current plan; each
+ * goal one support listing all of that client's codes (client_plans /
+ * client_goals / client_goal_supports shapes).
+ */
+export function planFixtureRows(orgId: string = ORG_ID): Record<"client_plans" | "client_goals" | "client_goal_supports", Record<string, unknown>[]> {
+  const out = { client_plans: [] as Record<string, unknown>[], client_goals: [] as Record<string, unknown>[], client_goal_supports: [] as Record<string, unknown>[] };
+  for (const c of CLIENT_LIST) {
+    if (c.goals.length === 0) continue;
+    const planId = `plan-${c.id.slice(-3)}`;
+    out.client_plans.push({
+      id: planId, organization_id: orgId, client_id: c.id, start_date: "2026-01-01", end_date: "2026-12-31",
+      activated_on: null, meeting_date: null, status: "current", label: null, source: "manual", document_id: null,
+      created_at: "2026-01-01T00:00:00.000Z",
+    });
+    c.goals.forEach((text, i) => {
+      const goalId = `goal-${c.id.slice(-3)}-${i}`;
+      out.client_goals.push({
+        id: goalId, organization_id: orgId, client_id: c.id, plan_id: planId, carried_from_goal_id: null,
+        goal_text: text, domain: null, current_status: null, strengths: null, barriers: null,
+        success_person: null, success_team: null, sort: i, status: "active", ended_on: null,
+      });
+      out.client_goal_supports.push({
+        id: `support-${c.id.slice(-3)}-${i}`, organization_id: orgId, goal_id: goalId, support_text: "Staff prompt and model each step",
+        details: null, start_date: null, end_date: null, our_codes: [...c.codes], other_providers: [], health_needs: [], sort: 0,
+      });
+    });
+  }
+  return out;
+}
 
 /** Fake daily_logs rows — IDs and narrative are synthetic, not live PHI. */
 export const PENDING_LOG_ID = "00000000-0000-4000-a000-000000000601";

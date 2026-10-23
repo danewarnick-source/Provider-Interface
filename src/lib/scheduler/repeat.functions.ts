@@ -12,6 +12,8 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { newShiftStatus } from "@/lib/scheduler/shift-status";
 import { projectShifts, type ShiftRow } from "@/lib/scheduler/repeat-project";
+import { openExcludedShifts } from "@/lib/clients/team/exclusions";
+import { loadActiveExclusions } from "@/lib/clients/team/exclusions-check.server";
 import { expandRecurringOccurrences, occurrenceSlotKey } from "@/lib/scheduler/recurrence";
 
 async function loadSourceShifts(
@@ -150,6 +152,14 @@ export const applyRepeat = createServerFn({ method: "POST" })
         created_from: "manual",
       });
     }
+    // Copied shifts never keep a team member on the client's do-not-schedule list.
+    let opened = 0;
+    if (data.keep_staff && rows.length > 0) {
+      const exclusions = await loadActiveExclusions(supabase, data.organization_id);
+      const r = openExcludedShifts(rows as Array<{ client_id: string; staff_id: string | null }>, exclusions);
+      opened = r.opened;
+      rows.splice(0, rows.length, ...r.rows.map((x) => ({ ...x, status: newShiftStatus(x.staff_id) })));
+    }
     if (rows.length > 0) {
       const { assertNoBillingConflict } = await import("@/lib/scheduler/shift-commit");
       await assertNoBillingConflict(supabase, rows as never);
@@ -157,7 +167,7 @@ export const applyRepeat = createServerFn({ method: "POST" })
       if (error) throw error;
       inserted = rows.length;
     }
-    return { inserted, skipped };
+    return { inserted, skipped, opened };
   });
 
 // ──────────────────────────────────────────────────────────────────────────────

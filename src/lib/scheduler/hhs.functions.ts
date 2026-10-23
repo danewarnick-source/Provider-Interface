@@ -2,7 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { z } from "zod";
-import type { EmarStatus } from "@/lib/emar-status";
 
 // ---------- Schemas ----------
 const OrgInput = z.object({ organizationId: z.string().uuid() });
@@ -19,6 +18,8 @@ export const saveDailyRecord = createServerFn({ method: "POST" })
       recordDate:        z.string(),
       narrative:         z.string().min(1).max(8000),
       pcspGoalsAddressed: z.array(z.string().max(500)).max(50).default([]),
+      goalIds:           z.array(z.string().uuid()).max(50).default([]),
+      supportIds:        z.array(z.string().uuid()).max(100).default([]),
       aiStatus:          z.string().nullable().optional(),
       aiFeedback:        z.string().nullable().optional(),
       signatureDataUrl:  z.string().nullable().optional(),
@@ -42,6 +43,8 @@ export const saveDailyRecord = createServerFn({ method: "POST" })
         log_date:              data.recordDate,
         narrative:             data.narrative,
         pcsp_goals_addressed:  data.pcspGoalsAddressed,
+        goal_ids:              data.goalIds,
+        support_ids:           data.supportIds,
         signature_data_url:    data.signatureDataUrl ?? null,
         status:                "pending_approval",
         ai_compliance_status:  data.aiStatus ?? null,
@@ -93,93 +96,6 @@ export const listDailyRecords = createServerFn({ method: "POST" })
       .limit(500);
     if (error) throw new Error(error.message);
     return rows ?? [];
-  });
-
-// ---------- eMAR ----------
-export const saveEmarLog = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i) =>
-    z.object({
-      organizationId:       z.string().uuid(),
-      clientId:             z.string().uuid(),
-      medicationId:         z.string().uuid().nullable().optional(),
-      medicationName:       z.string().min(1).max(200),
-      dosage:               z.string().max(100).nullable().optional(),
-      route:                z.string().max(100).nullable().optional(),
-      scheduledFor:         z.string(),
-      status:               z.enum(["Passed", "Refused", "Missed", "Held"]),
-      isPrn:                z.boolean().default(false),
-      prnReason:            z.string().max(500).nullable().optional(),
-      isControlled:         z.boolean().default(false),
-      pillCountVerified:    z.boolean().nullable().optional(),
-      pillCountValue:       z.number().int().nullable().optional(),
-      exceptionReason:      z.string().max(2000).nullable().optional(),
-      varianceNote:         z.string().max(2000).nullable().optional(),
-      isMedicationError:    z.boolean().default(false),
-      attestationSigned:    z.boolean().default(false),
-      signatureAttestation: z.string().max(200).nullable().optional(),
-      staffName:            z.string().max(200).nullable().optional(),
-    }).parse(i)
-  )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
-    if (!supabase || !userId) return null;
-    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
-
-
-    // Map HHS status enum → unified emar_logs status enum.
-    const statusMap: Record<typeof data.status, EmarStatus> = {
-      Passed: "self_administered",
-      Refused: "refused",
-      Missed: "missed",
-      Held:   "omitted",
-    };
-    const unifiedStatus = statusMap[data.status];
-
-    // Cross-hub dedupe: if a terminal-status row already exists for this exact
-    // dose (same client + medication + scheduled_for), return it instead of
-    // inserting a duplicate.
-    if (data.medicationId) {
-      const { data: existing } = await supabase
-        .from("emar_logs")
-        .select("*")
-        .eq("client_id", data.clientId)
-        .eq("medication_id", data.medicationId)
-        .eq("scheduled_for", data.scheduledFor)
-        .in("status", ["self_administered", "refused", "omitted", "missed"])
-        .maybeSingle();
-      if (existing) return existing;
-    }
-
-    const { error, data: row } = await supabase
-      .from("emar_logs")
-      .insert({
-        organization_id:       data.organizationId,
-        client_id:             data.clientId,
-        medication_id:         data.medicationId ?? null,
-        scheduled_for:         data.scheduledFor,
-        administered_at:       unifiedStatus === "self_administered" ? new Date().toISOString() : null,
-        status:                unifiedStatus,
-        is_prn:                data.isPrn,
-        prn_reason:            data.prnReason ?? null,
-        is_controlled:         data.isControlled,
-        pill_count_verified:   data.pillCountVerified ?? null,
-        pill_count_value:      data.pillCountValue ?? null,
-        exception_reason:      data.exceptionReason ?? null,
-        variance_note:         data.varianceNote ?? null,
-        notes:                 data.varianceNote ?? null,
-        is_medication_error:   data.isMedicationError,
-        attestation_signed:    data.attestationSigned,
-        signature_attestation: data.signatureAttestation ?? null,
-        staff_id:              userId,
-        staff_name:            data.staffName ?? null,
-        recorded_in:           "hhs",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
-      .select()
-      .single();
-    if (error) throw new Error(error.message);
-    return row;
   });
 
 // ---------- Attendance ----------

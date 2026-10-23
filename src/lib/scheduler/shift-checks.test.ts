@@ -26,6 +26,19 @@ test("passes when authorized, assigned the code, and not off", async () => {
   await assertShiftAllowed(db, base);
 });
 
+test("refuses a team member on the client's do-not-schedule list, with the reason", async () => {
+  const { db } = fakeDb({
+    ...names,
+    client_billing_codes: [{ id: "a", service_end_date: null }],
+    "rpc:active_client_staff_exclusions": [
+      { client_id: "client-1", staff_user_id: "staff-1", reason: "Family request" },
+    ],
+    staff_assignments: { id: "x", service_codes: ["SLH"] },
+    time_off_requests: [],
+  });
+  await assert.rejects(assertShiftAllowed(db, base), /do-not-schedule list: Family request/);
+});
+
 test("refuses a code the client is not authorized for", async () => {
   const { db } = fakeDb({ ...names, client_billing_codes: [], staff_assignments: null, time_off_requests: [] });
   await assert.rejects(assertShiftAllowed(db, base), /isn't authorized for SLH/);

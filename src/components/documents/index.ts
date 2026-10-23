@@ -1,5 +1,5 @@
 // Domain Hub: Documents & Forms
-// Consolidates: documents, agency-documents, records, forms, smart-import
+// Consolidates: documents, agency-documents, records, forms
 
 export * from './document-effective-dating-dialog';
 export * from './outdated-documents-section';

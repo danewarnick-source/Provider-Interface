@@ -72,6 +72,7 @@ async function loadStaffFacts(
   const { data: mems, error: memErr } = await supabase
     .from("organization_members")
     .select("user_id, role:access_level")
+    .is("deleted_at", null)
     .eq("organization_id", organizationId)
     .eq("active", true);
   if (memErr) throw new Error(memErr.message);

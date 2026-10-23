@@ -140,6 +140,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       supabase
         .from("organization_members")
         .select("organization_id")
+        .is("deleted_at", null)
         .eq("user_id", session.user.id)
         .eq("active", true)
         .limit(5),
@@ -160,6 +161,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           const { data: again } = await supabase
             .from("organization_members")
             .select("organization_id")
+            .is("deleted_at", null)
             .eq("user_id", session.user.id)
             .eq("active", true)
             .limit(5);

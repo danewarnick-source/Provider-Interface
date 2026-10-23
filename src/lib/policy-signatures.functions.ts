@@ -41,6 +41,7 @@ export async function resolvePolicyAssignees(
     const { data: members } = await supabase
       .from("organization_members")
       .select("user_id")
+      .is("deleted_at", null)
       .eq("organization_id", organizationId)
       .eq("active", true);
     for (const u of members ?? []) targetUserIds.add(u.user_id as string);

@@ -102,7 +102,7 @@ Columns: **app** = queried from application code; **RLS** = live; **rows** = liv
 | `shift_callouts` | table | yes | yes | 0 | wired, empty tenant | `src/routes/dashboard.shift.$shiftId.tsx` |
 | `callout_escalation_events` | table | yes | yes | 0 | wired, empty tenant | `src/routes/dashboard.shift.$shiftId.tsx` |
 | `shift_swap_requests` | table | yes | yes | 0 | wired, empty tenant | `src/lib/schedule-requests.ts`, `src/lib/scheduling/swaps.functions.ts`, `src/lib/scheduling/workflow.functions.ts` |
-| `shift_reports` | table | yes | yes | 0 | wired, empty tenant | `src/lib/progress-summaries.functions.ts`, `src/lib/progress-summary-draft.functions.ts`, `src/routes/dashboard.shift.$shiftId.tsx` |
+| `shift_reports` | table | yes | yes | 0 | wired, empty tenant | `src/lib/progress-summaries/progress-summaries.functions.ts`, `src/lib/progress-summaries/progress-summary-draft.functions.ts`, `src/routes/dashboard.shift.$shiftId.tsx` |
 | `shift_completeness_flags` | table | yes | yes | 0 | wired, empty tenant | `src/components/evv/punch-pad.tsx`, `src/lib/mcp/tools/nectar-flags.ts` |
 | `shift_behavior_observations` | table | yes | yes | 2 | live | `src/components/evv/punch-pad.tsx` |
 | `time_off_requests` | table | yes | yes | 0 | wired, empty tenant | `src/hooks/use-scheduler-data.tsx`, `src/lib/schedule-requests.ts`, `src/lib/scheduler/scheduler.functions.ts` +3 more |
@@ -142,7 +142,7 @@ Columns: **app** = queried from application code; **RLS** = live; **rows** = liv
 | `host_home_certifications` | table | yes | yes | 1 | live | `src/components/hosts/host-home-certification-dialog.tsx`, `src/lib/agency-health.functions.ts`, `src/lib/host-home-certifications.functions.ts` +1 more |
 | `host_home_cert_concerns` | table | yes | yes | 0 | wired, empty tenant | `src/components/hosts/host-home-certification-dialog.tsx`, `src/lib/host-home-certifications.functions.ts` |
 | `host_supervision_contacts` | table | yes | yes | 0 | wired, empty tenant | `src/components/residential/residential-daily-tab.tsx` |
-| `emar_logs` | table | yes | yes | 1 | live | `src/components/admin-home/admin-home-dashboard.tsx`, `src/components/mar-calendar.tsx`, `src/components/medications/staff-medications-panel.tsx` +11 more |
+| `emar_logs` | table | yes | yes | 1 | live | `src/components/admin-home/admin-home-dashboard.tsx`, `src/components/mar-calendar.tsx`, `src/lib/medications/give-meds.functions.ts` +11 more |
 | `emar_log_addenda` | table | yes | yes | 0 | wired, empty tenant | `src/lib/emar-pass.functions.ts` |
 | `client_medications` | table | yes | yes | 7 | live | `src/components/clients/setup-checklist.tsx`, `src/components/mar-calendar.tsx`, `src/components/medications-manager.tsx` +22 more |
 | `controlled_med_counts` | table | yes | yes | 0 | wired, empty tenant | `src/lib/agency-health.functions.ts`, `src/lib/emar-nectar.functions.ts`, `src/lib/emar-pass.functions.ts` |
@@ -213,7 +213,7 @@ Columns: **app** = queried from application code; **RLS** = live; **rows** = liv
 | `document_attestations` | table | yes | yes | 0 | wired, empty tenant | `src/lib/document-attestations.functions.ts` |
 | `policy_signatures` | table | yes | yes | 0 | wired, empty tenant | `src/components/admin-home/admin-home-dashboard.tsx`, `src/lib/agency-health.functions.ts`, `src/lib/policy-signatures.functions.ts` +3 more |
 | `upi_attestations` | table | yes | yes | 0 | wired, empty tenant | `src/components/admin-home/admin-home-dashboard.tsx`, `src/lib/agency-health.functions.ts`, `src/lib/upi-attestations.functions.ts` |
-| `client_progress_summaries` | table | yes | yes | 1 | live | `src/lib/audit-evidence.functions.ts`, `src/lib/progress-summaries.functions.ts`, `src/lib/progress-summary-draft.functions.ts` +1 more |
+| `client_progress_summaries` | table | yes | yes | 1 | live | `src/lib/audit-evidence.functions.ts`, `src/lib/progress-summaries/progress-summaries.functions.ts`, `src/lib/progress-summaries/progress-summary-draft.functions.ts` +1 more |
 | `sjd_assessment_selections` | table | yes | yes | 0 | wired, empty tenant | `src/components/clients/profile-tab.tsx` |
 | `staff_checklist_completion` | table | yes | yes | 0 | wired, empty tenant | `src/lib/client-specific-training.functions.ts`, `src/lib/forms.functions.ts`, `src/lib/hr-staff.functions.ts` |
 | `staff_baseline_training_completions` | table | yes | yes | 0 | wired, empty tenant | `src/lib/employee-face-sheet.ts`, `src/lib/hr-staff.functions.ts`, `src/lib/scheduling/required-qualifications.functions.ts` +4 more |

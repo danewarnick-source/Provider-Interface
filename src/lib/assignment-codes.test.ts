@@ -5,7 +5,6 @@ import {
   assignmentCodes,
   assignmentCoversCode,
   buildAssignmentMap,
-  importAssignmentCodes,
   normalizeServiceCodes,
   resolveStaffClientCodes,
   uncoveredCodes,
@@ -14,7 +13,6 @@ import {
   caseloadCardActions,
   caseloadDailyNoteLabel,
   caseloadTimeClockLabel,
-  clientAuthorizedCodes,
   defaultCaseloadCode,
   firstClockableCode,
   hasHhsCode,
@@ -26,27 +24,6 @@ import {
   stackDualCaseloadActions,
   type AssignmentMap,
 } from "./assignment-codes.ts";
-
-describe("clientAuthorizedCodes", () => {
-  it("uses authorized_dspd_codes when job_code is empty (Stephen / SLH)", () => {
-    assert.deepEqual(clientAuthorizedCodes({ job_code: null, authorized_dspd_codes: ["SLH"] }), [
-      "SLH",
-    ]);
-    assert.deepEqual(clientAuthorizedCodes({ job_code: [], authorized_dspd_codes: ["SLH"] }), [
-      "SLH",
-    ]);
-  });
-
-  it("unions authorized + job_code without dupes", () => {
-    assert.deepEqual(
-      clientAuthorizedCodes({
-        authorized_dspd_codes: ["SLH", "DSI"],
-        job_code: ["dsi", "HHS"],
-      }),
-      ["SLH", "DSI", "HHS"],
-    );
-  });
-});
 
 describe("allowedCodesFor — assigned ∩ authorized, never all", () => {
   it("returns [] while assignments are still loading (map undefined)", () => {
@@ -70,7 +47,7 @@ describe("allowedCodesFor — assigned ∩ authorized, never all", () => {
 
   it("drops assigned codes the client is no longer authorized for", () => {
     const map: AssignmentMap = new Map([["client-stephen", new Set(["DSI", "SLH"])]]);
-    const clientCodes = clientAuthorizedCodes({ job_code: null, authorized_dspd_codes: ["SLH"] });
+    const clientCodes = ["SLH"];
     assert.deepEqual(allowedCodesFor(map, "client-stephen", clientCodes), ["SLH"]);
   });
 
@@ -146,14 +123,6 @@ describe("explicit assignment code helpers", () => {
     );
     assert.throws(() => resolveStaffClientCodes(["HHS"], []), /not authorized/);
     assert.throws(() => resolveStaffClientCodes([" ", ""], ["HHS"]), /at least one/);
-  });
-
-  it("importAssignmentCodes: source codes ∩ authorized, else all authorized, explicitly", () => {
-    assert.deepEqual(importAssignmentCodes(null, ["HHS", "DSI"]), ["HHS", "DSI"]);
-    assert.deepEqual(importAssignmentCodes([], ["HHS"]), ["HHS"]);
-    assert.deepEqual(importAssignmentCodes(["dsi", "SLH"], ["HHS", "DSI"]), ["DSI"]);
-    assert.deepEqual(importAssignmentCodes(["SLH"], ["HHS"]), []);
-    assert.deepEqual(importAssignmentCodes(null, []), []);
   });
 
   it("uncoveredCodes lists authorized codes with no staff (NULL rows cover nothing)", () => {

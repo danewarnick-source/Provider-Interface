@@ -30,6 +30,10 @@ export function fakeDb(tables: Record<string, unknown>, failTables: string[] = [
         insert: (payload: unknown) => builder(table, "insert", payload),
       };
     },
+    // RPCs resolve like tables keyed "rpc:<name>"; unset ones return no rows.
+    rpc(name: string) {
+      return builder(`rpc:${name}`, "rpc");
+    },
   };
   return { db, calls };
 }

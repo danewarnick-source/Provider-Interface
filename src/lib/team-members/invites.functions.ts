@@ -449,6 +449,7 @@ export const resendInvitation = createServerFn({ method: "POST" })
       const { data: members, error: memErr } = await sb
         .from("organization_members")
         .select("user_id, access_level, access_preset_id")
+        .is("deleted_at", null)
         .eq("organization_id", data.organization_id);
       if (memErr) throw new Error(memErr.message);
       const memberRows = (members ?? []) as MemberAccessPick[];
@@ -712,6 +713,7 @@ export const inviteStaffMembers = createServerFn({ method: "POST" })
         const { data: members, error: memErr } = await sb
           .from("organization_members")
           .select("user_id, access_level, access_preset_id")
+          .is("deleted_at", null)
           .eq("organization_id", data.organization_id)
           .in("user_id", data.user_ids);
         if (memErr) throw new Error(memErr.message);

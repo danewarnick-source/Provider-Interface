@@ -1,0 +1,4274 @@
+{
+ "version": "2026-10-12",
+ "about": "PI's built-in medication list. Suggestions only: the admin confirms every field against the pharmacy label or prescriber order. Dose and times are never filled from this list. Psychotropic and controlled values follow drug class and the federal DEA schedule. Uses and side effects are plain-language summaries of FDA labeling and should be spot-checked by a nurse or pharmacist before release.",
+ "any_med_bad_reaction": "Any medication: hives, swelling of the face, lips or throat, or trouble breathing. Call 911.",
+ "meds": [
+  {
+   "name": "Acetaminophen",
+   "brands": [
+    "Tylenol"
+   ],
+   "drug_class": "Pain and fever reliever",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 325, 500 mg",
+    "extended-release tablet 650 mg",
+    "liquid 160 mg/5 mL",
+    "suppository"
+   ],
+   "uses": [
+    "Pain",
+    "Fever"
+   ],
+   "side_effects": "Usually none at normal doses",
+   "bad_reaction": "More than 4,000 mg in a day, or yellow skin or eyes, dark urine. Call Poison Control (1-800-222-1222) or the prescriber now.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Acetazolamide",
+   "brands": [
+    "Diamox"
+   ],
+   "drug_class": "Diuretic",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 125, 250 mg",
+    "extended-release capsule 500 mg"
+   ],
+   "uses": [
+    "Seizures (add-on)",
+    "Glaucoma",
+    "Altitude sickness"
+   ],
+   "side_effects": "Tingling, taste changes, urinating more, tiredness",
+   "bad_reaction": "Rash, fast breathing, confusion, side or back pain. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Albuterol",
+   "brands": [
+    "ProAir",
+    "Ventolin",
+    "Proventil"
+   ],
+   "drug_class": "Rescue inhaler (bronchodilator)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "inhaler 90 mcg/puff",
+    "nebulizer solution 2.5 mg/3 mL"
+   ],
+   "uses": [
+    "Asthma or COPD symptoms (rescue)"
+   ],
+   "side_effects": "Shakiness, fast heartbeat, nervousness",
+   "bad_reaction": "Breathing gets worse after use, chest pain. Call 911.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Alendronate",
+   "brands": [
+    "Fosamax"
+   ],
+   "drug_class": "Bone medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 10, 35, 70 mg (weekly)"
+   ],
+   "uses": [
+    "Osteoporosis"
+   ],
+   "side_effects": "Heartburn, stomach pain. Give first thing with a full glass of water; upright for 30 minutes; no food for 30 minutes.",
+   "bad_reaction": "Pain or trouble swallowing, chest pain, jaw pain, new thigh pain. Call the prescriber.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Allopurinol",
+   "brands": [
+    "Zyloprim"
+   ],
+   "drug_class": "Gout medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 100, 300 mg"
+   ],
+   "uses": [
+    "Gout",
+    "High uric acid"
+   ],
+   "side_effects": "Upset stomach, diarrhea",
+   "bad_reaction": "Any rash, especially with fever or mouth sores. Stop and call the prescriber the same day.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Alprazolam",
+   "brands": [
+    "Xanax",
+    "Xanax XR"
+   ],
+   "drug_class": "Benzodiazepine",
+   "psychotropic": "anti-anxiety",
+   "controlled": "IV",
+   "forms": [
+    "tablet 0.25, 0.5, 1, 2 mg",
+    "extended-release tablet 0.5, 1, 2, 3 mg",
+    "orally disintegrating tablet"
+   ],
+   "uses": [
+    "Anxiety",
+    "Panic disorder"
+   ],
+   "side_effects": "Sleepiness, dizziness, unsteady walking, memory problems",
+   "bad_reaction": "Slow or shallow breathing, very hard to wake, falls. Call 911 for breathing problems.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Amantadine",
+   "brands": [
+    "Gocovri",
+    "Osmolex"
+   ],
+   "drug_class": "Parkinson's medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 100 mg",
+    "tablet 100 mg",
+    "oral solution 50 mg/5 mL",
+    "extended-release"
+   ],
+   "uses": [
+    "Parkinson's disease",
+    "Movement side effects",
+    "Flu (rarely now)"
+   ],
+   "side_effects": "Dizziness, dry mouth, trouble sleeping, purple blotchy skin on legs",
+   "bad_reaction": "Seeing things that aren't there, confusion, fainting. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Amitriptyline",
+   "brands": [
+    "Elavil"
+   ],
+   "drug_class": "Tricyclic antidepressant",
+   "psychotropic": "antidepressant",
+   "controlled": null,
+   "forms": [
+    "tablet 10, 25, 50, 75, 100, 150 mg"
+   ],
+   "uses": [
+    "Depression",
+    "Nerve pain (off-label)",
+    "Headache prevention (off-label)"
+   ],
+   "side_effects": "Sleepiness, dry mouth, constipation, blurry vision, trouble urinating, weight gain",
+   "bad_reaction": "Fast or irregular heartbeat, fainting, confusion, can't urinate. Call 911 for fainting or chest symptoms.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Amlodipine",
+   "brands": [
+    "Norvasc"
+   ],
+   "drug_class": "Blood pressure (calcium channel blocker)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 2.5, 5, 10 mg",
+    "oral suspension 1 mg/mL"
+   ],
+   "uses": [
+    "High blood pressure",
+    "Chest pain (angina)"
+   ],
+   "side_effects": "Ankle swelling, flushing, headache, dizziness",
+   "bad_reaction": "Fainting, chest pain that's new or worse. Call 911.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Amoxicillin",
+   "brands": [
+    "Amoxil"
+   ],
+   "drug_class": "Antibiotic (penicillin)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 250, 500 mg",
+    "tablet 500, 875 mg",
+    "chewable tablet",
+    "oral suspension 125, 200, 250, 400 mg/5 mL"
+   ],
+   "uses": [
+    "Bacterial infections (ear, throat, sinus, lung, urinary)"
+   ],
+   "side_effects": "Diarrhea, upset stomach, mild rash",
+   "bad_reaction": "Hives, swelling or trouble breathing; watery or bloody diarrhea. Call 911 for breathing problems. Check penicillin allergy first.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Amoxicillin and clavulanate",
+   "brands": [
+    "Augmentin"
+   ],
+   "drug_class": "Antibiotic (penicillin)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 250/125, 500/125, 875/125 mg",
+    "oral suspension"
+   ],
+   "uses": [
+    "Bacterial infections (ear, sinus, skin, lung)"
+   ],
+   "side_effects": "Diarrhea, upset stomach. Give with food.",
+   "bad_reaction": "Hives, swelling or trouble breathing; watery or bloody diarrhea; yellow skin. Call 911 for breathing problems.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Amphetamine and dextroamphetamine",
+   "brands": [
+    "Adderall",
+    "Adderall XR",
+    "Mydayis"
+   ],
+   "drug_class": "Stimulant",
+   "psychotropic": "stimulant",
+   "controlled": "II",
+   "forms": [
+    "tablet 5, 7.5, 10, 12.5, 15, 20, 30 mg",
+    "extended-release capsule 5, 10, 15, 20, 25, 30 mg"
+   ],
+   "uses": [
+    "ADHD",
+    "Narcolepsy"
+   ],
+   "side_effects": "Less appetite, trouble sleeping, dry mouth, fast heartbeat, irritability",
+   "bad_reaction": "Chest pain, fainting, seeing or hearing things that aren't there. Call 911 for chest pain or fainting.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Apixaban",
+   "brands": [
+    "Eliquis"
+   ],
+   "drug_class": "Blood thinner (anticoagulant)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 2.5, 5 mg"
+   ],
+   "uses": [
+    "Stroke prevention in atrial fibrillation",
+    "Blood clots"
+   ],
+   "side_effects": "Easy bruising, nosebleeds",
+   "bad_reaction": "Black or bloody stools, vomiting blood, a fall with head injury, bleeding that won't stop. Call 911.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Aripiprazole",
+   "brands": [
+    "Abilify",
+    "Abilify Maintena",
+    "Aristada"
+   ],
+   "drug_class": "Atypical antipsychotic",
+   "psychotropic": "antipsychotic",
+   "controlled": null,
+   "forms": [
+    "tablet 2, 5, 10, 15, 20, 30 mg",
+    "orally disintegrating tablet 10, 15 mg",
+    "oral solution 1 mg/mL",
+    "long-acting injection"
+   ],
+   "uses": [
+    "Schizophrenia",
+    "Bipolar disorder",
+    "Irritability with autism",
+    "Depression (add-on)",
+    "Tourette's disorder"
+   ],
+   "side_effects": "Restlessness, upset stomach, headache, sleepiness or trouble sleeping, weight gain",
+   "bad_reaction": "High fever with stiff muscles or confusion; repeated face or tongue movements; new urges (gambling, eating). Call the prescriber; call 911 for high fever with stiffness.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Artificial tears",
+   "brands": [
+    "Refresh",
+    "Systane"
+   ],
+   "drug_class": "Eye lubricant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "eye drops",
+    "eye gel or ointment"
+   ],
+   "uses": [
+    "Dry eyes"
+   ],
+   "side_effects": "Brief blurry vision",
+   "bad_reaction": "Eye pain or vision changes. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Aspirin low dose",
+   "brands": [
+    "Bayer",
+    "Ecotrin"
+   ],
+   "drug_class": "Blood thinner (antiplatelet)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 81 mg",
+    "delayed-release tablet 81, 325 mg"
+   ],
+   "uses": [
+    "Heart attack and stroke prevention"
+   ],
+   "side_effects": "Upset stomach, easy bruising",
+   "bad_reaction": "Black or bloody stools, vomiting blood, ringing ears. Call the prescriber; call 911 for heavy bleeding.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Atomoxetine",
+   "brands": [
+    "Strattera"
+   ],
+   "drug_class": "ADHD non-stimulant",
+   "psychotropic": "other",
+   "controlled": null,
+   "forms": [
+    "capsule 10, 18, 25, 40, 60, 80, 100 mg"
+   ],
+   "uses": [
+    "ADHD"
+   ],
+   "side_effects": "Upset stomach, less appetite, sleepiness, dizziness",
+   "bad_reaction": "Thoughts of self-harm; yellow skin or eyes, dark urine. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Atorvastatin",
+   "brands": [
+    "Lipitor"
+   ],
+   "drug_class": "Cholesterol medicine (statin)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 10, 20, 40, 80 mg"
+   ],
+   "uses": [
+    "High cholesterol",
+    "Heart attack and stroke prevention"
+   ],
+   "side_effects": "Muscle aches, joint pain, upset stomach",
+   "bad_reaction": "Severe muscle pain or weakness with dark urine; yellow skin or eyes. Call the prescriber the same day.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Azithromycin",
+   "brands": [
+    "Zithromax",
+    "Z-Pak"
+   ],
+   "drug_class": "Antibiotic (macrolide)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 250, 500, 600 mg",
+    "oral suspension 100, 200 mg/5 mL"
+   ],
+   "uses": [
+    "Bacterial infections (lung, sinus, throat, skin)"
+   ],
+   "side_effects": "Diarrhea, upset stomach, belly pain",
+   "bad_reaction": "Fainting or irregular heartbeat; watery or bloody diarrhea. Call 911 for fainting.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Bacitracin and polymyxin ointment",
+   "brands": [
+    "Neosporin",
+    "Polysporin"
+   ],
+   "drug_class": "Antibiotic ointment",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "ointment"
+   ],
+   "uses": [
+    "Minor cuts and scrapes"
+   ],
+   "side_effects": "Usually none",
+   "bad_reaction": "Rash or spreading redness. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Baclofen",
+   "brands": [
+    "Lioresal",
+    "Ozobax",
+    "Lyvispah"
+   ],
+   "drug_class": "Muscle relaxant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 5, 10, 20 mg",
+    "oral solution 5 mg/5 mL",
+    "intrathecal pump"
+   ],
+   "uses": [
+    "Muscle stiffness (spasticity)"
+   ],
+   "side_effects": "Sleepiness, weakness, dizziness, upset stomach",
+   "bad_reaction": "Very hard to wake, slow breathing, seizures or seeing things if doses are missed. Don't stop suddenly. Call 911 for breathing problems.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Benzonatate",
+   "brands": [
+    "Tessalon"
+   ],
+   "drug_class": "Cough medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 100, 200 mg"
+   ],
+   "uses": [
+    "Cough"
+   ],
+   "side_effects": "Sleepiness, dizziness, upset stomach. Swallow whole; don't chew.",
+   "bad_reaction": "Choking or numb mouth and throat if chewed, confusion. Call 911 for choking.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Benztropine",
+   "brands": [
+    "Cogentin"
+   ],
+   "drug_class": "Anticholinergic",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 0.5, 1, 2 mg",
+    "injection"
+   ],
+   "uses": [
+    "Movement side effects from antipsychotics",
+    "Parkinson's disease"
+   ],
+   "side_effects": "Dry mouth, constipation, blurry vision, trouble urinating",
+   "bad_reaction": "Confusion, can't urinate, overheating (can't sweat). Call the prescriber.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Bisacodyl",
+   "brands": [
+    "Dulcolax"
+   ],
+   "drug_class": "Stimulant laxative",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 5 mg",
+    "suppository 10 mg"
+   ],
+   "uses": [
+    "Constipation"
+   ],
+   "side_effects": "Cramps, diarrhea",
+   "bad_reaction": "Severe belly pain, vomiting, rectal bleeding. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Brexpiprazole",
+   "brands": [
+    "Rexulti"
+   ],
+   "drug_class": "Atypical antipsychotic",
+   "psychotropic": "antipsychotic",
+   "controlled": null,
+   "forms": [
+    "tablet 0.25, 0.5, 1, 2, 3, 4 mg"
+   ],
+   "uses": [
+    "Schizophrenia",
+    "Depression (add-on)",
+    "Agitation with Alzheimer's dementia"
+   ],
+   "side_effects": "Weight gain, restlessness, sleepiness",
+   "bad_reaction": "High fever with stiff muscles, repeated face movements, new urges. Call the prescriber.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Brivaracetam",
+   "brands": [
+    "Briviact"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "controlled": "V",
+   "forms": [
+    "tablet 10, 25, 50, 75, 100 mg",
+    "oral solution 10 mg/mL"
+   ],
+   "uses": [
+    "Seizures"
+   ],
+   "side_effects": "Sleepiness, dizziness, tiredness, upset stomach",
+   "bad_reaction": "New aggression, depression or thoughts of self-harm. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Budesonide and formoterol",
+   "brands": [
+    "Symbicort",
+    "Breyna"
+   ],
+   "drug_class": "Controller inhaler",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "inhaler 80/4.5, 160/4.5 mcg"
+   ],
+   "uses": [
+    "Asthma",
+    "COPD"
+   ],
+   "side_effects": "Hoarse voice, thrush in the mouth (rinse after use), headache",
+   "bad_reaction": "Breathing gets worse after use, white patches in the mouth that don't go away. Call the prescriber; call 911 for trouble breathing.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Bupropion",
+   "brands": [
+    "Wellbutrin SR",
+    "Wellbutrin XL",
+    "Zyban"
+   ],
+   "drug_class": "Antidepressant",
+   "psychotropic": "antidepressant",
+   "controlled": null,
+   "forms": [
+    "tablet 75, 100 mg",
+    "extended-release tablet SR 100, 150, 200 mg",
+    "extended-release tablet XL 150, 300, 450 mg"
+   ],
+   "uses": [
+    "Depression",
+    "Seasonal depression",
+    "Quitting smoking"
+   ],
+   "side_effects": "Trouble sleeping, dry mouth, headache, less appetite, nervousness",
+   "bad_reaction": "Seizure; thoughts of self-harm or agitation. Call 911 for a seizure. Don't crush extended-release tablets.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Buspirone",
+   "brands": [
+    "Buspar"
+   ],
+   "drug_class": "Anti-anxiety",
+   "psychotropic": "anti-anxiety",
+   "controlled": null,
+   "forms": [
+    "tablet 5, 7.5, 10, 15, 30 mg"
+   ],
+   "uses": [
+    "Anxiety"
+   ],
+   "side_effects": "Dizziness, upset stomach, headache, nervousness",
+   "bad_reaction": "Fever with stiff muscles, shaking or confusion. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Calcium carbonate",
+   "brands": [
+    "Tums",
+    "Os-Cal",
+    "Caltrate"
+   ],
+   "drug_class": "Calcium supplement and antacid",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 500, 600, 1250 mg",
+    "chewable tablet",
+    "with vitamin D"
+   ],
+   "uses": [
+    "Low calcium",
+    "Bone health",
+    "Heartburn"
+   ],
+   "side_effects": "Constipation, gas. Large tablet; give with food and water, upright.",
+   "bad_reaction": "Trouble swallowing the tablet, nausea or confusion (too much calcium). Call the prescriber.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Cannabidiol",
+   "brands": [
+    "Epidiolex"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "oral solution 100 mg/mL"
+   ],
+   "uses": [
+    "Seizures (Lennox-Gastaut, Dravet, tuberous sclerosis)"
+   ],
+   "side_effects": "Sleepiness, less appetite, diarrhea, tiredness",
+   "bad_reaction": "Yellow skin or eyes, dark urine, belly pain. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Carbamazepine",
+   "brands": [
+    "Tegretol",
+    "Tegretol XR",
+    "Carbatrol",
+    "Epitol"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "also_psychotropic": "mood stabilizer",
+   "controlled": null,
+   "forms": [
+    "tablet 200 mg",
+    "chewable tablet 100 mg",
+    "extended-release tablet 100, 200, 400 mg",
+    "extended-release capsule 100, 200, 300 mg",
+    "oral suspension 100 mg/5 mL"
+   ],
+   "uses": [
+    "Seizures",
+    "Nerve pain (trigeminal neuralgia)",
+    "Bipolar disorder (mood)"
+   ],
+   "side_effects": "Dizziness, unsteady walking, sleepiness, upset stomach, blurred vision",
+   "bad_reaction": "Rash or blisters, fever, sore throat, mouth sores, unusual bruising, confusion. Call the prescriber the same day.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Carbamide peroxide ear drops",
+   "brands": [
+    "Debrox"
+   ],
+   "drug_class": "Earwax remover",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "ear drops 6.5%"
+   ],
+   "uses": [
+    "Earwax buildup"
+   ],
+   "side_effects": "Bubbling or fullness in the ear",
+   "bad_reaction": "Ear pain, drainage, dizziness. Stop and call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Carbidopa and levodopa",
+   "brands": [
+    "Sinemet",
+    "Rytary"
+   ],
+   "drug_class": "Parkinson's medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 10/100, 25/100, 25/250 mg",
+    "extended-release tablet 25/100, 50/200 mg",
+    "orally disintegrating tablet"
+   ],
+   "uses": [
+    "Parkinson's disease"
+   ],
+   "side_effects": "Upset stomach, dizziness when standing, sleepiness, uncontrolled movements",
+   "bad_reaction": "Seeing things that aren't there, sudden sleep, fainting. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Cariprazine",
+   "brands": [
+    "Vraylar"
+   ],
+   "drug_class": "Atypical antipsychotic",
+   "psychotropic": "antipsychotic",
+   "controlled": null,
+   "forms": [
+    "capsule 1.5, 3, 4.5, 6 mg"
+   ],
+   "uses": [
+    "Schizophrenia",
+    "Bipolar disorder",
+    "Depression (add-on)"
+   ],
+   "side_effects": "Restlessness, stiffness, upset stomach, sleepiness",
+   "bad_reaction": "High fever with stiff muscles, repeated face movements. Call the prescriber.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Carvedilol",
+   "brands": [
+    "Coreg"
+   ],
+   "drug_class": "Beta blocker",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 3.125, 6.25, 12.5, 25 mg",
+    "extended-release capsule"
+   ],
+   "uses": [
+    "Heart failure",
+    "High blood pressure"
+   ],
+   "side_effects": "Dizziness, tiredness, slow heartbeat",
+   "bad_reaction": "Fainting, very slow heartbeat, swelling and weight gain. Call 911 for fainting.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Cenobamate",
+   "brands": [
+    "Xcopri"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "controlled": "V",
+   "forms": [
+    "tablet 12.5, 25, 50, 100, 150, 200 mg"
+   ],
+   "uses": [
+    "Seizures"
+   ],
+   "side_effects": "Sleepiness, dizziness, double vision, tiredness",
+   "bad_reaction": "Rash with fever or swollen glands, fainting. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Cephalexin",
+   "brands": [
+    "Keflex"
+   ],
+   "drug_class": "Antibiotic (cephalosporin)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 250, 500, 750 mg",
+    "oral suspension 125, 250 mg/5 mL"
+   ],
+   "uses": [
+    "Skin, urinary, bone and throat infections"
+   ],
+   "side_effects": "Diarrhea, upset stomach",
+   "bad_reaction": "Hives, swelling or trouble breathing; watery or bloody diarrhea. Call 911 for breathing problems.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Cetirizine",
+   "brands": [
+    "Zyrtec"
+   ],
+   "drug_class": "Antihistamine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 5, 10 mg",
+    "chewable tablet",
+    "oral solution 1 mg/mL"
+   ],
+   "uses": [
+    "Allergies",
+    "Hives"
+   ],
+   "side_effects": "Sleepiness, dry mouth",
+   "bad_reaction": "Can't urinate, unusual restlessness. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Chlorhexidine oral rinse",
+   "brands": [
+    "Peridex"
+   ],
+   "drug_class": "Dental rinse",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "oral rinse 0.12%"
+   ],
+   "uses": [
+    "Gum disease"
+   ],
+   "side_effects": "Teeth staining, taste changes. Don't swallow.",
+   "bad_reaction": "Swelling of the mouth or face. Call 911 for trouble breathing.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Chlorpromazine",
+   "brands": [
+    "Thorazine"
+   ],
+   "drug_class": "Typical antipsychotic",
+   "psychotropic": "antipsychotic",
+   "controlled": null,
+   "forms": [
+    "tablet 10, 25, 50, 100, 200 mg",
+    "injection"
+   ],
+   "uses": [
+    "Schizophrenia",
+    "Severe behavior problems",
+    "Nausea"
+   ],
+   "side_effects": "Sleepiness, dizziness when standing, dry mouth, constipation, sun sensitivity",
+   "bad_reaction": "High fever with stiff muscles, yellow skin or eyes, repeated face movements. Call the prescriber.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Ciprofloxacin",
+   "brands": [
+    "Cipro"
+   ],
+   "drug_class": "Antibiotic (fluoroquinolone)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 250, 500, 750 mg",
+    "oral suspension"
+   ],
+   "uses": [
+    "Urinary and other bacterial infections"
+   ],
+   "side_effects": "Upset stomach, diarrhea, dizziness. Keep apart from calcium, iron and dairy.",
+   "bad_reaction": "Tendon pain or swelling (heel), confusion, seizure, irregular heartbeat. Stop and call the prescriber; call 911 for seizure.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Ciprofloxacin ear or eye drops",
+   "brands": [
+    "Ciloxan",
+    "Cetraxal",
+    "Ciprodex (with dexamethasone)"
+   ],
+   "drug_class": "Antibiotic drops",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "eye drops 0.3%",
+    "ear drops"
+   ],
+   "uses": [
+    "Eye or ear infections"
+   ],
+   "side_effects": "Brief stinging",
+   "bad_reaction": "Rash, swelling, worsening pain. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Citalopram",
+   "brands": [
+    "Celexa"
+   ],
+   "drug_class": "SSRI antidepressant",
+   "psychotropic": "antidepressant",
+   "controlled": null,
+   "forms": [
+    "tablet 10, 20, 40 mg",
+    "oral solution 10 mg/5 mL"
+   ],
+   "uses": [
+    "Depression"
+   ],
+   "side_effects": "Upset stomach, sleepiness or trouble sleeping, sweating, dry mouth",
+   "bad_reaction": "Fainting or racing, irregular heartbeat; thoughts of self-harm. Call the prescriber; call 911 for fainting.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Clindamycin",
+   "brands": [
+    "Cleocin"
+   ],
+   "drug_class": "Antibiotic",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 75, 150, 300 mg",
+    "oral solution 75 mg/5 mL",
+    "topical"
+   ],
+   "uses": [
+    "Skin, bone, dental and lung infections"
+   ],
+   "side_effects": "Diarrhea, upset stomach, metallic taste",
+   "bad_reaction": "Watery or bloody diarrhea, even weeks later (C. diff). Call the prescriber the same day.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Clobazam",
+   "brands": [
+    "Onfi",
+    "Sympazan"
+   ],
+   "drug_class": "Benzodiazepine anticonvulsant",
+   "psychotropic": null,
+   "controlled": "IV",
+   "forms": [
+    "tablet 10, 20 mg",
+    "oral suspension 2.5 mg/mL",
+    "oral film 5, 10, 20 mg"
+   ],
+   "uses": [
+    "Seizures (Lennox-Gastaut syndrome)"
+   ],
+   "side_effects": "Sleepiness, drooling, irritability, constipation, unsteady walking",
+   "bad_reaction": "Very hard to wake, slow breathing, rash with blisters. Call 911 for breathing problems.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Clonazepam",
+   "brands": [
+    "Klonopin"
+   ],
+   "drug_class": "Benzodiazepine",
+   "psychotropic": "anti-anxiety",
+   "controlled": "IV",
+   "forms": [
+    "tablet 0.5, 1, 2 mg",
+    "orally disintegrating tablet 0.125, 0.25, 0.5, 1, 2 mg"
+   ],
+   "uses": [
+    "Seizures",
+    "Panic disorder"
+   ],
+   "side_effects": "Sleepiness, unsteady walking, drooling, behavior changes",
+   "bad_reaction": "Slow or shallow breathing, very hard to wake, thoughts of self-harm. Call 911 for breathing problems.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Clonidine",
+   "brands": [
+    "Catapres",
+    "Kapvay"
+   ],
+   "drug_class": "Alpha-2 agonist",
+   "psychotropic": null,
+   "also_psychotropic": "other",
+   "controlled": null,
+   "forms": [
+    "tablet 0.1, 0.2, 0.3 mg",
+    "extended-release tablet 0.1 mg",
+    "patch 0.1, 0.2, 0.3 mg/day"
+   ],
+   "uses": [
+    "High blood pressure",
+    "ADHD (extended-release)",
+    "Sleep (off-label)"
+   ],
+   "side_effects": "Sleepiness, dry mouth, dizziness, tiredness",
+   "bad_reaction": "Fainting, very slow heartbeat. Don't stop suddenly (blood pressure can spike). Call 911 for fainting.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Clopidogrel",
+   "brands": [
+    "Plavix"
+   ],
+   "drug_class": "Blood thinner (antiplatelet)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 75, 300 mg"
+   ],
+   "uses": [
+    "Heart attack and stroke prevention"
+   ],
+   "side_effects": "Easy bruising, nosebleeds",
+   "bad_reaction": "Black or bloody stools, vomiting blood, bleeding that won't stop. Call 911 for heavy bleeding.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Clotrimazole",
+   "brands": [
+    "Lotrimin",
+    "Mycelex"
+   ],
+   "drug_class": "Antifungal",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "cream 1%",
+    "troche 10 mg"
+   ],
+   "uses": [
+    "Fungal skin infections",
+    "Thrush in the mouth (troche)"
+   ],
+   "side_effects": "Mild skin irritation",
+   "bad_reaction": "Blistering or swelling. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Clozapine",
+   "brands": [
+    "Clozaril",
+    "Versacloz"
+   ],
+   "drug_class": "Atypical antipsychotic",
+   "psychotropic": "antipsychotic",
+   "controlled": null,
+   "forms": [
+    "tablet 25, 50, 100, 200 mg",
+    "orally disintegrating tablet 12.5, 25, 100, 150, 200 mg",
+    "oral suspension 50 mg/mL"
+   ],
+   "uses": [
+    "Schizophrenia that other medicines didn't help",
+    "Reducing suicidal behavior in schizophrenia"
+   ],
+   "side_effects": "Drooling, sleepiness, constipation, weight gain, dizziness, fast heartbeat",
+   "bad_reaction": "Fever, sore throat or flu symptoms (low white cells); no bowel movement for 2 or more days or belly pain; chest pain; seizure. Call the prescriber the same day; call 911 for chest pain or seizure. Requires regular blood tests.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Cranberry supplement",
+   "brands": [
+    "Azo Cranberry"
+   ],
+   "drug_class": "Supplement",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule or tablet"
+   ],
+   "uses": [
+    "Urinary tract health"
+   ],
+   "side_effects": "Upset stomach",
+   "bad_reaction": "Bleeding with warfarin. Tell the prescriber if they take a blood thinner.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Cyanocobalamin (vitamin B12)",
+   "brands": [],
+   "drug_class": "Vitamin",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 500, 1000 mcg",
+    "injection 1000 mcg/mL",
+    "nasal spray"
+   ],
+   "uses": [
+    "Low vitamin B12"
+   ],
+   "side_effects": "Usually none",
+   "bad_reaction": "Rash or swelling. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Cyclobenzaprine",
+   "brands": [
+    "Flexeril",
+    "Amrix"
+   ],
+   "drug_class": "Muscle relaxant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 5, 7.5, 10 mg",
+    "extended-release capsule 15, 30 mg"
+   ],
+   "uses": [
+    "Muscle spasm"
+   ],
+   "side_effects": "Sleepiness, dry mouth, dizziness, constipation",
+   "bad_reaction": "Fast or irregular heartbeat, confusion. Call the prescriber.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Dantrolene",
+   "brands": [
+    "Dantrium"
+   ],
+   "drug_class": "Muscle relaxant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 25, 50, 100 mg"
+   ],
+   "uses": [
+    "Muscle stiffness (spasticity)"
+   ],
+   "side_effects": "Weakness, sleepiness, dizziness, diarrhea",
+   "bad_reaction": "Yellow skin or eyes, dark urine, belly pain. Call the prescriber the same day.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Desmopressin",
+   "brands": [
+    "DDAVP",
+    "Nocdurna"
+   ],
+   "drug_class": "Hormone (antidiuretic)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 0.1, 0.2 mg",
+    "nasal spray"
+   ],
+   "uses": [
+    "Bedwetting",
+    "Diabetes insipidus"
+   ],
+   "side_effects": "Headache, upset stomach. Limit fluids in the evening.",
+   "bad_reaction": "Headache with confusion, vomiting, seizure (low sodium). Call 911 for seizure.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Desvenlafaxine",
+   "brands": [
+    "Pristiq"
+   ],
+   "drug_class": "SNRI antidepressant",
+   "psychotropic": "antidepressant",
+   "controlled": null,
+   "forms": [
+    "extended-release tablet 25, 50, 100 mg"
+   ],
+   "uses": [
+    "Depression"
+   ],
+   "side_effects": "Upset stomach, dizziness, sweating, trouble sleeping",
+   "bad_reaction": "Thoughts of self-harm; fever with stiff muscles or confusion. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Dexmethylphenidate",
+   "brands": [
+    "Focalin",
+    "Focalin XR"
+   ],
+   "drug_class": "Stimulant",
+   "psychotropic": "stimulant",
+   "controlled": "II",
+   "forms": [
+    "tablet 2.5, 5, 10 mg",
+    "extended-release capsule 5, 10, 15, 20, 25, 30, 35, 40 mg"
+   ],
+   "uses": [
+    "ADHD"
+   ],
+   "side_effects": "Less appetite, trouble sleeping, stomach ache, headache",
+   "bad_reaction": "Chest pain, fainting, seeing or hearing things that aren't there. Call 911 for chest pain or fainting.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Diazepam",
+   "brands": [
+    "Valium"
+   ],
+   "drug_class": "Benzodiazepine",
+   "psychotropic": "anti-anxiety",
+   "controlled": "IV",
+   "forms": [
+    "tablet 2, 5, 10 mg",
+    "oral solution 5 mg/5 mL"
+   ],
+   "uses": [
+    "Anxiety",
+    "Muscle spasm",
+    "Seizures (add-on)",
+    "Alcohol withdrawal"
+   ],
+   "side_effects": "Sleepiness, unsteady walking, tiredness, muscle weakness",
+   "bad_reaction": "Slow or shallow breathing, very hard to wake. Call 911.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Diazepam nasal spray",
+   "brands": [
+    "Valtoco"
+   ],
+   "drug_class": "Benzodiazepine (seizure rescue)",
+   "psychotropic": null,
+   "controlled": "IV",
+   "forms": [
+    "nasal spray 5, 10, 15, 20 mg"
+   ],
+   "uses": [
+    "Seizure rescue (cluster seizures)"
+   ],
+   "side_effects": "Sleepiness, headache, nose discomfort",
+   "bad_reaction": "Slow or shallow breathing, can't be woken. Call 911.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Diazepam rectal gel",
+   "brands": [
+    "Diastat AcuDial"
+   ],
+   "drug_class": "Benzodiazepine (seizure rescue)",
+   "psychotropic": null,
+   "controlled": "IV",
+   "forms": [
+    "rectal gel 2.5, 10, 20 mg"
+   ],
+   "uses": [
+    "Seizure rescue (cluster or prolonged seizures)"
+   ],
+   "side_effects": "Sleepiness, dizziness, unsteady walking",
+   "bad_reaction": "Slow or shallow breathing, can't be woken. Call 911.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Diclofenac gel",
+   "brands": [
+    "Voltaren"
+   ],
+   "drug_class": "Topical pain reliever (NSAID)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "gel 1%"
+   ],
+   "uses": [
+    "Arthritis and joint pain"
+   ],
+   "side_effects": "Skin irritation where applied",
+   "bad_reaction": "Black stools, swelling, rash. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Digoxin",
+   "brands": [
+    "Lanoxin"
+   ],
+   "drug_class": "Heart medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 62.5, 125, 250 mcg",
+    "oral solution 50 mcg/mL"
+   ],
+   "uses": [
+    "Heart failure",
+    "Atrial fibrillation"
+   ],
+   "side_effects": "Upset stomach, dizziness",
+   "bad_reaction": "Vomiting, less appetite, blurry or yellow-green vision, slow or irregular heartbeat (too much). Call the prescriber now.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Diphenhydramine",
+   "brands": [
+    "Benadryl"
+   ],
+   "drug_class": "Antihistamine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 25, 50 mg",
+    "tablet 25 mg",
+    "liquid 12.5 mg/5 mL"
+   ],
+   "uses": [
+    "Allergies",
+    "Allergic reactions",
+    "Sleep"
+   ],
+   "side_effects": "Sleepiness, dry mouth, constipation, confusion in older adults",
+   "bad_reaction": "Confusion, can't urinate, very fast heartbeat. Call the prescriber.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Divalproex sodium",
+   "brands": [
+    "Depakote",
+    "Depakote ER"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "also_psychotropic": "mood stabilizer",
+   "controlled": null,
+   "forms": [
+    "delayed-release tablet 125, 250, 500 mg",
+    "extended-release tablet 250, 500 mg",
+    "sprinkle capsule 125 mg"
+   ],
+   "uses": [
+    "Seizures",
+    "Bipolar disorder (mood)",
+    "Migraine prevention"
+   ],
+   "side_effects": "Upset stomach, sleepiness, tremor, weight gain, hair thinning",
+   "bad_reaction": "Belly pain with vomiting, yellow skin or eyes, unusual bruising or bleeding, confusion. Call the prescriber the same day.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Docusate sodium",
+   "brands": [
+    "Colace"
+   ],
+   "drug_class": "Stool softener",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 100, 250 mg",
+    "liquid"
+   ],
+   "uses": [
+    "Constipation"
+   ],
+   "side_effects": "Mild cramps, loose stools",
+   "bad_reaction": "No bowel movement in 3 days, vomiting, swollen hard belly. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Donepezil",
+   "brands": [
+    "Aricept"
+   ],
+   "drug_class": "Dementia medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 5, 10, 23 mg",
+    "orally disintegrating tablet 5, 10 mg"
+   ],
+   "uses": [
+    "Alzheimer's dementia"
+   ],
+   "side_effects": "Upset stomach, diarrhea, less appetite, vivid dreams, slow heartbeat",
+   "bad_reaction": "Fainting, black stools or vomiting blood, seizure. Call 911 for fainting or seizure.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Doxepin low dose",
+   "brands": [
+    "Silenor"
+   ],
+   "drug_class": "Sleep medicine",
+   "psychotropic": "sleep",
+   "controlled": null,
+   "forms": [
+    "tablet 3, 6 mg"
+   ],
+   "uses": [
+    "Trouble staying asleep"
+   ],
+   "side_effects": "Next-day sleepiness, upset stomach",
+   "bad_reaction": "Confusion, sleepwalking, thoughts of self-harm. Call the prescriber.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Doxycycline",
+   "brands": [
+    "Vibramycin",
+    "Doryx"
+   ],
+   "drug_class": "Antibiotic (tetracycline)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 50, 100 mg",
+    "tablet 20, 50, 75, 100, 150 mg"
+   ],
+   "uses": [
+    "Bacterial infections",
+    "Acne",
+    "Tick-borne illness"
+   ],
+   "side_effects": "Upset stomach, sun sensitivity. Give with a full glass of water, upright for 30 minutes.",
+   "bad_reaction": "Pain when swallowing or chest pain after a dose, bad headache with vision changes. Call the prescriber.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Duloxetine",
+   "brands": [
+    "Cymbalta"
+   ],
+   "drug_class": "SNRI antidepressant",
+   "psychotropic": "antidepressant",
+   "controlled": null,
+   "forms": [
+    "delayed-release capsule 20, 30, 60 mg"
+   ],
+   "uses": [
+    "Depression",
+    "Generalized anxiety disorder",
+    "Nerve pain",
+    "Chronic muscle or joint pain"
+   ],
+   "side_effects": "Upset stomach, dry mouth, sleepiness, constipation, less appetite",
+   "bad_reaction": "Yellow skin or eyes, dark urine; thoughts of self-harm; fever with stiff muscles. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Epinephrine auto-injector",
+   "brands": [
+    "EpiPen",
+    "Auvi-Q",
+    "Adrenaclick"
+   ],
+   "drug_class": "Allergy emergency rescue",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "auto-injector 0.15, 0.3 mg",
+    "nasal spray 1, 2 mg (Neffy)"
+   ],
+   "uses": [
+    "Severe allergic reaction (anaphylaxis)"
+   ],
+   "side_effects": "Fast heartbeat, shakiness, pale skin, anxiety",
+   "bad_reaction": "Always call 911 after using it.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Ergocalciferol (vitamin D2)",
+   "brands": [
+    "Drisdol"
+   ],
+   "drug_class": "Vitamin",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 50,000 IU"
+   ],
+   "uses": [
+    "Low vitamin D"
+   ],
+   "side_effects": "Usually none",
+   "bad_reaction": "Nausea, constipation, confusion, very thirsty (too much). Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Escitalopram",
+   "brands": [
+    "Lexapro"
+   ],
+   "drug_class": "SSRI antidepressant",
+   "psychotropic": "antidepressant",
+   "controlled": null,
+   "forms": [
+    "tablet 5, 10, 20 mg",
+    "oral solution 5 mg/5 mL"
+   ],
+   "uses": [
+    "Depression",
+    "Generalized anxiety disorder"
+   ],
+   "side_effects": "Upset stomach, trouble sleeping, sleepiness, sweating",
+   "bad_reaction": "Thoughts of self-harm or sudden behavior change; fever with stiff muscles, shaking or confusion. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Esomeprazole",
+   "brands": [
+    "Nexium"
+   ],
+   "drug_class": "Acid reducer (PPI)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "delayed-release capsule 20, 40 mg",
+    "oral suspension packet"
+   ],
+   "uses": [
+    "Heartburn and reflux (GERD)"
+   ],
+   "side_effects": "Headache, upset stomach, diarrhea",
+   "bad_reaction": "Watery diarrhea that won't stop, black stools. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Ethinyl estradiol and norethindrone",
+   "brands": [
+    "Loestrin",
+    "Junel",
+    "Microgestin"
+   ],
+   "drug_class": "Birth control pill",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet (21 or 28-day pack)"
+   ],
+   "uses": [
+    "Birth control",
+    "Period regulation"
+   ],
+   "side_effects": "Spotting, nausea, breast tenderness, headache",
+   "bad_reaction": "Leg pain or swelling, chest pain, sudden severe headache, vision loss. Call 911.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Ethosuximide",
+   "brands": [
+    "Zarontin"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 250 mg",
+    "oral solution 250 mg/5 mL"
+   ],
+   "uses": [
+    "Absence seizures"
+   ],
+   "side_effects": "Upset stomach, less appetite, sleepiness, headache",
+   "bad_reaction": "Rash, fever, sore throat, unusual bruising. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Famotidine",
+   "brands": [
+    "Pepcid"
+   ],
+   "drug_class": "Acid reducer (H2 blocker)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 10, 20, 40 mg",
+    "oral suspension 40 mg/5 mL"
+   ],
+   "uses": [
+    "Heartburn and reflux",
+    "Stomach ulcers"
+   ],
+   "side_effects": "Headache, dizziness, constipation or diarrhea",
+   "bad_reaction": "Confusion, irregular heartbeat. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Felbamate",
+   "brands": [
+    "Felbatol"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 400, 600 mg",
+    "oral suspension 600 mg/5 mL"
+   ],
+   "uses": [
+    "Seizures (when others haven't worked)"
+   ],
+   "side_effects": "Less appetite, trouble sleeping, upset stomach, headache",
+   "bad_reaction": "Fever, sore throat, unusual bruising (blood problems); yellow skin or eyes. Call the prescriber the same day.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Fenfluramine",
+   "brands": [
+    "Fintepla"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "oral solution 2.2 mg/mL"
+   ],
+   "uses": [
+    "Seizures (Dravet, Lennox-Gastaut)"
+   ],
+   "side_effects": "Less appetite, sleepiness, diarrhea",
+   "bad_reaction": "Shortness of breath, chest pain, swelling (heart valve problems). Call the prescriber. Requires heart scans.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Ferrous sulfate",
+   "brands": [
+    "Feosol",
+    "Slow Fe"
+   ],
+   "drug_class": "Iron supplement",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 325 mg (65 mg iron)",
+    "liquid"
+   ],
+   "uses": [
+    "Low iron (anemia)"
+   ],
+   "side_effects": "Constipation, dark stools, upset stomach. Keep apart from calcium and thyroid medicine.",
+   "bad_reaction": "Belly pain with vomiting, black tarry stools with weakness. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Fexofenadine",
+   "brands": [
+    "Allegra"
+   ],
+   "drug_class": "Antihistamine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 60, 180 mg",
+    "oral suspension 30 mg/5 mL"
+   ],
+   "uses": [
+    "Allergies",
+    "Hives"
+   ],
+   "side_effects": "Headache, back pain",
+   "bad_reaction": "Rash, fast heartbeat. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Fiber supplement (psyllium)",
+   "brands": [
+    "Metamucil",
+    "Konsyl"
+   ],
+   "drug_class": "Bulk laxative",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "powder",
+    "capsule",
+    "wafer"
+   ],
+   "uses": [
+    "Constipation",
+    "Regularity"
+   ],
+   "side_effects": "Gas, bloating. Mix with a full glass of liquid.",
+   "bad_reaction": "Choking or chest pain if not mixed with enough liquid, trouble swallowing. Call 911 for choking.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Finasteride",
+   "brands": [
+    "Proscar",
+    "Propecia"
+   ],
+   "drug_class": "Prostate medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 1, 5 mg"
+   ],
+   "uses": [
+    "Enlarged prostate",
+    "Hair loss"
+   ],
+   "side_effects": "Lower sex drive",
+   "bad_reaction": "Breast lumps or pain, depression. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Fluconazole",
+   "brands": [
+    "Diflucan"
+   ],
+   "drug_class": "Antifungal",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 50, 100, 150, 200 mg",
+    "oral suspension"
+   ],
+   "uses": [
+    "Yeast infections",
+    "Thrush"
+   ],
+   "side_effects": "Headache, upset stomach",
+   "bad_reaction": "Fainting or irregular heartbeat, yellow skin or eyes, rash. Call the prescriber; call 911 for fainting.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Fluoxetine",
+   "brands": [
+    "Prozac"
+   ],
+   "drug_class": "SSRI antidepressant",
+   "psychotropic": "antidepressant",
+   "controlled": null,
+   "forms": [
+    "capsule 10, 20, 40 mg",
+    "tablet 10, 20, 60 mg",
+    "oral solution 20 mg/5 mL"
+   ],
+   "uses": [
+    "Depression",
+    "Obsessive-compulsive disorder",
+    "Panic disorder",
+    "Bulimia"
+   ],
+   "side_effects": "Nervousness, trouble sleeping, upset stomach, headache, less appetite",
+   "bad_reaction": "Thoughts of self-harm or sudden behavior change; fever with stiff muscles, shaking or confusion. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Fluphenazine",
+   "brands": [
+    "Prolixin"
+   ],
+   "drug_class": "Typical antipsychotic",
+   "psychotropic": "antipsychotic",
+   "controlled": null,
+   "forms": [
+    "tablet 1, 2.5, 5, 10 mg",
+    "oral solution",
+    "long-acting injection (decanoate)"
+   ],
+   "uses": [
+    "Schizophrenia"
+   ],
+   "side_effects": "Stiffness, tremor, restlessness, sleepiness, dry mouth",
+   "bad_reaction": "High fever with stiff muscles or confusion, neck or eye spasms, repeated face movements. Call 911 for high fever with stiffness.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Fluticasone and salmeterol",
+   "brands": [
+    "Advair",
+    "Wixela"
+   ],
+   "drug_class": "Controller inhaler",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "inhaler (diskus) 100/50, 250/50, 500/50 mcg",
+    "inhaler (HFA) 45/21, 115/21, 230/21 mcg"
+   ],
+   "uses": [
+    "Asthma",
+    "COPD"
+   ],
+   "side_effects": "Hoarse voice, thrush in the mouth (rinse after use), headache",
+   "bad_reaction": "Breathing gets worse after use. Call 911.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Fluticasone nasal",
+   "brands": [
+    "Flonase"
+   ],
+   "drug_class": "Nasal steroid",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "nasal spray 50 mcg/spray"
+   ],
+   "uses": [
+    "Allergies",
+    "Stuffy nose"
+   ],
+   "side_effects": "Nosebleeds, nose irritation, headache",
+   "bad_reaction": "Frequent nosebleeds, vision changes. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Fluvoxamine",
+   "brands": [
+    "Luvox"
+   ],
+   "drug_class": "SSRI antidepressant",
+   "psychotropic": "antidepressant",
+   "controlled": null,
+   "forms": [
+    "tablet 25, 50, 100 mg",
+    "extended-release capsule 100, 150 mg"
+   ],
+   "uses": [
+    "Obsessive-compulsive disorder"
+   ],
+   "side_effects": "Upset stomach, sleepiness, trouble sleeping, headache",
+   "bad_reaction": "Thoughts of self-harm; fever with stiff muscles or confusion. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Folic acid",
+   "brands": [],
+   "drug_class": "Vitamin",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 0.4, 0.8, 1 mg"
+   ],
+   "uses": [
+    "Low folate",
+    "Taken with some seizure medicines"
+   ],
+   "side_effects": "Usually none",
+   "bad_reaction": "Rash. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Furosemide",
+   "brands": [
+    "Lasix"
+   ],
+   "drug_class": "Water pill (diuretic)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 20, 40, 80 mg",
+    "oral solution 10 mg/mL"
+   ],
+   "uses": [
+    "Swelling (edema)",
+    "Heart failure",
+    "High blood pressure"
+   ],
+   "side_effects": "Urinating more, dizziness, thirst",
+   "bad_reaction": "Muscle cramps or weakness, confusion, very dry mouth, fainting. Call the prescriber; call 911 for fainting.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Gabapentin",
+   "brands": [
+    "Neurontin",
+    "Gralise"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 100, 300, 400 mg",
+    "tablet 600, 800 mg",
+    "oral solution 250 mg/5 mL"
+   ],
+   "uses": [
+    "Seizures",
+    "Nerve pain"
+   ],
+   "side_effects": "Sleepiness, dizziness, unsteady walking, swelling of hands or feet",
+   "bad_reaction": "Slow or shallow breathing, very hard to wake, new mood changes. Call 911 for breathing problems.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Glipizide",
+   "brands": [
+    "Glucotrol",
+    "Glucotrol XL"
+   ],
+   "drug_class": "Diabetes medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 5, 10 mg",
+    "extended-release tablet 2.5, 5, 10 mg"
+   ],
+   "uses": [
+    "Type 2 diabetes"
+   ],
+   "side_effects": "Low blood sugar, dizziness, upset stomach",
+   "bad_reaction": "Shaky, sweaty, confused or hard to wake (low blood sugar). Give sugar if they can swallow; call 911 if they can't.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Glycopyrrolate",
+   "brands": [
+    "Robinul",
+    "Cuvposa"
+   ],
+   "drug_class": "Anticholinergic",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 1, 1.5, 2 mg",
+    "oral solution 1 mg/5 mL"
+   ],
+   "uses": [
+    "Drooling",
+    "Stomach ulcers (add-on)"
+   ],
+   "side_effects": "Dry mouth, constipation, flushing, trouble urinating",
+   "bad_reaction": "Overheating, can't urinate, severe constipation. Call the prescriber.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Guaifenesin",
+   "brands": [
+    "Mucinex",
+    "Robitussin"
+   ],
+   "drug_class": "Expectorant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "extended-release tablet 600, 1200 mg",
+    "liquid 100 mg/5 mL"
+   ],
+   "uses": [
+    "Chest congestion"
+   ],
+   "side_effects": "Upset stomach, dizziness",
+   "bad_reaction": "Cough lasting over 7 days or with fever. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Guanfacine",
+   "brands": [
+    "Intuniv",
+    "Tenex"
+   ],
+   "drug_class": "Alpha-2 agonist",
+   "psychotropic": null,
+   "also_psychotropic": "other",
+   "controlled": null,
+   "forms": [
+    "tablet 1, 2 mg",
+    "extended-release tablet 1, 2, 3, 4 mg"
+   ],
+   "uses": [
+    "ADHD (extended-release)",
+    "High blood pressure"
+   ],
+   "side_effects": "Sleepiness, tiredness, dizziness, low blood pressure, dry mouth",
+   "bad_reaction": "Fainting, very slow heartbeat. Don't stop suddenly (blood pressure can spike). Call 911 for fainting.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Haloperidol",
+   "brands": [
+    "Haldol"
+   ],
+   "drug_class": "Typical antipsychotic",
+   "psychotropic": "antipsychotic",
+   "controlled": null,
+   "forms": [
+    "tablet 0.5, 1, 2, 5, 10, 20 mg",
+    "oral concentrate 2 mg/mL",
+    "injection"
+   ],
+   "uses": [
+    "Schizophrenia",
+    "Tourette's disorder",
+    "Severe behavior problems"
+   ],
+   "side_effects": "Stiffness, tremor, restlessness, sleepiness, dry mouth",
+   "bad_reaction": "High fever with stiff muscles or confusion, neck or eye muscle spasms, repeated face movements, fainting. Call 911 for high fever with stiffness.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Hydralazine",
+   "brands": [
+    "Apresoline"
+   ],
+   "drug_class": "Blood pressure medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 10, 25, 50, 100 mg"
+   ],
+   "uses": [
+    "High blood pressure",
+    "Heart failure"
+   ],
+   "side_effects": "Headache, fast heartbeat, flushing",
+   "bad_reaction": "Joint pain with fever and rash, chest pain. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Hydrochlorothiazide",
+   "brands": [
+    "Microzide"
+   ],
+   "drug_class": "Water pill (diuretic)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 12.5, 25, 50 mg",
+    "capsule 12.5 mg"
+   ],
+   "uses": [
+    "High blood pressure",
+    "Swelling"
+   ],
+   "side_effects": "Urinating more, dizziness, sun sensitivity",
+   "bad_reaction": "Muscle cramps or weakness, confusion, sudden eye pain. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Hydrocodone and acetaminophen",
+   "brands": [
+    "Norco",
+    "Vicodin",
+    "Lortab"
+   ],
+   "drug_class": "Opioid pain medicine",
+   "psychotropic": null,
+   "controlled": "II",
+   "forms": [
+    "tablet 5/325, 7.5/325, 10/325 mg",
+    "oral solution"
+   ],
+   "uses": [
+    "Moderate to severe pain"
+   ],
+   "side_effects": "Sleepiness, constipation, upset stomach, dizziness",
+   "bad_reaction": "Slow or shallow breathing, can't be woken, blue lips. Give naloxone if prescribed and call 911.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Hydrocortisone cream",
+   "brands": [
+    "Cortizone-10"
+   ],
+   "drug_class": "Topical steroid",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "cream or ointment 0.5%, 1%, 2.5%"
+   ],
+   "uses": [
+    "Itchy or irritated skin",
+    "Rash"
+   ],
+   "side_effects": "Mild burning or thinning skin with long use",
+   "bad_reaction": "Rash that spreads or looks infected. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Hydroxyzine",
+   "brands": [
+    "Atarax",
+    "Vistaril"
+   ],
+   "drug_class": "Antihistamine",
+   "psychotropic": "anti-anxiety",
+   "controlled": null,
+   "forms": [
+    "tablet (HCl) 10, 25, 50 mg",
+    "capsule (pamoate) 25, 50, 100 mg",
+    "oral solution 10 mg/5 mL"
+   ],
+   "uses": [
+    "Anxiety",
+    "Itching"
+   ],
+   "side_effects": "Sleepiness, dry mouth, dizziness",
+   "bad_reaction": "Fainting or irregular heartbeat, shaking, confusion. Call 911 for fainting.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Ibuprofen",
+   "brands": [
+    "Advil",
+    "Motrin"
+   ],
+   "drug_class": "Pain reliever (NSAID)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 200, 400, 600, 800 mg",
+    "liquid 100 mg/5 mL",
+    "chewable tablet"
+   ],
+   "uses": [
+    "Pain",
+    "Fever",
+    "Swelling"
+   ],
+   "side_effects": "Upset stomach, heartburn. Give with food.",
+   "bad_reaction": "Black or bloody stools, vomiting blood, chest pain, swelling. Call the prescriber; call 911 for chest pain or heavy bleeding.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Insulin glargine",
+   "brands": [
+    "Lantus",
+    "Basaglar",
+    "Toujeo",
+    "Semglee"
+   ],
+   "drug_class": "Long-acting insulin",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "injection pen 100 units/mL",
+    "injection pen 300 units/mL (Toujeo)",
+    "vial 100 units/mL"
+   ],
+   "uses": [
+    "Diabetes"
+   ],
+   "side_effects": "Low blood sugar, weight gain, redness where injected",
+   "bad_reaction": "Shaky, sweaty, confused or hard to wake (low blood sugar). Give sugar if they can swallow; call 911 if they can't.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Insulin lispro",
+   "brands": [
+    "Humalog",
+    "Admelog",
+    "Lyumjev"
+   ],
+   "drug_class": "Rapid-acting insulin",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "injection pen 100 units/mL",
+    "vial 100 units/mL"
+   ],
+   "uses": [
+    "Diabetes (with meals)"
+   ],
+   "side_effects": "Low blood sugar, redness where injected",
+   "bad_reaction": "Shaky, sweaty, confused or hard to wake (low blood sugar). Give sugar if they can swallow; call 911 if they can't.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Ipratropium and albuterol",
+   "brands": [
+    "DuoNeb",
+    "Combivent"
+   ],
+   "drug_class": "Nebulizer bronchodilator",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "nebulizer solution 0.5/2.5 mg per 3 mL",
+    "inhaler"
+   ],
+   "uses": [
+    "COPD"
+   ],
+   "side_effects": "Dry mouth, shakiness, fast heartbeat",
+   "bad_reaction": "Breathing gets worse after use, chest pain. Call 911.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Ketoconazole topical",
+   "brands": [
+    "Nizoral"
+   ],
+   "drug_class": "Antifungal",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "cream 2%",
+    "shampoo 1%, 2%"
+   ],
+   "uses": [
+    "Fungal skin infections",
+    "Dandruff"
+   ],
+   "side_effects": "Mild skin irritation",
+   "bad_reaction": "Blistering or swelling. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Ketotifen eye drops",
+   "brands": [
+    "Zaditor",
+    "Alaway"
+   ],
+   "drug_class": "Allergy eye drops",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "eye drops 0.025%"
+   ],
+   "uses": [
+    "Itchy eyes from allergies"
+   ],
+   "side_effects": "Brief stinging",
+   "bad_reaction": "Eye pain or vision changes. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Lacosamide",
+   "brands": [
+    "Vimpat"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "controlled": "V",
+   "forms": [
+    "tablet 50, 100, 150, 200 mg",
+    "oral solution 10 mg/mL"
+   ],
+   "uses": [
+    "Seizures"
+   ],
+   "side_effects": "Dizziness, double vision, headache, upset stomach, unsteady walking",
+   "bad_reaction": "Fainting, very slow or irregular heartbeat. Call the prescriber; call 911 if they pass out.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Lactulose",
+   "brands": [
+    "Enulose",
+    "Kristalose"
+   ],
+   "drug_class": "Osmotic laxative",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "oral solution 10 g/15 mL",
+    "packet 10, 20 g"
+   ],
+   "uses": [
+    "Constipation"
+   ],
+   "side_effects": "Gas, bloating, diarrhea",
+   "bad_reaction": "Many watery stools, dizziness or weakness (dehydration). Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Lamotrigine",
+   "brands": [
+    "Lamictal"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "also_psychotropic": "mood stabilizer",
+   "controlled": null,
+   "forms": [
+    "tablet 25, 100, 150, 200 mg",
+    "chewable tablet 5, 25 mg",
+    "orally disintegrating tablet 25, 50, 100, 200 mg",
+    "extended-release tablet 25, 50, 100, 200, 250, 300 mg"
+   ],
+   "uses": [
+    "Seizures",
+    "Bipolar disorder (mood)"
+   ],
+   "side_effects": "Dizziness, double vision, headache, upset stomach, sleepiness",
+   "bad_reaction": "Any new rash, especially with fever, blisters or mouth sores. Stop and call the prescriber the same day.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Latanoprost",
+   "brands": [
+    "Xalatan"
+   ],
+   "drug_class": "Glaucoma eye drops",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "eye drops 0.005%"
+   ],
+   "uses": [
+    "Glaucoma",
+    "High eye pressure"
+   ],
+   "side_effects": "Eye redness, darker iris or eyelashes over time",
+   "bad_reaction": "Eye pain, swelling or vision changes. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Levetiracetam",
+   "brands": [
+    "Keppra",
+    "Spritam"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 250, 500, 750, 1000 mg",
+    "extended-release tablet 500, 750 mg",
+    "oral solution 100 mg/mL"
+   ],
+   "uses": [
+    "Seizures"
+   ],
+   "side_effects": "Sleepiness, dizziness, weakness, irritability or mood changes",
+   "bad_reaction": "New or worse aggression, depression, or thoughts of self-harm; seizures that increase. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Levothyroxine",
+   "brands": [
+    "Synthroid",
+    "Levoxyl",
+    "Unithroid",
+    "Euthyrox"
+   ],
+   "drug_class": "Thyroid hormone",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 25, 50, 75, 88, 100, 112, 125, 137, 150, 175, 200, 300 mcg",
+    "capsule",
+    "oral solution"
+   ],
+   "uses": [
+    "Low thyroid (hypothyroidism)"
+   ],
+   "side_effects": "Usually none at the right dose. Give on an empty stomach, apart from calcium and iron.",
+   "bad_reaction": "Racing heartbeat, chest pain, shaking, sweating, weight loss. Call the prescriber; call 911 for chest pain.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Lidocaine patch",
+   "brands": [
+    "Lidoderm"
+   ],
+   "drug_class": "Numbing medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "patch 4% (OTC), 5% (Rx)",
+    "cream"
+   ],
+   "uses": [
+    "Nerve or muscle pain"
+   ],
+   "side_effects": "Skin redness where applied",
+   "bad_reaction": "Dizziness, slow heartbeat, confusion (too much). Remove the patch and call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Lisdexamfetamine",
+   "brands": [
+    "Vyvanse"
+   ],
+   "drug_class": "Stimulant",
+   "psychotropic": "stimulant",
+   "controlled": "II",
+   "forms": [
+    "capsule 10, 20, 30, 40, 50, 60, 70 mg",
+    "chewable tablet 10, 20, 30, 40, 50, 60 mg"
+   ],
+   "uses": [
+    "ADHD",
+    "Binge eating disorder"
+   ],
+   "side_effects": "Less appetite, trouble sleeping, dry mouth, irritability",
+   "bad_reaction": "Chest pain, fainting, seeing or hearing things that aren't there. Call 911 for chest pain or fainting.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Lisinopril",
+   "brands": [
+    "Prinivil",
+    "Zestril",
+    "Qbrelis"
+   ],
+   "drug_class": "Blood pressure (ACE inhibitor)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 2.5, 5, 10, 20, 30, 40 mg",
+    "oral solution 1 mg/mL"
+   ],
+   "uses": [
+    "High blood pressure",
+    "Heart failure"
+   ],
+   "side_effects": "Dry cough, dizziness, headache",
+   "bad_reaction": "Swelling of the face, lips, tongue or throat. Call 911.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Lithium carbonate",
+   "brands": [
+    "Lithobid"
+   ],
+   "drug_class": "Mood stabilizer",
+   "psychotropic": "mood stabilizer",
+   "controlled": null,
+   "forms": [
+    "capsule 150, 300, 600 mg",
+    "tablet 300 mg",
+    "extended-release tablet 300, 450 mg",
+    "oral solution 8 mEq/5 mL"
+   ],
+   "uses": [
+    "Bipolar disorder"
+   ],
+   "side_effects": "Thirst, urinating more, fine hand tremor, upset stomach, weight gain",
+   "bad_reaction": "Vomiting or diarrhea, coarse shaking, unsteady walking, slurred speech or confusion (toxic level). Call the prescriber now; call 911 if very confused. Needs regular blood tests.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Loperamide",
+   "brands": [
+    "Imodium"
+   ],
+   "drug_class": "Anti-diarrhea",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 2 mg",
+    "tablet 2 mg",
+    "liquid"
+   ],
+   "uses": [
+    "Diarrhea"
+   ],
+   "side_effects": "Constipation, bloating, dizziness",
+   "bad_reaction": "Swollen belly, fainting or irregular heartbeat. Call the prescriber; call 911 for fainting.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Loratadine",
+   "brands": [
+    "Claritin"
+   ],
+   "drug_class": "Antihistamine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 10 mg",
+    "orally disintegrating tablet 10 mg",
+    "syrup 5 mg/5 mL"
+   ],
+   "uses": [
+    "Allergies",
+    "Hives"
+   ],
+   "side_effects": "Headache, dry mouth, tiredness",
+   "bad_reaction": "Fast heartbeat, rash. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Lorazepam",
+   "brands": [
+    "Ativan"
+   ],
+   "drug_class": "Benzodiazepine",
+   "psychotropic": "anti-anxiety",
+   "controlled": "IV",
+   "forms": [
+    "tablet 0.5, 1, 2 mg",
+    "oral concentrate 2 mg/mL",
+    "injection"
+   ],
+   "uses": [
+    "Anxiety",
+    "Seizure emergencies (injection)"
+   ],
+   "side_effects": "Sleepiness, dizziness, unsteady walking, weakness",
+   "bad_reaction": "Slow or shallow breathing, very hard to wake, confusion or falls. Call 911 for breathing problems.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Losartan",
+   "brands": [
+    "Cozaar"
+   ],
+   "drug_class": "Blood pressure (ARB)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 25, 50, 100 mg"
+   ],
+   "uses": [
+    "High blood pressure",
+    "Kidney protection in diabetes"
+   ],
+   "side_effects": "Dizziness, tiredness",
+   "bad_reaction": "Fainting, swelling of face or throat, very slow or irregular heartbeat (high potassium). Call 911.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Lurasidone",
+   "brands": [
+    "Latuda"
+   ],
+   "drug_class": "Atypical antipsychotic",
+   "psychotropic": "antipsychotic",
+   "controlled": null,
+   "forms": [
+    "tablet 20, 40, 60, 80, 120 mg"
+   ],
+   "uses": [
+    "Schizophrenia",
+    "Bipolar depression"
+   ],
+   "side_effects": "Sleepiness, restlessness, upset stomach. Take with food.",
+   "bad_reaction": "High fever with stiff muscles, repeated face movements, thoughts of self-harm. Call the prescriber.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Magnesium oxide",
+   "brands": [
+    "Mag-Ox"
+   ],
+   "drug_class": "Mineral supplement",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 400, 500 mg"
+   ],
+   "uses": [
+    "Low magnesium",
+    "Constipation"
+   ],
+   "side_effects": "Diarrhea, upset stomach",
+   "bad_reaction": "Weakness, very slow heartbeat, confusion (too much). Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Mebendazole",
+   "brands": [
+    "Emverm",
+    "Vermox"
+   ],
+   "drug_class": "Anti-worm medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "chewable tablet 100, 500 mg"
+   ],
+   "uses": [
+    "Pinworms and other worms"
+   ],
+   "side_effects": "Stomach pain, diarrhea",
+   "bad_reaction": "Seizure, rash, fever. Call the prescriber; call 911 for seizure.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Medroxyprogesterone injection",
+   "brands": [
+    "Depo-Provera",
+    "Depo-SubQ Provera"
+   ],
+   "drug_class": "Birth control injection",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "injection 150 mg/mL every 3 months",
+    "subcutaneous 104 mg"
+   ],
+   "uses": [
+    "Birth control",
+    "Period management"
+   ],
+   "side_effects": "Irregular bleeding, weight gain, headache",
+   "bad_reaction": "Leg pain or swelling, chest pain, severe headache. Call 911.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Melatonin",
+   "brands": [],
+   "drug_class": "Sleep supplement",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 1, 3, 5, 10 mg",
+    "gummy",
+    "liquid"
+   ],
+   "uses": [
+    "Sleep"
+   ],
+   "side_effects": "Daytime sleepiness, headache, vivid dreams",
+   "bad_reaction": "Unusual confusion or very hard to wake. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Meloxicam",
+   "brands": [
+    "Mobic"
+   ],
+   "drug_class": "Pain reliever (NSAID)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 7.5, 15 mg"
+   ],
+   "uses": [
+    "Arthritis pain"
+   ],
+   "side_effects": "Upset stomach, swelling, dizziness",
+   "bad_reaction": "Black or bloody stools, chest pain, shortness of breath. Call 911 for chest pain.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Memantine",
+   "brands": [
+    "Namenda",
+    "Namenda XR"
+   ],
+   "drug_class": "Dementia medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 5, 10 mg",
+    "extended-release capsule 7, 14, 21, 28 mg",
+    "oral solution 2 mg/mL"
+   ],
+   "uses": [
+    "Alzheimer's dementia"
+   ],
+   "side_effects": "Dizziness, headache, confusion, constipation",
+   "bad_reaction": "Seeing things that aren't there, sudden confusion. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Metformin",
+   "brands": [
+    "Glucophage",
+    "Glumetza",
+    "Fortamet"
+   ],
+   "drug_class": "Diabetes medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 500, 850, 1000 mg",
+    "extended-release tablet 500, 750, 1000 mg",
+    "oral solution 500 mg/5 mL"
+   ],
+   "uses": [
+    "Type 2 diabetes",
+    "Weight gain from antipsychotics (off-label)"
+   ],
+   "side_effects": "Upset stomach, diarrhea, gas, metallic taste. Give with meals.",
+   "bad_reaction": "Unusual muscle pain, trouble breathing, belly pain with weakness (lactic acidosis). Call 911.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Methocarbamol",
+   "brands": [
+    "Robaxin"
+   ],
+   "drug_class": "Muscle relaxant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 500, 750 mg"
+   ],
+   "uses": [
+    "Muscle spasm"
+   ],
+   "side_effects": "Sleepiness, dizziness, dark urine color",
+   "bad_reaction": "Fainting, very hard to wake. Call 911 for fainting.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Methylphenidate",
+   "brands": [
+    "Ritalin",
+    "Concerta",
+    "Metadate",
+    "Quillichew",
+    "Daytrana"
+   ],
+   "drug_class": "Stimulant",
+   "psychotropic": "stimulant",
+   "controlled": "II",
+   "forms": [
+    "tablet 5, 10, 20 mg",
+    "extended-release tablet 18, 27, 36, 54, 72 mg",
+    "extended-release capsule",
+    "chewable tablet",
+    "patch"
+   ],
+   "uses": [
+    "ADHD"
+   ],
+   "side_effects": "Less appetite, trouble sleeping, stomach ache, headache, irritability",
+   "bad_reaction": "Chest pain, fainting, seeing or hearing things that aren't there, fingers or toes turning white or blue. Call 911 for chest pain or fainting.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Metoclopramide",
+   "brands": [
+    "Reglan"
+   ],
+   "drug_class": "Stomach motility",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 5, 10 mg",
+    "orally disintegrating tablet",
+    "oral solution 5 mg/5 mL"
+   ],
+   "uses": [
+    "Reflux",
+    "Slow stomach emptying"
+   ],
+   "side_effects": "Restlessness, sleepiness, tiredness",
+   "bad_reaction": "Repeated face, tongue or body movements; muscle spasms; depression. Stop and call the prescriber.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Metoprolol",
+   "brands": [
+    "Lopressor",
+    "Toprol XL"
+   ],
+   "drug_class": "Beta blocker",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet (tartrate) 25, 37.5, 50, 75, 100 mg",
+    "extended-release tablet (succinate) 25, 50, 100, 200 mg"
+   ],
+   "uses": [
+    "High blood pressure",
+    "Heart failure",
+    "Fast heartbeat",
+    "Chest pain"
+   ],
+   "side_effects": "Tiredness, dizziness, slow heartbeat, cold hands",
+   "bad_reaction": "Fainting, very slow heartbeat, shortness of breath. Don't stop suddenly. Call 911 for fainting.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Midazolam nasal spray",
+   "brands": [
+    "Nayzilam"
+   ],
+   "drug_class": "Benzodiazepine (seizure rescue)",
+   "psychotropic": null,
+   "controlled": "IV",
+   "forms": [
+    "nasal spray 5 mg"
+   ],
+   "uses": [
+    "Seizure rescue (cluster seizures)"
+   ],
+   "side_effects": "Sleepiness, nose discomfort, runny nose",
+   "bad_reaction": "Slow or shallow breathing, can't be woken. Call 911.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Mirtazapine",
+   "brands": [
+    "Remeron",
+    "Remeron SolTab"
+   ],
+   "drug_class": "Antidepressant",
+   "psychotropic": "antidepressant",
+   "controlled": null,
+   "forms": [
+    "tablet 7.5, 15, 30, 45 mg",
+    "orally disintegrating tablet 15, 30, 45 mg"
+   ],
+   "uses": [
+    "Depression"
+   ],
+   "side_effects": "Sleepiness, more appetite, weight gain, dry mouth",
+   "bad_reaction": "Fever, sore throat or mouth sores (low white cells); thoughts of self-harm. Call the prescriber.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Mometasone nasal",
+   "brands": [
+    "Nasonex"
+   ],
+   "drug_class": "Nasal steroid",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "nasal spray 50 mcg/spray"
+   ],
+   "uses": [
+    "Allergies",
+    "Nasal polyps"
+   ],
+   "side_effects": "Nosebleeds, headache",
+   "bad_reaction": "Frequent nosebleeds, vision changes. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Montelukast",
+   "brands": [
+    "Singulair"
+   ],
+   "drug_class": "Asthma and allergy medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 10 mg",
+    "chewable tablet 4, 5 mg",
+    "granules 4 mg"
+   ],
+   "uses": [
+    "Asthma",
+    "Allergies"
+   ],
+   "side_effects": "Headache, stomach ache",
+   "bad_reaction": "Mood or behavior changes, nightmares, thoughts of self-harm. Stop and call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Multivitamin",
+   "brands": [
+    "Centrum",
+    "One A Day"
+   ],
+   "drug_class": "Vitamin",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet",
+    "chewable tablet",
+    "gummy",
+    "liquid"
+   ],
+   "uses": [
+    "Nutrition supplement"
+   ],
+   "side_effects": "Upset stomach",
+   "bad_reaction": "Trouble swallowing the tablet. Ask about a chewable or liquid form.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Mupirocin",
+   "brands": [
+    "Bactroban"
+   ],
+   "drug_class": "Antibiotic ointment",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "ointment 2%",
+    "cream 2%"
+   ],
+   "uses": [
+    "Skin infections (impetigo)"
+   ],
+   "side_effects": "Burning or stinging where applied",
+   "bad_reaction": "Rash, spreading redness or swelling. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Naloxone nasal spray",
+   "brands": [
+    "Narcan",
+    "Kloxxado"
+   ],
+   "drug_class": "Opioid overdose rescue",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "nasal spray 4, 8 mg"
+   ],
+   "uses": [
+    "Opioid overdose rescue"
+   ],
+   "side_effects": "Withdrawal symptoms: agitation, sweating, vomiting",
+   "bad_reaction": "Always call 911 after giving it. Overdose can return when it wears off.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Naltrexone",
+   "brands": [
+    "Revia",
+    "Vivitrol"
+   ],
+   "drug_class": "Opioid blocker",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 50 mg",
+    "long-acting injection"
+   ],
+   "uses": [
+    "Alcohol or opioid dependence",
+    "Self-injury (off-label)"
+   ],
+   "side_effects": "Upset stomach, headache, dizziness, tiredness",
+   "bad_reaction": "Yellow skin or eyes, dark urine, belly pain. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Naproxen",
+   "brands": [
+    "Aleve",
+    "Naprosyn"
+   ],
+   "drug_class": "Pain reliever (NSAID)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 220, 250, 375, 500 mg",
+    "oral suspension 125 mg/5 mL"
+   ],
+   "uses": [
+    "Pain",
+    "Swelling",
+    "Arthritis"
+   ],
+   "side_effects": "Upset stomach, heartburn, dizziness. Give with food.",
+   "bad_reaction": "Black or bloody stools, vomiting blood, chest pain. Call 911 for chest pain or heavy bleeding.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Nicotine replacement",
+   "brands": [
+    "Nicoderm CQ",
+    "Nicorette"
+   ],
+   "drug_class": "Quit smoking aid",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "patch 7, 14, 21 mg/24 hr",
+    "gum 2, 4 mg",
+    "lozenge 2, 4 mg"
+   ],
+   "uses": [
+    "Quitting smoking"
+   ],
+   "side_effects": "Skin irritation (patch), vivid dreams, upset stomach",
+   "bad_reaction": "Fast or irregular heartbeat, severe dizziness. Remove the patch and call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Nitrofurantoin",
+   "brands": [
+    "Macrobid",
+    "Macrodantin"
+   ],
+   "drug_class": "Antibiotic",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 50, 100 mg"
+   ],
+   "uses": [
+    "Urinary infections"
+   ],
+   "side_effects": "Upset stomach, headache, brown urine. Give with food.",
+   "bad_reaction": "Cough, chest pain or trouble breathing; numbness or tingling. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Nitroglycerin",
+   "brands": [
+    "Nitrostat"
+   ],
+   "drug_class": "Chest pain medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "sublingual tablet 0.3, 0.4, 0.6 mg",
+    "spray"
+   ],
+   "uses": [
+    "Chest pain (angina)"
+   ],
+   "side_effects": "Headache, dizziness, flushing",
+   "bad_reaction": "Chest pain not better 5 minutes after the first dose: call 911.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Norethindrone",
+   "brands": [
+    "Aygestin",
+    "Camila"
+   ],
+   "drug_class": "Progestin",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 0.35 mg",
+    "tablet 5 mg"
+   ],
+   "uses": [
+    "Birth control (0.35 mg)",
+    "Period problems (5 mg)"
+   ],
+   "side_effects": "Irregular bleeding, headache, breast tenderness",
+   "bad_reaction": "Leg pain or swelling, severe headache, vision changes. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Nortriptyline",
+   "brands": [
+    "Pamelor"
+   ],
+   "drug_class": "Tricyclic antidepressant",
+   "psychotropic": "antidepressant",
+   "controlled": null,
+   "forms": [
+    "capsule 10, 25, 50, 75 mg",
+    "oral solution 10 mg/5 mL"
+   ],
+   "uses": [
+    "Depression",
+    "Nerve pain (off-label)"
+   ],
+   "side_effects": "Dry mouth, constipation, sleepiness, blurry vision",
+   "bad_reaction": "Fast or irregular heartbeat, fainting, confusion. Call 911 for fainting.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Nystatin",
+   "brands": [
+    "Mycostatin",
+    "Nyamyc"
+   ],
+   "drug_class": "Antifungal",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "oral suspension 100,000 units/mL",
+    "cream or ointment",
+    "powder"
+   ],
+   "uses": [
+    "Thrush in the mouth",
+    "Yeast skin infections"
+   ],
+   "side_effects": "Upset stomach (oral), mild skin irritation",
+   "bad_reaction": "Rash or swelling. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Olanzapine",
+   "brands": [
+    "Zyprexa",
+    "Zyprexa Zydis"
+   ],
+   "drug_class": "Atypical antipsychotic",
+   "psychotropic": "antipsychotic",
+   "controlled": null,
+   "forms": [
+    "tablet 2.5, 5, 7.5, 10, 15, 20 mg",
+    "orally disintegrating tablet 5, 10, 15, 20 mg",
+    "injection"
+   ],
+   "uses": [
+    "Schizophrenia",
+    "Bipolar disorder"
+   ],
+   "side_effects": "Weight gain, more appetite, sleepiness, dry mouth, constipation",
+   "bad_reaction": "High fever with stiff muscles or confusion, very high thirst and urination, repeated face movements. Call the prescriber; call 911 for high fever with stiffness.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Omeprazole",
+   "brands": [
+    "Prilosec"
+   ],
+   "drug_class": "Acid reducer (PPI)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "delayed-release capsule 10, 20, 40 mg",
+    "tablet 20 mg (OTC)",
+    "oral suspension packet"
+   ],
+   "uses": [
+    "Heartburn and reflux (GERD)",
+    "Stomach ulcers"
+   ],
+   "side_effects": "Headache, upset stomach, diarrhea",
+   "bad_reaction": "Watery diarrhea that won't stop, black stools, muscle cramps or shaking. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Ondansetron",
+   "brands": [
+    "Zofran"
+   ],
+   "drug_class": "Anti-nausea",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 4, 8 mg",
+    "orally disintegrating tablet 4, 8 mg",
+    "oral solution 4 mg/5 mL"
+   ],
+   "uses": [
+    "Nausea and vomiting"
+   ],
+   "side_effects": "Headache, constipation, tiredness",
+   "bad_reaction": "Fainting or irregular heartbeat. Call 911 for fainting.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Oseltamivir",
+   "brands": [
+    "Tamiflu"
+   ],
+   "drug_class": "Antiviral",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 30, 45, 75 mg",
+    "oral suspension 6 mg/mL"
+   ],
+   "uses": [
+    "Flu treatment and prevention"
+   ],
+   "side_effects": "Upset stomach, vomiting, headache",
+   "bad_reaction": "Confusion, unusual behavior, seeing things. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Oxcarbazepine",
+   "brands": [
+    "Trileptal",
+    "Oxtellar XR"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 150, 300, 600 mg",
+    "extended-release tablet 150, 300, 600 mg",
+    "oral suspension 300 mg/5 mL"
+   ],
+   "uses": [
+    "Seizures"
+   ],
+   "side_effects": "Dizziness, sleepiness, double vision, upset stomach, headache",
+   "bad_reaction": "Confusion, unusual tiredness or headache (low sodium), rash. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Oxybutynin",
+   "brands": [
+    "Ditropan XL",
+    "Oxytrol"
+   ],
+   "drug_class": "Bladder medicine (anticholinergic)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 5 mg",
+    "extended-release tablet 5, 10, 15 mg",
+    "syrup 5 mg/5 mL",
+    "patch"
+   ],
+   "uses": [
+    "Overactive bladder",
+    "Bladder spasms"
+   ],
+   "side_effects": "Dry mouth, constipation, blurry vision, sleepiness",
+   "bad_reaction": "Confusion, can't urinate, overheating. Call the prescriber.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Oxycodone",
+   "brands": [
+    "Roxicodone",
+    "OxyContin",
+    "Percocet (with acetaminophen)"
+   ],
+   "drug_class": "Opioid pain medicine",
+   "psychotropic": null,
+   "controlled": "II",
+   "forms": [
+    "tablet 5, 10, 15, 20, 30 mg",
+    "extended-release tablet",
+    "with acetaminophen 5/325, 7.5/325, 10/325 mg"
+   ],
+   "uses": [
+    "Moderate to severe pain"
+   ],
+   "side_effects": "Sleepiness, constipation, upset stomach, dizziness",
+   "bad_reaction": "Slow or shallow breathing, can't be woken, blue lips. Give naloxone if prescribed and call 911.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Paliperidone",
+   "brands": [
+    "Invega",
+    "Invega Sustenna",
+    "Invega Trinza"
+   ],
+   "drug_class": "Atypical antipsychotic",
+   "psychotropic": "antipsychotic",
+   "controlled": null,
+   "forms": [
+    "extended-release tablet 1.5, 3, 6, 9 mg",
+    "long-acting injection"
+   ],
+   "uses": [
+    "Schizophrenia",
+    "Schizoaffective disorder"
+   ],
+   "side_effects": "Restlessness, stiffness, sleepiness, weight gain, fast heartbeat",
+   "bad_reaction": "Fainting, high fever with stiff muscles, repeated face movements. Call the prescriber; call 911 for fainting.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Pantoprazole",
+   "brands": [
+    "Protonix"
+   ],
+   "drug_class": "Acid reducer (PPI)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "delayed-release tablet 20, 40 mg",
+    "oral suspension packet 40 mg"
+   ],
+   "uses": [
+    "Heartburn and reflux (GERD)"
+   ],
+   "side_effects": "Headache, diarrhea, upset stomach",
+   "bad_reaction": "Watery diarrhea that won't stop, black stools. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Paroxetine",
+   "brands": [
+    "Paxil",
+    "Paxil CR"
+   ],
+   "drug_class": "SSRI antidepressant",
+   "psychotropic": "antidepressant",
+   "controlled": null,
+   "forms": [
+    "tablet 10, 20, 30, 40 mg",
+    "extended-release tablet 12.5, 25, 37.5 mg",
+    "oral suspension 10 mg/5 mL"
+   ],
+   "uses": [
+    "Depression",
+    "Anxiety disorders",
+    "Obsessive-compulsive disorder",
+    "PTSD"
+   ],
+   "side_effects": "Sleepiness, upset stomach, dry mouth, sweating, constipation",
+   "bad_reaction": "Thoughts of self-harm; fever with stiff muscles or confusion. Call the prescriber. Don't stop suddenly.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Perampanel",
+   "brands": [
+    "Fycompa"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "controlled": "III",
+   "forms": [
+    "tablet 2, 4, 6, 8, 10, 12 mg",
+    "oral suspension 0.5 mg/mL"
+   ],
+   "uses": [
+    "Seizures"
+   ],
+   "side_effects": "Dizziness, sleepiness, irritability, unsteady walking",
+   "bad_reaction": "Aggression, anger or thoughts of harming others or self. Call the prescriber now.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Permethrin",
+   "brands": [
+    "Elimite",
+    "Nix"
+   ],
+   "drug_class": "Anti-lice and scabies",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "cream 5%",
+    "lotion 1%"
+   ],
+   "uses": [
+    "Scabies",
+    "Lice"
+   ],
+   "side_effects": "Itching or burning for a few weeks",
+   "bad_reaction": "Severe rash or swelling. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Petroleum jelly and barrier creams",
+   "brands": [
+    "Vaseline",
+    "Desitin",
+    "A+D"
+   ],
+   "drug_class": "Skin protectant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "ointment",
+    "cream",
+    "paste (zinc oxide)"
+   ],
+   "uses": [
+    "Dry skin",
+    "Diaper or brief rash"
+   ],
+   "side_effects": "Usually none",
+   "bad_reaction": "Rash that spreads, open sores. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Phenobarbital",
+   "brands": [
+    "Luminal"
+   ],
+   "drug_class": "Barbiturate anticonvulsant",
+   "psychotropic": null,
+   "controlled": "IV",
+   "forms": [
+    "tablet 15, 16.2, 30, 32.4, 60, 64.8, 97.2, 100 mg",
+    "oral elixir 20 mg/5 mL"
+   ],
+   "uses": [
+    "Seizures"
+   ],
+   "side_effects": "Sleepiness, slowed thinking, unsteady walking, irritability",
+   "bad_reaction": "Very hard to wake, slow or shallow breathing, rash. Call 911 for breathing problems.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Phenytoin",
+   "brands": [
+    "Dilantin",
+    "Phenytek"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "extended-release capsule 30, 100, 200, 300 mg",
+    "chewable tablet 50 mg",
+    "oral suspension 125 mg/5 mL"
+   ],
+   "uses": [
+    "Seizures"
+   ],
+   "side_effects": "Unsteady walking, dizziness, slurred speech, gum overgrowth, sleepiness",
+   "bad_reaction": "Rash, fever, swollen glands, eye movements that won't stop, severe unsteadiness. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Polyethylene glycol 3350",
+   "brands": [
+    "MiraLAX",
+    "GlycoLax"
+   ],
+   "drug_class": "Osmotic laxative",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "powder 17 g per dose"
+   ],
+   "uses": [
+    "Constipation"
+   ],
+   "side_effects": "Bloating, gas, loose stools",
+   "bad_reaction": "Severe belly pain or swelling, vomiting, bloody stools. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Potassium chloride",
+   "brands": [
+    "Klor-Con",
+    "K-Tab"
+   ],
+   "drug_class": "Potassium supplement",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "extended-release tablet 8, 10, 15, 20 mEq",
+    "powder packet",
+    "oral solution"
+   ],
+   "uses": [
+    "Low potassium"
+   ],
+   "side_effects": "Upset stomach, diarrhea. Large tablet; give with a full glass of water, sitting upright.",
+   "bad_reaction": "Trouble swallowing or chest pain after a dose, black stools, very slow or irregular heartbeat. Call the prescriber.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Prazosin",
+   "brands": [
+    "Minipress"
+   ],
+   "drug_class": "Alpha blocker",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 1, 2, 5 mg"
+   ],
+   "uses": [
+    "High blood pressure",
+    "Nightmares with PTSD (off-label)"
+   ],
+   "side_effects": "Dizziness when standing, headache, tiredness",
+   "bad_reaction": "Fainting, especially after the first dose. Call 911 for fainting.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Prednisone",
+   "brands": [
+    "Deltasone",
+    "Rayos"
+   ],
+   "drug_class": "Steroid",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 1, 2.5, 5, 10, 20, 50 mg",
+    "oral solution 5 mg/5 mL"
+   ],
+   "uses": [
+    "Swelling and inflammation",
+    "Asthma flares",
+    "Allergic reactions"
+   ],
+   "side_effects": "More appetite, trouble sleeping, mood changes, higher blood sugar. Give with food.",
+   "bad_reaction": "Black stools, severe mood change, signs of infection. Don't stop suddenly after long use. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Pregabalin",
+   "brands": [
+    "Lyrica"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "controlled": "V",
+   "forms": [
+    "capsule 25, 50, 75, 100, 150, 200, 225, 300 mg",
+    "oral solution 20 mg/mL"
+   ],
+   "uses": [
+    "Nerve pain",
+    "Fibromyalgia",
+    "Seizures (add-on)"
+   ],
+   "side_effects": "Dizziness, sleepiness, weight gain, swelling, blurry vision",
+   "bad_reaction": "Swelling of face or throat, slow breathing, very hard to wake. Call 911.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Primidone",
+   "brands": [
+    "Mysoline"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 50, 125, 250 mg"
+   ],
+   "uses": [
+    "Seizures",
+    "Essential tremor"
+   ],
+   "side_effects": "Sleepiness, dizziness, unsteady walking, upset stomach",
+   "bad_reaction": "Very hard to wake, rash, unusual bruising. Call the prescriber.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Probiotic",
+   "brands": [
+    "Culturelle",
+    "Florastor"
+   ],
+   "drug_class": "Supplement",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule",
+    "powder",
+    "chewable"
+   ],
+   "uses": [
+    "Digestive health",
+    "With antibiotics"
+   ],
+   "side_effects": "Gas, bloating",
+   "bad_reaction": "Fever with stomach pain. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Propranolol",
+   "brands": [
+    "Inderal",
+    "Inderal LA"
+   ],
+   "drug_class": "Beta blocker",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 10, 20, 40, 60, 80 mg",
+    "extended-release capsule 60, 80, 120, 160 mg",
+    "oral solution 20 mg/5 mL"
+   ],
+   "uses": [
+    "High blood pressure",
+    "Fast heartbeat",
+    "Migraine prevention",
+    "Tremor",
+    "Anxiety symptoms (off-label)"
+   ],
+   "side_effects": "Tiredness, cold hands, slow heartbeat, dizziness",
+   "bad_reaction": "Fainting, very slow heartbeat, wheezing. Don't stop suddenly. Call 911 for fainting or trouble breathing.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Pyridoxine (vitamin B6)",
+   "brands": [],
+   "drug_class": "Vitamin",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 25, 50, 100 mg"
+   ],
+   "uses": [
+    "Low vitamin B6",
+    "Taken with some seizure medicines"
+   ],
+   "side_effects": "Usually none",
+   "bad_reaction": "Numbness or tingling with long high doses. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Quetiapine",
+   "brands": [
+    "Seroquel",
+    "Seroquel XR"
+   ],
+   "drug_class": "Atypical antipsychotic",
+   "psychotropic": "antipsychotic",
+   "controlled": null,
+   "forms": [
+    "tablet 25, 50, 100, 200, 300, 400 mg",
+    "extended-release tablet 50, 150, 200, 300, 400 mg"
+   ],
+   "uses": [
+    "Schizophrenia",
+    "Bipolar disorder",
+    "Depression (add-on, XR)"
+   ],
+   "side_effects": "Sleepiness, dizziness when standing, dry mouth, weight gain, constipation",
+   "bad_reaction": "Fainting, high fever with stiff muscles, repeated face or tongue movements. Call the prescriber; call 911 for high fever with stiffness.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Ramelteon",
+   "brands": [
+    "Rozerem"
+   ],
+   "drug_class": "Sleep medicine",
+   "psychotropic": "sleep",
+   "controlled": null,
+   "forms": [
+    "tablet 8 mg"
+   ],
+   "uses": [
+    "Trouble falling asleep"
+   ],
+   "side_effects": "Next-day sleepiness, dizziness",
+   "bad_reaction": "Unusual behavior during sleep, worsening mood. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Risperidone",
+   "brands": [
+    "Risperdal",
+    "Risperdal Consta"
+   ],
+   "drug_class": "Atypical antipsychotic",
+   "psychotropic": "antipsychotic",
+   "controlled": null,
+   "forms": [
+    "tablet 0.25, 0.5, 1, 2, 3, 4 mg",
+    "orally disintegrating tablet 0.25, 0.5, 1, 2, 3, 4 mg",
+    "oral solution 1 mg/mL",
+    "long-acting injection"
+   ],
+   "uses": [
+    "Schizophrenia",
+    "Bipolar disorder",
+    "Irritability with autism"
+   ],
+   "side_effects": "Weight gain, sleepiness, more appetite, drooling, restlessness, stiffness",
+   "bad_reaction": "High fever with stiff muscles or confusion; repeated movements of the mouth, tongue or face; fainting. Call the prescriber; call 911 for high fever with stiffness.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Ropinirole",
+   "brands": [
+    "Requip"
+   ],
+   "drug_class": "Parkinson's and restless legs medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 0.25, 0.5, 1, 2, 3, 4, 5 mg",
+    "extended-release tablet"
+   ],
+   "uses": [
+    "Restless legs syndrome",
+    "Parkinson's disease"
+   ],
+   "side_effects": "Upset stomach, sleepiness, dizziness",
+   "bad_reaction": "Falling asleep suddenly, new urges (gambling, eating), seeing things that aren't there. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Rosuvastatin",
+   "brands": [
+    "Crestor"
+   ],
+   "drug_class": "Cholesterol medicine (statin)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 5, 10, 20, 40 mg"
+   ],
+   "uses": [
+    "High cholesterol"
+   ],
+   "side_effects": "Muscle aches, headache, upset stomach",
+   "bad_reaction": "Severe muscle pain or weakness with dark urine. Call the prescriber the same day.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Rufinamide",
+   "brands": [
+    "Banzel"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 200, 400 mg",
+    "oral suspension 40 mg/mL"
+   ],
+   "uses": [
+    "Seizures (Lennox-Gastaut syndrome)"
+   ],
+   "side_effects": "Sleepiness, headache, dizziness, upset stomach",
+   "bad_reaction": "Rash with fever, fainting. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Semaglutide",
+   "brands": [
+    "Ozempic",
+    "Wegovy",
+    "Rybelsus"
+   ],
+   "drug_class": "GLP-1 diabetes and weight medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "weekly injection pen",
+    "tablet 3, 7, 14 mg (Rybelsus)"
+   ],
+   "uses": [
+    "Type 2 diabetes",
+    "Weight loss"
+   ],
+   "side_effects": "Upset stomach, vomiting, diarrhea, constipation, less appetite",
+   "bad_reaction": "Severe belly pain that goes to the back, vomiting that won't stop, lump in the neck. Call the prescriber; call 911 for severe pain.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Sennosides",
+   "brands": [
+    "Senokot",
+    "Ex-Lax"
+   ],
+   "drug_class": "Stimulant laxative",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 8.6 mg",
+    "senna with docusate tablet 8.6/50 mg",
+    "liquid"
+   ],
+   "uses": [
+    "Constipation"
+   ],
+   "side_effects": "Cramps, diarrhea",
+   "bad_reaction": "Severe belly pain, vomiting, no bowel movement in 3 days. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Sertraline",
+   "brands": [
+    "Zoloft"
+   ],
+   "drug_class": "SSRI antidepressant",
+   "psychotropic": "antidepressant",
+   "controlled": null,
+   "forms": [
+    "tablet 25, 50, 100 mg",
+    "oral concentrate 20 mg/mL"
+   ],
+   "uses": [
+    "Depression",
+    "Anxiety disorders",
+    "Obsessive-compulsive disorder",
+    "PTSD"
+   ],
+   "side_effects": "Upset stomach, diarrhea, trouble sleeping or sleepiness, headache, sweating",
+   "bad_reaction": "Thoughts of self-harm or sudden behavior change; fever with stiff muscles, shaking or confusion. Call the prescriber; call 911 for serious symptoms.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Simethicone",
+   "brands": [
+    "Gas-X",
+    "Mylicon"
+   ],
+   "drug_class": "Anti-gas",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "chewable tablet 80, 125 mg",
+    "softgel 125, 180 mg",
+    "drops"
+   ],
+   "uses": [
+    "Gas and bloating"
+   ],
+   "side_effects": "Rarely any",
+   "bad_reaction": "Belly pain that gets worse. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Simvastatin",
+   "brands": [
+    "Zocor"
+   ],
+   "drug_class": "Cholesterol medicine (statin)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 5, 10, 20, 40, 80 mg"
+   ],
+   "uses": [
+    "High cholesterol"
+   ],
+   "side_effects": "Muscle aches, upset stomach",
+   "bad_reaction": "Severe muscle pain or weakness with dark urine. Call the prescriber the same day.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Sodium chloride nasal spray",
+   "brands": [
+    "Ocean",
+    "Ayr"
+   ],
+   "drug_class": "Saline nasal spray",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "nasal spray 0.65%",
+    "gel"
+   ],
+   "uses": [
+    "Dry or stuffy nose"
+   ],
+   "side_effects": "Usually none",
+   "bad_reaction": "Nosebleeds that don't stop. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Sodium fluoride toothpaste",
+   "brands": [
+    "PreviDent"
+   ],
+   "drug_class": "Dental",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "toothpaste 1.1%"
+   ],
+   "uses": [
+    "Cavity prevention"
+   ],
+   "side_effects": "Usually none. Don't swallow.",
+   "bad_reaction": "Upset stomach if swallowed in large amounts. Call Poison Control (1-800-222-1222).",
+   "swallow_risk": false
+  },
+  {
+   "name": "Spironolactone",
+   "brands": [
+    "Aldactone",
+    "Carospir"
+   ],
+   "drug_class": "Water pill (diuretic)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 25, 50, 100 mg",
+    "oral suspension 25 mg/5 mL"
+   ],
+   "uses": [
+    "Heart failure",
+    "Swelling",
+    "High blood pressure",
+    "Acne (off-label)"
+   ],
+   "side_effects": "Dizziness, breast tenderness, more urination",
+   "bad_reaction": "Muscle weakness, very slow or irregular heartbeat (high potassium). Call 911.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Stiripentol",
+   "brands": [
+    "Diacomit"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 250, 500 mg",
+    "powder packet 250, 500 mg"
+   ],
+   "uses": [
+    "Seizures (Dravet syndrome)"
+   ],
+   "side_effects": "Sleepiness, less appetite, weight loss",
+   "bad_reaction": "Fever, sore throat, unusual bruising. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Sulfamethoxazole and trimethoprim",
+   "brands": [
+    "Bactrim",
+    "Bactrim DS",
+    "Septra"
+   ],
+   "drug_class": "Antibiotic (sulfa)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 400/80 mg",
+    "DS tablet 800/160 mg",
+    "oral suspension 200/40 mg/5 mL"
+   ],
+   "uses": [
+    "Urinary infections",
+    "Skin infections"
+   ],
+   "side_effects": "Upset stomach, less appetite, sun sensitivity. Give with plenty of water.",
+   "bad_reaction": "Rash, blisters or mouth sores; fever; unusual bruising. Stop and call the prescriber the same day. Check sulfa allergy first.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Sumatriptan",
+   "brands": [
+    "Imitrex"
+   ],
+   "drug_class": "Migraine medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 25, 50, 100 mg",
+    "nasal spray",
+    "injection"
+   ],
+   "uses": [
+    "Migraine attacks"
+   ],
+   "side_effects": "Tingling, warmth, tiredness, chest tightness that passes",
+   "bad_reaction": "Chest pain that doesn't pass, sudden severe headache, weakness on one side. Call 911.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Tamsulosin",
+   "brands": [
+    "Flomax"
+   ],
+   "drug_class": "Prostate medicine (alpha blocker)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 0.4 mg"
+   ],
+   "uses": [
+    "Enlarged prostate",
+    "Kidney stones (off-label)"
+   ],
+   "side_effects": "Dizziness when standing, runny nose",
+   "bad_reaction": "Fainting, an erection lasting over 4 hours. Call 911.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Tiotropium",
+   "brands": [
+    "Spiriva"
+   ],
+   "drug_class": "Controller inhaler",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "inhalation capsule 18 mcg",
+    "inhaler 1.25, 2.5 mcg/puff"
+   ],
+   "uses": [
+    "COPD",
+    "Asthma"
+   ],
+   "side_effects": "Dry mouth, constipation, sore throat",
+   "bad_reaction": "Breathing gets worse after use, eye pain, can't urinate. Call the prescriber; call 911 for trouble breathing.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Tizanidine",
+   "brands": [
+    "Zanaflex"
+   ],
+   "drug_class": "Muscle relaxant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 2, 4 mg",
+    "capsule 2, 4, 6 mg"
+   ],
+   "uses": [
+    "Muscle stiffness (spasticity)"
+   ],
+   "side_effects": "Sleepiness, dry mouth, weakness, dizziness, low blood pressure",
+   "bad_reaction": "Fainting, yellow skin or eyes, seeing things that aren't there. Call 911 for fainting.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Topiramate",
+   "brands": [
+    "Topamax",
+    "Trokendi XR",
+    "Qudexy XR"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 25, 50, 100, 200 mg",
+    "sprinkle capsule 15, 25 mg",
+    "extended-release capsule 25, 50, 100, 200 mg"
+   ],
+   "uses": [
+    "Seizures",
+    "Migraine prevention"
+   ],
+   "side_effects": "Tingling hands or feet, slowed thinking, word-finding trouble, less appetite, sleepiness",
+   "bad_reaction": "Sudden eye pain or blurry vision, not sweating with high temperature, side or back pain (kidney stone). Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Tramadol",
+   "brands": [
+    "Ultram"
+   ],
+   "drug_class": "Opioid pain medicine",
+   "psychotropic": null,
+   "controlled": "IV",
+   "forms": [
+    "tablet 50, 100 mg",
+    "extended-release tablet 100, 200, 300 mg"
+   ],
+   "uses": [
+    "Moderate pain"
+   ],
+   "side_effects": "Sleepiness, dizziness, constipation, upset stomach",
+   "bad_reaction": "Seizure, slow breathing, fever with stiff muscles or confusion. Call 911.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Trazodone",
+   "brands": [
+    "Desyrel"
+   ],
+   "drug_class": "Antidepressant",
+   "psychotropic": "antidepressant",
+   "controlled": null,
+   "forms": [
+    "tablet 50, 100, 150, 300 mg"
+   ],
+   "uses": [
+    "Depression",
+    "Sleep (off-label)"
+   ],
+   "side_effects": "Sleepiness, dizziness, dry mouth, headache",
+   "bad_reaction": "Fainting or irregular heartbeat; an erection lasting over 4 hours. Call 911.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Triamcinolone cream",
+   "brands": [
+    "Kenalog"
+   ],
+   "drug_class": "Topical steroid",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "cream or ointment 0.025%, 0.1%, 0.5%"
+   ],
+   "uses": [
+    "Eczema",
+    "Rash",
+    "Itching"
+   ],
+   "side_effects": "Burning, thinning skin with long use",
+   "bad_reaction": "Rash that spreads or looks infected. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Trihexyphenidyl",
+   "brands": [
+    "Artane"
+   ],
+   "drug_class": "Anticholinergic",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 2, 5 mg",
+    "oral solution 2 mg/5 mL"
+   ],
+   "uses": [
+    "Movement side effects from antipsychotics",
+    "Parkinson's disease"
+   ],
+   "side_effects": "Dry mouth, blurry vision, constipation, dizziness",
+   "bad_reaction": "Confusion, can't urinate, overheating. Call the prescriber.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Valacyclovir",
+   "brands": [
+    "Valtrex"
+   ],
+   "drug_class": "Antiviral",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 500, 1000 mg"
+   ],
+   "uses": [
+    "Cold sores",
+    "Shingles",
+    "Herpes"
+   ],
+   "side_effects": "Headache, upset stomach",
+   "bad_reaction": "Confusion, much less urine, unusual bruising. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Valbenazine",
+   "brands": [
+    "Ingrezza"
+   ],
+   "drug_class": "Movement disorder medicine",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 40, 60, 80 mg",
+    "sprinkle capsule"
+   ],
+   "uses": [
+    "Tardive dyskinesia (repeated face or body movements from antipsychotics)",
+    "Huntington's chorea"
+   ],
+   "side_effects": "Sleepiness, tiredness",
+   "bad_reaction": "Fainting or irregular heartbeat, depression. Call the prescriber; call 911 for fainting.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Valproic acid",
+   "brands": [
+    "Depakene"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "also_psychotropic": "mood stabilizer",
+   "controlled": null,
+   "forms": [
+    "capsule 250 mg",
+    "oral solution 250 mg/5 mL"
+   ],
+   "uses": [
+    "Seizures"
+   ],
+   "side_effects": "Upset stomach, sleepiness, tremor, weight gain",
+   "bad_reaction": "Belly pain with vomiting, yellow skin or eyes, unusual bruising or bleeding, confusion. Call the prescriber the same day.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Venlafaxine",
+   "brands": [
+    "Effexor XR"
+   ],
+   "drug_class": "SNRI antidepressant",
+   "psychotropic": "antidepressant",
+   "controlled": null,
+   "forms": [
+    "tablet 25, 37.5, 50, 75, 100 mg",
+    "extended-release capsule 37.5, 75, 150 mg"
+   ],
+   "uses": [
+    "Depression",
+    "Anxiety disorders",
+    "Panic disorder"
+   ],
+   "side_effects": "Upset stomach, sweating, sleepiness or trouble sleeping, dizziness, higher blood pressure",
+   "bad_reaction": "Thoughts of self-harm; fever with stiff muscles or confusion; very high blood pressure headache. Call the prescriber. Don't stop suddenly.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Vigabatrin",
+   "brands": [
+    "Sabril",
+    "Vigadrone"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 500 mg",
+    "powder packet 500 mg"
+   ],
+   "uses": [
+    "Infantile spasms",
+    "Seizures"
+   ],
+   "side_effects": "Sleepiness, tiredness, weight gain",
+   "bad_reaction": "Bumping into things or missing things to the side (vision loss). Call the prescriber. Requires regular eye exams.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Vilazodone",
+   "brands": [
+    "Viibryd"
+   ],
+   "drug_class": "Antidepressant",
+   "psychotropic": "antidepressant",
+   "controlled": null,
+   "forms": [
+    "tablet 10, 20, 40 mg"
+   ],
+   "uses": [
+    "Depression"
+   ],
+   "side_effects": "Diarrhea, upset stomach, trouble sleeping. Give with food.",
+   "bad_reaction": "Thoughts of self-harm; fever with stiff muscles or confusion. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Vitamin D3 (cholecalciferol)",
+   "brands": [],
+   "drug_class": "Vitamin",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet or capsule 400, 1000, 2000, 5000 IU",
+    "capsule 50,000 IU (weekly)",
+    "drops"
+   ],
+   "uses": [
+    "Low vitamin D",
+    "Bone health"
+   ],
+   "side_effects": "Usually none",
+   "bad_reaction": "Nausea, constipation, confusion, very thirsty (too much). Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Vortioxetine",
+   "brands": [
+    "Trintellix"
+   ],
+   "drug_class": "Antidepressant",
+   "psychotropic": "antidepressant",
+   "controlled": null,
+   "forms": [
+    "tablet 5, 10, 20 mg"
+   ],
+   "uses": [
+    "Depression"
+   ],
+   "side_effects": "Upset stomach, constipation, itching",
+   "bad_reaction": "Thoughts of self-harm; fever with stiff muscles or confusion. Call the prescriber.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Warfarin",
+   "brands": [
+    "Coumadin",
+    "Jantoven"
+   ],
+   "drug_class": "Blood thinner (anticoagulant)",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "tablet 1, 2, 2.5, 3, 4, 5, 6, 7.5, 10 mg"
+   ],
+   "uses": [
+    "Blood clots",
+    "Stroke prevention in atrial fibrillation"
+   ],
+   "side_effects": "Easy bruising, nosebleeds. Needs regular blood tests (INR).",
+   "bad_reaction": "Black or bloody stools, vomiting blood, a fall with head injury, bleeding that won't stop. Call 911.",
+   "swallow_risk": false
+  },
+  {
+   "name": "Ziprasidone",
+   "brands": [
+    "Geodon"
+   ],
+   "drug_class": "Atypical antipsychotic",
+   "psychotropic": "antipsychotic",
+   "controlled": null,
+   "forms": [
+    "capsule 20, 40, 60, 80 mg",
+    "injection"
+   ],
+   "uses": [
+    "Schizophrenia",
+    "Bipolar disorder"
+   ],
+   "side_effects": "Sleepiness, dizziness, restlessness, upset stomach. Take with food.",
+   "bad_reaction": "Fainting or racing, irregular heartbeat; rash with fever; high fever with stiff muscles. Call 911 for fainting.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Zolpidem",
+   "brands": [
+    "Ambien",
+    "Ambien CR"
+   ],
+   "drug_class": "Sleep medicine",
+   "psychotropic": "sleep",
+   "controlled": "IV",
+   "forms": [
+    "tablet 5, 10 mg",
+    "extended-release tablet 6.25, 12.5 mg"
+   ],
+   "uses": [
+    "Trouble sleeping"
+   ],
+   "side_effects": "Next-day sleepiness, dizziness, headache",
+   "bad_reaction": "Sleepwalking, sleep-eating or driving while not awake; confusion. Stop and call the prescriber.",
+   "swallow_risk": true
+  },
+  {
+   "name": "Zonisamide",
+   "brands": [
+    "Zonegran"
+   ],
+   "drug_class": "Anticonvulsant",
+   "psychotropic": null,
+   "controlled": null,
+   "forms": [
+    "capsule 25, 50, 100 mg"
+   ],
+   "uses": [
+    "Seizures"
+   ],
+   "side_effects": "Sleepiness, dizziness, less appetite, slowed thinking",
+   "bad_reaction": "Not sweating with high temperature, rash, side or back pain (kidney stone). Call the prescriber.",
+   "swallow_risk": false
+  }
+ ]
+}

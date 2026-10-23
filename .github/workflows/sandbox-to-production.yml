@@ -6,6 +6,17 @@ name: Sandbox to production
 # 2. Later pushes to that branch are merged into staging too, so edits
 #    show up on the sandbox and in the production PR at the same time.
 #
+# 3. If a production PR couldn't be opened, the staging PR gets a comment
+#    saying why. Actions → Sandbox to production → Run workflow opens every
+#    missing production PR (dry run by default).
+#
+# Opening PRs needs one of: the repo setting "Allow GitHub Actions to create
+# and approve pull requests" (Settings → Actions → General → Workflow
+# permissions), or a PRODUCTION_PR_TOKEN secret (fine-grained token with
+# Pull requests + Contents read/write on this repo). The token is better:
+# PRs opened with the default token don't trigger other workflows, so the
+# Typecheck & Lint run on PRs to main only happens with the secret.
+#
 # Shell steps read PR fields from env vars, never ${{ }} inline.
 #
 # No workflow-level concurrency group: GitHub keeps only one pending run per
@@ -18,6 +29,15 @@ on:
     branches: [staging]
   push:
     branches-ignore: [main, staging]
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "Look at PRs merged into staging in the last N days"
+        default: "30"
+      dry_run:
+        description: "Only list what would be opened"
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -34,33 +54,48 @@ jobs:
       github.event.pull_request.head.ref != 'main'
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.PRODUCTION_PR_TOKEN || secrets.GITHUB_TOKEN }}
       REPO: ${{ github.repository }}
       HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
       PR_TITLE: ${{ github.event.pull_request.title }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Open or update the production PR
+        run: .github/scripts/open-production-pr.sh "$HEAD_BRANCH" "$PR_NUMBER" "$PR_TITLE" merge
+
+  open-missing-production-prs:
+    name: Open missing production PRs
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.PRODUCTION_PR_TOKEN || secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      DAYS: ${{ inputs.days }}
+      DRY_RUN: ${{ inputs.dry_run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Open a production PR for each branch merged into staging that has none
         run: |
-          gh label create production --repo "$REPO" --color 0E8A16 \
-            --description "Ships to providerinterface.com when merged" 2>/dev/null || true
-          existing=$(gh pr list --repo "$REPO" --head "$HEAD_BRANCH" --base main --state open \
-            --json number -q '.[0].number')
-          if [ -n "$existing" ]; then
-            gh pr edit "$existing" --repo "$REPO" --add-label production
-            gh pr comment "$existing" --repo "$REPO" --body "Merged into staging again via #$PR_NUMBER."
-            echo "Production PR #$existing already open." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-          body=$(printf '%s\n\n%s\n\n%s' \
-            "Tested on the sandbox via #$PR_NUMBER. **Merging this PR ships it to production (providerinterface.com).**" \
-            "Edits pushed to \`$HEAD_BRANCH\` update the sandbox and this PR together." \
-            "Check the Files tab: it should contain only this change. If it shows unrelated work, the branch was started from staging instead of main.")
-          url=$(gh pr create --repo "$REPO" --base main --head "$HEAD_BRANCH" \
-            --title "Production: $PR_TITLE" --label production --body "$body")
-          echo "Opened $url" >> "$GITHUB_STEP_SUMMARY"
+          since=$(date -u -d "$DAYS days ago" +%Y-%m-%dT%H:%M:%SZ)
+          # Newest merge per branch, same repo only, never main.
+          gh pr list --repo "$REPO" --base staging --state merged --limit 200 \
+            --json number,title,headRefName,isCrossRepository,mergedAt \
+            -q "[.[] | select(.isCrossRepository | not) | select(.headRefName != \"main\") | select(.mergedAt >= \"$since\")]
+                | sort_by(.mergedAt) | reverse | unique_by(.headRefName) | .[]
+                | [.headRefName, (.number|tostring), .title] | @tsv" > candidates.tsv
+          echo "Checking $(wc -l < candidates.tsv) branches merged into staging since $since (dry run: $DRY_RUN)." >> "$GITHUB_STEP_SUMMARY"
+          failed=0
+          while IFS=$'\t' read -r branch pr title; do
+            .github/scripts/open-production-pr.sh "$branch" "$pr" "$title" backfill || failed=1
+          done < candidates.tsv
+          exit $failed
 
   sync-edits-to-staging:
     name: Send edits to the sandbox

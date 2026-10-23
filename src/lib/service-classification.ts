@@ -1,5 +1,5 @@
 // =============================================================
-// Prompt 15 — provider scoping for Smart Import.
+// Provider scoping for PCSP service lines (document uploads, PCSP reader).
 //
 // Classifies an extracted PCSP service line into one of three buckets,
 // using:
@@ -10,8 +10,8 @@
 //     legal_name / aliases → "is THIS line ours?"
 //
 // Buckets:
-//   ours            → write to client_billing_codes / authorized_dspd_codes
-//   other_provider  → coordination only (client_external_services); never
+//   ours            → write to client_billing_codes (the one source for codes)
+//   other_provider  → coordination only (an "other provider" client contact); never
 //                     billing, never EVV, never caseload
 //   not_a_service   → not on the DSPD master list (transport "UTP",
 //                     support coordination "SCE"); coordination info only

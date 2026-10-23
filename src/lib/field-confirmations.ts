@@ -8,6 +8,8 @@
 // data; the explicit "has" entry exists so a Yes-answered field that hasn't
 // had data entered yet still reads as needs-data (not "unknown").
 
+import { LEGACY_ALERT_KEY } from "./clients/legacy-fields.ts";
+
 export type FieldState = "has" | "none" | "unknown";
 
 export type TrackedField = {
@@ -52,7 +54,8 @@ export const TRACKED_FIELDS: TrackedField[] = [
   { key: "rights_restrictions", label: "Rights restrictions",
     question: "Are there any rights restrictions for this client?",
     positiveStatement: "No rights restrictions." },
-  { key: "clinical_alert", label: "Clinical alert / special directions",
+  // Stored confirmation key (clients.field_confirmations) for the staff must-knows.
+  { key: LEGACY_ALERT_KEY, label: "Must-knows for staff",
     question: "Are there any clinical alerts or special directions staff must know?",
     positiveStatement: "No clinical alerts." },
   { key: "court_orders", label: "Court orders",

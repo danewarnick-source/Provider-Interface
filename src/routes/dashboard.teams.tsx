@@ -10,8 +10,3 @@ export const Route = createFileRoute("/dashboard/teams")({
   },
   component: () => <Navigate to="/dashboard/homes" replace />,
 });
-
-// Backwards-compat: hub.clients still imports TeamsPage. Same redirect.
-export function TeamsPage() {
-  return <Navigate to="/dashboard/homes" replace />;
-}

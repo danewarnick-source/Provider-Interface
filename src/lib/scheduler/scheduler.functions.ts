@@ -1,7 +1,7 @@
 // Scheduler server functions for the new code-section scheduler at
 // /dashboard/scheduler. All writes go through `requireSupabaseAuth` so RLS
-// is enforced as the calling user. Validation rules (caseload, time-off,
-// authorized code) match the product spec for the rebuilt scheduler.
+// is enforced as the calling user. Validation rules (do-not-schedule list,
+// caseload, time-off, authorized code) match the product spec for the rebuilt scheduler.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";

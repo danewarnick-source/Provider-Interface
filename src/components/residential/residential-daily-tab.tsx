@@ -51,7 +51,7 @@ function thisMonth(): string {
  * HHS only: it's the one service code with no time clock, so its
  * single-entry-per-day daily-note model applies. Every other daily-rate
  * code (RHS, DSG, and the rest) is documented through the normal
- * clocked-shift + shift-note flow instead — see useClientBudget for how
+ * clocked-shift + shift-note flow instead — see usedUnitsForCode (lib/clients/services/units.ts) for how
  * those billable days are determined.
  *
  * Scope shipped this pass:
@@ -116,6 +116,7 @@ export function ResidentialDailyTab({
       const { data: members } = await supabase
         .from("organization_members")
         .select("user_id")
+        .is("deleted_at", null)
         .eq("organization_id", orgId)
         .eq("active", true);
       const userIds = Array.from(
@@ -170,6 +171,7 @@ export function ResidentialDailyTab({
         .from("clients")
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .select("id, first_name, last_name, hhs_monthly_support_hours, team_id" as any)
+        .is("deleted_at", null)
         .eq("organization_id", orgId)
         .in("id", ids);
       const rows = (clientsData ?? []) as unknown as Array<{

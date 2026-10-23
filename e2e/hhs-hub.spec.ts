@@ -139,15 +139,6 @@ test.describe("HHS hub — mocked admin (Blake Stevens host home)", () => {
     await shot(page, "hhs_attendance_calendar_view");
   });
 
-  test("3b. MAR tab is a calendar overview, not a log form", async ({ page }) => {
-    await gotoMock(page, `${BLAKE}?tab=emar`);
-    await expect(page.getByText(/Medication overview/i)).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByText(/Logging is only on the daily note/i)).toBeVisible();
-    await expect(page.getByRole("button", { name: /^Log$/i })).toHaveCount(0);
-    await expect(page.getByText(/Due today/i)).toHaveCount(0);
-    await shot(page, "hhs_mar_calendar_view");
-  });
-
   test("4. Empty and error states do not crash or blank the page", async ({ page }) => {
     await gotoMock(page, MISSING);
     await expect(page.getByText(/Client unavailable/i)).toBeVisible({ timeout: 20_000 });
