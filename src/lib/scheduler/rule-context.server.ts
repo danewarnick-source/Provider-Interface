@@ -34,6 +34,7 @@ export type ShiftRowIn = {
   parent_shift_id?: string | null;
   status?: string | null;
   van_route_id?: string | null;
+  shift_type?: string | null;
 };
 
 export function toRuleShift(r: ShiftRowIn, fallbackId: string): RuleShift {
@@ -48,6 +49,7 @@ export function toRuleShift(r: ShiftRowIn, fallbackId: string): RuleShift {
     parentShiftId: r.parent_shift_id ?? null,
     status: r.status ?? null,
     vanRouteId: r.van_route_id ?? null,
+    shiftType: r.shift_type ?? null,
   };
 }
 
@@ -84,8 +86,9 @@ async function loadClients(
       last_name: string | null;
       date_of_birth: string | null;
       has_abi: boolean | null;
+      team_id: string | null;
     }>(
-      db.from("clients").select("id, first_name, last_name, date_of_birth, has_abi").in("id", ids),
+      db.from("clients").select("id, first_name, last_name, date_of_birth, has_abi, team_id").in("id", ids),
     ),
     rows<AuthRow>(db.rpc("client_authorizations_for_rules", { _client_ids: ids })),
     rows<{ client_id: string; staff_id: string; service_codes: string[] | null }>(
@@ -108,6 +111,7 @@ async function loadClients(
       name: [c.first_name, c.last_name].filter(Boolean).join(" ").trim() || "This client",
       age: ageOn(c.date_of_birth, today),
       hasAbi: !!c.has_abi,
+      homeId: c.team_id,
       authorizations: mine.map((a): Authorization => ({
         code: a.service_code.trim().toUpperCase(),
         startDate: a.service_start_date ?? "0001-01-01",
@@ -129,8 +133,9 @@ async function loadClients(
   return out;
 }
 
-const SHIFT_COLUMNS =
-  "id, staff_id, client_id, team_id, service_code, starts_at, ends_at, parent_shift_id, status, van_route_id";
+/** The scheduled_shifts columns toRuleShift reads; every caller that hands rows to the guard selects these. */
+export const SHIFT_COLUMNS =
+  "id, staff_id, client_id, team_id, service_code, starts_at, ends_at, parent_shift_id, status, van_route_id, shift_type";
 
 /** Shifts already on the books for these staff and clients, from the Sunday before to the Saturday after. */
 async function loadBooked(
@@ -160,6 +165,16 @@ async function loadBooked(
   return [...seen.values()];
 }
 
+const SETTINGS_COLUMNS = "rule_settings, ot_threshold_hours, hours_cap, min_rest_hours, max_days_in_row, max_hours_in_row";
+type AgencyRuleSettings = {
+  rule_settings: Record<string, Strength> | null;
+  ot_threshold_hours: number;
+  hours_cap: number;
+  min_rest_hours: number;
+  max_days_in_row: number;
+  max_hours_in_row: number;
+};
+
 export async function loadRuleContext(
   db: Db,
   orgId: string,
@@ -173,40 +188,44 @@ export async function loadRuleContext(
     const d = dayKey(s.startsAt);
     if (s.staffId && (!firstDay[s.staffId] || d < firstDay[s.staffId]!)) firstDay[s.staffId] = d;
   }
-  const [clients, { staff, evidence }, booked, settings, teams] = await Promise.all([
+  const [clients, { staff, evidence, signedOffHomes }, booked, settings] = await Promise.all([
     loadClients(db, orgId, clientIds),
     loadStaff(db, orgId, staffIds, firstDay),
     shifts.length ? loadBooked(db, orgId, shifts, staffIds, clientIds) : [],
-    db
-      .from("org_shift_behavior_settings")
-      .select("rule_settings, ot_threshold_hours")
-      .eq("organization_id", orgId)
-      .maybeSingle(),
-    teamIds.length
-      ? rows<{ id: string; team_name: string; capacity: number | null }>(
-          db.from("teams").select("id, team_name, capacity").in("id", teamIds),
-        )
-      : [],
+    db.from("org_shift_behavior_settings").select(SETTINGS_COLUMNS).eq("organization_id", orgId).maybeSingle(),
   ]);
   if (settings.error) throw new Error(settings.error.message);
-  const s = settings.data as {
-    rule_settings: Record<string, Strength> | null;
-    ot_threshold_hours: number | null;
-  } | null;
+  const s = settings.data as AgencyRuleSettings | null;
+  // Homes: each shift's own team, else its client's home.
+  const homeIds = uniq([...teamIds, ...Object.values(clients).map((c) => c.homeId)]);
+  const [teams, homeSettings] = homeIds.length
+    ? await Promise.all([
+        rows<{ id: string; team_name: string; capacity: number | null }>(
+          db.from("teams").select("id, team_name, capacity").in("id", homeIds)),
+        rows<{ team_id: string; rule_overrides: Record<string, Strength> | null }>(
+          db.from("team_schedule_settings").select("team_id, rule_overrides").in("team_id", homeIds)),
+      ])
+    : [[], []];
   return {
     today: dayKey(new Date()),
     clients,
     staff,
     evidence,
+    signedOffHomes,
     shifts: booked,
     places: Object.fromEntries(
       teams.map((t) => [t.id, { id: t.id, name: t.team_name, licensedCapacity: t.capacity }]),
     ),
     settings: {
       rules: s?.rule_settings ?? {},
-      ...(s?.ot_threshold_hours != null
-        ? { overtimeThresholdHours: Number(s.ot_threshold_hours) }
-        : {}),
+      homeRules: Object.fromEntries(homeSettings.map((h) => [h.team_id, h.rule_overrides ?? {}])),
+      ...(s ? {
+        overtimeThresholdHours: Number(s.ot_threshold_hours),
+        hoursCap: s.hours_cap,
+        minRestHours: s.min_rest_hours,
+        maxDaysInRow: s.max_days_in_row,
+        maxHoursInRow: s.max_hours_in_row,
+      } : {}),
     },
   };
 }

@@ -51,8 +51,9 @@ export function restAndStraightRules(s: RuleShift, ctx: RuleContext, batch: read
   while (lo > 0 && ms(list[lo - 1]!.endsAt) === ms(list[lo]!.startsAt)) lo--;
   while (hi < list.length - 1 && ms(list[hi + 1]!.startsAt) === ms(list[hi]!.endsAt)) hi++;
   const hours = (ms(list[hi]!.endsAt) - ms(list[lo]!.startsAt)) / HOUR;
-  if (hours > 16) {
-    out.push(find("over_16h_straight", "warn", `${firstName(staff.name)} would work ${hours.toFixed(1)} hours straight (over 16)`));
+  const maxRow = ctx.settings.maxHoursInRow ?? 16;
+  if (hours > maxRow) {
+    out.push(find("over_hours_in_row", "warn", `${firstName(staff.name)} would work ${hours.toFixed(1)} hours in a row (over ${maxRow})`));
   }
   return out;
 }
@@ -64,6 +65,31 @@ export function overtimeRule(s: RuleShift, ctx: RuleContext, batch: readonly Rul
   const week = sumHours(staffShifts(s, ctx, batch).filter((o) => weekOf(o) === weekOf(s)));
   return week > limit
     ? [find("overtime", "warn", `${firstName(staff.name)} would have ${week.toFixed(1)} hours this week (overtime starts at ${limit})`)]
+    : [];
+}
+
+/** Over the agency hours cap for the Sun–Sat week (Decision 10; default Needs a reason). */
+export function hoursCapRule(s: RuleShift, ctx: RuleContext, batch: readonly RuleShift[]): Finding[] {
+  const staff = staffOf(ctx, s);
+  const cap = ctx.settings.hoursCap;
+  if (!staff || cap == null || s.parentShiftId) return [];
+  const week = sumHours(staffShifts(s, ctx, batch).filter((o) => weekOf(o) === weekOf(s)));
+  return week > cap
+    ? [find("over_hours_cap", "warn", `${firstName(staff.name)} would have ${week.toFixed(1)} hours this week (agency cap ${cap})`)]
+    : [];
+}
+
+/** More days in a row than the agency allows, counting the days this shift touches. */
+export function daysInRowRule(s: RuleShift, ctx: RuleContext, batch: readonly RuleShift[]): Finding[] {
+  const staff = staffOf(ctx, s);
+  const max = ctx.settings.maxDaysInRow ?? 6;
+  if (!staff || s.parentShiftId) return [];
+  const days = new Set(staffShifts(s, ctx, batch).map(dayOf));
+  let run = 1;
+  for (let d = addDaysKey(dayOf(s), -1); days.has(d); d = addDaysKey(d, -1)) run++;
+  for (let d = addDaysKey(dayOf(s), 1); days.has(d); d = addDaysKey(d, 1)) run++;
+  return run > max
+    ? [find("over_days_in_row", "warn", `${firstName(staff.name)} would work ${run} days in a row (over ${max})`)]
     : [];
 }
 

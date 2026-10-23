@@ -11,6 +11,7 @@ import { requireCategory } from "@/lib/access/require";
 import {
   checkShiftRows,
   refusalsByShift,
+  SHIFT_COLUMNS,
   type ShiftRowIn,
 } from "@/lib/scheduler/shift-guard.server";
 import { warningLines } from "@/lib/scheduler/rules";
@@ -37,7 +38,7 @@ export const publishWeek = createServerFn({ method: "POST" })
     const { data: pending, error: pErr } = await supabase
       .from("scheduled_shifts")
       .select(
-        "id, staff_id, client_id, team_id, service_code, starts_at, ends_at, parent_shift_id, status, van_route_id",
+        SHIFT_COLUMNS,
       )
       .eq("organization_id", data.organization_id)
       .eq("published", false)

@@ -1,5 +1,6 @@
 // Team member facts for the rule engine: identity, age, membership, approved
-// time off and Evidence (what qualificationsOnDate reads). Called by
+// time off, Evidence (what qualificationsOnDate reads) and the homes they're
+// signed off to work alone at (new_hire_signoffs). Called by
 // rule-context.server.ts, and by open-shifts.functions.ts to decide who is
 // offered a van shift. Runs as the calling user (RLS applies).
 import { ageOn } from "../team-members/badges.ts";
@@ -66,8 +67,8 @@ export async function loadStaff(
   ids: string[],
   firstDay: Record<string, string>,
 ) {
-  if (!ids.length) return { staff: {}, evidence: {} };
-  const [profiles, members, timeOff, evidence] = await Promise.all([
+  if (!ids.length) return { staff: {}, evidence: {}, signedOffHomes: {} };
+  const [profiles, members, timeOff, evidence, signoffs] = await Promise.all([
     rows<{
       id: string;
       full_name: string | null;
@@ -97,7 +98,17 @@ export async function loadStaff(
         .in("staff_id", ids),
     ),
     loadStaffEvidence(db, orgId, ids),
+    rows<{ staff_id: string; team_id: string }>(
+      db
+        .from("new_hire_signoffs")
+        .select("staff_id, team_id")
+        .eq("organization_id", orgId)
+        .is("ended_at", null)
+        .in("staff_id", ids),
+    ),
   ]);
+  const signedOffHomes: Record<string, string[]> = {};
+  for (const r of signoffs) (signedOffHomes[r.staff_id] ??= []).push(r.team_id);
   const staff: Record<string, StaffFacts> = {};
   for (const p of profiles) {
     staff[p.id] = {
@@ -111,5 +122,5 @@ export async function loadStaff(
         .map((t) => [t.start_date, t.end_date] as const),
     };
   }
-  return { staff, evidence };
+  return { staff, evidence, signedOffHomes };
 }

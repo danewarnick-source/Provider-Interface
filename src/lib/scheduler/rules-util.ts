@@ -44,6 +44,11 @@ export function clientOf(ctx: RuleContext, s: RuleShift): ClientFacts | null {
   return s.clientId ? ctx.clients[s.clientId] ?? null : null;
 }
 
+/** The home (teams.id) a shift is at: its own team, else the client's home. */
+export function homeOf(ctx: RuleContext, s: RuleShift): string | null {
+  return s.teamId ?? clientOf(ctx, s)?.homeId ?? null;
+}
+
 /** Other live shifts (never the shift itself) from the context plus the batch. */
 export function othersOf(s: RuleShift, ctx: RuleContext, batch: readonly RuleShift[] = []): RuleShift[] {
   const seen = new Set<string>([s.id]);

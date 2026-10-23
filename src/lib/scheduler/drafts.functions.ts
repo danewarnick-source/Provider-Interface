@@ -6,7 +6,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireCategory } from "@/lib/access/require";
-import { guardShiftRows, type ShiftRowIn } from "@/lib/scheduler/shift-guard.server";
+import { guardShiftRows, SHIFT_COLUMNS, type ShiftRowIn } from "@/lib/scheduler/shift-guard.server";
 
 const Draft = z.object({
   // Nectar new shifts
@@ -20,9 +20,6 @@ const Draft = z.object({
   assign_to_shift_id: z.string().uuid().nullable().optional(),
 });
 const Input = z.object({ organization_id: z.string().uuid(), drafts: z.array(Draft) });
-
-const SHIFT_COLUMNS =
-  "id, staff_id, client_id, team_id, service_code, starts_at, ends_at, parent_shift_id, status, van_route_id";
 
 export const applyDrafts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

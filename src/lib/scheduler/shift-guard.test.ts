@@ -81,13 +81,12 @@ test("the same shift saves when nothing blocks; card reminders come back as warn
   assert.ok(warnings.some((w) => /General trainings/.test(w)));
 });
 
-test("a code the team member isn't assigned for this client is refused", async () => {
-  const { db } = fakeDb(
-    facts({
-      staff_assignments: [{ client_id: "client-1", staff_id: "staff-1", service_codes: ["DSI"] }],
-    }),
-  );
-  await assert.rejects(guardShiftRows(db, ORG, [row]), /isn't assigned SLH for Test/);
+test("a code the team member isn't assigned for this client warns by default, and refuses when Not on the team is Block", async () => {
+  const notAssigned = { staff_assignments: [{ client_id: "client-1", staff_id: "staff-1", service_codes: ["DSI"] }] };
+  const warnings = await guardShiftRows(fakeDb(facts(notAssigned)).db, ORG, [row]);
+  assert.ok(warnings.some((w) => /isn't assigned SLH for Test/.test(w)));
+  const blocked = fakeDb(facts({ ...notAssigned, org_shift_behavior_settings: { rule_settings: { team: "block" }, ot_threshold_hours: 40 } }));
+  await assert.rejects(guardShiftRows(blocked.db, ORG, [row]), /isn't assigned SLH for Test/);
 });
 
 test("no authorization for the code is refused, whatever the agency setting", async () => {

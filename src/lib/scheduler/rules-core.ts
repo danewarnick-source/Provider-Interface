@@ -7,7 +7,7 @@ import { billingFor, DAILY_UNIT_CODES } from "./billing-mode.ts";
 import { defaultRatio, staffNeeded, type Ratio } from "./ratios.ts";
 import type { Finding, RuleContext, RuleShift } from "./rules-types.ts";
 import {
-  clientOf, dayOf, find, firstName, isSegmentPair, minutesOf, othersOf, overlaps,
+  clientOf, dayOf, find, firstName, homeOf, isSegmentPair, minutesOf, othersOf, overlaps,
   staffOf, sumHours, up, weekOf,
 } from "./rules-util.ts";
 import { dayKey } from "./time.ts";
@@ -65,6 +65,20 @@ export function teamRules(s: RuleShift, ctx: RuleContext): Finding[] {
       `${firstName(staff.name)} isn't assigned ${up(s.code)} for ${firstName(client.name)}`));
   }
   return out;
+}
+
+/**
+ * Decision 8: a team member works paired shifts at a home until a lead signs
+ * them off there (new_hire_signoffs). Anyone without a sign-off is a new hire.
+ */
+export function newHireRule(s: RuleShift, ctx: RuleContext): Finding[] {
+  const staff = staffOf(ctx, s);
+  const home = homeOf(ctx, s);
+  if (!staff || !home || s.shiftType === "paired" || s.parentShiftId) return [];
+  if (ctx.signedOffHomes?.[staff.id]?.includes(home)) return [];
+  const where = ctx.places?.[home]?.name ?? "this home";
+  return [find("new_hire_alone", "block",
+    `${firstName(staff.name)} isn't signed off to work alone at ${where} yet; schedule a paired shift`)];
 }
 
 export function staffStatusRules(s: RuleShift, ctx: RuleContext): Finding[] {
