@@ -31,3 +31,8 @@ When `main` (or `staging`) is merged into `scheduler-rebuild-a`, update CLAUDE.m
 - **No-embed line:** drop `import.functions.ts` / `setup.functions.ts` from the known violations (S1 fixed them).
 - **Scheduler RLS line:** drop "its migration files are on scheduler-rebuild-a".
 - **Open owner decisions:** the MTP/1056 conflict matters for S4 — `authorizationRule` would block every MTP shift once the engine is wired in.
+
+## Part B rewritten (Oct 22, 2026, Dane)
+- Part B (S4–S15) of RUNBOOK.md is replaced by `PART-B.md` (B1–B20, one screen or flow per prompt, eight-part format). Decisions are in `DECISIONS.md` and override RUNBOOK.md's Decisions list.
+- The spec is `docs/demos/scheduler.html` and `docs/demos/daily-notes.html`.
+- Next: B1 (not started).
