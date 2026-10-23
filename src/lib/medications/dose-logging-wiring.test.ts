@@ -86,7 +86,7 @@ describe("Give meds is the only place doses are logged", () => {
 
 describe("HHS meds path", () => {
   it("saveEmarLog (browser-supplied staff name, no checks) is removed", () => {
-    assert.doesNotMatch(read("../hhs.functions.ts"), /saveEmarLog|staffName/);
+    assert.doesNotMatch(read("../scheduler/hhs.functions.ts"), /saveEmarLog|staffName/);
   });
 });
 

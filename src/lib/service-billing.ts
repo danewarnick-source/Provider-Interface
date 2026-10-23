@@ -1,15 +1,26 @@
+import { DAILY_MODE_CODES, DAILY_UNIT_CODES } from "./scheduler/billing-mode.ts";
+
 // Single source of truth for which service codes bill by the day vs. by
 // the hour. Hourly codes accrue in quarter-hour units from time punches
 // (see billing-units.ts). Daily codes pay once per completed
 // attendance/daily-log day.
 //
-// NOTE: RP3 is HOURLY — it is an EVV punch code (SOW §1.12), not a
-// daily-rate code.
+// The list comes from src/lib/scheduler/billing-mode.ts (the rate table). It
+// holds the codes whose own unit is the day (HHS, RHS, PPS, DSG, RP4, RP5, SED,
+// PN1) plus MTP (flat daily). Codes that are hourly but flip to a daily rate
+// (COM, PAC, RP2, RP3, EPR, PN2, and the DSI/SEE tiers) stay hourly here so
+// time accrual keeps counting their hours; ask hasDailyMode() for those, and
+// billingFor() in billing-mode.ts for the unit on a given day.
 // NOTE: DSP is mode-dependent (qtr-hr OR daily) — handled in
-// src/lib/day-program-billing.ts, NOT here. MTP is flat daily.
-export const DAILY_SERVICE_CODES: ReadonlySet<string> = new Set([
-  "HHS", "RHS", "PPS", "DSG", "RL6", "RP4", "RP5", "SED", "MTP",
-]);
+// src/lib/scheduler/day-program.ts, NOT here.
+export const DAILY_SERVICE_CODES: ReadonlySet<string> = new Set(DAILY_UNIT_CODES);
+
+const DAILY_MODE_SET: ReadonlySet<string> = new Set(DAILY_MODE_CODES);
+
+/** True for any code that can bill a daily rate in some mode (threshold, tier or by authorization). */
+export function hasDailyMode(code: string | null | undefined): boolean {
+  return !!code && DAILY_MODE_SET.has(code.toUpperCase());
+}
 
 export function isDailyServiceCode(code: string | null | undefined): boolean {
   return !!code && DAILY_SERVICE_CODES.has(code);
@@ -49,7 +60,7 @@ export function unitTypeLetter(
 
 // Codes that staff CAN clock in on for payroll/evidence capture even though
 // they may also have a daily-rate component (e.g. RHS — residential staff
-// clock for payroll even though the client billing is daily; DSG/RL6/RP4/
+// clock for payroll even though the client billing is daily; DSG/RP4/
 // RP5/SED similarly capture time for payroll). Excluded from staff
 // clock-in: HHS (host home) and PPS (professional parent supports) — no
 // agency clock component; and MTP — transport-only, logged on the day-

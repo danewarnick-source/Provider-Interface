@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./use-auth";
 import { useCurrentOrg } from "./use-org";
+import { dayKey, toLocalRange } from "@/lib/scheduler/time";
 
 export type TodayShift = {
   id: string;
@@ -21,7 +22,7 @@ export type ActiveTimesheet = {
 
 /**
  * Returns the current staff's next/active scheduled shift for today
- * (assigned, including unpublished drafts), plus any currently-open EVV timesheet.
+ * (assigned and published), plus any currently-open EVV timesheet.
  */
 export function useTodayShift() {
   const { user } = useAuth();
@@ -32,16 +33,16 @@ export function useTodayShift() {
     queryKey: ["today-shift", user?.id, org?.organization_id],
     queryFn: async (): Promise<TodayShift | null> => {
       const now = new Date();
-      const start = new Date(now); start.setHours(0, 0, 0, 0);
-      const end = new Date(now); end.setHours(23, 59, 59, 999);
+      const { startIso, endExclusiveIso } = toLocalRange(dayKey(now));
 
       const { data, error } = await supabase
         .from("scheduled_shifts")
         .select("id, client_id, job_code, starts_at, ends_at, status, published, clients:client_id(first_name, last_name)")
         .eq("staff_id", user!.id)
         .eq("organization_id", org!.organization_id)
-        .gte("starts_at", start.toISOString())
-        .lte("starts_at", end.toISOString())
+        .gte("starts_at", startIso)
+        .lt("starts_at", endExclusiveIso)
+        .eq("published", true)
         .neq("status", "cancelled")
         .order("starts_at", { ascending: true });
       if (error) throw error;

@@ -4,8 +4,7 @@
  * Auth is mocked as Company Admin. Every Supabase REST write and every
  * mutating server function is intercepted — these tests never touch the
  * live calendar. Staff schedule (`/dashboard/schedule`) is not the target;
- * admin nav points at /dashboard/scheduler (legacy /scheduling and
- * /schedule-preview redirect there).
+ * admin nav points at /dashboard/scheduler.
  *
  * Run: npm run test:e2e
  */
@@ -287,20 +286,10 @@ test.describe("Admin scheduler — True North Sep 1", () => {
     await saveShot(page, "07-denver-evening-shift-sep1");
   });
 
-  test("8. /dashboard/scheduling and /schedule-preview deep-link to the admin scheduler", async ({ page }) => {
+  test("8. the ?focus= deep link lands on the admin scheduler banner", async ({ page }) => {
     await openAdminScheduler(page);
 
-    await page.goto("/dashboard/scheduling", { waitUntil: "domcontentloaded" });
-    await page.waitForURL(/\/dashboard\/scheduler/, { timeout: 20_000 });
-    await waitForSchedulerChrome(page);
-    await saveShot(page, "08a-scheduling-redirect");
-
-    await page.goto("/dashboard/schedule-preview", { waitUntil: "domcontentloaded" });
-    await page.waitForURL(/\/dashboard\/scheduler/, { timeout: 20_000 });
-    await waitForSchedulerChrome(page);
-    await saveShot(page, "08b-schedule-preview-redirect");
-
-    await page.goto("/dashboard/schedule-preview?focus=unaccepted-shifts", {
+    await page.goto("/dashboard/scheduler?focus=unaccepted-shifts", {
       waitUntil: "domcontentloaded",
     });
     await page.waitForURL(/\/dashboard\/scheduler/, { timeout: 20_000 });
@@ -308,6 +297,6 @@ test.describe("Admin scheduler — True North Sep 1", () => {
     await expect(page.getByText(/Get those published shifts accepted/i)).toBeVisible({
       timeout: 10_000,
     });
-    await saveShot(page, "08c-schedule-preview-focus-banner");
+    await saveShot(page, "08-scheduler-focus-banner");
   });
 });

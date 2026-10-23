@@ -4,7 +4,7 @@
  *
  * For DSG/DSP/HHS the fee-schedule dollar figure is a CAP — the per-client
  * rate (from the RFS determination) must be ≤ cap. See
- * src/lib/day-program-billing.ts → validateClientRateAgainstCap().
+ * src/lib/scheduler/day-program.ts → validateClientRateAgainstCap().
  *
  * SLH/SLN bill at fixed table rates. MTP is FLAT statewide (not variable).
  */

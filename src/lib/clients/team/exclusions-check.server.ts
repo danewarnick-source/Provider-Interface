@@ -2,7 +2,7 @@
 // active_client_staff_exclusions (SECURITY DEFINER, org members only), so a
 // scheduler without Clients access is still refused and told why.
 
-import { exclusionRefusal, findExclusion, type StaffExclusion } from "./exclusions";
+import { exclusionRefusal, findExclusion, type StaffExclusion } from "./exclusions.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;

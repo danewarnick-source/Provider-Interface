@@ -96,11 +96,13 @@ describe("scheduler — shifts only for an assigned code", () => {
   const sched = src("./scheduler/scheduler.functions.ts");
 
   it("saveShift checks the shift's code is on the staff member's assignment", () => {
+    const checks = src("./scheduler/shift-checks.ts");
     assert.match(
-      sched,
+      checks,
       /assignmentCoversCode\(\s*\(data as \{ service_codes: string\[\] \| null \}\)\.service_codes,\s*code,?\s*\)/,
     );
-    assert.match(sched, /data\.job_code,\s*staffName,/);
+    assert.match(sched, /assertShiftAllowed\(supabase, \{/);
+    assert.match(sched, /code: data\.job_code,/);
   });
 
   it("the code-less addToCaseload / removeFromCaseload writers are gone", () => {

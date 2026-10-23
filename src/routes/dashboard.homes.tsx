@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { HomesTeamsBoard } from "@/components/scheduling/homes-teams-board";
+import { HomesTeamsBoard } from "@/components/scheduler/shared/homes-teams-board";
 
 /**
- * Promoted from /dashboard/scheduling?tab=homes so the Homes & Teams board
+ * Promoted from the old scheduling page so the Homes & Teams board
  * stays reachable independent of the Schedule V2 cut-over.
  *
  * Renders the exact same HomesTeamsBoard component — no logic changes.
