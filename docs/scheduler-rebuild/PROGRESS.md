@@ -37,7 +37,7 @@ When `main` (or `staging`) is merged into `scheduler-rebuild-a`, update CLAUDE.m
 - The spec is `docs/demos/scheduler.html` and `docs/demos/daily-notes.html`.
 - Next: B1 (not started).
 
-## B1 — Foundations — PR OPEN (into staging)
+## B1 — Foundations — PR OPEN (#498 into staging)
 - Branch `scheduler-b1-foundations` from main. No new screen; the punch pad gains a "reason" dialog that only opens when an agency sets a rule to Require a reason.
 - Settled with Dane (Oct 23): home kind = `teams.team_type` (rhs_home / day_program / other; group_home → rhs_home), site lead and note reviewer = `teams.manager_id`, licensed capacity = `teams.capacity`. Rule strengths live in `org_shift_behavior_settings.rule_settings` (agency only; per-home overrides in B2). Driver file = the three existing Evidence items, reviewed and current on the shift date. A van shift = `van_route_id` set (none exist until B8). MTP is never a shift code. Staff type their own reason at clock-in (saved on `evv_timesheets.override_reason`).
 - Decisions made in B1 (later prompts don't reopen): fixed (always Block) = staff/client double-booking, minimum age, no authorization. Agency rules = rest, 16 h straight, overtime, fatigue, travel gap, preference, availability. Cards = the Evidence/training reminders and the driver file. Everything else is a contract rule (Warn / Reason / Block). A contract or fixed rule set to an unavailable choice keeps its default.
