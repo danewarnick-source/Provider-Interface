@@ -2,7 +2,8 @@
 // member dialog and the Invited view on the Team Members roster) calls these
 // server fns instead
 // of inserting into `invitations` directly, so invite creation, resend, and
-// the actual email send live in exactly one place.
+// the actual email send live in exactly one place. Canceling an invite lives
+// in invite-cancel.functions.ts; the shared invite rules in invite-rules.ts.
 //
 // Email goes out through the same Resend rail as everything else
 // (resolveOrgSender + the `send-email` edge function) — see
@@ -39,6 +40,7 @@ import {
   type TeamInviteRow,
 } from "@/lib/team-members/roster";
 import { displayNameOf, loadVisibleMembers, selectIn } from "@/lib/team-members/roster.functions";
+import { inviteEmailKey, inviteVisibleTo } from "@/lib/team-members/invite-rules";
 
 const ORG_ID = z.string().uuid();
 const INVITE_LEVEL = z.enum(["owner", "admin", "staff"]);
@@ -498,41 +500,6 @@ export const resendInvitation = createServerFn({ method: "POST" })
     };
   });
 
-export const revokeInvitation = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { organization_id: string; invitation_id: string }) =>
-    z
-      .object({
-        organization_id: ORG_ID,
-        invitation_id: z.string().uuid(),
-      })
-      .parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
-    if (!supabase || !userId) return { invitation: null };
-    await requirePermission(
-      supabase as unknown as SupabaseClient,
-      userId,
-      data.organization_id,
-      "invite_staff",
-    );
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: invite, error } = await (supabase as any)
-      .from("invitations")
-      .update({ status: "revoked" })
-      .eq("id", data.invitation_id)
-      .eq("organization_id", data.organization_id)
-      .eq("status", "pending")
-      .select("id, email")
-      .single();
-    if (error) throw new Error(error.message);
-    if (!invite) throw new Error("Invitation not found or already resolved");
-
-    return { invitation: invite as { id: string; email: string } };
-  });
-
 async function upsertPendingInviteAndSend(args: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any;
@@ -906,17 +873,18 @@ export const listTeamInvites = createServerFn({ method: "POST" })
       .eq("status", "pending");
     if (invErr) throw new Error(invErr.message);
     const visibleEmails = new Set(
-      members
-        .map((m) => profiles.get(m.user_id)?.email?.trim().toLowerCase() ?? "")
-        .filter(Boolean),
+      members.map((m) => inviteEmailKey(profiles.get(m.user_id)?.email)).filter(Boolean),
     );
     const invitations = (
       (inviteData ?? []) as Array<InviteSourceInvitation & { invited_by: string | null }>
-    ).filter(
-      (i) =>
-        access.scope === "agency" ||
-        i.invited_by === userId ||
-        visibleEmails.has(i.email.trim().toLowerCase()),
+    ).filter((i) =>
+      inviteVisibleTo({
+        scope: access.scope,
+        viewerId: userId,
+        invitedBy: i.invited_by,
+        email: i.email,
+        visibleEmails,
+      }),
     );
 
     const signIns = await admin.rpc("org_member_last_sign_ins", { _org: orgId });

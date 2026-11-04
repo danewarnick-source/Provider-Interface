@@ -73,7 +73,7 @@ describe("resendInvitation source lock", () => {
     );
     const resend = fns.slice(
       fns.indexOf("export const resendInvitation"),
-      fns.indexOf("export const revokeInvitation"),
+      fns.indexOf("async function upsertPendingInviteAndSend"),
     );
     assert.match(resend, /resolveResendAccess\(/);
     assert.match(resend, /findMemberAccessByEmail\(/);

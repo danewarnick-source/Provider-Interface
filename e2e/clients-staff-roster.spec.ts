@@ -562,11 +562,38 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(invited.getByText(/Not invited yet/)).toHaveCount(0);
     await expect(invited.getByText(/Program Manager|Default preset|DSP/)).toHaveCount(0);
     await invited.getByRole("button", { name: /Uninvite/i }).click();
-    await expect(page.getByRole("alertdialog")).toContainText(/Uninvite new\.dsp@example\.test\?/);
+    await expect(page.getByRole("alertdialog")).toContainText(
+      "Cancel invite for new.dsp@example.test?",
+    );
     await shot(page, "team_members_invited_view");
-    await page.getByRole("button", { name: /^Cancel$/ }).click();
+    // Keep invite closes and changes nothing.
+    await page.getByRole("button", { name: "Keep invite" }).click();
+    await expect(page.getByRole("alertdialog")).toHaveCount(0);
+    await expect(invited.getByText("new.dsp@example.test")).toBeVisible();
     await expect(page.getByRole("button", { name: /Invite by email/i })).toHaveCount(0);
     await assertPageNotBlank(page, "invitations");
+  });
+
+  test("Uninvite cancels the invite: row leaves, Invited count drops, toast", async ({ page }) => {
+    await gotoAdmin(page, "/dashboard/team-members?view=invited");
+    const invited = page.getByTestId("invites-view");
+    await expect(invited.getByText("new.dsp@example.test")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("button", { name: "Invited (2)" })).toBeVisible();
+    await expect(page.getByTestId("roster-counts")).toContainText("2 invited");
+
+    await invited.getByRole("button", { name: /Uninvite/i }).click();
+    const dialog = page.getByRole("alertdialog");
+    await expect(dialog).toContainText("Cancel invite for new.dsp@example.test?");
+    await dialog.getByRole("button", { name: "Cancel invite" }).click();
+
+    await expect(page.getByText("Invite canceled.")).toBeVisible();
+    await expect(dialog).toHaveCount(0);
+    await expect(invited.getByText("new.dsp@example.test")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Invited (1)" })).toBeVisible();
+    await expect(page.getByTestId("roster-counts")).toContainText("1 invited");
+    // The page is still usable: the remaining row's button responds.
+    await expect(invited.getByRole("button", { name: /^Send invite$/i })).toBeEnabled();
+    await shot(page, "team_members_invite_canceled");
   });
 
   test("roster hides the Home filter when the org has no homes", async ({ page }) => {
