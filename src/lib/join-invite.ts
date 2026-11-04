@@ -50,7 +50,8 @@ export function inviteFailureMessage(reason: InviteFailureReason): string {
     case "used":
       return `This invitation was already used. ${ASK_ADMIN_MANUAL}`;
     case "revoked":
-      return `This invitation was cancelled. ${ASK_ADMIN_MANUAL}`;
+      // Uninvite, or the person was deleted or deactivated.
+      return `This invite is no longer valid. ${ASK_ADMIN_MANUAL}`;
     case "email_mismatch":
       return `This invitation was sent to a different email than the one you're using. ${ASK_ADMIN_MANUAL}`;
     case "not_authenticated":
