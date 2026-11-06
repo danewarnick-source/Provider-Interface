@@ -7,7 +7,7 @@
 2. **Ask before guessing.** If the prompt leaves a user-visible behavior open, ask (up to ~10 questions in one message). Don't pick a default and move on.
 3. **A demo is the spec.** When the prompt points at a demo (`docs/demos/*.html`, a folder created with the first demo, or an artifact), every button does exactly what it does there. Differences go in the PR, with the reason.
 4. **One screen or one flow per PR.** If a prompt covers more, split it and say so.
-5. **Done when** lines are what Dane clicks through on the sandbox. They go in the PR as a checklist; Dane tests, not an e2e suite.
+5. **Done when** lines are what Dane clicks through on the PR's Vercel preview. They go in the PR as a checklist; Dane tests, not an e2e suite.
 6. **PR body** = the final behavior table, the done-when checklist, decisions made, what was deleted, any DB change.
 
 ## Writing a prompt (for Dane, and for any agent drafting prompts or runbooks)
@@ -18,7 +18,7 @@ A prompt is complete when it has these eight parts, in this order, each a few li
 2. **Screen or flow:** one. If it takes more than one, it's more than one prompt.
 3. **Reference:** the demo, artifact, screenshot or existing screen to match. If there is none, say "no reference, bring me 2–3 options as demos first" and the agent stops after the options.
 4. **Behaviors:** what each button, link, shortcut and empty state does, as *click X → Y happens → user sees Z*. Anything not listed, the agent asks about before building.
-5. **Done when:** 3–8 observable lines Dane can click through on the sandbox.
+5. **Done when:** 3–8 observable lines Dane can click through on the PR's Vercel preview.
 6. **Data:** which tables or lib files own the facts involved (`docs/SOURCE_OF_TRUTH.md`), and which existing consumers must keep working.
 7. **Delete:** what this replaces, by file and table name. Empty is allowed only for a brand-new area.
 8. **Out of scope:** what not to touch.

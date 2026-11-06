@@ -1,7 +1,7 @@
 name: Deploy AWS (parallel target)
 
 # Production deploy: every push to main ships providerinterface.com.
-# Vercel serves the staging sandbox from the staging branch.
+# Vercel builds a preview for every branch; PRs are verified there, then merged.
 # This workflow never touches wrangler.jsonc, src/server.ts's Cloudflare
 # entry point, or anything Lovable's GitHub sync manages.
 #
