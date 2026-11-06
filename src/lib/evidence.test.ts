@@ -24,6 +24,7 @@ import {
   resolveEvidenceTab,
 } from "./evidence/nav.ts";
 import {
+  attestBlock,
   companyEvidencePerson,
   isAttestFullName,
   isListedEvidenceClient,
@@ -576,6 +577,17 @@ describe("Evidence people roster", () => {
     assert.equal(isAttestFullName("Dane", "Warnick"), true);
     assert.equal(isAttestFullName("Dane", "  "), false);
     assert.equal(isAttestFullName("", "Warnick"), false);
+  });
+
+  it("tells the person what is missing from the acknowledgment before Apply is ready", () => {
+    assert.equal(attestBlock(true, "Dane", "Warnick"), null);
+    assert.deepEqual(attestBlock(true, "", "Warnick"), {
+      field: "firstName",
+      message: "Type your full name above to accept and apply.",
+    });
+    assert.equal(attestBlock(true, "Dane", "  ")?.field, "lastName");
+    assert.equal(attestBlock(false, "Dane", "Warnick")?.field, "liability");
+    assert.match(attestBlock(false, "", "")?.message ?? "", /Check the acknowledgment and type/);
   });
 
   it("uses the same people helper for employees, clients, and company", () => {
