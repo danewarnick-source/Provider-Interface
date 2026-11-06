@@ -128,3 +128,35 @@ export function itemsForEvidenceTab(
 export function isAttestFullName(firstName: string, lastName: string): boolean {
   return firstName.trim().length >= 1 && lastName.trim().length >= 1;
 }
+
+export type AttestBlock = {
+  /** Which acknowledgment control to send the person to first. */
+  field: "liability" | "firstName" | "lastName";
+  /** Plain-English reason the Apply / Save / Create button is not ready. */
+  message: string;
+};
+
+/** What is still missing from the acknowledgment (checkbox + full name); null when ready. */
+export function attestBlock(
+  liability: boolean,
+  firstName: string,
+  lastName: string,
+): AttestBlock | null {
+  const named = isAttestFullName(firstName, lastName);
+  if (!liability && !named) {
+    return {
+      field: "liability",
+      message: "Check the acknowledgment and type your full name above to accept and apply.",
+    };
+  }
+  if (!liability) {
+    return { field: "liability", message: "Check the acknowledgment above to accept and apply." };
+  }
+  if (!named) {
+    return {
+      field: firstName.trim().length === 0 ? "firstName" : "lastName",
+      message: "Type your full name above to accept and apply.",
+    };
+  }
+  return null;
+}

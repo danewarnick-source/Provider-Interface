@@ -23,7 +23,7 @@ import {
 } from "@/lib/evidence/catalog.ts";
 import { EvidenceDueFields } from "@/components/evidence/evidence-due-fields.tsx";
 import { defaultDueDraft, dueSubtitle, type EvidenceDueDraft } from "@/lib/evidence/due.ts";
-import { isAttestFullName } from "@/lib/evidence/people.ts";
+import { attestBlock, isAttestFullName } from "@/lib/evidence/people.ts";
 import {
   EVIDENCE_LIABILITY_TEXT,
   EVIDENCE_UNCHECK_TITLE,
@@ -107,6 +107,12 @@ export function EvidenceQuestionnaire({
   const [formDescription, setFormDescription] = useState("");
   const [formQuestions, setFormQuestions] = useState<string[]>([""]);
   const [formDue, setFormDue] = useState<EvidenceDueDraft>(() => defaultDueDraft(subject));
+  // Set when someone clicks the not-ready button, so the missing field is highlighted.
+  const [nudged, setNudged] = useState(false);
+
+  useEffect(() => {
+    setNudged(false);
+  }, [step]);
 
   useEffect(() => {
     setChecked((prev) => {
@@ -193,6 +199,58 @@ export function EvidenceQuestionnaire({
   const canSaveCustom = named && customTitle.trim().length > 0 && !pending;
   const formQs = formQuestions.map((q) => q.trim()).filter(Boolean);
   const canCreateForm = named && formTitle.trim().length > 0 && formQs.length > 0 && !pending;
+
+  // The attestation controls carry a per-step id prefix (the three steps share one set of state).
+  const idPrefix = step === "custom" ? "custom" : step === "form" ? "form" : "attest";
+  const attestMissing = attestBlock(liability, firstName, lastName);
+  const stepMissing =
+    step === "rows"
+      ? checked.size === 0
+        ? { message: "Select at least one requirement above.", targetId: null }
+        : null
+      : step === "custom"
+        ? customTitle.trim().length === 0
+          ? { message: "Enter a title above.", targetId: "evidence-custom-title" }
+          : null
+        : step === "form"
+          ? formTitle.trim().length === 0
+            ? { message: "Enter a form title above.", targetId: "evidence-form-title" }
+            : formQs.length === 0
+              ? {
+                  message: "Add at least one checklist question above.",
+                  targetId: "evidence-form-q-0",
+                }
+              : null
+          : null;
+  const attestTargetId = attestMissing
+    ? attestMissing.field === "liability"
+      ? `evidence-${idPrefix}-liability`
+      : attestMissing.field === "firstName"
+        ? `evidence-${idPrefix}-first`
+        : `evidence-${idPrefix}-last`
+    : null;
+  // Why the footer button is not ready (what the person should do next), or null when it is.
+  const notReady =
+    step === "quiz" || pending
+      ? null
+      : stepMissing
+        ? { message: stepMissing.message, targetId: stepMissing.targetId }
+        : attestMissing
+          ? { message: attestMissing.message, targetId: attestTargetId }
+          : null;
+  const highlightAttest = nudged && !stepMissing && !!attestMissing;
+  const attestBoxClass = `space-y-3 rounded-xl border bg-muted/30 px-3 py-3 ${
+    highlightAttest ? "border-destructive ring-2 ring-destructive/40" : "border-border"
+  }`;
+
+  // The footer button stays clickable while not ready so a click can explain itself.
+  const nudgeMissing = () => {
+    setNudged(true);
+    const el = notReady?.targetId ? document.getElementById(notReady.targetId) : null;
+    if (!el) return;
+    el.scrollIntoView({ block: "center", behavior: "smooth" });
+    el.focus({ preventScroll: true });
+  };
 
   const grouped = suggested.map((row) => ({
     pack: row.pack,
@@ -459,9 +517,13 @@ export function EvidenceQuestionnaire({
                 </section>
               ))}
 
-              <div className="space-y-3 rounded-xl border border-border bg-muted/30 px-3 py-3">
+              <div className={attestBoxClass}>
                 <label className="flex items-start gap-3 text-sm">
-                  <Checkbox checked={liability} onCheckedChange={(v) => setLiability(v === true)} />
+                  <Checkbox
+                    id="evidence-attest-liability"
+                    checked={liability}
+                    onCheckedChange={(v) => setLiability(v === true)}
+                  />
                   <span>{EVIDENCE_LIABILITY_TEXT}</span>
                 </label>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -531,9 +593,13 @@ export function EvidenceQuestionnaire({
                   placeholder="What this row is for"
                 />
               </div>
-              <div className="space-y-3 rounded-xl border border-border bg-muted/30 px-3 py-3">
+              <div className={attestBoxClass}>
                 <label className="flex items-start gap-3 text-sm">
-                  <Checkbox checked={liability} onCheckedChange={(v) => setLiability(v === true)} />
+                  <Checkbox
+                    id="evidence-custom-liability"
+                    checked={liability}
+                    onCheckedChange={(v) => setLiability(v === true)}
+                  />
                   <span>{EVIDENCE_LIABILITY_TEXT}</span>
                 </label>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -588,6 +654,7 @@ export function EvidenceQuestionnaire({
                 {formQuestions.map((q, i) => (
                   <Input
                     key={`fq-${i}`}
+                    id={`evidence-form-q-${i}`}
                     value={q}
                     onChange={(e) =>
                       setFormQuestions((prev) =>
@@ -606,9 +673,13 @@ export function EvidenceQuestionnaire({
                   Add question
                 </Button>
               </div>
-              <div className="space-y-3 rounded-xl border border-border bg-muted/30 px-3 py-3">
+              <div className={attestBoxClass}>
                 <label className="flex items-start gap-3 text-sm">
-                  <Checkbox checked={liability} onCheckedChange={(v) => setLiability(v === true)} />
+                  <Checkbox
+                    id="evidence-form-liability"
+                    checked={liability}
+                    onCheckedChange={(v) => setLiability(v === true)}
+                  />
                   <span>{EVIDENCE_LIABILITY_TEXT}</span>
                 </label>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -649,8 +720,15 @@ export function EvidenceQuestionnaire({
           ) : step === "custom" ? (
             <Button
               type="button"
-              disabled={!canSaveCustom}
-              onClick={() =>
+              disabled={pending}
+              aria-disabled={!canSaveCustom}
+              aria-describedby={notReady ? "evidence-footer-hint" : undefined}
+              className={canSaveCustom ? undefined : "opacity-50"}
+              onClick={() => {
+                if (!canSaveCustom) {
+                  nudgeMissing();
+                  return;
+                }
                 onApplyCustom({
                   title: customTitle.trim(),
                   evidenceType: customType,
@@ -660,23 +738,30 @@ export function EvidenceQuestionnaire({
                       : null,
                   blurb: customBlurb.trim(),
                   due: customDue,
-                })
-              }
+                });
+              }}
             >
               {pending ? "Saving…" : "Save custom evidence"}
             </Button>
           ) : step === "form" ? (
             <Button
               type="button"
-              disabled={!canCreateForm}
-              onClick={() =>
+              disabled={pending}
+              aria-disabled={!canCreateForm}
+              aria-describedby={notReady ? "evidence-footer-hint" : undefined}
+              className={canCreateForm ? undefined : "opacity-50"}
+              onClick={() => {
+                if (!canCreateForm) {
+                  nudgeMissing();
+                  return;
+                }
                 onCreateForm({
                   title: formTitle.trim(),
                   description: formDescription.trim(),
                   questions: formQs,
                   due: formDue,
-                })
-              }
+                });
+              }}
             >
               {pending ? "Creating…" : "Create form"}
             </Button>
@@ -688,11 +773,29 @@ export function EvidenceQuestionnaire({
               <Button type="button" variant="outline" onClick={() => setStep("form")}>
                 Create a form
               </Button>
-              <Button type="button" disabled={!canApply} onClick={apply}>
+              <Button
+                type="button"
+                disabled={pending}
+                aria-disabled={!canApply}
+                aria-describedby={notReady ? "evidence-footer-hint" : undefined}
+                className={canApply ? undefined : "opacity-50"}
+                onClick={canApply ? apply : nudgeMissing}
+              >
                 {pending ? "Applying…" : "Apply packs"}
               </Button>
             </div>
           )}
+          {notReady ? (
+            <p
+              id="evidence-footer-hint"
+              role="status"
+              className={`basis-full text-right text-xs ${
+                nudged ? "font-medium text-destructive" : "text-muted-foreground"
+              }`}
+            >
+              {notReady.message}
+            </p>
+          ) : null}
         </footer>
       </div>
 
