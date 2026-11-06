@@ -2,7 +2,7 @@
 HIVE is a multi-tenant compliance platform for Utah DSPD (disability services) providers, replacing Connecteam + manual compliance. AI engine = "Nectar" (AWS Bedrock; Nectar advises/flags, NEVER fabricates documentation or acts unreviewed). First tenant: True North Supports (TNS). Services TNS runs: HHS, SLN, SLH, SEI, DSI. The state contract DHHS91172 has been in effect since 2026-07-01; build to it.
 
 ## Architecture & workflow
-- TanStack Start + React + Supabase. Live project: "Provider-Interface" `dhrrukdcigiiqksibdfb` (Lovable no longer edits or hosts the app, but the build still runs through `@lovable.dev/vite-tanstack-config` and Google sign-in through `lovable.auth`; don't remove either). Schema changes are migration files in supabase/migrations/, applied to the live DB directly (Supabase MCP/CLI) — one file per logical step, named for what it does. Small atomic commits; the checks under **Checks** once per PR, before the push.
+- TanStack Start + React + Supabase. Live project: "Provider-Interface" `dhrrukdcigiiqksibdfb` (Lovable no longer edits or hosts the app, but the build still runs through `@lovable.dev/vite-tanstack-config` and Google sign-in through `lovable.auth`; don't remove either). Schema changes are migration files in supabase/migrations/, applied to the live DB directly (Supabase MCP/CLI) — one file per logical step, named for what it does. Small atomic commits, build green before push.
 - Branches & deploys: `staging` = Vercel sandbox (agency-peace-of-mind.vercel.app); `main` = production on AWS (providerinterface.com, via .github/workflows/deploy-aws.yml). Nothing reaches `main` until the user says that change is ready.
   - Branch new work from `main` (never from `staging`, or unrelated staging work rides along to production). Open the PR against `staging`.
   - Merging the PR into `staging` puts it on the sandbox, and .github/workflows/sandbox-to-production.yml opens a matching "Production: …" PR from the same branch into `main` (label `production`). Merging that PR is the only way the change reaches production; the user decides when.
@@ -17,7 +17,6 @@ HIVE is a multi-tenant compliance platform for Utah DSPD (disability services) p
 - Regenerate `src/integrations/supabase/types.ts` from the live DB after every migration and on any merge conflict in it; never hand-edit or hand-merge it.
 - NEVER PostgREST-embed organization_members↔profiles (no FK; both key off auth.users.id) — two queries, join in JS. These still do it and silently show empty staff lists: `audit-zone.tsx`, `approved-evv-archive.tsx`, `lib/scheduler/import.functions.ts`, `lib/scheduler/setup.functions.ts` (the last two are fixed by Scheduler Part A).
 - Access model (see docs/access-levels-migration-plan.md): organization_members.access_level (owner/admin/staff) + access_scope (agency/assigned/self) + access_preset_id (access_presets) + access_overrides. 18 categories, each off/view/edit (`phone_app` is on/off, `agency_settings` is owner-only), defined in src/lib/access/categories.ts. UI checks: `useAccess()` (src/hooks/use-access.tsx) `.can` / `canCategory`; server functions: `requireCategory` (src/lib/access/require.ts). Under live RLS only Owners can write organization_members, invitations, access_presets and access_assignments. DB helpers: access_is_owner, is_org_admin_or_manager (= Owner or agency-wide Admin), access_has_category, access_can_see_client, access_can_see_staff. Scoped managers come from access_assignments (home/staff/client, many-to-many). The legacy role system was dropped live on 2026-09-25 (recorded as `20260925090443 access_levels_b_drop_legacy_roles`): organization_members.role and invitations.role no longer exist. Never read, write or recreate them, and never re-apply supabase/migrations/20260926000000_access_levels_b_drop_legacy_roles.sql. Unrelated `role` columns (client_contacts.role, thread_members.role, notifications.recipient_role, profiles.system_role) are fine.
-- Team-member invites: ending a membership (any `organization_members` update that sets `active = false` or `deleted_at`, i.e. Deactivate and Delete) revokes that person's pending invitations in that agency via the live trigger `trg_member_leave_revokes_invites`; don't repeat it in code. Canceling one invite by hand is `revokeInvitation` (src/lib/team-members/invite-cancel.functions.ts): server checks, then a service-role write, because RLS lets only Owners write invitations.
 - RLS: every org-data table is org-scoped; never USING(true) on org/PHI data. Helpers: is_org_member, is_org_admin_or_manager, access_is_owner, access_has_category(_org,_user,cat,min); client PHI rows: can_access_client_phi(client_id) or access_can_see_client(_client,_user); staff PII: can_view_staff_pii(_org,_staff,_viewer); shifts: access_can_read_shift / access_can_write_shift(_org,_user,_client); day program writes: access_can_write_day_program; HIVE platform staff: OR is_hive_executive(auth.uid()). Org helpers take the org FIRST, user second — write `(organization_id, auth.uid())`. Swapped arguments type-check but silently deny everyone; these live policies are still swapped and need a fix: gmail_connections, gmail_ingested_messages, gmail_ingestion_audit, gmail_ingestion_rules, referral_documents, referral_match_scores, provider_interest_outline, functionality_reports.
 - Scheduler RLS (Scheduler S1) has been live since 2026-10-13, so it already applies on production: members other than admins and `scheduling` viewers see only published shifts that are theirs, open, or on a client/home they're assigned to. Its migration files are on `scheduler-rebuild-a` until Part A reaches main.
 - `teams` = homes (team_name/setting/address). `home_designations` holds the Homes & Teams CARE-TEAM role labels (DSP/House Manager/Lead/Supervisor) — that's its legitimate data; never delete it, and never treat its rows as locations/homes.
@@ -50,22 +49,15 @@ HIVE is a multi-tenant compliance platform for Utah DSPD (disability services) p
 - **Phones first:** 44 px touch targets, tables become cards under 640 px, no horizontal page scroll.
 - **Wording:** "client", "team member", "home", plain English; SOW citations only as small "§" hints when a spec asks for them. No PHI in texts, pushes, toasts or URLs.
 
-## Two kinds of work: a fix and a build
-Dane tests the UI on the sandbox. Agents don't write e2e tests, take screenshots, or reproduce bugs in a browser unless a prompt asks for it. Time goes into the change and the unit tests for its logic.
-
-**A fix** (a bug, copy, one existing screen's behavior; most prompts):
-1. Read the code involved and the live DB/RLS where a write is in play. Reproduce only if the cause isn't clear from reading; use the cheapest way (a unit test, a SQL query, the API logs), not a browser.
-2. If the prompt leaves a user-visible behavior open, ask. Otherwise build it.
-3. Add or update a unit test for the logic you changed (pure functions in `lib/`). No regex-over-source "source lock" tests: they break on every refactor and catch no behavior.
-4. Run the checks under **Checks** below, push, open the PR into `staging`.
-5. **PR body:** what broke and why (two or three sentences), what changed, a short "click through this on the sandbox" list for Dane, what was deleted, any DB change. No behavior table, no screenshots, no line counts.
-
-**A build** (a new screen or flow, or a runbook step that changes a screen):
-1. **Plan first.** Post a behavior table: every button, link, shortcut and empty state, with columns *Label · What happens on click · When it's disabled or hidden · What the user sees after*, plus every decision the prompt didn't settle. Wait for approval. (Unattended runbooks: see Open owner decisions.)
-2. **Ask before guessing**, up to ~10 questions in one message.
-3. **A demo is the spec.** When the prompt points at one (`docs/demos/*.html` or an artifact), every button does what it does there; list differences in the PR with the reason.
-4. **One screen or one flow per PR.**
-5. **PR body:** the final behavior table, the done-when list for Dane to click through, decisions made, what was deleted, any DB change.
+## How to run a build prompt (every feature or screen)
+1. **Plan first, build second.** (Unattended runbooks: see Open owner decisions.) Before writing code, post a plan with a **behavior table**: every button, link, shortcut and empty state on the screen, with columns *Label · What happens on click · When it's disabled or hidden · What the user sees after*. Also list every decision you had to make that the prompt didn't settle. Wait for approval of the table before building. If the prompt says "no plan needed", still include the table in the PR.
+2. **Ask before guessing.** If the prompt leaves a user-visible behavior open, ask (up to ~10 questions in one message). Don't pick a default and move on.
+3. **"Done when" is observable.** Turn each done-when line into an e2e test *before* building ("click + Set home on a client with no home → Home select is open and focused → pick → Save → list shows the home"). Technical checks (file sizes, one request) are extra, never the definition of done.
+4. **A demo is the spec.** When the prompt points at a demo (`docs/demos/*.html`, a folder created with the first demo, or an artifact), every button does exactly what it does there. Differences must be listed in the PR, with the reason.
+5. **One screen or one flow per PR.** If a prompt covers more, split it and say so.
+6. **Walkthrough before the PR.** (e2e can't run in cloud sessions yet and `e2e/artifacts/` is gitignored; see Claude cloud sessions and Open owner decisions. If you can't run or attach them, say so in the PR; never claim them as passed.) Run the done-when e2e tests with screenshots on (`screenshot: "on"`), save one image per step to `e2e/artifacts/<feature>/NN-<step>.png`, and put them in the PR body in order with one line each. The reviewer reads the strip, not the code.
+7. **PR body** = behavior table (final), done-when list with pass/fail, screenshot strip, decisions made, what was deleted. No PHI in screenshots: use the mock/fixture data.
+8. **Type errors never go up.** `NODE_OPTIONS=--max-old-space-size=8192 npx tsc --noEmit` (the default heap runs out) error count before and after in the PR; a PR that raises it isn't done.
 
 ## Writing a prompt (for Dane, and for any agent drafting prompts or runbooks)
 This file carries the defaults, so a prompt only has to say what's *different*. Never restate CLAUDE.md rules in a prompt; if a rule is missing or wrong, fix it here instead so every future prompt gets it.
@@ -75,7 +67,7 @@ A prompt is complete when it has these eight parts, in this order, each a few li
 2. **Screen or flow:** one. If it takes more than one, it's more than one prompt.
 3. **Reference:** the demo, artifact, screenshot or existing screen to match ("match `docs/demos/clients-list.html`"; "works like the Team Members profile side menu"). If there is none, say "no reference, bring me 2–3 options as demos first" and the agent stops after the options.
 4. **Behaviors:** what each button, link, shortcut and empty state does, in the form *click X → Y happens → user sees Z*. Anything not listed, the agent must ask about before building (not guess).
-5. **Done when:** 3–8 observable lines Dane can click through on the sandbox. They go in the PR as a checklist.
+5. **Done when:** 3–8 observable lines a tester can click through. Each becomes an e2e test before code is written.
 6. **Data:** which tables or lib files own the facts involved, and which existing consumers must keep working.
 7. **Delete:** what this replaces, by file and table name. Empty is allowed only for a brand-new area.
 8. **Out of scope:** what not to touch, so the agent doesn't "improve" nearby code.
@@ -86,7 +78,7 @@ Rules for the prompt itself:
 - **No design by adjective.** "Clean", "modern", "intuitive" tell the agent nothing. Point at a reference or describe the behavior.
 - **One prompt, one PR, one preview.** Review the preview against the done-when list, send fixes as one numbered list per screen, and push them to the same branch.
 - **Runbooks** are a sequence of these prompts plus a `PROGRESS.md` with one entry per prompt (status, PR, decisions made, notes for later prompts). A new session resumes from the first prompt not marked merged. Decisions recorded in PROGRESS.md are settled; later prompts don't reopen them.
-- **Kickoff line** for a new session: "Read CLAUDE.md, then `docs/<area>/RUNBOOK.md` and `PROGRESS.md`. Continue from the first prompt not marked merged. For a build step, post the plan and behavior table and wait; for a fix step, build it."
+- **Kickoff line** for a new session: "Read CLAUDE.md, then `docs/<area>/RUNBOOK.md` and `PROGRESS.md`. Continue from the first prompt not marked merged. Post the plan and behavior table and wait."
 
 ## Source of truth map (check before adding any table, column, file or fact)
 Every fact has exactly one owner: one table (or column) and one lib file that reads and writes it. Everything else reads from the owner. The full map will live in `docs/SOURCE_OF_TRUTH.md` (not written yet; until then this table is the map).
@@ -125,7 +117,7 @@ The codebase and database must shrink and get easier to read with each change. "
 - **Database:** every new table or column needs a one-line reason in the migration. Prefer a column on an existing table to a new table. Drop tables, columns, functions, views, triggers and storage buckets that nothing reads or writes (additive migration while `main` still uses them; the drop in a Phase B migration right after the replacement reaches `main`). Before dropping anything with rows, confirm the data is either migrated or outside the retention rules (7-year Medicaid retention for client and staff records). Keep `src/integrations/supabase/types.ts` regenerated so dead tables disappear from the types.
 - **Names say what things are.** Files, functions, tables and columns are named for what they hold or do, in plain words (`client-list.tsx`, `evidence_files`, `hire_date`), not for a phase, person, batch number or feature flag (`ninth-executable-batch.ts`, `phase-b`, `new-`). Rename when you touch a badly named thing, with `git mv` so history is kept.
 - **Read-once code.** A new reader should understand a file from its first 20 lines: a one-paragraph comment saying what it owns and what calls it, then the code. No clever abstractions for one call site; no `as any` (fix the type or regenerate it); no catch-all `utils.ts`.
-- **Say what you deleted.** The PR names removed files, functions, tables and columns. A build PR that only adds is suspicious; say why.
+- **Report the numbers.** Every PR body ends with: lines added/removed, files added/deleted, tables/columns added/dropped, `tsc` error count before/after. A feature PR that only adds is suspicious; say why.
 - **Protected, never delete without instruction:** `home_designations`, anything under 7-year retention.
 
 ## Known landmines
@@ -142,27 +134,27 @@ This project uses TanStack Router (via @lovable.dev/vite-tanstack-config). The
 file src/routeTree.gen.ts is auto-generated AND committed to git. If it is stale
 relative to the route files, preview builds fail.
 
-## Checks (once per PR, before the push; not per commit)
-CI doesn't gate anything yet (the Vercel preview build is the only signal on PRs into `staging`), so run these yourself, once, on the finished branch:
-1. `npm run build`. It regenerates `src/routeTree.gen.ts`; if that file changed, commit it with the route change (never a route change without it). Skip the build only if no file under `src/routes/` or `vite.config.ts` changed and you ran it once already.
-2. `npm run test:unit` (about 20 seconds). `test:unit` runs only the files listed in package.json: add every new `*.test.ts` there, and on a merge conflict keep both lists. Needs Node ≥ 22.6.
-3. `npx eslint <changed files>`.
-4. `NODE_OPTIONS=--max-old-space-size=8192 npx tsc --noEmit` only if you touched types, a server function's input/output, or `types.ts`. Don't run it per commit; it takes minutes.
+## Required before EVERY commit and push:
+1. Run `npm run build`. This regenerates src/routeTree.gen.ts via the
+   tanstack router plugin.
+2. If src/routeTree.gen.ts changed, stage it together with your other changes.
+3. Never commit changes to files under src/routes/ without the matching
+   regenerated src/routeTree.gen.ts in the same commit.
+4. The build must pass before you push.
 
-**Don't re-measure `main`.** The known red on `main` as of 2026-11-06 (update this line when it changes; a PR that fixes some of it is welcome):
-- `tsc`: 213 errors. A PR may not add to that number; it doesn't have to report it unless it ran tsc.
-- `test:unit`: 8 failures: *client template round trip*, *spreadsheet files*, *templates from the agency* (all the `xlsx` stub), *Lambda build path does not collide with Vercel or build:aws*, *NECTAR onboarding — agency setup gate, no Home wizard*, *Admin notification bell*, *confirm and webhook share the upsert*, *SOW index*. A new failure outside this list is yours.
-- Mocked e2e: `clients-staff-roster.spec.ts` has 7 failing tests and `client-1056-billing.spec.ts` 6 (stale mocks). Agents don't run e2e unless asked; when asked, say which failed and compare with this list, not with a fresh run of `main`.
-- `mock-hive.ts`, `mock-hive-1056.ts`, `clients-staff-roster.spec.ts` have Prettier errors; don't reformat them in an unrelated PR.
+## Checks (CI doesn't gate anything yet; run them yourself)
+- PRs into `staging` get only the Vercel preview build. typecheck-lint.yml runs on pushes to main/staging and PRs to main, but its tsc step can't fail and its lint step skips. No workflow runs `test:unit` or e2e. `main` and `staging` are unprotected.
+- Before pushing, run and report in the PR: `npm run build`; `NODE_OPTIONS=--max-old-space-size=8192 npx tsc --noEmit` (count before and after, never higher); `npm run test:unit` (compare with the base branch); `npx eslint <changed files>`. A test that also fails on the base branch still gets named in the PR; never wave failures through as "pre-existing".
+- `test:unit` runs only the files listed in package.json: add every new `*.test.ts` there, and on a merge conflict keep both lists. It needs Node ≥ 22.6 (`--experimental-strip-types`).
 
 ## Claude cloud sessions
-- npm can't download `xlsx` (cdn.sheetjs.com is blocked). Install with `xlsx` temporarily removed from package.json / package-lock.json, restore both, then put a stub in `node_modules/xlsx` (`package.json` + `index.js` exporting `{}`). Never commit the stub or the package.json change. It causes the three `xlsx` unit failures above and some TS7016 errors.
-- Playwright wants Chromium r1228; the container has r1243 at `/opt/pw-browsers/chromium` and downloads are blocked. If a prompt asks for e2e, run it with a scratch config that sets `use.launchOptions.executablePath` to that path; the dev server needs placeholder `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` values (the mocks intercept every request; use a project ref the mock seeds, not the live one).
+- npm can't download `xlsx` (cdn.sheetjs.com is blocked). To build, use a local-only stub in node_modules; never commit it or change package.json for it, and say so in the PR. The stub adds TS7016 errors and one unit failure; don't report those as regressions.
+- The preinstalled Playwright Chromium doesn't match the version `@playwright/test` wants, and browser downloads are blocked, so e2e can't run there. Say which e2e tests you couldn't run.
 
 ## Open owner decisions (don't pick a side; ask Dane)
 - **Feature switches:** may unfinished work ship to `main` hidden behind a temporary per-agency switch (with a removal date)? Until decided, the "no feature flags" rule stands.
 - **Unattended runbooks vs "Plan first":** do runbook steps stop for approval of the behavior table? Until decided, follow the runbook for logic-only steps and ask before a step that builds or changes a screen.
-- **A green baseline:** fixing the 213 tsc errors, the 8 unit failures and the 13 stale mocked-e2e failures, then letting CI gate PRs. Until then the "known red" list above is the baseline.
+- **Walkthrough screenshots:** where they live, since `e2e/artifacts/` is gitignored.
 - **Quarter-hour rounding:** raw duration vs rounded punch endpoints. Don't extend or "fix" either path until decided.
 - **Admin time edits** overwrite raw clock timestamps; how corrections should be stored.
 - **MTP and the 1056:** a live trigger (cbc_validate_day_program_rate_cap) rejects MTP rows in client_billing_codes, so MTP can never have an authorization. Settle before the scheduler rule engine is wired in (S4).
