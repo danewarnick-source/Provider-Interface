@@ -40,6 +40,7 @@ import {
 } from "@/components/team-members/dialogs/reset-password-dialog";
 import { useStaffRecord } from "@/components/team-members/profile/staff-record-button";
 import { useMemberCaseload } from "@/components/team-members/profile/use-member-caseload";
+import { useMemberLeft } from "@/components/team-members/roster/use-member-left";
 import { isReadyAlone, readyAloneLabel } from "@/lib/team-members/readiness";
 
 const profileRoute = getRouteApi("/dashboard/team-members/$staffId");
@@ -118,6 +119,7 @@ export function ProfileHeader({
   const [resetTarget, setResetTarget] = useState<ResetPasswordTarget | null>(null);
   const [deactivating, setDeactivating] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const memberLeft = useMemberLeft(orgId);
   // Made-by-mistake delete: never yourself or an Owner (the server refuses too).
   const canDelete =
     canCategory("delete_people", "edit") && m.userId !== user?.id && m.accessLevel !== "owner";
@@ -168,7 +170,7 @@ export function ProfileHeader({
     },
     onSuccess: (out) => {
       if (out.email_sent) toast.success(`Invite emailed to ${p.email}`);
-      else if (out.rpc_failure) toast.error(out.message);
+      else if (out.rpc_failure || out.refused) toast.error(out.message);
       else
         toast.warning(`Invite saved, but the email didn't send: ${out.email_error ?? out.message}`);
       onChanged();
@@ -182,6 +184,7 @@ export function ProfileHeader({
     onSuccess: () => {
       toast.success(`${p.displayName} moved to Inactive.`);
       setDeactivating(false);
+      memberLeft(m.userId);
       onChanged();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -385,7 +388,10 @@ export function ProfileHeader({
         orgId={orgId}
         kind="member"
         id={m.userId}
-        onDeleted={() => void navigate({ to: "/dashboard/team-members", search: backSearch })}
+        onDeleted={() => {
+          memberLeft(m.userId);
+          void navigate({ to: "/dashboard/team-members", search: backSearch });
+        }}
       />
       <DeactivateDialog
         name={deactivating ? p.displayName : null}

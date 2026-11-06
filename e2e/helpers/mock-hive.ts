@@ -768,6 +768,9 @@ function emptyClientCareData(clientId: string) {
 /** Options of the most recent installHiveMocks call (server fns don't get them otherwise). */
 let activeMockOpts: MockOptions = {};
 
+/** Invites canceled with Uninvite (revokeInvitation) since the last installHiveMocks. */
+const canceledInviteIds = new Set<string>();
+
 /** listTeamRoster — the RosterRow shape from src/lib/team-members/roster.ts. */
 function teamRosterRows(): Row[] {
   return STAFF_LIST.map((s) => {
@@ -954,7 +957,7 @@ function memberOverview(body: string): Row | null {
 
 /** listTeamInvites — the one pending invite (expired on the fixture date) first. */
 function teamInviteRows(): Row[] {
-  return [
+  const rows: Row[] = [
     {
       status: "pending",
       invitationId: PENDING_INVITE.id,
@@ -982,6 +985,7 @@ function teamInviteRows(): Row[] {
       expired: false,
     },
   ];
+  return rows.filter((r) => !canceledInviteIds.has(String(r.invitationId)));
 }
 
 function decodeServerFnExport(url: string): string {
@@ -1143,20 +1147,12 @@ function serverFnPayload(url: string, body: string): unknown {
   if (/deactivateMember|reactivateMember/i.test(fn)) {
     return { ok: true };
   }
-  if (/createInvitation/i.test(fn)) {
-    let email = "invited@example.test";
-    const m = `${url}\n${body}`.match(/sep1\.tester@example\.test|[a-z0-9._%+-]+@example\.test/i);
-    if (m) email = m[0];
-    return {
-      invitation: {
-        ...PENDING_INVITE,
-        id: "00000000-0000-4000-a000-000000000402",
-        email,
-        token: "mock-invite-created",
-      },
-      email_sent: true,
-      email_error: null,
-    };
+  if (/^revokeInvitation/.test(fn)) {
+    if (body.includes(PENDING_INVITE.id)) canceledInviteIds.add(PENDING_INVITE.id);
+    return { invitationId: PENDING_INVITE.id };
+  }
+  if (/^resendInvitation/.test(fn)) {
+    return { invitation: { ...PENDING_INVITE }, email_sent: true, email_error: null };
   }
   if (/checkHiveExecutive/i.test(fn)) return { isExecutive: false };
   if (/getAgencySetupStatus/i.test(fn)) {
@@ -1571,6 +1567,7 @@ export async function installHiveMocks(page: Page, opts: MockOptions = {}): Prom
   const persona = opts.persona ?? "admin";
   activeMockOpts = opts;
   savedHomes.clear();
+  canceledInviteIds.clear();
   const personaStaff =
     persona === "dsp" ? STAFF.jake : persona === "manager" ? STAFF.harvey : STAFF.admin;
   const personaId = personaStaff.id;

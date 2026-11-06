@@ -612,21 +612,6 @@ function serverFnPayload(url: string, body: string): unknown {
   if (/deactivateMember|reactivateMember/i.test(fn)) {
     return { ok: true };
   }
-  if (/createInvitation/i.test(fn)) {
-    let email = "invited@example.test";
-    const m = `${url}\n${body}`.match(/sep1\.tester@example\.test|[a-z0-9._%+-]+@example\.test/i);
-    if (m) email = m[0];
-    return {
-      invitation: {
-        ...PENDING_INVITE,
-        id: "00000000-0000-4000-a000-000000000402",
-        email,
-        token: "mock-invite-created",
-      },
-      email_sent: true,
-      email_error: null,
-    };
-  }
   if (/checkHiveExecutive/i.test(fn)) return { isExecutive: false };
   if (/getMyEntitlements/i.test(fn)) {
     return {
