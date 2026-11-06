@@ -67,6 +67,7 @@ export const deactivateMember = createServerFn({ method: "POST" })
       .select("id");
     if (mErr) throw new Error(mErr.message);
     if (!rows?.length) throw new Error("Team member not found in this organization");
+    // trg_member_leave_revokes_invites has canceled their pending invites here.
 
     if (data.note) {
       const { error: noteErr } = await supabaseAdmin.from("staff_notes").insert({

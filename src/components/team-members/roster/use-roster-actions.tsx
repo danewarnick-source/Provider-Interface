@@ -24,6 +24,7 @@ import {
   type ResetPasswordTarget,
 } from "@/components/team-members/dialogs/reset-password-dialog";
 import type { RosterActionHandler } from "./row-actions";
+import { useMemberLeft } from "./use-member-left";
 
 /** Which ⋯ items the signed-in viewer gets for a row (see rowActionKeys). */
 export function useRowActionKeys(): (row: RosterRow) => RosterActionKey[] {
@@ -52,6 +53,7 @@ export function useRosterActions(organizationId: string | null): {
   const resendFn = useServerFn(resendInvitation);
   const [resetTarget, setResetTarget] = useState<ResetPasswordTarget | null>(null);
   const [deactivateRow, setDeactivateRow] = useState<RosterRow | null>(null);
+  const memberLeft = useMemberLeft(organizationId);
 
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: rosterQueryKey(organizationId) });
@@ -97,12 +99,16 @@ export function useRosterActions(organizationId: string | null): {
       if (key === "deactivate") {
         toast.success(`${row.displayName} moved to Inactive.`);
         setDeactivateRow(null);
-      } else if (key === "reactivate") {
+        // Their pending invites were canceled with the membership.
+        memberLeft(row.userId);
+        return;
+      }
+      if (key === "reactivate") {
         toast.success(`${row.displayName} is active again.`);
       } else {
         const out = interpretInviteSendResult(res);
         if (out.email_sent) toast.success(`Invite emailed to ${row.email}`);
-        else if (out.rpc_failure) toast.error(out.message);
+        else if (out.rpc_failure || out.refused) toast.error(out.message);
         else
           toast.warning(
             `Invite saved, but the email didn't send: ${out.email_error ?? out.message}`,

@@ -148,9 +148,11 @@ describe("Team roster page source lock", () => {
     "roster-cards.tsx",
     "row-actions.tsx",
     "invites-view.tsx",
+    "cancel-invite-dialog.tsx",
     "inactive-view.tsx",
     "evidence-status.tsx",
     "use-roster-actions.tsx",
+    "use-member-left.ts",
   ];
 
   it("loads through one server call — no browser queries, no hive_executives, no Platform admin", () => {
@@ -243,24 +245,68 @@ describe("Team roster page source lock", () => {
     assert.match(hook, /reactivateMember/);
   });
 
-  it("invites view: per-row busy, awaited clipboard, AlertDialog uninvite, expiry badge", () => {
+  it("invites view: per-row busy, awaited clipboard, one Uninvite dialog outside the rows, expiry badge", () => {
     const src = roster("invites-view.tsx");
     assert.match(src, /function InviteRowItem/);
     assert.match(src, /useMutation/);
     assert.match(src, /await navigator\.clipboard\.writeText/);
     assert.match(src, /toast\.error\("Couldn't copy the invite link/);
-    assert.match(src, /AlertDialog/);
     assert.match(src, /Expired/);
     assert.match(src, /resendInvitation/);
-    assert.match(src, /revokeInvitation/);
     assert.match(src, /Send invite/);
     assert.match(src, /Account created — no invite email sent/);
     assert.doesNotMatch(src, /Not invited yet/);
     // Send invite is the primary button (no outline variant).
     assert.match(
       src,
-      /<Button size="sm" disabled=\{busy\} onClick=\{\(\) => act\.mutate\("send"\)\}>/,
+      /<Button size="sm" disabled=\{busy \|\| !!sendBlocked\} onClick=\{\(\) => act\.mutate\("send"\)\}>/,
     );
+    // Canceling removes the row, so the dialog lives once, after the list — never in a row.
+    assert.match(src, /<CancelInviteDialog/);
+    assert.ok(
+      src.indexOf("<CancelInviteDialog") > src.lastIndexOf("</ul>"),
+      "dialog after the list",
+    );
+    assert.doesNotMatch(src, /revokeInvitation|AlertDialog/);
+    // Buttons the server would refuse are disabled, with the reason on hover/focus:
+    // Uninvite on an Owner invite; Resend / Send invite per sendInviteBlockedReason.
+    assert.match(src, /cancelInviteBlockedReason\(row\.accessLevel, isOwner\)/);
+    assert.match(
+      src,
+      /sendInviteBlockedReason\(\{\s*level: row\.accessLevel,\s*forMember: !!row\.userId,/,
+    );
+    assert.match(src, /<WithReason reason=\{sendBlocked\}>\s*<Button\s+variant="outline"/);
+    assert.match(src, /<WithReason reason=\{cancelBlocked\}>/);
+    assert.match(src, /<TooltipContent>\{reason\}<\/TooltipContent>/);
+    // A refused send (nothing saved) is an error toast, never "Invite saved, but…".
+    for (const f of ["invites-view.tsx", "use-roster-actions.tsx"]) {
+      assert.match(roster(f), /out\.rpc_failure \|\| out\.refused\) toast\.error/, f);
+    }
+
+    const dialog = roster("cancel-invite-dialog.tsx");
+    assert.match(dialog, /<AlertDialog open=\{open\}/);
+    assert.match(dialog, /revokeInvitation/);
+    assert.match(dialog, /cancelInviteQuestion\(target\)/);
+    assert.match(dialog, /toast\.success\(INVITE_CANCELED_TOAST\)/);
+    assert.match(dialog, /withoutInvite\(rows, t\.invitationId\)/);
+    assert.match(dialog, /safeErrorMessage\(e, /);
+    assert.match(dialog, />Keep invite</);
+    assert.match(dialog, /Cancel invite\s*<\/AlertDialogAction>/);
+    assert.match(dialog, /queryKey: teamInvitesQueryKey\(organizationId\)/);
+    assert.match(dialog, /queryKey: rosterQueryKey\(organizationId\)/);
+  });
+
+  it("deactivate and delete drop the person from the cached Invited list (useMemberLeft)", () => {
+    const hook = roster("use-member-left.ts");
+    assert.match(hook, /withoutPersonInvites\(rows, userId\)/);
+    assert.match(hook, /queryKey: teamInvitesQueryKey\(organizationId\)/);
+    assert.match(hook, /queryKey: rosterQueryKey\(organizationId\)/);
+    assert.match(roster("use-roster-actions.tsx"), /memberLeft\(row\.userId\)/);
+    const header = readFileSync(
+      new URL("../../components/team-members/profile/profile-header.tsx", import.meta.url),
+      "utf8",
+    );
+    assert.equal(header.match(/memberLeft\(m\.userId\)/g)?.length, 2, "Deactivate and Delete");
   });
 
   it("filters: one at a time, solid when on, disabled with a reason at 0", () => {

@@ -124,7 +124,6 @@ export const SETUP_CREATE_APIS = [
   "createTeamMember",
   "importTeamMembers",
   "hireTeamMemberInternal",
-  "createInvitation",
   "clients.insert",
 ] as const;
 
