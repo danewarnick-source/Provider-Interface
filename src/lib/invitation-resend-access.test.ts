@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { findMemberAccessByEmail, resolveResendAccess } from "./invitation-resend-access.ts";
+import {
+  findMemberAccessByEmail,
+  findMemberByEmail,
+  resolveResendAccess,
+} from "./invitation-resend-access.ts";
 
 const U1 = "11111111-1111-4111-8111-111111111111";
 const U2 = "22222222-2222-4222-8222-222222222222";
@@ -47,6 +51,20 @@ describe("findMemberAccessByEmail", () => {
   });
 });
 
+describe("findMemberByEmail", () => {
+  it("returns the member row itself, extra columns included, so Resend can check who it's for", () => {
+    const rows = [{ user_id: U1, access_level: "admin", access_preset_id: PRESET, active: false }];
+    assert.equal(findMemberByEmail(" dana.lee@AGENCY.org", rows, profiles), rows[0]);
+    assert.equal(findMemberByEmail("dana.lee@agency.org", rows, profiles)?.active, false);
+  });
+
+  it("returns null when the email has no profile, the profile isn't a member, or is blank", () => {
+    assert.equal(findMemberByEmail("nobody@agency.org", members, profiles), null);
+    assert.equal(findMemberByEmail("owner@agency.org", [members[0]], profiles), null);
+    assert.equal(findMemberByEmail("   ", members, profiles), null);
+  });
+});
+
 describe("resolveResendAccess", () => {
   const requested = { access_level: "staff" as const, access_preset_id: null };
   const member = { access_level: "admin" as const, access_preset_id: PRESET };
@@ -78,7 +96,12 @@ describe("resendInvitation source lock", () => {
     assert.match(resend, /resolveResendAccess\(/);
     assert.match(resend, /findMemberAccessByEmail\(/);
     assert.match(resend, /assertCanInviteAt\(/);
-    assert.match(resend, /status: "pending", \.\.\.\(access \?\? \{\}\)/);
+    // Rewrites access on the still-pending row only; never brings back a canceled invite.
+    assert.match(
+      resend,
+      /\.update\(\{ expires_at: expires, \.\.\.\(access \?\? \{\}\) \}\)[\s\S]{0,160}\.eq\("status", "pending"\)/,
+    );
+    assert.doesNotMatch(resend, /status: "pending", \.\.\.\(access/);
     assert.doesNotMatch(resend, /update\(\{ expires_at: expires, status: "pending" \}\)/);
     // organization_members ↔ profiles share no FK: two queries, never an embed.
     assert.doesNotMatch(resend, /profiles\s*\(/);

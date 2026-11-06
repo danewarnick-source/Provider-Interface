@@ -5,6 +5,10 @@
 // the actual email send live in exactly one place. Canceling an invite lives
 // in invite-cancel.functions.ts; the shared invite rules in invite-rules.ts.
 //
+// Live RLS lets only Owners write invitations, so Resend and Send invite run
+// their own checks (category, scope, the Owner rules) and then read and write
+// with the service-role client, as Add / Import already do.
+//
 // Email goes out through the same Resend rail as everything else
 // (resolveOrgSender + the `send-email` edge function) — see
 // src/lib/email.functions.ts. We call that rail's building blocks directly
@@ -17,7 +21,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireCategory, requireLevel, requirePermission } from "@/lib/access/require";
 import { resolveOrgSender } from "@/lib/email.functions";
-import { type AccessLevel } from "@/lib/access/levels";
+import { isOwner, type AccessLevel } from "@/lib/access/levels";
 import { resolvePresetId } from "@/lib/access/preset-resolve";
 import { buildInvitationEmail } from "@/lib/invitation-email";
 import { inviteJoinUrl } from "@/lib/join-invite";
@@ -26,11 +30,20 @@ import { canSendImportInvite } from "@/lib/import-invite";
 import { assertAgencySetupCompleteForOrg } from "@/lib/agency-setup-gate.functions";
 import {
   findMemberAccessByEmail,
+  findMemberByEmail,
   resolveResendAccess,
   type InviteAccessValues,
   type MemberAccessPick,
   type ProfileEmailPick,
 } from "@/lib/invitation-resend-access";
+import { OWNER_ONLY_MESSAGE, runManageMemberGuard } from "@/lib/team-members/guards";
+import {
+  DEACTIVATED_INVITE_MESSAGE,
+  INVITE_CANCELED_MESSAGE,
+  INVITE_GONE_MESSAGE,
+  INVITE_USED_MESSAGE,
+  assertCanSeeInvite,
+} from "@/lib/team-members/invite-guard.server";
 import {
   asRosterLevel,
   buildTeamInviteRows,
@@ -40,7 +53,11 @@ import {
   type TeamInviteRow,
 } from "@/lib/team-members/roster";
 import { displayNameOf, loadVisibleMembers, selectIn } from "@/lib/team-members/roster.functions";
-import { inviteEmailKey, inviteVisibleTo } from "@/lib/team-members/invite-rules";
+import {
+  inviteEmailKey,
+  inviteVisibleTo,
+  sendInviteBlockedReason,
+} from "@/lib/team-members/invite-rules";
 
 const ORG_ID = z.string().uuid();
 const INVITE_LEVEL = z.enum(["owner", "admin", "staff"]);
@@ -381,6 +398,13 @@ export const createInvitation = createServerFn({ method: "POST" })
  * invitation-resend-access.ts): from the values passed in, or else from the
  * person's current organization_members row. Without this, an invite created
  * before an access change would hand the OLD access back when they join.
+ *
+ * Who may resend: Hire & deactivate Edit, the Invited view's visibility rule,
+ * only an Owner acts on an Owner, and only an Owner hands out Owner or brings
+ * someone new in as an Admin (sendInviteBlockedReason). Only a pending invite
+ * is resent: never a canceled or accepted one, and never for someone
+ * deactivated. Live RLS lets only Owners write invitations, so after those
+ * checks the service-role client reads and writes.
  */
 export const resendInvitation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -403,89 +427,100 @@ export const resendInvitation = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { invitation: null, email_sent: false, email_error: null };
-    await requirePermission(
+    const orgId = data.organization_id;
+    const actor = await requireCategory(
       supabase as unknown as SupabaseClient,
       userId,
-      data.organization_id,
-      "invite_staff",
+      orgId,
+      "staff_hiring",
+      "edit",
     );
     await assertInviteRate(userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = supabase as any;
+    const admin = supabaseAdmin as any;
 
-    const { data: current, error: readErr } = await sb
+    const { data: current, error: readErr } = await admin
       .from("invitations")
-      .select(INVITE_SELECT)
+      .select(`${INVITE_SELECT}, status, invited_by`)
       .eq("id", data.invitation_id)
-      .eq("organization_id", data.organization_id)
+      .eq("organization_id", orgId)
       .maybeSingle();
     if (readErr) throw new Error(readErr.message);
-    if (!current) throw new Error("Invitation not found");
-    const currentRow = current as InvitationRow;
+    const currentRow = current as
+      (InvitationRow & { status: string; invited_by: string | null }) | null;
+    if (!currentRow) throw new Error(INVITE_GONE_MESSAGE);
+    await assertCanSeeInvite({
+      admin,
+      organizationId: orgId,
+      viewerId: userId,
+      scope: actor.scope,
+      invite: currentRow,
+    });
+    if (currentRow.status === "accepted") throw new Error(INVITE_USED_MESSAGE);
+    if (currentRow.status !== "pending") throw new Error(INVITE_CANCELED_MESSAGE);
 
     // Explicit values go through the same checks as a new invite (Owner/Admin
     // needs an Owner; preset must belong to the org and match the level).
     let requested: InviteAccessValues | null = null;
     if (data.access_level) {
-      await assertCanInviteAt(
-        sb,
-        userId,
-        data.organization_id,
-        data.access_level,
-        data.access_preset_id,
-      );
+      await assertCanInviteAt(supabase, userId, orgId, data.access_level, data.access_preset_id);
       requested = {
         access_level: data.access_level,
-        access_preset_id: await presetIdForInvite(
-          data.organization_id,
-          data.access_level,
-          data.access_preset_id,
-        ),
+        access_preset_id: await presetIdForInvite(orgId, data.access_level, data.access_preset_id),
       };
     }
 
-    // Otherwise mirror what the person holds right now. organization_members
+    // Who the invite is for, if they're on the roster. organization_members
     // and profiles share no FK — two queries, joined by email in JS.
-    let member: InviteAccessValues | null = null;
-    if (!requested) {
-      const { data: members, error: memErr } = await sb
-        .from("organization_members")
-        .select("user_id, access_level, access_preset_id")
-        .is("deleted_at", null)
-        .eq("organization_id", data.organization_id);
-      if (memErr) throw new Error(memErr.message);
-      const memberRows = (members ?? []) as MemberAccessPick[];
-      let profiles: ProfileEmailPick[] = [];
-      if (memberRows.length) {
-        const { data: profs, error: pErr } = await sb
-          .from("profiles")
-          .select("id, email")
-          .in(
-            "id",
-            memberRows.map((m) => m.user_id),
-          );
-        if (pErr) throw new Error(pErr.message);
-        profiles = (profs ?? []) as ProfileEmailPick[];
-      }
-      member = findMemberAccessByEmail(currentRow.email, memberRows, profiles);
+    const { data: members, error: memErr } = await admin
+      .from("organization_members")
+      .select("user_id, access_level, access_preset_id, active")
+      .is("deleted_at", null)
+      .eq("organization_id", orgId);
+    if (memErr) throw new Error(memErr.message);
+    const memberRows = (members ?? []) as Array<MemberAccessPick & { active: boolean | null }>;
+    const profiles = await selectIn<ProfileEmailPick>(
+      (ids) => admin.from("profiles").select("id, email").in("id", ids),
+      memberRows.map((m) => m.user_id),
+    );
+    const target = findMemberByEmail(currentRow.email, memberRows, profiles);
+    if (target?.active === false) throw new Error(DEACTIVATED_INVITE_MESSAGE);
+    const viewerIsOwner = actor.level === "owner";
+    if (target && isOwner(target.access_level) && !viewerIsOwner) {
+      throw new Error(OWNER_ONLY_MESSAGE);
     }
+
+    // Otherwise mirror what the person holds right now.
+    const member = requested
+      ? null
+      : findMemberAccessByEmail(currentRow.email, memberRows, profiles);
     const access = resolveResendAccess({ requested, member });
+    if (!requested) {
+      const blocked = sendInviteBlockedReason({
+        level: access?.access_level ?? currentRow.access_level,
+        forMember: !!target,
+        viewerIsOwner,
+      });
+      if (blocked) throw new Error(blocked);
+    }
 
     const expires = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
-    const { data: invite, error } = await sb
+    const { data: updated, error } = await admin
       .from("invitations")
-      .update({ expires_at: expires, status: "pending", ...(access ?? {}) })
+      .update({ expires_at: expires, ...(access ?? {}) })
       .eq("id", data.invitation_id)
-      .eq("organization_id", data.organization_id)
-      .select(INVITE_SELECT)
-      .single();
+      .eq("organization_id", orgId)
+      .eq("status", "pending")
+      .select(INVITE_SELECT);
     if (error) throw new Error(error.message);
-    if (!invite) throw new Error("Invitation not found");
+    // Canceled between the read and the write: never brought back.
+    const row = (updated as InvitationRow[] | null)?.[0];
+    if (!row) throw new Error(INVITE_CANCELED_MESSAGE);
 
-    const row = invite as InvitationRow;
     const emailResult = await sendInvitationEmail({
-      supabase,
-      organizationId: data.organization_id,
+      supabase: admin,
+      organizationId: orgId,
       email: row.email,
       level: row.access_level,
       token: row.token,
@@ -625,9 +660,16 @@ export async function sendTeamMemberInvitesInternal(args: {
 }
 
 /**
- * Invite already-created roster members (roster Send invite and the Invited
- * view). Never emails during CSV parse. Never re-invites an accepted
- * join unless resend_accepted is explicit.
+ * Invite already-created roster members (roster Send invite, the Invited view
+ * and the profile menu). Never emails during CSV parse. Never re-invites an
+ * accepted join unless resend_accepted is explicit.
+ *
+ * Each person goes through the member guard (guards.ts: Hire & deactivate
+ * Edit, scoped viewers only for people they can see, only an Owner acts on an
+ * Owner), and someone deactivated is refused until they're reactivated. A
+ * refused person comes back `skipped` with the reason and nothing is saved for
+ * them. Live RLS lets only Owners write invitations, so after those checks the
+ * service-role client reads and writes.
  */
 export const inviteStaffMembers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -636,7 +678,6 @@ export const inviteStaffMembers = createServerFn({ method: "POST" })
       .object({
         organization_id: ORG_ID,
         user_ids: z.array(z.string().uuid()).max(200).default([]),
-        emails: z.array(z.string().trim().toLowerCase().email().max(255)).max(200).default([]),
         access_level: INVITE_LEVEL.optional(),
         resend_accepted: z.boolean().optional().default(false),
         force: z.boolean().optional().default(false),
@@ -653,89 +694,121 @@ export const inviteStaffMembers = createServerFn({ method: "POST" })
       results: [],
     });
     if (!supabase || !userId) return { ...empty, email_error: "Unauthorized" };
+    const orgId = data.organization_id;
     try {
-      await requirePermission(
+      const actor = await requireCategory(
         supabase as unknown as SupabaseClient,
         userId,
-        data.organization_id,
-        "invite_staff",
+        orgId,
+        "staff_hiring",
+        "edit",
       );
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sb = supabase as any;
       if (data.access_level) {
-        await assertCanInviteAt(sb, userId, data.organization_id, data.access_level, null);
+        await assertCanInviteAt(supabase, userId, orgId, data.access_level, null);
       }
+      if (!data.user_ids.length) return empty;
       await assertInviteRate(userId);
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const admin = supabaseAdmin as any;
+
+      type Member = {
+        user_id: string;
+        access_level: AccessLevel;
+        access_preset_id: string | null;
+        active: boolean | null;
+      };
+      const { data: members, error: memErr } = await admin
+        .from("organization_members")
+        .select("user_id, access_level, access_preset_id, active")
+        .is("deleted_at", null)
+        .eq("organization_id", orgId)
+        .in("user_id", data.user_ids);
+      if (memErr) throw new Error(memErr.message);
+      const memberById = new Map<string, Member>(
+        ((members ?? []) as Member[]).map((m) => [m.user_id, m]),
+      );
+      const profileById = new Map(
+        (
+          await selectIn<{
+            id: string;
+            email: string | null;
+            must_change_password: boolean | null;
+          }>(
+            (ids) => admin.from("profiles").select("id, email, must_change_password").in("id", ids),
+            [...memberById.keys()],
+          )
+        ).map((p) => [p.id, p]),
+      );
+      // The member rules (guards.ts), with the actor's category already checked above.
+      const guard = {
+        requireCategory: async () => ({ level: actor.level, scope: actor.scope }),
+        canSeeStaff: async (staffId: string) => {
+          const { data: ok, error } = await admin.rpc("access_can_see_staff", {
+            _org: orgId,
+            _staff: staffId,
+            _viewer: userId,
+          });
+          if (error) throw new Error(error.message);
+          return ok === true;
+        },
+        loadTargetLevel: async (staffId: string) => memberById.get(staffId)?.access_level ?? null,
+      };
+
+      const results: InviteTargetResult[] = [];
+      let sent = 0;
+      let skipped = 0;
+      let errors = 0;
+      const refuse = (email: string, id: string, reason: string) => {
+        skipped += 1;
+        results.push({ email, user_id: id, status: "skipped", reason });
+      };
+
       type Target = {
-        userId: string | null;
+        userId: string;
         email: string;
         level: AccessLevel;
         presetId: string | null;
         mustChange: boolean | null;
       };
       const targets = new Map<string, Target>();
-
-      if (data.user_ids.length) {
-        const { data: members, error: memErr } = await sb
-          .from("organization_members")
-          .select("user_id, access_level, access_preset_id")
-          .is("deleted_at", null)
-          .eq("organization_id", data.organization_id)
-          .in("user_id", data.user_ids);
-        if (memErr) throw new Error(memErr.message);
-        type MemberAccessPick = {
-          user_id: string;
-          access_level: AccessLevel;
-          access_preset_id: string | null;
-        };
-        const ids = (members ?? []).map((m: MemberAccessPick) => m.user_id);
-        const accessByUser = new Map<string, MemberAccessPick>(
-          (members ?? []).map((m: MemberAccessPick) => [m.user_id, m]),
-        );
-        if (ids.length) {
-          const { data: profs, error: pErr } = await sb
-            .from("profiles")
-            .select("id, email, must_change_password")
-            .in("id", ids);
-          if (pErr) throw new Error(pErr.message);
-          for (const p of profs ?? []) {
-            const email = String(p.email ?? "")
-              .trim()
-              .toLowerCase();
-            if (!email) continue;
-            targets.set(email, {
-              userId: p.id,
-              email,
-              level: data.access_level ?? accessByUser.get(p.id)?.access_level ?? "staff",
-              presetId: data.access_level
-                ? null
-                : (accessByUser.get(p.id)?.access_preset_id ?? null),
-              mustChange: p.must_change_password ?? null,
-            });
-          }
+      for (const id of new Set(data.user_ids)) {
+        const member = memberById.get(id);
+        const profile = profileById.get(id);
+        const email = inviteEmailKey(profile?.email);
+        try {
+          await runManageMemberGuard(
+            { actorId: userId, targetUserId: id, action: "invite" },
+            guard,
+          );
+        } catch (e) {
+          refuse(email, id, e instanceof Error ? e.message : "You can't invite this person.");
+          continue;
         }
-      }
-
-      for (const raw of data.emails) {
-        const email = raw.trim().toLowerCase();
-        if (targets.has(email)) continue;
+        if (member?.active === false) {
+          refuse(email, id, DEACTIVATED_INVITE_MESSAGE);
+          continue;
+        }
+        if (!email) {
+          refuse("", id, "They have no email on file. Add one on their profile first.");
+          continue;
+        }
         targets.set(email, {
-          userId: null,
+          userId: id,
           email,
-          level: data.access_level ?? "staff",
-          presetId: null,
-          mustChange: true,
+          level: data.access_level ?? member?.access_level ?? "staff",
+          presetId: data.access_level ? null : (member?.access_preset_id ?? null),
+          mustChange: profile?.must_change_password ?? null,
         });
       }
 
       const emails = [...targets.keys()];
       const inviteByEmail = new Map<string, string>();
       if (emails.length) {
-        const { data: invites, error: invErr } = await sb
+        const { data: invites, error: invErr } = await admin
           .from("invitations")
           .select("email, status")
-          .eq("organization_id", data.organization_id)
+          .eq("organization_id", orgId)
           .in("email", emails);
         if (invErr) throw new Error(invErr.message);
         for (const row of invites ?? []) {
@@ -746,11 +819,6 @@ export const inviteStaffMembers = createServerFn({ method: "POST" })
           }
         }
       }
-
-      const results: InviteTargetResult[] = [];
-      let sent = 0;
-      let skipped = 0;
-      let errors = 0;
 
       for (const t of targets.values()) {
         const invitationStatus = inviteByEmail.get(t.email) ?? null;
@@ -781,8 +849,8 @@ export const inviteStaffMembers = createServerFn({ method: "POST" })
 
         try {
           const out = await upsertPendingInviteAndSend({
-            supabase: sb,
-            organizationId: data.organization_id,
+            supabase: admin,
+            organizationId: orgId,
             userId,
             email: t.email,
             level: t.level,

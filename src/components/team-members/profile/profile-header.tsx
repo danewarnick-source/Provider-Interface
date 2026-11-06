@@ -170,7 +170,7 @@ export function ProfileHeader({
     },
     onSuccess: (out) => {
       if (out.email_sent) toast.success(`Invite emailed to ${p.email}`);
-      else if (out.rpc_failure) toast.error(out.message);
+      else if (out.rpc_failure || out.refused) toast.error(out.message);
       else
         toast.warning(`Invite saved, but the email didn't send: ${out.email_error ?? out.message}`);
       onChanged();

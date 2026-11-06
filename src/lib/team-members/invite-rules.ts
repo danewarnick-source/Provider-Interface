@@ -1,8 +1,9 @@
-// Pure rules for pending team-member invites: who sees one in the Invited view,
-// who may cancel it, and how the cached Invited list changes when an invite or
-// a person goes away. No Supabase, no aliases — importable by node --test.
-// Callers: listTeamInvites (invites.functions.ts), revokeInvitation
-// (invite-cancel.functions.ts), InvitesView / CancelInviteDialog, useMemberLeft.
+// Pure rules for team-member invites: who sees one in the Invited view, who may
+// send, resend or cancel it, and how the cached Invited list changes when an
+// invite or a person goes away. No Supabase, no aliases — importable by node
+// --test. Callers: listTeamInvites / resendInvitation (invites.functions.ts),
+// revokeInvitation (invite-cancel.functions.ts), InvitesView /
+// CancelInviteDialog, useMemberLeft.
 //
 // Deleting or deactivating a person cancels their pending invites in the
 // database (trg_member_leave_revokes_invites); nothing here re-checks that.
@@ -35,6 +36,27 @@ export function inviteVisibleTo(args: {
     args.invitedBy === args.viewerId ||
     args.visibleEmails.has(inviteEmailKey(args.email))
   );
+}
+
+export const OWNER_INVITE_MESSAGE = "Only an Owner can invite someone to be an Owner.";
+export const NEW_ADMIN_INVITE_MESSAGE = "Only an Owner can invite someone new to be an Admin.";
+
+/**
+ * Why this viewer can't send or resend an invite at this level, or null. An
+ * invite hands out its level: only an Owner hands out Owner, and only an Owner
+ * brings someone new in as an Admin. Re-inviting an existing member at the
+ * access they already hold is fine for anyone with Hire & deactivate Edit.
+ */
+export function sendInviteBlockedReason(args: {
+  level: string | null | undefined;
+  /** The invite is for someone already on this agency's roster. */
+  forMember: boolean;
+  viewerIsOwner: boolean;
+}): string | null {
+  if (args.viewerIsOwner) return null;
+  if (isOwner(args.level)) return OWNER_INVITE_MESSAGE;
+  if (args.level === "admin" && !args.forMember) return NEW_ADMIN_INVITE_MESSAGE;
+  return null;
 }
 
 export const CANCEL_OWNER_INVITE_MESSAGE = "Only an Owner can cancel an invite to be an Owner.";

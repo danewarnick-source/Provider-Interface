@@ -1151,6 +1151,9 @@ function serverFnPayload(url: string, body: string): unknown {
     if (body.includes(PENDING_INVITE.id)) canceledInviteIds.add(PENDING_INVITE.id);
     return { invitationId: PENDING_INVITE.id };
   }
+  if (/^resendInvitation/.test(fn)) {
+    return { invitation: { ...PENDING_INVITE }, email_sent: true, email_error: null };
+  }
   if (/createInvitation/i.test(fn)) {
     let email = "invited@example.test";
     const m = `${url}\n${body}`.match(/sep1\.tester@example\.test|[a-z0-9._%+-]+@example\.test/i);

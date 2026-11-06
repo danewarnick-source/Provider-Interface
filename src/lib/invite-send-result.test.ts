@@ -72,11 +72,71 @@ describe("interpretInviteSendResult", () => {
       sent: 0,
       skipped: 0,
       errors: 1,
-      results: [{ email: "a@b.org", status: "created_unsent", reason: "No reply-to address configured" }],
+      results: [
+        { email: "a@b.org", status: "created_unsent", reason: "No reply-to address configured" },
+      ],
     });
     assert.equal(out.rpc_failure, false);
     assert.equal(out.sent, 0);
     assert.equal(out.email_error, "No reply-to address configured");
+    assert.equal(out.refused, false, "the invite was saved; only the email failed");
+  });
+
+  it("refused: nobody was invited, so the reason is an error, never 'Invite saved'", () => {
+    const out = interpretInviteSendResult({
+      sent: 0,
+      skipped: 1,
+      errors: 0,
+      email_sent: false,
+      email_error: null,
+      results: [
+        {
+          email: "owner@agency.org",
+          user_id: "u2",
+          status: "skipped",
+          reason: "Only an Owner can do this to an Owner",
+        },
+      ],
+    });
+    assert.equal(out.refused, true);
+    assert.equal(out.rpc_failure, false);
+    assert.equal(out.email_sent, false);
+    assert.equal(out.message, "Only an Owner can do this to an Owner");
+  });
+
+  it("refused covers a request that failed before anything was saved", () => {
+    const out = interpretInviteSendResult({
+      invitation: null,
+      email_sent: false,
+      email_error: "Forbidden: requires edit on staff_hiring",
+      sent: 0,
+      skipped: 0,
+      errors: 1,
+      results: [
+        {
+          email: "",
+          user_id: null,
+          status: "error",
+          reason: "Forbidden: requires edit on staff_hiring",
+        },
+      ],
+    });
+    assert.equal(out.refused, true);
+    assert.equal(out.message, "Forbidden: requires edit on staff_hiring");
+  });
+
+  it("not refused when anyone was invited or saved", () => {
+    const sentOne = interpretInviteSendResult({
+      sent: 1,
+      skipped: 1,
+      results: [
+        { email: "a@b.org", status: "sent", reason: null },
+        { email: "o@b.org", status: "skipped", reason: "Only an Owner can do this to an Owner" },
+      ],
+    });
+    assert.equal(sentOne.refused, false);
+    assert.equal(sentOne.email_sent, true);
+    assert.equal(interpretInviteSendResult(undefined).refused, false, "rpc_failure covers it");
   });
 });
 

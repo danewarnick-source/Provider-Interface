@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Ban, Copy, Loader2, Mail, RefreshCcw } from "lucide-react";
@@ -9,7 +9,10 @@ import { useAccess } from "@/hooks/use-access";
 import { interpretInviteSendResult } from "@/lib/invite-send-result";
 import { inviteJoinUrl } from "@/lib/join-invite";
 import { inviteStaffMembers, resendInvitation } from "@/lib/team-members/invites.functions";
-import { cancelInviteBlockedReason } from "@/lib/team-members/invite-rules";
+import {
+  cancelInviteBlockedReason,
+  sendInviteBlockedReason,
+} from "@/lib/team-members/invite-rules";
 import {
   formatRosterDate,
   rosterQueryKey,
@@ -56,6 +59,11 @@ export function InvitesView({
                 row={row}
                 organizationId={organizationId}
                 canEdit={canEdit}
+                sendBlocked={sendInviteBlockedReason({
+                  level: row.accessLevel,
+                  forMember: !!row.userId,
+                  viewerIsOwner: isOwner,
+                })}
                 cancelBlocked={cancelInviteBlockedReason(row.accessLevel, isOwner)}
                 onUninvite={() => askCancel(row)}
               />
@@ -77,12 +85,15 @@ function InviteRowItem({
   row,
   organizationId,
   canEdit,
+  sendBlocked,
   cancelBlocked,
   onUninvite,
 }: {
   row: TeamInviteRow;
   organizationId: string | null;
   canEdit: boolean;
+  /** Why this viewer can't send or resend this invite, or null. */
+  sendBlocked: string | null;
   /** Why this viewer can't cancel this invite, or null. */
   cancelBlocked: string | null;
   onUninvite: () => void;
@@ -113,7 +124,7 @@ function InviteRowItem({
     onSuccess: (res) => {
       const out = interpretInviteSendResult(res);
       if (out.email_sent) toast.success(`Invite emailed to ${row.email} — expires in 14 days`);
-      else if (out.rpc_failure) toast.error(out.message);
+      else if (out.rpc_failure || out.refused) toast.error(out.message);
       else
         toast.warning(`Invite saved, but the email didn't send: ${out.email_error ?? out.message}`);
       refresh();
@@ -132,17 +143,6 @@ function InviteRowItem({
   };
 
   const busy = act.isPending;
-  const uninvite = (
-    <Button
-      variant="ghost"
-      size="sm"
-      className="text-destructive hover:text-destructive"
-      disabled={busy || !!cancelBlocked}
-      onClick={onUninvite}
-    >
-      <Ban className="mr-1 h-3.5 w-3.5" /> Uninvite
-    </Button>
-  );
   return (
     <li className="flex flex-col gap-3 p-4 text-sm md:flex-row md:items-center md:justify-between">
       <div className="min-w-0 space-y-0.5">
@@ -182,42 +182,56 @@ function InviteRowItem({
           {busy && <Loader2 className="mr-1 h-4 w-4 animate-spin text-muted-foreground" />}
           {row.status === "pending" ? (
             <>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={busy}
-                onClick={() => act.mutate("resend")}
-              >
-                <RefreshCcw className="mr-1 h-3.5 w-3.5" /> Resend
-              </Button>
+              <WithReason reason={sendBlocked}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={busy || !!sendBlocked}
+                  onClick={() => act.mutate("resend")}
+                >
+                  <RefreshCcw className="mr-1 h-3.5 w-3.5" /> Resend
+                </Button>
+              </WithReason>
               <Button variant="outline" size="sm" onClick={() => void copyLink()}>
                 <Copy className="mr-1 h-3.5 w-3.5" /> Copy link
               </Button>
-              {cancelBlocked ? (
-                // Disabled buttons swallow pointer events; the wrapper carries the tooltip.
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span
-                      tabIndex={0}
-                      aria-label={cancelBlocked}
-                      className="inline-flex cursor-not-allowed"
-                    >
-                      {uninvite}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>{cancelBlocked}</TooltipContent>
-                </Tooltip>
-              ) : (
-                uninvite
-              )}
+              <WithReason reason={cancelBlocked}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive"
+                  disabled={busy || !!cancelBlocked}
+                  onClick={onUninvite}
+                >
+                  <Ban className="mr-1 h-3.5 w-3.5" /> Uninvite
+                </Button>
+              </WithReason>
             </>
           ) : (
-            <Button size="sm" disabled={busy} onClick={() => act.mutate("send")}>
-              <Mail className="mr-1 h-3.5 w-3.5" /> Send invite
-            </Button>
+            <WithReason reason={sendBlocked}>
+              <Button size="sm" disabled={busy || !!sendBlocked} onClick={() => act.mutate("send")}>
+                <Mail className="mr-1 h-3.5 w-3.5" /> Send invite
+              </Button>
+            </WithReason>
           )}
         </div>
       )}
     </li>
+  );
+}
+
+/** A disabled button with its reason on hover/focus. Disabled buttons swallow
+ *  pointer events, so the wrapper carries the tooltip. */
+function WithReason({ reason, children }: { reason: string | null; children: ReactElement }) {
+  if (!reason) return children;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span tabIndex={0} aria-label={reason} className="inline-flex cursor-not-allowed">
+          {children}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{reason}</TooltipContent>
+    </Tooltip>
   );
 }

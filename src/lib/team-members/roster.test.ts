@@ -259,7 +259,7 @@ describe("Team roster page source lock", () => {
     // Send invite is the primary button (no outline variant).
     assert.match(
       src,
-      /<Button size="sm" disabled=\{busy\} onClick=\{\(\) => act\.mutate\("send"\)\}>/,
+      /<Button size="sm" disabled=\{busy \|\| !!sendBlocked\} onClick=\{\(\) => act\.mutate\("send"\)\}>/,
     );
     // Canceling removes the row, so the dialog lives once, after the list — never in a row.
     assert.match(src, /<CancelInviteDialog/);
@@ -268,9 +268,20 @@ describe("Team roster page source lock", () => {
       "dialog after the list",
     );
     assert.doesNotMatch(src, /revokeInvitation|AlertDialog/);
-    // An Owner invite is disabled for non-Owners, with the reason on hover/focus.
+    // Buttons the server would refuse are disabled, with the reason on hover/focus:
+    // Uninvite on an Owner invite; Resend / Send invite per sendInviteBlockedReason.
     assert.match(src, /cancelInviteBlockedReason\(row\.accessLevel, isOwner\)/);
-    assert.match(src, /<TooltipContent>\{cancelBlocked\}<\/TooltipContent>/);
+    assert.match(
+      src,
+      /sendInviteBlockedReason\(\{\s*level: row\.accessLevel,\s*forMember: !!row\.userId,/,
+    );
+    assert.match(src, /<WithReason reason=\{sendBlocked\}>\s*<Button\s+variant="outline"/);
+    assert.match(src, /<WithReason reason=\{cancelBlocked\}>/);
+    assert.match(src, /<TooltipContent>\{reason\}<\/TooltipContent>/);
+    // A refused send (nothing saved) is an error toast, never "Invite saved, but…".
+    for (const f of ["invites-view.tsx", "use-roster-actions.tsx"]) {
+      assert.match(roster(f), /out\.rpc_failure \|\| out\.refused\) toast\.error/, f);
+    }
 
     const dialog = roster("cancel-invite-dialog.tsx");
     assert.match(dialog, /<AlertDialog open=\{open\}/);

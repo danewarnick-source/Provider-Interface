@@ -596,6 +596,35 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await shot(page, "team_members_invite_canceled");
   });
 
+  test("as an Admin: Resend and Uninvite work; Send invite to an Owner is disabled with the reason", async ({
+    page,
+  }) => {
+    // Harvey is an Admin (Program Manager preset: Hire & deactivate Edit), not an Owner.
+    await installHiveMocks(page, { persona: "manager" });
+    await gotoAdmin(page, "/dashboard/team-members?view=invited");
+    const invited = page.getByTestId("invites-view");
+    await expect(invited.getByText("new.dsp@example.test")).toBeVisible({ timeout: 20_000 });
+
+    // The Owner's own row: only an Owner can invite someone to be an Owner.
+    const reason = "Only an Owner can invite someone to be an Owner.";
+    await expect(invited.getByRole("button", { name: /^Send invite$/i })).toBeDisabled();
+    await invited.getByLabel(reason).focus();
+    await expect(page.getByRole("tooltip")).toContainText(reason);
+    await shot(page, "team_members_invited_as_admin");
+
+    // A team member invite: Resend goes through for an Admin.
+    await invited.getByRole("button", { name: /Resend/i }).click();
+    await expect(
+      page.getByText("Invite emailed to new.dsp@example.test — expires in 14 days"),
+    ).toBeVisible();
+
+    // And so does Uninvite.
+    await invited.getByRole("button", { name: /Uninvite/i }).click();
+    await page.getByRole("alertdialog").getByRole("button", { name: "Cancel invite" }).click();
+    await expect(page.getByText("Invite canceled.")).toBeVisible();
+    await expect(invited.getByText("new.dsp@example.test")).toHaveCount(0);
+  });
+
   test("roster hides the Home filter when the org has no homes", async ({ page }) => {
     await installHiveMocks(page, { persona: "admin", noHomes: true });
     await gotoAdmin(page, "/dashboard/team-members?filter=bogus,review,missing");

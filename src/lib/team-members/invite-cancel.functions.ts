@@ -13,20 +13,15 @@ import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireCategory } from "@/lib/access/require";
+import { cancelInviteBlockedReason } from "@/lib/team-members/invite-rules";
 import {
-  cancelInviteBlockedReason,
-  inviteEmailKey,
-  inviteVisibleTo,
-} from "@/lib/team-members/invite-rules";
-import { loadVisibleMembers } from "@/lib/team-members/roster.functions";
+  INVITE_GONE_MESSAGE,
+  INVITE_USED_MESSAGE,
+  assertCanSeeInvite,
+} from "@/lib/team-members/invite-guard.server";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = SupabaseClient<any>;
-
-export const INVITE_GONE_MESSAGE =
-  "This invite is no longer on your Invited list. Refresh the page.";
-export const INVITE_USED_MESSAGE =
-  "They already joined with this invite. To remove their access, deactivate them.";
 
 type InviteRow = {
   id: string;
@@ -64,26 +59,13 @@ export const revokeInvitation = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     const invite = found as InviteRow | null;
     if (!invite) throw new Error(INVITE_GONE_MESSAGE);
-
-    if (access.scope !== "agency" && invite.invited_by !== userId) {
-      const { members, profiles } = await loadVisibleMembers({
-        admin,
-        organizationId: orgId,
-        viewerId: userId,
-        scope: access.scope,
-      });
-      const visibleEmails = new Set(
-        members.map((m) => inviteEmailKey(profiles.get(m.user_id)?.email)).filter(Boolean),
-      );
-      const visible = inviteVisibleTo({
-        scope: access.scope,
-        viewerId: userId,
-        invitedBy: invite.invited_by,
-        email: invite.email,
-        visibleEmails,
-      });
-      if (!visible) throw new Error(INVITE_GONE_MESSAGE);
-    }
+    await assertCanSeeInvite({
+      admin,
+      organizationId: orgId,
+      viewerId: userId,
+      scope: access.scope,
+      invite,
+    });
     const blocked = cancelInviteBlockedReason(invite.access_level, access.level === "owner");
     if (blocked) throw new Error(blocked);
     if (invite.status === "accepted") throw new Error(INVITE_USED_MESSAGE);

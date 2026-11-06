@@ -28,6 +28,12 @@ export type InterpretedInviteSend = {
   results: InviteSendResultRow[];
   /** Hard RPC / missing-payload failure — toast as error, never read `.sent` raw. */
   rpc_failure: boolean;
+  /**
+   * Nothing was saved: every person was refused (e.g. "Only an Owner can do this
+   * to an Owner") or failed before an invite existed. Toast as error, never as
+   * "Invite saved, but…".
+   */
+  refused: boolean;
   message: string;
 };
 
@@ -71,6 +77,7 @@ export function interpretInviteSendResult(res: unknown): InterpretedInviteSend {
     email: null,
     results: [],
     rpc_failure: true,
+    refused: false,
     message: INVITE_SEND_UNCONFIRMED,
   };
 
@@ -119,6 +126,12 @@ export function interpretInviteSendResult(res: unknown): InterpretedInviteSend {
 
   if (!hasInviteShape) return empty;
 
+  const refused =
+    !email_sent &&
+    !createdUnsent &&
+    results.length > 0 &&
+    results.every((r) => r.status === "skipped" || r.status === "error");
+
   let message: string;
   if (email_sent) {
     message = firstEmail
@@ -126,6 +139,8 @@ export function interpretInviteSendResult(res: unknown): InterpretedInviteSend {
       : sent === 1
         ? "Invite emailed."
         : `Invited ${sent} team members.`;
+  } else if (refused) {
+    message = firstReason(results, null) ?? "Invite was not sent.";
   } else if (createdUnsent || emailError) {
     message = `Invitation created, but the email couldn't be sent (${emailError ?? "unknown error"}). Share the join link from Pending invitations.`;
   } else {
@@ -141,6 +156,7 @@ export function interpretInviteSendResult(res: unknown): InterpretedInviteSend {
     email: firstEmail,
     results,
     rpc_failure: false,
+    refused,
     message,
   };
 }
