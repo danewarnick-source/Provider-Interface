@@ -1154,21 +1154,6 @@ function serverFnPayload(url: string, body: string): unknown {
   if (/^resendInvitation/.test(fn)) {
     return { invitation: { ...PENDING_INVITE }, email_sent: true, email_error: null };
   }
-  if (/createInvitation/i.test(fn)) {
-    let email = "invited@example.test";
-    const m = `${url}\n${body}`.match(/sep1\.tester@example\.test|[a-z0-9._%+-]+@example\.test/i);
-    if (m) email = m[0];
-    return {
-      invitation: {
-        ...PENDING_INVITE,
-        id: "00000000-0000-4000-a000-000000000402",
-        email,
-        token: "mock-invite-created",
-      },
-      email_sent: true,
-      email_error: null,
-    };
-  }
   if (/checkHiveExecutive/i.test(fn)) return { isExecutive: false };
   if (/getAgencySetupStatus/i.test(fn)) {
     // Mocked TNS has finished agency setup, so the Employees/Clients create gate stays open.

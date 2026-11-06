@@ -5,7 +5,7 @@
  *
  * Accept both payload families:
  *   - inviteStaffMembers: { sent, skipped, errors, results }
- *   - createInvitation / resendInvitation: { invitation, email_sent, email_error }
+ *   - resendInvitation: { invitation, email_sent, email_error }
  */
 
 export const INVITE_SEND_UNCONFIRMED =
@@ -158,22 +158,5 @@ export function interpretInviteSendResult(res: unknown): InterpretedInviteSend {
     rpc_failure: false,
     refused,
     message,
-  };
-}
-
-export function resendInviteToastMessage(outcome: InterpretedInviteSend): {
-  tone: "success" | "warning" | "error";
-  text: string;
-} {
-  if (outcome.rpc_failure) {
-    return { tone: "error", text: outcome.message };
-  }
-  if (outcome.email_sent) {
-    const who = outcome.email ? ` to ${outcome.email}` : "";
-    return { tone: "success", text: `Invitation re-emailed${who} — expires in 14 days` };
-  }
-  return {
-    tone: "warning",
-    text: `Invitation refreshed, but the email couldn't be sent (${outcome.email_error ?? "unknown error"}). Share the link manually instead.`,
   };
 }
