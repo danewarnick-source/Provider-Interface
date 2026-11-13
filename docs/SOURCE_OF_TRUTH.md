@@ -22,7 +22,6 @@ Every fact has exactly one owner: one table (or column) and one lib file that re
 | Where a client lives (home) | `clients.team_id` → `teams` | `src/lib/clients/` |
 | Homes, their kind and lead (the host, on a host home), address, capacity, archive | `teams` (`team_type`, `manager_id`, `address`, `capacity`, `active`/`archived_*`) | `src/lib/homes/home-kind.ts`, `home-setup.ts`, `homes.functions.ts` (Settings › Homes) |
 | How many staff a home needs, and when | `location_coverage_requirements` by `team_id` | `src/lib/homes/staffing-needs.ts` |
-| A client's staffing ratio | `client_billing_codes.ratio` (per authorization) | `src/lib/clients/services/ratio.ts` |
 | Staff requirements, proof, renewals | `evidence_items`, `evidence_files` | `src/lib/evidence/`, `src/lib/evidence.functions.ts` |
 | Hours worked / EVV | `evv_timesheets` | `src/lib/billing-units.ts`, EVV lib |
 | Scheduled work | `scheduled_shifts` | `src/lib/scheduler/` |
