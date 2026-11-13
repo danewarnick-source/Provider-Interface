@@ -2,27 +2,29 @@
 // why not?" Pure; no database calls. Callers load the facts into a RuleContext
 // (see rules-types.ts) and pass the proposed shift(s).
 //
-// Every finding is { rule, level: 'block' | 'warn', message, fix? }. SOW rules
-// are always on; Agency rules follow ctx.settings. Evidence-based qualification
-// reminders come from qualificationsOnDate (Decision 14) and are always warns
-// (Decision 15). After S3, no other file may add its own "can this shift exist"
-// check.
+// Every finding is { rule, level: 'block' | 'reason' | 'warn', message, fix? }.
+// Each rule returns its default level; applyStrength (rules-strength.ts) then
+// applies the agency's Off / Warn / Reason / Block choice from ctx.settings.
+// Evidence reminders come from qualificationsOnDate (default Warn). No other
+// file may add its own "can this shift exist" check: server callers go through
+// shift-guard.server.ts.
 import { authorizationRule, enhancedStaffingRule, groupRules, hourCapRules, overlapRules,
   sameDayEmploymentRule, segmentRules, staffStatusRules, teamRules, twoToOneRule } from "./rules-core.ts";
 import { absenceRule, asleepRule, custodyRule, mtpRules, nursingRules, relationshipCodeRule,
   supportedLivingRespiteRules } from "./rules-contract.ts";
 import { behaviorConsultRule, daySupportRules, employmentRules, eprRules, hostHomeRules,
   residentialRule, respiteRules, tfbAndElsRules } from "./rules-contract2.ts";
-import { qualificationFindings, qualificationsOnDate } from "./rules-qualifications.ts";
+import { driverFileFindings, qualificationFindings, qualificationsOnDate } from "./rules-qualifications.ts";
+import { applyStrength } from "./rules-strength.ts";
 import type { Finding, RuleContext, RuleShift } from "./rules-types.ts";
 import { clientOf, find, firstName, isLive, staffOf, up } from "./rules-util.ts";
-import { assumedRatioRule, availabilityRule, dsiHoursRule, fatigueRule, overtimeRule, preferenceRule,
+import { assumedRatioRule, availabilityRule, fatigueRule, overtimeRule, preferenceRule,
   restAndStraightRules, travelGapRule, windowRequirementRules, worksheetHoursRule } from "./rules-warn.ts";
 
-export type { Finding, Fix, Level, RuleContext, RuleShift } from "./rules-types.ts";
+export type { Finding, Fix, Level, RuleContext, RuleShift, Strength } from "./rules-types.ts";
 export { qualificationsOnDate } from "./rules-qualifications.ts";
 
-/** Minimum staff age (Decision 4): 16; 18 to drive or for DCFS/DJJYS clients; 21 for HHS/PPS. */
+/** Minimum staff age (Decision 3): 16; 18 to drive (§1.5(1)) or for DCFS/DJJYS clients; 21 for HHS/PPS. */
 export function minStaffAgeForCode(
   code: string | null | undefined,
   opts: { driving?: boolean; custody?: "none" | "dcfs" | "djjys" | null; agencyFloor18?: boolean } = {},
@@ -36,12 +38,14 @@ export function minStaffAgeForCode(
 function ageRule(s: RuleShift, ctx: RuleContext): Finding[] {
   const staff = staffOf(ctx, s);
   if (!staff || staff.age === null) return [];
+  const driving = !!s.driving || !!s.vanRouteId;
   const need = minStaffAgeForCode(s.code, {
-    driving: !!s.driving, custody: clientOf(ctx, s)?.custody, agencyFloor18: !!ctx.settings.minAge18,
+    driving, custody: clientOf(ctx, s)?.custody, agencyFloor18: !!ctx.settings.minAge18,
   });
-  return staff.age < need
-    ? [find("under_minimum_age", "block", `${firstName(staff.name)} is ${staff.age}; ${up(s.code)} here needs ${need}+ (Decision 4)`)]
-    : [];
+  if (staff.age >= need) return [];
+  const what = driving && need === 18 ? "driving clients" : `${up(s.code)} here`;
+  return [find("under_minimum_age", "block",
+    `${firstName(staff.name)} is ${staff.age}; ${what} needs ${need}+${driving ? " (§1.5(1))" : ""}`)];
 }
 
 function qualificationRules(s: RuleShift, ctx: RuleContext): Finding[] {
@@ -53,14 +57,20 @@ function qualificationRules(s: RuleShift, ctx: RuleContext): Finding[] {
     clientName: client?.name,
     behaviorSupport: client?.behaviorSupport,
     hasAbi: client?.hasAbi,
-    driving: s.driving,
+    // A van driver's license is part of the driver file below.
+    driving: s.driving && !s.vanRouteId,
   });
-  return qualificationFindings(results);
+  const driverFile = s.vanRouteId ? driverFileFindings(staff, s, ctx.evidence[staff.id]) : [];
+  return [...qualificationFindings(results), ...driverFile];
 }
 
-/** Every finding for one shift. `batch` = other shifts proposed in the same save. */
+/** Every finding for one shift, at the agency's strengths. `batch` = other shifts proposed in the same save. */
 export function evaluateShift(shift: RuleShift, ctx: RuleContext, batch: readonly RuleShift[] = []): Finding[] {
   if (!isLive(shift)) return [];
+  return applyStrength(rawFindings(shift, ctx, batch), ctx.settings.rules);
+}
+
+function rawFindings(shift: RuleShift, ctx: RuleContext, batch: readonly RuleShift[]): Finding[] {
   return [
     ...authorizationRule(shift, ctx, batch),
     ...teamRules(shift, ctx),
@@ -89,7 +99,6 @@ export function evaluateShift(shift: RuleShift, ctx: RuleContext, batch: readonl
     ...daySupportRules(shift, ctx, batch),
     ...tfbAndElsRules(shift, ctx, batch),
     ...qualificationRules(shift, ctx),
-    ...dsiHoursRule(shift, ctx, batch),
     ...worksheetHoursRule(shift, ctx, batch),
     ...restAndStraightRules(shift, ctx, batch),
     ...overtimeRule(shift, ctx, batch),
@@ -108,14 +117,4 @@ export function evaluateShifts(shifts: readonly RuleShift[], ctx: RuleContext): 
     evaluateShift(s, ctx, shifts.filter((o) => o.id !== s.id)).map((f) => ({ ...f, shiftId: s.id })));
 }
 
-export function hasBlock(findings: readonly Finding[]): boolean {
-  return findings.some((f) => f.level === "block");
-}
-
-export function blocksOf(findings: readonly Finding[]): Finding[] {
-  return findings.filter((f) => f.level === "block");
-}
-
-export function warningsOf(findings: readonly Finding[]): Finding[] {
-  return findings.filter((f) => f.level === "warn");
-}
+export { refusalLine, verdictOf, warningLines, type Verdict } from "./rules-strength.ts";

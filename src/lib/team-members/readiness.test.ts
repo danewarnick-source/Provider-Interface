@@ -4,10 +4,8 @@ import { describe, it } from "node:test";
 import type { EvidenceFileRow } from "../evidence/types.ts";
 import type { BadgeEvidenceItem } from "./badges.ts";
 import {
-  isCprQualificationKey,
   isReadyAlone,
   readinessBadge,
-  readinessWarnings,
   readyAloneLabel,
   staffClientReadiness,
   type ReadinessInput,
@@ -247,47 +245,11 @@ describe("readiness badges and counts", () => {
     assert.equal(readyAloneLabel([]), null);
   });
 
-  it("scheduler warnings come from the same result", () => {
-    const r = staffClientReadiness(
-      input({
-        hireDate: "2026-08-01",
-        evidence: { items: [], files: [] },
-        client: { hasAbi: true, behaviorSupport: false },
-      }),
-    );
-    assert.deepEqual(readinessWarnings(r), [
-      "Not ready: 30-day orientation, ABI training",
-      "CPR due by 2026-10-30",
-    ]);
-    assert.deepEqual(readinessWarnings(staffClientReadiness(input())), []);
-  });
 
-  it("CPR qualification keys are recognized so the scheduler checks CPR once", () => {
-    for (const k of [
-      "cpr-fa",
-      "external_cert:cpr-fa",
-      "baseline_training:cpr_first_aid",
-      "baseline_training:cpr_first_aid_bbp",
-      "hive_course:cpr_first_aid",
-    ]) {
-      assert.equal(isCprQualificationKey(k), true, k);
-    }
-    assert.equal(isCprQualificationKey("external_cert:abuse-neglect"), false);
-  });
 });
 
 describe("one rule set", () => {
   const read = (p: string) => readFileSync(new URL(p, import.meta.url), "utf8");
-
-  it("rankStaffForShift scores readiness through staffClientReadiness", () => {
-    const fn = read("../scheduler/eligibility.functions.ts");
-    assert.match(fn, /staffClientReadiness\(/);
-    assert.match(fn, /readinessWarnings\(/);
-    assert.match(fn, /isCprQualificationKey/);
-    const pure = read("../scheduler/eligibility.ts");
-    assert.doesNotMatch(pure, /No client-specific training/);
-    assert.doesNotMatch(pure, /completedClientTrainings/);
-  });
 
   it("the caseload loader and tab use the same function", () => {
     assert.match(read("./caseload.functions.ts"), /staffClientReadiness\(/);

@@ -9,7 +9,6 @@ export type ShiftRow = {
   staff_id: string | null;
   client_id: string;
   service_code: string | null;
-  job_code: string | null;
   starts_at: string;
   ends_at: string;
   shift_type: string | null;
@@ -39,7 +38,7 @@ export function projectShifts(
     const targetStart = shiftByDays(s.starts_at, daysBetween(srcKey, targetKey));
     const durationMs = new Date(s.ends_at).getTime() - new Date(s.starts_at).getTime();
     const targetEnd = new Date(new Date(targetStart).getTime() + durationMs).toISOString();
-    const key = `${s.client_id}|${(s.service_code ?? s.job_code ?? "").toUpperCase()}|${weekday}|${new Date(targetStart).toISOString().slice(11, 16)}|${s.staff_id ?? ""}`;
+    const key = `${s.client_id}|${(s.service_code ?? "").toUpperCase()}|${weekday}|${new Date(targetStart).toISOString().slice(11, 16)}|${s.staff_id ?? ""}`;
     if (usedKey.has(key)) continue;
     usedKey.add(key);
     out.push({

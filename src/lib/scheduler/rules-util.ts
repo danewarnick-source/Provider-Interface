@@ -1,8 +1,6 @@
 // Small shared helpers for the rule files. Pure; all day math is Denver.
 import { addDaysKey, dayKey, weekStartKey } from "./time.ts";
-import type {
-  AgencyRuleKey, ClientFacts, Finding, Level, RuleContext, RuleShift, StaffFacts,
-} from "./rules-types.ts";
+import type { ClientFacts, Finding, Level, RuleContext, RuleShift, StaffFacts } from "./rules-types.ts";
 
 export const MS_HOUR = 3_600_000;
 
@@ -56,13 +54,6 @@ export function othersOf(s: RuleShift, ctx: RuleContext, batch: readonly RuleShi
     out.push(o);
   }
   return out;
-}
-
-/** Level for an Agency rule: null when the agency turned it off. */
-export function agencyLevel(ctx: RuleContext, key: AgencyRuleKey, dflt: Level): Level | null {
-  const r = ctx.settings.rules?.[key];
-  if (!r) return dflt;
-  return r.enabled ? r.level : null;
 }
 
 export function find(rule: string, level: Level, message: string, fix?: Finding["fix"]): Finding {

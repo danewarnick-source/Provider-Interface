@@ -2444,6 +2444,7 @@ export type Database = {
           rate_source_at: string | null
           rate_source_document_id: string | null
           rate_source_plan_number: string | null
+          ratio: string | null
           sce: string | null
           service_code: string
           service_end_date: string | null
@@ -2451,6 +2452,8 @@ export type Database = {
           unit_type: string
           updated_at: string
           weekly_cap_units: number | null
+          worksheet_absence_days: number | null
+          worksheet_weekly_hours: number | null
         }
         Insert: {
           annual_unit_authorization?: number
@@ -2468,6 +2471,7 @@ export type Database = {
           rate_source_at?: string | null
           rate_source_document_id?: string | null
           rate_source_plan_number?: string | null
+          ratio?: string | null
           sce?: string | null
           service_code: string
           service_end_date?: string | null
@@ -2475,6 +2479,8 @@ export type Database = {
           unit_type?: string
           updated_at?: string
           weekly_cap_units?: number | null
+          worksheet_absence_days?: number | null
+          worksheet_weekly_hours?: number | null
         }
         Update: {
           annual_unit_authorization?: number
@@ -2492,6 +2498,7 @@ export type Database = {
           rate_source_at?: string | null
           rate_source_document_id?: string | null
           rate_source_plan_number?: string | null
+          ratio?: string | null
           sce?: string | null
           service_code?: string
           service_end_date?: string | null
@@ -2499,6 +2506,8 @@ export type Database = {
           unit_type?: string
           updated_at?: string
           weekly_cap_units?: number | null
+          worksheet_absence_days?: number | null
+          worksheet_weekly_hours?: number | null
         }
         Relationships: [
           {
@@ -7436,6 +7445,7 @@ export type Database = {
           organization_id: string
           original_transcript: string | null
           outside_geofence_reason: string | null
+          override_reason: string | null
           raw_clock_in: string | null
           raw_clock_out: string | null
           reconciliation_attestation: string | null
@@ -7450,6 +7460,7 @@ export type Database = {
           reviewed_by: string | null
           rounded_clock_in: string | null
           rounded_clock_out: string | null
+          scheduled_shift_id: string | null
           service_type_code: string
           shift_entry_type: string
           shift_note_text: string | null
@@ -7525,6 +7536,7 @@ export type Database = {
           organization_id: string
           original_transcript?: string | null
           outside_geofence_reason?: string | null
+          override_reason?: string | null
           raw_clock_in?: string | null
           raw_clock_out?: string | null
           reconciliation_attestation?: string | null
@@ -7539,6 +7551,7 @@ export type Database = {
           reviewed_by?: string | null
           rounded_clock_in?: string | null
           rounded_clock_out?: string | null
+          scheduled_shift_id?: string | null
           service_type_code: string
           shift_entry_type: string
           shift_note_text?: string | null
@@ -7614,6 +7627,7 @@ export type Database = {
           organization_id?: string
           original_transcript?: string | null
           outside_geofence_reason?: string | null
+          override_reason?: string | null
           raw_clock_in?: string | null
           raw_clock_out?: string | null
           reconciliation_attestation?: string | null
@@ -7628,6 +7642,7 @@ export type Database = {
           reviewed_by?: string | null
           rounded_clock_in?: string | null
           rounded_clock_out?: string | null
+          scheduled_shift_id?: string | null
           service_type_code?: string
           shift_entry_type?: string
           shift_note_text?: string | null
@@ -7673,6 +7688,13 @@ export type Database = {
             columns: ["matched_approved_location_id"]
             isOneToOne: false
             referencedRelation: "client_approved_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evv_timesheets_scheduled_shift_id_fkey"
+            columns: ["scheduled_shift_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_shifts"
             referencedColumns: ["id"]
           },
         ]
@@ -15259,9 +15281,11 @@ export type Database = {
       scheduled_shifts: {
         Row: {
           callout_reason: string | null
+          cancelled_at: string | null
           claim_requested_by: string | null
-          client_id: string
+          client_id: string | null
           code_id: string | null
+          confirmed_at: string | null
           created_at: string
           created_by: string | null
           created_from: string | null
@@ -15272,9 +15296,11 @@ export type Database = {
           job_code: string | null
           location_id: string | null
           notes: string | null
+          open_spots: number | null
           organization_id: string
           override_reason: string | null
           parent_shift_id: string | null
+          pattern_line_id: string | null
           published: boolean
           recurrence_end_date: string | null
           recurrence_rule: string | null
@@ -15283,13 +15309,17 @@ export type Database = {
           staff_id: string | null
           starts_at: string
           status: string
+          team_id: string | null
           updated_at: string
+          van_route_id: string | null
         }
         Insert: {
           callout_reason?: string | null
+          cancelled_at?: string | null
           claim_requested_by?: string | null
-          client_id: string
+          client_id?: string | null
           code_id?: string | null
+          confirmed_at?: string | null
           created_at?: string
           created_by?: string | null
           created_from?: string | null
@@ -15300,9 +15330,11 @@ export type Database = {
           job_code?: string | null
           location_id?: string | null
           notes?: string | null
+          open_spots?: number | null
           organization_id: string
           override_reason?: string | null
           parent_shift_id?: string | null
+          pattern_line_id?: string | null
           published?: boolean
           recurrence_end_date?: string | null
           recurrence_rule?: string | null
@@ -15311,13 +15343,17 @@ export type Database = {
           staff_id?: string | null
           starts_at: string
           status?: string
+          team_id?: string | null
           updated_at?: string
+          van_route_id?: string | null
         }
         Update: {
           callout_reason?: string | null
+          cancelled_at?: string | null
           claim_requested_by?: string | null
-          client_id?: string
+          client_id?: string | null
           code_id?: string | null
+          confirmed_at?: string | null
           created_at?: string
           created_by?: string | null
           created_from?: string | null
@@ -15328,9 +15364,11 @@ export type Database = {
           job_code?: string | null
           location_id?: string | null
           notes?: string | null
+          open_spots?: number | null
           organization_id?: string
           override_reason?: string | null
           parent_shift_id?: string | null
+          pattern_line_id?: string | null
           published?: boolean
           recurrence_end_date?: string | null
           recurrence_rule?: string | null
@@ -15339,7 +15377,9 @@ export type Database = {
           staff_id?: string | null
           starts_at?: string
           status?: string
+          team_id?: string | null
           updated_at?: string
+          van_route_id?: string | null
         }
         Relationships: [
           {
@@ -15389,6 +15429,13 @@ export type Database = {
             columns: ["staff_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_shifts_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]
@@ -17653,6 +17700,18 @@ export type Database = {
           client_id: string
           service_code: string
           service_end_date: string
+        }[]
+      }
+      client_authorizations_for_rules: {
+        Args: { _client_ids: string[] }
+        Returns: {
+          authorization_approved_on: string
+          client_id: string
+          ratio: string
+          service_code: string
+          service_end_date: string
+          service_start_date: string
+          worksheet_weekly_hours: number
         }[]
       }
       client_discharge_assert: { Args: { _client: string }; Returns: string }

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { at, ctx, shift } from "./rules-fixtures.ts";
-import { agencyLevel, firstName, hoursOf, isLive, isSegmentPair, othersOf, overlaps } from "./rules-util.ts";
+import { firstName, hoursOf, isLive, isSegmentPair, othersOf, overlaps } from "./rules-util.ts";
 
 test("overlap treats back-to-back as not overlapping", () => {
   assert.equal(overlaps(shift({ startsAt: at(9), endsAt: at(11) }), shift({ id: "b", startsAt: at(10), endsAt: at(12) })), true);
@@ -23,8 +23,3 @@ test("othersOf drops the shift itself, cancelled shifts and duplicates", () => {
   assert.deepEqual(othersOf(shift({ id: "a" }), c, [shift({ id: "b" }), shift({ id: "d" })]).map((s) => s.id), ["b", "d"]);
 });
 
-test("agencyLevel: default, off, and overridden", () => {
-  assert.equal(agencyLevel(ctx(), "overtime", "warn"), "warn");
-  assert.equal(agencyLevel(ctx({ settings: { rules: { overtime: { enabled: false, level: "warn" } } } }), "overtime", "warn"), null);
-  assert.equal(agencyLevel(ctx({ settings: { rules: { overtime: { enabled: true, level: "block" } } } }), "overtime", "warn"), "block");
-});

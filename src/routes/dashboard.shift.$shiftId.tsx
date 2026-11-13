@@ -42,7 +42,7 @@ type Shift = {
   staff_id: string;
   client_id: string;
   code_id: string | null;
-  job_code: string | null;
+  service_code: string | null;
   starts_at: string;
   ends_at: string;
   status: string;
@@ -63,7 +63,7 @@ function ShiftOverviewPage() {
       const { data, error } = await supabase
         .from("scheduled_shifts")
         .select(
-          "id, organization_id, staff_id, client_id, code_id, job_code, starts_at, ends_at, status, notes, client:client_id(first_name,last_name,client_photo_url,date_of_birth,phone_number,physical_address,special_directions,medicaid_id), code:code_id(id,code,label,kind)",
+          "id, organization_id, staff_id, client_id, code_id, service_code, starts_at, ends_at, status, notes, client:client_id(first_name,last_name,client_photo_url,date_of_birth,phone_number,physical_address,special_directions,medicaid_id), code:code_id(id,code,label,kind)",
         )
         .eq("id", shiftId)
         .maybeSingle();
@@ -80,10 +80,10 @@ function ShiftOverviewPage() {
   }
 
   const clientName = `${shift.client?.first_name ?? ""} ${shift.client?.last_name ?? ""}`.trim() || "Client";
-  const codeLabel = shift.code?.code ?? shift.job_code ?? "—";
+  const codeLabel = shift.code?.code ?? shift.service_code ?? "—";
   const isContinuous = shift.code?.kind === "continuous";
 
-  const visitCode = (shift.code?.code ?? shift.job_code ?? "").toUpperCase();
+  const visitCode = (shift.code?.code ?? shift.service_code ?? "").toUpperCase();
   const isHhsSupportVisit = visitCode === "HHS";
 
   return (
@@ -111,7 +111,7 @@ function ShiftOverviewPage() {
       <ActiveClockPanel shift={shift} userId={user?.id} />
       {isContinuous && <RhsOverviewPanel shift={shift} />}
       <ShiftReportPanel shift={shift} userId={user?.id} />
-      <MedsReadOnlyList clientId={shift.client_id} serviceCode={shift.code?.code ?? shift.job_code ?? null} />
+      <MedsReadOnlyList clientId={shift.client_id} serviceCode={shift.code?.code ?? shift.service_code ?? null} />
       <MarPanel shift={shift} />
       <CalloutPanel shift={shift} userId={user?.id} />
     </div>
@@ -167,7 +167,7 @@ function HhsSupportHoursNote({
 function ClientProfileCard({ shift, clientName }: { shift: Shift; clientName: string }) {
   const c = shift.client;
   const emergency = primaryContact(useClientContacts(shift.client_id).data ?? [], "emergency");
-  const shiftCode = shift.code?.code ?? shift.job_code ?? null;
+  const shiftCode = shift.code?.code ?? shift.service_code ?? null;
   const goals = useClientCareData(shift.client_id, shiftCode).data?.visibility.goalsForStaff ?? [];
   return (
     <section className="rounded-xl border border-border bg-card p-4">
@@ -222,7 +222,7 @@ function ClientProfileCard({ shift, clientName }: { shift: Shift; clientName: st
 // workspace punch pad, which runs the geofence, authorization, and shift
 // verification checks, with this shift's own service code preselected.
 function ActiveClockPanel({ shift, userId }: { shift: Shift; userId?: string }) {
-  const code = (shift.code?.code ?? shift.job_code ?? "").toUpperCase();
+  const code = (shift.code?.code ?? shift.service_code ?? "").toUpperCase();
   const isContinuous = shift.code?.kind === "continuous";
 
   const { data: activePunch } = useQuery({
@@ -277,7 +277,7 @@ function ActiveClockPanel({ shift, userId }: { shift: Shift; userId?: string }) 
 }
 
 function RhsOverviewPanel({ shift }: { shift: Shift }) {
-  const code = shift.code?.code ?? shift.job_code ?? "";
+  const code = shift.code?.code ?? shift.service_code ?? "";
   const { data } = useQuery({
     enabled: !!code,
     queryKey: ["rhs-overview", shift.client_id, code],
@@ -394,7 +394,7 @@ function MarPanel({ shift }: { shift: Shift }) {
   return (
     <section className="rounded-xl border border-border bg-card p-4">
       <h2 className="text-sm font-semibold mb-2 flex items-center gap-2"><Pill className="h-4 w-4" /> Give meds</h2>
-      <GiveMeds clientId={shift.client_id} serviceContext={shift.code?.code ?? shift.job_code ?? null} scheduledShiftId={shift.id} />
+      <GiveMeds clientId={shift.client_id} serviceContext={shift.code?.code ?? shift.service_code ?? null} scheduledShiftId={shift.id} />
     </section>
   );
 }
@@ -447,7 +447,7 @@ function CalloutPanel({ shift, userId }: { shift: Shift; userId?: string }) {
         recipient_role: "admin",
         type: "callout",
         urgency: urgency === "critical" ? "critical" : urgency === "high" ? "high" : "normal",
-        title: `Call-out: ${shift.code?.code ?? shift.job_code ?? "shift"} · ${startLabel}`,
+        title: `Call-out: ${shift.code?.code ?? shift.service_code ?? "shift"} · ${startLabel}`,
         body: reason.trim() || "A team member can't make their shift.",
         link_to: "/dashboard/scheduler",
         related_id: shift.id,

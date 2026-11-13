@@ -166,14 +166,14 @@ export async function fetchConflictingShifts(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
     .from("scheduled_shifts")
-    .select("id, starts_at, ends_at, job_code, published, status, client_id")
+    .select("id, starts_at, ends_at, service_code, published, status, client_id")
     .eq("organization_id", organizationId)
     .eq("staff_id", staffId)
     .lt("starts_at", endIso)
     .gt("ends_at", startIso)
     .order("starts_at", { ascending: true });
   if (error) throw error;
-  type Row = { id: string; starts_at: string; ends_at: string; job_code: string | null; published: boolean; status: string; client_id: string };
+  type Row = { id: string; starts_at: string; ends_at: string; service_code: string | null; published: boolean; status: string; client_id: string };
   return ((data ?? []) as Row[]).filter((s) => s.published && s.status !== "cancelled");
 }
 
@@ -271,8 +271,7 @@ export async function approveSwap(
   resolvedToStaffId: string,
   shift: {
     client_id: string;
-    job_code: string | null;
-    service_code?: string | null;
+    service_code: string | null;
     shift_type: string;
     starts_at: string;
     ends_at: string;
@@ -288,7 +287,7 @@ export async function approveSwap(
       organization_id: req.organization_id,
       staff_id: resolvedToStaffId,
       client_id: shift.client_id,
-      job_code: shift.job_code ?? "",
+      service_code: shift.service_code ?? "",
       shift_type: shift.shift_type,
       starts_at: shift.starts_at,
       ends_at: shift.ends_at,

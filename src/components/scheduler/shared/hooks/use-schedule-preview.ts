@@ -8,7 +8,7 @@ export type ShiftRow = {
   id: string;
   staff_id: string | null;
   client_id: string | null;
-  job_code: string | null;
+  service_code: string | null;
   shift_type: string | null;
   starts_at: string;
   ends_at: string;
@@ -19,7 +19,6 @@ export type ShiftRow = {
   recurrence_end_date: string | null;
   /** Set on 1:1 segments nested inside a base shift. */
   parent_shift_id: string | null;
-  service_code: string | null;
   created_from: string | null;
 };
 /** `codes` = active service codes (client_billing_codes). */
@@ -42,7 +41,7 @@ export function useSchedulePreview(weekStart: Date) {
       const [shiftsRes, clientsRes, teamsRes, membersRes] = await Promise.all([
         supabase
           .from("scheduled_shifts")
-          .select("id, staff_id, client_id, job_code, shift_type, starts_at, ends_at, status, published, is_recurring, recurrence_rule, recurrence_end_date, parent_shift_id, service_code, created_from")
+          .select("id, staff_id, client_id, shift_type, starts_at, ends_at, status, published, is_recurring, recurrence_rule, recurrence_end_date, parent_shift_id, service_code, created_from")
           .eq("organization_id", orgId!)
           .gte("starts_at", weekStart.toISOString())
           .lt("starts_at", weekEnd.toISOString()),
@@ -117,7 +116,7 @@ export function inferSiteType(
   if (teamId === UNASSIGNED_SITE_ID) return "day";
   const clientIds = new Set(clients.filter((c) => c.team_id === teamId).map((c) => c.id));
   for (const s of shifts) {
-    if (s.client_id && clientIds.has(s.client_id) && isDaily(s.job_code)) return "residential";
+    if (s.client_id && clientIds.has(s.client_id) && isDaily(s.service_code)) return "residential";
   }
   return "day";
 }

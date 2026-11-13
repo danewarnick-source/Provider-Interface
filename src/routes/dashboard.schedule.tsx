@@ -62,7 +62,7 @@ type ScheduledShift = {
   client_last_name: string | null;
   home_name: string | null;
   is_host_home: boolean;
-  job_code: string | null;
+  service_code: string | null;
   starts_at: string;
   ends_at: string;
   status: string;
@@ -173,7 +173,7 @@ function useMyScheduledShifts(view: ViewMode, anchor: Date) {
       const { data, error } = await supabase
         .from("scheduled_shifts")
         .select(
-          "id, client_id, job_code, starts_at, ends_at, status, published, updated_at, clients:client_id(first_name, last_name, team_id, teams:team_id(team_name, setting))",
+          "id, client_id, service_code, starts_at, ends_at, status, published, updated_at, clients:client_id(first_name, last_name, team_id, teams:team_id(team_name, setting))",
         )
         .eq("staff_id", user!.id)
         .eq("organization_id", org!.organization_id)
@@ -194,7 +194,7 @@ function useMyScheduledShifts(view: ViewMode, anchor: Date) {
         client_last_name: r.clients?.last_name ?? null,
         home_name: r.clients?.teams?.team_name ?? null,
         is_host_home: /host/i.test(String(r.clients?.teams?.setting ?? "")),
-        job_code: r.job_code,
+        service_code: r.service_code,
         starts_at: r.starts_at,
         ends_at: r.ends_at,
         status: r.status,
@@ -247,8 +247,8 @@ function useMyDayProgramSessions(view: ViewMode, anchor: Date) {
 
 
 function ShiftCard({ s }: { s: ScheduledShift }) {
-  const daily = isDaily(s.job_code);
-  const code = s.job_code ?? "";
+  const daily = isDaily(s.service_code);
+  const code = s.service_code ?? "";
   const hideStatus = scheduleStaffHidesStatusBadge(s.status);
   const visitLabel = hhsVisitLabel(code, s.is_host_home);
   const codeLabel = visitLabel ?? (code || "Service TBD");
@@ -485,7 +485,7 @@ function GroupCard({ shifts }: { shifts: ScheduledShift[] }) {
       </p>
       <ul className="mt-3 space-y-1">
         {shifts.map((s) => {
-          const daily = isDaily(s.job_code);
+          const daily = isDaily(s.service_code);
           return (
             <li key={s.id}>
               <Link
@@ -619,7 +619,7 @@ function SchedulePage() {
   const goNext = () => setAnchor((a) => shiftAnchor(view, a, 1));
   const goToday = () => setAnchor(new Date());
 
-  const hasHhsVisit = (shifts ?? []).some((s) => !!hhsVisitLabel(s.job_code, s.is_host_home));
+  const hasHhsVisit = (shifts ?? []).some((s) => !!hhsVisitLabel(s.service_code, s.is_host_home));
   const updatedCount = (shifts ?? []).filter((s) => s.is_updated).length;
 
   return (

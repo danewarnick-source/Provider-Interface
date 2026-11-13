@@ -1,29 +1,29 @@
-// Scheduler server functions for the new code-section scheduler at
+// Scheduler server functions for the code-section scheduler at
 // /dashboard/scheduler. All writes go through `requireSupabaseAuth` so RLS
-// is enforced as the calling user. Validation rules (do-not-schedule list,
-// caseload, time-off, authorized code) match the product spec for the rebuilt scheduler.
+// is enforced as the calling user. Saving runs the rule engine through
+// shift-guard.server.ts (rules.ts at the agency's strengths); publishing is in
+// publish.functions.ts.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { coerceScheduledShiftStatus } from "@/lib/scheduler/shift-status";
-import { denverWeekUtcBounds } from "@/lib/scheduler/recurrence";
 import { requireCategory } from "@/lib/access/require";
-import { assertShiftAllowed, collectShiftFailures } from "@/lib/scheduler/shift-checks";
-import { dayKey } from "@/lib/scheduler/time";
-import { notify } from "@/lib/scheduler/notify";
+import { guardShiftRows } from "@/lib/scheduler/shift-guard.server";
 
 const ShiftInput = z.object({
   id: z.string().uuid().optional(),
   organization_id: z.string().uuid(),
   staff_id: z.string().uuid().nullable(),
   client_id: z.string().uuid(),
-  job_code: z.string().min(1),
+  service_code: z.string().min(1),
   starts_at: z.string().min(1),
   ends_at: z.string().min(1),
   shift_type: z.string().default("hourly"),
   status: z.string().default("draft"),
   published: z.boolean().default(false),
   notes: z.string().nullable().optional(),
+  /** Typed when a rule is set to "Require a reason". */
+  override_reason: z.string().max(1000).nullable().optional(),
 });
 export type ShiftInput = z.infer<typeof ShiftInput>;
 
@@ -32,24 +32,14 @@ export const saveShift = createServerFn({ method: "POST" })
   .inputValidator((d: ShiftInput) => ShiftInput.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as any;
-    if (!supabase || !userId) return { id: "" };
+    if (!supabase || !userId) return { id: "", warnings: [] as string[] };
     await requireCategory(supabase, userId, data.organization_id, "scheduling", "edit");
-
-    // Same checks for every path that puts someone on a client's shift.
-    await assertShiftAllowed(supabase, {
-      organization_id: data.organization_id,
-      staff_id: data.staff_id,
-      client_id: data.client_id,
-      code: data.job_code,
-      starts_at: data.starts_at,
-    });
 
     const payload = {
       organization_id: data.organization_id,
       staff_id: data.staff_id,
       client_id: data.client_id,
-      job_code: data.job_code,
-      service_code: data.job_code,
+      service_code: data.service_code.toUpperCase(),
       shift_type: data.shift_type,
       starts_at: data.starts_at,
       ends_at: data.ends_at,
@@ -57,12 +47,14 @@ export const saveShift = createServerFn({ method: "POST" })
       status: coerceScheduledShiftStatus(data.status, data.staff_id),
       published: data.published,
       notes: data.notes?.trim() || null,
+      override_reason: data.override_reason?.trim() || null,
       created_by: userId,
     };
 
-    // Overlapping services for one client are refused, on insert and on update.
-    const { assertNoBillingConflict } = await import("@/lib/scheduler/shift-commit");
-    await assertNoBillingConflict(supabase, { ...payload, id: data.id } as never);
+    // The rule engine: a block refuses with its one line; warnings come back.
+    const warnings = await guardShiftRows(supabase, data.organization_id, [{ ...payload, id: data.id }], {
+      reason: payload.override_reason,
+    });
 
     if (data.id) {
       const { error } = await supabase
@@ -71,7 +63,7 @@ export const saveShift = createServerFn({ method: "POST" })
         .eq("id", data.id)
         .eq("organization_id", data.organization_id);
       if (error) throw error;
-      return { id: data.id };
+      return { id: data.id, warnings };
     }
     const { data: row, error } = await supabase
       .from("scheduled_shifts")
@@ -79,7 +71,7 @@ export const saveShift = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw error;
-    return { id: row.id as string };
+    return { id: row.id as string, warnings };
   });
 
 export const deleteShift = createServerFn({ method: "POST" })
@@ -98,93 +90,6 @@ export const deleteShift = createServerFn({ method: "POST" })
       .eq("organization_id", data.organization_id);
     if (error) throw error;
     return { ok: true };
-  });
-
-export const publishWeek = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { organization_id: string; week_start_iso: string }) =>
-    z.object({
-      organization_id: z.string().uuid(),
-      week_start_iso: z.string().min(1),
-    }).parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as any;
-    if (!supabase || !userId) return { ok: true as const, shifts: 0, staff: 0, failures: [] };
-    await requireCategory(supabase, userId, data.organization_id, "scheduling", "edit");
-    const { startIso, endExclusiveIso } = denverWeekUtcBounds(data.week_start_iso);
-
-    const { data: pending, error: pErr } = await supabase
-      .from("scheduled_shifts")
-      .select("id, organization_id, staff_id, client_id, service_code, job_code, starts_at")
-      .eq("organization_id", data.organization_id)
-      .eq("published", false)
-      .neq("status", "cancelled")
-      .gte("starts_at", startIso)
-      .lt("starts_at", endExclusiveIso)
-      .not("staff_id", "is", null);
-    if (pErr) throw pErr;
-    const toPublish = (pending ?? []) as Array<{
-      id: string; organization_id: string; staff_id: string; client_id: string | null;
-      service_code: string | null; job_code: string | null; starts_at: string;
-    }>;
-
-    // Publish nothing unless every shift passes the same checks saveShift runs.
-    const failed = await collectShiftFailures(
-      supabase,
-      toPublish.map((r) => ({
-        id: r.id,
-        organization_id: r.organization_id,
-        staff_id: r.staff_id,
-        client_id: r.client_id,
-        code: (r.service_code ?? r.job_code ?? "").toUpperCase() || null,
-        starts_at: r.starts_at,
-      })),
-    );
-    if (failed.length > 0) {
-      const byId = new Map(toPublish.map((r) => [r.id, r] as const));
-      return {
-        ok: false as const,
-        shifts: 0,
-        staff: 0,
-        failures: failed.map((f) => ({
-          shift_id: f.shift_id,
-          day: dayKey(byId.get(f.shift_id)!.starts_at),
-          code: byId.get(f.shift_id)!.service_code ?? byId.get(f.shift_id)!.job_code,
-          reason: f.reason,
-        })),
-      };
-    }
-
-    const { data: rows, error } = await supabase
-      .from("scheduled_shifts")
-      .update({ published: true, status: "published" })
-      .in("id", toPublish.map((r) => r.id))
-      .select("id, staff_id");
-    if (error) throw error;
-    const byStaff = new Map<string, number>();
-    for (const r of rows ?? []) {
-      const sid = (r as { staff_id: string | null }).staff_id;
-      if (!sid) continue;
-      byStaff.set(sid, (byStaff.get(sid) ?? 0) + 1);
-    }
-    if (byStaff.size > 0) {
-      const weekLabel = new Date(startIso).toLocaleDateString("en-US", {
-        timeZone: "America/Denver", month: "short", day: "numeric",
-      });
-      const notifs = Array.from(byStaff.entries()).map(([staffId, count]) => ({
-        organization_id: data.organization_id,
-        recipient_role: "staff",
-        recipient_user_id: staffId,
-        type: "shift_published",
-        urgency: "normal",
-        title: "Your schedule was published",
-        body: `You have ${count} new or updated shift${count === 1 ? "" : "s"} for the week of ${weekLabel}.`,
-        link_to: "/dashboard/schedule",
-      }));
-      await notify(supabase, notifs);
-    }
-    return { ok: true as const, shifts: rows?.length ?? 0, staff: byStaff.size, failures: [] };
   });
 
 export const setAdminTimeOff = createServerFn({ method: "POST" })
@@ -281,7 +186,7 @@ export const saveDayProgramSession = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as any;
-    if (!supabase || !userId) return { id: "" };
+    if (!supabase || !userId) return { id: "", warnings: [] as string[] };
     await requireCategory(supabase, userId, data.organization_id, "scheduling", "edit");
     if (data.id) {
       const { error } = await supabase

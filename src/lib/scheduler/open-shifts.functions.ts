@@ -3,7 +3,9 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { isAgencyAdmin } from "@/lib/access/levels";
-import { assertShiftAllowed } from "@/lib/scheduler/shift-checks";
+import { guardShiftRows } from "@/lib/scheduler/shift-guard.server";
+import { loadStaffEvidence } from "@/lib/scheduler/rule-staff-facts.server";
+import { isOfferedTo } from "@/lib/scheduler/rules-qualifications";
 import { notify } from "@/lib/scheduler/notify";
 import { dayKey } from "@/lib/scheduler/time";
 
@@ -14,6 +16,9 @@ import { dayKey } from "@/lib/scheduler/time";
  *   team member requests → status stays 'open', claim_requested_by = userId (staff_id still NULL)
  *   admin approves → status='accepted', staff_id = claim_requested_by, claim_requested_by NULL
  *   admin denies → status='open', claim_requested_by NULL
+ *
+ * Claiming and approving run the rule engine (shift-guard.server.ts). Van
+ * shifts are never offered to someone without a driver file (Decision 18).
  *
  * Note: status 'pending' is NOT allowed by scheduled_shifts_status_check.
  */
@@ -33,7 +38,7 @@ export const listOpenShifts = createServerFn({ method: "POST" })
     if (!context.supabase || !context.userId) return [];
     const { data: rows, error } = await context.supabase
       .from("scheduled_shifts")
-      .select("id, organization_id, client_id, service_code, starts_at, ends_at, location_id, notes, status, claim_requested_by")
+      .select("id, organization_id, client_id, team_id, service_code, starts_at, ends_at, location_id, notes, status, claim_requested_by, van_route_id")
       .eq("organization_id", data.organizationId)
       .eq("status", "open")
       .is("staff_id", null)
@@ -41,7 +46,10 @@ export const listOpenShifts = createServerFn({ method: "POST" })
       .lt("starts_at", data.endIso)
       .order("starts_at", { ascending: true });
     if (error) throw error;
-    return rows ?? [];
+    const list = rows ?? [];
+    if (!list.some((r) => r.van_route_id)) return list;
+    const evidence = (await loadStaffEvidence(context.supabase, data.organizationId, [context.userId]))[context.userId];
+    return list.filter((r) => isOfferedTo(r, evidence));
   });
 
 export const claimOpenShift = createServerFn({ method: "POST" })
@@ -50,17 +58,25 @@ export const claimOpenShift = createServerFn({ method: "POST" })
     z.object({ shiftId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { userId, supabase } = context;
-    if (!supabase || !userId) return { ok: false };
+    if (!supabase || !userId) return { ok: false, warnings: [] as string[] };
     const { data: shift, error: gErr } = await supabase
       .from("scheduled_shifts")
-      .select("id, organization_id, status, staff_id, client_id, starts_at, service_code, claim_requested_by")
+      .select("id, organization_id, status, staff_id, client_id, team_id, starts_at, ends_at, service_code, claim_requested_by, parent_shift_id, van_route_id")
       .eq("id", data.shiftId).maybeSingle();
     if (gErr) throw gErr;
     if (!shift) throw new Error("Shift not found");
     if (shift.staff_id) throw new Error("Shift is already assigned");
     if (shift.status !== "open") throw new Error("Shift is not open for claim");
-    if (shift.claim_requested_by === userId) return { ok: true };
+    if (shift.claim_requested_by === userId) return { ok: true, warnings: [] as string[] };
     if (shift.claim_requested_by) throw new Error("Someone already requested this shift.");
+    if (shift.van_route_id) {
+      const evidence = (await loadStaffEvidence(supabase, shift.organization_id, [userId]))[userId];
+      if (!isOfferedTo(shift, evidence)) {
+        throw new Error("This van shift needs a driver file on record (license, driving record, insurance). Add them in Evidence first.");
+      }
+    }
+    // Same rules as saving, with the claimer on the shift.
+    const warnings = await guardShiftRows(supabase, shift.organization_id, [{ ...shift, staff_id: userId }]);
 
     const { data: updated, error: uErr } = await supabase
       .from("scheduled_shifts")
@@ -85,7 +101,7 @@ export const claimOpenShift = createServerFn({ method: "POST" })
       related_type: "scheduled_shift",
     });
 
-    return { ok: true };
+    return { ok: true, warnings };
   });
 
 export const decideClaim = createServerFn({ method: "POST" })
@@ -94,10 +110,10 @@ export const decideClaim = createServerFn({ method: "POST" })
     z.object({ shiftId: z.string().uuid(), approve: z.boolean() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    if (!supabase || !userId) return { ok: false };
+    if (!supabase || !userId) return { ok: false, warnings: [] as string[] };
     const { data: shift, error: gErr } = await supabase
       .from("scheduled_shifts")
-      .select("id, organization_id, claim_requested_by, service_code, client_id, starts_at")
+      .select("id, organization_id, claim_requested_by, service_code, client_id, team_id, starts_at, ends_at, parent_shift_id, status, van_route_id")
       .eq("id", data.shiftId).maybeSingle();
     if (gErr) throw gErr;
     if (!shift) throw new Error("Shift not found");
@@ -111,16 +127,10 @@ export const decideClaim = createServerFn({ method: "POST" })
 
     const claimant = shift.claim_requested_by;
 
-    // Approving puts the claimant on a client's shift: same checks saveShift runs.
-    if (data.approve) {
-      await assertShiftAllowed(supabase, {
-        organization_id: shift.organization_id,
-        staff_id: claimant,
-        client_id: shift.client_id,
-        code: shift.service_code,
-        starts_at: shift.starts_at,
-      });
-    }
+    // Approving puts the claimant on the shift: the same rules saveShift runs.
+    const warnings = data.approve
+      ? await guardShiftRows(supabase, shift.organization_id, [{ ...shift, staff_id: claimant }])
+      : [];
 
     const patch = data.approve
       ? { status: "accepted", staff_id: claimant, claim_requested_by: null }
@@ -146,5 +156,5 @@ export const decideClaim = createServerFn({ method: "POST" })
       related_type: "scheduled_shift",
     });
 
-    return { ok: true };
+    return { ok: true, warnings };
   });

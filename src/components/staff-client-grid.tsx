@@ -290,10 +290,10 @@ function ClientRow({
   // Assigned ∩ authorized only — no fallback to every client code.
   const effectiveCodes = allowedCodesFor(assignments, c.id, allCodes);
   const hasHhs = hasHostHomeDailyCode(effectiveCodes);
-  const hasClockableToday = !!(todayShift && isClockableServiceCode(todayShift.job_code));
+  const hasClockableToday = !!(todayShift && isClockableServiceCode(todayShift.service_code));
   const hostHomeCard = isHostHomeDailyNoteCard({
     codes: effectiveCodes,
-    todayJobCode: todayShift?.job_code,
+    todayJobCode: todayShift?.service_code,
     isOnTheClock,
   });
   const actions = caseloadCardActions({
@@ -367,7 +367,7 @@ function ClientRow({
               <span className="inline-flex items-center gap-1 rounded-full bg-[color:var(--amber-600,var(--hive-gold))]/15 px-2 py-0.5 text-[10px] font-semibold text-[color:var(--amber-700,var(--hive-gold))]">
                 <CalendarCheck2 className="h-3 w-3" />
                 Scheduled · {fmtTime(todayShift.starts_at)}–{fmtTime(todayShift.ends_at)}
-                {todayShift.job_code ? ` · ${todayShift.job_code}` : ""}
+                {todayShift.service_code ? ` · ${todayShift.service_code}` : ""}
               </span>
             ) : (
               <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
@@ -480,7 +480,7 @@ export function StaffClientGrid() {
   const todayByClient = useMemo(() => {
     const map = new Map<string, TodayShiftRow>();
     for (const s of todayShifts) {
-      if (isClockableServiceCode(s.job_code) && scheduledShiftIsClockedOut(s, completedPunches)) {
+      if (isClockableServiceCode(s.service_code) && scheduledShiftIsClockedOut(s, completedPunches)) {
         continue;
       }
       // Keep the earliest still-open shift per client.

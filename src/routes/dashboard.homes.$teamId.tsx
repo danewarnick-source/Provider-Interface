@@ -1,10 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { syncTeamToLocation } from "@/lib/scheduler/locations.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,7 +76,6 @@ function HomeDetailPage() {
   const orgId = org?.organization_id;
   const qc = useQueryClient();
   const today = new Date().toISOString().slice(0, 10);
-  const syncLocationCall = useServerFn(syncTeamToLocation);
 
   const teamQ = useQuery({
     enabled: !!orgId && !!teamId,
@@ -193,22 +190,15 @@ function HomeDetailPage() {
   // Mutations
   const updateHome = useMutation({
     mutationFn: async (patch: { team_name?: string; setting?: string }) => {
-      const previousName = teamQ.data?.team_name;
       const { error } = await supabase
         .from("teams")
         .update(patch as never)
         .eq("id", teamId);
       if (error) throw error;
-      if (orgId) {
-        await syncLocationCall({
-          data: { organizationId: orgId, teamId, previousName },
-        }).catch(() => {});
-      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["home-detail", teamId] });
       qc.invalidateQueries({ queryKey: ["ht-teams", orgId] });
-      qc.invalidateQueries({ queryKey: ["locations", orgId] });
       toast.success("Home updated");
     },
     onError: (e: Error) => toast.error(e.message),

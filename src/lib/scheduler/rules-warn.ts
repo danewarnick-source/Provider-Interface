@@ -1,12 +1,12 @@
-// Warn rules that are not Evidence-based: duration and hours limits, rest, fatigue,
-// travel gaps, staffing preferences, worksheet hours, and the assumed ratio
-// (Decision 13). Agency rules honour the agency's on/off + level setting.
+// Warn rules that are not Evidence-based: rest, fatigue, travel gaps, staffing
+// preferences, worksheet hours, and the assumed ratio (Decision 13). Each rule
+// returns its default level; the agency's strength is applied in rules.ts.
 import { denverWallToIso } from "../denver-date.ts";
 import { RATIO_CODES } from "./ratios.ts";
 import { evidenceStateOn } from "./rules-qualifications.ts";
 import type { Finding, RuleContext, RuleShift } from "./rules-types.ts";
 import {
-  agencyLevel, clientOf, dayOf, find, firstName, ms, othersOf, staffOf, sumHours, up, weekOf,
+  clientOf, dayOf, find, firstName, ms, othersOf, staffOf, sumHours, up, weekOf,
 } from "./rules-util.ts";
 import { addDaysKey, daysBetween, weekdayOf } from "./time.ts";
 
@@ -15,15 +15,6 @@ const HOUR = 3_600_000;
 function staffShifts(s: RuleShift, ctx: RuleContext, batch: readonly RuleShift[]): RuleShift[] {
   const mine = othersOf(s, ctx, batch).filter((o) => o.staffId === s.staffId && !o.parentShiftId);
   return [s, ...mine].filter((o) => !o.parentShiftId).sort((a, b) => ms(a.startsAt) - ms(b.startsAt));
-}
-
-export function dsiHoursRule(s: RuleShift, ctx: RuleContext, batch: readonly RuleShift[]): Finding[] {
-  if (up(s.code) !== "DSI" || !s.clientId) return [];
-  const day = sumHours([s, ...othersOf(s, ctx, batch).filter((o) =>
-    o.clientId === s.clientId && up(o.code) === "DSI" && dayOf(o) === dayOf(s))]);
-  return day > 6
-    ? [find("dsi_over_6h", "warn", `DSI is ${day.toFixed(1)} hours that day (max 6) (§8)`)]
-    : [];
 }
 
 export function worksheetHoursRule(s: RuleShift, ctx: RuleContext, batch: readonly RuleShift[]): Finding[] {
@@ -46,48 +37,40 @@ export function restAndStraightRules(s: RuleShift, ctx: RuleContext, batch: read
   const list = staffShifts(s, ctx, batch);
   const i = list.findIndex((x) => x.id === s.id);
   const restMin = (ctx.settings.minRestHours ?? 8) * HOUR;
-  const restLevel = agencyLevel(ctx, "under_rest", "warn");
-  if (restLevel) {
-    const prev = list[i - 1];
-    const next = list[i + 1];
-    const gapPrev = prev ? ms(s.startsAt) - ms(prev.endsAt) : null;
-    const gapNext = next ? ms(next.startsAt) - ms(s.endsAt) : null;
-    const short = [gapPrev, gapNext].find((g) => g !== null && g > 0 && g < restMin);
-    if (short != null) {
-      out.push(find("under_rest", restLevel,
-        `${firstName(staff.name)} would get only ${(short / HOUR).toFixed(1)} hours of rest between shifts`));
-    }
+  const prev = list[i - 1];
+  const next = list[i + 1];
+  const gapPrev = prev ? ms(s.startsAt) - ms(prev.endsAt) : null;
+  const gapNext = next ? ms(next.startsAt) - ms(s.endsAt) : null;
+  const short = [gapPrev, gapNext].find((g) => g !== null && g > 0 && g < restMin);
+  if (short != null) {
+    out.push(find("under_rest", "warn",
+      `${firstName(staff.name)} would get only ${(short / HOUR).toFixed(1)} hours of rest between shifts`));
   }
-  const strLevel = agencyLevel(ctx, "over_16h_straight", "warn");
-  if (strLevel) {
-    // chain back-to-back shifts (gap 0) around s
-    let lo = i, hi = i;
-    while (lo > 0 && ms(list[lo - 1]!.endsAt) === ms(list[lo]!.startsAt)) lo--;
-    while (hi < list.length - 1 && ms(list[hi + 1]!.startsAt) === ms(list[hi]!.endsAt)) hi++;
-    const hours = (ms(list[hi]!.endsAt) - ms(list[lo]!.startsAt)) / HOUR;
-    if (hours > 16) {
-      out.push(find("over_16h_straight", strLevel, `${firstName(staff.name)} would work ${hours.toFixed(1)} hours straight (over 16)`));
-    }
+  // chain back-to-back shifts (gap 0) around s
+  let lo = i, hi = i;
+  while (lo > 0 && ms(list[lo - 1]!.endsAt) === ms(list[lo]!.startsAt)) lo--;
+  while (hi < list.length - 1 && ms(list[hi + 1]!.startsAt) === ms(list[hi]!.endsAt)) hi++;
+  const hours = (ms(list[hi]!.endsAt) - ms(list[lo]!.startsAt)) / HOUR;
+  if (hours > 16) {
+    out.push(find("over_16h_straight", "warn", `${firstName(staff.name)} would work ${hours.toFixed(1)} hours straight (over 16)`));
   }
   return out;
 }
 
 export function overtimeRule(s: RuleShift, ctx: RuleContext, batch: readonly RuleShift[]): Finding[] {
-  const level = agencyLevel(ctx, "overtime", "warn");
   const staff = staffOf(ctx, s);
-  if (!level || !staff || s.parentShiftId) return [];
+  if (!staff || s.parentShiftId) return [];
   const limit = ctx.settings.overtimeThresholdHours ?? 40;
   const week = sumHours(staffShifts(s, ctx, batch).filter((o) => weekOf(o) === weekOf(s)));
   return week > limit
-    ? [find("overtime", level, `${firstName(staff.name)} would have ${week.toFixed(1)} hours this week (overtime starts at ${limit})`)]
+    ? [find("overtime", "warn", `${firstName(staff.name)} would have ${week.toFixed(1)} hours this week (overtime starts at ${limit})`)]
     : [];
 }
 
 /** Rolling 16 hours worked in any 24 hours, counting holdovers and declared outside hours. */
 export function fatigueRule(s: RuleShift, ctx: RuleContext, batch: readonly RuleShift[]): Finding[] {
-  const level = agencyLevel(ctx, "fatigue_16_in_24", "warn");
   const staff = staffOf(ctx, s);
-  if (!level || !staff || s.parentShiftId) return [];
+  if (!staff || s.parentShiftId) return [];
   const list = staffShifts(s, ctx, batch);
   const day24 = 24 * HOUR;
   for (const anchor of list) {
@@ -100,7 +83,7 @@ export function fatigueRule(s: RuleShift, ctx: RuleContext, batch: readonly Rule
     const touches = ms(s.startsAt) < to && ms(s.endsAt) > from;
     if (touches && worked > 16) {
       const hold = list.some((o) => o.holdover && ms(o.startsAt) < to && ms(o.endsAt) > from);
-      return [find("fatigue_16_in_24", level,
+      return [find("fatigue_16_in_24", "warn",
         `${firstName(staff.name)} would work ${worked.toFixed(1)} of 24 hours${hold ? " (with a holdover)" : ""}`)];
     }
   }
@@ -108,9 +91,8 @@ export function fatigueRule(s: RuleShift, ctx: RuleContext, batch: readonly Rule
 }
 
 export function travelGapRule(s: RuleShift, ctx: RuleContext, batch: readonly RuleShift[]): Finding[] {
-  const level = agencyLevel(ctx, "travel_gap", "warn");
   const staff = staffOf(ctx, s);
-  if (!level || !staff || !s.address || s.parentShiftId) return [];
+  if (!staff || !s.address || s.parentShiftId) return [];
   const minutes = ctx.settings.travelGapMinutes ?? 20;
   const hit = othersOf(s, ctx, batch).find((o) => {
     if (o.staffId !== s.staffId || o.parentShiftId || !o.address || o.address === s.address) return false;
@@ -118,20 +100,19 @@ export function travelGapRule(s: RuleShift, ctx: RuleContext, batch: readonly Ru
     return gap >= 0 && gap < minutes * 60_000;
   });
   return hit
-    ? [find("travel_gap", level, `${firstName(staff.name)} has under ${minutes} minutes to get between two addresses`)]
+    ? [find("travel_gap", "warn", `${firstName(staff.name)} has under ${minutes} minutes to get between two addresses`)]
     : [];
 }
 
 export function preferenceRule(s: RuleShift, ctx: RuleContext): Finding[] {
   const client = clientOf(ctx, s);
   const staff = staffOf(ctx, s);
-  const base = agencyLevel(ctx, "client_preference", "warn");
-  if (!client || !staff || !base) return [];
+  if (!client || !staff) return [];
   const out: Finding[] = [];
   for (const p of client.preferences ?? []) {
     if (p.codes?.length && !p.codes.map(up).includes(up(s.code))) continue;
     if (p.requiresStaffGender && staff.gender && staff.gender !== p.requiresStaffGender) {
-      out.push(find("client_preference", p.block ? "block" : base, `${firstName(client.name)} prefers ${p.label}`));
+      out.push(find("client_preference", p.block ? "block" : "warn", `${firstName(client.name)} prefers ${p.label}`));
     }
   }
   return out;
