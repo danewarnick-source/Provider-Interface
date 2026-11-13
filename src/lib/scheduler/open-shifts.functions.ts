@@ -41,7 +41,7 @@ export const listOpenShifts = createServerFn({ method: "POST" })
     if (!context.supabase || !context.userId) return [];
     const { data: rows, error } = await context.supabase
       .from("scheduled_shifts")
-      .select("id, organization_id, client_id, team_id, service_code, starts_at, ends_at, location_id, notes, status, claim_requested_by, van_route_id")
+      .select("id, organization_id, client_id, team_id, service_code, starts_at, ends_at, notes, status, claim_requested_by, van_route_id")
       .eq("organization_id", data.organizationId)
       .eq("status", "open")
       .is("staff_id", null)
