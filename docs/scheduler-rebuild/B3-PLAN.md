@@ -1,6 +1,6 @@
 # B3 plan: the board
 
-Status: **approved, building** (Nov 13, 2026). Dane: yes to all 7 questions. Spec: `docs/demos/scheduler.html` › Office › Scheduler. The step text is in PART-B.md (B3) plus the Nov 13 changes at the top of that file.
+Status: **built** (Nov 13, 2026), waiting for Dane on the preview. Dane: yes to all 7 questions. Spec: `docs/demos/scheduler.html` › Office › Scheduler. The step text is in PART-B.md (B3) plus the Nov 13 changes at the top of that file.
 
 ## 1. Job
 The scheduler sees the week at a glance and fixes it in place: add, move, copy, reassign, open or cancel a shift. Every change is checked by the rule engine and can be undone.
