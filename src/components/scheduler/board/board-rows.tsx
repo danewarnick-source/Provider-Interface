@@ -1,10 +1,12 @@
 // The rows of the week grid for each view. Homes & programs: one row per
-// staffed home or day program. Team members: an Open shifts row, then one row
-// per person with an hours meter, time off and a + that locks Add shift to
-// them. Clients: one row per client with a 1056 meter; host home clients say
-// "With host · Not scheduled" each day (host-away is B7b). Coverage gaps stay
-// hidden until homes have coverage needs (B7).
+// staffed home or day program; its name opens the home in Settings › Homes.
+// Team members: an Open shifts row, then one row per person with an hours
+// meter, time off and a + that locks Add shift to them. Clients: one row per
+// client with a 1056 meter; host home clients say "With host · Not scheduled"
+// each day (host-away is B7b). Coverage gaps stay hidden until homes have
+// coverage needs (B7).
 import type { ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
 import {
   clientName,
   clientPlace,
@@ -89,7 +91,15 @@ function homeRows(b: Board, filter: FilterKey, live: BoardShift[]): BoardRow[] {
         key: `team:${t.id}`,
         head: (
           <Head
-            title={t.team_name}
+            title={
+              <Link
+                to="/dashboard/settings/homes/$teamId"
+                params={{ teamId: t.id }}
+                className="hover:underline"
+              >
+                {t.team_name}
+              </Link>
+            }
             sub={
               <>
                 <CodeTag code={homeCode(t.team_type)} /> · {residents} residents

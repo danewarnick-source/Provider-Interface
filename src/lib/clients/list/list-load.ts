@@ -49,8 +49,12 @@ export async function loadClientList(
   const today = todayYmd(now);
   const [clients, homes, active, discharged, referralCount] = await Promise.all([
     loadClients(sb, orgId, f),
-    rows<{ id: string; team_name: string }>(
-      sb.from("teams").select("id, team_name").eq("organization_id", orgId).order("team_name"),
+    rows<{ id: string; team_name: string; active: boolean }>(
+      sb
+        .from("teams")
+        .select("id, team_name, active")
+        .eq("organization_id", orgId)
+        .order("team_name"),
     ),
     countView(sb, orgId, false),
     countView(sb, orgId, true),
@@ -214,7 +218,8 @@ export async function loadClientList(
   return {
     rows: sortRows(applyListFilters(built, f)),
     counts: { active, discharged },
-    homes: homes.map((h) => ({ id: h.id, name: h.team_name })),
+    // Archived homes still name where a past client lived, but aren't offered.
+    homes: homes.filter((h) => h.active).map((h) => ({ id: h.id, name: h.team_name })),
     staffOptions,
     codeOptions,
     hasReferrals: referralCount > 0,

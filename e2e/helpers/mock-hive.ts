@@ -229,7 +229,6 @@ function clientRow(c: (typeof CLIENT_LIST)[number]): Row {
     polst_status: null,
     palliative_care_status: null,
     hospice_status: null,
-    admin_hours_per_week: null,
     disability_category: null,
     bsp_status: null,
     diagnoses: null,
@@ -430,7 +429,6 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
     case "auditor_accounts":
     case "staff_types":
     case "hr_documents":
-    case "home_staff_designations":
     case "client_staffing_ratios":
       return [];
     case "client_plans":

@@ -135,9 +135,9 @@ function profiles() {
 
 function clients() {
   return [
-    { id: CLIENT.jake, first_name: "Jake", last_name: "Probert", team_id: null, admin_hours_per_week: null, has_abi: false, organization_id: ORG_ID },
-    { id: CLIENT.harvey, first_name: "Harvey", last_name: "Alisa", team_id: null, admin_hours_per_week: 4, has_abi: false, organization_id: ORG_ID },
-    { id: CLIENT.tom, first_name: "Tom", last_name: "Jones", team_id: null, admin_hours_per_week: null, has_abi: false, organization_id: ORG_ID },
+    { id: CLIENT.jake, first_name: "Jake", last_name: "Probert", team_id: null, has_abi: false, organization_id: ORG_ID },
+    { id: CLIENT.harvey, first_name: "Harvey", last_name: "Alisa", team_id: null, has_abi: false, organization_id: ORG_ID },
+    { id: CLIENT.tom, first_name: "Tom", last_name: "Jones", team_id: null, has_abi: false, organization_id: ORG_ID },
   ];
 }
 
