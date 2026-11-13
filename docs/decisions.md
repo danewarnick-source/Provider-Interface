@@ -18,3 +18,4 @@ One dated line per decision Dane makes, newest last. A fresh session reads this 
 - 2026-11-13: Homes (group homes and host homes) live in Settings as agency setup. A client points to their home from Clients; the client doesn't own it.
 - 2026-11-13: The host is the host home's lead. A host home is a home in Settings with the host as its lead (`teams.manager_id`); the client's Home (`clients.team_id`) says who lives there. The free-text host name in Finances goes, and Daily Logs stops working out the host from Positions; both read the home.
 - 2026-11-13: Scheduler demo approved (v2, with host-away coverage). Saved as `docs/demos/scheduler.html`; PART-B.md's top section lists the step changes.
+- 2026-11-13: Every PR targets `main` directly. No integration branches or stacked PRs; related changes can share one PR.

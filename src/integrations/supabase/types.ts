@@ -8851,7 +8851,6 @@ export type Database = {
         Row: {
           client_id: string
           created_at: string
-          hhp_name: string | null
           host_daily_rate: number
           id: string
           organization_id: string
@@ -8860,7 +8859,6 @@ export type Database = {
         Insert: {
           client_id: string
           created_at?: string
-          hhp_name?: string | null
           host_daily_rate?: number
           id?: string
           organization_id: string
@@ -8869,7 +8867,6 @@ export type Database = {
         Update: {
           client_id?: string
           created_at?: string
-          hhp_name?: string | null
           host_daily_rate?: number
           id?: string
           organization_id?: string
@@ -17087,7 +17084,6 @@ export type Database = {
           id: string
           manager_id: string | null
           organization_id: string | null
-          setting: string
           team_name: string
           team_type: string
           tenant_id: string | null
@@ -17102,7 +17098,6 @@ export type Database = {
           id?: string
           manager_id?: string | null
           organization_id?: string | null
-          setting?: string
           team_name: string
           team_type?: string
           tenant_id?: string | null
@@ -17117,7 +17112,6 @@ export type Database = {
           id?: string
           manager_id?: string | null
           organization_id?: string | null
-          setting?: string
           team_name?: string
           team_type?: string
           tenant_id?: string | null

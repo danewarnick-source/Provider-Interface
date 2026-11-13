@@ -39,9 +39,9 @@ Rules:
 ## Known duplicates (to fix, one owner each)
 | Fact | Copies today | Owner it should be | Fix when |
 |---|---|---|---|
-| Who a client's host is | (1) `staff_assignments` + Position "Host Home Provider" (Daily Logs, `src/lib/daily-log-missing.ts`); (2) `hhs_host_home_settings.hhp_name` free text (Finances › Host home); (3) host home `teams` row + `clients.team_id` | Decided (Dane, Nov 13): the host home is a home in Settings (`teams`), the host is its lead (`teams.manager_id`), and the client's Home (`clients.team_id`) says who lives there. Remove the free-text name; Daily Logs and Finances read the home. | Fixed in PR #503 (Phase B drops `hhp_name` after merge) |
-| Who leads a home | `teams.manager_id` and a "Manager" role in `home_staff_designations` | `teams.manager_id` | Fixed in PR #503 (the "Manager" title is a plain label now) |
-| What kind of home it is | `teams.team_type` and `teams.setting` | `teams.team_type` | Fixed in PR #503 (Phase B drops `setting` after merge) |
+| Who a client's host is | (1) `staff_assignments` + Position "Host Home Provider" (Daily Logs, `src/lib/daily-log-missing.ts`); (2) `hhs_host_home_settings.hhp_name` free text (Finances › Host home); (3) host home `teams` row + `clients.team_id` | Decided (Dane, Nov 13): the host home is a home in Settings (`teams`), the host is its lead (`teams.manager_id`), and the client's Home (`clients.team_id`) says who lives there. Remove the free-text name; Daily Logs and Finances read the home. | Fixed (PR #504; `hhp_name` dropped Nov 13) |
+| Who leads a home | `teams.manager_id` and a "Manager" role in `home_staff_designations` | `teams.manager_id` | Fixed (PR #504; the "Manager" title is a plain label now) |
+| What kind of home it is | `teams.team_type` and `teams.setting` | `teams.team_type` | Fixed (PR #504; `setting` dropped Nov 13) |
 | Where a client lives | `clients.team_id` (owner); `locations` (legacy, synced when a home is saved) | `clients.team_id` → `teams` | Next Homes/Clients work |
 
 ## More rules

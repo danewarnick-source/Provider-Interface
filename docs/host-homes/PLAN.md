@@ -1,6 +1,6 @@
 # Plan: one source for "who is the host"
 
-Status: **live on main (PR #504); Phase B cleanup waiting for Dane** (Nov 13, 2026). Answers: yes to 1–3; the Finances host names were test entries (no data move); hosts are team members with a login. Decision: the host is the host home's lead (`docs/decisions.md`).
+Status: **done** (live since PR #504; Phase B applied Nov 13) (Nov 13, 2026). Answers: yes to 1–3; the Finances host names were test entries (no data move); hosts are team members with a login. Decision: the host is the host home's lead (`docs/decisions.md`).
 
 ## 1. Job
 An admin records a host home once: the home, the host family (its lead) and who lives there. Clients, Daily Logs, Finances and later the scheduler's host-away flow all read that one record. Today the host is stored in three places that disagree.

@@ -44,7 +44,7 @@ Status: `audit` → `demo` → `demo approved` → `building` → `live` (✅ = 
 ## Other loose ends
 - **Denim design system (PR #469):** 314 commits behind `main`. Kept open as a reference for the look; redo it later.
 - **Phase B cleanup files waiting for Dane's OK:** see `supabase/migrations/*_b_*.sql` not yet in live history.
-- **Host home source fix:** live on `main` since PR #504. Waiting on Dane's go-ahead to apply the Phase B cleanup `20261113034500_host_homes_b_drop_setting_and_hhp_name.sql` (drops `teams.setting` and the typed host name).
+- **Host home source fix:** done. Live since PR #504; the Phase B cleanup (`20261113040659_host_homes_b_drop_setting_and_hhp_name.sql`) was applied Nov 13.
 - **Duplicate facts:** listed under "Known duplicates" in `docs/SOURCE_OF_TRUTH.md` (first: who a client's host is, stored three ways). Fix each before the feature that depends on it.
 - **Known defects and open owner questions:** see the "Don't decide these" list in `CLAUDE.md`.
 
