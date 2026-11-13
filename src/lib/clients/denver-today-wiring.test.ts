@@ -10,7 +10,6 @@ const UTC_TODAY = /toISOString\(\)\.(slice\(0, ?10\)|split\("T"\)\[0\]|substring
 
 describe("Denver today", () => {
   const files: [string, RegExp][] = [
-    ["./create/import-schema.ts", /const today = denverYmd\(\);/],
     ["./file/file-index.ts", /const today = denverYmd\(\);/],
     ["./file/file.ts", /liveDocs\(facts\.docs, denverYmd\(now\)\)/],
     ["../../components/clients/shared/hooks/use-client-billing-codes.tsx", /const today = denverYmd\(\);/],
