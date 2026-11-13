@@ -70,6 +70,8 @@ export type RuleShift = {
   windowRequirements?: readonly WindowRequirement[];
   /** Set on van run shifts (Decision 17); the driver needs 18+ and a driver file. */
   vanRouteId?: string | null;
+  /** shift_types key; "paired" is a new hire's training shift (Decision 8). */
+  shiftType?: string | null;
 };
 
 export type WindowRequirement = {
@@ -207,8 +209,14 @@ export type StaffFacts = {
 export type Place = { id: string; name: string; licensedCapacity?: number | null };
 
 export type AgencySettings = {
-  /** Strength per rule name (rules-strength.ts). A missing key means the rule's default. */
+  /** Agency default strength per setting key (rules-strength.ts SETTING_RULES). */
   rules?: Readonly<Record<string, Strength>>;
+  /** Per-home overrides, by teams.id then setting key (team_schedule_settings). */
+  homeRules?: Readonly<Record<string, Readonly<Record<string, Strength>>>>;
+  /** Agency hours cap per Sun–Sat week (Decision 10). */
+  hoursCap?: number | null;
+  maxDaysInRow?: number;
+  maxHoursInRow?: number;
   overtimeThresholdHours?: number;
   minRestHours?: number;
   travelGapMinutes?: number;
@@ -229,6 +237,8 @@ export type RuleContext = {
   evidence: Readonly<Record<string, QualEvidence>>;
   /** Person-specific training keys required per client id. */
   personTrainingKeys?: Readonly<Record<string, readonly string[]>>;
+  /** Homes (teams.id) each team member is signed off to work alone at (new_hire_signoffs). */
+  signedOffHomes?: Readonly<Record<string, readonly string[]>>;
 };
 
 export type QualItem = {

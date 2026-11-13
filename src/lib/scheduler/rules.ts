@@ -8,7 +8,7 @@
 // Evidence reminders come from qualificationsOnDate (default Warn). No other
 // file may add its own "can this shift exist" check: server callers go through
 // shift-guard.server.ts.
-import { authorizationRule, enhancedStaffingRule, groupRules, hourCapRules, overlapRules,
+import { authorizationRule, enhancedStaffingRule, groupRules, hourCapRules, newHireRule, overlapRules,
   sameDayEmploymentRule, segmentRules, staffStatusRules, teamRules, twoToOneRule } from "./rules-core.ts";
 import { absenceRule, asleepRule, custodyRule, mtpRules, nursingRules, relationshipCodeRule,
   supportedLivingRespiteRules } from "./rules-contract.ts";
@@ -17,8 +17,8 @@ import { behaviorConsultRule, daySupportRules, employmentRules, eprRules, hostHo
 import { driverFileFindings, qualificationFindings, qualificationsOnDate } from "./rules-qualifications.ts";
 import { applyStrength } from "./rules-strength.ts";
 import type { Finding, RuleContext, RuleShift } from "./rules-types.ts";
-import { clientOf, find, firstName, isLive, staffOf, up } from "./rules-util.ts";
-import { assumedRatioRule, availabilityRule, fatigueRule, overtimeRule, preferenceRule,
+import { clientOf, find, firstName, homeOf, isLive, staffOf, up } from "./rules-util.ts";
+import { assumedRatioRule, availabilityRule, daysInRowRule, fatigueRule, hoursCapRule, overtimeRule, preferenceRule,
   restAndStraightRules, travelGapRule, windowRequirementRules, worksheetHoursRule } from "./rules-warn.ts";
 
 export type { Finding, Fix, Level, RuleContext, RuleShift, Strength } from "./rules-types.ts";
@@ -67,7 +67,8 @@ function qualificationRules(s: RuleShift, ctx: RuleContext): Finding[] {
 /** Every finding for one shift, at the agency's strengths. `batch` = other shifts proposed in the same save. */
 export function evaluateShift(shift: RuleShift, ctx: RuleContext, batch: readonly RuleShift[] = []): Finding[] {
   if (!isLive(shift)) return [];
-  return applyStrength(rawFindings(shift, ctx, batch), ctx.settings.rules);
+  const home = homeOf(ctx, shift);
+  return applyStrength(rawFindings(shift, ctx, batch), ctx.settings.rules, home ? ctx.settings.homeRules?.[home] : undefined);
 }
 
 function rawFindings(shift: RuleShift, ctx: RuleContext, batch: readonly RuleShift[]): Finding[] {
@@ -75,6 +76,7 @@ function rawFindings(shift: RuleShift, ctx: RuleContext, batch: readonly RuleShi
     ...authorizationRule(shift, ctx, batch),
     ...teamRules(shift, ctx),
     ...staffStatusRules(shift, ctx),
+    ...newHireRule(shift, ctx),
     ...overlapRules(shift, ctx, batch),
     ...twoToOneRule(shift, ctx, batch),
     ...enhancedStaffingRule(shift, ctx, batch),
@@ -102,6 +104,8 @@ function rawFindings(shift: RuleShift, ctx: RuleContext, batch: readonly RuleShi
     ...worksheetHoursRule(shift, ctx, batch),
     ...restAndStraightRules(shift, ctx, batch),
     ...overtimeRule(shift, ctx, batch),
+    ...hoursCapRule(shift, ctx, batch),
+    ...daysInRowRule(shift, ctx, batch),
     ...fatigueRule(shift, ctx, batch),
     ...travelGapRule(shift, ctx, batch),
     ...preferenceRule(shift, ctx),

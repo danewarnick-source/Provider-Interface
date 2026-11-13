@@ -93,7 +93,7 @@ test("cancelled shifts are never linked", async () => {
 });
 
 test("a Require-a-reason rule asks the staff member for a reason, and goes ahead once given", async () => {
-  const over = { org_shift_behavior_settings: { rule_settings: { general_training: "reason" } } };
+  const over = { org_shift_behavior_settings: { rule_settings: { card: "reason" } } };
   const { db } = fakeDb(facts([shift("sched-1", 15, 18)], over));
   const without = await check(db);
   assert.match(without.refusal ?? "", /^Add a reason to go ahead/);

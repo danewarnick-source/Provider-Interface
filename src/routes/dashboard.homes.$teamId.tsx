@@ -26,6 +26,7 @@ import {
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PlaceSettingsCard } from "@/components/scheduler/settings/place-settings-card";
 
 export const Route = createFileRoute("/dashboard/homes/$teamId")({
   head: () => ({ meta: [{ title: "Home details — Provider Interface" }] }),
@@ -659,6 +660,8 @@ function HomeDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      <PlaceSettingsCard teamId={team.id} name={team.team_name} />
 
       {/* Danger zone */}
       <Card>

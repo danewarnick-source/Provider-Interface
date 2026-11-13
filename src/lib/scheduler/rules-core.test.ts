@@ -13,14 +13,14 @@ test("no authorization that day blocks; an authorized code passes", () => {
   assert.ok(has(run(shift(), expired), "no_authorization"));
 });
 
-test("units over the authorization block, exactly enough passes", () => {
+test("units past the 1056 need a reason by default (Past the 1056), exactly enough passes", () => {
   const low = (n: number) => ctx({ client: { authorizations: [auth("SLH", { unitsLeft: n })] } });
-  assert.ok(has(run(shift(), low(7)), "over_authorized_units", "block")); // 2 h = 8 units
+  assert.ok(has(run(shift(), low(7)), "over_authorized_units", "reason")); // 2 h = 8 units
   assert.ok(!has(run(shift(), low(8)), "over_authorized_units"));
 });
 
-test("not on the client's team blocks", () => {
-  assert.ok(has(run(shift(), ctx({ client: { teamStaffIds: ["s2"] } })), "not_on_team", "block"));
+test("not on the client's team warns by default (an agency rule)", () => {
+  assert.ok(has(run(shift(), ctx({ client: { teamStaffIds: ["s2"] } })), "not_on_team", "warn"));
   assert.ok(!has(run(), "not_on_team"));
 });
 
@@ -29,9 +29,9 @@ test("do-not-schedule list blocks", () => {
   assert.ok(!has(run(), "do_not_schedule"));
 });
 
-test("inactive staff and approved time off block", () => {
+test("inactive staff block; approved time off needs a reason by default", () => {
   assert.ok(has(run(shift(), ctx({ staff: { active: false } })), "staff_inactive", "block"));
-  assert.ok(has(run(shift(), ctx({ staff: { timeOff: [[DAY, DAY]] } })), "on_time_off", "block"));
+  assert.ok(has(run(shift(), ctx({ staff: { timeOff: [[DAY, DAY]] } })), "on_time_off", "reason"));
   assert.ok(!has(run(shift(), ctx({ staff: { timeOff: [["2026-10-15", "2026-10-16"]] } })), "on_time_off"));
   assert.ok(!has(run(), "staff_inactive"));
 });
@@ -159,3 +159,15 @@ test("ELS: over 6 h a day, 260 days a year, absence days first", () => {
   assert.ok(has(run(els(2), c({ absenceDaysLeft: 3 })), "els_absence_days_left", "block"));
   assert.ok(!has(run(els(2), c({ absenceDaysLeft: 0 })), "els_absence_days_left"));
 });
+
+test("a team member with no sign-off at the home is a new hire: paired shifts only", () => {
+  const notSigned = ctx({ signedOffHomes: {} });
+  assert.ok(has(run(shift(), notSigned), "new_hire_alone", "block"));
+  assert.ok(!has(run(shift({ shiftType: "paired" }), notSigned), "new_hire_alone"));
+  assert.ok(!has(run(shift(), ctx()), "new_hire_alone"));
+  // A client's home counts when the shift names no team.
+  const atClientHome = ctx({ signedOffHomes: {}, client: { homeId: "h9" } });
+  assert.ok(has(run(shift({ teamId: null }), atClientHome), "new_hire_alone"));
+  assert.ok(!has(run(shift({ teamId: null }), ctx({ signedOffHomes: {} })), "new_hire_alone"));
+});
+

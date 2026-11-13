@@ -11,7 +11,7 @@ import { loadRuleContext, toRuleShift, type ShiftRowIn } from "./rule-context.se
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Db = any;
 
-export type { ShiftRowIn } from "./rule-context.server.ts";
+export { SHIFT_COLUMNS, type ShiftRowIn } from "./rule-context.server.ts";
 
 /** A refused action. The message is the finding's one plain line. */
 export class ShiftRefusedError extends Error {

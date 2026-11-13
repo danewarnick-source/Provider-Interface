@@ -877,6 +877,38 @@ export type Database = {
           },
         ]
       }
+      agency_holidays: {
+        Row: {
+          holiday_date: string
+          id: string
+          name: string
+          organization_id: string
+          pay_multiplier: number | null
+        }
+        Insert: {
+          holiday_date: string
+          id?: string
+          name: string
+          organization_id: string
+          pay_multiplier?: number | null
+        }
+        Update: {
+          holiday_date?: string
+          id?: string
+          name?: string
+          organization_id?: string
+          pay_multiplier?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_holidays_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agency_policies: {
         Row: {
           active: boolean
@@ -13005,6 +13037,78 @@ export type Database = {
           },
         ]
       }
+      new_hire_signoffs: {
+        Row: {
+          end_reason: string | null
+          ended_at: string | null
+          ended_by: string | null
+          id: string
+          organization_id: string
+          signed_at: string
+          signed_by: string
+          staff_id: string
+          team_id: string
+        }
+        Insert: {
+          end_reason?: string | null
+          ended_at?: string | null
+          ended_by?: string | null
+          id?: string
+          organization_id: string
+          signed_at?: string
+          signed_by: string
+          staff_id: string
+          team_id: string
+        }
+        Update: {
+          end_reason?: string | null
+          ended_at?: string | null
+          ended_by?: string | null
+          id?: string
+          organization_id?: string
+          signed_at?: string
+          signed_by?: string
+          staff_id?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "new_hire_signoffs_ended_by_fkey"
+            columns: ["ended_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "new_hire_signoffs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "new_hire_signoffs_signed_by_fkey"
+            columns: ["signed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "new_hire_signoffs_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "new_hire_signoffs_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string
@@ -13288,25 +13392,91 @@ export type Database = {
       }
       org_shift_behavior_settings: {
         Row: {
+          claim_mode: string
+          digest: boolean
+          escalation_waits: number[]
+          holdover_ask: boolean
+          holdover_visible: boolean
+          hours_cap: number
+          location_at_punch_only: boolean
+          max_days_in_row: number
+          max_hours_in_row: number
+          min_rest_hours: number
+          night_diff: number | null
+          night_from: number
+          night_to: number
+          oncall_stipend: number
           organization_id: string
+          ot_multiplier: number
           ot_threshold_hours: number
+          quiet_end: number
+          quiet_start: number
+          reminder_minutes: number
           rule_settings: Json
+          sleep_rate: number
           updated_at: string
           updated_by: string | null
+          urgent_hours: number
+          weekend_diff: number | null
+          workweek_start: number
         }
         Insert: {
+          claim_mode?: string
+          digest?: boolean
+          escalation_waits?: number[]
+          holdover_ask?: boolean
+          holdover_visible?: boolean
+          hours_cap?: number
+          location_at_punch_only?: boolean
+          max_days_in_row?: number
+          max_hours_in_row?: number
+          min_rest_hours?: number
+          night_diff?: number | null
+          night_from?: number
+          night_to?: number
+          oncall_stipend?: number
           organization_id: string
+          ot_multiplier?: number
           ot_threshold_hours?: number
+          quiet_end?: number
+          quiet_start?: number
+          reminder_minutes?: number
           rule_settings?: Json
+          sleep_rate?: number
           updated_at?: string
           updated_by?: string | null
+          urgent_hours?: number
+          weekend_diff?: number | null
+          workweek_start?: number
         }
         Update: {
+          claim_mode?: string
+          digest?: boolean
+          escalation_waits?: number[]
+          holdover_ask?: boolean
+          holdover_visible?: boolean
+          hours_cap?: number
+          location_at_punch_only?: boolean
+          max_days_in_row?: number
+          max_hours_in_row?: number
+          min_rest_hours?: number
+          night_diff?: number | null
+          night_from?: number
+          night_to?: number
+          oncall_stipend?: number
           organization_id?: string
+          ot_multiplier?: number
           ot_threshold_hours?: number
+          quiet_end?: number
+          quiet_start?: number
+          reminder_minutes?: number
           rule_settings?: Json
+          sleep_rate?: number
           updated_at?: string
           updated_by?: string | null
+          urgent_hours?: number
+          weekend_diff?: number | null
+          workweek_start?: number
         }
         Relationships: [
           {
@@ -15893,6 +16063,68 @@ export type Database = {
         }
         Relationships: []
       }
+      shift_types: {
+        Row: {
+          archive_reason: string | null
+          archived_at: string | null
+          built_in: boolean
+          color: string
+          counts_toward_coverage: boolean
+          created_at: string
+          created_by: string | null
+          end_time: string
+          id: string
+          key: string | null
+          name: string
+          organization_id: string
+          pay_kind: string
+          start_time: string
+          used_at: string[]
+        }
+        Insert: {
+          archive_reason?: string | null
+          archived_at?: string | null
+          built_in?: boolean
+          color: string
+          counts_toward_coverage?: boolean
+          created_at?: string
+          created_by?: string | null
+          end_time: string
+          id?: string
+          key?: string | null
+          name: string
+          organization_id: string
+          pay_kind?: string
+          start_time: string
+          used_at: string[]
+        }
+        Update: {
+          archive_reason?: string | null
+          archived_at?: string | null
+          built_in?: boolean
+          color?: string
+          counts_toward_coverage?: boolean
+          created_at?: string
+          created_by?: string | null
+          end_time?: string
+          id?: string
+          key?: string | null
+          name?: string
+          organization_id?: string
+          pay_kind?: string
+          start_time?: string
+          used_at?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sjd_assessment_selections: {
         Row: {
           assessment_start_date: string | null
@@ -16781,6 +17013,66 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_schedule_settings: {
+        Row: {
+          fix_approval: string | null
+          organization_id: string
+          overnight_pay: string | null
+          pickup_approval: string | null
+          premium_per_hour: number | null
+          publish_approval: string | null
+          rule_overrides: Json
+          swap_approval: string | null
+          team_id: string
+          timeoff_approval: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          fix_approval?: string | null
+          organization_id: string
+          overnight_pay?: string | null
+          pickup_approval?: string | null
+          premium_per_hour?: number | null
+          publish_approval?: string | null
+          rule_overrides?: Json
+          swap_approval?: string | null
+          team_id: string
+          timeoff_approval?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          fix_approval?: string | null
+          organization_id?: string
+          overnight_pay?: string | null
+          pickup_approval?: string | null
+          premium_per_hour?: number | null
+          publish_approval?: string | null
+          rule_overrides?: Json
+          swap_approval?: string | null
+          team_id?: string
+          timeoff_approval?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_schedule_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_schedule_settings_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: true
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]
@@ -17694,6 +17986,10 @@ export type Database = {
         Args: { _org: string; _staff: string; _viewer: string }
         Returns: boolean
       }
+      claim_open_shift_first: {
+        Args: { _shift: string; _staff: string }
+        Returns: boolean
+      }
       client_active_codes: {
         Args: { _client_ids: string[] }
         Returns: {
@@ -18319,6 +18615,7 @@ export type Database = {
         Args: { _id: string; _kind: string }
         Returns: undefined
       }
+      seed_scheduling_settings: { Args: { _org: string }; Returns: undefined }
       seed_standard_service_codes: {
         Args: { _org: string }
         Returns: undefined

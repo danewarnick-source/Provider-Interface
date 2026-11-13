@@ -5,7 +5,7 @@
 // scheduled shift, the rules run on a 15-minute shift starting now.
 // Called by clock-in.functions.ts (the punch pad).
 import { refusalLine, warningLines } from "./rules.ts";
-import { checkShiftRows, type ShiftRowIn } from "./shift-guard.server.ts";
+import { checkShiftRows, SHIFT_COLUMNS, type ShiftRowIn } from "./shift-guard.server.ts";
 import { pickShiftForClockIn } from "./staff-clock.ts";
 import { dayKey, toLocalRange } from "./time.ts";
 
@@ -39,7 +39,7 @@ export async function clockInCheck(
   const { data, error } = await db
     .from("scheduled_shifts")
     .select(
-      "id, staff_id, client_id, team_id, service_code, starts_at, ends_at, parent_shift_id, status, van_route_id",
+      SHIFT_COLUMNS,
     )
     .eq("organization_id", args.orgId)
     .eq("staff_id", args.staffId)

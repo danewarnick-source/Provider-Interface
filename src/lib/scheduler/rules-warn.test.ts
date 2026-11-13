@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { DAY, at, auth, ctx, evidence, has, shift, ALL_KEYS } from "./rules-fixtures.ts";
+import { DAY, SUNDAY as SUNDAY_OF, at, auth, ctx, evidence, has, shift, ALL_KEYS } from "./rules-fixtures.ts";
 import { evaluateShift } from "./rules.ts";
 import { addDaysKey } from "./time.ts";
 
@@ -18,17 +18,17 @@ test("under 8 hours of rest warns (Agency), and the agency can turn it off or ma
   assert.ok(has(run(shift(), ctx({ shifts: [prev] })), "under_rest", "warn"));
   const ok = shift({ id: "p", startsAt: at(0), endsAt: at(1) });
   assert.ok(!has(run(shift(), ctx({ shifts: [ok] })), "under_rest"));
-  const off = ctx({ shifts: [prev], settings: { rules: { under_rest: "off" } } });
+  const off = ctx({ shifts: [prev], settings: { rules: { rest: "off" } } });
   assert.ok(!has(run(shift(), off), "under_rest"));
-  const blk = ctx({ shifts: [prev], settings: { rules: { under_rest: "block" } } });
+  const blk = ctx({ shifts: [prev], settings: { rules: { rest: "block" } } });
   assert.ok(has(run(shift(), blk), "under_rest", "block"));
 });
 
-test("over 16 hours straight warns", () => {
+test("over the agency's hours in a row warns (default 16)", () => {
   const long = shift({ id: "o", startsAt: at(11), endsAt: at(3, 0, NEXT) });
-  assert.ok(has(run(shift(), ctx({ shifts: [long] })), "over_16h_straight", "warn"));
+  assert.ok(has(run(shift(), ctx({ shifts: [long] })), "over_hours_in_row", "warn"));
   const short = shift({ id: "o", startsAt: at(11), endsAt: at(23) });
-  assert.ok(!has(run(shift(), ctx({ shifts: [short] })), "over_16h_straight"));
+  assert.ok(!has(run(shift(), ctx({ shifts: [short] })), "over_hours_in_row"));
 });
 
 test("overtime past the weekly threshold warns", () => {
@@ -101,5 +101,15 @@ test("outside the availability a person gave warns", () => {
   const inside = { 3: [["08:00", "12:00"]] as const };
   assert.ok(!has(run(shift(), ctx({ staff: { availability: inside } })), "outside_availability"));
   assert.ok(!has(run(shift(), ctx()), "outside_availability"));
+});
+
+test("agency hours cap and days in a row use the agency's numbers", () => {
+  const week = [1, 2, 4, 5].map((d) => shift({ id: `w${d}`, startsAt: at(7, 0, addDaysKey(SUNDAY_OF, d)), endsAt: at(19, 0, addDaysKey(SUNDAY_OF, d)) }));
+  const capped = ctx({ shifts: week, settings: { hoursCap: 48 } });
+  assert.ok(has(run(shift({ startsAt: at(7), endsAt: at(9) }), capped), "over_hours_cap", "reason"));
+  assert.ok(!has(run(shift(), ctx({ settings: { hoursCap: 48 } })), "over_hours_cap"));
+  const days = [-3, -2, -1].map((d) => shift({ id: `d${d}`, startsAt: at(7, 0, addDaysKey(DAY, d)), endsAt: at(9, 0, addDaysKey(DAY, d)) }));
+  assert.ok(has(run(shift(), ctx({ shifts: days, settings: { maxDaysInRow: 3 } })), "over_days_in_row", "warn"));
+  assert.ok(!has(run(shift(), ctx({ shifts: days })), "over_days_in_row"));
 });
 

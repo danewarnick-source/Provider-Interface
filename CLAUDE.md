@@ -95,7 +95,12 @@ Every fact has exactly one owner: one table (or column) and one lib file that re
 | Hours worked / EVV | `evv_timesheets` | `src/lib/billing-units.ts`, EVV lib |
 | Scheduled work | `scheduled_shifts` | `src/lib/scheduler/` |
 | Can this shift exist? (every scheduler rule) | derived | `src/lib/scheduler/rules.ts`; server callers use `shift-guard.server.ts` |
-| Scheduler rule strengths (Off / Warn / Require a reason / Block) | `org_shift_behavior_settings.rule_settings` | `src/lib/scheduler/rules-strength.ts` |
+| Scheduler rule strengths (Off / Warn / Needs a reason / Block), agency default and per home | `org_shift_behavior_settings.rule_settings`, `team_schedule_settings.rule_overrides` (keyed by `SETTING_RULES` key) | `src/lib/scheduler/rules-strength.ts` |
+| Agency scheduling defaults (thresholds, open-shift offering, escalation, pay, notifications) | `org_shift_behavior_settings` (one row per agency) | `src/lib/scheduler/settings/` |
+| What a home does differently (overnight pay, premium, pickups, approvals) | `team_schedule_settings` | `src/lib/scheduler/settings/settings-model.ts` |
+| Shift types | `shift_types` | `src/lib/scheduler/settings/` |
+| Paid holidays | `agency_holidays` | `src/lib/scheduler/settings/` |
+| Who may work alone at a home (new hire sign-off) | `new_hire_signoffs` | `src/lib/scheduler/settings/new-hire*.ts`; engine rule `new_hire_alone` |
 | Which scheduled shift a punch was made from | `evv_timesheets.scheduled_shift_id` | `src/lib/scheduler/clock-in.server.ts` |
 | Driver file (license, driving record, insurance) | `evidence_items` (`driver_license`, `driving_record`, `auto_insurance_proof`) | `DRIVER_FILE_KEYS` in `src/lib/scheduler/rules-qualifications.ts` |
 | Shift notes and daily notes | `daily_logs` | `src/lib/daily-log-*.ts` |
