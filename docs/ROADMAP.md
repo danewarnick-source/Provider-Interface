@@ -2,7 +2,7 @@
 
 Read this before planning or building anything. Update it at the end of every session ("update the roadmap and decisions, then commit"). Owner decisions are in `docs/decisions.md`.
 
-**Next up:** Scheduler. (1) Refresh B1 (#498) and B2 (#499) onto `main`; Dane tests B2 Settings on the preview. (2) Re-check the scheduler demo (`docs/demos/scheduler.html`) against competitors and DHHS91172: keep/add/cut list → updated demo as a private link → Dane approves → B3.
+**Next up:** Scheduler. (1) Refresh B1 (#498) and B2 (#499) onto `main`; Dane tests B2 Settings on the preview. (2) Re-check done (`docs/scheduler-rebuild/RECHECK.md`; Dane's picks in `docs/decisions.md`). Updated demo (v1, Nov 13) is a private link: https://claude.ai/artifact/UePkDdre3r7jbpeV6NbrUM. Read it with the Artifact tool's `read` action; it is the working copy. Next: Dane's changes → he approves → save it over `docs/demos/scheduler.html` → update PART-B.md → B3.
 
 ## The vision (Dane, Nov 13, 2026)
 - **One platform for Utah DSPD providers, built for the admin side first.** Staff screens exist to feed admins clean records.
@@ -15,7 +15,7 @@ Read this before planning or building anything. Update it at the end of every se
 - **Every feature is a demo first.** The demo works from start to finish with fake data, every button does something, and it remembers changes while you click around. Dane tests it and asks for changes. Once he approves, it's saved in `docs/demos/` and the real build must match it.
 
 ## How each tab gets done
-1. **Audit:** what the tab does today, which tables and files it uses, and what's dead or duplicated.
+1. **Audit:** what the tab does today, which tables and files it uses, and what's dead. **Source-of-truth check:** every fact the tab shows, its owner (Clients, Team members or Settings; see `docs/SOURCE_OF_TRUTH.md`), and every copy the tab keeps. The build deletes the copies.
 2. **Compare:** competitors and contract rules, written as a short "keep / add / cut" list.
 3. **Demo:** a clickable page with fake data. Dane revises it until he approves.
 4. **Build:** small PRs straight into `main`, each one deleting what it replaces. No more than 2 PRs waiting for Dane at once.
@@ -29,7 +29,7 @@ Status: `audit` → `demo` → `demo approved` → `building` → `live` (✅ = 
 | Team Members | ✅ live | Rebuilt Sept 28–30. Re-check against competitors later. |
 | Clients | ✅ live | Rebuilt Oct 6–22 (incl. Meds, progress summaries). |
 | **Scheduler** | **building (Part B)** | Demo: `docs/demos/scheduler.html`, `docs/demos/daily-notes.html`. Plan: `docs/scheduler-rebuild/PART-B.md` (B1–B20). B1 #498 and B2 #499 open, both 13 commits behind `main`; their DB changes went live Oct 23. B3–B20 not started. |
-| Daily Logs | not started | Part B (B16–B19) rebuilds notes; decide whether this tab merges into it. |
+| Daily Logs | not started | Part B (B16–B19) rebuilds notes; decide whether this tab merges into it. The host home "can this day bill" grid and missing-note alerts belong here (moved out of the scheduler Nov 13). |
 | Evidence | not started | |
 | Summaries | not started | |
 | Documentation | not started | |
@@ -44,6 +44,8 @@ Status: `audit` → `demo` → `demo approved` → `building` → `live` (✅ = 
 ## Other loose ends
 - **Denim design system (PR #469):** 314 commits behind `main`. Kept open as a reference for the look; redo it later.
 - **Phase B cleanup files waiting for Dane's OK:** see `supabase/migrations/*_b_*.sql` not yet in live history.
+- **Host home source fix:** built in PR #503 (`docs/host-homes/PLAN.md`). After Dane merges and says so, apply `20261113034500_host_homes_b_drop_setting_and_hhp_name.sql`.
+- **Duplicate facts:** listed under "Known duplicates" in `docs/SOURCE_OF_TRUTH.md` (first: who a client's host is, stored three ways). Fix each before the feature that depends on it.
 - **Known defects and open owner questions:** see the "Don't decide these" list in `CLAUDE.md`.
 
 ## Scoreboard (lower is better)

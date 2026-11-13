@@ -1,20 +1,15 @@
 /**
- * teams → locations type mapping. `teams` is the source of truth for homes;
- * every scheduler location is derived from a team's setting/team_type:
- *   contains "host"    → host_home
- *   contains "day"     → day_site
- *   contains "communi" → community
- *   everything else    → residential
+ * teams → locations type mapping. `teams` is the source of truth for homes and
+ * `teams.team_type` says what kind of home it is; the legacy scheduler
+ * `locations` row is derived from it when a home is saved.
  */
+import { homeKind } from "@/lib/homes/home-kind";
+
 export type LocationType = "residential" | "host_home" | "day_site" | "community";
 
-export function locationTypeForTeam(
-  setting: string | null | undefined,
-  teamType?: string | null,
-): LocationType {
-  const v = `${setting ?? ""} ${teamType ?? ""}`.toLowerCase();
-  if (v.includes("host")) return "host_home";
-  if (v.includes("day")) return "day_site";
-  if (v.includes("communi")) return "community";
+export function locationTypeForTeam(teamType: string | null | undefined): LocationType {
+  const kind = homeKind(teamType);
+  if (kind === "host_home") return "host_home";
+  if (kind === "day_program") return "day_site";
   return "residential";
 }

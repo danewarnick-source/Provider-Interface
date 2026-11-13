@@ -173,7 +173,7 @@ function useMyScheduledShifts(view: ViewMode, anchor: Date) {
       const { data, error } = await supabase
         .from("scheduled_shifts")
         .select(
-          "id, client_id, job_code, starts_at, ends_at, status, published, updated_at, clients:client_id(first_name, last_name, team_id, teams:team_id(team_name, setting))",
+          "id, client_id, job_code, starts_at, ends_at, status, published, updated_at, clients:client_id(first_name, last_name, team_id, teams:team_id(team_name, team_type))",
         )
         .eq("staff_id", user!.id)
         .eq("organization_id", org!.organization_id)
@@ -193,7 +193,7 @@ function useMyScheduledShifts(view: ViewMode, anchor: Date) {
         client_first_name: r.clients?.first_name ?? null,
         client_last_name: r.clients?.last_name ?? null,
         home_name: r.clients?.teams?.team_name ?? null,
-        is_host_home: /host/i.test(String(r.clients?.teams?.setting ?? "")),
+        is_host_home: r.clients?.teams?.team_type === "host_home",
         job_code: r.job_code,
         starts_at: r.starts_at,
         ends_at: r.ends_at,

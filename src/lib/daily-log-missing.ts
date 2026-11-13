@@ -8,10 +8,10 @@
 //     staff_assignments row's created_at, as a Denver date).
 //   - Any staff assigned to the client satisfies the day by writing that
 //     day's note (the host or a respite worker alike).
-//   - A missing day is the host home provider's: the assigned staff whose
-//     Position is Host Home Provider and whose assignment had started. With no
-//     such host, the gap belongs to the client only, never to every assigned
-//     staff member.
+//   - A missing day is the host's: the lead of the client's host home
+//     (teams.manager_id, see src/lib/homes/home-kind.ts), when the host is on
+//     the client's team and their assignment had started. With no host, the gap
+//     belongs to the client only, never to every assigned staff member.
 
 export type DailyLogProgram = "HHS" | "RP5";
 
@@ -23,17 +23,12 @@ export function dailyLogProgram(c: { codes?: readonly string[] | null }): DailyL
   return null;
 }
 
-/** A Position (staff_types key + label) that makes someone a Host Home Provider. */
-export function isHostHomeProviderPosition(p: { key: string; label: string }): boolean {
-  return p.key.trim().toLowerCase() === "hhp" || /host\s*home/i.test(p.label);
-}
-
 export type DailyNoteAssignment = {
   clientId: string;
   staffId: string;
   /** YYYY-MM-DD. Days before this don't count for this assignment. */
   startDate: string;
-  /** The staff member's Position is Host Home Provider. */
+  /** The staff member is the lead of the client's host home (the host). */
   isHost: boolean;
 };
 

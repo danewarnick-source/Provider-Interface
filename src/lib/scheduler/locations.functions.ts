@@ -8,7 +8,7 @@ const LocationTypeZ = z.enum(["residential", "host_home", "day_site", "community
 /**
  * `teams` is the source of truth for homes. Whenever a home is created or
  * edited in Homes & Teams, mirror it into `locations` (name = team_name,
- * type mapped from setting/team_type, address carried over) so the
+ * type mapped from team_type, address carried over) so the
  * scheduler's Locations panel and coverage requirements always list real
  * homes — never staff-role labels or hand-typed strays.
  */
@@ -24,7 +24,7 @@ export const syncTeamToLocation = createServerFn({ method: "POST" })
     if (!context.supabase || !context.userId) return null;
     const { data: team, error: tErr } = await context.supabase
       .from("teams")
-      .select("id, organization_id, team_name, setting, team_type, address, active")
+      .select("id, organization_id, team_name, team_type, address, active")
       .eq("id", data.teamId)
       .eq("organization_id", data.organizationId)
       .maybeSingle();
@@ -34,7 +34,7 @@ export const syncTeamToLocation = createServerFn({ method: "POST" })
     const desired = {
       organization_id: data.organizationId,
       name: team.team_name as string,
-      type: locationTypeForTeam(team.setting as string | null, (team as { team_type?: string | null }).team_type),
+      type: locationTypeForTeam(team.team_type),
       address: (team as { address?: string | null }).address ?? null,
       active: (team as { active?: boolean | null }).active ?? true,
     };

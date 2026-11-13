@@ -92,7 +92,7 @@ export function OpenShiftsPanel({
                   {s.service_code ?? "Shift"} · {fmtWhen(s.starts_at)}
                 </div>
                 <div className="text-[11px] text-muted-foreground">
-                  {clientNames?.get(s.client_id) ?? "Client"}
+                  {(s.client_id && clientNames?.get(s.client_id)) || "Client"}
                   {mode === "admin" && pending ? " · waiting for approval" : ""}
                 </div>
               </button>

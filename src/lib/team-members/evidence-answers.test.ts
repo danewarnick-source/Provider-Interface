@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import { defaultQuestionnaireAnswers, suggestPacks } from "../evidence/catalog.ts";
 import {
   answersForPeople,
+  isHostHomeProviderPosition,
   positionServiceCodes,
   type CaseloadFacts,
   type EvidencePersonFacts,
@@ -137,5 +138,16 @@ describe("questionnaire wiring", () => {
     assert.match(src, /subjectIds,/);
     const fns = readFileSync(new URL("../evidence.functions.ts", import.meta.url), "utf8");
     assert.match(fns, /optedOutKeys: z\.array\(z\.string\(\)\)\.optional\(\)/);
+  });
+});
+
+describe("Host Home Provider Position (Evidence pack only)", () => {
+  it("matches by key or label", () => {
+    assert.equal(isHostHomeProviderPosition({ key: "hhp", label: "x" }), true);
+    assert.equal(isHostHomeProviderPosition({ key: "x", label: "Host Home Provider" }), true);
+    assert.equal(
+      isHostHomeProviderPosition({ key: "dsp", label: "Direct Support Professional" }),
+      false,
+    );
   });
 });

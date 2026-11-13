@@ -4,7 +4,6 @@
  * the facts, this only decides the starting answers. Every answer stays
  * editable and nothing is created until the admin clicks Apply.
  */
-import { isHostHomeProviderPosition } from "../daily-log-missing.ts";
 import { defaultQuestionnaireAnswers } from "../evidence/catalog.ts";
 import {
   STAFF_QUIZ_CODES,
@@ -36,6 +35,15 @@ export type CaseloadFacts = {
 export type CaseloadFactsByUser =
   | ReadonlyMap<string, CaseloadFacts>
   | Readonly<Record<string, CaseloadFacts | undefined>>;
+
+/**
+ * A Position (staff_types key + label) that makes someone a Host Home Provider.
+ * Only decides which Evidence pack applies. Who hosts which client is the host
+ * home's lead (src/lib/homes/home-kind.ts), never this.
+ */
+export function isHostHomeProviderPosition(p: { key: string; label: string }): boolean {
+  return p.key.trim().toLowerCase() === "hhp" || /host\s*home/i.test(p.label);
+}
 
 /** Positions that imply a service code's pack. Host Home Provider → HHS (the host home pack). */
 const POSITION_CODES: Array<{ match: (p: EvidencePosition) => boolean; code: ServiceCodeFlag }> = [

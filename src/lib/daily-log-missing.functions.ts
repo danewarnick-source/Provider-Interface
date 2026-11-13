@@ -12,13 +12,13 @@ import { denverYmdFromInstant } from "@/lib/denver-date";
 import {
   dailyLogProgram,
   dailyNoteGapsFor,
-  isHostHomeProviderPosition,
   missingDailyNotes,
   type DailyNoteAssignment,
   type DailyNoteRow,
 } from "@/lib/daily-log-missing";
 import { selectIn } from "@/lib/team-members/roster.functions";
 import { loadActiveCodes } from "@/lib/clients/services/codes";
+import { hostOfClient, type HomeForHost } from "@/lib/homes/home-kind";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = SupabaseClient<any>;
@@ -28,7 +28,11 @@ export type DailyNoteFacts = {
   notes: DailyNoteRow[];
 };
 
-/** Every assignment (with its host flag) and every non-rejected note on these clients since `since`. */
+/**
+ * Every assignment (flagged when that staff member is the client's host, i.e. the
+ * lead of the client's host home) and every non-rejected note on these clients
+ * since `since`.
+ */
 export async function loadDailyNoteFacts(
   admin: Sb,
   orgId: string,
@@ -37,7 +41,7 @@ export async function loadDailyNoteFacts(
 ): Promise<DailyNoteFacts> {
   const ids = [...new Set(clientIds)];
   if (!ids.length) return { assignments: [], notes: [] };
-  const [assigns, notes, staffTypes] = await Promise.all([
+  const [assigns, notes, clientHomes] = await Promise.all([
     selectIn<{ staff_id: string; client_id: string; created_at: string }>(
       (chunk) =>
         admin
@@ -58,35 +62,30 @@ export async function loadDailyNoteFacts(
           .neq("status", "rejected"),
       ids,
     ),
-    admin.from("staff_types").select("key, label").eq("organization_id", orgId),
+    selectIn<{ id: string; team_id: string | null }>(
+      (chunk) =>
+        admin.from("clients").select("id, team_id").eq("organization_id", orgId).in("id", chunk),
+      ids,
+    ),
   ]);
-  if (staffTypes.error) throw new Error(staffTypes.error.message);
-  const labelByKey = new Map(
-    ((staffTypes.data ?? []) as Array<{ key: string; label: string | null }>).map((t) => [
-      t.key,
-      t.label ?? t.key,
-    ]),
+  const homeIds = [...new Set(clientHomes.map((c) => c.team_id).filter((x): x is string => !!x))];
+  const homes = await selectIn<HomeForHost>(
+    (chunk) =>
+      admin
+        .from("teams")
+        .select("id, team_type, manager_id")
+        .eq("organization_id", orgId)
+        .in("id", chunk),
+    homeIds,
   );
-  const staffIds = [...new Set(assigns.map((a) => a.staff_id))];
-  const profiles = await selectIn<{ id: string; staff_type_keys: string[] | null }>(
-    (chunk) => admin.from("profiles").select("id, staff_type_keys").in("id", chunk),
-    staffIds,
-  );
-  const hosts = new Set(
-    profiles
-      .filter((p) =>
-        (p.staff_type_keys ?? []).some((key) =>
-          isHostHomeProviderPosition({ key, label: labelByKey.get(key) ?? key }),
-        ),
-      )
-      .map((p) => p.id),
-  );
+  const homesById = new Map(homes.map((h) => [h.id, h]));
+  const hostByClient = new Map(clientHomes.map((c) => [c.id, hostOfClient(c, homesById)]));
   return {
     assignments: assigns.map((a) => ({
       clientId: a.client_id,
       staffId: a.staff_id,
       startDate: denverYmdFromInstant(a.created_at) ?? a.created_at.slice(0, 10),
-      isHost: hosts.has(a.staff_id),
+      isHost: hostByClient.get(a.client_id) === a.staff_id,
     })),
     notes,
   };
