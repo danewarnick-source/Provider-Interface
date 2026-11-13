@@ -2,7 +2,7 @@
 
 Read this before planning or building anything. Update it at the end of every session ("update the roadmap and decisions, then commit"). Owner decisions are in `docs/decisions.md`.
 
-**Next up:** Scheduler. (1) Refresh B1 (#498) and B2 (#499) onto `main`; Dane tests B2 Settings on the preview. (2) Check the existing scheduler demo (`docs/demos/scheduler.html`) against competitors and DHHS91172; Dane approves changes before B3.
+**Next up:** Scheduler. (1) Refresh B1 (#498) and B2 (#499) onto `main`; Dane tests B2 Settings on the preview. (2) Re-check the scheduler demo (`docs/demos/scheduler.html`) against competitors and DHHS91172: keep/add/cut list → updated demo as a private link → Dane approves → B3.
 
 ## The vision (Dane, Nov 13, 2026)
 - **One platform for Utah DSPD providers, built for the admin side first.** Staff screens exist to feed admins clean records.
@@ -37,12 +37,12 @@ Status: `audit` → `demo` → `demo approved` → `building` → `live` (✅ = 
 | Training | not started | |
 | Inbox | not started | |
 | Settings | not started | |
-| Nectar + Knowledge base | built, not live | PR #484 (N1–N6) points at retired `staging`, 99 commits behind `main`. Its DB changes went live Oct 13–14. Rescue: rebase onto `main`, retarget, test, merge. |
+| Nectar + Knowledge base | built, not live | PR #484 (N1–N6) points at retired `staging`, 99 commits behind `main`. Its DB changes went live Oct 13–14. Rescue it when we reach this tab: rebase onto `main`, retarget, test, merge. |
 | Human Rights Committee | not started | |
 | Home | not started | Do last; it summarizes the other tabs. |
 
 ## Other loose ends
-- **Denim design system (PR #469):** 314 commits behind `main`. Close it or redo it.
+- **Denim design system (PR #469):** 314 commits behind `main`. Kept open as a reference for the look; redo it later.
 - **Phase B cleanup files waiting for Dane's OK:** see `supabase/migrations/*_b_*.sql` not yet in live history.
 - **Known defects and open owner questions:** see the "Don't decide these" list in `CLAUDE.md`.
 
