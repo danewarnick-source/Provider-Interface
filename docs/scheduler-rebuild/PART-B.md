@@ -21,6 +21,33 @@ Owner: Dane. Written Oct 22, 2026 from two demos and the decisions in `docs/sche
   - printing
   - Excel import
 
+## Changes from the Nov 13 re-check (these override the steps below)
+The demo `docs/demos/scheduler.html` was updated and approved by Dane on Nov 13 (`RECHECK.md`, `docs/decisions.md`). Where a step below disagrees, this list and the demo win.
+
+**Added**
+- **Late and missed clock-in alerts → B5 and B14.**
+  - Staff get a nudge 10 minutes after the start with no clock-in.
+  - At 30 minutes a Needs you card appears ("Late clock-in", with Call, Find cover and "They're there: add the punch").
+  - A shift that ended with no punch is a "Missed visit" card ("They worked it: add the punch" or "Didn't happen"). An added punch carries the admin's name and is marked as a manual entry for EVV.
+  - The 10 and 30 minute times are agency settings in B2.
+- **Authorization outlook → B3 (Clients view of the board) and B5.**
+  - A table of authorized, used + scheduled, left and the standard week, for the whole plan year.
+  - Outlook: On pace / Watch (runs out early) / Act now (runs out within 4 weeks or over) / Under-using (units will go unused).
+  - Watch and Act now also appear as "1056" cards in Needs you. HHS rows count days.
+- **Host homes → a new step, B7b, after B7.**
+  - Hosts are never scheduled. A host home client's row on the Clients view says "With host · not scheduled".
+  - Agency staff visits are ordinary visits under the client.
+  - **Host away:** the admin records the host's days away ("Host away…" on the client row). That creates a "Host away" card in Needs you with "Add coverage shifts" (8a–8p and 8p–8a for each day away, one shift covering every client of that host, offered to staff trained on them) or "They'll stay somewhere else".
+  - It reads the host from the client's home (`clients.team_id` → `teams.manager_id`, on main since PR #504).
+  - The "can this day bill" grid is **not** in the scheduler; it belongs to notes review (B16–B17).
+- **Offline clock-in → B14.** With no signal, the phone saves the punch with the tap time and place and sends it when signal returns. The card says "saved on phone, not sent yet". The office sees the late alert until it arrives.
+
+**Cut or moved**
+- **B8 (day program and van routes) and B15 (DSG van run and notes):** postponed until an agency that runs DSG signs on. The demo no longer has them.
+- **B10 (Scheduling readiness page):** cut. Find staff shows why each person can't take a shift, with an "Evidence ›" link.
+- **B11 (Messages):** Phase 2.
+- **B19 (House log) and the House log box in B14:** cut.
+
 ---
 
 ## B1 — Foundations (no new screen)
