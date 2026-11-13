@@ -74,7 +74,7 @@ function readShiftTypes(): ShiftType[] {
 function inferKey(s: ShiftRow, types: ShiftType[]): string {
   const explicit = (s.shift_type ?? "").toString().trim().toLowerCase();
   if (explicit && types.some((t) => t.key === explicit)) return explicit;
-  const code = (s.job_code ?? "").toUpperCase();
+  const code = (s.service_code ?? "").toUpperCase();
   if (code === "DSI") return "dsi";
   if (code === "DSG") return "day";
   if (code.startsWith("RP") || code === "RL6") return "respite";
@@ -93,7 +93,7 @@ export function shiftAccentHex(s: ShiftRow): string {
 export function shiftTypeLabel(s: ShiftRow): string {
   const types = readShiftTypes();
   const k = inferKey(s, types);
-  return types.find((t) => t.key === k)?.label ?? s.shift_type ?? s.job_code ?? "Shift";
+  return types.find((t) => t.key === k)?.label ?? s.shift_type ?? s.service_code ?? "Shift";
 }
 
 // ── Display settings (persisted per-device; logic preserved verbatim) ──

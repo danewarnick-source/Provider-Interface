@@ -95,14 +95,10 @@ describe("setStaffClientCodes — the single write path", () => {
 describe("scheduler — shifts only for an assigned code", () => {
   const sched = src("./scheduler/scheduler.functions.ts");
 
-  it("saveShift checks the shift's code is on the staff member's assignment", () => {
-    const checks = src("./scheduler/shift-checks.ts");
-    assert.match(
-      checks,
-      /assignmentCoversCode\(\s*\(data as \{ service_codes: string\[\] \| null \}\)\.service_codes,\s*code,?\s*\)/,
-    );
-    assert.match(sched, /assertShiftAllowed\(supabase, \{/);
-    assert.match(sched, /code: data\.job_code,/);
+  it("saveShift runs the rule engine, which checks the code is on the staff member's assignment", () => {
+    assert.match(sched, /guardShiftRows\(supabase, data\.organization_id/);
+    assert.match(src("./scheduler/rules-core.ts"), /assignmentCoversCode\(client\.teamCodes\[staff\.id\], s\.code\)/);
+    assert.match(src("./scheduler/rule-context.server.ts"), /teamCodes: Object\.fromEntries\(members\.map\(\(t\) => \[t\.staff_id, t\.service_codes \?\? \[\]\]\)\)/);
   });
 
   it("the code-less addToCaseload / removeFromCaseload writers are gone", () => {

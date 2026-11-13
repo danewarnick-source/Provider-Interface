@@ -309,7 +309,7 @@ export type StaffShiftRow = {
   id: string;
   client_id: string;
   client_name: string;
-  job_code: string | null;
+  service_code: string | null;
   starts_at: string;
   ends_at: string;
 };
@@ -318,7 +318,7 @@ export type StaffScheduleFact = {
   id: string;
   client_id: string;
   client_name: string;
-  job_code: string | null;
+  service_code: string | null;
   starts_at: string;
   ends_at: string;
   weekday: string;
@@ -347,7 +347,7 @@ export function toScheduleFact(row: StaffShiftRow): StaffScheduleFact {
     id: row.id,
     client_id: row.client_id,
     client_name: row.client_name,
-    job_code: row.job_code,
+    service_code: row.service_code,
     starts_at: row.starts_at,
     ends_at: row.ends_at,
     weekday: weekdayLabelForIso(row.starts_at),

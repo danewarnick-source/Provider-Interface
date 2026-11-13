@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useAccess } from "@/hooks/use-access";
+import { toastRuleWarnings } from "@/components/scheduler/shared/rule-warnings";
 
 function fmtWhen(iso: string) {
   const d = new Date(iso);
@@ -51,12 +52,16 @@ export function OpenShiftsPanel({
 
   const decide = useMutation({
     mutationFn: (vars: { shiftId: string; approve: boolean }) => decideFn({ data: vars }),
-    onSuccess: (_d, v) => { invalidate(); toast.success(v.approve ? "Claim approved" : "Claim denied"); },
+    onSuccess: (d, v) => { invalidate(); toast.success(v.approve ? "Claim approved" : "Claim denied"); toastRuleWarnings(d); },
     onError: (e: any) => toast.error(e?.message ?? "Failed"),
   });
   const claim = useMutation({
     mutationFn: (shiftId: string) => claimFn({ data: { shiftId } }),
-    onSuccess: () => { invalidate(); toast.success("Requested, waiting for approval"); },
+    onSuccess: (d) => {
+      invalidate();
+      toast.success(d.assigned ? "Shift picked up. It's on your schedule." : "Requested, waiting for approval");
+      toastRuleWarnings(d);
+    },
     onError: (e: any) => toast.error(e?.message ?? "Failed"),
   });
 

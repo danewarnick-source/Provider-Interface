@@ -68,6 +68,7 @@ type CtxOver = {
   evidence?: RuleContext["evidence"];
   today?: string;
   places?: RuleContext["places"];
+  signedOffHomes?: RuleContext["signedOffHomes"];
 };
 
 export function ctx(o: CtxOver = {}): RuleContext {
@@ -82,9 +83,11 @@ export function ctx(o: CtxOver = {}): RuleContext {
     settings: o.settings ?? {},
     evidence: o.evidence ?? { s1: evidence(ALL_KEYS), s2: evidence(ALL_KEYS) },
     places: o.places,
+    // Both made-up staff are signed off at the made-up home t1 unless a test says otherwise.
+    signedOffHomes: o.signedOffHomes ?? { s1: ["t1"], s2: ["t1"] },
   };
 }
 
-export function has(findings: readonly Finding[], rule: string, level?: "block" | "warn"): boolean {
+export function has(findings: readonly Finding[], rule: string, level?: Finding["level"]): boolean {
   return findings.some((f) => f.rule === rule && (!level || f.level === level));
 }

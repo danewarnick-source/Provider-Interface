@@ -6,7 +6,9 @@
 // day. "Uploaded, waiting for review" is its own state and never clears a
 // reminder (Decision 15). Reminders are warns, never blocks.
 //
-// Old paths this replaces (re-pointed in S4, still in place): see the S3 PR.
+// The driver file (license, driving record, insurance; §1.30(2), Decision 18)
+// is three Evidence items treated as one: it counts only when all three are
+// reviewed and current on the shift date.
 import { effectiveAttentionDate, parseIsoDate } from "../evidence/due.ts";
 import { addDaysKey, dayKey } from "./time.ts";
 import type { Fix, Finding, QualEvidence, QualFile, QualItem, RuleShift, StaffFacts } from "./rules-types.ts";
@@ -210,4 +212,39 @@ export function qualificationFindings(results: readonly QualResult[]): Finding[]
     out.push(find(ruleFor[r.kind], "warn", `${r.message}${cite}`, r.fix));
   }
   return out;
+}
+
+/** The three Evidence items that make up a driver file (§1.30(2)). */
+export const DRIVER_FILE_KEYS: ReadonlyArray<{ key: string; label: string }> = [
+  { key: "driver_license", label: "license" },
+  { key: "driving_record", label: "driving record" },
+  { key: "auto_insurance_proof", label: "insurance" },
+];
+
+/** The driver file pieces that don't count on this Denver date. Empty = complete. */
+export function driverFileGaps(evidence: QualEvidence | undefined, onDate: string): Array<{ key: string; label: string; state: QualState }> {
+  return DRIVER_FILE_KEYS
+    .map((k) => ({ ...k, state: evidenceStateOn(evidence, k.key, onDate).state as QualState }))
+    .filter((k) => k.state !== "valid");
+}
+
+export function hasDriverFile(evidence: QualEvidence | undefined, onDate: string): boolean {
+  return driverFileGaps(evidence, onDate).length === 0;
+}
+
+/** Reminder for a van shift driver with no complete driver file (Decision 18: warn, never offered). */
+export function driverFileFindings(staff: StaffFacts, shift: Pick<RuleShift, "startsAt">, evidence: QualEvidence | undefined): Finding[] {
+  const gaps = driverFileGaps(evidence, dayKey(shift.startsAt));
+  if (!gaps.length) return [];
+  const who = firstName(staff.name);
+  const detail = gaps.length === DRIVER_FILE_KEYS.length
+    ? ""
+    : `: ${gaps.map((g) => `${g.label} ${g.state === "waiting_review" ? "waiting for review" : STATE_TEXT[g.state as keyof typeof STATE_TEXT] ?? "isn't on file"}`).join(", ")}`;
+  return [find("driver_file", "warn", `${who} has no driver file on record${detail} (§1.30(2))`,
+    evidenceFix(staff, gaps[0]!.key, evidence?.items.find((i) => i.requirement_key === gaps[0]!.key)))];
+}
+
+/** Decision 18: a van shift is never offered to someone without a complete driver file. */
+export function isOfferedTo(shift: { starts_at: string; van_route_id?: string | null }, evidence: QualEvidence | undefined): boolean {
+  return !shift.van_route_id || hasDriverFile(evidence, dayKey(shift.starts_at));
 }

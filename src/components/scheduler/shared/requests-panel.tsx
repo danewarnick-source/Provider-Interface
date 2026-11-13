@@ -257,7 +257,7 @@ function SwapRow({ req, staff }: { req: SwapRequest; staff: StaffRow[] }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("scheduled_shifts")
-        .select("id, client_id, job_code, shift_type, starts_at, ends_at, status, published, organization_id")
+        .select("id, client_id, service_code, shift_type, starts_at, ends_at, status, published, organization_id")
         .eq("id", req.shift_id)
         .eq("organization_id", req.organization_id)
         .maybeSingle();
@@ -274,7 +274,7 @@ function SwapRow({ req, staff }: { req: SwapRequest; staff: StaffRow[] }) {
       if (!to) throw new Error("Pick who is taking the shift first.");
       await approveSwap(req, to, {
         client_id: shift.client_id as string,
-        job_code: (shift.job_code as string | null) ?? null,
+        service_code: (shift.service_code as string | null) ?? null,
         shift_type: shift.shift_type as string,
         starts_at: shift.starts_at as string,
         ends_at: shift.ends_at as string,

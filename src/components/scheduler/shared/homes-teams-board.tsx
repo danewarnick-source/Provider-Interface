@@ -37,8 +37,6 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useServerFn } from "@tanstack/react-start";
-import { syncTeamToLocation } from "@/lib/scheduler/locations.functions";
 import { HOME_KINDS, homeKind, homeKindLabel, type HomeKind } from "@/lib/homes/home-kind";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PersonAvatar } from "@/components/person/person-avatar";
@@ -117,7 +115,6 @@ export function HomesTeamsBoard() {
   const qc = useQueryClient();
   const orgId = org?.organization_id;
   const today = new Date().toISOString().slice(0, 10);
-  const syncLocationCall = useServerFn(syncTeamToLocation);
 
   const teamsQ = useQuery({
     enabled: !!orgId,
@@ -293,22 +290,15 @@ export function HomesTeamsBoard() {
 
   const createHome = useMutation({
     mutationFn: async (v: { team_name: string; team_type: HomeKind }) => {
-      const { data: row, error } = await supabase.from("teams").insert({
+      const { error } = await supabase.from("teams").insert({
         organization_id: orgId,
         team_name: v.team_name,
         team_type: v.team_type,
-      } as never).select("id").single();
+      } as never);
       if (error) throw error;
-      // teams is the source of truth for homes — mirror into locations so the
-      // scheduler's Locations panel / coverage requirements see the new home.
-      const teamId = (row as { id?: string } | null)?.id;
-      if (teamId && orgId) {
-        await syncLocationCall({ data: { organizationId: orgId, teamId } }).catch(() => {});
-      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ht-teams", orgId] });
-      qc.invalidateQueries({ queryKey: ["locations", orgId] });
       toast.success("Home added");
     },
     onError: (e: Error) => toast.error(e.message),
@@ -320,8 +310,6 @@ export function HomesTeamsBoard() {
       team_name?: string;
       team_type?: HomeKind;
     }) => {
-      // Capture the pre-update name so a rename can find its locations row.
-      const previousName = teamsQ.data?.find((t) => t.id === v.id)?.team_name;
       const patch: Record<string, string> = {};
       if (v.team_name != null) patch.team_name = v.team_name;
       if (v.team_type != null) patch.team_type = v.team_type;
@@ -330,15 +318,9 @@ export function HomesTeamsBoard() {
         .update(patch as never)
         .eq("id", v.id);
       if (error) throw error;
-      if (orgId) {
-        await syncLocationCall({
-          data: { organizationId: orgId, teamId: v.id, previousName },
-        }).catch(() => {});
-      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ht-teams", orgId] });
-      qc.invalidateQueries({ queryKey: ["locations", orgId] });
     },
     onError: (e: Error) => toast.error(e.message),
   });

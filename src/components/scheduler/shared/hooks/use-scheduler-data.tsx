@@ -23,7 +23,6 @@ export type SchedShift = {
   id: string;
   staff_id: string | null;
   client_id: string;
-  job_code: string | null;
   service_code: string | null;
   starts_at: string;
   ends_at: string;
@@ -69,7 +68,7 @@ export function useSchedulerData(weekStart: Date) {
           supabase
             .from("scheduled_shifts")
             .select(
-              "id, staff_id, client_id, job_code, service_code, starts_at, ends_at, status, published, parent_shift_id",
+              "id, staff_id, client_id, service_code, starts_at, ends_at, status, published, parent_shift_id",
             )
             .eq("organization_id", orgId!)
             .gte("starts_at", weekStart.toISOString())

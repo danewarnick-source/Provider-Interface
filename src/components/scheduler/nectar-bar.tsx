@@ -9,8 +9,8 @@ import { Sparkles, Wand2, AlertTriangle, Loader2, Check, Copy, Upload } from "lu
 import {
   nectarDraftShifts,
   autoFillOpenShifts,
-  applyDrafts,
 } from "@/lib/scheduler/setup.functions";
+import { applyDrafts } from "@/lib/scheduler/drafts.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { RepeatShiftsDialog } from "./repeat-shifts-dialog";
 import { ImportScheduleDialog } from "./import-schedule-dialog";
+import { toastRuleWarnings } from "@/components/scheduler/shared/rule-warnings";
 
 type Draft = {
   staff_id: string | null;
@@ -148,12 +149,13 @@ export function NectarBar({
           }));
         return applyFn({ data: { organization_id: organizationId, drafts: rows } });
       }
-      return Promise.resolve({ created: 0, assigned: 0 });
+      return Promise.resolve({ created: 0, assigned: 0, warnings: [] as string[] });
     },
     onSuccess: (r) => {
       toast.success(
         `${r.created} shifts created, ${r.assigned} open shifts assigned.`,
       );
+      toastRuleWarnings(r);
       qc.invalidateQueries({ queryKey: ["scheduler-data"] });
       qc.invalidateQueries({ queryKey: ["open-shifts"] });
       setDrafts(null);

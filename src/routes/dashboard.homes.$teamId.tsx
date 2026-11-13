@@ -1,10 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { syncTeamToLocation } from "@/lib/scheduler/locations.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +26,7 @@ import {
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PlaceSettingsCard } from "@/components/scheduler/settings/place-settings-card";
 import { HOME_KINDS, homeKind, leadLabel, type HomeKind } from "@/lib/homes/home-kind";
 import { HomeLeadField } from "@/components/homes/home-lead-field";
 
@@ -74,7 +73,6 @@ function HomeDetailPage() {
   const orgId = org?.organization_id;
   const qc = useQueryClient();
   const today = new Date().toISOString().slice(0, 10);
-  const syncLocationCall = useServerFn(syncTeamToLocation);
 
   const teamQ = useQuery({
     enabled: !!orgId && !!teamId,
@@ -193,22 +191,15 @@ function HomeDetailPage() {
       team_type?: HomeKind;
       manager_id?: string | null;
     }) => {
-      const previousName = teamQ.data?.team_name;
       const { error } = await supabase
         .from("teams")
         .update(patch as never)
         .eq("id", teamId);
       if (error) throw error;
-      if (orgId) {
-        await syncLocationCall({
-          data: { organizationId: orgId, teamId, previousName },
-        }).catch(() => {});
-      }
     },
     onSuccess: (_d, patch) => {
       qc.invalidateQueries({ queryKey: ["home-detail", teamId] });
       qc.invalidateQueries({ queryKey: ["ht-teams", orgId] });
-      qc.invalidateQueries({ queryKey: ["locations", orgId] });
       const lead = leadLabel(patch.team_type ?? teamQ.data?.team_type);
       toast.success(
         "manager_id" in patch
@@ -683,6 +674,8 @@ function HomeDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      <PlaceSettingsCard teamId={team.id} name={team.team_name} />
 
       {/* Danger zone */}
       <Card>

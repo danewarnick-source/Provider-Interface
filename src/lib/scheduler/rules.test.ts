@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { ctx, has, shift } from "./rules-fixtures.ts";
-import { evaluateShift, evaluateShifts, hasBlock, blocksOf, warningsOf, minStaffAgeForCode } from "./rules.ts";
+import { evaluateShift, evaluateShifts, minStaffAgeForCode, verdictOf } from "./rules.ts";
 
 const run = (s = shift(), c = ctx()) => evaluateShift(s, c);
 
@@ -22,16 +22,10 @@ test("minimum age: 16 base, 18 to drive or for DCFS/DJJYS, 21 for HHS/PPS, agenc
   assert.ok(has(run(shift(), ctx({ staff: { age: 17 }, settings: { minAge18: true } })), "under_minimum_age"));
 });
 
-test("evaluateShifts tags findings and hasBlock sees blocks; cancelled shifts are skipped", () => {
+test("evaluateShifts tags findings and verdictOf sees blocks; cancelled shifts are skipped", () => {
   const f = evaluateShifts([shift({ code: "COM" })], ctx());
   assert.equal(f[0]?.shiftId, "sh1");
-  assert.ok(hasBlock(f));
+  assert.ok(verdictOf(f).blocks.length >= 1);
   assert.deepEqual(evaluateShift(shift({ code: "COM", status: "cancelled" }), ctx()), []);
-  assert.ok(!hasBlock(evaluateShifts([shift()], ctx())));
-});
-
-test("blocksOf and warningsOf split the findings", () => {
-  const f = evaluateShifts([shift({ code: "COM" })], ctx());
-  assert.ok(blocksOf(f).length >= 1 && blocksOf(f).every((x) => x.level === "block"));
-  assert.ok(warningsOf(f).every((x) => x.level === "warn"));
+  assert.equal(verdictOf(evaluateShifts([shift()], ctx())).blocks.length, 0);
 });

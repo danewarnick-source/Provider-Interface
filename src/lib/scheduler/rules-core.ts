@@ -2,11 +2,12 @@
 // booking, age, segments, 1:1 and 2:1 staffing, group size, and the hour caps.
 // Each rule is a small pure function returning findings (Decision 18: SOW rules
 // are always on). Sections cite DHHS91172.
+import { assignmentCoversCode } from "../assignment-codes.ts";
 import { billingFor, DAILY_UNIT_CODES } from "./billing-mode.ts";
 import { defaultRatio, staffNeeded, type Ratio } from "./ratios.ts";
 import type { Finding, RuleContext, RuleShift } from "./rules-types.ts";
 import {
-  clientOf, dayOf, find, firstName, isSegmentPair, minutesOf, othersOf, overlaps,
+  clientOf, dayOf, find, firstName, homeOf, isSegmentPair, minutesOf, othersOf, overlaps,
   staffOf, sumHours, up, weekOf,
 } from "./rules-util.ts";
 import { dayKey } from "./time.ts";
@@ -53,12 +54,31 @@ export function teamRules(s: RuleShift, ctx: RuleContext): Finding[] {
   if (!client || !staff) return [];
   const out: Finding[] = [];
   if (client.doNotScheduleStaffIds.includes(staff.id)) {
-    out.push(find("do_not_schedule", "block", `${firstName(staff.name)} is on ${firstName(client.name)}'s do-not-schedule list`));
+    const why = client.doNotScheduleReasons?.[staff.id]?.trim();
+    out.push(find("do_not_schedule", "block",
+      `${firstName(staff.name)} is on ${firstName(client.name)}'s do-not-schedule list${why ? `: ${why}` : ""}`));
   }
   if (!client.teamStaffIds.includes(staff.id)) {
     out.push(find("not_on_team", "block", `${firstName(staff.name)} isn't on ${firstName(client.name)}'s team`));
+  } else if (client.teamCodes && !assignmentCoversCode(client.teamCodes[staff.id], s.code)) {
+    out.push(find("code_not_assigned", "block",
+      `${firstName(staff.name)} isn't assigned ${up(s.code)} for ${firstName(client.name)}`));
   }
   return out;
+}
+
+/**
+ * Decision 8: a team member works paired shifts at a home until a lead signs
+ * them off there (new_hire_signoffs). Anyone without a sign-off is a new hire.
+ */
+export function newHireRule(s: RuleShift, ctx: RuleContext): Finding[] {
+  const staff = staffOf(ctx, s);
+  const home = homeOf(ctx, s);
+  if (!staff || !home || s.shiftType === "paired" || s.parentShiftId) return [];
+  if (ctx.signedOffHomes?.[staff.id]?.includes(home)) return [];
+  const where = ctx.places?.[home]?.name ?? "this home";
+  return [find("new_hire_alone", "block",
+    `${firstName(staff.name)} isn't signed off to work alone at ${where} yet; schedule a paired shift`)];
 }
 
 export function staffStatusRules(s: RuleShift, ctx: RuleContext): Finding[] {
