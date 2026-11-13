@@ -2,7 +2,7 @@
 
 Read this before planning or building anything. Update it at the end of every session ("update the roadmap and decisions, then commit"). Owner decisions are in `docs/decisions.md`.
 
-**Next up:** Scheduler B3 (the board). The demo was approved Nov 13 and saved as `docs/demos/scheduler.html`. Part B's step changes are at the top of `docs/scheduler-rebuild/PART-B.md`. B1 (#498) and B2 (#499) are still open and 13+ commits behind `main`: refresh them first (Dane's OK needed to push to those branches).
+**Next up:** Dane tests and merges PR #506 (Scheduler B1 + B2, brought up to date with `main`), then Scheduler B3 (the board). The approved demo is `docs/demos/scheduler.html`; Part B's step changes are at the top of `docs/scheduler-rebuild/PART-B.md`. After #506 merges, ask before applying its Phase B file `20261023052600_scheduler_b_drop_job_code.sql`.
 
 ## The vision (Dane, Nov 13, 2026)
 - **One platform for Utah DSPD providers, built for the admin side first.** Staff screens exist to feed admins clean records.
