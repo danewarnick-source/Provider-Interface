@@ -2,7 +2,7 @@
 
 Read this before planning or building anything. Update it at the end of every session ("update the roadmap and decisions, then commit"). Owner decisions are in `docs/decisions.md`.
 
-**Next up:** Scheduler. (1) Refresh B1 (#498) and B2 (#499) onto `main`; Dane tests B2 Settings on the preview. (2) Re-check the scheduler demo (`docs/demos/scheduler.html`) against competitors and DHHS91172: keep/add/cut list → updated demo as a private link → Dane approves → B3.
+**Next up:** Scheduler. (1) Refresh B1 (#498) and B2 (#499) onto `main`; Dane tests B2 Settings on the preview. (2) Re-check done (`docs/scheduler-rebuild/RECHECK.md`; Dane's picks in `docs/decisions.md`). Next: update the scheduler demo with the adds and cuts → private link → Dane approves → update PART-B.md → B3.
 
 ## The vision (Dane, Nov 13, 2026)
 - **One platform for Utah DSPD providers, built for the admin side first.** Staff screens exist to feed admins clean records.

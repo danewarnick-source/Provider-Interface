@@ -10,3 +10,6 @@ One dated line per decision Dane makes, newest last. A fresh session reads this 
 - 2026-11-13: Demos are standalone pages with fake data, shared as private claude.ai links. Each approved demo is saved in `docs/demos/`.
 - 2026-11-13: Re-check the Oct 22 scheduler demo against competitors and DHHS91172 (a keep/add/cut list for Dane) before building B3.
 - 2026-11-13: The Nectar rebuild (#484) waits until we reach the Nectar tab. Denim (#469) stays open as a reference for the look; it gets redone later.
+- 2026-11-13: Scheduler adds (from the re-check, `docs/scheduler-rebuild/RECHECK.md`): late/missed clock-in alerts, an authorization-units view over the whole authorization period, host homes (HHS), and offline clock-in.
+- 2026-11-13: Scheduler cuts: Messages (B11) moves to Phase 2; the Scheduling readiness page (B10) folds into Find staff; vans/day program (B8, B15) wait until a customer runs DSG; the House log (B19) is cut.
+- 2026-11-13: Keep the Part B build order. The additions slot into the steps they belong to: late alerts → B5 Needs you and B14 phone; units view → B3 board and the client card; HHS → a new step after B7 (home page); offline → B14.
