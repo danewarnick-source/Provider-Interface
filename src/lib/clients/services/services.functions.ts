@@ -1,6 +1,7 @@
 // Services & billing server functions: load the section, add or edit an
-// authorization, and End one (sets the end date — authorizations are never
-// deleted). Writes need Billing: Edit for this client (assertCanManageClient).
+// authorization, set its staffing ratio, and End one (sets the end date —
+// authorizations are never deleted). Writes need Billing: Edit for this client
+// (assertCanManageClient).
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -15,6 +16,7 @@ import {
   endProblems,
 } from "./authorizations";
 import { authorizationSaveTarget } from "./authorization-renewal";
+import { RATIO_CHOICES } from "./ratio";
 import { todayYmd } from "../dates";
 import {
   loadAgencyCodes,
@@ -128,6 +130,34 @@ export const endAuthorization = createServerFn({ method: "POST" })
     const { data: out, error } = await sb
       .from("client_billing_codes")
       .update({ service_end_date: data.endOn })
+      .eq("id", data.id)
+      .eq("client_id", clientId)
+      .eq("organization_id", organizationId)
+      .select("id");
+    if (error) throw new Error(error.message);
+    assertRowsChanged(out as unknown[]);
+    return { id: data.id };
+  });
+
+/** Set or clear one authorization's staffing ratio (the one the scheduler reads). */
+export const saveAuthorizationRatio = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ ...scope, id: z.string().uuid(), ratio: z.enum(RATIO_CHOICES).nullable() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { sb, userId } = ctx(context);
+    const { organizationId, clientId } = data;
+    await assertCanManageClient({
+      supabase: sb,
+      actorId: userId,
+      organizationId,
+      clientId,
+      action: "edit_billing",
+    });
+    const { data: out, error } = await sb
+      .from("client_billing_codes")
+      .update({ ratio: data.ratio })
       .eq("id", data.id)
       .eq("client_id", clientId)
       .eq("organization_id", organizationId)

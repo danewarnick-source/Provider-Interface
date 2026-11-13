@@ -20,6 +20,8 @@ export type AuthorizationRow = {
   authorization_approved_on: string | null;
   authorization_pending: boolean | null;
   rate_source: string | null;
+  /** Staff-to-client ratio, "1:2"; the scheduler reads it (ratio.ts). */
+  ratio: string | null;
 };
 
 export type AuthorizationState = "pending" | "upcoming" | "current" | "ended";
