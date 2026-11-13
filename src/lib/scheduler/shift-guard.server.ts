@@ -1,9 +1,9 @@
 // The one server-side check every path that saves, publishes, claims or clocks
 // into a shift runs: load the facts (rule-context.server.ts), run rules.ts at
 // the agency's strengths, and turn the findings into refuse / ask for a reason
-// / go ahead with warnings. Called by scheduler.functions.ts (save, publish),
-// open-shifts.functions.ts (claim), repeat.functions.ts, drafts.functions.ts
-// and clock-in.functions.ts. No caller adds checks of its own.
+// / go ahead with warnings. Called by scheduler.functions.ts (save, restore),
+// publish.functions.ts, open-shifts.functions.ts (claim), find-staff.functions.ts
+// (checks) and clock-in.functions.ts. No caller adds checks of its own.
 import { evaluateShifts, refusalLine, verdictOf, warningLines, type Verdict } from "./rules.ts";
 import type { Finding } from "./rules-types.ts";
 import { loadRuleContext, toRuleShift, type ShiftRowIn } from "./rule-context.server.ts";

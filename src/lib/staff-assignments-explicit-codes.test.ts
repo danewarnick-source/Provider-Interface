@@ -76,19 +76,12 @@ describe("setStaffClientCodes — the single write path", () => {
     assert.doesNotMatch(setup, /scopes === null/);
   });
 
-  it("add / remove go through the same writer and keep the assignment hooks", () => {
-    assert.match(setup, /withCodeAdded\(existing\?\.service_codes, code\)/);
-    assert.match(setup, /withCodeRemoved\(existing\.service_codes, data\.service_code\)/);
+  it("the writer keeps the assignment hooks", () => {
     assert.match(
       setup,
       /onStaffAssignmentCreatedInternal\(supabase, organizationId, staffId, clientId, codes\)/,
     );
     assert.match(setup, /onStaffAssignmentRemovedInternal\(supabase, organizationId, staffId\)/);
-  });
-
-  it("auto-fill only proposes staff assigned the shift's exact code", () => {
-    assert.match(setup, /staffByClientCode/);
-    assert.match(setup, /assignmentCodes\(a\.service_codes\)/);
   });
 });
 

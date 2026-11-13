@@ -1,44 +1,61 @@
-// Scheduler server functions for the code-section scheduler at
-// /dashboard/scheduler. All writes go through `requireSupabaseAuth` so RLS
-// is enforced as the calling user. Saving runs the rule engine through
-// shift-guard.server.ts (rules.ts at the agency's strengths); publishing is in
-// publish.functions.ts.
+// Shift writes for the scheduler board (/dashboard/scheduler): save, cancel and
+// restore. All run as the calling user (RLS applies) after requireCategory
+// (scheduling edit). Saving and restoring run the rule engine through
+// shift-guard.server.ts (rules.ts at the agency's strengths). Nothing here
+// deletes a shift: a cancelled shift stays on record and can be restored.
+// Publishing is in publish.functions.ts; offering open shifts in
+// offer.functions.ts.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { coerceScheduledShiftStatus } from "@/lib/scheduler/shift-status";
 import { requireCategory } from "@/lib/access/require";
-import { guardShiftRows } from "@/lib/scheduler/shift-guard.server";
+import { guardShiftRows, SHIFT_COLUMNS, type ShiftRowIn } from "@/lib/scheduler/shift-guard.server";
 
-const ShiftInput = z.object({
-  id: z.string().uuid().optional(),
-  organization_id: z.string().uuid(),
-  staff_id: z.string().uuid().nullable(),
-  client_id: z.string().uuid(),
-  service_code: z.string().min(1),
-  starts_at: z.string().min(1),
-  ends_at: z.string().min(1),
-  shift_type: z.string().default("hourly"),
-  status: z.string().default("draft"),
-  published: z.boolean().default(false),
-  notes: z.string().nullable().optional(),
-  /** Typed when a rule is set to "Require a reason". */
-  override_reason: z.string().max(1000).nullable().optional(),
-});
+const uuid = z.string().uuid();
+
+const ShiftInput = z
+  .object({
+    id: uuid.optional(),
+    organization_id: uuid,
+    staff_id: uuid.nullable(),
+    /** A home (team) shift has no client (Decision 1); a 1:1 shift sets both. */
+    client_id: uuid.nullable().optional(),
+    team_id: uuid.nullable().optional(),
+    service_code: z.string().min(1),
+    starts_at: z.string().min(1),
+    ends_at: z.string().min(1),
+    shift_type: z.string().default("hourly"),
+    status: z.string().default("draft"),
+    published: z.boolean().default(false),
+    notes: z.string().nullable().optional(),
+    /** Typed when a rule is set to "Require a reason". */
+    override_reason: z.string().max(1000).nullable().optional(),
+    /** Unfilled spots on an open shift. */
+    open_spots: z.number().int().min(0).max(3).nullable().optional(),
+    parent_shift_id: uuid.nullable().optional(),
+  })
+  .refine((d) => !!d.client_id || !!d.team_id, {
+    message: "Pick a client or a home for the shift.",
+  });
 export type ShiftInput = z.infer<typeof ShiftInput>;
+
+/** Only the optional columns a caller sent, so an update never blanks what it didn't mention. */
+function sent<T extends Record<string, unknown>>(o: T) {
+  return Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined));
+}
 
 export const saveShift = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: ShiftInput) => ShiftInput.parse(d))
+  .inputValidator((d: z.input<typeof ShiftInput>) => ShiftInput.parse(d))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as any;
+    const { supabase, userId } = context;
     if (!supabase || !userId) return { id: "", warnings: [] as string[] };
     await requireCategory(supabase, userId, data.organization_id, "scheduling", "edit");
 
     const payload = {
       organization_id: data.organization_id,
       staff_id: data.staff_id,
-      client_id: data.client_id,
       service_code: data.service_code.toUpperCase(),
       shift_type: data.shift_type,
       starts_at: data.starts_at,
@@ -48,239 +65,101 @@ export const saveShift = createServerFn({ method: "POST" })
       published: data.published,
       notes: data.notes?.trim() || null,
       override_reason: data.override_reason?.trim() || null,
-      created_by: userId,
+      ...sent({
+        client_id: data.client_id,
+        team_id: data.team_id,
+        open_spots: data.open_spots,
+        parent_shift_id: data.parent_shift_id,
+      }),
     };
 
     // The rule engine: a block refuses with its one line; warnings come back.
-    const warnings = await guardShiftRows(supabase, data.organization_id, [{ ...payload, id: data.id }], {
+    const row: ShiftRowIn = { client_id: null, ...payload, id: data.id };
+    const warnings = await guardShiftRows(supabase, data.organization_id, [row], {
       reason: payload.override_reason,
     });
 
     if (data.id) {
-      const { error } = await supabase
+      const { data: rows, error } = await supabase
         .from("scheduled_shifts")
         .update(payload)
         .eq("id", data.id)
-        .eq("organization_id", data.organization_id);
+        .eq("organization_id", data.organization_id)
+        .select("id");
       if (error) throw error;
+      if (!rows?.length)
+        throw new Error("That shift wasn't saved: it no longer exists or you can't edit it.");
       return { id: data.id, warnings };
     }
-    const { data: row, error } = await supabase
+    const { data: inserted, error } = await supabase
       .from("scheduled_shifts")
-      .insert(payload)
+      .insert({ ...payload, created_by: userId })
       .select("id")
       .single();
     if (error) throw error;
-    return { id: row.id as string, warnings };
+    return { id: inserted.id as string, warnings };
   });
 
-export const deleteShift = createServerFn({ method: "POST" })
+const ShiftRef = z.object({
+  id: uuid,
+  organization_id: uuid,
+  override_reason: z.string().max(1000).nullable().optional(),
+});
+
+/** Cancel a shift: it stays on record (status cancelled, cancelled_at) and can be restored. */
+export const cancelShift = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string; organization_id: string }) =>
-    z.object({ id: z.string().uuid(), organization_id: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d: z.input<typeof ShiftRef>) => ShiftRef.parse(d))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as any;
+    const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false };
     await requireCategory(supabase, userId, data.organization_id, "scheduling", "edit");
-    const { error } = await supabase
+    const { data: rows, error } = await supabase
       .from("scheduled_shifts")
-      .delete()
+      .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
       .eq("id", data.id)
-      .eq("organization_id", data.organization_id);
+      .eq("organization_id", data.organization_id)
+      .select("id");
     if (error) throw error;
+    if (!rows?.length)
+      throw new Error("That shift wasn't cancelled: it no longer exists or you can't edit it.");
     return { ok: true };
   });
 
-export const setAdminTimeOff = createServerFn({ method: "POST" })
+/**
+ * Restore a cancelled shift. Its status comes back from what the row still
+ * holds: a person and published → published; a person, not published → draft;
+ * no person → open. (A claim's "accepted" comes back as "published".) The rule
+ * engine runs first, since the week may have changed while it was cancelled.
+ */
+export const restoreShift = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(
-    (d: { organization_id: string; staff_id: string; date: string; on: boolean }) =>
-      z.object({
-        organization_id: z.string().uuid(),
-        staff_id: z.string().uuid(),
-        date: z.string().min(8),
-        on: z.boolean(),
-      }).parse(d),
-  )
+  .inputValidator((d: z.input<typeof ShiftRef>) => ShiftRef.parse(d))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as any;
-    if (!supabase || !userId) return { ok: false };
+    const { supabase, userId } = context;
+    if (!supabase || !userId) return { ok: false, warnings: [] as string[] };
     await requireCategory(supabase, userId, data.organization_id, "scheduling", "edit");
-    if (data.on) {
-      // Insert an approved single-day time off (admin-initiated).
-      const { error } = await supabase.from("time_off_requests").insert({
-        organization_id: data.organization_id,
-        staff_id: data.staff_id,
-        start_date: data.date,
-        end_date: data.date,
-        type: "pto",
-        status: "approved",
-        decided_by: userId,
-        decided_at: new Date().toISOString(),
-        note: "Admin-marked from scheduler",
-      });
-      if (error) throw error;
-    } else {
-      // Remove approved single-day rows that exactly cover this date.
-      const { error } = await supabase
-        .from("time_off_requests")
-        .delete()
-        .eq("organization_id", data.organization_id)
-        .eq("staff_id", data.staff_id)
-        .eq("start_date", data.date)
-        .eq("end_date", data.date)
-        .eq("status", "approved");
-      if (error) throw error;
-    }
-    return { ok: true };
-  });
-
-export const saveAdminHours = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator(
-    (d: { organization_id: string; client_id: string; hours: number | null }) =>
-      z.object({
-        organization_id: z.string().uuid(),
-        client_id: z.string().uuid(),
-        hours: z.number().min(0).max(168).nullable(),
-      }).parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as any;
-    if (!supabase || !userId) return { ok: false };
-    await requireCategory(supabase, userId, data.organization_id, "scheduling", "edit");
-    const { error } = await supabase
-      .from("clients")
-      .update({ admin_hours_per_week: data.hours })
-      .eq("id", data.client_id)
-      .eq("organization_id", data.organization_id);
+    const { data: row, error: rErr } = await supabase
+      .from("scheduled_shifts")
+      .select(`${SHIFT_COLUMNS}, published`)
+      .eq("id", data.id)
+      .eq("organization_id", data.organization_id)
+      .maybeSingle();
+    if (rErr) throw rErr;
+    if (!row) throw new Error("That shift no longer exists.");
+    const shift = row as ShiftRowIn & { published: boolean };
+    const status = shift.staff_id ? (shift.published ? "published" : "draft") : "open";
+    const reason = data.override_reason?.trim() || null;
+    const warnings = await guardShiftRows(supabase, data.organization_id, [{ ...shift, status }], {
+      reason,
+    });
+    const { data: rows, error } = await supabase
+      .from("scheduled_shifts")
+      .update({ status, cancelled_at: null, ...(reason ? { override_reason: reason } : {}) })
+      .eq("id", data.id)
+      .eq("organization_id", data.organization_id)
+      .select("id");
     if (error) throw error;
-    return { ok: true };
-  });
-
-// ============================================================
-// Day Program
-// ============================================================
-
-export const saveDayProgramSession = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: {
-    id?: string;
-    organization_id: string;
-    session_date: string;
-    service_code: "DSG" | "DSP";
-    location_label: string | null;
-    start_time: string;
-    end_time: string;
-  }) =>
-    z.object({
-      id: z.string().uuid().optional(),
-      organization_id: z.string().uuid(),
-      session_date: z.string().min(8),
-      service_code: z.enum(["DSG", "DSP"]),
-      location_label: z.string().nullable(),
-      start_time: z.string().min(1),
-      end_time: z.string().min(1),
-    }).parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as any;
-    if (!supabase || !userId) return { id: "", warnings: [] as string[] };
-    await requireCategory(supabase, userId, data.organization_id, "scheduling", "edit");
-    if (data.id) {
-      const { error } = await supabase
-        .from("day_program_sessions")
-        .update({
-          session_date: data.session_date,
-          service_code: data.service_code,
-          location_label: data.location_label,
-          start_time: data.start_time,
-          end_time: data.end_time,
-        })
-        .eq("id", data.id)
-        .eq("organization_id", data.organization_id);
-      if (error) throw error;
-      return { id: data.id };
-    }
-    const { data: row, error } = await supabase
-      .from("day_program_sessions")
-      .insert({
-        organization_id: data.organization_id,
-        session_date: data.session_date,
-        service_code: data.service_code,
-        location_label: data.location_label,
-        start_time: data.start_time,
-        end_time: data.end_time,
-        created_by: userId,
-      })
-      .select("id")
-      .single();
-    if (error) throw error;
-    return { id: row.id as string };
-  });
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function requireSessionEdit(supabase: any, userId: string, sessionId: string) {
-  const { data: session, error } = await supabase
-    .from("day_program_sessions")
-    .select("organization_id")
-    .eq("id", sessionId)
-    .maybeSingle();
-  if (error) throw error;
-  if (!session) throw new Error("That session no longer exists.");
-  await requireCategory(supabase, userId, session.organization_id, "scheduling", "edit");
-}
-
-export const markAttendance = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: {
-    session_id: string;
-    client_id: string;
-    attended: boolean;
-  }) =>
-    z.object({
-      session_id: z.string().uuid(),
-      client_id: z.string().uuid(),
-      attended: z.boolean(),
-    }).parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as any;
-    if (!supabase || !userId) return { ok: false };
-    await requireSessionEdit(supabase, userId, data.session_id);
-    const { error } = await supabase
-      .from("day_program_attendance")
-      .upsert(
-        {
-          session_id: data.session_id,
-          client_id: data.client_id,
-          attended: data.attended,
-        },
-        { onConflict: "session_id,client_id" },
-      );
-    if (error) throw error;
-    return { ok: true };
-  });
-
-export const addSessionStaff = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { session_id: string; staff_id: string }) =>
-    z.object({
-      session_id: z.string().uuid(),
-      staff_id: z.string().uuid(),
-    }).parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as any;
-    if (!supabase || !userId) return { ok: false };
-    await requireSessionEdit(supabase, userId, data.session_id);
-    const { error } = await supabase
-      .from("day_program_session_staff")
-      .upsert(
-        { session_id: data.session_id, staff_id: data.staff_id },
-        { onConflict: "session_id,staff_id", ignoreDuplicates: true },
-      );
-    if (error) throw error;
-    return { ok: true };
+    if (!rows?.length) throw new Error("That shift wasn't restored: you can't edit it.");
+    return { ok: true, warnings };
   });
