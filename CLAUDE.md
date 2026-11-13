@@ -1,6 +1,8 @@
 # Provider Interface (HIVE) — read me first
 Multi-tenant compliance platform for Utah DSPD (disability services) providers. AI engine "Nectar" (AWS Bedrock) advises and flags; it never fabricates documentation or acts unreviewed. First tenant: True North Supports (TNS), running HHS, SLN, SLH, SEI, DSI. State contract DHHS91172 has been in effect since 2026-07-01; build to it.
 
+**Before planning or building, read `docs/ROADMAP.md` (vision, where we left off, what's next) and `docs/decisions.md` (owner decisions). Update both at the end of a session.**
+
 This file holds only what you can't learn from the code: what breaks the platform, facts about the live system, and domain truths that look like bugs. How we work together (plans, behavior tables, PR bodies, UI conventions, prompt writing, code style) is in `docs/agent-process.md`; read it for a **build** (a new screen or flow), skip it for a **fix**.
 
 ## Fix vs build
