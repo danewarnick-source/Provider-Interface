@@ -15460,7 +15460,6 @@ export type Database = {
           id: string
           is_awake_overnight: boolean | null
           is_recurring: boolean
-          job_code: string | null
           location_id: string | null
           notes: string | null
           open_spots: number | null
@@ -15494,7 +15493,6 @@ export type Database = {
           id?: string
           is_awake_overnight?: boolean | null
           is_recurring?: boolean
-          job_code?: string | null
           location_id?: string | null
           notes?: string | null
           open_spots?: number | null
@@ -15528,7 +15526,6 @@ export type Database = {
           id?: string
           is_awake_overnight?: boolean | null
           is_recurring?: boolean
-          job_code?: string | null
           location_id?: string | null
           notes?: string | null
           open_spots?: number | null
