@@ -59,11 +59,21 @@ export function rankStaff(candidates: readonly Candidate[]): RankedCandidate[] {
     .map((c) => ({
       ...c,
       level: fitLevel(c.findings),
-      reasons: [...new Set([...c.findings].sort((a, b) => SEVERITY[a.level] - SEVERITY[b.level]).map((f) => f.message))],
+      reasons: [
+        ...new Set(
+          [...c.findings]
+            .sort((a, b) => SEVERITY[a.level] - SEVERITY[b.level])
+            .map((f) => f.message),
+        ),
+      ],
       evidenceHref: evidenceHref(c.findings),
     }))
-    .sort((a, b) =>
-      ORDER[a.level] - ORDER[b.level] || a.hoursThisWeek - b.hoursThisWeek || a.name.localeCompare(b.name));
+    .sort(
+      (a, b) =>
+        ORDER[a.level] - ORDER[b.level] ||
+        a.hoursThisWeek - b.hoursThisWeek ||
+        a.name.localeCompare(b.name),
+    );
 }
 
 /** Qualified = may be offered an open shift: no block, no reason needed, no missing Evidence. */
@@ -72,10 +82,21 @@ export function isQualified(c: Pick<RankedCandidate, "level">): boolean {
 }
 
 /** Hours a team member has in the Sun–Sat week of `day`, leaving out one shift (the one being placed). */
-export function weekHours(shifts: readonly RuleShift[], staffId: string, day: string, leaveOut?: string): number {
+export function weekHours(
+  shifts: readonly RuleShift[],
+  staffId: string,
+  day: string,
+  leaveOut?: string,
+): number {
   const week = weekStartKey(day);
   const total = shifts
-    .filter((s) => s.staffId === staffId && s.id !== leaveOut && isLive(s) && weekStartKey(dayKey(s.startsAt)) === week)
+    .filter(
+      (s) =>
+        s.staffId === staffId &&
+        s.id !== leaveOut &&
+        isLive(s) &&
+        weekStartKey(dayKey(s.startsAt)) === week,
+    )
     .reduce((n, s) => n + hoursOf(s), 0);
   return Math.round(total * 100) / 100;
 }

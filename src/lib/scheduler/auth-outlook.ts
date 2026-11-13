@@ -70,14 +70,18 @@ export function authOutlook(i: OutlookInput): Outlook {
 export function fmtDay(ymd: string): string {
   const [y, m, d] = ymd.split("-").map(Number);
   return new Date(Date.UTC(y!, m! - 1, d!)).toLocaleDateString("en-US", {
-    timeZone: "UTC", month: "short", day: "numeric", year: "numeric",
+    timeZone: "UTC",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
 }
 
 /** The one line next to the outlook pill. `unit` is "h" or "days". */
 export function outlookMessage(o: Outlook, unit: string): string {
   if (o.left < 0) return `Over by ${Math.abs(o.left)} ${unit}.`;
-  if (o.runsOutOn) return `Runs out about ${fmtDay(o.runsOutOn)}, ${o.weeksEarly} weeks before the plan year ends.`;
+  if (o.runsOutOn)
+    return `Runs out about ${fmtDay(o.runsOutOn)}, ${o.weeksEarly} weeks before the plan year ends.`;
   if (o.status === "under") return `About ${o.unused} ${unit} will go unused at this pace.`;
   return "On pace to the end of the plan year.";
 }
@@ -87,7 +91,10 @@ export function isDailyCode(code: string): boolean {
 }
 
 /** Plan year bounds from a 1056 row. The end date closes the code (that day is not covered). */
-export function planYearOf(start: string | null, end: string | null): { start: string; end: string } | null {
+export function planYearOf(
+  start: string | null,
+  end: string | null,
+): { start: string; end: string } | null {
   if (start) return { start, end: end ? addDaysKey(end, -1) : addDaysKey(addYears(start, 1), -1) };
   if (end) return { start: addYears(end, -1), end: addDaysKey(end, -1) };
   return null;

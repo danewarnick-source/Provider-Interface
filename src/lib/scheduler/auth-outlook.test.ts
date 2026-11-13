@@ -1,13 +1,23 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  authOutlook, fmtDay, inDisplayUnits, outlookMessage, planYearOf, usageUnits, type OutlookInput,
+  authOutlook,
+  fmtDay,
+  inDisplayUnits,
+  outlookMessage,
+  planYearOf,
+  usageUnits,
+  type OutlookInput,
 } from "./auth-outlook.ts";
 
 // Week of Nov 8–14, 2026; plan year ends Jun 30, 2027 (about 33 weeks left).
 const base: OutlookInput = {
-  authorized: 1000, usedBefore: 0, scheduledThisWeek: 0, standardWeek: 0,
-  weekEnd: "2026-11-14", planEnd: "2027-06-30",
+  authorized: 1000,
+  usedBefore: 0,
+  scheduledThisWeek: 0,
+  standardWeek: 0,
+  weekEnd: "2026-11-14",
+  planEnd: "2027-06-30",
 };
 
 test("over the authorization is Act now", () => {
@@ -24,7 +34,10 @@ test("runs out within 4 weeks is Act now; later but early is Watch", () => {
   const later = authOutlook({ ...base, usedBefore: 400, standardWeek: 40 });
   assert.equal(later.status, "watch");
   assert.equal(later.runsOutOn, "2027-02-27");
-  assert.match(outlookMessage(later, "h"), /^Runs out about Feb 27, 2027, 18 weeks before the plan year ends\.$/);
+  assert.match(
+    outlookMessage(later, "h"),
+    /^Runs out about Feb 27, 2027, 18 weeks before the plan year ends\.$/,
+  );
 });
 
 test("on pace when the standard week lasts to the end", () => {
@@ -44,7 +57,10 @@ test("units that would go unused are Under-using", () => {
 });
 
 test("plan year from the 1056 dates; the end date closes the code", () => {
-  assert.deepEqual(planYearOf("2026-07-01", "2027-07-01"), { start: "2026-07-01", end: "2027-06-30" });
+  assert.deepEqual(planYearOf("2026-07-01", "2027-07-01"), {
+    start: "2026-07-01",
+    end: "2027-06-30",
+  });
   assert.deepEqual(planYearOf("2026-09-01", null), { start: "2026-09-01", end: "2027-08-31" });
   assert.deepEqual(planYearOf(null, "2027-03-01"), { start: "2026-03-01", end: "2027-02-28" });
   assert.equal(planYearOf(null, null), null);

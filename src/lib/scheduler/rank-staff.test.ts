@@ -5,8 +5,12 @@ import type { Finding, RuleShift } from "./rules-types.ts";
 
 const f = (rule: string, level: Finding["level"], message = rule, fix?: Finding["fix"]): Finding =>
   fix ? { rule, level, message, fix } : { rule, level, message };
-const cand = (staffId: string, hoursThisWeek: number, findings: Finding[] = []): Candidate =>
-  ({ staffId, name: staffId, hoursThisWeek, findings });
+const cand = (staffId: string, hoursThisWeek: number, findings: Finding[] = []): Candidate => ({
+  staffId,
+  name: staffId,
+  hoursThisWeek,
+  findings,
+});
 
 test("fitLevel: block beats reason beats reminder beats warn", () => {
   assert.equal(fitLevel([]), "ok");
@@ -25,32 +29,57 @@ test("rankStaff orders by level, then fewest hours, then name", () => {
     cand("warn", 0, [f("overtime", "warn")]),
     cand("card", 0, [f("cpr_first_aid", "warn")]),
   ]);
-  assert.deepEqual(ranked.map((r) => r.staffId), ["free", "busy", "warn", "card", "reason", "cant"]);
-  assert.deepEqual(ranked.map((r) => r.level), ["ok", "ok", "warn", "reminder", "reason", "cant"]);
+  assert.deepEqual(
+    ranked.map((r) => r.staffId),
+    ["free", "busy", "warn", "card", "reason", "cant"],
+  );
+  assert.deepEqual(
+    ranked.map((r) => r.level),
+    ["ok", "ok", "warn", "reminder", "reason", "cant"],
+  );
 });
 
 test("reasons are the findings' text, worst first, without repeats", () => {
-  const [r] = rankStaff([cand("a", 0, [f("overtime", "warn", "Over 40"), f("on_time_off", "reason", "Off Tue"),
-    f("overtime", "warn", "Over 40")])]);
+  const [r] = rankStaff([
+    cand("a", 0, [
+      f("overtime", "warn", "Over 40"),
+      f("on_time_off", "reason", "Off Tue"),
+      f("overtime", "warn", "Over 40"),
+    ]),
+  ]);
   assert.deepEqual(r!.reasons, ["Off Tue", "Over 40"]);
 });
 
 test("evidenceHref comes from a card finding's fix", () => {
   const href = "/dashboard/evidence?tab=staff&person=a&item=cpr";
-  const [withCard] = rankStaff([cand("a", 0, [f("cpr_first_aid", "warn", "CPR expired", { label: "Open", href })])]);
+  const [withCard] = rankStaff([
+    cand("a", 0, [f("cpr_first_aid", "warn", "CPR expired", { label: "Open", href })]),
+  ]);
   const [plain] = rankStaff([cand("b", 0, [f("overtime", "warn")])]);
   assert.equal(withCard!.evidenceHref, href);
   assert.equal(plain!.evidenceHref, null);
 });
 
 test("only ok and warn candidates are qualified for an offer", () => {
-  assert.deepEqual(["ok", "warn", "reminder", "reason", "cant"].map((level) =>
-    isQualified({ level: level as never })), [true, true, false, false, false]);
+  assert.deepEqual(
+    ["ok", "warn", "reminder", "reason", "cant"].map((level) =>
+      isQualified({ level: level as never }),
+    ),
+    [true, true, false, false, false],
+  );
 });
 
 test("weekHours counts the Sun–Sat week, skips cancelled and the shift being placed", () => {
-  const s = (id: string, startsAt: string, endsAt: string, status = "draft"): RuleShift =>
-    ({ id, staffId: "a", clientId: "c", teamId: null, code: "DSI", startsAt, endsAt, status });
+  const s = (id: string, startsAt: string, endsAt: string, status = "draft"): RuleShift => ({
+    id,
+    staffId: "a",
+    clientId: "c",
+    teamId: null,
+    code: "DSI",
+    startsAt,
+    endsAt,
+    status,
+  });
   const shifts = [
     s("1", "2026-11-09T15:00:00Z", "2026-11-09T19:00:00Z"), // Mon, 4 h
     s("2", "2026-11-10T15:00:00Z", "2026-11-10T17:30:00Z"), // Tue, 2.5 h

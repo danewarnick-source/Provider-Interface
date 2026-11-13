@@ -1,6 +1,6 @@
 // B1 done-when: saving a shift for a team member on the client's
 // do-not-schedule list is refused, and the reason shows. Runs the same guard
-// saveShift, publishWeek, claims, repeats and clock-in call.
+// saveShift, publishWeek, claims, Find staff and clock-in call.
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fakeDb } from "./fake-db.ts";
