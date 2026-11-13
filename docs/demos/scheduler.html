@@ -1,4 +1,4 @@
-<title>Scheduler for Group Homes</title>
+<title>Provider Interface Scheduler</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
@@ -259,12 +259,14 @@ pre.csv{font-family:var(--mono);font-size:11.5px;background:var(--panel2);border
 @media (max-width:1000px){.grid2{grid-template-columns:minmax(0,1fr)}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.shell{grid-template-columns:minmax(0,1fr)}.nav{flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid var(--line);padding:8px 12px;gap:2px;overflow-x:auto}.nav .logo{padding:4px 8px}.nav a{padding:6px 9px;font-size:12.5px}.nav .sp,.nav .who{display:none}}
 @media (max-width:640px){main{padding:14px 16px 80px}.cols2,.fgrid{grid-template-columns:minmax(0,1fr)}.audit{grid-template-columns:minmax(0,1fr)}.board td:first-child{min-width:150px}.staff{padding-inline:16px}.msg{max-width:92%}}
 @media (prefers-reduced-motion:no-preference){.drawer{animation:slide .18s ease-out}.sheet{animation:up .18s ease-out}@keyframes slide{from{transform:translateX(24px);opacity:.5}to{transform:none;opacity:1}}@keyframes up{from{transform:translateY(24px);opacity:.5}to{transform:none;opacity:1}}}
+.code.HHS{background:var(--gold-soft);color:var(--gold-ink)}.chip.HHS,.sshift.HHS{border-left-color:var(--gold)}
 </style>
 
 <div class="demo"><b>DEMO · VIEW AS</b>
   <div class="seg" id="modeseg"><button data-mode="office" aria-pressed="true">Office · Rosa (scheduler)</button><button data-mode="staff" aria-pressed="false">Team member phone</button></div>
   <span id="asbox" hidden>as <span class="seg" id="asseg"></span></span>
-  <span style="margin-left:auto;opacity:.75">Built from what group-home staff and schedulers praise in reviews. Everything you change works; reload to reset.</span>
+  <span id="sigbox" hidden>Phone signal <span class="seg" id="sigseg"><button data-sig="on">On</button><button data-sig="off">Off</button></span></span>
+  <span style="margin-left:auto;opacity:.75">Made-up people. Everything you click works; reload to reset.</span>
 </div>
 <div id="app"></div>
 <div id="layer"></div>
@@ -303,18 +305,22 @@ const CODES={
  SEI:{n:'Supported employment, individual',bill:'Quarter hour · monthly summary by the 15th',evv:false,unit:'qh'},
  COM:{n:'Companion services',bill:'Quarter hour · EVV required',evv:true,unit:'qh'},
  HSQ:{n:'Homemaker',bill:'Quarter hour · EVV required',evv:true,unit:'qh'},
+ HHS:{n:'Host home supports',bill:'Daily rate per Person · present + host daily note + overnight confirmed',evv:false,unit:'day'},
 };
 
 /* ---------- places ---------- */
 const PLACES={
  maple:{n:'Maple House',kind:'home',code:'RHS',res:['Anika B.','Quinn H.','Theo R.'],addr:'Lehi',geo:150,need:[{days:[0,1,2,3,4,5,6],a:7,b:15,n:1},{days:[0,1,2,3,4,5,6],a:15,b:23,n:2},{days:[0,1,2,3,4,5,6],a:23,b:31,n:1,awake:true}]},
  cedar:{n:'Cedar House',kind:'home',code:'RHS',res:['Marcus T.','Hazel P.'],addr:'American Fork',geo:150,need:[{days:[0,1,2,3,4,5,6],a:7,b:23,n:1},{days:[0,1,2,3,4,5,6],a:23,b:31,n:1,awake:false}]},
- lehi:{n:'Lehi Day Program',kind:'program',code:'DSG',addr:'Lehi',geo:200,hours:[9,15],clients:[{n:'Sofia M.',ratio:4},{n:'Owen S.',ratio:6},{n:'Hazel P.',ratio:6},{n:'Casey L.',ratio:6},{n:'Priya N.',ratio:6},{n:'Jonah K.',ratio:6},{n:'Mateo L.',ratio:6},{n:'Ella F.',ratio:6},{n:'Ravi P.',ratio:6},{n:'Nora D.',ratio:6}]},
- sam:{n:'Sam Carter',kind:'client',code:'SLH',addr:'Apartment, Orem',geo:100,auth:{used:286,total:520},abi:true,overnight:true},
- riley:{n:'Riley Park',kind:'client',code:'SLH',addr:'Apartment, Provo',geo:100,auth:{used:506,total:520},dns:['maria']},
- morgan:{n:'Morgan Ellis',kind:'client',code:'SEI',addr:'Job site, Lehi',geo:250,auth:{used:140,total:260},drives:true},
- alex:{n:'Alex Morgan',kind:'client',code:'COM',addr:'Family home, Kearns',geo:100,auth:{used:88,total:208},drives:true},
- rosalind:{n:'Rosalind K.',kind:'client',code:'HSQ',addr:'Family home, Murray',geo:100,auth:{used:60,total:104}},
+ jordan:{n:'Jordan W.',kind:'client',code:'HHS',addr:'Host home, Spanish Fork',host:'The Larsen family',hostPhone:'(801) 555-0140',geo:150},
+ elena:{n:'Elena V.',kind:'client',code:'HHS',addr:'Host home, Payson',host:'Tom and Ana Ruiz',hostPhone:'(801) 555-0141',geo:150},
+ marcus:{n:'Marcus D.',kind:'client',code:'HHS',addr:'Host home, Payson',host:'Tom and Ana Ruiz',hostPhone:'(801) 555-0141',geo:150},
+ lily:{n:'Lily S.',kind:'client',code:'HHS',addr:'Host home, Springville',host:'Deb Carter',hostPhone:'(385) 555-0142',geo:150},
+ sam:{n:'Sam Carter',kind:'client',code:'SLH',addr:'Apartment, Orem',geo:100,auth:{used:122,total:780,wk:16},abi:true,overnight:true},
+ riley:{n:'Riley Park',kind:'client',code:'SLH',addr:'Apartment, Provo',geo:100,auth:{used:506,total:520,wk:12},dns:['maria']},
+ morgan:{n:'Morgan Ellis',kind:'client',code:'SEI',addr:'Job site, Lehi',geo:250,auth:{used:92,total:640,wk:12},drives:true},
+ alex:{n:'Alex Morgan',kind:'client',code:'COM',addr:'Family home, Kearns',geo:100,auth:{used:40,total:456,wk:8},drives:true},
+ rosalind:{n:'Rosalind K.',kind:'client',code:'HSQ',addr:'Family home, Murray',geo:100,auth:{used:23,total:160,wk:3}},
 };
 
 /* ---------- day program van runs (DSG + MTP) ----------
@@ -341,6 +347,15 @@ const AWAY_LABELS=['Day program','Job','School',"Another provider's service",'Ot
 const DP_HOURS={'Sofia M.':[6,5.8],'Owen S.':[6,6.1],'Hazel P.':[6,5.9],'Casey L.':[6,4.6],'Priya N.':[6,6]};
 function allAway(pid,wd,h){const res=PLACES[pid].res||[];return res.length>0&&res.every(r=>(RES_AWAY[r]||[]).some(x=>x.days.includes(wd)&&h>=x.a&&h+1<=x.b))}
 
+/* ---------- host homes (HHS) ----------
+   The host lives with the Person, so hosts are never scheduled. Two things reach the scheduler:
+   agency staff visits (timed shifts), and coverage when the host is away. Whether a day bills
+   (present + host's daily note + overnight) is checked in notes review, not here. */
+const HOST_AWAY=[{id:'h1',host:'Tom and Ana Ruiz',clients:['elena','marcus'],days:[DISO[5],DISO[6]],reason:'Family wedding out of state',else:false}];
+const HHS_AUTH={'Jordan W.':[53,365],'Elena V.':[52,365],'Marcus D.':[50,365],'Lily S.':[53,365]};
+const PLAN_END='2027-08-31';
+const LATE={nudge:10,lead:30}; // minutes after the start: nudge the staff member, then alert the office
+
 /* ---------- team ---------- */
 const STAFF={
  maria:{n:'Maria Lopez',job:'DSP',wage:18,teams:['maple','cedar','riley'],certs:{cpr:'2027-03-10',core:'2024-05-01',med:'2027-11-02',mandt:'2027-01-15'},ps:['maple','cedar'],phone:'(801) 555-0101',avail:{}},
@@ -348,10 +363,10 @@ const STAFF={
  ava:{n:'Ava Johnson',job:'DSP',wage:17,teams:['maple','sam'],certs:{cpr:'2027-06-01',core:'2025-09-01',med:'2027-06-01',abi:'2027-01-10'},ps:['maple','sam'],phone:'(801) 555-0103',avail:{2:'off'}},
  ben:{n:'Ben Okafor',job:'DSP',wage:17,teams:['maple','cedar'],certs:{cpr:'2027-01-01',core:'2025-01-01',med:'2027-01-30'},ps:['maple','cedar'],phone:'(801) 555-0104',avail:{}},
  chris:{n:'Chris Dale',job:'Night DSP',wage:18.5,teams:['maple','cedar'],certs:{cpr:'2027-08-01',core:'2024-11-01',med:'2027-04-01'},ps:['maple','cedar'],phone:'(801) 555-0105',avail:{},nights:true},
- leo:{n:'Leo Park',job:'DSP · float',wage:17.5,teams:['maple','cedar','lehi'],certs:{drive:'2027-06-01',cpr:'2027-02-01',core:'2025-06-01',med:'2027-02-01'},ps:['maple','cedar'],phone:'(801) 555-0106',avail:{}},
- priya:{n:'Priya Shah',job:'Program lead · Van 1',wage:21,teams:['lehi'],certs:{drive:'2027-04-15',cpr:'2027-05-01',core:'2023-01-01',med:'2027-05-01',mandt:'2027-03-01'},ps:['lehi'],phone:'(801) 555-0107',avail:{}},
- sofia:{n:'Sofia Reyes',job:'DSP · Van 2',wage:17,teams:['lehi'],certs:{drive:'2027-02-20',cpr:'2027-04-01',core:'2026-03-01',med:'2027-04-01'},ps:['lehi'],phone:'(801) 555-0108',avail:{},eow:true},
- jamie:{n:'Jamie Cole',job:'DSP · 17',wage:16,teams:['lehi','morgan'],certs:{cpr:'2027-07-01',core:'2026-08-01'},ps:['lehi'],phone:'(801) 555-0109',avail:{},age:17},
+ leo:{n:'Leo Park',job:'DSP · float',wage:17.5,teams:['maple','cedar','elena','marcus'],certs:{drive:'2027-06-01',cpr:'2027-02-01',core:'2025-06-01',med:'2027-02-01'},ps:['maple','cedar','elena','marcus'],phone:'(801) 555-0106',avail:{}},
+ priya:{n:'Priya Shah',job:'Host home coordinator',wage:21,teams:['jordan','elena','marcus','lily'],certs:{cpr:'2027-05-01',core:'2023-01-01',mandt:'2027-03-01'},ps:['jordan','elena','marcus','lily'],phone:'(801) 555-0107',avail:{}},
+ sofia:{n:'Sofia Reyes',job:'DSP',wage:17,teams:['cedar','maple'],certs:{drive:'2027-02-20',cpr:'2027-04-01',core:'2026-03-01',med:'2027-04-01'},ps:['cedar'],phone:'(801) 555-0108',avail:{},eow:true},
+ jamie:{n:'Jamie Cole',job:'DSP · 17',wage:16,teams:['morgan','alex'],certs:{cpr:'2027-07-01',core:'2026-08-01'},ps:['morgan'],phone:'(801) 555-0109',avail:{},age:17},
  nora:{n:'Nora Fields',job:'Job coach',wage:19,teams:['morgan','alex','rosalind'],certs:{cpr:'2027-02-01',core:'2025-04-01',sei:'2027-02-01'},ps:['morgan','alex','rosalind'],phone:'(801) 555-0110',avail:{}},
  dev:{n:'Dev Anand',job:'DSP · community',wage:17.5,teams:['sam','riley','alex'],certs:{cpr:'2027-03-01',core:'2025-03-01',abi:'2027-04-01',med:'2027-03-01'},ps:['sam','riley'],phone:'(801) 555-0111',avail:{}},
  omar:{n:'Omar Haddad',job:'DSP',wage:17.5,teams:['cedar','maple'],certs:{cpr:'2027-05-01',core:'2025-05-01',med:'2027-05-01'},ps:['cedar'],phone:'(801) 555-0114',avail:{}},
@@ -397,8 +412,6 @@ DISO.forEach((d,i)=>{
   add({day:d,place:'cedar',staff:['omar','leo','omar','omar','leo','leo','omar'][i],a:7,b:15,code:'RHS'});
   add({day:d,place:'cedar',staff:i===4?null:['maria','ava','ben','theo','omar','ben','dev'][i],a:15,b:23,code:'RHS'});
   add({day:d,place:'cedar',staff:i===2?null:'kai',a:23,b:31,code:'RHS',awake:false});
-  // Lehi weekdays
-  if(i>=1&&i<=5){add({day:d,place:'lehi',staff:'priya',a:8,b:15.75,code:'DSG',van:'v1'});add({day:d,place:'lehi',staff:i===5?null:'sofia',a:8,b:15.75,code:'DSG',van:'v2'});add({day:d,place:'lehi',staff:i===2||i===4?null:'jamie',a:9,b:15,code:'DSG',onsite:true});}
   // Maple: Quinn H. 1:1 enhanced staffing 4p–8p (Form 930). Doesn't count toward house coverage.
   add({day:d,place:'maple',staff:i===6?null:'luis',a:16,b:20,code:'RHS',seg:'1:1 · Quinn H.',one:'Quinn H.'});
 });
@@ -406,10 +419,12 @@ DISO.forEach((d,i)=>{
 add({day:DISO[1],place:'sam',staff:'dev',a:16,b:20,code:'SLH'});add({day:DISO[3],place:'sam',staff:'dev',a:16,b:20,code:'SLH'});add({day:DISO[5],place:'sam',staff:'dev',a:22,b:30,code:'SLN',asleep:[0,6]});
 add({day:DISO[2],place:'riley',staff:'dev',a:10,b:14,code:'SLH'});add({day:DISO[4],place:'riley',staff:'dev',a:10,b:14,code:'SLH'});add({day:DISO[6],place:'riley',staff:null,a:10,b:14,code:'SLH',status:'draft'});
 add({day:DISO[1],place:'morgan',staff:'nora',a:8,b:12,code:'SEI'});add({day:DISO[3],place:'morgan',staff:'nora',a:8,b:12,code:'SEI'});add({day:DISO[5],place:'morgan',staff:'nora',a:8,b:12,code:'SEI'});
-add({day:DISO[2],place:'alex',staff:'nora',a:13,b:17,code:'COM'});add({day:DISO[5],place:'alex',staff:'dev',a:13,b:17,code:'COM',status:'draft'});
+add({day:DISO[4],place:'alex',staff:'nora',a:14,b:18,code:'COM'});add({day:DISO[5],place:'alex',staff:'dev',a:13,b:17,code:'COM',status:'draft'});
 add({day:DISO[4],place:'rosalind',staff:'nora',a:9,b:12,code:'HSQ'});
-// Lehi DSI segment inside Priya's shift Tue
-add({day:DISO[2],place:'lehi',staff:'priya',a:13,b:15,code:'DSI',seg:'Casey L.'});
+// host homes: hosts live with the Person and are never scheduled. Agency staff visits are timed shifts.
+add({day:DISO[2],place:'jordan',staff:'priya',a:10,b:11.5,code:'HHS',visit:'Monthly supervision visit'});
+add({day:DISO[3],place:'elena',staff:'priya',a:13,b:14.5,code:'HHS',visit:'Monthly supervision visit'});
+add({day:DISO[1],place:'lily',staff:'priya',a:16,b:17,code:'HHS',visit:'Host training follow-up'});
 
 /* ---------- requests, punches, messages ---------- */
 const REQ=[
@@ -428,6 +443,8 @@ const PUNCH=[
  {id:'p4',staff:'nora',shift:SH.find(s=>s.day===DISO[3]&&s.place==='morgan').id,in:7.98,out:12.1,evv:'n/a',status:'ok'},
  {id:'p5',staff:'chris',shift:SH.find(s=>s.day===DISO[2]&&s.place==='maple'&&s.staff==='chris').id,in:22.95,out:31.02,evv:'n/a',status:'ok'},
  {id:'p6',staff:'dev',shift:SH.find(s=>s.day===DISO[2]&&s.place==='riley').id,in:10,out:14,evv:'verified',status:'ok'},
+ {id:'p7',staff:'leo',shift:SH.find(s=>s.day===DISO[4]&&s.place==='cedar'&&s.a===7).id,in:6.97,out:null,evv:'n/a',status:'on'},
+ {id:'p8',staff:'nora',shift:SH.find(s=>s.day===DISO[4]&&s.place==='rosalind').id,in:8.98,out:12.02,evv:'verified',status:'ok'},
 ];
 const AUDIT=[
  {w:'Thu 6:41 AM',who:'Theo Nguyen',t:'Called out of Thu 7a–3p Maple House · Sick. Shift reposted to 5 qualified people.'},
@@ -436,18 +453,13 @@ const AUDIT=[
  {w:'Tue 5:02 PM',who:'Rosa Delgado',t:'Published week Oct 18–24. 41 shifts. 9 people notified, 1 digest.'},
  {w:'Mon 8:15 AM',who:'System',t:'Riley Park SLH authorization at 97%. Flagged on Sat draft and in Needs you.'},
 ];
-const CH={
- maple:{n:'Maple House',m:[['Maria Lopez','Anika had a good night. Dentist is 2p Thursday, Priya has the form.','Wed 7:04 AM'],['Rosa Delgado','Thanks. Theo is out Thu AM, Leo is covering until Grace gets in.','Thu 6:50 AM']]},
- cedar:{n:'Cedar House',m:[['Ben Okafor','Van needs gas before the Friday outing.','Wed 4:20 PM']]},
- lehi:{n:'Lehi Day Program',m:[['Priya Shah','Sofia M. ratio is 1:4 now per the new PCSP. Thursday needs 3 staff.','Tue 3:10 PM']]},
- all:{n:'Announcements',m:[['Rosa Delgado','Open-shift offers go to everyone qualified at once and stop at 9p. If it starts within 4 hours you will still get a push.','Mon 9:00 AM']]},
-};
 const NOTIF={};
 const notify=(sid,text,urgent)=>{(NOTIF[sid]=NOTIF[sid]||[]).unshift({t:text,w:'Just now',urgent:!!urgent,read:false})};
 notify('maria','Reminder: Maple House 7a tomorrow (Fri). Also on: Ben, Leo.');
 notify('theo','Your call-out for Thu 7a–3p is recorded. Feel better.');
 notify('grace','Open shift you can pick up: Fri 3p–11p Maple House (supervised with Ava).');
 notify('leo','Your give-away for Sat 7p–11p is posted to qualified coworkers.');
+notify('nora','You’re 10 minutes past the start of Alex Morgan 2p–6p and not clocked in. Clock in, or tap Can’t make it.',true);
 notify('leo','Ben asked you to take Thu 3p–11p Maple. You accepted; waiting on Rosa.');
 </script>
 <script>
@@ -471,7 +483,7 @@ const RULES=[
  {k:'newhire',n:'New hire working alone',d:'Before the items that block working alone are on file and a lead signs off.',state:true},
 ];
 const LV={ot:'warn',cap:'reason',rest:'warn',days:'warn',row:'warn',avail:'warn',timeoff:'reason',team:'warn',card:'warn',ps:'warn',auth:'reason',age:'block',dns:'block',newhire:'block'};
-const OV={ot:{lehi:'off'},rest:{maple:'reason'},card:{},auth:{riley:'block'}};
+const OV={ot:{},rest:{maple:'reason'},card:{},auth:{riley:'block'}};
 const lvl=(rule,place)=>(OV[rule]&&OV[rule][place])||LV[rule];
 const LVNAME={off:'Off',warn:'Warn',reason:'Needs a reason',block:'Block'};
 
@@ -485,6 +497,7 @@ const TYPES=[
  {id:'oncall',n:'On-call',color:'#9A6208',a:7,b:31,kinds:['home','program'],cov:false,pay:'stipend',sys:true},
  {id:'prog',n:'Day program',color:'#1F6F8B',a:9,b:15,kinds:['program'],cov:true,pay:'normal',sys:true},
  {id:'transport',n:'Transport',color:'#237A47',a:8,b:9,kinds:['program'],cov:false,pay:'normal',sys:true},
+ {id:'hvisit',n:'Host home visit',color:'#B8901F',a:10,b:11.5,kinds:['client'],cov:false,pay:'normal',sys:true},
  {id:'visit',n:'Community visit',color:'#2F7D5B',a:10,b:14,kinds:['client'],cov:false,pay:'normal',sys:true},
 ];
 const TPAY={normal:'Hourly rate',sleep:'Home’s overnight rule',stipend:'Flat on-call stipend'};
@@ -498,10 +511,30 @@ function payFor(s,sid){const st=STAFF[sid];if(!st)return 0;const wd=D(s.day).get
   let t=0;for(let h=s.a;h<s.b;h++){let r=st.wage+(PREM[s.place]||0);const hh=h%24;if(PAY.night.on&&(hh>=PAY.night.a||hh<PAY.night.b))r+=PAY.night.amt;const dd=h>=24?(wd+1)%7:wd;if(PAY.weekend.on&&(dd===0||dd===6))r+=PAY.weekend.amt;const date=h>=24?iso(addD(D(s.day),1)):s.day;const hd=HOL.find(x=>x.on&&x.date===date);if(hd)r*=hd.mult;t+=r}return t}
 
 /* approvals, per place (owner can always approve anything) */
-const APPROVE={maple:{lead:'maria',swap:'lead',timeoff:'owner',pickup:'auto',fix:'lead',publish:'owner'},cedar:{lead:'ben',swap:'lead',timeoff:'owner',pickup:'auto',fix:'lead',publish:'owner'},lehi:{lead:'priya',swap:'lead',timeoff:'lead',pickup:'auto',fix:'lead',publish:'lead'},community:{lead:null,swap:'owner',timeoff:'owner',pickup:'owner',fix:'owner',publish:'owner'}};
+const APPROVE={maple:{lead:'maria',swap:'lead',timeoff:'owner',pickup:'auto',fix:'lead',publish:'owner'},cedar:{lead:'ben',swap:'lead',timeoff:'owner',pickup:'auto',fix:'lead',publish:'owner'},community:{lead:null,swap:'owner',timeoff:'owner',pickup:'owner',fix:'owner',publish:'owner'}};
 const APNAME={lead:'Lead',owner:'Owner only',auto:'Automatic'};
 
 /* open shifts and hold-overs */
+function authRows(){const wl=(D(PLAN_END)-D(DISO[6]))/(7*864e5);const rows=[];
+ Object.entries(PLACES).filter(([,p])=>p.auth).forEach(([k,p])=>{const wk=live().filter(s=>s.place===k).reduce((n,s)=>n+dur(s),0);const used=p.auth.used+wk,left=p.auth.total-used,rate=p.auth.wk;const lastsW=rate?left/rate:99;const out=addD(D(DISO[6]),Math.round(lastsW*7));const unused=Math.round(left-rate*wl);
+  let st,msg;if(left<0){st='crit';msg=`Over by ${-left} h.`}else if(lastsW<wl-1){st=lastsW<4?'crit':'warn';msg=`Runs out about ${md(out)}, ${Math.round(wl-lastsW)} weeks before the plan year ends.`}else if(unused>rate*2){st='info';msg=`About ${unused} h will go unused at this pace.`}else{st='ok';msg='On pace to the end of the plan year.'}
+  rows.push({n:p.n,code:p.code,unit:'h',total:p.auth.total,used,left,rate,st,msg})});
+ Object.values(PLACES).filter(p=>p.code==='HHS').forEach(p=>{const[u,t]=HHS_AUTH[p.n];rows.push({n:p.n,code:'HHS',unit:'days',total:t,used:u,left:t-u,rate:7,st:'ok',msg:'On pace. Daily rate.'})});return rows}
+function authPanel(){const r=authRows();return `<div class="pb" style="padding-top:14px;border-bottom:1px solid var(--line)"><h2>Authorizations (the 1056) · plan year to Aug 31, 2027</h2><p class="xs muted" style="margin:2px 0 10px">Used plus this week's schedule, against what's authorized. The outlook uses each client's standard week, so a shortfall shows up months ahead.</p><div class="tw"><table class="t"><thead><tr><th>Client</th><th>Code</th><th>Authorized</th><th>Used + scheduled</th><th>Left</th><th>Standard week</th><th>Outlook</th></tr></thead><tbody>${r.map(x=>`<tr><td><b>${esc(x.n)}</b></td><td>${code(x.code)}</td><td class="num">${x.total} ${x.unit}${x.unit==='h'?` <span class="xs muted">(${x.total*4} units)</span>`:''}</td><td class="num">${x.used} ${x.unit}</td><td class="num">${x.left} ${x.unit}</td><td class="num">${x.rate} ${x.unit}</td><td>${pill(x.st==='ok'?'ok':x.st,x.st==='ok'?'On pace':x.st==='info'?'Under-using':x.st==='warn'?'Watch':'Act now')} <span class="xs">${esc(x.msg)}</span></td></tr>`).join('')}</tbody></table></div></div>`}
+function lateItems(){const nowH=TODAY.getHours()+TODAY.getMinutes()/60;const out=[];
+ live().filter(s=>s.staff&&s.day===TISO&&s.status!=='draft').forEach(s=>{if(PUNCH.some(p=>p.shift===s.id))return;if(ME.clock===s.id&&!(ME.queued&&ME.queued.shift===s.id))return;
+  const late=Math.round((nowH-s.a)*60);if(late<LATE.nudge)return;const ended=nowH>=s.b;const st=STAFF[s.staff],p=PLACES[s.place];
+  out.push({tag:ended?'Missed visit':'Late clock-in',lvl:'crit',t:`${st.n} · ${p.n} · ${span(s.a,s.b)} ${s.code}`,
+   p:ended?`No clock-in or clock-out. ${CODES[s.code].evv?'EVV has no visit, so it can’t bill until a punch is added with a reason.':'No time on record for payroll.'} ${first(st.n)} was nudged at ${hm(s.a+LATE.nudge/60)}.`:`${late} min past the start and not clocked in. ${first(st.n)} was nudged at ${hm(s.a+LATE.nudge/60)}${late>=LATE.lead?' and you were alerted at '+hm(s.a+LATE.lead/60):''}.${p.kind==='client'?' '+first(p.n)+' may be waiting.':''}`,
+   acts:ended?[[`Call ${first(st.n)}`,`note:Calling ${st.phone}`],['They worked it: add the punch',`latepunch:${s.id}`],['Didn’t happen',`latemiss:${s.id}`]]:[[`Call ${first(st.n)}`,`note:Calling ${st.phone}`],['Find cover',`find:${s.id}`],['They’re there: add the punch',`latepunch:${s.id}`]],sort:0})});return out}
+function awayStatus(h){const opens=[],filled=[];h.days.forEach(d=>live().filter(s=>s.place===h.clients[0]&&s.day===d&&s.cover).forEach(s=>(s.staff?filled:opens).push(s)));return{opens,filled,none:!opens.length&&!filled.length}}
+function hostAwayOn(pid,d){return HOST_AWAY.find(h=>!h.else&&h.clients.includes(pid)&&h.days.includes(d))}
+function dlgHostAway(){const pid=S.dlg.id,p=PLACES[pid],x=S.dlg.x;const same=Object.keys(PLACES).filter(k=>PLACES[k].host===p.host);
+ const body=`<p class="small">${esc(p.host)} host ${esc(list(same.map(k=>PLACES[k].n)))}. While they're away, someone has to be with ${same.length>1?'them':esc(first(p.n))}.</p>
+ <div class="field"><label>Days the host is away</label><div class="choice">${DISO.slice(1).map((d,i)=>`<button data-ha="day:${d}" aria-pressed="${x.days.includes(d)}">${DN[i+1]} ${D(d).getDate()}</button>`).join('')}</div></div>
+ <div class="field"><label for="ha_note">Why (optional)</label><input class="inp" id="ha_note" value="${esc(x.reason)}" placeholder="e.g. Surgery, vacation"></div>
+ <p class="hint">Saving adds a Needs you item. From there you add coverage shifts or note that the Person stays somewhere else.</p>`;
+ return wrap(p.host,'Host away',body,`<button class="btn" data-close="1">Cancel</button><button class="btn pri" data-act="savehostaway:${pid}" ${x.days.length?'':'disabled title="Pick at least one day"'}>Save</button>`)}
 const ESC=[{who:'Home lead',wait:15},{who:'On-call',wait:15},{who:'Owner',wait:10}];
 const HOLD={maria:{last:'2026-09-12',month:0},ava:{last:'2026-10-09',month:2},ben:{last:'2026-08-30',month:0},theo:{last:'2026-10-15',month:1},leo:{last:'2026-07-18',month:0},chris:{last:'2026-10-01',month:1},omar:{last:null,month:0},kai:{last:'2026-09-28',month:0},grace:{last:null,month:0}};
 CFG.holdVisible=true;CFG.holdAsk=true;
@@ -517,8 +550,8 @@ const S={mode:'office',as:'maria',tab:'board',range:'week',view:'homes',filter:'
 let TOAST=null,HIST=[];
 const live=()=>SH.filter(s=>!S.cancel.has(s.id));
 const sh=id=>SH.find(s=>s.id===id);
-const snap=()=>JSON.stringify({SH,REQ,PUNCH,cancel:[...S.cancel],changed:[...S.changed],OFFERS,CFG,EXC,TPL,VANS,ONSITE,RES_AWAY});
-const restore=j=>{const o=JSON.parse(j);SH.length=0;SH.push(...o.SH);REQ.length=0;REQ.push(...o.REQ);PUNCH.length=0;PUNCH.push(...o.PUNCH);S.cancel=new Set(o.cancel);S.changed=new Set(o.changed);Object.keys(OFFERS).forEach(k=>delete OFFERS[k]);Object.assign(OFFERS,o.OFFERS);Object.assign(CFG,o.CFG);EXC.length=0;EXC.push(...o.EXC);TPL.length=0;TPL.push(...o.TPL);Object.keys(VANS).forEach(k=>VANS[k]=o.VANS[k]);ONSITE.riders=o.ONSITE.riders;Object.keys(RES_AWAY).forEach(k=>delete RES_AWAY[k]);Object.assign(RES_AWAY,o.RES_AWAY)};
+const snap=()=>JSON.stringify({HA:HOST_AWAY,SH,REQ,PUNCH,cancel:[...S.cancel],changed:[...S.changed],OFFERS,CFG,EXC,TPL,VANS,ONSITE,RES_AWAY});
+const restore=j=>{const o=JSON.parse(j);HOST_AWAY.length=0;HOST_AWAY.push(...o.HA);SH.length=0;SH.push(...o.SH);REQ.length=0;REQ.push(...o.REQ);PUNCH.length=0;PUNCH.push(...o.PUNCH);S.cancel=new Set(o.cancel);S.changed=new Set(o.changed);Object.keys(OFFERS).forEach(k=>delete OFFERS[k]);Object.assign(OFFERS,o.OFFERS);Object.assign(CFG,o.CFG);EXC.length=0;EXC.push(...o.EXC);TPL.length=0;TPL.push(...o.TPL);Object.keys(VANS).forEach(k=>VANS[k]=o.VANS[k]);ONSITE.riders=o.ONSITE.riders;Object.keys(RES_AWAY).forEach(k=>delete RES_AWAY[k]);Object.assign(RES_AWAY,o.RES_AWAY)};
 function commit(fn,msg){const j=snap();fn();HIST.push(j);render();toast(msg,true)}
 function undo(){const j=HIST.pop();if(j){restore(j);render();toast('Undone')}}
 function log(who,t){AUDIT.unshift({w:'Just now',who,t})}
@@ -609,7 +642,7 @@ function flagsFor(s){if(!s.staff)return[];return checkStaff(s.staff,s,s.id)}
 function chip(s,ctx){
   const p=PLACES[s.place],cs=flagsFor(s),w=worst(cs);
   const who=ctx==='staff'?p.n:s.staff?first(STAFF[s.staff].n):'Open';
-  const extra=s.van?` · ${VANS[s.van].n} · ${VANS[s.van].stops.length} riders`:s.onsite?' · on-site group':s.seg?` · ${s.seg}`:s.awake?' · awake':s.awake===false?' · asleep ok':s.code==='SLN'?' · overnight':'';
+  const extra=s.cover?` · ${s.cover}`:s.visit?` · ${s.visit}`:s.van?` · ${VANS[s.van].n} · ${VANS[s.van].stops.length} riders`:s.onsite?' · on-site group':s.seg?` · ${s.seg}`:s.awake?' · awake':s.awake===false?' · asleep ok':s.code==='SLN'?' · overnight':'';
   const sub=ctx==='staff'?(s.staff?'':'Open'):(ctx==='clients'?(s.staff?STAFF[s.staff].job:'Open'):who);
   const st=s.staff?(w==='bad'?`<span class="bad">✕ ${esc(cs.find(c=>c.lvl==='bad').t)}</span>`:w!=='ok'?`<span class="flag">! ${esc(cs[0].t)}</span>`:''):(OFFERS[s.id]?`<span class="flag">Offered to ${OFFERS[s.id].asked.length}</span>`:`<span class="bad">Not offered yet</span>`);
   return `<button class="chip ${s.code} ${s.staff?'':'open'} ${s.status==='draft'?'draft':''} ${S.changed.has(s.id)?'changed':''}" data-open="${s.id}"><b>${span(s.a,s.b)} ${code(s.code)}${s.van?' '+code('MTP'):''}${s.sup?' <span class="pill info" style="font-size:10px">paired</span>':''}</b><span>${esc(ctx==='staff'?p.n+extra:sub+extra)}</span>${st}</button>`;
@@ -622,7 +655,7 @@ function offChips(sid,d){
   Object.entries(STAFF[sid].certs).forEach(([c,dt])=>{if(dt===d)out.push(`<div class="chip off"><b>${esc(CERTS[c])}</b><span>expires today</span></div>`)});
   return out.join('');
 }
-const inFilter=pid=>S.filter==='all'||S.filter===pid||(S.filter==='community'&&PLACES[pid].kind==='client');
+const inFilter=pid=>S.filter==='all'||S.filter===pid||(S.filter==='community'&&PLACES[pid].kind==='client')||(S.filter==='host'&&PLACES[pid].code==='HHS');
 function vBoard(){
   const open=live().filter(s=>!s.staff).length;
   const hrs=live().filter(s=>s.staff).reduce((n,s)=>n+dur(s),0);
@@ -632,7 +665,7 @@ function vBoard(){
   const head=`<div class="pagehead"><div><h1>Oct 18 – 24, 2026</h1><p class="sub">Today is Thu, Oct 22 · ${S.changed.size?pill('gold',S.changed.size+' change'+(S.changed.size>1?'s':'')+' not sent'):pill('ok','Published · staff notified')}</p></div>
    <div class="row"><button class="btn" data-dlg="copy">Copy week →</button><button class="btn" data-dlg="add">+ Add shift</button>${pub}</div></div>
    <div class="stats"><button class="panel stat" data-dlg="list:hours" style="text-align:left"><div class="v num">${hrs}<span class="muted" style="font-size:14px"> h</span></div><div class="l">Scheduled · ${live().filter(s=>s.staff).length} shifts · by place ›</div></button><button class="panel stat" data-dlg="list:open" style="text-align:left"><div class="v num" style="${open?'color:var(--crit)':''}">${open}</div><div class="l">Open shifts · show them ›</div></button><button class="panel stat" data-dlg="list:gaps" style="text-align:left"><div class="v num" style="${gaps?'color:var(--crit)':''}">${gaps}</div><div class="l">Coverage gaps at homes · show them ›</div></button><button class="panel stat" data-dlg="list:ot" style="text-align:left"><div class="v num" style="${ot?'color:var(--warn)':''}">${ot}</div><div class="l">People over ${CFG.ot} h · show them ›</div></button></div>`;
-  const tb=`<div class="toolbar"><span class="seg">${[['week','Week'],['month','Month']].map(x=>`<button data-range="${x[0]}" aria-pressed="${S.range===x[0]}">${x[1]}</button>`).join('')}</span><span class="seg">${[['homes','Homes & programs'],['staff','Team members'],['clients','Clients']].map(x=>`<button data-view="${x[0]}" aria-pressed="${S.view===x[0]}">${x[1]}</button>`).join('')}</span><span class="muted xs">Show</span>${[['all','Everything'],['maple','Maple'],['cedar','Cedar'],['lehi','Lehi Day'],['community','Community']].map(x=>`<button class="fbtn" data-filter="${x[0]}" aria-pressed="${S.filter===x[0]}">${x[1]}</button>`).join('')}</div>`;
+  const tb=`<div class="toolbar"><span class="seg">${[['week','Week'],['month','Month']].map(x=>`<button data-range="${x[0]}" aria-pressed="${S.range===x[0]}">${x[1]}</button>`).join('')}</span><span class="seg">${[['homes','Homes & programs'],['staff','Team members'],['clients','Clients']].map(x=>`<button data-view="${x[0]}" aria-pressed="${S.view===x[0]}">${x[1]}</button>`).join('')}</span><span class="muted xs">Show</span>${[['all','Everything'],['maple','Maple'],['cedar','Cedar'],['host','Host homes'],['community','Community']].map(x=>`<button class="fbtn" data-filter="${x[0]}" aria-pressed="${S.filter===x[0]}">${x[1]}</button>`).join('')}</div>`;
   let body='';
   if(S.range==='month')body=vMonth();
   else{
@@ -654,16 +687,17 @@ function vBoard(){
       rows=`<tr><td><div class="rowname"><b>Open shifts</b><span>${open?open+' to fill':'All filled'}</span></div></td>${DISO.map((d,i)=>`<td class="${d===TISO?'today':''}">${opens[i].map(s=>chip(s,'homes')).join('')}</td>`).join('')}</tr>`+rows;
     }
     if(S.view==='clients'){
-      rows=Object.entries(PLACES).filter(([k,p])=>p.kind==='client'&&inFilter(k)).map(([k,p])=>{const wk=live().filter(s=>s.place===k).reduce((n,s)=>n+dur(s),0);const pct=Math.round((p.auth.used+wk)/p.auth.total*100);
+      rows=Object.entries(PLACES).filter(([k,p])=>p.kind==='client'&&inFilter(k)).map(([k,p])=>{if(p.code==='HHS')return hhsRow(k,p);const wk=live().filter(s=>s.place===k).reduce((n,s)=>n+dur(s),0);const pct=Math.round((p.auth.used+wk)/p.auth.total*100);
         return `<tr><td><div class="rowname"><b>${esc(p.n)}</b><span>${code(p.code)} · ${esc(p.addr)}${p.abi?' · ABI':''}</span><div class="meter"><i style="width:${Math.min(100,pct)}%;background:var(--${pct>100?'crit':pct>90?'warn':'ok'})"></i></div><span class="xs muted num">${p.auth.used} + ${wk} of ${p.auth.total} h this plan year${pct>90?` · <b style="color:var(--${pct>100?'crit':'warn'})">${p.auth.total-p.auth.used-wk<0?'over by '+(-(p.auth.total-p.auth.used-wk))+' h':(p.auth.total-p.auth.used-wk)+' h left'}</b>`:''}</span></div></td>
          ${DISO.map(d=>{const list=live().filter(s=>s.place===k&&s.day===d);return `<td class="${d===TISO?'today':''}">${list.map(s=>chip(s,'clients')).join('')}<button class="addc" data-addat="${k}|${d}">+</button></td>`}).join('')}</tr>`}).join('');
     }
-    body=`<div class="tw"><table class="board"><thead>${th}</thead><tbody>${rows}</tbody></table></div><div class="legend"><span><i style="border-style:dashed"></i>Draft</span><span><i style="background:var(--crit-soft);border-color:var(--crit)"></i>Open</span><span><i style="box-shadow:inset 0 0 0 1px var(--gold)"></i>Changed since publish</span><span><i style="background:var(--panel2)"></i>Off or unavailable</span><span><span class="pill info" style="font-size:10px">paired</span> supervised shift</span><span>Click a shift to open it. Nothing is deleted; cancelled shifts stay on record.</span></div>`;
+    body=`${S.view==='clients'?authPanel():''}<div class="tw"><table class="board"><thead>${th}</thead><tbody>${rows}</tbody></table></div><div class="legend"><span><i style="border-style:dashed"></i>Draft</span><span><i style="background:var(--crit-soft);border-color:var(--crit)"></i>Open</span><span><i style="box-shadow:inset 0 0 0 1px var(--gold)"></i>Changed since publish</span><span><i style="background:var(--panel2)"></i>Off or unavailable</span><span><span class="pill info" style="font-size:10px">paired</span> supervised shift</span><span>Click a shift to open it. Nothing is deleted; cancelled shifts stay on record.</span></div>`;
   }
   const it=needsItems();const byTag={};it.forEach(i=>{byTag[i.tag]=(byTag[i.tag]||0)+1});
   const strip=it.length?`<div class="banner ${it.some(i=>i.lvl==='crit')?'crit':'warn'}" style="margin-bottom:14px"><div><b>${it.length} thing${it.length>1?'s':''} need you</b><p>${Object.entries(byTag).map(([k,v])=>`${v} ${k.toLowerCase()}`).join(' · ')}</p></div><button class="btn pri" data-tab="needs">Open Needs you</button></div>`:`<div class="banner ok" style="margin-bottom:14px"><div><b>Nothing needs you</b><p>New call-outs, claims and requests will show up in Needs you.</p></div></div>`;
   return `${head}${strip}<section class="panel">${tb}${body}</section>`;
 }
+function hhsRow(k,p){const[u,t]=HHS_AUTH[p.n];return `<tr><td><div class="rowname"><b>${esc(p.n)}</b><span>${code('HHS')} · lives with ${esc(p.host)}</span><span class="xs muted num">${u} of ${t} days this plan year · <button class="btn link" style="padding:0" data-dlg="hostaway:${k}">Host away…</button></span></div></td>${DISO.map(d=>{const h=hostAwayOn(k,d);const list=live().filter(s=>s.place===k&&s.day===d);const cov=h?live().filter(s=>s.place===h.clients[0]&&s.day===d&&s.cover):[];return `<td class="${d===TISO?'today':''}">${h?(cov.length&&cov.every(s=>s.staff)?`<div class="chip off"><b>Host away</b><span>Covered</span></div>`:`<button class="gap" style="border:0;width:100%;text-align:left;cursor:pointer" data-tab="needs">Host away · ${cov.length?'coverage open':'no coverage'} ›</button>`):`<div class="chip off"><b>With host</b><span>Not scheduled</span></div>`}${list.map(s=>chip(s,'clients')).join('')}<button class="addc" data-addat="${k}|${d}">+</button></td>`}).join('')}</tr>`}
 function vNeeds(){
   const all=needsItems();const tags=[...new Set(all.map(i=>i.tag))];const f=S.needTag||'all';
   const it=f==='all'?all:all.filter(i=>i.tag===f);
@@ -682,9 +716,10 @@ function vMonth(){
 function needsItems(){
   const it=[];
   ['maple','cedar'].forEach(pid=>DISO.forEach((d,i)=>covDay(pid,i).gaps.forEach(g=>{const open=live().find(s=>s.place===pid&&!s.staff&&s.day===d&&s.a<g.b&&s.b>g.a);it.push({tag:'Coverage gap',lvl:'crit',t:`${PLACES[pid].n} · ${DN[i]} ${span(g.a,g.b)}`,p:gapWhy(pid,i,g),acts:(open?[['Find staff',`find:${open.id}`],[OFFERS[open.id]?'Re-offer':'Offer to qualified',`offer:${open.id}`]]:[['Add a shift for the gap',`addgap:${pid}|${d}|${g.a}|${g.b}`]]).concat(d===TISO?[['Start escalation',`escalate:${pid}|${d}|${g.a}|${g.b}`]]:[]).concat([['No staff needed…',`gapdlg:${pid}|${d}|${g.a}|${g.b}`]]),sort:0})})));
-  [1,2,3,4,5].forEach(i=>{const L=lehiNeed(i);if(L.sched<L.need)it.push({tag:'Short staffed',lvl:'crit',t:`Lehi Day Program · ${DN[i]} needs ${L.need}, has ${L.sched}`,p:`${L.clients} clients · Σ(1 ÷ ratio) = ${L.raw} → ${L.need} staff.${i===4?' Thursday has 2 extra clients.':''}`,acts:[['Add open shift',`addat:lehi|${DISO[i]}`]],sort:0})});
-  live().filter(s=>s.van&&!s.staff).forEach(s=>{const v=VANS[s.van],other=Object.entries(VANS).find(([k])=>k!==s.van),os=other[1].stops.length,ns=v.stops.length;it.push({tag:'Van without a driver',lvl:'crit',t:`${v.n} · ${dow(s.day)} ${span(s.a,s.b)} · ${ns} riders`,p:`Only staff 18+ with a driver file are offered it. ${OFFERS[s.id]?'Offered to '+OFFERS[s.id].asked.length+' driver'+(OFFERS[s.id].asked.length===1?'':'s')+'.':'Not offered yet.'} Moving everyone to ${other[1].n} would put ${os+ns} riders in ${seatsOf(other[0])} seats.`,acts:[['Find a driver',`find:${s.id}`],['Offer to drivers',`offer:${s.id}`],['Move riders…',`note:${other[1].n} has ${seatsOf(other[0])} seats and ${os} riders, so only ${seatsOf(other[0])-os} can move. The rest need a driver or a family drop-off. Riders who move become that driver's note group for the day.`]],sort:0})});
   live().filter(s=>s.one&&!s.staff).forEach(s=>it.push({tag:'1:1 not covered',lvl:'crit',t:`${s.one} · ${PLACES[s.place].n} · ${dow(s.day)} ${span(s.a,s.b)}`,p:`Enhanced staffing on ${s.one}'s Form 930 (§21.3(4)). House staff can't count as the 1:1. ${OFFERS[s.id]?'Offered to '+OFFERS[s.id].asked.length+'.':'Not offered yet.'}`,acts:[['Find staff',`find:${s.id}`],['Offer',`offer:${s.id}`]],sort:0}));
+  lateItems().forEach(x=>it.push(x));
+  HOST_AWAY.filter(h=>!h.else).forEach(h=>{const a=awayStatus(h);if(!a.none&&!a.opens.length)return;const names=list(h.clients.map(k=>PLACES[k].n));const dd=h.days.map(d=>dow(d)).join(', ');
+   it.push({tag:'Host away',lvl:'crit',t:`${h.host} away ${dd} · ${names}`,p:`${h.reason}. ${a.none?'No coverage yet. The Person can’t be left alone.':`${a.filled.length} of ${a.filled.length+a.opens.length} coverage shifts filled.`}`,acts:a.none?[['Add coverage shifts',`hostcover:${h.id}`],['They’ll stay somewhere else',`hostelse:${h.id}`]]:[['Find staff',`find:${a.opens[0].id}`],['Offer to qualified',`offer:${a.opens[0].id}`]],sort:0})});
   live().filter(s=>!s.staff&&PLACES[s.place].kind==='client').forEach(s=>it.push({tag:'Open visit',lvl:'warn',t:`${PLACES[s.place].n} · ${dow(s.day)} ${span(s.a,s.b)}`,p:OFFERS[s.id]?`Offered to ${OFFERS[s.id].asked.length}.`:'Not offered yet.',acts:[['Find staff',`find:${s.id}`],['Offer',`offer:${s.id}`]],sort:1}));
   REQ.filter(r=>r.kind==='callout').forEach(r=>{const s=sh(r.shift);it.push({tag:'Call-out',lvl:'crit',t:`${STAFF[r.staff].n} · ${dow(s.day)} ${span(s.a,s.b)} ${PLACES[s.place].n}`,p:`${r.reason} · ${r.at}. ${OFFERS[s.id]?'Offered to '+OFFERS[s.id].asked.length+'.':'Shift is open.'}`,acts:[['Find staff',`find:${s.id}`],['Done',`dismiss:${r.id}`]],sort:0})});
   REQ.filter(r=>r.kind==='claim'&&r.status==='waiting').forEach(r=>{const s=sh(r.shift);it.push({tag:'Claim',lvl:'info',t:`${STAFF[r.staff].n} wants ${dow(s.day)} ${span(s.a,s.b)} ${PLACES[s.place].n}`,p:`${hoursWeek(r.staff)} h → ${hoursWeek(r.staff)+dur(s)} h this week.`,acts:[['Approve',`approve:${r.id}`],['Not this time',`deny:${r.id}`]],sort:1})});
@@ -693,7 +728,7 @@ function needsItems(){
   REQ.filter(r=>r.kind==='timeoff'&&r.status==='waiting').forEach(r=>{const hit=live().filter(s=>s.staff===r.staff&&r.days.includes(s.day));it.push({tag:'Time off',lvl:'info',t:`${STAFF[r.staff].n} · ${r.days.map(md).join(', ')} · ${r.type}`,p:`${r.note}. ${hit.length?hit.length+' scheduled shift'+(hit.length>1?'s':'')+' would open.':'Nothing scheduled those days.'}`,acts:[['Approve',`tooff:${r.id}`],['Not approved',`deny:${r.id}`]],sort:2})});
   PUNCH.filter(p=>p.fix).forEach(p=>{const s=sh(p.shift);it.push({tag:'Punch fix',lvl:'info',t:`${STAFF[p.staff].n} · ${dow(s.day)} ${PLACES[s.place].n}`,p:`Asks to set clock-out to ${hm(p.fix.out)}: “${p.fix.reason}”`,acts:[['Approve fix',`fixok:${p.id}`],['Ask for more detail',`deny:${p.id}`]],sort:2})});
   Object.entries(STAFF).forEach(([sid,st])=>Object.entries(st.certs).filter(([c])=>!ONCE[c]).forEach(([c,dt])=>{const n=certDays(dt);if(n>=0&&n<=14)it.push({tag:'Card expiring',lvl:'warn',t:`${st.n} · ${CERTS[c]} expires ${md(dt)}`,p:`${(LV.card==='block')?'After that date they can’t be scheduled where it’s required.':'They can still be scheduled; it will show as a reminder.'} ${live().filter(s=>s.staff===sid&&s.day>dt).length} shift(s) after the date.`,acts:[['Text a reminder',`remind:${sid}`],['Card renewed',`renew:${sid}|${c}`]],sort:2});if(n<0)it.push({tag:'Card expired',lvl:'crit',t:`${st.n} · ${CERTS[c]} expired ${md(dt)}`,p:`${live().filter(s=>s.staff===sid&&requiredCerts(s.place).includes(c)).length} scheduled shift(s) need it.`,acts:[['Card renewed',`renew:${sid}|${c}`]],sort:0})}));
-  Object.entries(PLACES).filter(([k,p])=>p.auth).forEach(([k,p])=>{const wk=live().filter(s=>s.place===k).reduce((n,s)=>n+dur(s),0);const left=p.auth.total-p.auth.used-wk;if(left<=12)it.push({tag:'1056',lvl:left<0?'crit':'warn',t:`${p.n} · ${left<0?'over by '+(-left):left+' h left'} on ${p.code}`,p:`Plan year runs to Aug 31, 2027. Hours past the 1056 can’t be billed.`,acts:[['Draft a 1056 request to the SC',`note:Nectar drafted a request to ${first(p.n)}'s support coordinator. It's in Inbox for you to review and send.`]],sort:1})});
+  authRows().filter(x=>x.code!=='HHS'&&(x.st==='crit'||x.st==='warn')).forEach(x=>it.push({tag:'1056',lvl:x.st,t:`${x.n} · ${x.code} · ${x.left<0?'over by '+(-x.left):x.left+' h left'}`,p:x.msg+' Hours past the 1056 can’t be billed.',acts:[['Draft a 1056 request to the SC',`note:Nectar drafted a request to ${first(x.n)}'s support coordinator. It's in Inbox for you to review and send.`],['See authorizations','authview:1']],sort:x.st==='crit'?0:1}));
   Object.entries(STAFF).forEach(([sid])=>{const h=hoursWeek(sid);if(h>CFG.ot)it.push({tag:'Overtime',lvl:'warn',t:`${STAFF[sid].n} · ${h} h this week`,p:`${h-CFG.ot} h over. Reason is saved to the record.`,acts:[['They asked for it',`ot:${sid}`],['No one else trained',`ot:${sid}`],['Find someone',`note:Opens the busiest shift with the ranked list`]],sort:2})});
   return it.sort((a,b)=>a.sort-b.sort);
 }
@@ -741,48 +776,27 @@ function vPlace(){
 const ROTS={
  maple:[{who:'maria',pat:'5 on, 2 off',slot:'Day 7a–3p',start:'Sun'},{who:'theo',pat:'5 on, 2 off',slot:'Day 7a–3p',start:'Thu'},{who:'ava',pat:'2-2-3 (Pitman)',slot:'Eve 3p–11p',start:'Sun'},{who:'ben',pat:'2-2-3 (Pitman)',slot:'Eve 3p–11p',start:'Tue'},{who:'chris',pat:'6 on, 1 off',slot:'Night 11p–7a · awake',start:'Sun'}],
  cedar:[{who:'omar',pat:'4 on, 3 off',slot:'Day 7a–3p',start:'Sun'},{who:'leo',pat:'3 on, 4 off',slot:'Day 7a–3p',start:'Mon'},{who:'ben',pat:'Tue, Fri',slot:'Eve 3p–11p',start:'Tue'},{who:'kai',pat:'6 on, 1 off',slot:'Night 11p–7a · asleep ok',start:'Sun'}],
- lehi:[{who:'priya',pat:'Mon–Fri',slot:'Van 1 · 8a–3:45p',start:'Mon'},{who:'sofia',pat:'Mon–Thu',slot:'Van 2 · 8a–3:45p',start:'Mon'},{who:'jamie',pat:'Mon, Wed, Fri',slot:'On site · 9a–3p',start:'Mon'}],
+ jordan:[{who:'priya',pat:'Monthly',slot:'Supervision visit · 1.5 h',start:'Tue'}],
+ elena:[{who:'priya',pat:'Monthly',slot:'Supervision visit · 1.5 h',start:'Wed'}],
+ lily:[{who:'priya',pat:'Monthly',slot:'Supervision visit · 1 h',start:'Mon'}],
  sam:[{who:'ava',pat:'Mon',slot:'SLH 4p–8p',start:'Mon'},{who:'dev',pat:'Wed',slot:'SLH 4p–8p',start:'Wed'},{who:'dev',pat:'Fri',slot:'SLN 10p–6a',start:'Fri'}],
  riley:[{who:'dev',pat:'Tue, Thu, Sat',slot:'SLH 10a–2p',start:'Tue'}],
  morgan:[{who:'nora',pat:'Mon, Wed, Fri',slot:'SEI 8a–12p',start:'Mon'}],
- alex:[{who:'nora',pat:'Tue',slot:'COM 1p–5p',start:'Tue'},{who:'dev',pat:'Fri',slot:'COM 1p–5p',start:'Fri'}],
+ alex:[{who:'nora',pat:'Thu',slot:'COM 2p–6p',start:'Thu'},{who:'dev',pat:'Fri',slot:'COM 1p–5p',start:'Fri'}],
  rosalind:[{who:'nora',pat:'Thu',slot:'HSQ 9a–12p',start:'Thu'}],
 };
 function vRotations(){
   const k=S.rotTab,p=PLACES[k];
   return `<div class="pagehead"><div><h1>Standard weeks and rotations</h1><p class="sub">One rotation per person per place. They never expire; the next 4 weeks are always drafted from them. Shifts you edited by hand are never overwritten.</p></div><div class="row"><button class="btn" data-dlg="copy">Copy this week instead</button><button class="btn pri" data-dlg="rot">+ Add a rotation</button></div></div>
   <div class="tabs">${Object.entries(PLACES).map(([id,pl])=>`<button data-rot="${id}" ${S.rotTab===id?'aria-current="page"':''}>${esc(pl.n)}<span class="cnt">${(ROTS[id]||[]).length}</span></button>`).join('')}</div>
-  <div class="cols2"><section class="panel"><div class="ph"><div><h2>${esc(p.n)}</h2><p class="sub">${code(p.code)} · ${p.kind==='home'?'Coverage needs: '+p.need.map(b=>`${span(b.a,b.b)} × ${b.n}${b.awake?' awake':b.awake===false?' asleep ok':''}`).join(', '):p.kind==='program'?'Mon–Fri 9a–3p · staffing from ratios':'Hours come from the 1056'}</p></div></div><div class="pb"><ul class="lst">${(ROTS[k]||[]).map((r,i)=>`<li><span><b>${esc(STAFF[r.who].n)}</b><span class="s">${esc(r.pat)} · ${esc(r.slot)} · cycle starts ${r.start}</span></span><span class="row"><button class="btn sm" data-note="Opens this rotation: pattern, cycle length, start day, 4-week preview with overtime and time-off marked">Edit</button><button class="btn sm link" data-note="Ends the rotation from a date you pick; past weeks stay as they were">End</button></span></li>`).join('')||'<li class="muted">No rotations yet.</li>'}</ul></div></section>
+  <div class="cols2"><section class="panel"><div class="ph"><div><h2>${esc(p.n)}</h2><p class="sub">${code(p.code)} · ${p.kind==='home'?'Coverage needs: '+p.need.map(b=>`${span(b.a,b.b)} × ${b.n}${b.awake?' awake':b.awake===false?' asleep ok':''}`).join(', '):p.code==='HHS'?'Lives with the host, who isn’t scheduled. Only staff visits and host-away coverage are.':p.kind==='program'?'Mon–Fri 9a–3p · staffing from ratios':'Hours come from the 1056'}</p></div></div><div class="pb"><ul class="lst">${(ROTS[k]||[]).map((r,i)=>`<li><span><b>${esc(STAFF[r.who].n)}</b><span class="s">${esc(r.pat)} · ${esc(r.slot)} · cycle starts ${r.start}</span></span><span class="row"><button class="btn sm" data-note="Opens this rotation: pattern, cycle length, start day, 4-week preview with overtime and time-off marked">Edit</button><button class="btn sm link" data-note="Ends the rotation from a date you pick; past weeks stay as they were">End</button></span></li>`).join('')||'<li class="muted">No rotations yet.</li>'}</ul></div></section>
   <section class="panel"><div class="ph"><div><h2>Next 4 weeks from these rotations</h2><p class="sub">What the board will show before anyone edits it.</p></div></div><div class="pb"><table class="t"><thead><tr><th>Week</th><th>Shifts</th><th>Open</th><th>Over ${CFG.ot} h</th><th>Time off hits</th></tr></thead><tbody>${['Oct 25–31','Nov 1–7','Nov 8–14','Nov 15–21'].map((w,i)=>`<tr><td><b>${w}</b></td><td class="num">${p.kind==='home'?28:p.kind==='program'?15:(ROTS[k]||[]).length}</td><td class="num">${i===0&&k==='maple'?'<span style="color:var(--crit);font-weight:700">2</span>':'0'}</td><td class="num">${k==='maple'&&i===1?'<span style="color:var(--warn);font-weight:700">Chris 42 h</span>':'—'}</td><td class="num">${k==='maple'&&i===0?'Theo Oct 25':'—'}</td></tr>`).join('')}</tbody></table><p class="xs muted" style="margin-top:8px">Approved time off and expired cards turn those shifts into open shifts automatically, and they show up in Needs you two weeks ahead.</p></div></section></div>`;
 }
 
 /* ---------- timesheets, payroll, EVV, history ---------- */
 function vTime(){
-  const body=`<section class="panel"><div class="ph"><div><h2>This week's punches</h2><p class="sub">Team members fix their own punches with a reason. Fixes wait for your approval, and the original and the fix both stay on record.</p></div><button class="btn sm" data-note="Approves every punch with no flags in one click">Approve all clean punches</button></div><div class="tw"><table class="t"><thead><tr><th>Team member</th><th>Shift</th><th>In</th><th>Out</th><th>Hours</th><th>Status</th><th></th></tr></thead><tbody>${PUNCH.map(p=>{const s=sh(p.shift);const out=p.out??(p.fix?p.fix.out:null);const h=out?Math.round((out-p.in)*4)/4:null;return `<tr><td><b>${esc(STAFF[p.staff].n)}</b></td><td>${dow(s.day)} ${span(s.a,s.b)} · ${esc(PLACES[s.place].n)} ${code(s.code)}</td><td class="num mono">${hm(p.in)}${p.status==='late'?` <span class="pill warn">late</span>`:''}</td><td class="num mono">${p.out?hm(p.out):p.fix?`<span style="color:var(--info);font-weight:700">${hm(p.fix.out)} (fix)</span>`:'<span class="pill crit">missing</span>'}</td><td class="num">${h!==null?h+' h':'—'}</td><td>${p.fix?pill('info','Fix waiting'):p.status==='ok'?pill('ok','Approved'):p.status==='late'?pill('warn','Late · reason saved'):pill('crit','Open')}</td><td>${p.fix?`<span class="row"><button class="btn sm pri" data-act="fixok:${p.id}">Approve</button><button class="btn sm" data-act="deny:${p.id}">Ask</button></span>`:''}</td></tr>`}).join('')}</tbody></table></div><p class="xs muted" style="padding:10px 16px">Quarter-hour codes round each punch to the nearest quarter hour; totals are summed, never rounded. EVV transmission and payroll export are not in this demo yet.</p></section>`;
+  const body=`<section class="panel"><div class="ph"><div><h2>This week's punches</h2><p class="sub">Team members fix their own punches with a reason. Fixes wait for your approval, and the original and the fix both stay on record.</p></div><button class="btn sm" data-note="Approves every punch with no flags in one click">Approve all clean punches</button></div><div class="tw"><table class="t"><thead><tr><th>Team member</th><th>Shift</th><th>In</th><th>Out</th><th>Hours</th><th>Status</th><th></th></tr></thead><tbody>${PUNCH.map(p=>{const s=sh(p.shift);const out=p.out??(p.fix?p.fix.out:null);const h=out?Math.round((out-p.in)*4)/4:null;return `<tr><td><b>${esc(STAFF[p.staff].n)}</b></td><td>${dow(s.day)} ${span(s.a,s.b)} · ${esc(PLACES[s.place].n)} ${code(s.code)}</td><td class="num mono">${hm(p.in)}${p.status==='late'?` <span class="pill warn">late</span>`:''}</td><td class="num mono">${p.out?hm(p.out):p.fix?`<span style="color:var(--info);font-weight:700">${hm(p.fix.out)} (fix)</span>`:(p.status==='on'?'<span class="pill info">on shift</span>':'<span class="pill crit">missing</span>')}</td><td class="num">${h!==null?h+' h':'—'}</td><td>${p.fix?pill('info','Fix waiting'):p.status==='ok'?pill('ok','Approved'):p.status==='late'?pill('warn','Late · reason saved'):p.status==='on'?pill('info','On shift'):pill('crit','Open')}</td><td>${p.fix?`<span class="row"><button class="btn sm pri" data-act="fixok:${p.id}">Approve</button><button class="btn sm" data-act="deny:${p.id}">Ask</button></span>`:''}</td></tr>`}).join('')}</tbody></table></div><p class="xs muted" style="padding:10px 16px">Quarter-hour codes round each punch to the nearest quarter hour; totals are summed, never rounded. EVV transmission and payroll export are not in this demo yet.</p></section>`;
   return `<div class="pagehead"><div><h1>Time</h1><p class="sub">Punches and punch fixes for this week.</p></div></div>${body}`;
-}
-
-/* ---------- team: cards drive who can be scheduled ---------- */
-function vTeam(){
-  const cols=['cpr','core','med','mandt','abi','sei'];
-  const req=Object.entries(PLACES).map(([k,p])=>`${esc(p.kind==='client'?first(p.n):p.n)}: ${requiredCerts(k).map(c=>CERTS[c].split(' (')[0]).join(', ')}`).join(' · ');
-  return `<div class="pagehead"><div><h1>Scheduling readiness</h1><p class="sub">Read-only. Nothing is entered on this page. It shows what the scheduler reads from Team members, so you can see why someone is or isn't offered a shift.</p></div><button class="btn" data-note="Opens Team members, where every item on this page is edited">Open Team members</button></div>
-  <section class="panel" style="margin-bottom:16px"><div class="ph"><div><h2>Where each column comes from</h2></div></div><div class="pb"><ul class="lst">
-   <li><span><b>Cards and training</b><span class="s">Each team member's Evidence items (Team members › profile › Requirements). Upload or renew there; the scheduler updates the moment it's on file.</span></span>${pill('na','Evidence')}</li>
-   <li><span><b>Trained on</b><span class="s">Person-specific training items in Evidence, one per home or client.</span></span>${pill('na','Evidence')}</li>
-   <li><span><b>On the team for</b><span class="s">Assignments on the team member's Work tab (the same assignments that drive Evidence suggestions).</span></span>${pill('na','Team members › Work')}</li>
-   <li><span><b>What's required where</b><span class="s">Evidence › Requirement settings: what each item blocks. Today: ${req}.</span></span>${pill('na','Evidence settings')}</li>
-   <li><span><b>Medication administration</b><span class="s">Not a DHHS91172 Evidence item. It's in this demo as an agency requirement added in Evidence › Requirement settings. If your agency doesn't add it, the column and the rule disappear.</span></span>${pill('warn','Agency-added')}</li>
-  </ul></div></section>
-  <section class="panel"><div class="tw"><table class="t matrix"><thead><tr><th>Team member</th>${cols.map(c=>`<th title="${esc(CERTS[c])} · ${esc(CERT_SRC[c])}">${esc(CERTS[c].split(' ')[0].replace('/',''))}</th>`).join('')}<th>Trained on</th><th>Can be offered shifts at</th><th></th></tr></thead><tbody>${Object.entries(STAFF).map(([sid,st])=>`<tr><td><div class="row" style="gap:8px"><span class="av">${ini(st.n)}</span><div><b>${esc(st.n)}</b><div class="xs muted">${esc(st.job)}${st.age?' · age '+st.age:''}${st.newHire?' · new hire':''}</div></div></div></td>${cols.map(c=>{const d=st.certs[c];if(!d)return `<td class="c"><span class="cell na" title="No Evidence item">–</span></td>`;if(ONCE[c])return `<td class="c"><span class="cell ok" title="Evidence item · completed ${md(d)}">✓</span></td>`;const n=certDays(d);return `<td class="c"><span class="cell ${n<0?'late':n<=14?'soon':'ok'}" title="Evidence item · ${esc(CERTS[c])} · ${n<0?'expired':'expires'} ${md(d)}">${n<0?'✕':n<=14?'!':'✓'}</span></td>`}).join('')}<td class="small">${st.ps.map(p=>esc(PLACES[p].kind==='client'?first(PLACES[p].n):PLACES[p].n)).join(', ')||'<span class="muted">Nothing yet</span>'}</td><td class="small">${Object.keys(PLACES).filter(pk=>st.teams.includes(pk)).map(pk=>{const bad=requiredCerts(pk).some(c=>!st.certs[c]||certDays(st.certs[c])<0);return `<span class="pill ${bad?'crit':'ok'}" title="${bad?'Missing or expired: '+esc(requiredCerts(pk).filter(c=>!st.certs[c]||certDays(st.certs[c])<0).map(c=>CERTS[c]).join(', ')):'Ready'}">${esc(PLACES[pk].kind==='client'?first(PLACES[pk].n):PLACES[pk].n)}</span>`}).join(' ')}</td><td><button class="btn sm link" data-note="Opens ${esc(st.n)}'s Requirements tab in Team members">Open profile</button></td></tr>`).join('')}</tbody></table></div><div class="legend"><span><span class="cell ok" style="width:18px;height:18px;font-size:10px">✓</span> On file</span><span><span class="cell soon" style="width:18px;height:18px;font-size:10px">!</span> Expires within 14 days</span><span><span class="cell late" style="width:18px;height:18px;font-size:10px">✕</span> Expired</span><span><span class="cell na" style="width:18px;height:18px;font-size:10px">–</span> No Evidence item</span></div></section>`;
-}
-
-/* ---------- messages ---------- */
-function vMessages(){
-  const c=CH[S.chan];
-  return `<div class="pagehead"><div><h1>Messages</h1><p class="sub">A channel per home and program, plus 1:1. It replaces the group text. Messages are kept with the record, so a handoff note is there for a reviewer. No client health details here; those go in the daily note.</p></div></div>
-  <div class="grid2" style="grid-template-columns:240px minmax(0,1fr)"><section class="panel"><div class="pb" style="padding-top:12px"><div class="chan">${Object.entries(CH).map(([k,ch])=>`<button data-chan="${k}" aria-current="${S.chan===k}"><span>${esc(ch.n)}</span><span class="cnt">${ch.m.length}</span></button>`).join('')}</div><p class="xs muted" style="margin-top:10px">Open-shift offers never post here. They go to the people they're for.</p></div></section>
-  <section class="panel"><div class="ph"><div><h2>${esc(c.n)}</h2><p class="sub">${S.chan==='all'?'Everyone · only owners and leads can post':'Everyone on the '+esc(c.n)+' team'}</p></div></div><div class="pb"><div class="msgs">${c.m.map(m=>`<div class="msg ${m[0]==='Rosa Delgado'?'me':''}"><b class="xs">${esc(m[0])}</b><div>${esc(m[1])}</div><span class="w">${esc(m[2])}</span></div>`).join('')}</div><div class="row" style="margin-top:12px"><input class="inp" id="msgin" placeholder="Write to ${esc(c.n)}" style="flex:1"><button class="btn pri" data-act="send">Send</button></div></div></section></div>`;
 }
 
 /* ---------- settings ---------- */
@@ -845,9 +859,9 @@ function dlgAdd(){
 }
 function dlgFind(){
   const s=sh(S.dlg.id);const cands=rank(s,s.id);const q=cands.filter(c=>c.lvl!=='bad');
-  const body=`<p class="small">${esc(PLACES[s.place].n)} · ${dow(s.day)} ${span(s.a,s.b)} ${code(s.code)}${s.staff?' · now '+esc(STAFF[s.staff].n):''}</p>
+  const body=`<p class="small">${esc(PLACES[s.place].n)} · ${dow(s.day)} ${span(s.a,s.b)} ${code(s.code)}${s.staff?' · now '+esc(STAFF[s.staff].n):''}</p><p class="xs muted">Cards and training come from Evidence. Anyone who can't take it says why, with a link to fix it.</p>
    ${q.length&&q[0].lvl==='ok'?`<div class="why"><b>Nectar’s pick: ${esc(STAFF[q[0].sid].n)}</b>Fewest hours among people with no flags (${q[0].h} h → ${q[0].h+dur(s)} h), trained on ${esc(PLACES[s.place].kind==='client'?first(PLACES[s.place].n):PLACES[s.place].n)}${false?', and next in the rotation':''}.</div>`:''}
-   ${cands.map((c,i)=>`<div class="cand ${i===0&&c.lvl==='ok'?'pick':''}"><span class="av">${ini(STAFF[c.sid].n)}</span><span><b>${esc(STAFF[c.sid].n)}</b><div class="why">${c.h} h → ${c.h+dur(s)} h${c.cs.length?' · '+esc(c.cs.map(x=>x.t).join('; ')):' · no flags'}</div></span>${c.lvl==='bad'?pill('crit','Can’t'):`<button class="btn sm ${i===0?'pri':''}" data-act="assign:${s.id}|${c.sid}">${c.lvl==='reason'?'Assign with a reason':'Assign'}</button>`}</div>${S.dlg.rs===c.sid?`<div class="field" style="margin:-2px 0 10px"><label for="fr_reason">Why (required): ${esc(c.cs.filter(x=>x.lvl==='reason').map(x=>x.t).join('; '))}</label><div class="row" style="flex-wrap:nowrap"><input class="inp" id="fr_reason" placeholder="Saved on the shift"><button class="btn sm pri" data-act="assign:${s.id}|${c.sid}">Assign</button></div></div>`:''}`).join('')}`;
+   ${cands.map((c,i)=>`<div class="cand ${i===0&&c.lvl==='ok'?'pick':''}"><span class="av">${ini(STAFF[c.sid].n)}</span><span><b>${esc(STAFF[c.sid].n)}</b><div class="why">${c.h} h → ${c.h+dur(s)} h${c.cs.length?' · '+esc(c.cs.map(x=>x.t).join('; ')):' · no flags'}</div></span><span class="row" style="gap:4px;justify-content:flex-end">${c.cs.some(x=>['card','ps','cardsoon','newhire'].includes(x.rule))?`<button class="btn sm link" data-note="Opens ${esc(STAFF[c.sid].n)}'s Evidence, where cards and training are uploaded and reviewed">Evidence ›</button>`:''}${c.lvl==='bad'?pill('crit','Can’t'):`<button class="btn sm ${i===0?'pri':''}" data-act="assign:${s.id}|${c.sid}">${c.lvl==='reason'?'Assign with a reason':'Assign'}</button>`}</span></div>${S.dlg.rs===c.sid?`<div class="field" style="margin:-2px 0 10px"><label for="fr_reason">Why (required): ${esc(c.cs.filter(x=>x.lvl==='reason').map(x=>x.t).join('; '))}</label><div class="row" style="flex-wrap:nowrap"><input class="inp" id="fr_reason" placeholder="Saved on the shift"><button class="btn sm pri" data-act="assign:${s.id}|${c.sid}">Assign</button></div></div>`:''}`).join('')}`;
   return wrap('Find staff','Who should take it?',body,`<button class="btn" data-close="1">Close</button><button class="btn" data-act="offer:${s.id}">Offer to ${q.length} qualified instead</button>`);
 }
 function dlgPublish(){
@@ -918,7 +932,7 @@ function dlgExc(){
   const body=`<div class="kv"><div><span class="k">When</span>${x.date?md(x.date):x.days.map(j=>DN[j]).join(', ')+' every week'} · ${span(x.a,x.b)}</div><div><span class="k">Why</span>${esc(x.label)}</div><div><span class="k">From</span>${x.tpl?'Template: '+esc(TPL.find(t=>t.id===x.tpl)?.name||''):'One time'}</div></div><p class="small">“${esc(x.note)}”</p><p class="xs muted">Marked by Rosa Delgado. If someone is home after all, remove it and the time counts as a gap again.</p>`;
   return wrap(p.n,'No staff needed',body,`<button class="btn" data-close="1">Close</button><button class="btn danger" data-act="excoff:${S.dlg.id}">${x.tpl?'Remove the template from the schedule':'Remove'}</button>`);
 }
-function dlgCount(){if(S.dlg&&S.dlg.k==='route')return dlgRoute();if(S.dlg&&S.dlg.k==='away')return dlgAway();if(S.dlg&&S.dlg.k==='list')return dlgList();if(S.dlg&&S.dlg.k==='gap')return dlgGap();if(S.dlg&&S.dlg.k==='tpl')return dlgTpl();if(S.dlg&&S.dlg.k==='exc')return dlgExc();return S.dlg?S.dlg.k==='add'||S.dlg.k==='edit'?dlgAdd():S.dlg.k==='find'?dlgFind():S.dlg.k==='publish'?dlgPublish():S.dlg.k==='copy'?dlgCopy():S.dlg.k==='rot'?dlgRot():'':''}
+function dlgCount(){if(S.dlg&&S.dlg.k==='hostaway')return dlgHostAway();if(S.dlg&&S.dlg.k==='route')return dlgRoute();if(S.dlg&&S.dlg.k==='away')return dlgAway();if(S.dlg&&S.dlg.k==='list')return dlgList();if(S.dlg&&S.dlg.k==='gap')return dlgGap();if(S.dlg&&S.dlg.k==='tpl')return dlgTpl();if(S.dlg&&S.dlg.k==='exc')return dlgExc();return S.dlg?S.dlg.k==='add'||S.dlg.k==='edit'?dlgAdd():S.dlg.k==='find'?dlgFind():S.dlg.k==='publish'?dlgPublish():S.dlg.k==='copy'?dlgCopy():S.dlg.k==='rot'?dlgRot():'':''}
 </script>
 <script>
 /* ---------- team member phone (responsive page, not a frame) ---------- */
@@ -935,7 +949,7 @@ function sToday(){
   const firstLine=fits.find(s=>OFFERS[s.id]&&OFFERS[s.id].next===S.as);
   const expiring=Object.entries(st.certs).filter(([c,d])=>!ONCE[c]&&certDays(d)<=14);
   let main='';
-  if(cur){const p=PLACES[cur.place];main=`<div class="card now"><span class="k">${ME.clock===cur.id?'On shift · since '+hm(ME.clockAt):'Starts at '+hm(cur.a)}</span><div class="big">${esc(p.n)} · ${span(cur.a,cur.b)}</div><div class="small muted">${code(cur.code)}${cur.van?' '+code('MTP'):''} ${esc(CODES[cur.code].n)}${cur.van?` · ${VANS[cur.van].n}: ${VANS[cur.van].stops.map(x=>x[0]).join(', ')}`:cur.one?' · 1:1 with '+esc(cur.one):p.kind==='home'?' · '+p.res.join(', '):''}</div>${ME.clock===cur.id?`<div class="row"><button class="btn pri" data-sheet="notes:${cur.id}">Clock out</button><button class="btn" data-sheet="shift:${cur.id}">Details</button></div><span class="xs muted">Your location was checked once at clock-in (38 ft from ${esc(p.n)}). It isn't tracked now.</span>`:`<div class="row"><button class="btn pri" data-act="clockin:${cur.id}">Clock in${nowH>cur.a+0.17?' (late)':''}</button><button class="btn" data-sheet="shift:${cur.id}">Details</button><button class="btn" data-sheet="callout:${cur.id}">Can't make it</button></div><span class="xs muted">Clocking in checks your location once. Nothing tracks you after.</span>`}</div>`}
+  if(cur){const p=PLACES[cur.place];main=`<div class="card now"><span class="k">${ME.clock===cur.id?'On shift · since '+hm(ME.clockAt)+(ME.queued&&ME.queued.shift===cur.id?' · saved on phone, not sent yet':''):'Starts at '+hm(cur.a)}</span><div class="big">${esc(p.n)} · ${span(cur.a,cur.b)}</div><div class="small muted">${code(cur.code)}${cur.van?' '+code('MTP'):''} ${esc(CODES[cur.code].n)}${cur.van?` · ${VANS[cur.van].n}: ${VANS[cur.van].stops.map(x=>x[0]).join(', ')}`:cur.one?' · 1:1 with '+esc(cur.one):p.kind==='home'?' · '+p.res.join(', '):''}</div>${ME.clock===cur.id?`<div class="row"><button class="btn pri" data-sheet="notes:${cur.id}">Clock out</button><button class="btn" data-sheet="shift:${cur.id}">Details</button></div><span class="xs muted">Your location was checked once at clock-in (38 ft from ${esc(p.n)}). It isn't tracked now.</span>`:`<div class="row"><button class="btn pri" data-act="clockin:${cur.id}">Clock in${nowH>cur.a+0.17?' (late)':''}</button><button class="btn" data-sheet="shift:${cur.id}">Details</button><button class="btn" data-sheet="callout:${cur.id}">Can't make it</button></div><span class="xs muted">Clocking in checks your location once. Nothing tracks you after.</span>`}</div>`}
   else if(next)main=`<div class="card"><span class="k">Next shift · ${next.day===TISO?'today':dow(next.day)+' '+md(next.day)}</span><div class="big">${esc(PLACES[next.place].n)} · ${span(next.a,next.b)}</div><div class="small muted">${code(next.code)} · ${(()=>{const a=live().filter(x=>x.id!==next.id&&x.place===next.place&&x.day===next.day&&x.staff&&x.staff!==S.as&&x.a<next.b&&x.b>next.a).map(x=>first(STAFF[x.staff].n));return a.length?'with '+esc(list(a)):'just you'})()}</div><div class="row"><button class="btn pri" data-act="conf:${next.id}" ${ME.conf.has(next.id)?'disabled':''}>${ME.conf.has(next.id)?'Confirmed ✓':'Confirm'}</button><button class="btn" data-sheet="shift:${next.id}">Details</button></div></div>`;
   else main=`<div class="card"><span class="k">Nothing scheduled</span><div class="big">You're off until next week.</div></div>`;
   return `<h1 style="font-size:22px">Hi, ${esc(first(st.n))}</h1><p class="small muted" style="margin-bottom:12px">Thursday, Oct 22 · 2:40 PM</p><div class="col">${main}
@@ -1009,8 +1023,8 @@ function vStaff(){
 /* ---------- render ---------- */
 function vOffice(){
   const need=needsItems().length;
-  const nav=[['board','Scheduler'],['needs','Needs you',need],['rotations','Rotations'],['time','Time',PUNCH.filter(p=>p.fix).length],['team','Scheduling readiness',Object.values(STAFF).reduce((n,s)=>n+Object.entries(s.certs).filter(([c,d])=>!ONCE[c]&&certDays(d)<=14).length,0)],['messages','Messages'],['settings','Settings']];
-  const V={board:vBoard,needs:vNeeds,place:vPlace,rotations:vRotations,time:vTime,team:vTeam,messages:vMessages,settings:vSettings};
+  const nav=[['board','Scheduler'],['needs','Needs you',need],['rotations','Rotations'],['time','Time',PUNCH.filter(p=>p.fix).length],['settings','Settings']];
+  const V={board:vBoard,needs:vNeeds,place:vPlace,rotations:vRotations,time:vTime,settings:vSettings};
   return `<div class="shell"><nav class="nav" aria-label="Main menu"><div class="logo"><i>PI</i>Provider Interface</div>${nav.map(n=>`<a href="#${n[0]}" data-tab="${n[0]}" ${S.tab===n[0]||(S.tab==='place'&&n[0]==='board')?'aria-current="page"':''}>${n[1]}${n[2]?`<span class="cnt ${n[0]==='board'?'crit':'warn'}" style="margin-left:auto">${n[2]}</span>`:''}</a>`).join('')}<span class="sp"></span><div class="who">Rosa Delgado · Owner<br>True North Supports</div></nav><main>${V[S.tab]()}<p class="foot">Demo with invented people. Set on Thursday, October 22, 2026. State rules (1056, EVV, training, ratios, age) always show; only a double-booking stops a shift, and an expired required card can too if the agency chooses.</p></main></div>`;
 }
 function render(keep){
@@ -1020,7 +1034,7 @@ function render(keep){
   document.body.style.overflow=(S.mode==='office'&&(S.dlg||S.drawer))||(S.mode==='staff'&&S.sheet)?'hidden':'';
   const nb=document.getElementById('dbody');if(nb&&keep)nb.scrollTop=top;if(keep)window.scrollTo(0,y);
   document.getElementById('modeseg').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===S.mode));
-  const as=document.getElementById('asbox');as.hidden=S.mode!=='staff';
+  const as=document.getElementById('asbox');as.hidden=S.mode!=='staff';document.getElementById('sigbox').hidden=S.mode!=='staff';document.getElementById('sigseg').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.sig==='off')===!!ME.offline));
   document.getElementById('asseg').innerHTML=['maria','theo','ava','leo','grace','dev','nora','jamie'].map(k=>`<button data-as="${k}" aria-pressed="${S.as===k}">${first(STAFF[k].n)}</button>`).join('');
 }
 function toast(t,canUndo){clearTimeout(TOAST);document.querySelectorAll('.toast').forEach(x=>x.remove());const e=document.createElement('div');e.className='toast';e.innerHTML=`<span>${esc(t)}</span>${canUndo&&HIST.length?'<button data-act="undo">Undo</button>':''}`;(S.mode==='staff'?document.querySelector('.staff'):document.body).appendChild(e);TOAST=setTimeout(()=>e.remove(),3600)}
@@ -1029,10 +1043,11 @@ function makeShift(w,staff){const p=PLACES[w.place];const c=p.code==='SLH'&&w.a>
 
 /* ---------- events ---------- */
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-mode],[data-as],[data-tab],[data-range],[data-view],[data-filter],[data-open],[data-close],[data-dlg],[data-act],[data-place],[data-addat],[data-rot],[data-sub],[data-chan],[data-cfg],[data-w],[data-note],[data-stab],[data-sheet],[data-srange],[data-tog],[data-av],[data-pref],[data-needtag],[data-x],[data-rt],[data-aw]');
+  const t=e.target.closest('[data-mode],[data-as],[data-tab],[data-range],[data-view],[data-filter],[data-open],[data-close],[data-dlg],[data-act],[data-place],[data-addat],[data-rot],[data-sub],[data-chan],[data-cfg],[data-w],[data-note],[data-stab],[data-sheet],[data-srange],[data-tog],[data-av],[data-pref],[data-needtag],[data-x],[data-rt],[data-aw],[data-sig],[data-ha]');
   if(!t)return;const d=t.dataset;
   if(d.mode){S.mode=d.mode;S.dlg=null;S.drawer=null;S.sheet=null;render();window.scrollTo(0,0);return}
-  if(d.as){S.as=d.as;ME.conf=new Set();ME.pick=new Set();ME.clock=null;S.sheet=null;render();return}
+  if(d.as){S.as=d.as;ME.conf=new Set();ME.pick=new Set();ME.clock=null;ME.queued=null;S.sheet=null;render();return}
+  if(d.sig){const was=ME.offline;ME.offline=d.sig==='off';if(was&&!ME.offline&&ME.queued){const q=ME.queued;ME.queued=null;render(true);toast(`Back online. Your clock-in was sent with the time you tapped (${hm(q.at)}).`);return}render(true);toast(ME.offline?'Phone signal off (demo). Try clocking in.':'Phone signal on.');return}
   if(d.note!==undefined){e.preventDefault();toast(d.note);return}
   if(d.tab){e.preventDefault();S.tab=d.tab;S.dlg=null;S.drawer=null;render();window.scrollTo(0,0);return}
   if(d.range){S.range=d.range;render(true);return}
@@ -1051,6 +1066,8 @@ document.addEventListener('click',e=>{
   if(d.dlg&&d.dlg.startsWith('away:')){S.dlg={k:'away',id:d.dlg.slice(5),x:{days:[1,2,3,4,5],a:9,b:15,label:'Day program',note:''}};S.drawer=null;render(true);return}
   if(d.rt){const[k,v]=d.rt.split(/:(.*)/s),r=S.dlg.r,i=Number(v);if(k==='veh')r.vehicle=v;if(k==='drv')r.driver=v;if(k==='up'&&i>0)[r.stops[i-1],r.stops[i]]=[r.stops[i],r.stops[i-1]];if(k==='down'&&i<r.stops.length-1)[r.stops[i+1],r.stops[i]]=[r.stops[i],r.stops[i+1]];if(k==='rm')r.stops.splice(i,1);if(k==='add'){const last=r.stops.length?r.stops[r.stops.length-1][2]:8;r.stops.push([v,'Family home',Math.min(last+0.15,9)])}render(true);return}
   if(d.aw){const[k,v]=d.aw.split(/:(.*)/s),x=S.dlg.x;const n=document.getElementById('aw_note');if(n)x.note=n.value;if(k==='day'){const j=Number(v);x.days=x.days.includes(j)?x.days.filter(y=>y!==j):[...x.days,j].sort()}if(k==='label')x.label=v;render(true);return}
+  if(d.dlg&&d.dlg.startsWith('hostaway:')){S.dlg={k:'hostaway',id:d.dlg.slice(9),x:{days:[],reason:''}};S.drawer=null;render(true);return}
+  if(d.ha){const[k,v]=d.ha.split(/:(.*)/s);const x=S.dlg.x;const n=document.getElementById('ha_note');if(n)x.reason=n.value;if(k==='day')x.days=x.days.includes(v)?x.days.filter(y=>y!==v):[...x.days,v];render(true);return}
   if(d.dlg){const[k,id]=d.dlg.split(/:(.*)/s);if(k==='gap'){const[,,ga,gb]=id.split('|');S.dlg={k,id,x:{label:'At day program',note:'',scope:'once',a:Number(ga),b:Number(gb),days:[1,2,3,4,5],name:'Day program hours'}};S.drawer=null;render(true);return}if(k==='tpl'){S.dlg={k,id,x:{label:'At day program',note:'',a:9,b:15,days:[1,2,3,4,5],name:''}};S.drawer=null;render(true);return}if(k==='add')S.dlg={k:'add',w:newAdd(null,TISO)};else if(k==='edit'){const s=sh(id);S.dlg={k:'edit',w:{...newAdd(s.place,s.day,s.staff,s.a,s.b),edit:s.id,staff:s.staff}}}else S.dlg={k,id};S.drawer=null;render(true);return}
   if(d.w){const[k,v]=d.w.split(':');const w=S.dlg.w;if(k==='day')w.day=v;if(k==='place'){w.place=v;const p=PLACES[v];w.a=p.kind==='program'?9:p.kind==='home'?7:10;w.b=p.kind==='program'?15:p.kind==='home'?15:14}if(k==='time'){const pt=v.split('|');w.a=Number(pt[0]);w.b=Number(pt[1]);w.type=pt[2]||null}if(k==='staff')w.staff=v||null;if(k==='unlock'){w.lock=false}if(k==='spots')w.spots=Number(v);render(true);return}
   if(d.cfg){const[k,v]=d.cfg.split(':');const before=Object.keys(STAFF).map(sid=>live().filter(s=>s.staff===sid&&flagsFor(s).some(c=>c.lvl==='bad')).length);CFG[k]=v==='true'?true:v==='false'?false:isNaN(v)?v:Number(v);render(true);toast('Saved · applies to every screen now');return}
@@ -1101,7 +1118,13 @@ document.addEventListener('click',e=>{
   /* staff */
   if(cmd==='conf'){ME.conf.add(arg);render(true);toast('Confirmed');return}
   if(cmd==='confall'){my().forEach(x=>ME.conf.add(x.id));render(true);toast('All confirmed. Rosa sees the checkmarks.');return}
-  if(cmd==='clockin'){ME.clock=arg;ME.clockAt=TODAY.getHours()+TODAY.getMinutes()/60;render(true);toast(`Clocked in. ${CODES[s.code].evv?'EVV check-in sent with your location.':'Location matched '+PLACES[s.place].n+'.'} Not tracked after this.`);return}
+  if(cmd==='hostcover'){const h=HOST_AWAY.find(x=>x.id===arg);const names=list(h.clients.map(k=>first(PLACES[k].n)));commit(()=>{h.days.forEach(d=>{[[8,20],[20,32]].forEach(([a,b])=>{const x={id:'n'+(seq++),day:d,place:h.clients[0],staff:null,a,b,code:'HHS',cover:`Host away · covers ${names}`,status:'published'};SH.push(x);markChanged(x.id)})});h.days.forEach(d=>live().filter(s=>s.place===h.clients[0]&&s.day===d&&s.cover).forEach(s=>offer(s)))},`Added ${h.days.length*2} coverage shifts (8a–8p, 8p–8a) and offered them to staff trained on ${names}.`);return}
+  if(cmd==='hostelse'){const h=HOST_AWAY.find(x=>x.id===arg);commit(()=>{h.else=true},'Saved: they stay somewhere else. Nothing to schedule.');log('Rosa Delgado',`${h.host} away; Persons stay elsewhere`);return}
+  if(cmd==='savehostaway'){const p=PLACES[arg],x=S.dlg.x;const n=document.getElementById('ha_note');const same=Object.keys(PLACES).filter(k=>PLACES[k].host===p.host);HOST_AWAY.push({id:'h'+(seq++),host:p.host,clients:same,days:x.days.slice().sort(),reason:(n&&n.value)||'Host away',else:false});S.dlg=null;render(true);toast('Saved. It’s in Needs you until coverage is set.');return}
+  if(cmd==='authview'){S.tab='board';S.view='clients';S.range='week';S.filter='all';render();window.scrollTo(0,0);return}
+  if(cmd==='latepunch'){const ended=TODAY.getHours()+TODAY.getMinutes()/60>=s.b;commit(()=>{PUNCH.push({id:'p'+(seq++),staff:s.staff,shift:s.id,in:s.a,out:ended?s.b:null,evv:'manual',status:ended?'late':'on',note:'Added by Rosa'})},'Punch added with your name. EVV marks it as a manual entry.');return}
+  if(cmd==='latemiss'){commit(()=>{S.cancel.add(s.id)},'Recorded as not worked. It stays on record and won’t bill.');return}
+  if(cmd==='clockin'){ME.clock=arg;ME.clockAt=TODAY.getHours()+TODAY.getMinutes()/60;if(ME.offline){ME.queued={shift:arg,at:ME.clockAt};render(true);toast('No signal. Your clock-in is saved on this phone with the time and place. It sends on its own when you have signal.');return}render(true);toast(`Clocked in. ${CODES[s.code].evv?'EVV check-in sent with your location.':'Location matched '+PLACES[s.place].n+'.'} Not tracked after this.`);return}
   if(cmd==='clockout'){ME.clock=null;S.sheet=null;PUNCH.push({id:'p'+(seq++),staff:S.as,shift:arg,in:ME.clockAt||s.a,out:TODAY.getHours()+TODAY.getMinutes()/60,evv:CODES[s.code].evv?'sent':'n/a',status:'ok'});log(STAFF[S.as].n,`Clocked out ${PLACES[s.place].n}; ${s.code==='RHS'?'daily notes':'notes'} saved.`);render(true);toast('Clocked out. Notes are on file.');return}
   if(cmd==='draft'){const[id,i,who]=arg.split('|');const s2=sh(id);ME.notes[id+i]=`${who} had a steady ${dow(s2.day)}. ${s2.code==='RHS'?'Ate all meals, took evening meds at 8:05 with no issues, and chose a movie after dinner. Worked on the goal of making a snack independently: got the ingredients out without prompting.':s2.code==='DSG'?'Joined the morning group, practiced counting change for the store trip, and needed one reminder about personal space.':'Worked on the budgeting goal: sorted receipts and entered three in the app with one prompt. Mood was good; no concerns.'}`;render(true);toast('Draft written from today’s records. Read it, change what’s wrong, then save.');return}
   if(cmd==='pick'){if(CFG.claim==='first'||(OFFERS[arg]&&OFFERS[arg].next===S.as)){commit(()=>{s.staff=S.as;delete OFFERS[s.id];log(STAFF[S.as].n,`Picked up ${dow(s.day)} ${span(s.a,s.b)} ${PLACES[s.place].n}`)},'It’s yours. It’s on your schedule now.')}else{REQ.push({id:'c'+(seq++),kind:'claim',staff:S.as,shift:arg,status:'waiting'});ME.pick.add(arg);render(true);toast('Asked. Rosa sees it in Needs you.')}return}
@@ -1136,7 +1159,7 @@ const SETS=[['types','Shift types'],['rules','Rules'],['pay','Pay'],['open','Ope
 function lvSeg(rule,cur,state,attr){return `<span class="seg">${['off','warn','reason','block'].map(l=>`<button ${attr}="${rule}|${l}" aria-pressed="${cur===l}" ${state&&l==='off'?'disabled title="State rules always at least warn"':''}>${LVNAME[l]}</button>`).join('')}</span>`}
 function sTypes(){
   return `<section class="panel"><div class="ph"><div><h2>Shift types</h2><p class="sub">What a shift is: its default times, whether it counts toward a home's coverage, and how it pays. Built-in types can be renamed and recolored; you can add your own.</p></div></div>
-  <div class="tw"><table class="t"><thead><tr><th>Type</th><th>Default time</th><th>Used at</th><th>Counts toward coverage</th><th>Pay</th><th></th></tr></thead><tbody>${TYPES.map((t,i)=>`<tr><td><span class="row" style="gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:${t.color};display:inline-block"></span><b>${esc(t.n)}</b>${t.sys?'':' '+pill('gold','Yours')}</span></td><td class="num mono">${span(t.a,t.b)}</td><td class="small">${t.kinds.map(k=>({home:'Homes',program:'Day programs',client:'Community'})[k]).join(', ')}</td><td><span class="seg"><button data-sa="tcov|${i}|1" aria-pressed="${t.cov}">Yes</button><button data-sa="tcov|${i}|0" aria-pressed="${!t.cov}">No</button></span></td><td class="small">${esc(TPAY[t.pay])}</td><td>${t.sys?'':`<button class="btn sm link" data-sa="tdel|${i}">Remove</button>`}</td></tr>`).join('')}</tbody></table></div>
+  <div class="tw"><table class="t"><thead><tr><th>Type</th><th>Default time</th><th>Used at</th><th>Counts toward coverage</th><th>Pay</th><th></th></tr></thead><tbody>${TYPES.map((t,i)=>`<tr><td><span class="row" style="gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:${t.color};display:inline-block"></span><b>${esc(t.n)}</b>${t.sys?'':' '+pill('gold','Yours')}</span></td><td class="num mono">${span(t.a,t.b)}</td><td class="small">${t.kinds.map(k=>({home:'Homes',host:'Host homes',program:'Day programs',client:'Community'})[k]).join(', ')}</td><td><span class="seg"><button data-sa="tcov|${i}|1" aria-pressed="${t.cov}">Yes</button><button data-sa="tcov|${i}|0" aria-pressed="${!t.cov}">No</button></span></td><td class="small">${esc(TPAY[t.pay])}</td><td>${t.sys?'':`<button class="btn sm link" data-sa="tdel|${i}">Remove</button>`}</td></tr>`).join('')}</tbody></table></div>
   <div class="pb" style="padding-top:12px;border-top:1px solid var(--line)"><h3 style="margin-bottom:8px">Add a shift type</h3><div class="fgrid"><div class="field"><label for="nt_n">Name</label><input class="inp" id="nt_n" placeholder="e.g. Med pass, Split shift, Weekend outing"></div><div class="field"><label for="nt_c">Color</label><select class="inp" id="nt_c">${[['#8A3A62','Plum'],['#B0632A','Rust'],['#2F7D5B','Green'],['#2D5A9B','Blue'],['#6B6B2A','Olive']].map(c=>`<option value="${c[0]}">${c[1]}</option>`).join('')}</select></div><div class="field"><label>From / to</label><span class="row"><input class="inp" type="time" id="nt_a" value="17:00" style="width:auto"><span class="xs">to</span><input class="inp" type="time" id="nt_b" value="19:00" style="width:auto"></span></div><div class="field"><label for="nt_k">Used at</label><select class="inp" id="nt_k"><option value="home">Homes</option><option value="program">Day programs</option><option value="client">Community</option></select></div><div class="field"><label for="nt_cov">Counts toward coverage</label><select class="inp" id="nt_cov"><option value="1">Yes</option><option value="0">No (extra hands)</option></select></div><div class="field"><label for="nt_p">Pay</label><select class="inp" id="nt_p"><option value="normal">Hourly rate</option><option value="stipend">Flat stipend</option></select></div></div><div class="row" style="margin-top:10px"><button class="btn pri" data-sa="tadd">Add shift type</button></div></div></section>`;
 }
 function sRules(){

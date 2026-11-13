@@ -2,7 +2,7 @@
 
 Read this before planning or building anything. Update it at the end of every session ("update the roadmap and decisions, then commit"). Owner decisions are in `docs/decisions.md`.
 
-**Next up:** Scheduler. (1) Refresh B1 (#498) and B2 (#499) onto `main`; Dane tests B2 Settings on the preview. (2) Re-check done (`docs/scheduler-rebuild/RECHECK.md`; Dane's picks in `docs/decisions.md`). Updated demo (v1, Nov 13) is a private link: https://claude.ai/artifact/UePkDdre3r7jbpeV6NbrUM. Read it with the Artifact tool's `read` action; it is the working copy. Next: Dane's changes → he approves → save it over `docs/demos/scheduler.html` → update PART-B.md → B3.
+**Next up:** Dane tests and merges PR #506 (Scheduler B1 + B2, brought up to date with `main`), then Scheduler B3 (the board). The approved demo is `docs/demos/scheduler.html`; Part B's step changes are at the top of `docs/scheduler-rebuild/PART-B.md`. After #506 merges, ask before applying its Phase B file `20261023052600_scheduler_b_drop_job_code.sql`.
 
 ## The vision (Dane, Nov 13, 2026)
 - **One platform for Utah DSPD providers, built for the admin side first.** Staff screens exist to feed admins clean records.
@@ -28,7 +28,7 @@ Status: `audit` → `demo` → `demo approved` → `building` → `live` (✅ = 
 |---|---|---|
 | Team Members | ✅ live | Rebuilt Sept 28–30. Re-check against competitors later. |
 | Clients | ✅ live | Rebuilt Oct 6–22 (incl. Meds, progress summaries). |
-| **Scheduler** | **building (Part B)** | Demo: `docs/demos/scheduler.html`, `docs/demos/daily-notes.html`. Plan: `docs/scheduler-rebuild/PART-B.md` (B1–B20). B1 #498 and B2 #499 open, both 13 commits behind `main`; their DB changes went live Oct 23. B3–B20 not started. |
+| **Scheduler** | **building (Part B) · demo approved Nov 13** | Demo: `docs/demos/scheduler.html`, `docs/demos/daily-notes.html`. Plan: `docs/scheduler-rebuild/PART-B.md` (B1–B20). B1 #498 and B2 #499 open, both 13 commits behind `main`; their DB changes went live Oct 23. B3–B20 not started. |
 | Daily Logs | not started | Part B (B16–B19) rebuilds notes; decide whether this tab merges into it. The host home "can this day bill" grid and missing-note alerts belong here (moved out of the scheduler Nov 13). |
 | Evidence | not started | |
 | Summaries | not started | |
@@ -44,7 +44,7 @@ Status: `audit` → `demo` → `demo approved` → `building` → `live` (✅ = 
 ## Other loose ends
 - **Denim design system (PR #469):** 314 commits behind `main`. Kept open as a reference for the look; redo it later.
 - **Phase B cleanup files waiting for Dane's OK:** see `supabase/migrations/*_b_*.sql` not yet in live history.
-- **Host home source fix:** built in PR #503 (`docs/host-homes/PLAN.md`). After Dane merges and says so, apply `20261113034500_host_homes_b_drop_setting_and_hhp_name.sql`.
+- **Host home source fix:** done. Live since PR #504; the Phase B cleanup (`20261113040659_host_homes_b_drop_setting_and_hhp_name.sql`) was applied Nov 13.
 - **Duplicate facts:** listed under "Known duplicates" in `docs/SOURCE_OF_TRUTH.md` (first: who a client's host is, stored three ways). Fix each before the feature that depends on it.
 - **Known defects and open owner questions:** see the "Don't decide these" list in `CLAUDE.md`.
 

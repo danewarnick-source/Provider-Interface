@@ -16,7 +16,7 @@ This file holds only what you can't learn from the code: what breaks the platfor
 - `main` = production on AWS (providerinterface.com, `.github/workflows/deploy-aws.yml`). Every push to `main` deploys, so nothing merges into `main` until Dane has verified it and merges it himself. Never merge a PR; never enable auto-merge.
 - One branch, one PR, straight into `main`. Branch from `main`; open the PR against `main`; Vercel builds a preview for the branch, Dane tests there and sends fixes; push them to the same branch. The PR is done when Dane merges it.
 - The `staging` branch is retired: don't branch from it, merge into it, or merge it into anything.
-- Big rebuilds: one integration branch from `main`, one PR per step into it, then one PR into `main`.
+- **Every PR targets `main`** (Dane, Nov 13): no integration branches, no stacked PRs. Combine related changes into one PR when it's more efficient, but whatever Dane merges lands on `main`.
 
 ## Database (one live DB for production and every preview)
 - Schema changes are files in `supabase/migrations/`, applied live through the Supabase MCP, one file per step, named for what it does. The apply records the apply time as the version: name the file with that version. Never `supabase db push`. Older files don't match live history; confirm schema against the live DB before relying on one.
