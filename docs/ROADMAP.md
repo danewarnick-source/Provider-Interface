@@ -2,7 +2,7 @@
 
 Read this before planning or building anything. Update it at the end of every session ("update the roadmap and decisions, then commit"). Owner decisions are in `docs/decisions.md`.
 
-**Next up:** Dane tests B3 (the board) on PR #507's preview. Then **Settings › Homes**: move the Homes & Teams board (the only place a home is created) into Settings, with coverage needs on the home instead of the old `locations` table. Then B4 (Publish, Copy week, Send changes; Copy week is missing until then).
+**Next up:** Settings › Homes: plan in `docs/homes/PLAN.md`, waiting for Dane's answers (8 questions at the bottom). B3 is live (PR #508). Then B4 (Publish, Copy week, Send changes; Copy week is missing until then).
 
 ## The vision (Dane, Nov 13, 2026)
 - **One platform for Utah DSPD providers, built for the admin side first.** Staff screens exist to feed admins clean records.
