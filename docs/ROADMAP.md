@@ -2,7 +2,7 @@
 
 Read this before planning or building anything. Update it at the end of every session ("update the roadmap and decisions, then commit"). Owner decisions are in `docs/decisions.md`.
 
-**Next up:** Scheduler. (1) Refresh B1 (#498) and B2 (#499) onto `main`; Dane tests B2 Settings on the preview. (2) Re-check done (`docs/scheduler-rebuild/RECHECK.md`; Dane's picks in `docs/decisions.md`). Next: update the scheduler demo with the adds and cuts → private link → Dane approves → update PART-B.md → B3.
+**Next up:** Scheduler. (1) Refresh B1 (#498) and B2 (#499) onto `main`; Dane tests B2 Settings on the preview. (2) Re-check done (`docs/scheduler-rebuild/RECHECK.md`; Dane's picks in `docs/decisions.md`). Updated demo (v1, Nov 13) is a private link: https://claude.ai/artifact/UePkDdre3r7jbpeV6NbrUM. Read it with the Artifact tool's `read` action; it is the working copy. Next: Dane's changes → he approves → save it over `docs/demos/scheduler.html` → update PART-B.md → B3.
 
 ## The vision (Dane, Nov 13, 2026)
 - **One platform for Utah DSPD providers, built for the admin side first.** Staff screens exist to feed admins clean records.
