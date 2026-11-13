@@ -11,7 +11,7 @@ export type SchedClient = {
   /** When true, staff ideally have ABI training — reminder only, never blocks schedule. */
   has_abi: boolean;
 };
-export type SchedTeam = { id: string; team_name: string; setting: string | null };
+export type SchedTeam = { id: string; team_name: string; team_type: string | null };
 export type SchedStaff = {
   id: string;
   name: string;
@@ -60,7 +60,7 @@ export function useSchedulerData(weekStart: Date) {
             .select("id, first_name, last_name, team_id, admin_hours_per_week, has_abi" as any)
             .is("deleted_at", null)
             .eq("organization_id", orgId!),
-          supabase.from("teams").select("id, team_name, setting").eq("organization_id", orgId!),
+          supabase.from("teams").select("id, team_name, team_type").eq("organization_id", orgId!),
           supabase
             .from("organization_members")
             .select("user_id")

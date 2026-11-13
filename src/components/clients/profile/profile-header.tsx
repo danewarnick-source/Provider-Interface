@@ -29,6 +29,7 @@ import { InfoTile } from "./cards/card-parts";
 import type { ClientProfileData } from "./use-client-profile";
 import { HeaderMenu } from "./header-menu";
 import { HeaderPills } from "./header-pills";
+import { HostLine } from "./host-line";
 import { PcspUploadButton } from "./plans/pcsp-upload-button";
 
 export function isDischarged(status: string | null | undefined): boolean {
@@ -104,6 +105,7 @@ export function ClientProfileHeader({
                 {data.name}
               </h1>
               {subtitle ? <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p> : null}
+              <HostLine home={data.home} />
               <HeaderPills
                 codes={data.codes}
                 readiness={headerReadiness(attention)}

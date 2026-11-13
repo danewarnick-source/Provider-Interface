@@ -20,7 +20,7 @@ Every fact has exactly one owner: one table (or column) and one lib file that re
 | Pending team-member invites | `invitations` (revoked by `trg_member_leave_revokes_invites` when the member leaves) | `src/lib/team-members/invites.functions.ts`, `invite-cancel.functions.ts`, `invite-rules.ts` |
 | What a client is authorized for (the 1056) | `client_billing_codes` | `src/lib/clients/authorizations.ts` (+ `auth-1056.ts`) |
 | Where a client lives (home) | `clients.team_id` → `teams` | `src/lib/clients/` |
-| Homes | `teams` | homes route/lib |
+| Homes, their kind and lead (the host, on a host home) | `teams` (`team_type`, `manager_id`) | `src/lib/homes/home-kind.ts` |
 | Staff requirements, proof, renewals | `evidence_items`, `evidence_files` | `src/lib/evidence/`, `src/lib/evidence.functions.ts` |
 | Hours worked / EVV | `evv_timesheets` | `src/lib/billing-units.ts`, EVV lib |
 | Scheduled work | `scheduled_shifts` | `src/lib/scheduler/` |
@@ -39,9 +39,9 @@ Rules:
 ## Known duplicates (to fix, one owner each)
 | Fact | Copies today | Owner it should be | Fix when |
 |---|---|---|---|
-| Who a client's host is | (1) `staff_assignments` + Position "Host Home Provider" (Daily Logs, `src/lib/daily-log-missing.ts`); (2) `hhs_host_home_settings.hhp_name` free text (Finances › Host home); (3) host home `teams` row + `clients.team_id` | Decided (Dane, Nov 13): the host home is a home in Settings (`teams`), the host is its lead (`teams.manager_id`), and the client's Home (`clients.team_id`) says who lives there. Remove the free-text name; Daily Logs and Finances read the home. | Before the scheduler's host-away flow is built |
-| Who leads a home | `teams.manager_id` and a "Manager" role in `home_staff_designations` | `teams.manager_id` | `docs/host-homes/PLAN.md` |
-| What kind of home it is | `teams.team_type` and `teams.setting` | `teams.team_type` | `docs/host-homes/PLAN.md` |
+| Who a client's host is | (1) `staff_assignments` + Position "Host Home Provider" (Daily Logs, `src/lib/daily-log-missing.ts`); (2) `hhs_host_home_settings.hhp_name` free text (Finances › Host home); (3) host home `teams` row + `clients.team_id` | Decided (Dane, Nov 13): the host home is a home in Settings (`teams`), the host is its lead (`teams.manager_id`), and the client's Home (`clients.team_id`) says who lives there. Remove the free-text name; Daily Logs and Finances read the home. | Fixed in PR #503 (Phase B drops `hhp_name` after merge) |
+| Who leads a home | `teams.manager_id` and a "Manager" role in `home_staff_designations` | `teams.manager_id` | Fixed in PR #503 (the "Manager" title is a plain label now) |
+| What kind of home it is | `teams.team_type` and `teams.setting` | `teams.team_type` | Fixed in PR #503 (Phase B drops `setting` after merge) |
 | Where a client lives | `clients.team_id` (owner); `locations` (legacy, synced when a home is saved) | `clients.team_id` → `teams` | Next Homes/Clients work |
 
 ## More rules

@@ -44,7 +44,7 @@ Status: `audit` → `demo` → `demo approved` → `building` → `live` (✅ = 
 ## Other loose ends
 - **Denim design system (PR #469):** 314 commits behind `main`. Kept open as a reference for the look; redo it later.
 - **Phase B cleanup files waiting for Dane's OK:** see `supabase/migrations/*_b_*.sql` not yet in live history.
-- **Host home source fix:** plan in `docs/host-homes/PLAN.md`, waiting for Dane's answers (5 questions at the bottom). Do before the scheduler's host-away step.
+- **Host home source fix:** built in PR #503 (`docs/host-homes/PLAN.md`). After Dane merges and says so, apply `20261113034500_host_homes_b_drop_setting_and_hhp_name.sql`.
 - **Duplicate facts:** listed under "Known duplicates" in `docs/SOURCE_OF_TRUTH.md` (first: who a client's host is, stored three ways). Fix each before the feature that depends on it.
 - **Known defects and open owner questions:** see the "Don't decide these" list in `CLAUDE.md`.
 

@@ -877,6 +877,38 @@ export type Database = {
           },
         ]
       }
+      agency_holidays: {
+        Row: {
+          holiday_date: string
+          id: string
+          name: string
+          organization_id: string
+          pay_multiplier: number | null
+        }
+        Insert: {
+          holiday_date: string
+          id?: string
+          name: string
+          organization_id: string
+          pay_multiplier?: number | null
+        }
+        Update: {
+          holiday_date?: string
+          id?: string
+          name?: string
+          organization_id?: string
+          pay_multiplier?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_holidays_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agency_policies: {
         Row: {
           active: boolean
@@ -2444,6 +2476,7 @@ export type Database = {
           rate_source_at: string | null
           rate_source_document_id: string | null
           rate_source_plan_number: string | null
+          ratio: string | null
           sce: string | null
           service_code: string
           service_end_date: string | null
@@ -2451,6 +2484,8 @@ export type Database = {
           unit_type: string
           updated_at: string
           weekly_cap_units: number | null
+          worksheet_absence_days: number | null
+          worksheet_weekly_hours: number | null
         }
         Insert: {
           annual_unit_authorization?: number
@@ -2468,6 +2503,7 @@ export type Database = {
           rate_source_at?: string | null
           rate_source_document_id?: string | null
           rate_source_plan_number?: string | null
+          ratio?: string | null
           sce?: string | null
           service_code: string
           service_end_date?: string | null
@@ -2475,6 +2511,8 @@ export type Database = {
           unit_type?: string
           updated_at?: string
           weekly_cap_units?: number | null
+          worksheet_absence_days?: number | null
+          worksheet_weekly_hours?: number | null
         }
         Update: {
           annual_unit_authorization?: number
@@ -2492,6 +2530,7 @@ export type Database = {
           rate_source_at?: string | null
           rate_source_document_id?: string | null
           rate_source_plan_number?: string | null
+          ratio?: string | null
           sce?: string | null
           service_code?: string
           service_end_date?: string | null
@@ -2499,6 +2538,8 @@ export type Database = {
           unit_type?: string
           updated_at?: string
           weekly_cap_units?: number | null
+          worksheet_absence_days?: number | null
+          worksheet_weekly_hours?: number | null
         }
         Relationships: [
           {
@@ -7436,6 +7477,7 @@ export type Database = {
           organization_id: string
           original_transcript: string | null
           outside_geofence_reason: string | null
+          override_reason: string | null
           raw_clock_in: string | null
           raw_clock_out: string | null
           reconciliation_attestation: string | null
@@ -7450,6 +7492,7 @@ export type Database = {
           reviewed_by: string | null
           rounded_clock_in: string | null
           rounded_clock_out: string | null
+          scheduled_shift_id: string | null
           service_type_code: string
           shift_entry_type: string
           shift_note_text: string | null
@@ -7525,6 +7568,7 @@ export type Database = {
           organization_id: string
           original_transcript?: string | null
           outside_geofence_reason?: string | null
+          override_reason?: string | null
           raw_clock_in?: string | null
           raw_clock_out?: string | null
           reconciliation_attestation?: string | null
@@ -7539,6 +7583,7 @@ export type Database = {
           reviewed_by?: string | null
           rounded_clock_in?: string | null
           rounded_clock_out?: string | null
+          scheduled_shift_id?: string | null
           service_type_code: string
           shift_entry_type: string
           shift_note_text?: string | null
@@ -7614,6 +7659,7 @@ export type Database = {
           organization_id?: string
           original_transcript?: string | null
           outside_geofence_reason?: string | null
+          override_reason?: string | null
           raw_clock_in?: string | null
           raw_clock_out?: string | null
           reconciliation_attestation?: string | null
@@ -7628,6 +7674,7 @@ export type Database = {
           reviewed_by?: string | null
           rounded_clock_in?: string | null
           rounded_clock_out?: string | null
+          scheduled_shift_id?: string | null
           service_type_code?: string
           shift_entry_type?: string
           shift_note_text?: string | null
@@ -7673,6 +7720,13 @@ export type Database = {
             columns: ["matched_approved_location_id"]
             isOneToOne: false
             referencedRelation: "client_approved_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evv_timesheets_scheduled_shift_id_fkey"
+            columns: ["scheduled_shift_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_shifts"
             referencedColumns: ["id"]
           },
         ]
@@ -12983,6 +13037,78 @@ export type Database = {
           },
         ]
       }
+      new_hire_signoffs: {
+        Row: {
+          end_reason: string | null
+          ended_at: string | null
+          ended_by: string | null
+          id: string
+          organization_id: string
+          signed_at: string
+          signed_by: string
+          staff_id: string
+          team_id: string
+        }
+        Insert: {
+          end_reason?: string | null
+          ended_at?: string | null
+          ended_by?: string | null
+          id?: string
+          organization_id: string
+          signed_at?: string
+          signed_by: string
+          staff_id: string
+          team_id: string
+        }
+        Update: {
+          end_reason?: string | null
+          ended_at?: string | null
+          ended_by?: string | null
+          id?: string
+          organization_id?: string
+          signed_at?: string
+          signed_by?: string
+          staff_id?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "new_hire_signoffs_ended_by_fkey"
+            columns: ["ended_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "new_hire_signoffs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "new_hire_signoffs_signed_by_fkey"
+            columns: ["signed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "new_hire_signoffs_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "new_hire_signoffs_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string
@@ -13266,25 +13392,91 @@ export type Database = {
       }
       org_shift_behavior_settings: {
         Row: {
+          claim_mode: string
+          digest: boolean
+          escalation_waits: number[]
+          holdover_ask: boolean
+          holdover_visible: boolean
+          hours_cap: number
+          location_at_punch_only: boolean
+          max_days_in_row: number
+          max_hours_in_row: number
+          min_rest_hours: number
+          night_diff: number | null
+          night_from: number
+          night_to: number
+          oncall_stipend: number
           organization_id: string
+          ot_multiplier: number
           ot_threshold_hours: number
+          quiet_end: number
+          quiet_start: number
+          reminder_minutes: number
           rule_settings: Json
+          sleep_rate: number
           updated_at: string
           updated_by: string | null
+          urgent_hours: number
+          weekend_diff: number | null
+          workweek_start: number
         }
         Insert: {
+          claim_mode?: string
+          digest?: boolean
+          escalation_waits?: number[]
+          holdover_ask?: boolean
+          holdover_visible?: boolean
+          hours_cap?: number
+          location_at_punch_only?: boolean
+          max_days_in_row?: number
+          max_hours_in_row?: number
+          min_rest_hours?: number
+          night_diff?: number | null
+          night_from?: number
+          night_to?: number
+          oncall_stipend?: number
           organization_id: string
+          ot_multiplier?: number
           ot_threshold_hours?: number
+          quiet_end?: number
+          quiet_start?: number
+          reminder_minutes?: number
           rule_settings?: Json
+          sleep_rate?: number
           updated_at?: string
           updated_by?: string | null
+          urgent_hours?: number
+          weekend_diff?: number | null
+          workweek_start?: number
         }
         Update: {
+          claim_mode?: string
+          digest?: boolean
+          escalation_waits?: number[]
+          holdover_ask?: boolean
+          holdover_visible?: boolean
+          hours_cap?: number
+          location_at_punch_only?: boolean
+          max_days_in_row?: number
+          max_hours_in_row?: number
+          min_rest_hours?: number
+          night_diff?: number | null
+          night_from?: number
+          night_to?: number
+          oncall_stipend?: number
           organization_id?: string
+          ot_multiplier?: number
           ot_threshold_hours?: number
+          quiet_end?: number
+          quiet_start?: number
+          reminder_minutes?: number
           rule_settings?: Json
+          sleep_rate?: number
           updated_at?: string
           updated_by?: string | null
+          urgent_hours?: number
+          weekend_diff?: number | null
+          workweek_start?: number
         }
         Relationships: [
           {
@@ -15259,9 +15451,11 @@ export type Database = {
       scheduled_shifts: {
         Row: {
           callout_reason: string | null
+          cancelled_at: string | null
           claim_requested_by: string | null
-          client_id: string
+          client_id: string | null
           code_id: string | null
+          confirmed_at: string | null
           created_at: string
           created_by: string | null
           created_from: string | null
@@ -15272,9 +15466,11 @@ export type Database = {
           job_code: string | null
           location_id: string | null
           notes: string | null
+          open_spots: number | null
           organization_id: string
           override_reason: string | null
           parent_shift_id: string | null
+          pattern_line_id: string | null
           published: boolean
           recurrence_end_date: string | null
           recurrence_rule: string | null
@@ -15283,13 +15479,17 @@ export type Database = {
           staff_id: string | null
           starts_at: string
           status: string
+          team_id: string | null
           updated_at: string
+          van_route_id: string | null
         }
         Insert: {
           callout_reason?: string | null
+          cancelled_at?: string | null
           claim_requested_by?: string | null
-          client_id: string
+          client_id?: string | null
           code_id?: string | null
+          confirmed_at?: string | null
           created_at?: string
           created_by?: string | null
           created_from?: string | null
@@ -15300,9 +15500,11 @@ export type Database = {
           job_code?: string | null
           location_id?: string | null
           notes?: string | null
+          open_spots?: number | null
           organization_id: string
           override_reason?: string | null
           parent_shift_id?: string | null
+          pattern_line_id?: string | null
           published?: boolean
           recurrence_end_date?: string | null
           recurrence_rule?: string | null
@@ -15311,13 +15513,17 @@ export type Database = {
           staff_id?: string | null
           starts_at: string
           status?: string
+          team_id?: string | null
           updated_at?: string
+          van_route_id?: string | null
         }
         Update: {
           callout_reason?: string | null
+          cancelled_at?: string | null
           claim_requested_by?: string | null
-          client_id?: string
+          client_id?: string | null
           code_id?: string | null
+          confirmed_at?: string | null
           created_at?: string
           created_by?: string | null
           created_from?: string | null
@@ -15328,9 +15534,11 @@ export type Database = {
           job_code?: string | null
           location_id?: string | null
           notes?: string | null
+          open_spots?: number | null
           organization_id?: string
           override_reason?: string | null
           parent_shift_id?: string | null
+          pattern_line_id?: string | null
           published?: boolean
           recurrence_end_date?: string | null
           recurrence_rule?: string | null
@@ -15339,7 +15547,9 @@ export type Database = {
           staff_id?: string | null
           starts_at?: string
           status?: string
+          team_id?: string | null
           updated_at?: string
+          van_route_id?: string | null
         }
         Relationships: [
           {
@@ -15389,6 +15599,13 @@ export type Database = {
             columns: ["staff_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_shifts_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]
@@ -15845,6 +16062,68 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      shift_types: {
+        Row: {
+          archive_reason: string | null
+          archived_at: string | null
+          built_in: boolean
+          color: string
+          counts_toward_coverage: boolean
+          created_at: string
+          created_by: string | null
+          end_time: string
+          id: string
+          key: string | null
+          name: string
+          organization_id: string
+          pay_kind: string
+          start_time: string
+          used_at: string[]
+        }
+        Insert: {
+          archive_reason?: string | null
+          archived_at?: string | null
+          built_in?: boolean
+          color: string
+          counts_toward_coverage?: boolean
+          created_at?: string
+          created_by?: string | null
+          end_time: string
+          id?: string
+          key?: string | null
+          name: string
+          organization_id: string
+          pay_kind?: string
+          start_time: string
+          used_at: string[]
+        }
+        Update: {
+          archive_reason?: string | null
+          archived_at?: string | null
+          built_in?: boolean
+          color?: string
+          counts_toward_coverage?: boolean
+          created_at?: string
+          created_by?: string | null
+          end_time?: string
+          id?: string
+          key?: string | null
+          name?: string
+          organization_id?: string
+          pay_kind?: string
+          start_time?: string
+          used_at?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sjd_assessment_selections: {
         Row: {
@@ -16734,6 +17013,66 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_schedule_settings: {
+        Row: {
+          fix_approval: string | null
+          organization_id: string
+          overnight_pay: string | null
+          pickup_approval: string | null
+          premium_per_hour: number | null
+          publish_approval: string | null
+          rule_overrides: Json
+          swap_approval: string | null
+          team_id: string
+          timeoff_approval: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          fix_approval?: string | null
+          organization_id: string
+          overnight_pay?: string | null
+          pickup_approval?: string | null
+          premium_per_hour?: number | null
+          publish_approval?: string | null
+          rule_overrides?: Json
+          swap_approval?: string | null
+          team_id: string
+          timeoff_approval?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          fix_approval?: string | null
+          organization_id?: string
+          overnight_pay?: string | null
+          pickup_approval?: string | null
+          premium_per_hour?: number | null
+          publish_approval?: string | null
+          rule_overrides?: Json
+          swap_approval?: string | null
+          team_id?: string
+          timeoff_approval?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_schedule_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_schedule_settings_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: true
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]
@@ -17647,12 +17986,28 @@ export type Database = {
         Args: { _org: string; _staff: string; _viewer: string }
         Returns: boolean
       }
+      claim_open_shift_first: {
+        Args: { _shift: string; _staff: string }
+        Returns: boolean
+      }
       client_active_codes: {
         Args: { _client_ids: string[] }
         Returns: {
           client_id: string
           service_code: string
           service_end_date: string
+        }[]
+      }
+      client_authorizations_for_rules: {
+        Args: { _client_ids: string[] }
+        Returns: {
+          authorization_approved_on: string
+          client_id: string
+          ratio: string
+          service_code: string
+          service_end_date: string
+          service_start_date: string
+          worksheet_weekly_hours: number
         }[]
       }
       client_discharge_assert: { Args: { _client: string }; Returns: string }
@@ -18260,6 +18615,7 @@ export type Database = {
         Args: { _id: string; _kind: string }
         Returns: undefined
       }
+      seed_scheduling_settings: { Args: { _org: string }; Returns: undefined }
       seed_standard_service_codes: {
         Args: { _org: string }
         Returns: undefined

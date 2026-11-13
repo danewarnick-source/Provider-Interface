@@ -1,6 +1,6 @@
 # Plan: one source for "who is the host"
 
-Status: **waiting for Dane's answers and approval** (written Nov 13, 2026). Decision: the host is the host home's lead (`docs/decisions.md`).
+Status: **built, in PR #503, waiting for Dane to test on the preview** (Nov 13, 2026). Answers: yes to 1–3; the Finances host names were test entries (no data move); hosts are team members with a login. Decision: the host is the host home's lead (`docs/decisions.md`).
 
 ## 1. Job
 An admin records a host home once: the home, the host family (its lead) and who lives there. Clients, Daily Logs, Finances and later the scheduler's host-away flow all read that one record. Today the host is stored in three places that disagree.
@@ -66,7 +66,13 @@ True North's live data:
 - The host home billing grid (notes review, B16–B17).
 - Host pay rules.
 
-## Questions for Dane
+## Built differently from the plan
+- **Daily Logs › "Set host" row:** not built. Daily Logs only lists the signed-in host's own missing notes, so a client with no host never shows there. An admin list of unowned gaps comes with notes review (B16–B17).
+- **The host must be on the client's team** (`staff_assignments`) for a missing note to be theirs. That's unchanged from before.
+- **Star on the care team** now marks the home's lead (`teams.manager_id`), not whoever has the "Manager" title.
+- **Fixed in passing:** the Open shifts panel now handles a shift with no client (team shifts went live with scheduler B1). `types.ts` was regenerated from live and picked up B1/B2's tables.
+
+## Questions for Dane (answered Nov 13)
 1. **Home kind:** use `team_type` (add "Host home") and retire the older `setting` column? *Recommended: yes. Two columns for one fact is the same kind of duplicate we're removing.*
 2. **Lead label:** call it "Host" on host homes and "Lead" everywhere else? *Recommended: yes.*
 3. **"Manager" care-team role:** the home page lets you tag someone "Manager", and that's a second record of who leads a home. Make the Lead field the only one and keep "Manager" as a plain title that the app doesn't act on? *Recommended: yes.*

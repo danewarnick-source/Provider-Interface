@@ -1,5 +1,6 @@
 // The client row behind the profile header and the Profile section, plus
-// codes (active client_billing_codes), home name and current plan year.
+// codes (active client_billing_codes), home (and, on a host home, its host)
+// and current plan year.
 // Contacts (guardian, support coordinator) come from useAllClientContacts, the
 // same cached query the Contacts section saves into. Org-filtered; `null` when
 // the client isn't in the org.
@@ -7,6 +8,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { isRouteUuid } from "@/lib/route-uuid";
+import { homeKind } from "@/lib/homes/home-kind";
 import { loadActiveCodes } from "@/lib/clients/services/codes";
 import { currentPlan, type ClientPlan } from "@/lib/clients/plans/plans";
 import { pcspState, type PcspState } from "@/lib/clients/pcsp/pcsp-status";
@@ -43,7 +45,8 @@ export type ClientProfileData = {
   client: ClientProfileRow;
   name: string;
   codes: string[];
-  home: { id: string; name: string } | null;
+  /** The client's home. On a host home, hostName is the home's lead (the host). */
+  home: { id: string; name: string; isHostHome: boolean; hostName: string | null } | null;
   plan: Pick<ClientPlan, "start_date" | "end_date" | "label"> | null;
   /** The PCSP's state today (pcsp-status.ts): the header tile's wording. */
   pcsp: PcspState;
@@ -69,7 +72,11 @@ export function useClientProfile(orgId: string | undefined, clientId: string) {
       const [codes, home, plans] = await Promise.all([
         loadActiveCodes(supabase, [clientId]),
         client.team_id
-          ? supabase.from("teams").select("id, team_name").eq("id", client.team_id).maybeSingle()
+          ? supabase
+              .from("teams")
+              .select("id, team_name, team_type, manager_id")
+              .eq("id", client.team_id)
+              .maybeSingle()
           : Promise.resolve({ data: null }),
         supabase
           .from("client_plans")
@@ -80,12 +87,34 @@ export function useClientProfile(orgId: string | undefined, clientId: string) {
       ]);
       const planRows = (plans.data ?? []) as ClientPlan[];
       const plan = currentPlan(planRows);
-      const team = home.data as { id: string; team_name: string } | null;
+      const team = home.data as {
+        id: string;
+        team_name: string;
+        team_type: string | null;
+        manager_id: string | null;
+      } | null;
+      const isHostHome = homeKind(team?.team_type) === "host_home";
+      const host =
+        isHostHome && team?.manager_id
+          ? await supabase
+              .from("profiles")
+              .select("full_name, email")
+              .eq("id", team.manager_id)
+              .maybeSingle()
+          : { data: null };
+      const hostRow = host.data as { full_name: string | null; email: string | null } | null;
       return {
         client,
         name: `${client.first_name ?? ""} ${client.last_name ?? ""}`.trim() || "Unnamed client",
         codes: codes.get(clientId) ?? [],
-        home: team ? { id: team.id, name: team.team_name } : null,
+        home: team
+          ? {
+              id: team.id,
+              name: team.team_name,
+              isHostHome,
+              hostName: hostRow ? hostRow.full_name || hostRow.email || "Host" : null,
+            }
+          : null,
         plan: plan
           ? { start_date: plan.start_date, end_date: plan.end_date, label: plan.label }
           : null,
