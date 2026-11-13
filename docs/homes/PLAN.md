@@ -1,6 +1,6 @@
 # Plan: Settings › Homes
 
-Status: **waiting for Dane's answers and approval** (Nov 13, 2026). Decision: homes live in Settings as agency setup (`docs/decisions.md`).
+Status: **approved, building** (Nov 13, 2026). Dane: yes to all 8 questions. Decision: homes live in Settings as agency setup (`docs/decisions.md`).
 
 ## 1. Job
 An owner or admin sets up each home once:
