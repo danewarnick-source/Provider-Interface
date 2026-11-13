@@ -40,6 +40,8 @@ Rules:
 | Fact | Copies today | Owner it should be | Fix when |
 |---|---|---|---|
 | Who a client's host is | (1) `staff_assignments` + Position "Host Home Provider" (Daily Logs, `src/lib/daily-log-missing.ts`); (2) `hhs_host_home_settings.hhp_name` free text (Finances › Host home); (3) host home `teams` row + `clients.team_id` | Decided (Dane, Nov 13): the host home is a home in Settings (`teams`), the host is its lead (`teams.manager_id`), and the client's Home (`clients.team_id`) says who lives there. Remove the free-text name; Daily Logs and Finances read the home. | Before the scheduler's host-away flow is built |
+| Who leads a home | `teams.manager_id` and a "Manager" role in `home_staff_designations` | `teams.manager_id` | `docs/host-homes/PLAN.md` |
+| What kind of home it is | `teams.team_type` and `teams.setting` | `teams.team_type` | `docs/host-homes/PLAN.md` |
 | Where a client lives | `clients.team_id` (owner); `locations` (legacy, synced when a home is saved) | `clients.team_id` → `teams` | Next Homes/Clients work |
 
 ## More rules
