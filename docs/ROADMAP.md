@@ -44,6 +44,7 @@ Status: `audit` → `demo` → `demo approved` → `building` → `live` (✅ = 
 ## Other loose ends
 - **Denim design system (PR #469):** 314 commits behind `main`. Kept open as a reference for the look; redo it later.
 - **Phase B cleanup files waiting for Dane's OK:** see `supabase/migrations/*_b_*.sql` not yet in live history.
+- **"Who is the host" is stored three ways (found Nov 13):** (1) `staff_assignments` + the staff member's Position = Host Home Provider (Daily Logs uses this); (2) `hhs_host_home_settings.hhp_name`, free text (Finances › Host home pay); (3) a `teams` row with setting `host_home` + `clients.team_id` (only 1 TNS client has a home set). Pick one source before the scheduler's host-away flow is built. Proposal: a host home is a home (`teams`), the host is that home's lead, `clients.team_id` says who lives there, and the free-text name goes.
 - **Known defects and open owner questions:** see the "Don't decide these" list in `CLAUDE.md`.
 
 ## Scoreboard (lower is better)
