@@ -2,7 +2,7 @@
 
 Read this before planning or building anything. Update it at the end of every session ("update the roadmap and decisions, then commit"). Owner decisions are in `docs/decisions.md`.
 
-**Next up:** Scheduler B3 (the board): plan and behavior table first, then build. B1 + B2 are live (PR #506); their `job_code` cleanup was applied Nov 13. The approved demo is `docs/demos/scheduler.html`; Part B's step changes are at the top of `docs/scheduler-rebuild/PART-B.md`.
+**Next up:** Scheduler B3 (the board): plan in `docs/scheduler-rebuild/B3-PLAN.md`, waiting for Dane's answers (7 questions at the bottom), then build. B1 + B2 are live (PR #506); their `job_code` cleanup was applied Nov 13. The approved demo is `docs/demos/scheduler.html`; Part B's step changes are at the top of `docs/scheduler-rebuild/PART-B.md`.
 
 ## The vision (Dane, Nov 13, 2026)
 - **One platform for Utah DSPD providers, built for the admin side first.** Staff screens exist to feed admins clean records.
