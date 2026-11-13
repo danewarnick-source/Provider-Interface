@@ -2,7 +2,7 @@
 
 Read this before planning or building anything. Update it at the end of every session ("update the roadmap and decisions, then commit"). Owner decisions are in `docs/decisions.md`.
 
-**Next up:** Scheduler B3 (the board): plan in `docs/scheduler-rebuild/B3-PLAN.md`, waiting for Dane's answers (7 questions at the bottom), then build. B1 + B2 are live (PR #506); their `job_code` cleanup was applied Nov 13. The approved demo is `docs/demos/scheduler.html`; Part B's step changes are at the top of `docs/scheduler-rebuild/PART-B.md`.
+**Next up:** Dane tests B3 (the board) on PR #507's preview. Then **Settings › Homes**: move the Homes & Teams board (the only place a home is created) into Settings, with coverage needs on the home instead of the old `locations` table. Then B4 (Publish, Copy week, Send changes; Copy week is missing until then).
 
 ## The vision (Dane, Nov 13, 2026)
 - **One platform for Utah DSPD providers, built for the admin side first.** Staff screens exist to feed admins clean records.
@@ -28,7 +28,7 @@ Status: `audit` → `demo` → `demo approved` → `building` → `live` (✅ = 
 |---|---|---|
 | Team Members | ✅ live | Rebuilt Sept 28–30. Re-check against competitors later. |
 | Clients | ✅ live | Rebuilt Oct 6–22 (incl. Meds, progress summaries). |
-| **Scheduler** | **building (Part B) · demo approved Nov 13** | Demo: `docs/demos/scheduler.html`, `docs/demos/daily-notes.html`. Plan: `docs/scheduler-rebuild/PART-B.md` (B1–B20). B1 #498 and B2 #499 open, both 13 commits behind `main`; their DB changes went live Oct 23. B3–B20 not started. |
+| **Scheduler** | **building (Part B) · demo approved Nov 13 · B1–B3 built** | Demo: `docs/demos/scheduler.html`, `docs/demos/daily-notes.html`. Plan: `docs/scheduler-rebuild/PART-B.md` (B1–B20). B1 #498 and B2 #499 open, both 13 commits behind `main`; their DB changes went live Oct 23. B3–B20 not started. |
 | Daily Logs | not started | Part B (B16–B19) rebuilds notes; decide whether this tab merges into it. The host home "can this day bill" grid and missing-note alerts belong here (moved out of the scheduler Nov 13). |
 | Evidence | not started | |
 | Summaries | not started | |
@@ -52,3 +52,4 @@ Status: `audit` → `demo` → `demo approved` → `building` → `live` (✅ = 
 | Date | Tables (public) | Code files in `src/` | Lines in `src/` |
 |---|---|---|---|
 | 2026-11-13 | 274 | 1,773 | 376,664 |
+| 2026-11-13 (after B1 + B2 + B3) | 274 | 1,820 | 378,853 |
