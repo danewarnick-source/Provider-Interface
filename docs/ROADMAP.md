@@ -15,7 +15,7 @@ Read this before planning or building anything. Update it at the end of every se
 - **Every feature is a demo first.** The demo works from start to finish with fake data, every button does something, and it remembers changes while you click around. Dane tests it and asks for changes. Once he approves, it's saved in `docs/demos/` and the real build must match it.
 
 ## How each tab gets done
-1. **Audit:** what the tab does today, which tables and files it uses, and what's dead or duplicated.
+1. **Audit:** what the tab does today, which tables and files it uses, and what's dead. **Source-of-truth check:** every fact the tab shows, its owner (Clients, Team members or Settings; see `docs/SOURCE_OF_TRUTH.md`), and every copy the tab keeps. The build deletes the copies.
 2. **Compare:** competitors and contract rules, written as a short "keep / add / cut" list.
 3. **Demo:** a clickable page with fake data. Dane revises it until he approves.
 4. **Build:** small PRs straight into `main`, each one deleting what it replaces. No more than 2 PRs waiting for Dane at once.
@@ -44,7 +44,7 @@ Status: `audit` → `demo` → `demo approved` → `building` → `live` (✅ = 
 ## Other loose ends
 - **Denim design system (PR #469):** 314 commits behind `main`. Kept open as a reference for the look; redo it later.
 - **Phase B cleanup files waiting for Dane's OK:** see `supabase/migrations/*_b_*.sql` not yet in live history.
-- **"Who is the host" is stored three ways (found Nov 13):** (1) `staff_assignments` + the staff member's Position = Host Home Provider (Daily Logs uses this); (2) `hhs_host_home_settings.hhp_name`, free text (Finances › Host home pay); (3) a `teams` row with setting `host_home` + `clients.team_id` (only 1 TNS client has a home set). Pick one source before the scheduler's host-away flow is built. Proposal: a host home is a home (`teams`), the host is that home's lead, `clients.team_id` says who lives there, and the free-text name goes.
+- **Duplicate facts:** listed under "Known duplicates" in `docs/SOURCE_OF_TRUTH.md` (first: who a client's host is, stored three ways). Fix each before the feature that depends on it.
 - **Known defects and open owner questions:** see the "Don't decide these" list in `CLAUDE.md`.
 
 ## Scoreboard (lower is better)
