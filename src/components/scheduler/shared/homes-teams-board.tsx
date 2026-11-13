@@ -37,6 +37,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { HOME_KINDS, homeKind, homeKindLabel, type HomeKind } from "@/lib/homes/home-kind";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PersonAvatar } from "@/components/person/person-avatar";
 
@@ -48,7 +49,7 @@ type TeamRow = {
   team_name: string;
   manager_id: string | null;
   organization_id: string | null;
-  setting: string | null;
+  team_type: string | null;
 };
 type StaffRow = { id: string; name: string; team_id: string | null; photo_path: string | null };
 type ClientRow = {
@@ -73,14 +74,6 @@ type Ratio = {
   effective_end: string | null;
 };
 
-const SETTINGS: { value: string; label: string }[] = [
-  { value: "residential", label: "RHS" },
-  { value: "slh", label: "SLH" },
-  { value: "host-home", label: "Host home" },
-  { value: "day-program", label: "Day program" },
-];
-const settingLabel = (v: string | null) =>
-  SETTINGS.find((s) => s.value === (v ?? "residential"))?.label ?? "RHS";
 
 // ============================================================================
 // Coverage requirement (client-side mirror of generate_coverage_requirements
@@ -129,7 +122,7 @@ export function HomesTeamsBoard() {
     queryFn: async (): Promise<TeamRow[]> => {
       const { data, error } = await supabase
         .from("teams")
-        .select("id, team_name, manager_id, organization_id, setting" as never)
+        .select("id, team_name, manager_id, organization_id, team_type" as never)
         .eq("organization_id", orgId!)
         .order("team_name");
       if (error) throw error;
@@ -296,11 +289,11 @@ export function HomesTeamsBoard() {
   });
 
   const createHome = useMutation({
-    mutationFn: async (v: { team_name: string; setting: string }) => {
+    mutationFn: async (v: { team_name: string; team_type: HomeKind }) => {
       const { error } = await supabase.from("teams").insert({
         organization_id: orgId,
         team_name: v.team_name,
-        setting: v.setting,
+        team_type: v.team_type,
       } as never);
       if (error) throw error;
     },
@@ -315,11 +308,11 @@ export function HomesTeamsBoard() {
     mutationFn: async (v: {
       id: string;
       team_name?: string;
-      setting?: string;
+      team_type?: HomeKind;
     }) => {
       const patch: Record<string, string> = {};
       if (v.team_name != null) patch.team_name = v.team_name;
-      if (v.setting != null) patch.setting = v.setting;
+      if (v.team_type != null) patch.team_type = v.team_type;
       const { error } = await supabase
         .from("teams")
         .update(patch as never)
@@ -399,9 +392,6 @@ export function HomesTeamsBoard() {
     () => new Map(designations.map((d) => [d.id, d])),
     [designations],
   );
-  const managerDesigId = designations.find((d) =>
-    /manager/i.test(d.label),
-  )?.id;
 
   // staff_id -> teams the staffer is on
   const staffHomes = useMemo(() => {
@@ -420,7 +410,7 @@ export function HomesTeamsBoard() {
   // --- UI state ----------------------------------------------------------
   const [newHomeOpen, setNewHomeOpen] = useState(false);
   const [newName, setNewName] = useState("");
-  const [newSetting, setNewSetting] = useState("residential");
+  const [newKind, setNewKind] = useState<HomeKind>("rhs_home");
   const [editing, setEditing] = useState<TeamRow | null>(null);
   const [moveClient, setMoveClient] = useState<ClientRow | null>(null);
   const [openStaff, setOpenStaff] = useState<{
@@ -566,7 +556,7 @@ export function HomesTeamsBoard() {
                       </div>
                       <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                         <Badge variant="outline" className="gap-1">
-                          {settingLabel(t.setting)}
+                          {homeKindLabel(t.team_type)}
                         </Badge>
                         <Badge
                           variant={inRatio ? "success" : "warning"}
@@ -672,7 +662,7 @@ export function HomesTeamsBoard() {
                               (a.s?.name ?? "").localeCompare(b.s?.name ?? ""),
                           )
                           .map(({ h, s, d }) => {
-                            const isMgr = d?.id === managerDesigId;
+                            const isMgr = s!.id === t.manager_id;
                             const otherHomes = (
                               staffHomes.get(s!.id) ?? []
                             ).filter((id) => id !== t.id);
@@ -763,15 +753,15 @@ export function HomesTeamsBoard() {
               />
             </div>
             <div>
-              <Label>Setting</Label>
-              <Select value={newSetting} onValueChange={setNewSetting}>
+              <Label>Kind of home</Label>
+              <Select value={newKind} onValueChange={(v) => setNewKind(homeKind(v))}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {SETTINGS.map((s) => (
-                    <SelectItem key={s.value} value={s.value}>
-                      {s.label}
+                  {HOME_KINDS.map((k) => (
+                    <SelectItem key={k.value} value={k.value}>
+                      {k.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -789,12 +779,12 @@ export function HomesTeamsBoard() {
                   return;
                 }
                 createHome.mutate(
-                  { team_name: newName.trim(), setting: newSetting },
+                  { team_name: newName.trim(), team_type: newKind },
                   {
                     onSuccess: () => {
                       setNewHomeOpen(false);
                       setNewName("");
-                      setNewSetting("residential");
+                      setNewKind("rhs_home");
                     },
                   },
                 );
@@ -831,20 +821,20 @@ export function HomesTeamsBoard() {
                 />
               </div>
               <div>
-                <Label>Setting</Label>
+                <Label>Kind of home</Label>
                 <Select
-                  defaultValue={editing.setting ?? "residential"}
+                  defaultValue={homeKind(editing.team_type)}
                   onValueChange={(v) =>
-                    updateHome.mutate({ id: editing.id, setting: v })
+                    updateHome.mutate({ id: editing.id, team_type: homeKind(v) })
                   }
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {SETTINGS.map((s) => (
-                      <SelectItem key={s.value} value={s.value}>
-                        {s.label}
+                    {HOME_KINDS.map((k) => (
+                      <SelectItem key={k.value} value={k.value}>
+                        {k.label}
                       </SelectItem>
                     ))}
                   </SelectContent>

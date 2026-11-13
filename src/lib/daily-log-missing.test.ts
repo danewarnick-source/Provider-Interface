@@ -4,7 +4,6 @@ import {
   dailyLogProgram,
   dailyNoteGapsFor,
   hostedDailyNoteDays,
-  isHostHomeProviderPosition,
   missingDailyNotes,
   type DailyNoteAssignment,
 } from "./daily-log-missing.ts";
@@ -25,21 +24,12 @@ const assign = (
   isHost,
 });
 
-describe("dailyLogProgram / host position", () => {
+describe("dailyLogProgram", () => {
   it("HHS and RP5 are daily-note programs", () => {
     assert.equal(dailyLogProgram({ codes: ["HHS"] }), "HHS");
     assert.equal(dailyLogProgram({ codes: ["RP5", "SLN"] }), "RP5");
     assert.equal(dailyLogProgram({ codes: ["SLN"] }), null);
     assert.equal(dailyLogProgram({ codes: null }), null);
-  });
-
-  it("Host Home Provider by key or label", () => {
-    assert.equal(isHostHomeProviderPosition({ key: "hhp", label: "x" }), true);
-    assert.equal(isHostHomeProviderPosition({ key: "x", label: "Host Home Provider" }), true);
-    assert.equal(
-      isHostHomeProviderPosition({ key: "dsp", label: "Direct Support Professional" }),
-      false,
-    );
   });
 });
 

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -16,6 +16,7 @@ import {
   getHhDays,
   getHhSettings,
   getHhMonthly,
+  type HhClient,
 } from "@/lib/financial-host-home.functions";
 
 export const Route = createFileRoute("/dashboard/financial/host-home")({
@@ -23,11 +24,10 @@ export const Route = createFileRoute("/dashboard/financial/host-home")({
   component: HostHomePage,
 });
 
-type ClientLite = { id: string; first_name: string; last_name: string };
+type ClientLite = HhClient;
 
 type HostSettings = {
   client_id: string;
-  hhp_name: string | null;
   host_daily_rate: number;
 };
 
@@ -128,14 +128,13 @@ function HostHomePage() {
   }, [hhsCodesQ.data]);
 
   const saveSettings = useMutation({
-    mutationFn: async (vars: { client_id: string; hhp_name: string | null; host_daily_rate: number }) => {
+    mutationFn: async (vars: { client_id: string; host_daily_rate: number }) => {
       const { error } = await supabase
         .from("hhs_host_home_settings" as never)
         .upsert(
           {
             organization_id: org!.organization_id,
             client_id: vars.client_id,
-            hhp_name: vars.hhp_name,
             host_daily_rate: vars.host_daily_rate,
           } as never,
           { onConflict: "organization_id,client_id" },
@@ -144,7 +143,7 @@ function HostHomePage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["hh-settings", org?.organization_id] });
-      toast.success("Host settings saved");
+      toast.success("Host rate saved");
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -228,7 +227,7 @@ function HostHomePage() {
           <table className="w-full min-w-[1100px] text-sm">
             <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
-                <th className="px-3 py-2 text-left">Host (HHP)</th>
+                <th className="px-3 py-2 text-left">Host</th>
                 <th className="px-3 py-2 text-left">Client</th>
                 <th className="px-3 py-2 text-right">Days / Mo</th>
                 <th className="px-3 py-2 text-right">DSPD rate</th>
@@ -248,9 +247,8 @@ function HostHomePage() {
                 <HostRow
                   key={r.client.id}
                   row={r}
-                  initialHhpName={settingsByClient[r.client.id]?.hhp_name ?? ""}
-                  onSaveSettings={(hhp_name, host_daily_rate) =>
-                    saveSettings.mutate({ client_id: r.client.id, hhp_name: hhp_name || null, host_daily_rate })
+                  onSaveSettings={(host_daily_rate) =>
+                    saveSettings.mutate({ client_id: r.client.id, host_daily_rate })
                   }
                   onSaveMonthly={(activities_amount, room_and_board_amount) =>
                     saveMonthly.mutate({ client_id: r.client.id, activities_amount, room_and_board_amount })
@@ -301,39 +299,29 @@ type Row = {
 
 function HostRow({
   row,
-  initialHhpName,
   onSaveSettings,
   onSaveMonthly,
 }: {
   row: Row;
-  initialHhpName: string;
-  onSaveSettings: (hhp_name: string, host_daily_rate: number) => void;
+  onSaveSettings: (host_daily_rate: number) => void;
   onSaveMonthly: (activities: number, rb: number) => void;
 }) {
-  const [hhpName, setHhpName] = useState(initialHhpName);
   const [hostRate, setHostRate] = useState(String(row.hostRate || ""));
   const [activities, setActivities] = useState(String(row.activities || ""));
   const [rb, setRb] = useState(String(row.rb || ""));
 
   // Sync when underlying data changes (month switch, etc.)
-  useEffect(() => { setHhpName(initialHhpName); }, [initialHhpName]);
   useEffect(() => { setHostRate(String(row.hostRate || "")); }, [row.hostRate]);
   useEffect(() => { setActivities(String(row.activities || "")); }, [row.activities]);
   useEffect(() => { setRb(String(row.rb || "")); }, [row.rb]);
 
-  const settingsDirty = hhpName !== initialHhpName || Number(hostRate || 0) !== row.hostRate;
+  const settingsDirty = Number(hostRate || 0) !== row.hostRate;
   const monthlyDirty = Number(activities || 0) !== row.activities || Number(rb || 0) !== row.rb;
 
   return (
     <tr className="hover:bg-muted/30">
       <td className="px-3 py-2">
-        <Input
-          value={hhpName}
-          onChange={(e) => setHhpName(e.target.value)}
-          onBlur={() => settingsDirty && onSaveSettings(hhpName, Number(hostRate || 0))}
-          placeholder="HHP name"
-          className="h-8 w-40"
-        />
+        <HostCell home={row.client.home} />
       </td>
       <td className="px-3 py-2 font-medium">
         {row.client.first_name} {row.client.last_name}
@@ -346,7 +334,7 @@ function HostRow({
           step="0.01"
           value={hostRate}
           onChange={(e) => setHostRate(e.target.value)}
-          onBlur={() => settingsDirty && onSaveSettings(hhpName, Number(hostRate || 0))}
+          onBlur={() => settingsDirty && onSaveSettings(Number(hostRate || 0))}
           className="h-8 w-24 text-right tabular-nums"
         />
       </td>
@@ -376,5 +364,20 @@ function HostRow({
         {fmtUSD(row.tnsMargin)}
       </td>
     </tr>
+  );
+}
+
+/** The host is the lead of the client's host home; it's set on the home page, not here. */
+function HostCell({ home }: { home: HhClient["home"] }) {
+  if (!home) return <span className="text-muted-foreground">No home set</span>;
+  return (
+    <Link
+      to="/dashboard/homes/$teamId"
+      params={{ teamId: home.id }}
+      hash={home.hostName ? undefined : "lead"}
+      className={home.hostName ? "hover:underline" : "font-medium text-primary hover:underline"}
+    >
+      {home.hostName ?? (home.isHostHome ? "+ Set host" : "Not a host home")}
+    </Link>
   );
 }

@@ -31,23 +31,38 @@ export interface ProfileEmailPick {
 const LEVELS: readonly string[] = ["owner", "admin", "staff"];
 
 /**
- * Two separate queries (organization_members, profiles) joined here by email —
- * they share no FK, so they are never PostgREST-embedded. Case-insensitive.
+ * The member an invite email belongs to. Two separate queries
+ * (organization_members, profiles) joined here by email — they share no FK, so
+ * they are never PostgREST-embedded. Case-insensitive.
  */
+export function findMemberByEmail<M extends MemberAccessPick>(
+  email: string,
+  members: readonly M[],
+  profiles: readonly ProfileEmailPick[],
+): M | null {
+  const wanted = email.trim().toLowerCase();
+  if (!wanted) return null;
+  const userId = profiles.find((p) => (p.email ?? "").trim().toLowerCase() === wanted)?.id;
+  if (!userId) return null;
+  return members.find((m) => m.user_id === userId) ?? null;
+}
+
+/** That member's current access, as the columns a resent invite carries. */
 export function findMemberAccessByEmail(
   email: string,
   members: readonly MemberAccessPick[],
   profiles: readonly ProfileEmailPick[],
 ): InviteAccessValues | null {
-  const wanted = email.trim().toLowerCase();
-  if (!wanted) return null;
-  const userId = profiles.find((p) => (p.email ?? "").trim().toLowerCase() === wanted)?.id;
-  if (!userId) return null;
-  const member = members.find((m) => m.user_id === userId);
+  const member = findMemberByEmail(email, members, profiles);
   if (!member) return null;
-  const level = LEVELS.includes(member.access_level ?? "") ? (member.access_level as AccessLevel) : "staff";
+  const level = LEVELS.includes(member.access_level ?? "")
+    ? (member.access_level as AccessLevel)
+    : "staff";
   // Owners never carry a preset; keep the stored preset for everyone else.
-  return { access_level: level, access_preset_id: level === "owner" ? null : member.access_preset_id };
+  return {
+    access_level: level,
+    access_preset_id: level === "owner" ? null : member.access_preset_id,
+  };
 }
 
 /**

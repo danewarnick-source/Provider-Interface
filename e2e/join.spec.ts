@@ -10,7 +10,7 @@ test.use({ storageState: { cookies: [], origins: [] } });
 const NEW_AGENCY = /team & pricing|create your account|your business|staff training|payment/i;
 const JOIN_HEADING = /join /i;
 const JOIN_ERROR =
-  /invitation (link is missing|isn't valid|has expired|was already used|was cancelled|can't be used)/i;
+  /invitation (link is missing|isn't valid|has expired|was already used|can't be used)|invite is no longer valid/i;
 const ASK_ADMIN = /ask your admin to add you manually/i;
 
 async function blockWrites(page: import("@playwright/test").Page) {

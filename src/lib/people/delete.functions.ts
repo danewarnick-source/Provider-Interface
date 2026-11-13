@@ -134,6 +134,8 @@ export const deletePerson = createServerFn({ method: "POST" })
     if (hasServiceHistory(await loadHistory(sb, data.kind, rowId))) {
       throw new Error(historyBlockedMessage(data.kind, name));
     }
+    // For a team member, trg_member_leave_revokes_invites also cancels their
+    // pending invites in this agency, so the old join link stops working.
     const { error } = await sb.rpc("soft_delete_person", {
       _kind: data.kind,
       _id: rowId,

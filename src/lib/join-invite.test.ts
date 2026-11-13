@@ -153,4 +153,10 @@ describe("inviteFailureMessage", () => {
       assert.match(inviteFailureMessage(reason), /admin/i);
     }
   });
+
+  it("a canceled invite (Uninvite, or the person deleted or deactivated) is no longer valid", () => {
+    assert.match(inviteFailureMessage("revoked"), /^This invite is no longer valid\. /);
+    assert.equal(humanizeInviteError("Invitation revoked"), inviteFailureMessage("revoked"));
+    assert.equal(humanizeInviteError("invite canceled"), inviteFailureMessage("revoked"));
+  });
 });

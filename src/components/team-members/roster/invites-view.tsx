@@ -1,33 +1,25 @@
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Ban, Copy, Loader2, Mail, RefreshCcw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAccess } from "@/hooks/use-access";
 import { interpretInviteSendResult } from "@/lib/invite-send-result";
 import { inviteJoinUrl } from "@/lib/join-invite";
+import { inviteStaffMembers, resendInvitation } from "@/lib/team-members/invites.functions";
 import {
-  inviteStaffMembers,
-  resendInvitation,
-  revokeInvitation,
-} from "@/lib/team-members/invites.functions";
+  cancelInviteBlockedReason,
+  sendInviteBlockedReason,
+} from "@/lib/team-members/invite-rules";
 import {
   formatRosterDate,
   rosterQueryKey,
   teamInvitesQueryKey,
   type TeamInviteRow,
 } from "@/lib/team-members/roster";
+import { CancelInviteDialog, type CancelInviteTarget } from "./cancel-invite-dialog";
 
 /** Invited view: pending invites with expiry, then accounts that never got an invite email. */
 export function InvitesView({
@@ -39,29 +31,53 @@ export function InvitesView({
   rows: TeamInviteRow[];
   loading: boolean;
 }) {
-  const { canCategory } = useAccess();
+  const { canCategory, isOwner } = useAccess();
   const canEdit = canCategory("staff_hiring", "edit");
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center gap-2 p-12 text-sm text-muted-foreground">
-        <Loader2 className="h-4 w-4 animate-spin" /> Loading invites…
-      </div>
-    );
-  }
-  if (!rows.length) {
-    return <p className="p-12 text-center text-sm text-muted-foreground">No pending invites.</p>;
-  }
+  // One dialog for the list, outside the rows: canceling removes the row.
+  const [cancelTarget, setCancelTarget] = useState<CancelInviteTarget | null>(null);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const askCancel = (row: TeamInviteRow) => {
+    if (!row.invitationId) return;
+    setCancelTarget({ invitationId: row.invitationId, name: row.name, email: row.email });
+    setCancelOpen(true);
+  };
+
   return (
-    <ul className="divide-y divide-border" data-testid="invites-view">
-      {rows.map((row) => (
-        <InviteRowItem
-          key={row.invitationId ?? row.userId}
-          row={row}
-          organizationId={organizationId}
-          canEdit={canEdit}
-        />
-      ))}
-    </ul>
+    <>
+      {loading ? (
+        <div className="flex items-center justify-center gap-2 p-12 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading invites…
+        </div>
+      ) : !rows.length ? (
+        <p className="p-12 text-center text-sm text-muted-foreground">No pending invites.</p>
+      ) : (
+        <TooltipProvider>
+          <ul className="divide-y divide-border" data-testid="invites-view">
+            {rows.map((row) => (
+              <InviteRowItem
+                key={row.invitationId ?? row.userId}
+                row={row}
+                organizationId={organizationId}
+                canEdit={canEdit}
+                sendBlocked={sendInviteBlockedReason({
+                  level: row.accessLevel,
+                  forMember: !!row.userId,
+                  viewerIsOwner: isOwner,
+                })}
+                cancelBlocked={cancelInviteBlockedReason(row.accessLevel, isOwner)}
+                onUninvite={() => askCancel(row)}
+              />
+            ))}
+          </ul>
+        </TooltipProvider>
+      )}
+      <CancelInviteDialog
+        organizationId={organizationId}
+        target={cancelTarget}
+        open={cancelOpen}
+        onOpenChange={setCancelOpen}
+      />
+    </>
   );
 }
 
@@ -69,16 +85,22 @@ function InviteRowItem({
   row,
   organizationId,
   canEdit,
+  sendBlocked,
+  cancelBlocked,
+  onUninvite,
 }: {
   row: TeamInviteRow;
   organizationId: string | null;
   canEdit: boolean;
+  /** Why this viewer can't send or resend this invite, or null. */
+  sendBlocked: string | null;
+  /** Why this viewer can't cancel this invite, or null. */
+  cancelBlocked: string | null;
+  onUninvite: () => void;
 }) {
   const qc = useQueryClient();
   const resendFn = useServerFn(resendInvitation);
-  const revokeFn = useServerFn(revokeInvitation);
   const inviteFn = useServerFn(inviteStaffMembers);
-  const [confirmUninvite, setConfirmUninvite] = useState(false);
 
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: teamInvitesQueryKey(organizationId) });
@@ -87,39 +109,24 @@ function InviteRowItem({
 
   // One mutation per row, so only this row shows busy.
   const act = useMutation({
-    mutationFn: async (kind: "resend" | "send" | "uninvite") => {
+    mutationFn: async (kind: "resend" | "send") => {
       if (!organizationId) throw new Error("No organization selected.");
-      if (kind === "uninvite" && row.invitationId) {
-        await revokeFn({
-          data: { organization_id: organizationId, invitation_id: row.invitationId },
-        });
-        return { kind, res: null };
-      }
       if (kind === "resend" && row.invitationId) {
-        const res = await resendFn({
+        return resendFn({
           data: { organization_id: organizationId, invitation_id: row.invitationId },
         });
-        return { kind, res };
       }
       if (!row.userId) throw new Error("This person isn't on the roster yet.");
-      const res = await inviteFn({
+      return inviteFn({
         data: { organization_id: organizationId, user_ids: [row.userId], force: true },
       });
-      return { kind, res };
     },
-    onSuccess: ({ kind, res }) => {
-      if (kind === "uninvite") {
-        toast.success(`Uninvited ${row.email}. That link no longer works.`);
-        setConfirmUninvite(false);
-      } else {
-        const out = interpretInviteSendResult(res);
-        if (out.email_sent) toast.success(`Invite emailed to ${row.email} — expires in 14 days`);
-        else if (out.rpc_failure) toast.error(out.message);
-        else
-          toast.warning(
-            `Invite saved, but the email didn't send: ${out.email_error ?? out.message}`,
-          );
-      }
+    onSuccess: (res) => {
+      const out = interpretInviteSendResult(res);
+      if (out.email_sent) toast.success(`Invite emailed to ${row.email} — expires in 14 days`);
+      else if (out.rpc_failure || out.refused) toast.error(out.message);
+      else
+        toast.warning(`Invite saved, but the email didn't send: ${out.email_error ?? out.message}`);
       refresh();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -175,58 +182,56 @@ function InviteRowItem({
           {busy && <Loader2 className="mr-1 h-4 w-4 animate-spin text-muted-foreground" />}
           {row.status === "pending" ? (
             <>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={busy}
-                onClick={() => act.mutate("resend")}
-              >
-                <RefreshCcw className="mr-1 h-3.5 w-3.5" /> Resend
-              </Button>
+              <WithReason reason={sendBlocked}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={busy || !!sendBlocked}
+                  onClick={() => act.mutate("resend")}
+                >
+                  <RefreshCcw className="mr-1 h-3.5 w-3.5" /> Resend
+                </Button>
+              </WithReason>
               <Button variant="outline" size="sm" onClick={() => void copyLink()}>
                 <Copy className="mr-1 h-3.5 w-3.5" /> Copy link
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-destructive hover:text-destructive"
-                disabled={busy}
-                onClick={() => setConfirmUninvite(true)}
-              >
-                <Ban className="mr-1 h-3.5 w-3.5" /> Uninvite
-              </Button>
+              <WithReason reason={cancelBlocked}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive"
+                  disabled={busy || !!cancelBlocked}
+                  onClick={onUninvite}
+                >
+                  <Ban className="mr-1 h-3.5 w-3.5" /> Uninvite
+                </Button>
+              </WithReason>
             </>
           ) : (
-            <Button size="sm" disabled={busy} onClick={() => act.mutate("send")}>
-              <Mail className="mr-1 h-3.5 w-3.5" /> Send invite
-            </Button>
+            <WithReason reason={sendBlocked}>
+              <Button size="sm" disabled={busy || !!sendBlocked} onClick={() => act.mutate("send")}>
+                <Mail className="mr-1 h-3.5 w-3.5" /> Send invite
+              </Button>
+            </WithReason>
           )}
         </div>
       )}
-      <AlertDialog open={confirmUninvite} onOpenChange={(o) => !busy && setConfirmUninvite(o)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Uninvite {row.email}?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Their join link stops working. If they're already on the roster they stay there — you
-              can send a new invite later.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={busy}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={(e) => {
-                e.preventDefault();
-                act.mutate("uninvite");
-              }}
-            >
-              Uninvite
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </li>
+  );
+}
+
+/** A disabled button with its reason on hover/focus. Disabled buttons swallow
+ *  pointer events, so the wrapper carries the tooltip. */
+function WithReason({ reason, children }: { reason: string | null; children: ReactElement }) {
+  if (!reason) return children;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span tabIndex={0} aria-label={reason} className="inline-flex cursor-not-allowed">
+          {children}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{reason}</TooltipContent>
+    </Tooltip>
   );
 }

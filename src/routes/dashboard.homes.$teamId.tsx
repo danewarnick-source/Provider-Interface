@@ -27,18 +27,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { PlaceSettingsCard } from "@/components/scheduler/settings/place-settings-card";
+import { HOME_KINDS, homeKind, leadLabel, type HomeKind } from "@/lib/homes/home-kind";
+import { HomeLeadField } from "@/components/homes/home-lead-field";
 
 export const Route = createFileRoute("/dashboard/homes/$teamId")({
   head: () => ({ meta: [{ title: "Home details — Provider Interface" }] }),
   component: HomeDetailPage,
 });
-
-const SETTINGS = [
-  { value: "residential", label: "RHS" },
-  { value: "slh", label: "SLH" },
-  { value: "host-home", label: "Host home" },
-  { value: "day-program", label: "Day program" },
-] as const;
 
 const RATIO_OPTIONS: { staff: number; clients: number; label: string }[] = [
   { staff: 1, clients: 1, label: "1:1" },
@@ -51,7 +46,8 @@ const RATIO_OPTIONS: { staff: number; clients: number; label: string }[] = [
 type Team = {
   id: string;
   team_name: string;
-  setting: string | null;
+  team_type: string | null;
+  manager_id: string | null;
   organization_id: string | null;
 };
 type Client = {
@@ -84,7 +80,7 @@ function HomeDetailPage() {
     queryFn: async (): Promise<Team | null> => {
       const { data, error } = await supabase
         .from("teams")
-        .select("id, team_name, setting, organization_id" as never)
+        .select("id, team_name, team_type, manager_id, organization_id" as never)
         .eq("id", teamId)
         .maybeSingle();
       if (error) throw error;
@@ -190,17 +186,28 @@ function HomeDetailPage() {
 
   // Mutations
   const updateHome = useMutation({
-    mutationFn: async (patch: { team_name?: string; setting?: string }) => {
+    mutationFn: async (patch: {
+      team_name?: string;
+      team_type?: HomeKind;
+      manager_id?: string | null;
+    }) => {
       const { error } = await supabase
         .from("teams")
         .update(patch as never)
         .eq("id", teamId);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_d, patch) => {
       qc.invalidateQueries({ queryKey: ["home-detail", teamId] });
       qc.invalidateQueries({ queryKey: ["ht-teams", orgId] });
-      toast.success("Home updated");
+      const lead = leadLabel(patch.team_type ?? teamQ.data?.team_type);
+      toast.success(
+        "manager_id" in patch
+          ? patch.manager_id
+            ? `${lead} saved`
+            : `${lead} removed`
+          : "Home saved",
+      );
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -319,7 +326,6 @@ function HomeDetailPage() {
     () => new Map(designations.map((d) => [d.id, d])),
     [designations],
   );
-  const managerDesigId = designations.find((d) => /manager/i.test(d.label))?.id;
 
   const residents = clients.filter((c) => c.team_id === teamId);
   const availableClients = clients.filter((c) => c.team_id !== teamId);
@@ -399,23 +405,31 @@ function HomeDetailPage() {
             </div>
           </div>
           <div>
-            <Label>Setting</Label>
+            <Label>Kind of home</Label>
             <Select
-              value={team.setting ?? "residential"}
-              onValueChange={(v) => updateHome.mutate({ setting: v })}
+              value={homeKind(team.team_type)}
+              onValueChange={(v) => updateHome.mutate({ team_type: homeKind(v) })}
             >
               <SelectTrigger className="mt-1">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {SETTINGS.map((s) => (
-                  <SelectItem key={s.value} value={s.value}>
-                    {s.label}
+                {HOME_KINDS.map((k) => (
+                  <SelectItem key={k.value} value={k.value}>
+                    {k.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
+          <HomeLeadField
+            teamType={team.team_type}
+            leadId={team.manager_id}
+            people={staff}
+            residentNames={residents.map((c) => c.first_name)}
+            saving={updateHome.isPending}
+            onSave={(leadId) => updateHome.mutate({ manager_id: leadId })}
+          />
         </CardContent>
       </Card>
 
@@ -610,7 +624,7 @@ function HomeDetailPage() {
                     (a.s?.name ?? "").localeCompare(b.s?.name ?? ""),
                 )
                 .map(({ h, s, d }) => {
-                  const isMgr = d?.id === managerDesigId;
+                  const isMgr = s!.id === team?.manager_id;
                   return (
                     <div
                       key={h.id}
