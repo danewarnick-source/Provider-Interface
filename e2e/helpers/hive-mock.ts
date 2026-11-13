@@ -410,12 +410,6 @@ function serverFnResult(exportName: string): unknown {
   if (/getInboxUnreadCount|getPendingUpgradeRequestCount/i.test(exportName)) {
     return { count: 0 };
   }
-  if (/getMissingThirtyDayStaffIds|getMissingAbiStaffIds/i.test(exportName)) {
-    return { missingIds: [] };
-  }
-  if (/nectarDraftShifts|autoFillOpenShifts/i.test(exportName)) {
-    return { drafts: [], proposals: [] };
-  }
   if (/nudgeDraftJob|processDraftChunk|finalizeRequirementsDraft/i.test(exportName)) {
     return { ok: true };
   }
@@ -535,7 +529,7 @@ export async function installHiveMocks(page: Page, role: HiveRole = "admin"): Pr
     const method = req.method().toUpperCase();
     const url = req.url();
     const name = serverFnExport(url);
-    const mutating = /saveShift|deleteShift|publishWeek|createRecurring|applyDrafts|autoFill|setAdminTimeOff/i.test(
+    const mutating = /saveShift|cancelShift|restoreShift|offerOpenShifts|publishWeek/i.test(
       name,
     );
     if (mutating) {

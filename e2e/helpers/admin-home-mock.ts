@@ -850,7 +850,6 @@ function serverFnName(url: string, postText: string): string | null {
     "proposeRemediationPlan",
     "reviewRemediationPlan",
     "recordObligationOverride",
-    "recordSoloOverride",
     "listOverridesForStaff",
     "listOverridesForOrg",
     "generateMyReview",
@@ -1253,7 +1252,6 @@ function serverFnResult(
     case "reviewRemediationPlan":
       return { result: { ok: true } };
     case "recordObligationOverride":
-    case "recordSoloOverride":
       return { result: { id: "e2e-override-1" } };
     case "listOverridesForStaff":
     case "listOverridesForOrg":

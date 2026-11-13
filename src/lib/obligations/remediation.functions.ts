@@ -1,4 +1,4 @@
-// Server functions for remediation plans, solo-lapse checks, and This Week.
+// Server functions for remediation plans, overrides, and This Week.
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -12,7 +12,6 @@ import {
   type ThisWeekResult,
 } from "./this-week.functions.ts";
 import {
-  hasActiveSoloOverride,
   initialRemediationPlanStatus,
   loadAwaitingApprovalPlans,
   resolveEscalationsForPlan,
@@ -27,13 +26,7 @@ import {
   type OverrideRow,
   type OverrideScope,
 } from "./overrides.ts";
-import {
-  BLOCKS_SOLO_WHEN_LAPSED_KEYS,
-  filterSoloLapsesForClient,
-  soloLapseLabel,
-  type SoloLapse,
-  type SoloLapseClientContext,
-} from "./solo-lapse.ts";
+import type { SoloLapse } from "./solo-lapse.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
@@ -69,105 +62,6 @@ export const getThisWeekForUser = createServerFn({ method: "POST" })
     }
     await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     return getThisWeek(supabase, data.organizationId, userId);
-  });
-
-export async function loadSoloLapsesForStaffInternal(
-  supabase: AnySupabase,
-  organizationId: string,
-  staffId: string,
-  client?: SoloLapseClientContext | null,
-  now: Date = new Date(),
-): Promise<SoloLapse[]> {
-  const { data: obs, error: oErr } = await supabase
-    .from("company_obligations")
-    .select("id, title, key")
-    .eq("organization_id", organizationId)
-    .eq("active", true)
-    .in("key", [...BLOCKS_SOLO_WHEN_LAPSED_KEYS]);
-  if (oErr) {
-    if (tableMissing(oErr.message)) return [];
-    throw new Error(oErr.message);
-  }
-  const obligations = (obs ?? []) as Array<{ id: string; title: string; key: string | null }>;
-  if (!obligations.length) return [];
-  const byId = new Map(obligations.map((o) => [o.id, o]));
-
-  const { data: insts, error: iErr } = await supabase
-    .from("company_obligation_instances")
-    .select("id, obligation_id, status, due_at, assignee_staff_id")
-    .eq("organization_id", organizationId)
-    .in(
-      "obligation_id",
-      obligations.map((o) => o.id),
-    )
-    .in("status", ["pending", "overdue"])
-    .eq("assignee_staff_id", staffId);
-  if (iErr) {
-    if (tableMissing(iErr.message)) return [];
-    throw new Error(iErr.message);
-  }
-
-  const lapses: SoloLapse[] = [];
-  const seenKeys = new Set<string>();
-  for (const inst of (insts ?? []) as Array<{
-    id: string;
-    obligation_id: string;
-    status: string;
-    due_at: string;
-    assignee_staff_id: string | null;
-  }>) {
-    const ob = byId.get(inst.obligation_id);
-    if (!ob?.key) continue;
-    const dueMs = new Date(inst.due_at).getTime();
-    const lapsed = inst.status === "overdue" || (!Number.isNaN(dueMs) && dueMs < now.getTime());
-    if (!lapsed) continue;
-    if (seenKeys.has(ob.key)) continue;
-    seenKeys.add(ob.key);
-    lapses.push({
-      obligationKey: ob.key,
-      obligationId: ob.id,
-      instanceId: inst.id,
-      title: ob.title,
-      dueAt: inst.due_at,
-      label: soloLapseLabel(ob.key),
-    });
-  }
-
-  const applicable = filterSoloLapsesForClient(lapses, client);
-  const open: SoloLapse[] = [];
-  for (const row of applicable) {
-    const covered = await hasActiveSoloOverride(
-      supabase,
-      organizationId,
-      staffId,
-      row.obligationKey,
-      now,
-    );
-    if (!covered) open.push(row);
-  }
-  return open;
-}
-
-export const listSoloLapsesForStaff = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) =>
-    z
-      .object({
-        organizationId: z.string().uuid(),
-        staffId: z.string().uuid(),
-        hasAbi: z.boolean().optional(),
-        hasBehaviorPlan: z.boolean().optional(),
-      })
-      .parse(i),
-  )
-  .handler(async ({ data, context }): Promise<SoloLapse[]> => {
-    const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
-    if (!supabase || !userId) return [];
-    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
-    return loadSoloLapsesForStaffInternal(supabase, data.organizationId, data.staffId, {
-      hasAbi: data.hasAbi,
-      hasBehaviorPlan: data.hasBehaviorPlan,
-    });
   });
 
 const OVERRIDE_SCOPE_Z = z.enum(["instance", "staff_clock", "shift"]);
@@ -273,33 +167,6 @@ export const recordObligationOverride = createServerFn({ method: "POST" })
     if (!supabase || !userId) throw new Error("Not authenticated");
     await requireManager(supabase, userId, data.organizationId);
     return insertObligationOverride(supabase, userId, data);
-  });
-
-export const recordSoloOverride = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) =>
-    z
-      .object({
-        organizationId: z.string().uuid(),
-        staffId: z.string().uuid(),
-        obligationKey: z.string().min(1).max(80),
-        obligationId: z.string().uuid().nullable().optional(),
-        instanceId: z.string().uuid().nullable().optional(),
-        reason: z.string().min(8).max(500),
-        shiftId: z.string().uuid().nullable().optional(),
-        expiresAt: z.string().min(1),
-        scope: OVERRIDE_SCOPE_Z.optional(),
-      })
-      .parse(i),
-  )
-  .handler(async ({ data, context }): Promise<{ id: string }> => {
-    const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
-    if (!supabase || !userId) throw new Error("Not authenticated");
-    await requireManager(supabase, userId, data.organizationId);
-    return insertObligationOverride(supabase, userId, {
-      ...data,
-      scope: data.scope ?? (data.instanceId ? "instance" : "staff_clock"),
-    });
   });
 
 export const listOverridesForStaff = createServerFn({ method: "POST" })
