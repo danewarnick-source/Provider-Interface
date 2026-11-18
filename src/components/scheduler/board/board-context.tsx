@@ -1,7 +1,8 @@
 // Shared state for one scheduler board: the loaded data and rule findings,
 // lookups by id, whether the viewer may edit, the change actions (with Undo),
-// the unsent changes to published shifts (B4) and which drawer or dialog is open. Provided by scheduler-board.tsx; every board
-// component reads it with useBoard() instead of threading props.
+// the unsent changes to published shifts (B4) and which drawer or dialog is
+// open. Provided by scheduler-board.tsx; every board component reads it with
+// useBoard() instead of threading props.
 import { createContext, useContext, type ReactNode } from "react";
 import type { Check } from "@/lib/scheduler/find-staff.functions";
 import type { BoardClient, BoardShift, BoardTeam } from "@/lib/scheduler/board-model";
