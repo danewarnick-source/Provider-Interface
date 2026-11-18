@@ -2,7 +2,7 @@
 
 Read this before planning or building anything. Update it at the end of every session ("update the roadmap and decisions, then commit"). Owner decisions are in `docs/decisions.md`.
 
-**Next up:** Dane tests Settings › Homes (new PR). After merge and Dane's OK, apply `20261113174700_homes_b_drop_locations_and_duplicates.sql`. Then B4 (Publish, Copy week, Send changes; Copy week is missing until then).
+**Next up:** (1) Dane merges PR #509 (Settings › Homes; still open as of Nov 18), then apply `20261113174700_homes_b_drop_locations_and_duplicates.sql` with his OK. (2) B4: plan in `docs/scheduler-rebuild/B4-PLAN.md`, waiting for Dane's answers (6 questions).
 
 ## The vision (Dane, Nov 13, 2026)
 - **One platform for Utah DSPD providers, built for the admin side first.** Staff screens exist to feed admins clean records.
