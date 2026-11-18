@@ -2,7 +2,7 @@
 
 Read this before planning or building anything. Update it at the end of every session ("update the roadmap and decisions, then commit"). Owner decisions are in `docs/decisions.md`.
 
-**Next up:** B4 (Publish, Send changes, Copy week) is built on `claude/busy-cray-w323d6`, not pushed: Dane reviews, then B5 (Needs you). Settings › Homes is live (PR #509) and its cleanup was applied Nov 18.
+**Next up:** B5 (Needs you): plan in `docs/scheduler-rebuild/B5-PLAN.md`, waiting for Dane's answers (7 questions). B4 is live (PR #511).
 
 ## The vision (Dane, Nov 13, 2026)
 - **One platform for Utah DSPD providers, built for the admin side first.** Staff screens exist to feed admins clean records.
