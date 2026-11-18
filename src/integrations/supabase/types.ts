@@ -11362,11 +11362,12 @@ export type Database = {
           day_of_week: number | null
           end_time: string
           id: string
-          location_id: string
+          location_id: string | null
           notes: string | null
           organization_id: string
           required_staff_count: number
           start_time: string
+          team_id: string | null
           updated_at: string
         }
         Insert: {
@@ -11375,11 +11376,12 @@ export type Database = {
           day_of_week?: number | null
           end_time: string
           id?: string
-          location_id: string
+          location_id?: string | null
           notes?: string | null
           organization_id: string
           required_staff_count?: number
           start_time: string
+          team_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -11388,11 +11390,12 @@ export type Database = {
           day_of_week?: number | null
           end_time?: string
           id?: string
-          location_id?: string
+          location_id?: string | null
           notes?: string | null
           organization_id?: string
           required_staff_count?: number
           start_time?: string
+          team_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -11408,6 +11411,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "location_coverage_requirements_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]
@@ -17075,6 +17085,8 @@ export type Database = {
         Row: {
           active: boolean
           address: string | null
+          archived_at: string | null
+          archived_reason: string | null
           capacity: number | null
           color: string | null
           created_at: string
@@ -17089,6 +17101,8 @@ export type Database = {
         Insert: {
           active?: boolean
           address?: string | null
+          archived_at?: string | null
+          archived_reason?: string | null
           capacity?: number | null
           color?: string | null
           created_at?: string
@@ -17103,6 +17117,8 @@ export type Database = {
         Update: {
           active?: boolean
           address?: string | null
+          archived_at?: string | null
+          archived_reason?: string | null
           capacity?: number | null
           color?: string | null
           created_at?: string

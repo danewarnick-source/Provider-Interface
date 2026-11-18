@@ -48,7 +48,7 @@ export const Route = createFileRoute("/dashboard/hub/clients")({
       });
     if (s.tab === "referrals")
       throw redirect({ to: "/dashboard/clients", search: { view: "referrals" }, replace: true });
-    if (s.tab === "teams") throw redirect({ to: "/dashboard/homes", replace: true });
+    if (s.tab === "teams") throw redirect({ to: "/dashboard/settings/homes", replace: true });
     if (s.tab === "funds") throw redirect({ to: "/dashboard/clients", replace: true });
   },
   component: ClientsHub,

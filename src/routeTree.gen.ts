@@ -63,7 +63,6 @@ import { Route as DashboardFormsRouteImport } from './routes/dashboard.forms'
 import { Route as DashboardHelpRouteImport } from './routes/dashboard.help'
 import { Route as DashboardHistoricalDailyNotesFormerStaffRouteImport } from './routes/dashboard.historical-daily-notes-former-staff'
 import { Route as DashboardHiveExecRouteImport } from './routes/dashboard.hive-exec'
-import { Route as DashboardHomesRouteImport } from './routes/dashboard.homes'
 import { Route as DashboardHostHomeControlRouteImport } from './routes/dashboard.host-home-control'
 import { Route as DashboardHrAdminRouteImport } from './routes/dashboard.hr-admin'
 import { Route as DashboardHrcRouteImport } from './routes/dashboard.hrc'
@@ -151,6 +150,7 @@ import { Route as DashboardHiveExecStatesRouteImport } from './routes/dashboard.
 import { Route as DashboardHiveExecTicketsRouteImport } from './routes/dashboard.hive-exec.tickets'
 import { Route as DashboardHiveExecUpgradeRequestsRouteImport } from './routes/dashboard.hive-exec.upgrade-requests'
 import { Route as DashboardHiveTrainingIndexRouteImport } from './routes/dashboard.hive-training.index'
+import { Route as DashboardHomesIndexRouteImport } from './routes/dashboard.homes.index'
 import { Route as DashboardHomesTeamIdRouteImport } from './routes/dashboard.homes.$teamId'
 import { Route as DashboardHrAdminSettingsRouteImport } from './routes/dashboard.hr-admin.settings'
 import { Route as DashboardHubClientsRouteImport } from './routes/dashboard.hub.clients'
@@ -193,6 +193,8 @@ import { Route as DashboardHiveExecAgreementsRequirementsRouteImport } from './r
 import { Route as DashboardHiveExecStatesStateCodeRouteImport } from './routes/dashboard.hive-exec.states.$stateCode'
 import { Route as DashboardHiveTrainingCourseAssignmentIdRouteImport } from './routes/dashboard.hive-training.course.$assignmentId'
 import { Route as DashboardMyObligationsCourseInstanceIdRouteImport } from './routes/dashboard.my-obligations_.course.$instanceId'
+import { Route as DashboardSettingsHomesIndexRouteImport } from './routes/dashboard.settings.homes.index'
+import { Route as DashboardSettingsHomesTeamIdRouteImport } from './routes/dashboard.settings.homes.$teamId'
 import { Route as ApiPublicOauthGmailCallbackRouteImport } from './routes/api/public/oauth/gmail/callback'
 import { Route as DashboardHiveExecStatesStateCodeOnboardingRouteImport } from './routes/dashboard.hive-exec.states.$stateCode.onboarding'
 
@@ -470,11 +472,6 @@ const DashboardHistoricalDailyNotesFormerStaffRoute =
 const DashboardHiveExecRoute = DashboardHiveExecRouteImport.update({
   id: '/hive-exec',
   path: '/hive-exec',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardHomesRoute = DashboardHomesRouteImport.update({
-  id: '/homes',
-  path: '/homes',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardHostHomeControlRoute =
@@ -950,10 +947,15 @@ const DashboardHiveTrainingIndexRoute =
     path: '/hive-training/',
     getParentRoute: () => DashboardRoute,
   } as any)
+const DashboardHomesIndexRoute = DashboardHomesIndexRouteImport.update({
+  id: '/homes/',
+  path: '/homes/',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardHomesTeamIdRoute = DashboardHomesTeamIdRouteImport.update({
-  id: '/$teamId',
-  path: '/$teamId',
-  getParentRoute: () => DashboardHomesRoute,
+  id: '/homes/$teamId',
+  path: '/homes/$teamId',
+  getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardHrAdminSettingsRoute =
   DashboardHrAdminSettingsRouteImport.update({
@@ -1192,6 +1194,18 @@ const DashboardMyObligationsCourseInstanceIdRoute =
     path: '/my-obligations/course/$instanceId',
     getParentRoute: () => DashboardRoute,
   } as any)
+const DashboardSettingsHomesIndexRoute =
+  DashboardSettingsHomesIndexRouteImport.update({
+    id: '/homes/',
+    path: '/homes/',
+    getParentRoute: () => DashboardSettingsRoute,
+  } as any)
+const DashboardSettingsHomesTeamIdRoute =
+  DashboardSettingsHomesTeamIdRouteImport.update({
+    id: '/homes/$teamId',
+    path: '/homes/$teamId',
+    getParentRoute: () => DashboardSettingsRoute,
+  } as any)
 const ApiPublicOauthGmailCallbackRoute =
   ApiPublicOauthGmailCallbackRouteImport.update({
     id: '/api/public/oauth/gmail/callback',
@@ -1257,7 +1271,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/help': typeof DashboardHelpRoute
   '/dashboard/historical-daily-notes-former-staff': typeof DashboardHistoricalDailyNotesFormerStaffRoute
   '/dashboard/hive-exec': typeof DashboardHiveExecRouteWithChildren
-  '/dashboard/homes': typeof DashboardHomesRouteWithChildren
   '/dashboard/host-home-control': typeof DashboardHostHomeControlRoute
   '/dashboard/hr-admin': typeof DashboardHrAdminRouteWithChildren
   '/dashboard/hrc': typeof DashboardHrcRoute
@@ -1374,6 +1387,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/forms/': typeof DashboardFormsIndexRoute
   '/dashboard/hive-exec/': typeof DashboardHiveExecIndexRoute
   '/dashboard/hive-training/': typeof DashboardHiveTrainingIndexRoute
+  '/dashboard/homes/': typeof DashboardHomesIndexRoute
   '/dashboard/team-members/': typeof DashboardTeamMembersIndexRoute
   '/api/public/hooks/billing-daily-check': typeof ApiPublicHooksBillingDailyCheckRoute
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
@@ -1390,6 +1404,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/hive-exec/states/$stateCode': typeof DashboardHiveExecStatesStateCodeRouteWithChildren
   '/dashboard/hive-training/course/$assignmentId': typeof DashboardHiveTrainingCourseAssignmentIdRoute
   '/dashboard/my-obligations/course/$instanceId': typeof DashboardMyObligationsCourseInstanceIdRoute
+  '/dashboard/settings/homes/$teamId': typeof DashboardSettingsHomesTeamIdRoute
+  '/dashboard/settings/homes/': typeof DashboardSettingsHomesIndexRoute
   '/api/public/oauth/gmail/callback': typeof ApiPublicOauthGmailCallbackRoute
   '/dashboard/hive-exec/states/$stateCode/onboarding': typeof DashboardHiveExecStatesStateCodeOnboardingRoute
 }
@@ -1437,7 +1453,6 @@ export interface FileRoutesByTo {
   '/dashboard/external-compliance': typeof DashboardExternalComplianceRoute
   '/dashboard/help': typeof DashboardHelpRoute
   '/dashboard/historical-daily-notes-former-staff': typeof DashboardHistoricalDailyNotesFormerStaffRoute
-  '/dashboard/homes': typeof DashboardHomesRouteWithChildren
   '/dashboard/host-home-control': typeof DashboardHostHomeControlRoute
   '/dashboard/hr-admin': typeof DashboardHrAdminRouteWithChildren
   '/dashboard/hrc': typeof DashboardHrcRoute
@@ -1554,6 +1569,7 @@ export interface FileRoutesByTo {
   '/dashboard/forms': typeof DashboardFormsIndexRoute
   '/dashboard/hive-exec': typeof DashboardHiveExecIndexRoute
   '/dashboard/hive-training': typeof DashboardHiveTrainingIndexRoute
+  '/dashboard/homes': typeof DashboardHomesIndexRoute
   '/dashboard/team-members': typeof DashboardTeamMembersIndexRoute
   '/api/public/hooks/billing-daily-check': typeof ApiPublicHooksBillingDailyCheckRoute
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
@@ -1570,6 +1586,8 @@ export interface FileRoutesByTo {
   '/dashboard/hive-exec/states/$stateCode': typeof DashboardHiveExecStatesStateCodeRouteWithChildren
   '/dashboard/hive-training/course/$assignmentId': typeof DashboardHiveTrainingCourseAssignmentIdRoute
   '/dashboard/my-obligations/course/$instanceId': typeof DashboardMyObligationsCourseInstanceIdRoute
+  '/dashboard/settings/homes/$teamId': typeof DashboardSettingsHomesTeamIdRoute
+  '/dashboard/settings/homes': typeof DashboardSettingsHomesIndexRoute
   '/api/public/oauth/gmail/callback': typeof ApiPublicOauthGmailCallbackRoute
   '/dashboard/hive-exec/states/$stateCode/onboarding': typeof DashboardHiveExecStatesStateCodeOnboardingRoute
 }
@@ -1626,7 +1644,6 @@ export interface FileRoutesById {
   '/dashboard/help': typeof DashboardHelpRoute
   '/dashboard/historical-daily-notes-former-staff': typeof DashboardHistoricalDailyNotesFormerStaffRoute
   '/dashboard/hive-exec': typeof DashboardHiveExecRouteWithChildren
-  '/dashboard/homes': typeof DashboardHomesRouteWithChildren
   '/dashboard/host-home-control': typeof DashboardHostHomeControlRoute
   '/dashboard/hr-admin': typeof DashboardHrAdminRouteWithChildren
   '/dashboard/hrc': typeof DashboardHrcRoute
@@ -1743,6 +1760,7 @@ export interface FileRoutesById {
   '/dashboard/forms/': typeof DashboardFormsIndexRoute
   '/dashboard/hive-exec/': typeof DashboardHiveExecIndexRoute
   '/dashboard/hive-training/': typeof DashboardHiveTrainingIndexRoute
+  '/dashboard/homes/': typeof DashboardHomesIndexRoute
   '/dashboard/team-members/': typeof DashboardTeamMembersIndexRoute
   '/api/public/hooks/billing-daily-check': typeof ApiPublicHooksBillingDailyCheckRoute
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
@@ -1759,6 +1777,8 @@ export interface FileRoutesById {
   '/dashboard/hive-exec/states/$stateCode': typeof DashboardHiveExecStatesStateCodeRouteWithChildren
   '/dashboard/hive-training/course/$assignmentId': typeof DashboardHiveTrainingCourseAssignmentIdRoute
   '/dashboard/my-obligations_/course/$instanceId': typeof DashboardMyObligationsCourseInstanceIdRoute
+  '/dashboard/settings/homes/$teamId': typeof DashboardSettingsHomesTeamIdRoute
+  '/dashboard/settings/homes/': typeof DashboardSettingsHomesIndexRoute
   '/api/public/oauth/gmail/callback': typeof ApiPublicOauthGmailCallbackRoute
   '/dashboard/hive-exec/states/$stateCode/onboarding': typeof DashboardHiveExecStatesStateCodeOnboardingRoute
 }
@@ -1816,7 +1836,6 @@ export interface FileRouteTypes {
     | '/dashboard/help'
     | '/dashboard/historical-daily-notes-former-staff'
     | '/dashboard/hive-exec'
-    | '/dashboard/homes'
     | '/dashboard/host-home-control'
     | '/dashboard/hr-admin'
     | '/dashboard/hrc'
@@ -1933,6 +1952,7 @@ export interface FileRouteTypes {
     | '/dashboard/forms/'
     | '/dashboard/hive-exec/'
     | '/dashboard/hive-training/'
+    | '/dashboard/homes/'
     | '/dashboard/team-members/'
     | '/api/public/hooks/billing-daily-check'
     | '/api/public/hooks/gmail-ingest'
@@ -1949,6 +1969,8 @@ export interface FileRouteTypes {
     | '/dashboard/hive-exec/states/$stateCode'
     | '/dashboard/hive-training/course/$assignmentId'
     | '/dashboard/my-obligations/course/$instanceId'
+    | '/dashboard/settings/homes/$teamId'
+    | '/dashboard/settings/homes/'
     | '/api/public/oauth/gmail/callback'
     | '/dashboard/hive-exec/states/$stateCode/onboarding'
   fileRoutesByTo: FileRoutesByTo
@@ -1996,7 +2018,6 @@ export interface FileRouteTypes {
     | '/dashboard/external-compliance'
     | '/dashboard/help'
     | '/dashboard/historical-daily-notes-former-staff'
-    | '/dashboard/homes'
     | '/dashboard/host-home-control'
     | '/dashboard/hr-admin'
     | '/dashboard/hrc'
@@ -2113,6 +2134,7 @@ export interface FileRouteTypes {
     | '/dashboard/forms'
     | '/dashboard/hive-exec'
     | '/dashboard/hive-training'
+    | '/dashboard/homes'
     | '/dashboard/team-members'
     | '/api/public/hooks/billing-daily-check'
     | '/api/public/hooks/gmail-ingest'
@@ -2129,6 +2151,8 @@ export interface FileRouteTypes {
     | '/dashboard/hive-exec/states/$stateCode'
     | '/dashboard/hive-training/course/$assignmentId'
     | '/dashboard/my-obligations/course/$instanceId'
+    | '/dashboard/settings/homes/$teamId'
+    | '/dashboard/settings/homes'
     | '/api/public/oauth/gmail/callback'
     | '/dashboard/hive-exec/states/$stateCode/onboarding'
   id:
@@ -2184,7 +2208,6 @@ export interface FileRouteTypes {
     | '/dashboard/help'
     | '/dashboard/historical-daily-notes-former-staff'
     | '/dashboard/hive-exec'
-    | '/dashboard/homes'
     | '/dashboard/host-home-control'
     | '/dashboard/hr-admin'
     | '/dashboard/hrc'
@@ -2301,6 +2324,7 @@ export interface FileRouteTypes {
     | '/dashboard/forms/'
     | '/dashboard/hive-exec/'
     | '/dashboard/hive-training/'
+    | '/dashboard/homes/'
     | '/dashboard/team-members/'
     | '/api/public/hooks/billing-daily-check'
     | '/api/public/hooks/gmail-ingest'
@@ -2317,6 +2341,8 @@ export interface FileRouteTypes {
     | '/dashboard/hive-exec/states/$stateCode'
     | '/dashboard/hive-training/course/$assignmentId'
     | '/dashboard/my-obligations_/course/$instanceId'
+    | '/dashboard/settings/homes/$teamId'
+    | '/dashboard/settings/homes/'
     | '/api/public/oauth/gmail/callback'
     | '/dashboard/hive-exec/states/$stateCode/onboarding'
   fileRoutesById: FileRoutesById
@@ -2742,13 +2768,6 @@ declare module '@tanstack/react-router' {
       path: '/hive-exec'
       fullPath: '/dashboard/hive-exec'
       preLoaderRoute: typeof DashboardHiveExecRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/homes': {
-      id: '/dashboard/homes'
-      path: '/homes'
-      fullPath: '/dashboard/homes'
-      preLoaderRoute: typeof DashboardHomesRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/host-home-control': {
@@ -3360,12 +3379,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardHiveTrainingIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/homes/': {
+      id: '/dashboard/homes/'
+      path: '/homes'
+      fullPath: '/dashboard/homes/'
+      preLoaderRoute: typeof DashboardHomesIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/homes/$teamId': {
       id: '/dashboard/homes/$teamId'
-      path: '/$teamId'
+      path: '/homes/$teamId'
       fullPath: '/dashboard/homes/$teamId'
       preLoaderRoute: typeof DashboardHomesTeamIdRouteImport
-      parentRoute: typeof DashboardHomesRoute
+      parentRoute: typeof DashboardRoute
     }
     '/dashboard/hr-admin/settings': {
       id: '/dashboard/hr-admin/settings'
@@ -3654,6 +3680,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardMyObligationsCourseInstanceIdRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/settings/homes/': {
+      id: '/dashboard/settings/homes/'
+      path: '/homes'
+      fullPath: '/dashboard/settings/homes/'
+      preLoaderRoute: typeof DashboardSettingsHomesIndexRouteImport
+      parentRoute: typeof DashboardSettingsRoute
+    }
+    '/dashboard/settings/homes/$teamId': {
+      id: '/dashboard/settings/homes/$teamId'
+      path: '/homes/$teamId'
+      fullPath: '/dashboard/settings/homes/$teamId'
+      preLoaderRoute: typeof DashboardSettingsHomesTeamIdRouteImport
+      parentRoute: typeof DashboardSettingsRoute
+    }
     '/api/public/oauth/gmail/callback': {
       id: '/api/public/oauth/gmail/callback'
       path: '/api/public/oauth/gmail/callback'
@@ -3872,18 +3912,6 @@ const DashboardHiveExecRouteChildren: DashboardHiveExecRouteChildren = {
 const DashboardHiveExecRouteWithChildren =
   DashboardHiveExecRoute._addFileChildren(DashboardHiveExecRouteChildren)
 
-interface DashboardHomesRouteChildren {
-  DashboardHomesTeamIdRoute: typeof DashboardHomesTeamIdRoute
-}
-
-const DashboardHomesRouteChildren: DashboardHomesRouteChildren = {
-  DashboardHomesTeamIdRoute: DashboardHomesTeamIdRoute,
-}
-
-const DashboardHomesRouteWithChildren = DashboardHomesRoute._addFileChildren(
-  DashboardHomesRouteChildren,
-)
-
 interface DashboardHrAdminRouteChildren {
   DashboardHrAdminSettingsRoute: typeof DashboardHrAdminSettingsRoute
 }
@@ -3910,6 +3938,8 @@ interface DashboardSettingsRouteChildren {
   DashboardSettingsServiceCodesRoute: typeof DashboardSettingsServiceCodesRoute
   DashboardSettingsSubscriptionRoute: typeof DashboardSettingsSubscriptionRoute
   DashboardSettingsTeamAccessRoute: typeof DashboardSettingsTeamAccessRoute
+  DashboardSettingsHomesTeamIdRoute: typeof DashboardSettingsHomesTeamIdRoute
+  DashboardSettingsHomesIndexRoute: typeof DashboardSettingsHomesIndexRoute
 }
 
 const DashboardSettingsRouteChildren: DashboardSettingsRouteChildren = {
@@ -3927,6 +3957,8 @@ const DashboardSettingsRouteChildren: DashboardSettingsRouteChildren = {
   DashboardSettingsServiceCodesRoute: DashboardSettingsServiceCodesRoute,
   DashboardSettingsSubscriptionRoute: DashboardSettingsSubscriptionRoute,
   DashboardSettingsTeamAccessRoute: DashboardSettingsTeamAccessRoute,
+  DashboardSettingsHomesTeamIdRoute: DashboardSettingsHomesTeamIdRoute,
+  DashboardSettingsHomesIndexRoute: DashboardSettingsHomesIndexRoute,
 }
 
 const DashboardSettingsRouteWithChildren =
@@ -3957,7 +3989,6 @@ interface DashboardRouteChildren {
   DashboardHelpRoute: typeof DashboardHelpRoute
   DashboardHistoricalDailyNotesFormerStaffRoute: typeof DashboardHistoricalDailyNotesFormerStaffRoute
   DashboardHiveExecRoute: typeof DashboardHiveExecRouteWithChildren
-  DashboardHomesRoute: typeof DashboardHomesRouteWithChildren
   DashboardHostHomeControlRoute: typeof DashboardHostHomeControlRoute
   DashboardHrAdminRoute: typeof DashboardHrAdminRouteWithChildren
   DashboardHrcRoute: typeof DashboardHrcRoute
@@ -3993,6 +4024,7 @@ interface DashboardRouteChildren {
   DashboardEmployeesHireDatesRoute: typeof DashboardEmployeesHireDatesRoute
   DashboardEmployeesNewRoute: typeof DashboardEmployeesNewRoute
   DashboardHhsHubClientIdRoute: typeof DashboardHhsHubClientIdRoute
+  DashboardHomesTeamIdRoute: typeof DashboardHomesTeamIdRoute
   DashboardHubClientsRoute: typeof DashboardHubClientsRoute
   DashboardHubDocumentationRoute: typeof DashboardHubDocumentationRoute
   DashboardHubEmployeesRoute: typeof DashboardHubEmployeesRoute
@@ -4004,6 +4036,7 @@ interface DashboardRouteChildren {
   DashboardWorkspaceClientIdRoute: typeof DashboardWorkspaceClientIdRoute
   DashboardEmployeesIndexRoute: typeof DashboardEmployeesIndexRoute
   DashboardHiveTrainingIndexRoute: typeof DashboardHiveTrainingIndexRoute
+  DashboardHomesIndexRoute: typeof DashboardHomesIndexRoute
   DashboardTeamMembersIndexRoute: typeof DashboardTeamMembersIndexRoute
   DashboardComplianceCertReviewCompletionIdRoute: typeof DashboardComplianceCertReviewCompletionIdRoute
   DashboardCoursesPolicyDocumentIdRoute: typeof DashboardCoursesPolicyDocumentIdRoute
@@ -4037,7 +4070,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardHistoricalDailyNotesFormerStaffRoute:
     DashboardHistoricalDailyNotesFormerStaffRoute,
   DashboardHiveExecRoute: DashboardHiveExecRouteWithChildren,
-  DashboardHomesRoute: DashboardHomesRouteWithChildren,
   DashboardHostHomeControlRoute: DashboardHostHomeControlRoute,
   DashboardHrAdminRoute: DashboardHrAdminRouteWithChildren,
   DashboardHrcRoute: DashboardHrcRoute,
@@ -4073,6 +4105,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardEmployeesHireDatesRoute: DashboardEmployeesHireDatesRoute,
   DashboardEmployeesNewRoute: DashboardEmployeesNewRoute,
   DashboardHhsHubClientIdRoute: DashboardHhsHubClientIdRoute,
+  DashboardHomesTeamIdRoute: DashboardHomesTeamIdRoute,
   DashboardHubClientsRoute: DashboardHubClientsRoute,
   DashboardHubDocumentationRoute: DashboardHubDocumentationRoute,
   DashboardHubEmployeesRoute: DashboardHubEmployeesRoute,
@@ -4084,6 +4117,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardWorkspaceClientIdRoute: DashboardWorkspaceClientIdRoute,
   DashboardEmployeesIndexRoute: DashboardEmployeesIndexRoute,
   DashboardHiveTrainingIndexRoute: DashboardHiveTrainingIndexRoute,
+  DashboardHomesIndexRoute: DashboardHomesIndexRoute,
   DashboardTeamMembersIndexRoute: DashboardTeamMembersIndexRoute,
   DashboardComplianceCertReviewCompletionIdRoute:
     DashboardComplianceCertReviewCompletionIdRoute,

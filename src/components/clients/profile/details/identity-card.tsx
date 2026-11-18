@@ -102,6 +102,7 @@ export function IdentityCard({
         .from("teams")
         .select("id, team_name")
         .eq("organization_id", orgId)
+        .eq("active", true)
         .order("team_name");
       if (error) throw error;
       return rows ?? [];

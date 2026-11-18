@@ -113,13 +113,12 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await menu.getByTestId("profile-section-health").click();
     await expect(page.getByTestId("client-section-health")).toBeVisible({ timeout: 10_000 });
 
-    await gotoAdmin(page, "/dashboard/homes");
-    await expect(page.getByRole("heading", { name: /Homes & Teams/i }).first()).toBeVisible({
+    await gotoAdmin(page, "/dashboard/settings/homes");
+    await expect(page.getByRole("heading", { name: /^Homes$/ }).first()).toBeVisible({
       timeout: 20_000,
     });
     await expect(page.getByText("Maple House").first()).toBeVisible();
     await expect(page.getByText("Oak SLH").first()).toBeVisible();
-    await expect(page.getByText(/Tommy/i).first()).toBeVisible();
     await shot(page, "client_chart_codes_and_homes");
   });
 

@@ -121,6 +121,7 @@ const STATIC_ROUTES: string[] = [
   "/dashboard/settings/bank-mapping",
   "/dashboard/settings/email",
   "/dashboard/settings/gmail",
+  "/dashboard/settings/homes",
   "/dashboard/settings/retention",
   "/dashboard/settings/service-catalog",
   "/dashboard/settings/service-codes",

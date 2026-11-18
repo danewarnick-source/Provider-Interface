@@ -16,7 +16,6 @@
 // The billing-code, medication and custom-field passes live in import-codes.ts,
 // import-meds.ts and import-custom-fields.ts; field readers in import-fields.ts.
 import { enrichNamesFromFull, firstNameWithMiddle } from "@/lib/person-name";
-import { denverYmd } from "@/lib/denver-date";
 import { activeContacts, loadClientContacts } from "../contacts/contacts";
 import { applyContactMergePlan, planContactMerge } from "../contacts/contacts-merge";
 import { loadActiveCodesAsService } from "../services/codes";
@@ -479,37 +478,6 @@ export async function applyExtractedFieldsToClient(
     } catch (err) {
       suggested.push("Confirm home location for EVV");
       await onError("geocode_lookup_error", (err as Error).message);
-    }
-  }
-
-
-  // Staff ratio → client_ratios row (one per import, "default" setting).
-  const ratioF = byKey.get("staff_ratio");
-  const ratioText = ratioF ? fieldText(ratioF) : null;
-  if (ratioText) {
-    const m = /^\s*(\d+)\s*[:/x]\s*(\d+)\s*$/i.exec(ratioText);
-    if (m) {
-      const ratio_staff = parseInt(m[1], 10);
-      const ratio_clients = parseInt(m[2], 10);
-      const today = denverYmd();
-      const { error: rErr } = await supabase.from("client_ratios").insert({
-        organization_id: organizationId,
-        client_id: clientId,
-        setting: "default",
-        ratio_staff,
-        ratio_clients,
-        effective_start: today,
-      });
-      if (rErr) {
-        // Used to silently swallow → caused the staff_ratio debugging session.
-        suggested.push(`staff_ratio (db error: ${rErr.message})`);
-        await onError("client_ratios_insert_error", rErr.message);
-      } else {
-        autofilled.push(`client_ratios(${ratio_staff}:${ratio_clients})`);
-      }
-    } else {
-      suggested.push(`staff_ratio (unparseable "${ratioText}")`);
-      await onError("staff_ratio_unparseable", `"${ratioText}"`);
     }
   }
 

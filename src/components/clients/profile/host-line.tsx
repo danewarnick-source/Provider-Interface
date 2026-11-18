@@ -1,6 +1,6 @@
 // "Lives with <host> · <home>" under a host home client's name. The host is the
-// home's lead (teams.manager_id), set on the home page; this line only reads it
-// and links there. Shown only when the client's home is a host home.
+// home's lead (teams.manager_id), set in Settings › Homes; this line only reads
+// it and links there. Shown only when the client's home is a host home.
 import { Link } from "@tanstack/react-router";
 import type { ClientProfileData } from "./use-client-profile";
 
@@ -10,7 +10,7 @@ export function HostLine({ home }: { home: ClientProfileData["home"] }) {
     <p className="mt-1 text-sm text-muted-foreground" data-testid="client-host-line">
       {home.hostName ? (
         <Link
-          to="/dashboard/homes/$teamId"
+          to="/dashboard/settings/homes/$teamId"
           params={{ teamId: home.id }}
           className="hover:underline"
         >
@@ -20,7 +20,7 @@ export function HostLine({ home }: { home: ClientProfileData["home"] }) {
         <>
           {home.name} · no host set ·{" "}
           <Link
-            to="/dashboard/homes/$teamId"
+            to="/dashboard/settings/homes/$teamId"
             params={{ teamId: home.id }}
             hash="lead"
             className="font-medium text-primary hover:underline"

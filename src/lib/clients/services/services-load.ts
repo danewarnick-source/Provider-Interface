@@ -40,7 +40,7 @@ export type ClientServices = {
 };
 
 const AUTH_COLUMNS =
-  "id, client_id, service_code, unit_type, rate_per_unit, annual_unit_authorization, monthly_max_units, service_start_date, service_end_date, authorization_number, authorization_approved_on, authorization_pending, rate_source";
+  "id, client_id, service_code, unit_type, rate_per_unit, annual_unit_authorization, monthly_max_units, service_start_date, service_end_date, authorization_number, authorization_approved_on, authorization_pending, rate_source, ratio";
 
 export async function loadAuthorizationRows(
   sb: Sb,

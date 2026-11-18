@@ -47,7 +47,7 @@ This file holds only what you can't learn from the code: what breaks the platfor
 - Nectar: Gatekeeper (note coaching), Scrubber (pre-billing), Sentinel (deadlines), Auditor (packets). Always advisory: drafts marked, a human attests, never auto-publish, never invent content.
 
 ## Landmines
-- `teams` = homes. `locations` is legacy (→ `teams`), synced only when a home is saved; don't build on it.
+- `teams` = homes, set up in Settings › Homes (`src/lib/homes/`): kind = `team_type`, lead/host = `manager_id`, staffing needs = `location_coverage_requirements.team_id`, archived (never deleted) via `active` + `archived_at`/`archived_reason`. `locations`, `client_ratios` and `home_staff_designations` are unused leftovers awaiting Phase B (`20261113174700_homes_b_drop_locations_and_duplicates.sql`); don't build on them.
 - The old `hhs_daily_records` table was dropped 2026-08-17; read `hhs_daily_records_v`.
 - `saveDailyRecord` (`src/lib/hhs.functions.ts`) upserts that day's attendance as Present with initials "DN" and `attestation_accepted = true`, overwriting Away. Known defect awaiting a go-ahead; never copy it.
 - Not a source of truth, read-only until removed: `employee_client_assignments`, `staff_assigned_to_client`, `assignment_map`, `staff_other_assignments` (→ `staff_assignments`); `company_obligation*`, `obligation_applicability` (→ `evidence_*`); `training_completions`, `hive_training_*`, `training_class*`, `import_cert_documents`, `hr_documents`, `employee_documents` (→ `evidence_files`); `profiles.start_date` (→ `hire_date`), `profiles.requires_abi`, `profiles.requires_deescalation`. Which table and lib file owns each fact: `docs/SOURCE_OF_TRUTH.md`.

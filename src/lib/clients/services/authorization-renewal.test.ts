@@ -16,6 +16,7 @@ const row = (over: Partial<AuthorizationRow> = {}): AuthorizationRow => ({
   authorization_approved_on: "2025-06-20",
   authorization_pending: false,
   rate_source: null,
+  ratio: null,
   ...over,
 });
 const TODAY = "2026-10-07";

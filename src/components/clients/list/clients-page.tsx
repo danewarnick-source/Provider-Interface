@@ -39,9 +39,12 @@ const NO_FILTERS: ListFilters = {
 export function ClientsPage({
   startWithAddOpen = false,
   startView = "active",
+  setHomeHint,
 }: {
   startWithAddOpen?: boolean;
   startView?: PageView;
+  /** A home id from Settings › Homes "+ Add a resident": say how to move someone in. */
+  setHomeHint?: string;
 }) {
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id;
@@ -79,6 +82,7 @@ export function ClientsPage({
   const { query, reactivate } = useClientList(orgId, { ...filters, view: listView });
   const data = query.data;
   const rows = data?.rows ?? [];
+  const hintHome = setHomeHint ? data?.homes.find((h) => h.id === setHomeHint) : undefined;
   const filtering = !!(filters.search.trim() || filters.code || filters.homeId || filters.staffId);
 
   const viewProps: ClientListViewProps = {
@@ -126,6 +130,13 @@ export function ClientsPage({
             </>
           }
         />
+
+        {hintHome ? (
+          <p className="rounded-xl border border-hive-border bg-[var(--hive-info-soft)] p-3 text-sm">
+            To add someone to {hintHome.name}, open the client and set their Home to {hintHome.name}{" "}
+            under Profile.
+          </p>
+        ) : null}
 
         <ListToolbar
           tabs={

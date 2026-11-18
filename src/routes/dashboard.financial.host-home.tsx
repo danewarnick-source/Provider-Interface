@@ -372,7 +372,7 @@ function HostCell({ home }: { home: HhClient["home"] }) {
   if (!home) return <span className="text-muted-foreground">No home set</span>;
   return (
     <Link
-      to="/dashboard/homes/$teamId"
+      to="/dashboard/settings/homes/$teamId"
       params={{ teamId: home.id }}
       hash={home.hostName ? undefined : "lead"}
       className={home.hostName ? "hover:underline" : "font-medium text-primary hover:underline"}

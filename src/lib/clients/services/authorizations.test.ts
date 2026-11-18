@@ -27,6 +27,7 @@ const row = (over: Partial<AuthorizationRow> = {}): AuthorizationRow => ({
   authorization_approved_on: "2026-06-20",
   authorization_pending: false,
   rate_source: null,
+  ratio: null,
   ...over,
 });
 

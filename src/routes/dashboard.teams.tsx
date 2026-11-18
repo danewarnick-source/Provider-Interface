@@ -1,12 +1,8 @@
-import { createFileRoute, Navigate, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
-// Legacy route — Homes & Teams now lives at /dashboard/homes (promoted out
-// of the Scheduling page's tab so it stays reachable regardless of the
-// Schedule V2 cut-over flag). Both SSR and client renders redirect.
+// Old address of Homes & Teams. Homes live in Settings › Homes now.
 export const Route = createFileRoute("/dashboard/teams")({
-  head: () => ({ meta: [{ title: "Homes & Teams — Provider Interface" }] }),
-  loader: () => {
-    throw redirect({ to: "/dashboard/homes", replace: true });
+  beforeLoad: () => {
+    throw redirect({ to: "/dashboard/settings/homes", replace: true });
   },
-  component: () => <Navigate to="/dashboard/homes" replace />,
 });

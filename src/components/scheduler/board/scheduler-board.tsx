@@ -28,7 +28,7 @@ export type BoardSearch = { view: View; show: FilterKey; range: Range; week?: st
 
 const EMPTY = {
   homes:
-    "No homes or programs yet. Add one in Homes & Teams, or switch to Team members or Clients.",
+    "No homes or programs yet. Add one in Settings › Homes, or switch to Team members or Clients.",
   staff: "No team members yet.",
   clients: "No clients with an active code this week.",
 };
