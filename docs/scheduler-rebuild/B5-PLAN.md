@@ -1,6 +1,6 @@
 # B5 plan: Needs you
 
-Status: **waiting for Dane's answers and approval** (Nov 18, 2026). Spec: `docs/demos/scheduler.html` › Office › Needs you (`needsItems`). Step text: PART-B.md › B5, plus the Nov 13 re-check (late and missed clock-ins and the 1056 outlook go here).
+Status: **approved, building** (Nov 18, 2026). Dane: yes to all 7 questions. Spec: `docs/demos/scheduler.html` › Office › Needs you (`needsItems`). Step text: PART-B.md › B5, plus the Nov 13 re-check (late and missed clock-ins and the 1056 outlook go here).
 
 ## 1. Job
 The scheduler handles only what the schedule can't settle on its own, in one list, most urgent first, with the fix button on each row.
