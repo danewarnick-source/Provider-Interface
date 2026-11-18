@@ -10,6 +10,7 @@
 //                 an expired card, over the cap) lands as an open shift; one
 //                 the engine refuses even with no one on it is skipped.
 import type { Finding } from "./rules-types.ts";
+import { fmtDay } from "./auth-outlook.ts";
 import { addDaysKey, daysBetween, dayKey, shiftByDays } from "./time.ts";
 
 export type CopySource = {
@@ -41,8 +42,10 @@ export type Skip = { sourceId: string; why: SkipWhy; message?: string };
 
 const live = (s: { status: string }) => s.status !== "cancelled" && s.status !== "declined";
 const ms = (iso: string) => new Date(iso).getTime();
-const overlaps = (a: { starts_at: string; ends_at: string }, b: { starts_at: string; ends_at: string }) =>
-  ms(a.starts_at) < ms(b.ends_at) && ms(b.starts_at) < ms(a.ends_at);
+const overlaps = (
+  a: { starts_at: string; ends_at: string },
+  b: { starts_at: string; ends_at: string },
+) => ms(a.starts_at) < ms(b.ends_at) && ms(b.starts_at) < ms(a.ends_at);
 
 /** Why `copy` would overwrite something already in the target week, or null. */
 function clash(copy: CopyRow, existing: readonly CopySource[]): SkipWhy | null {
@@ -82,7 +85,11 @@ export function planCopyWeek(input: {
     })
     .filter((s) => input.scope === "all" || input.placeOf(s) === input.scope)
     // Parents before their segments, then by time.
-    .sort((a, b) => Number(!!a.parent_shift_id) - Number(!!b.parent_shift_id) || a.starts_at.localeCompare(b.starts_at));
+    .sort(
+      (a, b) =>
+        Number(!!a.parent_shift_id) - Number(!!b.parent_shift_id) ||
+        a.starts_at.localeCompare(b.starts_at),
+    );
   const copies: CopyRow[] = [];
   const skipped: Skip[] = [];
   const copied = new Set<string>();
@@ -120,7 +127,8 @@ export type CopyOutcome =
   | { as: "open"; message: string }
   | { as: "skip"; message: string };
 
-const refusing = (fs: readonly Finding[]) => fs.filter((f) => f.level === "block" || f.level === "reason");
+const refusing = (fs: readonly Finding[]) =>
+  fs.filter((f) => f.level === "block" || f.level === "reason");
 
 /**
  * How one copy lands, from the engine's findings for it with its person
@@ -128,7 +136,10 @@ const refusing = (fs: readonly Finding[]) => fs.filter((f) => f.level === "block
  * A "needs a reason" finding that isn't about the person (e.g. past the 1056)
  * copies as a draft and is asked for at Send.
  */
-export function decideCopy(staffed: readonly Finding[], asOpen: readonly Finding[] | null): CopyOutcome {
+export function decideCopy(
+  staffed: readonly Finding[],
+  asOpen: readonly Finding[] | null,
+): CopyOutcome {
   const refused = refusing(staffed);
   const warn = staffed.find((f) => f.level === "warn")?.message ?? null;
   if (!refused.length) return { as: "draft", note: warn };
@@ -138,10 +149,20 @@ export function decideCopy(staffed: readonly Finding[], asOpen: readonly Finding
     const personal = refused.filter((f) => !openRules.has(f.rule));
     if (personal.length) {
       const stillBlocked = block(asOpen);
-      return stillBlocked ? { as: "skip", message: stillBlocked.message } : { as: "open", message: personal[0]!.message };
+      return stillBlocked
+        ? { as: "skip", message: stillBlocked.message }
+        : { as: "open", message: personal[0]!.message };
     }
   }
   const b = block(refused);
   if (b) return { as: "skip", message: b.message };
   return { as: "draft", note: `Needs a reason at Send: ${refused[0]!.message}` };
+}
+
+/** A week for the Copy week dialog: "Oct 25–31", or "Oct 25 – Nov 1" across months. */
+export function weekSpan(start: string): string {
+  const a = fmtDay(start).replace(/, \d{4}$/, "");
+  const b = fmtDay(addDaysKey(start, 6)).replace(/, \d{4}$/, "");
+  const [am, bm] = [a.split(" ")[0], b.split(" ")[0]];
+  return am === bm ? `${a}–${b.split(" ")[1]}` : `${a} – ${b}`;
 }

@@ -75,7 +75,8 @@ export function publishPlan(input: {
     seen.add(key);
     const line = { shiftId: f.shiftId, rule: f.rule, message: f.message };
     if (f.level === "block") blocks.push(line);
-    else if (f.level === "reason" && !byId.get(f.shiftId)?.override_reason?.trim()) needReason.push(line);
+    else if (f.level === "reason" && !byId.get(f.shiftId)?.override_reason?.trim())
+      needReason.push(line);
     else reminders.push(line);
   }
   const perStaff = new Map<string, number>();
@@ -104,11 +105,17 @@ export function publishPlan(input: {
 }
 
 /** Why Send is disabled, or null when it may go. `reasons` = typed reasons by shift id. */
-export function sendBlocker(plan: PublishPlan, reasons: Readonly<Record<string, string>>): string | null {
+export function sendBlocker(
+  plan: PublishPlan,
+  reasons: Readonly<Record<string, string>>,
+): string | null {
   if (plan.blocks.length)
     return `Fix ${plan.blocks.length === 1 ? "the block" : `the ${plan.blocks.length} blocks`} first.`;
-  const missing = new Set(plan.needReason.filter((l) => !reasons[l.shiftId]?.trim()).map((l) => l.shiftId));
-  if (missing.size) return `Add a reason for ${missing.size === 1 ? "1 shift" : `${missing.size} shifts`} first.`;
+  const missing = new Set(
+    plan.needReason.filter((l) => !reasons[l.shiftId]?.trim()).map((l) => l.shiftId),
+  );
+  if (missing.size)
+    return `Add a reason for ${missing.size === 1 ? "1 shift" : `${missing.size} shifts`} first.`;
   if (!plan.count) return "Nothing new to send.";
   return null;
 }

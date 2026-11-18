@@ -117,13 +117,21 @@ const weekday = (iso: string) =>
   });
 const code = (s: ShiftSnapshot) => (s.service_code ?? "").toUpperCase();
 
-export type ChangeCard = { title: string; detail: string; kind: "changed" | "new" | "removed" | "cancelled" };
+export type ChangeCard = {
+  title: string;
+  detail: string;
+  kind: "changed" | "new" | "removed" | "cancelled";
+};
 
 /**
  * How one net change reads to one person. `place` is the home's name when the
  * shift is at a home (never a client's name); empty for the push.
  */
-export function changeCard(c: Pick<NetChange, "before" | "after">, viewerId: string, place = ""): ChangeCard {
+export function changeCard(
+  c: Pick<NetChange, "before" | "after">,
+  viewerId: string,
+  place = "",
+): ChangeCard {
   const at = place ? ` at ${place}` : "";
   const { before: b, after: a } = c;
   const had = b.staff_id === viewerId && !cancelled(b);
@@ -131,20 +139,30 @@ export function changeCard(c: Pick<NetChange, "before" | "after">, viewerId: str
   const when = (s: ShiftSnapshot) => `${weekday(s.starts_at)} ${fmtSpan(s)}`;
   if (had && !has) {
     if (cancelled(a))
-      return { kind: "cancelled", title: `Cancelled: your ${weekday(b.starts_at)} shift`, detail: `${code(b)} ${when(b)}${at}` };
-    return { kind: "removed", title: "Removed from your schedule", detail: `${code(b)} ${when(b)}${at}` };
+      return {
+        kind: "cancelled",
+        title: `Cancelled: your ${weekday(b.starts_at)} shift`,
+        detail: `${code(b)} ${when(b)}${at}`,
+      };
+    return {
+      kind: "removed",
+      title: "Removed from your schedule",
+      detail: `${code(b)} ${when(b)}${at}`,
+    };
   }
   if (!had && has) {
     const back = b.staff_id === viewerId && cancelled(b);
-    return { kind: "new", title: back ? "Back on your schedule" : "New shift for you", detail: `${code(a)} ${when(a)}${at}` };
+    return {
+      kind: "new",
+      title: back ? "Back on your schedule" : "New shift for you",
+      detail: `${code(a)} ${when(a)}${at}`,
+    };
   }
   const sameDay = dayKey(b.starts_at) === dayKey(a.starts_at);
   return {
     kind: "changed",
     title: `Your ${weekday(b.starts_at)} shift changed`,
-    detail: sameDay
-      ? `${fmtSpan(b)} → ${fmtSpan(a)}${at}`
-      : `${when(b)} → ${when(a)}${at}`,
+    detail: sameDay ? `${fmtSpan(b)} → ${fmtSpan(a)}${at}` : `${when(b)} → ${when(a)}${at}`,
   };
 }
 

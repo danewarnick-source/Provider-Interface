@@ -1,15 +1,10 @@
 // B1 done-when: saving a shift for a team member on the client's
 // do-not-schedule list is refused, and the reason shows. Runs the same guard
-// saveShift, publishWeek, claims, Find staff and clock-in call.
+// saveShift, Send changes, Copy week, claims, Find staff and clock-in call.
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fakeDb } from "./fake-db.ts";
-import {
-  checkShiftRows,
-  guardShiftRows,
-  refusalsByShift,
-  ShiftRefusedError,
-} from "./shift-guard.server.ts";
+import { checkShiftRows, guardShiftRows, ShiftRefusedError } from "./shift-guard.server.ts";
 
 const ORG = "00000000-0000-0000-0000-000000000001";
 const row = {
@@ -121,7 +116,7 @@ test("an ended authorization (end date on or before the shift day) is refused", 
   await assert.rejects(guardShiftRows(db, ORG, [row]), /has no SLH authorization on 2026-10-14/);
 });
 
-test("publish gets one refusal line per blocked shift", async () => {
+test("a batch check tags each block with its shift (Send changes, Copy week)", async () => {
   const { db } = fakeDb(
     facts({
       "rpc:active_client_staff_exclusions": [
@@ -130,5 +125,7 @@ test("publish gets one refusal line per blocked shift", async () => {
     }),
   );
   const { verdict } = await checkShiftRows(db, ORG, [row]);
-  assert.equal(refusalsByShift(verdict).get("shift-1"), "Test is on Test's do-not-schedule list");
+  const block = verdict.blocks.find((f) => f.rule === "do_not_schedule");
+  assert.equal(block?.shiftId, "shift-1");
+  assert.equal(block?.message, "Test is on Test's do-not-schedule list");
 });
