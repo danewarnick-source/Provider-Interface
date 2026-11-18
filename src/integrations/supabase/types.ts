@@ -4376,63 +4376,6 @@ export type Database = {
           },
         ]
       }
-      client_ratios: {
-        Row: {
-          client_id: string
-          created_at: string
-          effective_end: string | null
-          effective_start: string
-          id: string
-          notes: string | null
-          organization_id: string
-          ratio_clients: number
-          ratio_staff: number
-          setting: string
-          updated_at: string
-        }
-        Insert: {
-          client_id: string
-          created_at?: string
-          effective_end?: string | null
-          effective_start?: string
-          id?: string
-          notes?: string | null
-          organization_id: string
-          ratio_clients: number
-          ratio_staff: number
-          setting: string
-          updated_at?: string
-        }
-        Update: {
-          client_id?: string
-          created_at?: string
-          effective_end?: string | null
-          effective_start?: string
-          id?: string
-          notes?: string | null
-          organization_id?: string
-          ratio_clients?: number
-          ratio_staff?: number
-          setting?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_ratios_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_ratios_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       client_recipe_ingredients: {
         Row: {
           created_at: string
@@ -5037,7 +4980,6 @@ export type Database = {
         Row: {
           about_me: string | null
           account_status: string
-          admin_hours_per_week: number | null
           admission_date: string | null
           advance_directive_notes: string | null
           advanced_directives: boolean | null
@@ -5180,7 +5122,6 @@ export type Database = {
         Insert: {
           about_me?: string | null
           account_status?: string
-          admin_hours_per_week?: number | null
           admission_date?: string | null
           advance_directive_notes?: string | null
           advanced_directives?: boolean | null
@@ -5323,7 +5264,6 @@ export type Database = {
         Update: {
           about_me?: string | null
           account_status?: string
-          admin_hours_per_week?: number | null
           admission_date?: string | null
           advance_directive_notes?: string | null
           advanced_directives?: boolean | null
@@ -9731,71 +9671,6 @@ export type Database = {
           },
         ]
       }
-      home_staff_designations: {
-        Row: {
-          active: boolean
-          created_at: string
-          designation_id: string
-          id: string
-          organization_id: string
-          position: Database["public"]["Enums"]["home_position"]
-          staff_id: string
-          team_id: string
-          updated_at: string
-        }
-        Insert: {
-          active?: boolean
-          created_at?: string
-          designation_id: string
-          id?: string
-          organization_id: string
-          position?: Database["public"]["Enums"]["home_position"]
-          staff_id: string
-          team_id: string
-          updated_at?: string
-        }
-        Update: {
-          active?: boolean
-          created_at?: string
-          designation_id?: string
-          id?: string
-          organization_id?: string
-          position?: Database["public"]["Enums"]["home_position"]
-          staff_id?: string
-          team_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "home_staff_designations_designation_id_fkey"
-            columns: ["designation_id"]
-            isOneToOne: false
-            referencedRelation: "home_designations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "home_staff_designations_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "home_staff_designations_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "home_staff_designations_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       host_home_cert_concerns: {
         Row: {
           certification_id: string
@@ -11362,12 +11237,11 @@ export type Database = {
           day_of_week: number | null
           end_time: string
           id: string
-          location_id: string | null
           notes: string | null
           organization_id: string
           required_staff_count: number
           start_time: string
-          team_id: string | null
+          team_id: string
           updated_at: string
         }
         Insert: {
@@ -11376,12 +11250,11 @@ export type Database = {
           day_of_week?: number | null
           end_time: string
           id?: string
-          location_id?: string | null
           notes?: string | null
           organization_id: string
           required_staff_count?: number
           start_time: string
-          team_id?: string | null
+          team_id: string
           updated_at?: string
         }
         Update: {
@@ -11390,22 +11263,14 @@ export type Database = {
           day_of_week?: number | null
           end_time?: string
           id?: string
-          location_id?: string | null
           notes?: string | null
           organization_id?: string
           required_staff_count?: number
           start_time?: string
-          team_id?: string | null
+          team_id?: string
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "location_coverage_requirements_location_id_fkey"
-            columns: ["location_id"]
-            isOneToOne: false
-            referencedRelation: "locations"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "location_coverage_requirements_organization_id_fkey"
             columns: ["organization_id"]
@@ -11418,60 +11283,6 @@ export type Database = {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      locations: {
-        Row: {
-          active: boolean
-          address: string | null
-          created_at: string
-          id: string
-          legacy_home_designation_id: string | null
-          name: string
-          organization_id: string
-          sort: number
-          type: string
-          updated_at: string
-        }
-        Insert: {
-          active?: boolean
-          address?: string | null
-          created_at?: string
-          id?: string
-          legacy_home_designation_id?: string | null
-          name: string
-          organization_id: string
-          sort?: number
-          type: string
-          updated_at?: string
-        }
-        Update: {
-          active?: boolean
-          address?: string | null
-          created_at?: string
-          id?: string
-          legacy_home_designation_id?: string | null
-          name?: string
-          organization_id?: string
-          sort?: number
-          type?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "locations_legacy_home_designation_id_fkey"
-            columns: ["legacy_home_designation_id"]
-            isOneToOne: false
-            referencedRelation: "home_designations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "locations_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -15470,7 +15281,6 @@ export type Database = {
           id: string
           is_awake_overnight: boolean | null
           is_recurring: boolean
-          location_id: string | null
           notes: string | null
           open_spots: number | null
           organization_id: string
@@ -15503,7 +15313,6 @@ export type Database = {
           id?: string
           is_awake_overnight?: boolean | null
           is_recurring?: boolean
-          location_id?: string | null
           notes?: string | null
           open_spots?: number | null
           organization_id: string
@@ -15536,7 +15345,6 @@ export type Database = {
           id?: string
           is_awake_overnight?: boolean | null
           is_recurring?: boolean
-          location_id?: string | null
           notes?: string | null
           open_spots?: number | null
           organization_id?: string
@@ -15575,13 +15383,6 @@ export type Database = {
             columns: ["code_id"]
             isOneToOne: false
             referencedRelation: "provider_authorized_codes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "scheduled_shifts_location_id_fkey"
-            columns: ["location_id"]
-            isOneToOne: false
-            referencedRelation: "locations"
             referencedColumns: ["id"]
           },
           {
@@ -15777,6 +15578,93 @@ export type Database = {
             columns: ["staff_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shift_change_acks: {
+        Row: {
+          acked_at: string
+          change_id: string
+          organization_id: string
+          staff_id: string
+        }
+        Insert: {
+          acked_at?: string
+          change_id: string
+          organization_id: string
+          staff_id: string
+        }
+        Update: {
+          acked_at?: string
+          change_id?: string
+          organization_id?: string
+          staff_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_change_acks_change_id_fkey"
+            columns: ["change_id"]
+            isOneToOne: false
+            referencedRelation: "shift_changes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_change_acks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shift_changes: {
+        Row: {
+          affected_staff_ids: string[]
+          after: Json
+          before: Json
+          changed_at: string
+          changed_by: string | null
+          id: string
+          organization_id: string
+          sent_at: string | null
+          shift_id: string
+        }
+        Insert: {
+          affected_staff_ids?: string[]
+          after: Json
+          before: Json
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          organization_id: string
+          sent_at?: string | null
+          shift_id: string
+        }
+        Update: {
+          affected_staff_ids?: string[]
+          after?: Json
+          before?: Json
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          organization_id?: string
+          sent_at?: string | null
+          shift_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_changes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_changes_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_shifts"
             referencedColumns: ["id"]
           },
         ]
@@ -18036,7 +17924,6 @@ export type Database = {
         Returns: {
           about_me: string | null
           account_status: string
-          admin_hours_per_week: number | null
           admission_date: string | null
           advance_directive_notes: string | null
           advanced_directives: boolean | null
