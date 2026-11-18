@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { sameRuleShifts, type PlanLine, type PublishPlan } from "@/lib/scheduler/publish-plan";
 import { staffName, useBoard } from "./board-context";
-import { shiftLabel } from "./shift-chip";
+import { shiftLabel } from "./shift-label";
 
 export type Reasons = Record<string, string>;
 

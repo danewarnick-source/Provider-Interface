@@ -15,7 +15,6 @@ import {
   type BoardShift,
   type View,
 } from "@/lib/scheduler/board-model";
-import { dayKey, parseLocalDate } from "@/lib/scheduler/time";
 import { firstName, shiftFlags, staffName, useBoard, type Board } from "./board-context";
 import { CodeTag } from "./board-ui";
 
@@ -28,19 +27,6 @@ export type DragData =
 export function placeLabel(b: Board, s: BoardShift): string {
   if (s.team_id && b.teams.has(s.team_id)) return b.teams.get(s.team_id)!.team_name;
   return s.client_id ? clientName(b.clients.get(s.client_id)) : "Shift";
-}
-
-/** "Thu Oct 22 3p–11p · Maple House · Ava Reyes", for dialog lists. */
-export function shiftLabel(b: Board, id: string): string {
-  const s = b.shifts.find((x) => x.id === id);
-  if (!s) return "A shift outside this week";
-  const day = parseLocalDate(dayKey(s.starts_at)).toLocaleDateString("en-US", {
-    timeZone: "America/Denver",
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
-  return `${day} ${fmtSpan(s)} · ${placeLabel(b, s)} · ${staffName(b, s.staff_id)}`;
 }
 
 function subLine(b: Board, s: BoardShift, view: View): string {

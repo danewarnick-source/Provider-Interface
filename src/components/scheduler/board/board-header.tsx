@@ -14,7 +14,7 @@ import { newDraft } from "./add-draft";
 import { Pill } from "./board-ui";
 
 /** The week's changes and drafts waiting to be sent. */
-export function waitingCount(b: Board): number {
+function waitingCount(b: Board): number {
   const inWeek = (iso: string) => b.days.includes(dayKey(iso));
   return publishPlan({
     shifts: b.shifts,

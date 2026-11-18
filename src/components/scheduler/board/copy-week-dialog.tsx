@@ -23,7 +23,7 @@ import { weekSpan, type Skip } from "@/lib/scheduler/copy-week";
 import { filterOptions } from "@/lib/scheduler/board-model";
 import { addDaysKey } from "@/lib/scheduler/time";
 import { useBoard, type Board } from "./board-context";
-import { shiftLabel } from "./shift-chip";
+import { shiftLabel } from "./shift-label";
 
 const WHY: Record<Skip["why"], string> = {
   person: "they already have a shift then",
