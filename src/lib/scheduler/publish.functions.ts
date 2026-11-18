@@ -1,111 +1,114 @@
-// Publish a week of the scheduler (/dashboard/scheduler). All or nothing:
-// every unpublished staffed shift in the week runs the rule engine
-// (shift-guard.server.ts) and nothing is published while one is refused; the
-// screen lists each refused shift with its one-line reason. Notifies each
-// team member once.
+// Publish / Send changes for one week of the scheduler board (B4).
+// previewPublish: the checklist (publish-plan.server.ts): blocks, shifts that
+// need a reason, reminders, over the overtime threshold, who gets a notice,
+// open shifts to offer. sendChanges: refuses while any block or missing reason
+// remains (sendBlocker); otherwise publishes the drafts (typed reasons saved
+// in override_reason), marks the week's changes sent, sends one notice to each
+// affected person (no client details; shift-change.ts noticeFor) and offers
+// the open shifts (offer.server.ts). Both need scheduling edit and run as the
+// caller (RLS applies).
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { denverWeekUtcBounds } from "@/lib/scheduler/recurrence";
 import { requireCategory } from "@/lib/access/require";
-import {
-  checkShiftRows,
-  refusalsByShift,
-  SHIFT_COLUMNS,
-  type ShiftRowIn,
-} from "@/lib/scheduler/shift-guard.server";
-import { warningLines } from "@/lib/scheduler/rules";
-import { dayKey } from "@/lib/scheduler/time";
+import { loadPublishPlan } from "@/lib/scheduler/publish-plan.server";
+import { sendBlocker } from "@/lib/scheduler/publish-plan";
+import { noticeFor } from "@/lib/scheduler/shift-change";
+import { offerShifts } from "@/lib/scheduler/offer.server";
 import { notify } from "@/lib/scheduler/notify";
+import { parseLocalDate } from "@/lib/scheduler/time";
 
-export const publishWeek = createServerFn({ method: "POST" })
+const uuid = z.string().uuid();
+const Week = z.object({
+  organization_id: uuid,
+  week_start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+});
+const SendInput = Week.extend({ reasons: z.record(uuid, z.string().max(1000)).default({}) });
+
+export const previewPublish = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { organization_id: string; week_start_iso: string }) =>
-    z
-      .object({
-        organization_id: z.string().uuid(),
-        week_start_iso: z.string().min(1),
-      })
-      .parse(d),
-  )
+  .inputValidator((d: z.input<typeof Week>) => Week.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    if (!supabase || !userId)
-      return { ok: true as const, shifts: 0, staff: 0, failures: [], warnings: [] as string[] };
+    if (!supabase || !userId) throw new Error("Sign in again to publish.");
     await requireCategory(supabase, userId, data.organization_id, "scheduling", "edit");
-    const { startIso, endExclusiveIso } = denverWeekUtcBounds(data.week_start_iso);
+    return (await loadPublishPlan(supabase, data.organization_id, data.week_start)).plan;
+  });
 
-    const { data: pending, error: pErr } = await supabase
-      .from("scheduled_shifts")
-      .select(
-        SHIFT_COLUMNS,
-      )
-      .eq("organization_id", data.organization_id)
-      .eq("published", false)
-      .neq("status", "cancelled")
-      .gte("starts_at", startIso)
-      .lt("starts_at", endExclusiveIso)
-      .not("staff_id", "is", null);
-    if (pErr) throw pErr;
-    const toPublish = (pending ?? []) as ShiftRowIn[];
+export const sendChanges = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.input<typeof SendInput>) => SendInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) throw new Error("Sign in again to publish.");
+    const org = data.organization_id;
+    await requireCategory(supabase, userId, org, "scheduling", "edit");
+    const { plan, byId } = await loadPublishPlan(supabase, org, data.week_start);
+    const reasons = Object.fromEntries(
+      Object.entries(data.reasons)
+        .map(([id, r]) => [id, r.trim()] as const)
+        .filter(([id, r]) => r && plan.checked.includes(id)),
+    );
+    const blocker = sendBlocker(plan, reasons);
+    if (blocker) throw new Error(`Nothing was sent. ${blocker}`);
 
-    // Publish nothing unless every shift passes the rule engine (as saveShift).
-    const { verdict } = await checkShiftRows(supabase, data.organization_id, toPublish);
-    const refused = refusalsByShift(verdict);
-    if (refused.size > 0) {
-      const byId = new Map(toPublish.map((r) => [r.id, r] as const));
-      return {
-        ok: false as const,
-        shifts: 0,
-        staff: 0,
-        failures: [...refused].map(([shiftId, reason]) => ({
-          shift_id: shiftId,
-          day: dayKey(byId.get(shiftId)!.starts_at),
-          code: byId.get(shiftId)!.service_code,
-          reason,
-        })),
-        warnings: [] as string[],
-      };
+    const drafts = new Set(plan.drafts);
+    for (const [id, reason] of Object.entries(reasons)) {
+      const publish = drafts.has(id) ? { published: true, status: "published" } : {};
+      const { error } = await supabase
+        .from("scheduled_shifts")
+        .update({ override_reason: reason, ...publish })
+        .eq("id", id)
+        .eq("organization_id", org);
+      if (error) throw error;
+      drafts.delete(id);
+    }
+    if (drafts.size) {
+      const { error } = await supabase
+        .from("scheduled_shifts")
+        .update({ published: true, status: "published" })
+        .in("id", [...drafts])
+        .eq("organization_id", org);
+      if (error) throw error;
+    }
+    if (plan.changeIds.length) {
+      const { error } = await supabase
+        .from("shift_changes")
+        .update({ sent_at: new Date().toISOString() })
+        .in("id", plan.changeIds)
+        .eq("organization_id", org);
+      if (error) throw error;
     }
 
-    const { data: rows, error } = await supabase
-      .from("scheduled_shifts")
-      .update({ published: true, status: "published" })
-      .in(
-        "id",
-        toPublish.map((r) => r.id!),
-      )
-      .select("id, staff_id");
-    if (error) throw error;
-    const byStaff = new Map<string, number>();
-    for (const r of rows ?? []) {
-      const sid = (r as { staff_id: string | null }).staff_id;
-      if (!sid) continue;
-      byStaff.set(sid, (byStaff.get(sid) ?? 0) + 1);
-    }
-    if (byStaff.size > 0) {
-      const weekLabel = new Date(startIso).toLocaleDateString("en-US", {
-        timeZone: "America/Denver",
-        month: "short",
-        day: "numeric",
-      });
-      const notifs = Array.from(byStaff.entries()).map(([staffId, count]) => ({
-        organization_id: data.organization_id,
-        recipient_role: "staff",
-        recipient_user_id: staffId,
-        type: "shift_published",
-        urgency: "normal",
-        title: "Your schedule was published",
-        body: `You have ${count} new or updated shift${count === 1 ? "" : "s"} for the week of ${weekLabel}.`,
-        link_to: "/dashboard/schedule",
-      }));
-      await notify(supabase, notifs);
-    }
+    const weekLabel = parseLocalDate(data.week_start).toLocaleDateString("en-US", {
+      timeZone: "America/Denver",
+      month: "short",
+      day: "numeric",
+    });
+    await notify(
+      supabase,
+      plan.notify.map((staffId) => {
+        const mine = plan.changes.filter((c) => c.affected.includes(staffId));
+        const fresh = plan.drafts.filter((id) => byId.get(id)?.staff_id === staffId).length;
+        return {
+          organization_id: org,
+          recipient_role: "staff",
+          recipient_user_id: staffId,
+          urgency: "normal",
+          link_to: "/dashboard/schedule",
+          ...noticeFor(staffId, mine, fresh, weekLabel),
+        };
+      }),
+    );
+    const offered = await offerShifts(
+      supabase,
+      org,
+      plan.openToOffer.map((id) => byId.get(id)!),
+    );
     return {
-      ok: true as const,
-      shifts: rows?.length ?? 0,
-      staff: byStaff.size,
-      failures: [],
-      warnings: warningLines(verdict),
+      published: plan.drafts.length,
+      changes: plan.changes.length,
+      people: plan.notify.length,
+      offered,
     };
   });

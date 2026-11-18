@@ -2,8 +2,9 @@
 // into a shift runs: load the facts (rule-context.server.ts), run rules.ts at
 // the agency's strengths, and turn the findings into refuse / ask for a reason
 // / go ahead with warnings. Called by scheduler.functions.ts (save, restore),
-// publish.functions.ts, open-shifts.functions.ts (claim), find-staff.functions.ts
-// (checks) and clock-in.functions.ts. No caller adds checks of its own.
+// publish-plan.server.ts (Send changes), copy-week.server.ts (Copy week),
+// open-shifts.functions.ts (claim), find-staff.functions.ts (checks) and
+// clock-in.functions.ts. No caller adds checks of its own.
 import { evaluateShifts, refusalLine, verdictOf, warningLines, type Verdict } from "./rules.ts";
 import type { Finding } from "./rules-types.ts";
 import { loadRuleContext, toRuleShift, type ShiftRowIn } from "./rule-context.server.ts";
@@ -50,14 +51,4 @@ export async function guardShiftRows(
   const refused = refusalLine(verdict);
   if (refused) throw new ShiftRefusedError(refused, verdict);
   return warningLines(verdict);
-}
-
-/** Refusal lines per shift id, for a batch that is all-or-nothing (publish). */
-export function refusalsByShift(verdict: Verdict): Map<string, string> {
-  const out = new Map<string, string>();
-  for (const f of [...verdict.blocks, ...verdict.needReason]) {
-    if (!f.shiftId || out.has(f.shiftId)) continue;
-    out.set(f.shiftId, f.level === "block" ? f.message : `Add a reason to go ahead: ${f.message}`);
-  }
-  return out;
 }

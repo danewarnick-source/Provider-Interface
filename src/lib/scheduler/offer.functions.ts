@@ -1,34 +1,16 @@
 // Offering open shifts from the scheduler board, and who's been asked.
-// offerOpenShifts makes each shift open and visible to staff (published, no
-// one on it) and notifies everyone qualified for it at once (Decision 6):
-// qualified = Find staff's "Good fit" or "Check" rows (rank-staff.ts), so
-// people who need a reason, are missing an Evidence item or can't take it are
-// never offered it. The notification rows are the record of who was asked;
-// listShiftOffers reads them back for the shift drawer. Claims then run
-// through open-shifts.functions.ts.
+// offerOpenShifts runs offer.server.ts (open + published, everyone qualified
+// notified at once, Decision 6); listShiftOffers reads those notifications
+// back as the shift drawer's "Who's been asked". Claims then run through
+// open-shifts.functions.ts.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireCategory } from "@/lib/access/require";
-import { SHIFT_COLUMNS, type ShiftRowIn } from "@/lib/scheduler/shift-guard.server";
-import { rankCandidates } from "@/lib/scheduler/find-staff.server";
-import { isQualified } from "@/lib/scheduler/rank-staff";
-import { fmtSpan } from "@/lib/scheduler/board-model";
-import { notify, type SchedulerNotification } from "@/lib/scheduler/notify";
-import { dayKey, parseLocalDate } from "@/lib/scheduler/time";
+import { SHIFT_COLUMNS } from "@/lib/scheduler/shift-guard.server";
+import { OFFER_TYPE, offerShifts, type OfferShift } from "@/lib/scheduler/offer.server";
 
 const uuid = z.string().uuid();
-const OFFER_TYPE = "shift_published";
-
-function when(s: ShiftRowIn): string {
-  const day = parseLocalDate(dayKey(s.starts_at)).toLocaleDateString("en-US", {
-    timeZone: "America/Denver",
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
-  return `${day} ${fmtSpan(s)}`;
-}
 
 export const offerOpenShifts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -45,44 +27,12 @@ export const offerOpenShifts = createServerFn({ method: "POST" })
       .eq("organization_id", data.organization_id)
       .in("id", data.shift_ids);
     if (error) throw error;
-    const shifts = (
-      (found ?? []) as Array<ShiftRowIn & { id: string; open_spots: number | null }>
-    ).filter((s) => !s.staff_id && s.status !== "cancelled");
+    const shifts = ((found ?? []) as OfferShift[]).filter(
+      (s) => !s.staff_id && s.status !== "cancelled",
+    );
     if (!shifts.length)
       throw new Error("Those shifts already have someone on them or were cancelled.");
-
-    const people = new Set<string>();
-    const notes: SchedulerNotification[] = [];
-    for (const s of shifts) {
-      const { data: rows, error: uErr } = await supabase
-        .from("scheduled_shifts")
-        .update({ status: "open", published: true, open_spots: s.open_spots ?? 1 })
-        .eq("id", s.id)
-        .is("staff_id", null)
-        .select("id");
-      if (uErr) throw uErr;
-      if (!rows?.length) continue;
-      const qualified = (await rankCandidates(supabase, data.organization_id, s)).filter(
-        isQualified,
-      );
-      for (const c of qualified) {
-        people.add(c.staffId);
-        notes.push({
-          organization_id: data.organization_id,
-          recipient_role: "staff",
-          recipient_user_id: c.staffId,
-          type: OFFER_TYPE,
-          urgency: "normal",
-          title: "Open shift you can pick up",
-          body: `${(s.service_code ?? "").toUpperCase()} · ${when(s)}`,
-          link_to: "/dashboard/schedule",
-          related_id: s.id,
-          related_type: "scheduled_shift",
-        });
-      }
-    }
-    await notify(supabase, notes);
-    return { people: people.size, shifts: shifts.length };
+    return offerShifts(supabase, data.organization_id, shifts);
   });
 
 /** Who an open shift was offered to, and whether they've seen it. */

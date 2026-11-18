@@ -1,12 +1,14 @@
 // Shared state for one scheduler board: the loaded data and rule findings,
-// lookups by id, whether the viewer may edit, the change actions (with Undo)
-// and which drawer is open. Provided by scheduler-board.tsx; every board
-// component reads it with useBoard() instead of threading props.
+// lookups by id, whether the viewer may edit, the change actions (with Undo),
+// the unsent changes to published shifts (B4) and which drawer or dialog is
+// open. Provided by scheduler-board.tsx; every board component reads it with
+// useBoard() instead of threading props.
 import { createContext, useContext, type ReactNode } from "react";
 import type { Check } from "@/lib/scheduler/find-staff.functions";
 import type { BoardClient, BoardShift, BoardTeam } from "@/lib/scheduler/board-model";
 import type { BoardActions } from "./use-board-actions";
 import type { BoardData, BoardStaff } from "@/lib/scheduler/board-data";
+import type { NetChange } from "@/lib/scheduler/shift-change";
 
 /** What Add shift starts from. `lock` = the team member was picked from their row's +. */
 export type AddDraft = {
@@ -20,11 +22,16 @@ export type AddDraft = {
   shiftType: string | null;
 };
 
+/** A dialog a drawer goes back to when it closes (Publish › Open shift). */
+export type Back = "publish";
+
 export type Panel =
-  | { kind: "shift"; id: string }
-  | { kind: "add"; draft: AddDraft }
-  | { kind: "find"; id: string }
-  | { kind: "list"; which: "hours" | "open" | "ot" };
+  | { kind: "shift"; id: string; back?: Back }
+  | { kind: "add"; draft: AddDraft; back?: Back }
+  | { kind: "find"; id: string; back?: Back }
+  | { kind: "list"; which: "hours" | "open" | "ot"; back?: Back }
+  | { kind: "publish"; back?: undefined }
+  | { kind: "copy"; back?: undefined };
 
 export type Board = {
   orgId: string;
@@ -38,6 +45,10 @@ export type Board = {
   staff: ReadonlyMap<string, BoardStaff>;
   /** Live shifts (not cancelled) plus cancelled ones, as loaded. */
   shifts: BoardShift[];
+  /** Unsent changes to published shifts that tell someone something, one per shift. */
+  changes: NetChange[];
+  /** Shift ids with an unsent change ("Changed · not sent"). */
+  changed: ReadonlySet<string>;
   open: (p: Panel) => void;
   close: () => void;
 };

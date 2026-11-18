@@ -1,11 +1,14 @@
 // The board's queries: its data (lib/scheduler/board-data.ts), the rule
 // findings for the week's staffed shifts (weekChecks), and the 1056 outlook
-// for the Clients view. Findings load separately so a slow engine never holds
-// up the grid.
+// for the Clients view, and the unsent changes to published shifts (B4; RLS
+// lets schedulers read shift_changes). Findings load separately so a slow
+// engine never holds up the grid.
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { weekChecks, type Check } from "@/lib/scheduler/find-staff.functions";
 import { loadAuthOutlook, loadBoardData, type BoardRange } from "@/lib/scheduler/board-data";
+import { supabase } from "@/integrations/supabase/client";
+import { collapseChanges, type ChangeRow, type NetChange } from "@/lib/scheduler/shift-change";
 
 export function useBoardData(orgId: string | undefined, range: BoardRange) {
   return useQuery({
@@ -34,5 +37,22 @@ export function useAuthOutlook(orgId: string | undefined, weekStart: string, ena
     enabled: !!orgId && enabled,
     queryKey: ["scheduler-board", "outlook", orgId, weekStart],
     queryFn: () => loadAuthOutlook(orgId!, weekStart),
+  });
+}
+
+/** Every unsent change in the agency, collapsed per shift; ones that cancel out are dropped. */
+export function useUnsentChanges(orgId: string | undefined) {
+  return useQuery({
+    enabled: !!orgId,
+    queryKey: ["scheduler-board", "changes", orgId],
+    queryFn: async (): Promise<NetChange[]> => {
+      const { data, error } = await supabase
+        .from("shift_changes")
+        .select("id, shift_id, affected_staff_ids, before, after, changed_at")
+        .eq("organization_id", orgId!)
+        .is("sent_at", null);
+      if (error) throw new Error(error.message);
+      return collapseChanges((data ?? []) as unknown as ChangeRow[]).filter((c) => c.real);
+    },
   });
 }

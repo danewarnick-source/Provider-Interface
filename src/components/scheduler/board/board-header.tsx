@@ -1,24 +1,29 @@
 // The board's header: the week (or month) with previous / next, whether
-// everything is published, Add shift, and Publish. Publish works as it did
-// before B3 (all or nothing through the rule engine, publish.functions.ts);
-// B4 redoes it as Send changes.
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, Plus, Send } from "lucide-react";
+// anything is waiting to go to staff, Add shift, Copy week and Send N changes
+// (B4). The count is the week's unsent changes to published shifts plus its
+// drafts (publish-plan.ts); "Published ✓" when there's nothing new. Both
+// buttons open their dialog (publish-dialog.tsx, copy-week-dialog.tsx).
+import { ChevronLeft, ChevronRight, Copy, Plus, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { publishWeek } from "@/lib/scheduler/publish.functions";
 import { fmtDay } from "@/lib/scheduler/auth-outlook";
-import { isCancelled } from "@/lib/scheduler/board-model";
+import { publishPlan } from "@/lib/scheduler/publish-plan";
 import { addDaysKey, dayKey, parseLocalDate } from "@/lib/scheduler/time";
-import { toastRuleWarnings } from "@/components/scheduler/shared/rule-warnings";
 import { SchedulingSettingsLink } from "@/components/scheduler/settings/place-settings-card";
-import { useBoard } from "./board-context";
+import { useBoard, type Board } from "./board-context";
 import { newDraft } from "./add-draft";
 import { Pill } from "./board-ui";
 
-type Failure = { shift_id: string; day: string; code: string | null; reason: string };
+/** The week's changes and drafts waiting to be sent. */
+function waitingCount(b: Board): number {
+  const inWeek = (iso: string) => b.days.includes(dayKey(iso));
+  return publishPlan({
+    shifts: b.shifts,
+    changes: b.changes.filter((c) => inWeek(c.before.starts_at) || inWeek(c.after.starts_at)),
+    findings: [],
+    otHours: b.data.otHours,
+    weekDays: b.days,
+  }).count;
+}
 
 export function BoardHeader({
   week,
@@ -30,31 +35,8 @@ export function BoardHeader({
   onStep: (dir: -1 | 0 | 1) => void;
 }) {
   const b = useBoard();
-  const qc = useQueryClient();
-  const publish = useServerFn(publishWeek);
-  const [failures, setFailures] = useState<Failure[]>([]);
   const today = dayKey(new Date());
-  const unsent = b.shifts.filter(
-    (s) => s.staff_id && !s.published && !isCancelled(s) && b.days.includes(dayKey(s.starts_at)),
-  ).length;
-  const pub = useMutation({
-    mutationFn: () =>
-      publish({
-        data: { organization_id: b.orgId, week_start_iso: parseLocalDate(week).toISOString() },
-      }),
-    onSuccess: (r) => {
-      if (!r.ok) {
-        setFailures(r.failures);
-        toast.error("Nothing was published. Fix the shifts listed below first.");
-        return;
-      }
-      setFailures([]);
-      toast.success(`Published: ${r.shifts} shifts sent to ${r.staff} team members.`);
-      toastRuleWarnings(r);
-      void qc.invalidateQueries({ queryKey: ["scheduler-board"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
+  const waiting = waitingCount(b);
   const title = month
     ? parseLocalDate(week).toLocaleDateString("en-US", {
         timeZone: "America/Denver",
@@ -99,12 +81,12 @@ export function BoardHeader({
           </div>
           <p className="mt-1 text-sm text-[var(--hive-text-muted)]">
             Today is {todayLine} ·{" "}
-            {unsent ? (
+            {waiting ? (
               <Pill tone="gold">
-                {unsent} shift{unsent === 1 ? "" : "s"} not published
+                {waiting} change{waiting === 1 ? "" : "s"} not sent
               </Pill>
             ) : (
-              <Pill tone="ok">Published</Pill>
+              <Pill tone="ok">Published · staff notified</Pill>
             )}
           </p>
         </div>
@@ -125,32 +107,34 @@ export function BoardHeader({
                 <Plus className="mr-1 h-4 w-4" /> Add shift
               </Button>
               {!month && (
-                <Button className="min-h-11" disabled={pub.isPending} onClick={() => pub.mutate()}>
-                  <Send className="mr-1 h-4 w-4" /> {pub.isPending ? "Publishing…" : "Publish"}
-                </Button>
+                <>
+                  <Button
+                    variant="outline"
+                    className="min-h-11"
+                    onClick={() => b.open({ kind: "copy" })}
+                  >
+                    <Copy className="mr-1 h-4 w-4" /> Copy week
+                  </Button>
+                  <Button
+                    variant={waiting ? "default" : "outline"}
+                    className="min-h-11"
+                    onClick={() => b.open({ kind: "publish" })}
+                  >
+                    {waiting ? (
+                      <>
+                        <Send className="mr-1 h-4 w-4" /> Send {waiting} change
+                        {waiting === 1 ? "" : "s"}
+                      </>
+                    ) : (
+                      "Published ✓"
+                    )}
+                  </Button>
+                </>
               )}
             </>
           )}
         </div>
       </div>
-      {failures.length > 0 && (
-        <div
-          role="alert"
-          className="rounded-md border border-[var(--hive-gold)] bg-[var(--hive-gold-soft)] px-4 py-3 text-sm"
-        >
-          <div className="font-semibold">
-            Nothing was published. These shifts need fixing first:
-          </div>
-          <ul className="mt-1 list-disc pl-5">
-            {failures.map((f) => (
-              <li key={f.shift_id}>
-                {fmtDay(f.day)}
-                {f.code ? ` ${f.code}` : ""}: {f.reason}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </div>
   );
 }

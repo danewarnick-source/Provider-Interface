@@ -1,5 +1,6 @@
 // One shift on the board: time, code, who or where, and its flag ("! reminder"
-// or "✕ block" from the rule engine). Dashed = draft, red = open, grey = cancelled.
+// or "✕ block" from the rule engine). Dashed = draft, red = open, grey = cancelled,
+// gold edge = changed since it was published and not sent yet (B4).
 // Drag it to another day or person to move it (Alt-drag copies); drag its top or
 // bottom edge to change the start or end (every 8 px is 15 minutes). The drop
 // handler is in board-grid.tsx. Click opens the shift drawer.
@@ -91,6 +92,7 @@ export function ShiftChip({ s, view, rowKey }: { s: BoardShift; view: View; rowK
         {...move.listeners}
         {...move.attributes}
         onClick={() => b.open({ kind: "shift", id: s.id })}
+        title={b.changed.has(s.id) ? "Changed · not sent" : undefined}
         className={[
           "block w-full rounded-md border-l-4 px-1.5 py-1 text-left text-[11px] leading-tight",
           c.border,
@@ -100,6 +102,7 @@ export function ShiftChip({ s, view, rowKey }: { s: BoardShift; view: View; rowK
               ? "border border-[var(--hive-danger)] bg-[var(--hive-danger-soft)]"
               : "border border-[var(--hive-border)] bg-[var(--hive-surface)]",
           !s.published && !isCancelled(s) ? "border-dashed" : "",
+          b.changed.has(s.id) ? "ring-1 ring-inset ring-[var(--hive-gold)]" : "",
           locked ? "cursor-pointer" : "cursor-grab",
         ].join(" ")}
       >

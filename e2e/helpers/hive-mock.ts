@@ -529,9 +529,10 @@ export async function installHiveMocks(page: Page, role: HiveRole = "admin"): Pr
     const method = req.method().toUpperCase();
     const url = req.url();
     const name = serverFnExport(url);
-    const mutating = /saveShift|cancelShift|restoreShift|offerOpenShifts|publishWeek/i.test(
-      name,
-    );
+    const mutating =
+      /saveShift|cancelShift|restoreShift|offerOpenShifts|sendChanges|(^|_)copyWeek|ackShiftChange/i.test(
+        name,
+      );
     if (mutating) {
       mock.writes.push({ method, url, table: "_serverFn" });
     }

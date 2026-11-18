@@ -77,7 +77,13 @@ export function ShiftDrawer({ s }: { s: BoardShift }) {
         s.starts_at < x.ends_at,
     )
     .map((x) => staffName(b, x.staff_id));
-  const state = cancelled ? "Cancelled" : s.published ? "Published" : "Draft";
+  const state = cancelled
+    ? "Cancelled"
+    : !s.published
+      ? "Draft"
+      : b.changed.has(s.id)
+        ? "Changed · not sent"
+        : "Published";
   const act = (p: Promise<boolean>) => void p.then((ok) => ok && b.close());
   return (
     <DrawerShell

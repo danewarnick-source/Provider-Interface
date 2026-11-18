@@ -1,5 +1,6 @@
 // Every change the scheduler board makes, and its Undo. Each change calls a
-// server function (saveShift, cancelShift, restoreShift, offerOpenShifts), all
+// server function (saveShift, cancelShift, restoreShift, offerOpenShifts; Copy
+// week reports its copies here so Undo can cancel them), all
 // of which run the rule engine; a block shows its reason in a toast and the
 // board stays as it was. A "needs a reason" refusal opens the reason box and
 // retries with the typed reason (saved on the shift). After each change a
@@ -173,6 +174,11 @@ export function useBoardActions(orgId: string) {
         },
         (r) => done(`Shift is open · offered to ${r.people}`, () => put(s)),
       );
+    },
+
+    /** After Copy week: Undo cancels every copy (they stay on record). */
+    copied(ids: string[], message: string) {
+      done(message, () => cancelIds(ids));
     },
 
     offer(ids: string[]) {

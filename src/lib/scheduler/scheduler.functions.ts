@@ -3,14 +3,21 @@
 // (scheduling edit). Saving and restoring run the rule engine through
 // shift-guard.server.ts (rules.ts at the agency's strengths). Nothing here
 // deletes a shift: a cancelled shift stays on record and can be restored.
-// Publishing is in publish.functions.ts; offering open shifts in
-// offer.functions.ts.
+// Each write to a published shift records what changed (shift-change.server.ts)
+// so Send changes can tell the people affected. Publishing is in
+// publish.functions.ts; offering open shifts in offer.functions.ts.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { coerceScheduledShiftStatus } from "@/lib/scheduler/shift-status";
+import { snapshotOf } from "@/lib/scheduler/shift-change";
 import { requireCategory } from "@/lib/access/require";
 import { guardShiftRows, SHIFT_COLUMNS, type ShiftRowIn } from "@/lib/scheduler/shift-guard.server";
+import {
+  loadSnapshot,
+  recordShiftChange,
+  SNAPSHOT_COLUMNS,
+} from "@/lib/scheduler/shift-change.server";
 
 const uuid = z.string().uuid();
 
@@ -80,15 +87,17 @@ export const saveShift = createServerFn({ method: "POST" })
     });
 
     if (data.id) {
+      const before = await loadSnapshot(supabase, data.organization_id, data.id);
       const { data: rows, error } = await supabase
         .from("scheduled_shifts")
         .update(payload)
         .eq("id", data.id)
         .eq("organization_id", data.organization_id)
-        .select("id");
+        .select(SNAPSHOT_COLUMNS);
       if (error) throw error;
       if (!rows?.length)
         throw new Error("That shift wasn't saved: it no longer exists or you can't edit it.");
+      await recordShiftChange(supabase, data.organization_id, userId, data.id, before, rows[0]);
       return { id: data.id, warnings };
     }
     const { data: inserted, error } = await supabase
@@ -114,15 +123,17 @@ export const cancelShift = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false };
     await requireCategory(supabase, userId, data.organization_id, "scheduling", "edit");
+    const before = await loadSnapshot(supabase, data.organization_id, data.id);
     const { data: rows, error } = await supabase
       .from("scheduled_shifts")
       .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
       .eq("id", data.id)
       .eq("organization_id", data.organization_id)
-      .select("id");
+      .select(SNAPSHOT_COLUMNS);
     if (error) throw error;
     if (!rows?.length)
       throw new Error("That shift wasn't cancelled: it no longer exists or you can't edit it.");
+    await recordShiftChange(supabase, data.organization_id, userId, data.id, before, rows[0]);
     return { ok: true };
   });
 
@@ -158,8 +169,16 @@ export const restoreShift = createServerFn({ method: "POST" })
       .update({ status, cancelled_at: null, ...(reason ? { override_reason: reason } : {}) })
       .eq("id", data.id)
       .eq("organization_id", data.organization_id)
-      .select("id");
+      .select(SNAPSHOT_COLUMNS);
     if (error) throw error;
     if (!rows?.length) throw new Error("That shift wasn't restored: you can't edit it.");
+    await recordShiftChange(
+      supabase,
+      data.organization_id,
+      userId,
+      data.id,
+      snapshotOf(shift),
+      rows[0],
+    );
     return { ok: true, warnings };
   });
