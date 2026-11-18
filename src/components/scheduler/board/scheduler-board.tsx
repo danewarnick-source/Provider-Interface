@@ -22,7 +22,7 @@ import { BoardToolbar, StatTiles } from "./board-toolbar";
 import { AuthPanel } from "./auth-panel";
 import { MonthView } from "./month-view";
 import { useBoardActions } from "./use-board-actions";
-import { useAuthOutlook, useBoardData, useWeekChecks } from "./use-board-data";
+import { useAuthOutlook, useBoardData, useUnsentChanges, useWeekChecks } from "./use-board-data";
 
 export type BoardSearch = { view: View; show: FilterKey; range: Range; week?: string };
 
@@ -69,6 +69,7 @@ export function SchedulerBoard({
   });
   const outlook = useAuthOutlook(orgId, week, search.view === "clients" && !month);
   const actions = useBoardActions(orgId ?? "");
+  const changes = useUnsentChanges(orgId);
   const [panel, setPanel] = useState<Panel | null>(null);
 
   const board: Board | null =
@@ -85,8 +86,16 @@ export function SchedulerBoard({
           teams: new Map(data.data.teams.map((t) => [t.id, t])),
           staff: new Map(data.data.staff.map((s) => [s.id, s])),
           shifts: data.data.shifts,
-          open: setPanel,
-          close: () => setPanel(null),
+          changes: changes.data ?? [],
+          changed: new Set((changes.data ?? []).map((c) => c.shiftId)),
+          // A drawer opened from a dialog (Publish › Open shift) goes back to it on close.
+          open: (p) =>
+            setPanel((cur) =>
+              cur?.back && !p.back && p.kind !== "publish" && p.kind !== "copy"
+                ? ({ ...p, back: cur.back } as Panel)
+                : p,
+            ),
+          close: () => setPanel((cur) => (cur?.back ? { kind: cur.back } : null)),
         };
 
   if (data.error)
@@ -152,9 +161,9 @@ export function SchedulerBoard({
                 empty={EMPTY[search.view]}
               />
               <p className="px-4 py-2 text-xs text-[var(--hive-text-muted)]">
-                Dashed = draft · red = open · grey = cancelled. Click a shift to open it; drag to
-                move, Alt-drag to copy, drag an edge to change the time. Nothing is deleted;
-                cancelled shifts stay on record.
+                Dashed = draft · red = open · grey = cancelled · gold edge = changed, not sent.
+                Click a shift to open it; drag to move, Alt-drag to copy, drag an edge to change the
+                time. Nothing is deleted; cancelled shifts stay on record.
               </p>
             </>
           )}
