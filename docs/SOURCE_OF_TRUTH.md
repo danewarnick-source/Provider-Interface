@@ -43,9 +43,9 @@ Rules:
 | Who a client's host is | (1) `staff_assignments` + Position "Host Home Provider" (Daily Logs, `src/lib/daily-log-missing.ts`); (2) `hhs_host_home_settings.hhp_name` free text (Finances › Host home); (3) host home `teams` row + `clients.team_id` | Decided (Dane, Nov 13): the host home is a home in Settings (`teams`), the host is its lead (`teams.manager_id`), and the client's Home (`clients.team_id`) says who lives there. Remove the free-text name; Daily Logs and Finances read the home. | Fixed (PR #504; `hhp_name` dropped Nov 13) |
 | Who leads a home | `teams.manager_id` and a "Manager" role in `home_staff_designations` | `teams.manager_id` | Fixed (PR #504; the "Manager" title is a plain label now) |
 | What kind of home it is | `teams.team_type` and `teams.setting` | `teams.team_type` | Fixed (PR #504; `setting` dropped Nov 13) |
-| Where a client lives | `clients.team_id` (owner); `locations` (legacy, synced when a home is saved) | `clients.team_id` → `teams` | Fixed (Settings › Homes; `locations` dropped by Phase B `20261113174700`) |
-| Who works at a home | `home_staff_designations` (care team) and `staff_assignments` to its residents | `staff_assignments` | Fixed (Settings › Homes; table dropped by Phase B `20261113174700`) |
-| A client's ratio | `client_ratios` (homes board) and `client_billing_codes.ratio` (scheduler) | `client_billing_codes.ratio` | Fixed (Settings › Homes; table dropped by Phase B `20261113174700`). `clients.staff_ratio` (set by the client import) is still a third copy with no editor |
+| Where a client lives | `clients.team_id` (owner); `locations` (legacy, synced when a home is saved) | `clients.team_id` → `teams` | Fixed (Settings › Homes; `locations` dropped Nov 18 (`20261118181932`)) |
+| Who works at a home | `home_staff_designations` (care team) and `staff_assignments` to its residents | `staff_assignments` | Fixed (Settings › Homes; table dropped Nov 18 (`20261118181932`)) |
+| A client's ratio | `client_ratios` (homes board) and `client_billing_codes.ratio` (scheduler) | `client_billing_codes.ratio` | Fixed (Settings › Homes; table dropped Nov 18 (`20261118181932`)). `clients.staff_ratio` (set by the client import) is still a third copy with no editor |
 
 ## More rules
 - **Two names, one thing:** the UI says "client" / "team member" / "home"; the schema says `clients` / `profiles`+`organization_members` / `teams`. Don't introduce a third name (no "person", "staff", "location", "employee" in new tables or files).

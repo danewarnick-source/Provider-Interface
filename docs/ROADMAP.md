@@ -2,7 +2,7 @@
 
 Read this before planning or building anything. Update it at the end of every session ("update the roadmap and decisions, then commit"). Owner decisions are in `docs/decisions.md`.
 
-**Next up:** (1) Dane merges PR #509 (Settings › Homes; still open as of Nov 18), then apply `20261113174700_homes_b_drop_locations_and_duplicates.sql` with his OK. (2) B4: plan in `docs/scheduler-rebuild/B4-PLAN.md`, waiting for Dane's answers (6 questions).
+**Next up:** B4: plan in `docs/scheduler-rebuild/B4-PLAN.md`, waiting for Dane's answers (6 questions). Settings › Homes is live (PR #509) and its cleanup was applied Nov 18.
 
 ## The vision (Dane, Nov 13, 2026)
 - **One platform for Utah DSPD providers, built for the admin side first.** Staff screens exist to feed admins clean records.
@@ -53,3 +53,4 @@ Status: `audit` → `demo` → `demo approved` → `building` → `live` (✅ = 
 |---|---|---|---|
 | 2026-11-13 | 274 | 1,773 | 376,664 |
 | 2026-11-13 (after B1 + B2 + B3) | 274 | 1,820 | 378,853 |
+| 2026-11-18 (after Settings › Homes + cleanup) | 271 | 1,841 | 378,723 |
