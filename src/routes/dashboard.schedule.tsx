@@ -18,6 +18,7 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { useTimePaySettings } from "@/hooks/use-time-pay-settings";
 import { respondToShift } from "@/lib/scheduler/workflow.functions";
 import { OpenShiftsPanel } from "@/components/scheduler/shared/open-shifts-panel";
+import { ShiftChangeCards } from "@/components/scheduler/shared/shift-change-cards";
 import { useActiveShift } from "@/hooks/use-active-shift";
 import { useGeneralShift } from "@/hooks/use-general-shift";
 import { fmtElapsed } from "@/components/staff-mobile/general-time-clock";
@@ -649,6 +650,8 @@ function SchedulePage() {
           }
         />
       </div>
+
+      {org?.organization_id && <ShiftChangeCards organizationId={org.organization_id} />}
 
       <MyTimeOffPanel />
 
