@@ -15582,6 +15582,93 @@ export type Database = {
           },
         ]
       }
+      shift_change_acks: {
+        Row: {
+          acked_at: string
+          change_id: string
+          organization_id: string
+          staff_id: string
+        }
+        Insert: {
+          acked_at?: string
+          change_id: string
+          organization_id: string
+          staff_id: string
+        }
+        Update: {
+          acked_at?: string
+          change_id?: string
+          organization_id?: string
+          staff_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_change_acks_change_id_fkey"
+            columns: ["change_id"]
+            isOneToOne: false
+            referencedRelation: "shift_changes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_change_acks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shift_changes: {
+        Row: {
+          affected_staff_ids: string[]
+          after: Json
+          before: Json
+          changed_at: string
+          changed_by: string | null
+          id: string
+          organization_id: string
+          sent_at: string | null
+          shift_id: string
+        }
+        Insert: {
+          affected_staff_ids?: string[]
+          after: Json
+          before: Json
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          organization_id: string
+          sent_at?: string | null
+          shift_id: string
+        }
+        Update: {
+          affected_staff_ids?: string[]
+          after?: Json
+          before?: Json
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          organization_id?: string
+          sent_at?: string | null
+          shift_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_changes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_changes_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_shifts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shift_completeness_flags: {
         Row: {
           client_id: string | null

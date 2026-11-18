@@ -1,6 +1,6 @@
 # B4 plan: Publish, Send changes, Copy week
 
-Status: **waiting for Dane's answers and approval** (Nov 18, 2026). Spec: `docs/demos/scheduler.html` › Scheduler › Publish / Send changes / Copy week. Step text: PART-B.md › B4.
+Status: **approved, building** (Nov 18, 2026). Dane: yes to all 6 questions. Spec: `docs/demos/scheduler.html` › Scheduler › Publish / Send changes / Copy week. Step text: PART-B.md › B4.
 
 ## 1. Job
 Nothing broken reaches staff, staff hear only about what changed for them, and next week starts from this one.
