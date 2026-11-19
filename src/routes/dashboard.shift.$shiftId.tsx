@@ -17,8 +17,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useAccess } from "@/hooks/use-access";
-import { notify } from "@/lib/scheduler/notify";
 import { acknowledgeCallout } from "@/lib/scheduler/needs.functions";
+import { calloutUrgency, callOutOfShift, lockCalloutCoverage } from "@/lib/scheduler/callout.functions";
 import { staffClockOutSearch } from "@/lib/staff-clock-out";
 import { monthlySupportHoursTarget } from "@/lib/scheduler/hhs-visit";
 import { Button } from "@/components/ui/button";
@@ -420,55 +420,16 @@ function CalloutPanel({ shift, userId }: { shift: Shift; userId?: string }) {
     },
   });
 
-  const urgency = useMemo<"low" | "normal" | "high" | "critical">(() => {
-    const hrs = (new Date(shift.starts_at).getTime() - Date.now()) / 3_600_000;
-    if (hrs < 1) return "critical";
-    if (hrs < 4) return "high";
-    if (hrs < 12) return "normal";
-    return "low";
-  }, [shift.starts_at]);
+  const urgency = useMemo(() => calloutUrgency(shift.starts_at), [shift.starts_at]);
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["callout", shift.id] });
+    qc.invalidateQueries({ queryKey: ["callout-events", existing?.id] });
+  };
 
+  const callOutFn = useServerFn(callOutOfShift);
   const callOut = useMutation({
-    mutationFn: async () => {
-      const { data: co, error } = await (supabase as any).from("shift_callouts").insert({
-        organization_id: shift.organization_id,
-        scheduled_shift_id: shift.id,
-        staff_id: userId,
-        reason,
-        urgency,
-        status: "open",
-      }).select().single();
-      if (error) throw error;
-      // Until the full call-out flow ships, a call-out only notifies the scheduler.
-      // The event row records what actually happened, never an alert that was not sent.
-      const startLabel = new Date(shift.starts_at).toLocaleString("en-US", {
-        timeZone: "America/Denver", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
-      });
-      const sent = await notify(supabase, {
-        organization_id: shift.organization_id,
-        recipient_role: "admin",
-        type: "callout",
-        urgency: urgency === "critical" ? "critical" : urgency === "high" ? "high" : "normal",
-        title: `Call-out: ${shift.code?.code ?? shift.service_code ?? "shift"} · ${startLabel}`,
-        body: reason.trim() || "A team member can't make their shift.",
-        link_to: "/dashboard/scheduler/needs",
-        related_id: shift.id,
-        related_type: "scheduled_shift",
-      });
-      const { error: evErr } = await (supabase as any).from("callout_escalation_events").insert({
-        organization_id: shift.organization_id,
-        callout_id: co.id,
-        step: 1,
-        channel: "in_app",
-        target_role: "manager",
-        outcome: sent ? "sent" : "failed",
-        detail: sent ? "Scheduler notified in the app." : "Could not notify the scheduler. Tell them directly.",
-      });
-      if (evErr) console.error("[callout] event insert failed", evErr.message);
-      if (!sent) throw new Error("Your call-out was saved, but we could not notify the scheduler. Please tell them directly.");
-      return co;
-    },
-    onSuccess: () => { toast.success("Call-out received. Your scheduler has been notified."); setReason(""); qc.invalidateQueries({ queryKey: ["callout", shift.id] }); },
+    mutationFn: () => callOutFn({ data: { organization_id: shift.organization_id, shift_id: shift.id, reason } }),
+    onSuccess: () => { toast.success("Call-out received. Your scheduler has been notified."); setReason(""); invalidate(); },
     onError: (e: any) => toast.error(e.message ?? "Call-out failed"),
   });
 
@@ -478,29 +439,18 @@ function CalloutPanel({ shift, userId }: { shift: Shift; userId?: string }) {
       if (!existing) return;
       await acknowledgeFn({ data: { organization_id: shift.organization_id, callout_id: existing.id } });
     },
-    onSuccess: () => { toast.success("Acknowledged"); qc.invalidateQueries({ queryKey: ["callout", shift.id] }); qc.invalidateQueries({ queryKey: ["callout-events", existing?.id] }); },
+    onSuccess: () => { toast.success("Acknowledged"); invalidate(); },
     onError: (e: any) => toast.error(e.message ?? "That didn't save. Try again."),
   });
 
+  const lockFn = useServerFn(lockCalloutCoverage);
   const lockCoverage = useMutation({
     mutationFn: async () => {
       if (!existing) return;
-      const { error } = await (supabase as any).from("shift_callouts").update({
-        status: "coverage_locked",
-        coverage_locked_at: new Date().toISOString(),
-        resolved_at: new Date().toISOString(),
-      }).eq("id", existing.id);
-      if (error) throw error;
-      await (supabase as any).from("callout_escalation_events").insert({
-        organization_id: shift.organization_id,
-        callout_id: existing.id,
-        step: (events?.length ?? 0) + 1,
-        channel: "system",
-        outcome: "acknowledged",
-        detail: "Coverage locked. Call-out closed.",
-      });
+      await lockFn({ data: { organization_id: shift.organization_id, callout_id: existing.id } });
     },
-    onSuccess: () => { toast.success("Coverage locked"); qc.invalidateQueries({ queryKey: ["callout", shift.id] }); },
+    onSuccess: () => { toast.success("Coverage locked"); invalidate(); },
+    onError: (e: any) => toast.error(e.message ?? "That didn't save. Try again."),
   });
 
   if (existing && existing.status !== "cancelled") {
