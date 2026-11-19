@@ -101,3 +101,17 @@ export function noStaffWhen(b: Pick<NoStaffBlock, "days" | "start" | "end">, dat
       : `${timeText(b.start)} – ${timeText(b.end)}${b.end < b.start ? " (next day)" : ""}`;
   return `${when} · ${time}`;
 }
+
+/** A stored block back into a draft (Undo after Remove re-saves it as it was). */
+export function draftFromBlock(b: NoStaffBlock): NoStaffDraft {
+  const why = NO_STAFF_WHY.find((w) => b.reason.startsWith(`${w}: `));
+  return {
+    why: why ?? "Other",
+    explanation: why ? b.reason.slice(why.length + 2) : b.reason,
+    start: b.start,
+    end: b.end,
+    often: b.date ? "once" : "weekly",
+    date: b.date ?? "",
+    days: b.days,
+  };
+}

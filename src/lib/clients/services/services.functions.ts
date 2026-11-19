@@ -1,5 +1,5 @@
 // Services & billing server functions: load the section, add or edit an
-// authorization, set its staffing ratio, and End one (sets the end date —
+// authorization, set its staffing ratio or its RHS Worksheet numbers, and End one (sets the end date —
 // authorizations are never deleted). Writes need Billing: Edit for this client
 // (assertCanManageClient).
 
@@ -158,6 +158,44 @@ export const saveAuthorizationRatio = createServerFn({ method: "POST" })
     const { data: out, error } = await sb
       .from("client_billing_codes")
       .update({ ratio: data.ratio })
+      .eq("id", data.id)
+      .eq("client_id", clientId)
+      .eq("organization_id", organizationId)
+      .select("id");
+    if (error) throw new Error(error.message);
+    assertRowsChanged(out as unknown[]);
+    return { id: data.id };
+  });
+
+/** Set or clear an authorization's Worksheet weekly hours and absence days (RHS, B7). */
+export const saveAuthorizationWorksheet = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        ...scope,
+        id: z.string().uuid(),
+        weeklyHours: z.number().min(0).max(168).nullable(),
+        absenceDays: z.number().int().min(0).max(366).nullable(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { sb, userId } = ctx(context);
+    const { organizationId, clientId } = data;
+    await assertCanManageClient({
+      supabase: sb,
+      actorId: userId,
+      organizationId,
+      clientId,
+      action: "edit_billing",
+    });
+    const { data: out, error } = await sb
+      .from("client_billing_codes")
+      .update({
+        worksheet_weekly_hours: data.weeklyHours,
+        worksheet_absence_days: data.absenceDays,
+      })
       .eq("id", data.id)
       .eq("client_id", clientId)
       .eq("organization_id", organizationId)

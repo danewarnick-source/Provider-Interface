@@ -22,6 +22,9 @@ export type AuthorizationRow = {
   rate_source: string | null;
   /** Staff-to-client ratio, "1:2"; the scheduler reads it (ratio.ts). */
   ratio: string | null;
+  /** RHS Worksheet: staffing hours a week and absence days a plan year (the home page reads them). */
+  worksheet_weekly_hours?: number | null;
+  worksheet_absence_days?: number | null;
 };
 
 export type AuthorizationState = "pending" | "upcoming" | "current" | "ended";

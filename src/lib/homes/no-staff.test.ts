@@ -3,6 +3,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  draftFromBlock,
   noStaffBlocks,
   noStaffProblem,
   noStaffRows,
@@ -82,4 +83,25 @@ test("stored rows group back into blocks; real needs are left out", () => {
     noStaffWhen({ days: [0, 1, 2, 3, 4, 5, 6], start: "07:00", end: "07:00" }),
     "Every day · all day",
   );
+});
+
+test("a removed block comes back as the same draft (Undo)", () => {
+  const d = draftFromBlock({
+    ids: ["a"],
+    date: null,
+    days: [1, 2],
+    start: "09:00",
+    end: "15:00",
+    reason: "At day program: van",
+  });
+  assert.deepEqual(d, {
+    why: "At day program",
+    explanation: "van",
+    start: "09:00",
+    end: "15:00",
+    often: "weekly",
+    date: "",
+    days: [1, 2],
+  });
+  assert.equal(draftFromBlock({ ...d, ids: [], date: "2026-11-20", reason: "typed" }).why, "Other");
 });
