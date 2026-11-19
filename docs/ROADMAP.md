@@ -2,7 +2,7 @@
 
 Read this before planning or building anything. Update it at the end of every session ("update the roadmap and decisions, then commit"). Owner decisions are in `docs/decisions.md`.
 
-**Next up:** B6 (Rotations): plan first. The `scheduler-tick` job is on since Nov 19 (late alerts + escalation).
+**Next up:** B6 (Rotations): plan in `docs/scheduler-rebuild/B6-PLAN.md`, waiting for Dane's answers (9 questions). The `scheduler-tick` job is on since Nov 19 (late alerts + escalation).
 
 ## The vision (Dane, Nov 13, 2026)
 - **One platform for Utah DSPD providers, built for the admin side first.** Staff screens exist to feed admins clean records.
