@@ -1,6 +1,6 @@
 # Plan: escalation ladder and hold-overs
 
-Status: **approved, building** (Nov 19, 2026). Dane: yes to all 8 questions. Settled rule: Decision 7, "Unfilled: escalate lead → on-call → owner, then hold over whoever's last hold-over was longest ago, recorded with a reason." Spec: `docs/demos/scheduler.html` (Settings › Open shifts › "When nobody picks it up" and "Hold-over record"; Needs you › **Start escalation**).
+Status: **approved, built** (Nov 19, 2026; branch claude/busy-cray-w323d6, see PROGRESS.md). Dane: yes to all 8 questions. Settled rule: Decision 7, "Unfilled: escalate lead → on-call → owner, then hold over whoever's last hold-over was longest ago, recorded with a reason." Spec: `docs/demos/scheduler.html` (Settings › Open shifts › "When nobody picks it up" and "Hold-over record"; Needs you › **Start escalation**).
 
 ## 1. Job
 When a shift is about to start with nobody on it, the platform asks the right people in order, so the office doesn't phone down a list. If nobody can come, it fairly asks someone already there to stay, and keeps the record.
