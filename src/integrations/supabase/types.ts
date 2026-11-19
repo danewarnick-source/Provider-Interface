@@ -14800,12 +14800,10 @@ export type Database = {
           effective_until: string | null
           end_time_local: string
           id: string
-          location_id: string | null
           name: string | null
           notes: string | null
           organization_id: string
           service_code: string | null
-          service_code_id: string | null
           shift_type: string | null
           staff_id: string | null
           start_time_local: string
@@ -14825,12 +14823,10 @@ export type Database = {
           effective_until?: string | null
           end_time_local: string
           id?: string
-          location_id?: string | null
           name?: string | null
           notes?: string | null
           organization_id: string
           service_code?: string | null
-          service_code_id?: string | null
           shift_type?: string | null
           staff_id?: string | null
           start_time_local: string
@@ -14850,12 +14846,10 @@ export type Database = {
           effective_until?: string | null
           end_time_local?: string
           id?: string
-          location_id?: string | null
           name?: string | null
           notes?: string | null
           organization_id?: string
           service_code?: string | null
-          service_code_id?: string | null
           shift_type?: string | null
           staff_id?: string | null
           start_time_local?: string
@@ -15313,7 +15307,6 @@ export type Database = {
           ends_at: string
           id: string
           is_awake_overnight: boolean | null
-          is_recurring: boolean
           notes: string | null
           open_spots: number | null
           organization_id: string
@@ -15321,8 +15314,6 @@ export type Database = {
           parent_shift_id: string | null
           pattern_line_id: string | null
           published: boolean
-          recurrence_end_date: string | null
-          recurrence_rule: string | null
           service_code: string | null
           shift_type: string
           staff_id: string | null
@@ -15345,7 +15336,6 @@ export type Database = {
           ends_at: string
           id?: string
           is_awake_overnight?: boolean | null
-          is_recurring?: boolean
           notes?: string | null
           open_spots?: number | null
           organization_id: string
@@ -15353,8 +15343,6 @@ export type Database = {
           parent_shift_id?: string | null
           pattern_line_id?: string | null
           published?: boolean
-          recurrence_end_date?: string | null
-          recurrence_rule?: string | null
           service_code?: string | null
           shift_type?: string
           staff_id?: string | null
@@ -15377,7 +15365,6 @@ export type Database = {
           ends_at?: string
           id?: string
           is_awake_overnight?: boolean | null
-          is_recurring?: boolean
           notes?: string | null
           open_spots?: number | null
           organization_id?: string
@@ -15385,8 +15372,6 @@ export type Database = {
           parent_shift_id?: string | null
           pattern_line_id?: string | null
           published?: boolean
-          recurrence_end_date?: string | null
-          recurrence_rule?: string | null
           service_code?: string | null
           shift_type?: string
           staff_id?: string | null
