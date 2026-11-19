@@ -14794,6 +14794,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           crosses_midnight: boolean
+          cycle: number[] | null
+          cycle_start: string | null
           effective_from: string
           effective_until: string | null
           end_time_local: string
@@ -14802,9 +14804,12 @@ export type Database = {
           name: string | null
           notes: string | null
           organization_id: string
+          service_code: string | null
           service_code_id: string | null
+          shift_type: string | null
           staff_id: string | null
           start_time_local: string
+          team_id: string | null
           updated_at: string
           weekday_mask: number
         }
@@ -14814,6 +14819,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           crosses_midnight?: boolean
+          cycle?: number[] | null
+          cycle_start?: string | null
           effective_from?: string
           effective_until?: string | null
           end_time_local: string
@@ -14822,9 +14829,12 @@ export type Database = {
           name?: string | null
           notes?: string | null
           organization_id: string
+          service_code?: string | null
           service_code_id?: string | null
+          shift_type?: string | null
           staff_id?: string | null
           start_time_local: string
+          team_id?: string | null
           updated_at?: string
           weekday_mask?: number
         }
@@ -14834,6 +14844,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           crosses_midnight?: boolean
+          cycle?: number[] | null
+          cycle_start?: string | null
           effective_from?: string
           effective_until?: string | null
           end_time_local?: string
@@ -14842,13 +14854,24 @@ export type Database = {
           name?: string | null
           notes?: string | null
           organization_id?: string
+          service_code?: string | null
           service_code_id?: string | null
+          shift_type?: string | null
           staff_id?: string | null
           start_time_local?: string
+          team_id?: string | null
           updated_at?: string
           weekday_mask?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "recurring_shift_patterns_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       referral_activities: {
         Row: {
@@ -15407,6 +15430,13 @@ export type Database = {
             columns: ["parent_shift_id"]
             isOneToOne: false
             referencedRelation: "scheduled_shifts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_shifts_pattern_line_id_fkey"
+            columns: ["pattern_line_id"]
+            isOneToOne: false
+            referencedRelation: "recurring_shift_patterns"
             referencedColumns: ["id"]
           },
           {
