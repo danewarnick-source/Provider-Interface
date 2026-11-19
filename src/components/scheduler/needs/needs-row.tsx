@@ -1,13 +1,15 @@
 // One Needs you row (B5): its tag, where and when, why, and its fix buttons
 // (the plan's behavior table). Drawers (Find staff, the overtime list) are the
 // board's, opened through the board context the page provides; the other
-// buttons are useNeedsActions. A button the viewer can't use is disabled and
-// says why underneath.
+// buttons are useNeedsActions; the escalation line and Start / Stop
+// escalation are EscalationControls. A button the viewer can't use is
+// disabled and says why underneath.
 import { useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { NEED_TAG, type NeedItem } from "@/lib/scheduler/needs-items";
 import { firstName, useBoard } from "@/components/scheduler/board/board-context";
+import { EscalationControls } from "./escalation-controls";
 import type { NeedsActions } from "./use-needs-actions";
 
 const TAG_COLOR = {
@@ -156,6 +158,7 @@ export function NeedsRow({ item: i, act }: { item: NeedItem; act: NeedsActions }
       why={i.why}
     >
       <Actions acts={acts[i.kind]} busy={act.busy === i.key} />
+      <EscalationControls item={i} act={act} canEdit={b.canEdit} />
       {phone && (
         <p className="select-all text-sm font-semibold" onClick={(e) => e.stopPropagation()}>
           {i.phone ?? `No phone on file for ${who}.`}

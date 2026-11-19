@@ -2,7 +2,7 @@
 
 Read this before planning or building anything. Update it at the end of every session ("update the roadmap and decisions, then commit"). Owner decisions are in `docs/decisions.md`.
 
-**Next up:** B5 (Needs you) is built on `claude/busy-cray-w323d6`, waiting for Dane's preview check; then the late-alerts job (draft migration, not applied) and B6. B4 is live (PR #511).
+**Next up:** Dane tests the escalation step (new PR). After merge: test the live site with one in-database call to `scheduler-tick` (secret stays in the vault), then, with Dane's OK, apply `20261118200000_scheduler_b_tick_job.sql` to turn on late alerts and timed escalation. Then B6 (Rotations).
 
 ## The vision (Dane, Nov 13, 2026)
 - **One platform for Utah DSPD providers, built for the admin side first.** Staff screens exist to feed admins clean records.

@@ -13,6 +13,7 @@ import { decideClaim } from "@/lib/scheduler/open-shifts.functions";
 import { reviewPunchFix } from "@/lib/scheduler/punch-review.functions";
 import { approveSwap, decideTimeOff, denySwap } from "@/lib/scheduler/requests.functions";
 import { cancelShift } from "@/lib/scheduler/scheduler.functions";
+import { startEscalation, stopEscalation } from "@/lib/scheduler/escalation.functions";
 
 const NEED_REASON = "Add a reason to go ahead:";
 
@@ -39,6 +40,8 @@ export function useNeedsActions(orgId: string) {
     swapNo: useServerFn(denySwap),
     timeOff: useServerFn(decideTimeOff),
     punch: useServerFn(reviewPunchFix),
+    escalate: useServerFn(startEscalation),
+    stopEscalation: useServerFn(stopEscalation),
   };
   const org = orgId;
 
@@ -105,6 +108,18 @@ export function useNeedsActions(orgId: string) {
             : r.shifts
               ? `Time off approved · ${r.shifts} shift${r.shifts > 1 ? "s" : ""} need${r.shifts > 1 ? "" : "s"} someone else`
               : "Time off approved",
+      ),
+    escalate: (key: string, shiftId: string) =>
+      run(
+        key,
+        () => fns.escalate({ data: { organization_id: org, shift_id: shiftId } }),
+        (r) => r.message || "Escalation started",
+      ),
+    stopEscalation: (key: string, shiftId: string) =>
+      run(
+        key,
+        () => fns.stopEscalation({ data: { organization_id: org, shift_id: shiftId } }),
+        () => "Escalation stopped",
       ),
     approveFix: (key: string, id: string) =>
       run(

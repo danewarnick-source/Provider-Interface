@@ -1,7 +1,8 @@
 // Settings › Open shifts & hold-overs (Decisions 6, 7): who gets an open shift
 // (agency default and per home), quiet hours, the urgent window, the
-// escalation waits, and the hold-over ask. claimOpenShift reads the pickup
-// mode through settings/pickup.ts.
+// escalation waits, the hold-over ask and the Hold-over record
+// (holdover-record.tsx). claimOpenShift reads the pickup mode through
+// settings/pickup.ts; the escalation ladder (escalation.ts) reads the rest.
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { PICKUP_LABEL, pickupModeFor, type PickupMode } from "@/lib/scheduler/settings/pickup";
@@ -9,12 +10,13 @@ import {
   saveAgencySettings,
   saveHomeSettings,
 } from "@/lib/scheduler/settings/settings-save.functions";
+import { HoldoverRecord } from "./holdover-record";
 import { Panel, Segmented, SettingRow, useSettings } from "./settings-controls";
 import { hourLabel } from "./settings-format";
 
 const STEPS = [
-  { who: "Home lead", hint: "The lead for that home gets a call-style push" },
-  { who: "On-call", hint: "Whoever is on-call that day" },
+  { who: "Home lead", hint: "The lead for that home gets a push (skipped when there's no home)" },
+  { who: "On-call", hint: "Whoever has an on-call shift at that time" },
   { who: "Owner", hint: "The owner" },
 ];
 
@@ -152,7 +154,7 @@ export function OpenShiftsTab() {
 
       <Panel
         title="When nobody picks it up"
-        sub="If a home would be left without staff, the platform works down this list. Each step waits before moving on."
+        sub="When an open shift starts within the urgent window and no one has it, the platform works down this list. Each step waits before moving on."
       >
         {STEPS.map((step, i) => (
           <SettingRow key={step.who} label={`${i + 1}. ${step.who}`} hint={step.hint}>
@@ -213,9 +215,7 @@ export function OpenShiftsTab() {
           </span>
         }
       >
-        <p className="py-3 text-sm text-muted-foreground">
-          No hold-overs recorded yet. Each one is listed here with its reason once it happens.
-        </p>
+        <HoldoverRecord orgId={orgId} />
       </Panel>
     </div>
   );

@@ -4,6 +4,7 @@
 // expired cards, 1056 Act now), then tier 1 (open shifts, claims, swaps,
 // shifts left uncovered by time off, 1056 Watch), then tier 2 (time off,
 // punch fixes, cards expiring, overtime). Within a tier, the earliest first.
+import type { EscalationView } from "./escalation-view.ts";
 import type { Approval } from "./needs-approvers.ts";
 import { addDaysKey, weekStartKey } from "./time.ts";
 
@@ -73,6 +74,8 @@ export type NeedItem = {
   cardLabel?: string;
   /** 1056: the client. */
   clientId?: string;
+  /** Call-out / open / 1:1: the escalation ladder (escalation-needs.server.ts). */
+  escalation?: EscalationView & { canStart: boolean };
 };
 
 export function sortNeeds(items: NeedItem[]): NeedItem[] {

@@ -1,5 +1,5 @@
 // The background late-clock-in alerts (B5), run by the hook route
-// /api/public/hooks/scheduler-late-alerts every 5 minutes. Service role,
+// /api/public/hooks/scheduler-tick every 5 minutes. Service role,
 // across every agency: published shifts with a person that started in the
 // last LATE_LOOKBACK_HOURS and have no clock-in. At +10 minutes the person
 // gets a nudge; at +30 the home's lead (else the agency's schedulers) gets an

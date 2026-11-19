@@ -12,6 +12,8 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireCategory } from "@/lib/access/require";
 import { punchFixAskText } from "@/lib/scheduler/late-punch";
 import { loadNeeds } from "@/lib/scheduler/needs.server";
+import { withEscalations } from "@/lib/scheduler/escalation-needs.server";
+import { addCalloutEvent } from "@/lib/scheduler/callout-events.server";
 import { ASK_PUNCH, CARD_REMINDER, sentNotices } from "@/lib/scheduler/needs-notices.server";
 import { notify } from "@/lib/scheduler/notify";
 import { dayKey, parseLocalDate } from "@/lib/scheduler/time";
@@ -25,7 +27,9 @@ export const loadNeedsYou = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId) return [];
     const access = await requireCategory(supabase, userId, data.organization_id, "scheduling");
-    return loadNeeds(supabase, data.organization_id, userId, access);
+    const items = await loadNeeds(supabase, data.organization_id, userId, access);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    return withEscalations(supabaseAdmin, data.organization_id, items);
   });
 
 /** Done on a call-out: the scheduler has seen it (manager_acknowledged). */
@@ -52,21 +56,13 @@ export const acknowledgeCallout = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!rows?.length)
       throw new Error("That call-out was already handled. Reload to see the list.");
-    const { count } = await supabase
-      .from("callout_escalation_events")
-      .select("id", { count: "exact", head: true })
-      .eq("callout_id", data.callout_id);
-    const { error: evErr } = await supabase.from("callout_escalation_events").insert({
-      organization_id: data.organization_id,
-      callout_id: data.callout_id,
-      step: (count ?? 0) + 1,
+    await addCalloutEvent(supabase, data.organization_id, data.callout_id, {
       channel: "in_app",
       target_role: "manager",
       target_user_id: userId,
       outcome: "acknowledged",
       detail: "Manager acknowledged call-out.",
     });
-    if (evErr) console.error(`[callout] event insert failed: ${evErr.message}`);
     return { ok: true };
   });
 

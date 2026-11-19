@@ -183,7 +183,7 @@ import { Route as ApiPublicHooksBillingDailyCheckRouteImport } from './routes/ap
 import { Route as ApiPublicHooksGmailIngestRouteImport } from './routes/api/public/hooks/gmail-ingest'
 import { Route as ApiPublicHooksNectarDraftTickRouteImport } from './routes/api/public/hooks/nectar-draft-tick'
 import { Route as ApiPublicHooksNectarSchedulesRouteImport } from './routes/api/public/hooks/nectar-schedules'
-import { Route as ApiPublicHooksSchedulerLateAlertsRouteImport } from './routes/api/public/hooks/scheduler-late-alerts'
+import { Route as ApiPublicHooksSchedulerTickRouteImport } from './routes/api/public/hooks/scheduler-tick'
 import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
 import { Route as DashboardComplianceCertReviewCompletionIdRouteImport } from './routes/dashboard.compliance_.cert-review.$completionId'
 import { Route as DashboardCoursesPolicyDocumentIdRouteImport } from './routes/dashboard.courses.policy.$documentId'
@@ -1136,10 +1136,10 @@ const ApiPublicHooksNectarSchedulesRoute =
     path: '/api/public/hooks/nectar-schedules',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicHooksSchedulerLateAlertsRoute =
-  ApiPublicHooksSchedulerLateAlertsRouteImport.update({
-    id: '/api/public/hooks/scheduler-late-alerts',
-    path: '/api/public/hooks/scheduler-late-alerts',
+const ApiPublicHooksSchedulerTickRoute =
+  ApiPublicHooksSchedulerTickRouteImport.update({
+    id: '/api/public/hooks/scheduler-tick',
+    path: '/api/public/hooks/scheduler-tick',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicWebhooksStripeRoute = ApiPublicWebhooksStripeRouteImport.update({
@@ -1407,7 +1407,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
   '/api/public/hooks/nectar-draft-tick': typeof ApiPublicHooksNectarDraftTickRoute
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
-  '/api/public/hooks/scheduler-late-alerts': typeof ApiPublicHooksSchedulerLateAlertsRoute
+  '/api/public/hooks/scheduler-tick': typeof ApiPublicHooksSchedulerTickRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
   '/dashboard/compliance/cert-review/$completionId': typeof DashboardComplianceCertReviewCompletionIdRoute
   '/dashboard/courses/policy/$documentId': typeof DashboardCoursesPolicyDocumentIdRoute
@@ -1591,7 +1591,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
   '/api/public/hooks/nectar-draft-tick': typeof ApiPublicHooksNectarDraftTickRoute
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
-  '/api/public/hooks/scheduler-late-alerts': typeof ApiPublicHooksSchedulerLateAlertsRoute
+  '/api/public/hooks/scheduler-tick': typeof ApiPublicHooksSchedulerTickRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
   '/dashboard/compliance/cert-review/$completionId': typeof DashboardComplianceCertReviewCompletionIdRoute
   '/dashboard/courses/policy/$documentId': typeof DashboardCoursesPolicyDocumentIdRoute
@@ -1784,7 +1784,7 @@ export interface FileRoutesById {
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
   '/api/public/hooks/nectar-draft-tick': typeof ApiPublicHooksNectarDraftTickRoute
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
-  '/api/public/hooks/scheduler-late-alerts': typeof ApiPublicHooksSchedulerLateAlertsRoute
+  '/api/public/hooks/scheduler-tick': typeof ApiPublicHooksSchedulerTickRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
   '/dashboard/compliance_/cert-review/$completionId': typeof DashboardComplianceCertReviewCompletionIdRoute
   '/dashboard/courses/policy/$documentId': typeof DashboardCoursesPolicyDocumentIdRoute
@@ -1978,7 +1978,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/gmail-ingest'
     | '/api/public/hooks/nectar-draft-tick'
     | '/api/public/hooks/nectar-schedules'
-    | '/api/public/hooks/scheduler-late-alerts'
+    | '/api/public/hooks/scheduler-tick'
     | '/api/public/webhooks/stripe'
     | '/dashboard/compliance/cert-review/$completionId'
     | '/dashboard/courses/policy/$documentId'
@@ -2162,7 +2162,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/gmail-ingest'
     | '/api/public/hooks/nectar-draft-tick'
     | '/api/public/hooks/nectar-schedules'
-    | '/api/public/hooks/scheduler-late-alerts'
+    | '/api/public/hooks/scheduler-tick'
     | '/api/public/webhooks/stripe'
     | '/dashboard/compliance/cert-review/$completionId'
     | '/dashboard/courses/policy/$documentId'
@@ -2354,7 +2354,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/gmail-ingest'
     | '/api/public/hooks/nectar-draft-tick'
     | '/api/public/hooks/nectar-schedules'
-    | '/api/public/hooks/scheduler-late-alerts'
+    | '/api/public/hooks/scheduler-tick'
     | '/api/public/webhooks/stripe'
     | '/dashboard/compliance_/cert-review/$completionId'
     | '/dashboard/courses/policy/$documentId'
@@ -2411,7 +2411,7 @@ export interface RootRouteChildren {
   ApiPublicHooksGmailIngestRoute: typeof ApiPublicHooksGmailIngestRoute
   ApiPublicHooksNectarDraftTickRoute: typeof ApiPublicHooksNectarDraftTickRoute
   ApiPublicHooksNectarSchedulesRoute: typeof ApiPublicHooksNectarSchedulesRoute
-  ApiPublicHooksSchedulerLateAlertsRoute: typeof ApiPublicHooksSchedulerLateAlertsRoute
+  ApiPublicHooksSchedulerTickRoute: typeof ApiPublicHooksSchedulerTickRoute
   ApiPublicWebhooksStripeRoute: typeof ApiPublicWebhooksStripeRoute
   ApiPublicOauthGmailCallbackRoute: typeof ApiPublicOauthGmailCallbackRoute
 }
@@ -3636,11 +3636,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksNectarSchedulesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/hooks/scheduler-late-alerts': {
-      id: '/api/public/hooks/scheduler-late-alerts'
-      path: '/api/public/hooks/scheduler-late-alerts'
-      fullPath: '/api/public/hooks/scheduler-late-alerts'
-      preLoaderRoute: typeof ApiPublicHooksSchedulerLateAlertsRouteImport
+    '/api/public/hooks/scheduler-tick': {
+      id: '/api/public/hooks/scheduler-tick'
+      path: '/api/public/hooks/scheduler-tick'
+      fullPath: '/api/public/hooks/scheduler-tick'
+      preLoaderRoute: typeof ApiPublicHooksSchedulerTickRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/webhooks/stripe': {
@@ -4227,8 +4227,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksGmailIngestRoute: ApiPublicHooksGmailIngestRoute,
   ApiPublicHooksNectarDraftTickRoute: ApiPublicHooksNectarDraftTickRoute,
   ApiPublicHooksNectarSchedulesRoute: ApiPublicHooksNectarSchedulesRoute,
-  ApiPublicHooksSchedulerLateAlertsRoute:
-    ApiPublicHooksSchedulerLateAlertsRoute,
+  ApiPublicHooksSchedulerTickRoute: ApiPublicHooksSchedulerTickRoute,
   ApiPublicWebhooksStripeRoute: ApiPublicWebhooksStripeRoute,
   ApiPublicOauthGmailCallbackRoute: ApiPublicOauthGmailCallbackRoute,
 }

@@ -2017,37 +2017,40 @@ export type Database = {
       }
       callout_escalation_events: {
         Row: {
-          callout_id: string
+          callout_id: string | null
           channel: string
           created_at: string
           detail: string | null
           id: string
           organization_id: string
           outcome: string
+          scheduled_shift_id: string | null
           step: number
           target_role: string | null
           target_user_id: string | null
         }
         Insert: {
-          callout_id: string
+          callout_id?: string | null
           channel: string
           created_at?: string
           detail?: string | null
           id?: string
           organization_id: string
           outcome: string
+          scheduled_shift_id?: string | null
           step: number
           target_role?: string | null
           target_user_id?: string | null
         }
         Update: {
-          callout_id?: string
+          callout_id?: string | null
           channel?: string
           created_at?: string
           detail?: string | null
           id?: string
           organization_id?: string
           outcome?: string
+          scheduled_shift_id?: string | null
           step?: number
           target_role?: string | null
           target_user_id?: string | null
@@ -2065,6 +2068,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "callout_escalation_events_scheduled_shift_id_fkey"
+            columns: ["scheduled_shift_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_shifts"
             referencedColumns: ["id"]
           },
           {
@@ -15626,7 +15636,9 @@ export type Database = {
           changed_at: string
           changed_by: string | null
           id: string
+          kind: string
           organization_id: string
+          reason: string | null
           sent_at: string | null
           shift_id: string
         }
@@ -15637,7 +15649,9 @@ export type Database = {
           changed_at?: string
           changed_by?: string | null
           id?: string
+          kind?: string
           organization_id: string
+          reason?: string | null
           sent_at?: string | null
           shift_id: string
         }
@@ -15648,7 +15662,9 @@ export type Database = {
           changed_at?: string
           changed_by?: string | null
           id?: string
+          kind?: string
           organization_id?: string
+          reason?: string | null
           sent_at?: string | null
           shift_id?: string
         }
