@@ -1,6 +1,7 @@
 // The lists behind the stat tiles: scheduled hours by place, the open shifts
-// (each with Find staff and Open), and the people over the overtime threshold
-// with their shifts (open one to give it to someone else).
+// (each with Find staff and Open), the coverage gaps at homes (gap-list.tsx)
+// and the people over the overtime threshold with their shifts (open one to
+// give it to someone else).
 import { Button } from "@/components/ui/button";
 import { fmtDay } from "@/lib/scheduler/auth-outlook";
 import {
@@ -15,6 +16,7 @@ import {
 import { useBoard, type Board } from "./board-context";
 import { CodeTag, DrawerShell, Pill } from "./board-ui";
 import { placeLabel } from "./shift-chip";
+import { GapList } from "./gap-list";
 
 const when = (s: BoardShift) => `${fmtDay(shiftDay(s)).replace(/, \d{4}$/, "")} · ${fmtSpan(s)}`;
 
@@ -142,6 +144,7 @@ const TITLES = {
   hours: "Scheduled hours by place",
   open: "Open shifts",
   ot: "People over the overtime threshold",
+  gaps: "Coverage gaps at homes",
 } as const;
 
 export function WeekListDrawer({ which }: { which: keyof typeof TITLES }) {
@@ -164,6 +167,7 @@ export function WeekListDrawer({ which }: { which: keyof typeof TITLES }) {
       {which === "hours" && <HoursByPlace b={b} week={week} />}
       {which === "open" && <OpenList b={b} week={week} />}
       {which === "ot" && <OverList b={b} week={week} />}
+      {which === "gaps" && <GapList b={b} />}
     </DrawerShell>
   );
 }

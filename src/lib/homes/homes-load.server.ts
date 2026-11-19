@@ -146,6 +146,8 @@ export async function loadHomeDetail(
       .select("id, day_of_week, start_time, end_time, required_staff_count, awake_required, notes")
       .eq("organization_id", orgId)
       .eq("team_id", teamId)
+      .gt("required_staff_count", 0)
+      .is("on_date", null)
       .then(must),
     activePeople(sb, orgId),
   ]);

@@ -2,8 +2,9 @@
 // row, its words and whether this viewer may act on it. This file makes the
 // shift rows (call-outs, late and missed clock-ins, open shifts and claims,
 // swaps, time off); needs-rows.ts makes the rest (punch fixes, cards, 1056,
-// overtime). Kinds, tags and order are needs-items.ts; late/missed is
-// late-punch.ts; who approves is needs-approvers.ts. Office screen only: rows
+// overtime) and needs-gaps.ts the coverage gaps at homes. Kinds, tags and
+// order are needs-items.ts; late/missed is late-punch.ts; who approves is
+// needs-approvers.ts. Office screen only: rows
 // name clients and team members (texts to staff never do).
 import { fmtDay } from "./auth-outlook.ts";
 import { isCancelled, shiftHours, staffHours, type BoardShift } from "./board-model.ts";
@@ -20,6 +21,7 @@ import {
   type NeedsInput,
 } from "./needs-rows.ts";
 import { isEvvLockedCode } from "../evv-codes.ts";
+import { gapRows } from "./needs-gaps.ts";
 import { dayKey } from "./time.ts";
 
 export type { NeedsInput, NeedsViewer } from "./needs-rows.ts";
@@ -182,6 +184,7 @@ export function buildNeeds(i: NeedsInput): NeedItem[] {
   }
 
   out.push(
+    ...gapRows(i.gaps ?? [], i.shifts, i.teams, i.offers, i.now),
     ...punchFixRows(i, name),
     ...cardRows(i, name),
     ...authRows(i),

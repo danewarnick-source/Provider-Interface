@@ -1,10 +1,11 @@
 // The rows of the week grid for each view. Homes & programs: one row per
-// staffed home or day program; its name opens the home in Settings › Homes.
+// staffed home or day program; its name opens the home page, and each day
+// shows its "no staff needed" blocks and red "No one 3p–7p ›" gap bars
+// (coverage.ts) that open the gap dialog.
 // Team members: an Open shifts row, then one row per person with an hours
 // meter, time off and a + that locks Add shift to them. Clients: one row per
 // client with a 1056 meter; host home clients say "With host · Not scheduled"
-// each day (host-away is B7b). Coverage gaps stay hidden until homes have
-// coverage needs (B7).
+// each day (host-away is B7b).
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import {
@@ -26,6 +27,7 @@ import type { AddDraft, Board } from "./board-context";
 import { newDraft } from "./add-draft";
 import { CodeTag } from "./board-ui";
 import type { OutlookRow } from "@/lib/scheduler/auth-outlook-load";
+import { DayCoverage, OffChip } from "./day-extras";
 
 export type BoardRow = {
   key: string;
@@ -72,13 +74,6 @@ function Head({
   );
 }
 
-const OffChip = ({ title, sub }: { title: string; sub: string }) => (
-  <div className="mb-1 rounded-md bg-[var(--hive-muted-surface)] px-1.5 py-1 text-[11px] leading-tight text-[var(--hive-text-muted)]">
-    <b className="block text-[var(--hive-text)]">{title}</b>
-    {sub}
-  </div>
-);
-
 function homeRows(b: Board, filter: FilterKey, live: BoardShift[]): BoardRow[] {
   return b.data.teams
     .filter((t) => homeCode(t.team_type) && inFilter(filter, t.id))
@@ -93,7 +88,7 @@ function homeRows(b: Board, filter: FilterKey, live: BoardShift[]): BoardRow[] {
           <Head
             title={
               <Link
-                to="/dashboard/settings/homes/$teamId"
+                to="/dashboard/scheduler/homes/$teamId"
                 params={{ teamId: t.id }}
                 className="hover:underline"
               >
@@ -108,6 +103,7 @@ function homeRows(b: Board, filter: FilterKey, live: BoardShift[]): BoardRow[] {
           />
         ),
         shiftsOn: (d) => on(mine, d),
+        extrasOn: (d) => <DayCoverage b={b} teamId={t.id} day={d} />,
         addAt: (d) => newDraft(b, { day: d, placeKey: `team:${t.id}` }),
       };
     });

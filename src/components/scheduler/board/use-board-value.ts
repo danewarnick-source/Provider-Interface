@@ -1,9 +1,11 @@
 // One scheduler board's shared state (board-context.tsx) for a range of days:
-// its data, the rule findings, unsent changes, the change actions and which
-// drawer is open. Used by the board (scheduler-board.tsx) and by Needs you,
-// which opens the same drawers (Find staff, a shift, the overtime list) on
-// the days it lists.
-import { useState } from "react";
+// its data, the rule findings, unsent changes, the change actions, coverage
+// at the homes and which drawer is open. Used by the board
+// (scheduler-board.tsx), the home page and Needs you, which open the same
+// drawers (Find staff, a shift, the overtime list, a coverage gap) on the days
+// they show.
+import { useMemo, useState } from "react";
+import { homesCoverage } from "@/lib/scheduler/coverage-load";
 import { useAccess } from "@/hooks/use-access";
 import type { BoardRange } from "@/lib/scheduler/board-data";
 import type { Board, Panel } from "./board-context";
@@ -22,6 +24,14 @@ export function useBoardValue(
   const actions = useBoardActions(orgId ?? "");
   const changes = useUnsentChanges(orgId);
   const [panel, setPanel] = useState<Panel | null>(null);
+  const coverage = useMemo(
+    () =>
+      data.data
+        ? homesCoverage(data.data.teams, data.data.coverage, data.data.shifts, days)
+        : new Map(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- days is a fresh array each render
+    [data.data, days.join()],
+  );
 
   const board: Board | null =
     !orgId || !data.data
@@ -39,6 +49,7 @@ export function useBoardValue(
           shifts: data.data.shifts,
           changes: changes.data ?? [],
           changed: new Set((changes.data ?? []).map((c) => c.shiftId)),
+          coverage,
           // A drawer opened from a dialog (Publish › Open shift) goes back to it on close.
           open: (p) =>
             setPanel((cur) =>

@@ -77,10 +77,17 @@ test("the same shift saves when nothing blocks; card reminders come back as warn
 });
 
 test("a code the team member isn't assigned for this client warns by default, and refuses when Not on the team is Block", async () => {
-  const notAssigned = { staff_assignments: [{ client_id: "client-1", staff_id: "staff-1", service_codes: ["DSI"] }] };
+  const notAssigned = {
+    staff_assignments: [{ client_id: "client-1", staff_id: "staff-1", service_codes: ["DSI"] }],
+  };
   const warnings = await guardShiftRows(fakeDb(facts(notAssigned)).db, ORG, [row]);
   assert.ok(warnings.some((w) => /isn't assigned SLH for Test/.test(w)));
-  const blocked = fakeDb(facts({ ...notAssigned, org_shift_behavior_settings: { rule_settings: { team: "block" }, ot_threshold_hours: 40 } }));
+  const blocked = fakeDb(
+    facts({
+      ...notAssigned,
+      org_shift_behavior_settings: { rule_settings: { team: "block" }, ot_threshold_hours: 40 },
+    }),
+  );
   await assert.rejects(guardShiftRows(blocked.db, ORG, [row]), /isn't assigned SLH for Test/);
 });
 
@@ -128,4 +135,54 @@ test("a batch check tags each block with its shift (Send changes, Copy week)", a
   const block = verdict.blocks.find((f) => f.rule === "do_not_schedule");
   assert.equal(block?.shiftId, "shift-1");
   assert.equal(block?.message, "Test is on Test's do-not-schedule list");
+});
+
+test("B7: a 4-hour RHS 1:1 at the resident's home is caught without a Form 930, and clears with one", async () => {
+  const oneToOne = {
+    ...row,
+    client_id: "client-1",
+    team_id: "home-1",
+    service_code: "RHS",
+    starts_at: "2026-10-14T16:00:00Z",
+    ends_at: "2026-10-14T20:00:00Z",
+  };
+  const rhs = {
+    clients: [
+      {
+        id: "client-1",
+        first_name: "Test",
+        last_name: "Client",
+        date_of_birth: "1990-01-01",
+        has_abi: false,
+        team_id: "home-1",
+      },
+    ],
+    "rpc:client_authorizations_for_rules": [
+      {
+        client_id: "client-1",
+        service_code: "RHS",
+        service_start_date: "2026-01-01",
+        service_end_date: null,
+        authorization_approved_on: "2026-01-01",
+        worksheet_weekly_hours: null,
+        ratio: null,
+      },
+    ],
+    staff_assignments: [{ client_id: "client-1", staff_id: "staff-1", service_codes: ["RHS"] }],
+  };
+  const without = await checkShiftRows(fakeDb(facts(rhs)).db, ORG, [oneToOne]);
+  assert.ok(without.findings.some((f) => f.rule === "rhs_one_to_one_no_form_930"));
+  const withForm = await checkShiftRows(
+    fakeDb(
+      facts({
+        ...rhs,
+        client_documents: [
+          { client_id: "client-1", effective_from: "2026-10-01", effective_to: "2027-03-31" },
+        ],
+      }),
+    ).db,
+    ORG,
+    [oneToOne],
+  );
+  assert.ok(!withForm.findings.some((f) => f.rule === "rhs_one_to_one_no_form_930"));
 });

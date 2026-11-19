@@ -4,7 +4,8 @@
 // asked to fix a punch or sent a card reminder lives in other people's
 // notifications (needs-notices.server.ts, service role, after the caller's
 // scheduling check). Called by loadNeedsYou (needs.functions.ts) for the page,
-// the board banner and the menu count.
+// the board banner and the menu count. Coverage gaps at homes (B7) come from
+// coverage-load.ts over the same shifts, today through the end of next week.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { hasCategory } from "@/lib/access/can";
@@ -18,7 +19,9 @@ import { needsWindow, type NeedItem } from "@/lib/scheduler/needs-items";
 import { buildNeeds } from "@/lib/scheduler/needs-list";
 import { needsNotices } from "@/lib/scheduler/needs-notices.server";
 import { loadStaffEvidence, rows } from "@/lib/scheduler/rule-staff-facts.server";
-import { addDaysKey, dayKey, parseLocalDate } from "@/lib/scheduler/time";
+import { addDaysKey, dayKey, daysBetween, parseLocalDate } from "@/lib/scheduler/time";
+import { homesCoverage, loadCoverageData } from "@/lib/scheduler/coverage-load";
+import { allGaps } from "@/lib/scheduler/coverage";
 
 type Db = SupabaseClient<Database>;
 
@@ -70,6 +73,7 @@ export async function loadNeeds(
     homeSettings,
     settings,
     outlook,
+    coverage,
   ] = await Promise.all([
     rows(
       db
@@ -155,6 +159,7 @@ export async function loadNeeds(
       .eq("organization_id", org)
       .maybeSingle(),
     loadAuthOutlook(db, org, win.week[0]!),
+    loadCoverageData(db, org),
   ]);
 
   // Shifts a swap, call-out or time off points at that fall outside the window.
@@ -231,8 +236,14 @@ export async function loadNeeds(
       timeOff: [],
     }));
 
+  const gapDays = Array.from({ length: daysBetween(today, win.until) }, (_, n) =>
+    addDaysKey(today, n),
+  );
+  const gaps = allGaps(homesCoverage(teams, coverage, allShifts, gapDays));
+
   return buildNeeds({
     now,
+    gaps,
     week: win.week,
     openUntil: win.until,
     viewer: {

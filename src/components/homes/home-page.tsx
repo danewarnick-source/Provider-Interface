@@ -1,7 +1,8 @@
 // One home in Settings › Homes: Details, Residents, Staffing needs (not on
 // host homes), Team, the scheduling settings that differ for this home, and
 // the ⋯ menu with Archive home (off while anyone lives there). An archived
-// home shows when and why, and Restore.
+// home shows when and why, and Restore. A group home links to its page in the
+// scheduler (coverage this week, B7).
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
@@ -100,6 +101,13 @@ function HomeSections({
           <h1 className="font-display text-2xl font-semibold tracking-tight">{home.name}</h1>
           <p className="text-sm text-muted-foreground">{homeKindLabel(home.kind)}</p>
         </div>
+        {home.kind === "rhs_home" && home.active ? (
+          <Button asChild variant="outline" className="min-h-11">
+            <Link to="/dashboard/scheduler/homes/$teamId" params={{ teamId: home.id }}>
+              Open the home's schedule
+            </Link>
+          </Button>
+        ) : null}
         <StatusTag tone={home.active ? "ok" : "neutral"}>
           {home.active ? "Active" : "Archived"}
         </StatusTag>

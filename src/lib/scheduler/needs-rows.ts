@@ -7,6 +7,7 @@ import type { ShiftPunch } from "./late-punch.ts";
 import type { ApprovalHome } from "./needs-approvers.ts";
 import type { CardFinding } from "./needs-cards.ts";
 import type { NeedItem } from "./needs-items.ts";
+import type { Gap } from "./coverage.ts";
 import { dayKey } from "./time.ts";
 
 export type NeedsViewer = {
@@ -75,6 +76,8 @@ export type NeedsInput = {
   asked: ReadonlyMap<string, string>;
   /** Staff id → when they were last sent a card reminder (today). */
   reminded: ReadonlyMap<string, string>;
+  /** Coverage gaps at homes, today through the end of next week (B7). */
+  gaps?: readonly Gap[];
 };
 
 export type Namer = (id: string | null) => string;

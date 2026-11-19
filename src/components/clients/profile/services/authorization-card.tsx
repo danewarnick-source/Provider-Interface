@@ -1,7 +1,8 @@
 // One open authorization as a card: code and name, dates, 1056 number,
 // units used vs. left with the pace marker, rate and dollars, and its rate
 // history, its staffing ratio, Email coordinator when the units run out early,
-// and who works the code. Edit, End and Ratio for Billing: Edit holders;
+// and who works the code; RHS cards add the Worksheet weekly hours and
+// absence days. Edit, End, Ratio and Worksheet for Billing: Edit holders;
 // nothing here deletes.
 
 import { useState } from "react";
@@ -20,6 +21,7 @@ import { RateHistory } from "./rate-history";
 import { CoordinatorEmail } from "./coordinator-email";
 import { CodeTeamLine } from "./code-team-line";
 import { AuthorizationRatio } from "./authorization-ratio";
+import { AuthorizationWorksheet } from "./authorization-worksheet";
 
 const num = (n: number) => Math.round(n).toLocaleString();
 
@@ -96,8 +98,8 @@ export function AuthorizationCard({
           <div>
             <div className="flex flex-wrap justify-between gap-2 text-xs tabular-nums">
               <span>
-                {num(pace.used)} used · <strong>{num(pace.left)} left</strong> of{" "}
-                {num(pace.annual)} {v.unitWord}
+                {num(pace.used)} used · <strong>{num(pace.left)} left</strong> of {num(pace.annual)}{" "}
+                {v.unitWord}
               </span>
               {v.money ? (
                 <span className="text-muted-foreground">
@@ -132,8 +134,8 @@ export function AuthorizationCard({
           <CodeTeamLine clientId={email.clientId} code={row.service_code} team={team} />
         ) : null}
         <p className="text-xs text-muted-foreground">
-          Rate: {rate > 0 ? `${money(rate)} per ${v.daily ? "day" : "unit"}` : "no rate on file"}{" "}
-          · {unitLabel}
+          Rate: {rate > 0 ? `${money(rate)} per ${v.daily ? "day" : "unit"}` : "no rate on file"} ·{" "}
+          {unitLabel}
           {noRate ? (
             <span className="ml-2 inline-flex items-center gap-1 font-medium text-[var(--hive-danger-fg)]">
               <AlertTriangle className="h-3 w-3" aria-hidden /> Enter this client's worksheet rate
@@ -148,6 +150,17 @@ export function AuthorizationCard({
           ratio={row.ratio}
           canEdit={canEdit}
         />
+        {row.service_code.trim().toUpperCase() === "RHS" ? (
+          <AuthorizationWorksheet
+            key={`${row.worksheet_weekly_hours}|${row.worksheet_absence_days}`}
+            orgId={email.orgId}
+            clientId={email.clientId}
+            id={row.id}
+            weeklyHours={row.worksheet_weekly_hours ?? null}
+            absenceDays={row.worksheet_absence_days ?? null}
+            canEdit={canEdit}
+          />
+        ) : null}
         {history.length > 0 ? (
           <div>
             <button

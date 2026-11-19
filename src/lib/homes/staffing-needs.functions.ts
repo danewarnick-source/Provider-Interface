@@ -2,7 +2,9 @@
 // by replacing the rows it stood for) and remove one. Rows live in
 // location_coverage_requirements keyed by team_id, one per day
 // (staffing-needs.ts). Host homes have none: hosts never clock. Same access as
-// the rest of the home (requireHomes, edit).
+// the rest of the home (requireHomes, edit). Only weekly needs with people in
+// them are touched here; "no staff needed" blocks (0 staff, or one date) are
+// the home page's (no-staff.functions.ts).
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -39,6 +41,8 @@ async function removeRows(sb: Sb, orgId: string, teamId: string, ids: string[]) 
     .delete()
     .eq("organization_id", orgId)
     .eq("team_id", teamId)
+    .gt("required_staff_count", 0)
+    .is("on_date", null)
     .in("id", ids)
     .select("id");
   if (error) throw new Error(error.message);

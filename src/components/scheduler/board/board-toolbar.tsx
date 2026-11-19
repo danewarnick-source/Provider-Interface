@@ -1,6 +1,7 @@
-// The stat tiles (scheduled hours, open shifts, people over the overtime
-// threshold; each opens its list) and the toolbar (Week / Month, the three
-// views, and the place filter). The coverage-gaps tile waits for B7.
+// The stat tiles (scheduled hours, open shifts, coverage gaps at homes, people
+// over the overtime threshold; each opens its list) and the toolbar (Week /
+// Month, the three views, and the place filter). The coverage-gaps tile is
+// hidden while no home has staffing needs.
 import {
   filterOptions,
   isCancelled,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/scheduler/board-model";
 import { dayKey } from "@/lib/scheduler/time";
 import { useBoard } from "./board-context";
+import { allGaps } from "@/lib/scheduler/coverage";
 
 function Tile({
   value,
@@ -50,6 +52,7 @@ export function StatTiles() {
   const hours = Math.round(staffed.reduce((n, s) => n + shiftHours(s), 0) * 10) / 10;
   const open = week.filter(isOpenShift).length;
   const over = b.data.staff.filter((p) => staffHours(week, p.id) > b.data.otHours).length;
+  const gaps = allGaps(b.coverage).length;
   return (
     <div className="flex flex-col gap-2 sm:flex-row">
       <Tile
@@ -63,6 +66,14 @@ export function StatTiles() {
         label="Open shifts · show them ›"
         onClick={() => b.open({ kind: "list", which: "open" })}
       />
+      {b.coverage.size > 0 && (
+        <Tile
+          value={String(gaps)}
+          tone={gaps ? "crit" : undefined}
+          label="Coverage gaps at homes · show them ›"
+          onClick={() => b.open({ kind: "list", which: "gaps" })}
+        />
+      )}
       <Tile
         value={String(over)}
         tone={over ? "warn" : undefined}
