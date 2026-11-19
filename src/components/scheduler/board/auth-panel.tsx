@@ -1,6 +1,6 @@
 // The Authorizations (1056) panel above the Clients view: authorized, used +
 // scheduled, left, the standard week and the outlook for each client's codes
-// over the plan year. Read-only. Rows come from loadAuthOutlook (lib/scheduler/board-data.ts).
+// over the plan year. Read-only. Rows come from loadAuthOutlook (lib/scheduler/auth-outlook-load.ts).
 import {
   fmtDay,
   OUTLOOK_LABEL,
@@ -10,7 +10,7 @@ import {
 import { clientName } from "@/lib/scheduler/board-model";
 import { useBoard } from "./board-context";
 import { CodeTag, Pill, type Tone } from "./board-ui";
-import type { OutlookRow } from "@/lib/scheduler/board-data";
+import type { OutlookRow } from "@/lib/scheduler/auth-outlook-load";
 
 const TONE: Record<OutlookStatus, Tone> = { ok: "ok", watch: "warn", act: "crit", under: "info" };
 

@@ -6,7 +6,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { weekChecks, type Check } from "@/lib/scheduler/find-staff.functions";
-import { loadAuthOutlook, loadBoardData, type BoardRange } from "@/lib/scheduler/board-data";
+import { loadBoardData, type BoardRange } from "@/lib/scheduler/board-data";
+import { loadAuthOutlook } from "@/lib/scheduler/auth-outlook-load";
 import { supabase } from "@/integrations/supabase/client";
 import { collapseChanges, type ChangeRow, type NetChange } from "@/lib/scheduler/shift-change";
 
@@ -36,7 +37,7 @@ export function useAuthOutlook(orgId: string | undefined, weekStart: string, ena
   return useQuery({
     enabled: !!orgId && enabled,
     queryKey: ["scheduler-board", "outlook", orgId, weekStart],
-    queryFn: () => loadAuthOutlook(orgId!, weekStart),
+    queryFn: () => loadAuthOutlook(supabase, orgId!, weekStart),
   });
 }
 

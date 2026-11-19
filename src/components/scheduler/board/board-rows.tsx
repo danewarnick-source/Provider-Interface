@@ -25,7 +25,7 @@ import { homeKind } from "@/lib/homes/home-kind";
 import type { AddDraft, Board } from "./board-context";
 import { newDraft } from "./add-draft";
 import { CodeTag } from "./board-ui";
-import type { OutlookRow } from "@/lib/scheduler/board-data";
+import type { OutlookRow } from "@/lib/scheduler/auth-outlook-load";
 
 export type BoardRow = {
   key: string;
