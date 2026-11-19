@@ -3,6 +3,8 @@
 // (B4). The count is the week's unsent changes to published shifts plus its
 // drafts (publish-plan.ts); "Published ✓" when there's nothing new. Both
 // buttons open their dialog (publish-dialog.tsx, copy-week-dialog.tsx).
+// Rotations and Scheduling settings link to their pages.
+import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Copy, Plus, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { fmtDay } from "@/lib/scheduler/auth-outlook";
@@ -91,6 +93,12 @@ export function BoardHeader({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Link
+            to="/dashboard/scheduler/rotations"
+            className="inline-flex min-h-11 items-center rounded-md border border-[var(--hive-border)] px-3.5 text-[13px] font-semibold text-[var(--hive-text)]"
+          >
+            Rotations
+          </Link>
           <SchedulingSettingsLink />
           {b.canEdit && (
             <>

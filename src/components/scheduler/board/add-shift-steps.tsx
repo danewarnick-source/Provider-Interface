@@ -5,10 +5,8 @@ import { Input } from "@/components/ui/input";
 import { timesOn, type PlaceOption } from "@/lib/scheduler/board-model";
 import { parseLocalDate } from "@/lib/scheduler/time";
 import type { AddDraft } from "./board-context";
+import { choice } from "./choice-class";
 import type { BoardShiftType } from "@/lib/scheduler/board-data";
-
-const choice = (on: boolean) =>
-  `min-h-11 rounded-md border px-3 text-[13px] font-semibold ${on ? "border-[var(--hive-ink)] bg-[var(--hive-ink)] text-white" : "border-[var(--hive-border)] hover:bg-[var(--hive-hover)]"}`;
 
 export function Field({
   label,

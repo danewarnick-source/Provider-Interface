@@ -1,6 +1,7 @@
 // Office › Scheduler: the board (components/scheduler/board/). This file only
-// reads the URL (view, place filter, week or month, and Nectar's ?focus=) and
-// sends people without scheduling access back to the dashboard.
+// reads the URL (view, place filter, week or month, Nectar's ?focus=, and
+// ?copy=1 from Rotations › Copy this week instead) and sends people without
+// scheduling access back to the dashboard.
 import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { useAccess } from "@/hooks/use-access";
 import { SchedulerBoard, type BoardSearch } from "@/components/scheduler/board/scheduler-board";
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/dashboard/scheduler")({
     range: pick(s.range, ["week", "month"] as const),
     week: typeof s.week === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s.week) ? s.week : undefined,
     focus: typeof s.focus === "string" ? s.focus : undefined,
+    copy: s.copy === true || s.copy === 1 || s.copy === "1" ? true : undefined,
   }),
   component: SchedulerPage,
 });
@@ -42,6 +44,7 @@ function SchedulerPage() {
         show: search.show ?? "all",
         range: search.range ?? "week",
         week: search.week,
+        copy: search.copy,
       }}
       onSearch={(p) => void navigate({ search: (prev) => ({ ...prev, ...p }), replace: true })}
     />

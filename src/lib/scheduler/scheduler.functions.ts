@@ -4,7 +4,8 @@
 // shift-guard.server.ts (rules.ts at the agency's strengths). Nothing here
 // deletes a shift: a cancelled shift stays on record and can be restored.
 // Each write to a published shift records what changed (shift-change.server.ts)
-// so Send changes can tell the people affected. Publishing is in
+// so Send changes can tell the people affected. Editing a shift detaches it
+// from its rotation line (pattern_line_id = null). Publishing is in
 // publish.functions.ts; offering open shifts in offer.functions.ts.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -88,9 +89,10 @@ export const saveShift = createServerFn({ method: "POST" })
 
     if (data.id) {
       const before = await loadSnapshot(supabase, data.organization_id, data.id);
+      // A hand edit detaches a rotation draft from its line, so the line never rebuilds it (B6).
       const { data: rows, error } = await supabase
         .from("scheduled_shifts")
-        .update(payload)
+        .update({ ...payload, pattern_line_id: null })
         .eq("id", data.id)
         .eq("organization_id", data.organization_id)
         .select(SNAPSHOT_COLUMNS);

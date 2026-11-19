@@ -1,5 +1,6 @@
 // The shift drawer: details, the rule engine's checks for this shift, who's
-// been asked (offers and escalation steps, who-asked.tsx), and Edit day,
+// been asked (offers and escalation steps, who-asked.tsx), the rotation line
+// that drafted it (from-rotation.tsx), and Edit day,
 // place or time / Give it to someone else / Make it open / Cancel shift (or
 // Restore). Nothing is deleted: cancelled shifts stay on record.
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import {
 import { shiftFlags, staffName, useBoard } from "./board-context";
 import { editDraft } from "./add-draft";
 import { CodeTag, DrawerShell } from "./board-ui";
+import { FromRotation } from "./from-rotation";
 import { placeLabel } from "./shift-chip";
 import { WhoAsked } from "./who-asked";
 
@@ -96,6 +98,7 @@ export function ShiftDrawer({ s }: { s: BoardShift }) {
           </>
         )}
       </dl>
+      {!cancelled && <FromRotation s={s} />}
       {s.staff_id && !cancelled && (
         <div>
           <h3 className="mb-1.5 text-sm font-bold">Checks for this shift</h3>
