@@ -21,10 +21,7 @@ export type WorksheetHours = {
 const atHome = (shifts: readonly BoardShift[], teamId: string, days: readonly string[]) =>
   shifts.filter(
     (s) =>
-      s.team_id === teamId &&
-      !s.parent_shift_id &&
-      !isCancelled(s) &&
-      days.includes(shiftDay(s)),
+      s.team_id === teamId && !s.parent_shift_id && !isCancelled(s) && days.includes(shiftDay(s)),
   );
 
 export function worksheetHours(
@@ -43,7 +40,12 @@ export function worksheetHours(
     .map((r) => rhsCodeOf(codes, r, days[0] ?? "")?.worksheet_weekly_hours)
     .filter((v): v is number => v != null);
   const worksheet = values.length ? round1(values.reduce((a, b) => a + Number(b), 0)) : null;
-  return { worksheet, staffed, open, short: worksheet == null ? 0 : Math.max(0, round1(worksheet - staffed)) };
+  return {
+    worksheet,
+    staffed,
+    open,
+    short: worksheet == null ? 0 : Math.max(0, round1(worksheet - staffed)),
+  };
 }
 
 export type OneToOneChip = {

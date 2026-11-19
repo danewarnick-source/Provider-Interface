@@ -14,7 +14,15 @@ import {
 } from "./residential-facts.ts";
 
 const HOME = "home-1";
-const WEEK = ["2026-11-15", "2026-11-16", "2026-11-17", "2026-11-18", "2026-11-19", "2026-11-20", "2026-11-21"];
+const WEEK = [
+  "2026-11-15",
+  "2026-11-16",
+  "2026-11-17",
+  "2026-11-18",
+  "2026-11-19",
+  "2026-11-20",
+  "2026-11-21",
+];
 const code = (over: Partial<RhsCodeRow> = {}): RhsCodeRow => ({
   client_id: "r1",
   service_code: "RHS",
@@ -66,7 +74,10 @@ test("absence days: counted inside the plan year, an open absence through today"
   ];
   assert.deepEqual(absenceUse(absences, [code()], "r1", "2026-11-19"), { used: 5, allowed: 12 });
   assert.equal(absenceDaysLeft(absences, [code()], "r1", "2026-11-19"), 7);
-  assert.equal(absenceDaysLeft(absences, [code({ worksheet_absence_days: null })], "r1", "2026-11-19"), undefined);
+  assert.equal(
+    absenceDaysLeft(absences, [code({ worksheet_absence_days: null })], "r1", "2026-11-19"),
+    undefined,
+  );
   assert.deepEqual(absenceUse(absences, [], "r1", "2026-11-19"), { used: 0, allowed: null });
   assert.equal(absenceDaysLeft([], [code({ worksheet_absence_days: 3 })], "r1", "2026-11-19"), 3);
 });
@@ -87,7 +98,13 @@ test("Worksheet hours: residents' weekly hours vs staffed vs open (with open spo
     shift("2026-11-17", 10, 11, { parent_shift_id: "x" }),
     shift("2026-11-23", 7, 15),
   ];
-  const w = worksheetHours(HOME, ["r1", "r2"], [code(), code({ client_id: "r2", worksheet_weekly_hours: 20 })], shifts, WEEK);
+  const w = worksheetHours(
+    HOME,
+    ["r1", "r2"],
+    [code(), code({ client_id: "r2", worksheet_weekly_hours: 20 })],
+    shifts,
+    WEEK,
+  );
   assert.deepEqual(w, { worksheet: 60, staffed: 12, open: 16, short: 48 });
   assert.equal(worksheetHours(HOME, ["r1"], [], shifts, WEEK).worksheet, null);
 });
@@ -101,6 +118,12 @@ test("1:1 chips: resident RHS shifts at the home with their Form 930", () => {
     [shift("2026-11-16", 7, 15), one, shift("2026-11-17", 9, 13, { client_id: "r1" })],
     WEEK,
   );
-  assert.deepEqual(chips.map((c) => [c.day, !!c.form930]), [["2026-11-17", true], ["2026-11-21", false]]);
+  assert.deepEqual(
+    chips.map((c) => [c.day, !!c.form930]),
+    [
+      ["2026-11-17", true],
+      ["2026-11-21", false],
+    ],
+  );
   assert.equal(chips[1]!.shift.id, one.id);
 });

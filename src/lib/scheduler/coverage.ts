@@ -72,7 +72,13 @@ export type Slot = {
 };
 export type Gap = { teamId: string; day: string; from: number; to: number; short: number };
 /** A "no staff needed" block as it falls on one bar. */
-export type NoStaffOnDay = { id: string; from: number; to: number; reason: string; weekly: boolean };
+export type NoStaffOnDay = {
+  id: string;
+  from: number;
+  to: number;
+  reason: string;
+  weekly: boolean;
+};
 export type CoverageDay = {
   day: string;
   slots: Slot[];
@@ -155,7 +161,11 @@ function awayAt(away: readonly CoverageAway[], clientId: string, ref: string, t:
 }
 
 /** Does this shift count toward the home's coverage? */
-export function countsTowardCoverage(s: CoverageShift, teamId: string, notCounted: ReadonlySet<string>) {
+export function countsTowardCoverage(
+  s: CoverageShift,
+  teamId: string,
+  notCounted: ReadonlySet<string>,
+) {
   return (
     s.team_id === teamId &&
     !s.client_id &&
@@ -198,7 +208,9 @@ function coverageDay(i: CoverageInput, day: string): CoverageDay {
   const slots: Slot[] = [];
   for (let at = BAR_FROM; at < BAR_TO; at += SLOT_MIN) {
     const mid = at + SLOT_MIN / 2;
-    const want = positive.filter((s) => within(s, mid)).reduce((n, s) => Math.max(n, s.n.required_staff_count), 0);
+    const want = positive
+      .filter((s) => within(s, mid))
+      .reduce((n, s) => Math.max(n, s.n.required_staff_count), 0);
     const noStaff = zero.some((s) => within(s, mid));
     const away =
       !noStaff &&

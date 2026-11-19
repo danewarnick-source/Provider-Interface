@@ -88,8 +88,7 @@ export function noStaffBlocks(rows: readonly NoStaffRow[]): NoStaffBlock[] {
     out.set(key, b);
   }
   return [...out.values()].sort(
-    (a, b) =>
-      (a.date ?? "").localeCompare(b.date ?? "") || a.start.localeCompare(b.start),
+    (a, b) => (a.date ?? "").localeCompare(b.date ?? "") || a.start.localeCompare(b.start),
   );
 }
 
@@ -97,6 +96,8 @@ export function noStaffBlocks(rows: readonly NoStaffRow[]): NoStaffBlock[] {
 export function noStaffWhen(b: Pick<NoStaffBlock, "days" | "start" | "end">, dateText?: string) {
   const when = dateText ?? daysText(b.days);
   const time =
-    b.start === b.end ? "all day" : `${timeText(b.start)} – ${timeText(b.end)}${b.end < b.start ? " (next day)" : ""}`;
+    b.start === b.end
+      ? "all day"
+      : `${timeText(b.start)} – ${timeText(b.end)}${b.end < b.start ? " (next day)" : ""}`;
   return `${when} · ${time}`;
 }

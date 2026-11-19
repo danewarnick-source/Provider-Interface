@@ -48,7 +48,8 @@ const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 /** What's wrong with an away time, in plain words; null when it can be saved. */
 export function awayProblem(d: AwayDraft): string | null {
   if (!d.days.length) return "Pick at least one day.";
-  if (!TIME.test(d.start) || !TIME.test(d.end)) return "Enter when they leave and when they're back.";
+  if (!TIME.test(d.start) || !TIME.test(d.end))
+    return "Enter when they leave and when they're back.";
   if (d.end <= d.start) return "They have to be back after they leave, the same day.";
   if (!AWAY_LABELS.some(([k]) => k === d.label)) return "Pick where they are.";
   if (d.note.length > NOTE_MAX) return `Keep the details under ${NOTE_MAX} characters.`;
@@ -56,7 +57,8 @@ export function awayProblem(d: AwayDraft): string | null {
 }
 
 /** The weekdays in a mask, Sunday = 0. */
-export const maskDays = (mask: number) => WEEKDAY_SHORT.map((_, i) => i).filter((i) => (mask & (1 << i)) !== 0);
+export const maskDays = (mask: number) =>
+  WEEKDAY_SHORT.map((_, i) => i).filter((i) => (mask & (1 << i)) !== 0);
 
 export const awayMask = (d: Pick<AwayDraft, "days">) => maskOf(d.days);
 
@@ -64,7 +66,9 @@ export const awayLabelText = (label: string) =>
   AWAY_LABELS.find(([k]) => k === label)?.[1] ?? "Away";
 
 /** "Mon–Fri · 9:00 AM – 3:00 PM · Day program · Lehi Day Program". */
-export function awayText(a: Pick<AwayTime, "weekday_mask" | "start_time" | "end_time" | "label" | "note">): string {
+export function awayText(
+  a: Pick<AwayTime, "weekday_mask" | "start_time" | "end_time" | "label" | "note">,
+): string {
   return [
     daysText(maskDays(a.weekday_mask)),
     `${timeText(a.start_time.slice(0, 5))} – ${timeText(a.end_time.slice(0, 5))}`,
