@@ -2,8 +2,10 @@
 // Stored one row per day in location_coverage_requirements (team_id = the
 // home; day_of_week 0 = Sunday … 6 = Saturday, null = every day). Settings ›
 // Homes shows and edits them as time blocks: rows with the same times, staff
-// count, awake flag and notes are one block across their days. Pure: the
-// home page and staffing-needs.functions.ts call these. Hidden on host homes.
+// count, awake flag and notes are one block across their days. Rows with 0
+// staff or one date (on_date) are "no staff needed" blocks (no-staff.ts) and
+// never reach these. Pure: Settings › Homes and staffing-needs.functions.ts
+// call these. Hidden on host homes.
 
 export type NeedRow = {
   id: string;
