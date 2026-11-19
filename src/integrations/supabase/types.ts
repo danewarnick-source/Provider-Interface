@@ -2317,6 +2317,66 @@ export type Database = {
           },
         ]
       }
+      client_away_times: {
+        Row: {
+          archived_at: string | null
+          client_id: string
+          created_at: string
+          created_by: string | null
+          end_time: string
+          id: string
+          label: string
+          note: string | null
+          organization_id: string
+          start_time: string
+          updated_at: string
+          weekday_mask: number
+        }
+        Insert: {
+          archived_at?: string | null
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          end_time: string
+          id?: string
+          label: string
+          note?: string | null
+          organization_id: string
+          start_time: string
+          updated_at?: string
+          weekday_mask: number
+        }
+        Update: {
+          archived_at?: string | null
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          end_time?: string
+          id?: string
+          label?: string
+          note?: string | null
+          organization_id?: string
+          start_time?: string
+          updated_at?: string
+          weekday_mask?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_away_times_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_away_times_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_belongings: {
         Row: {
           client_id: string
@@ -11248,6 +11308,7 @@ export type Database = {
           end_time: string
           id: string
           notes: string | null
+          on_date: string | null
           organization_id: string
           required_staff_count: number
           start_time: string
@@ -11261,6 +11322,7 @@ export type Database = {
           end_time: string
           id?: string
           notes?: string | null
+          on_date?: string | null
           organization_id: string
           required_staff_count?: number
           start_time: string
@@ -11274,6 +11336,7 @@ export type Database = {
           end_time?: string
           id?: string
           notes?: string | null
+          on_date?: string | null
           organization_id?: string
           required_staff_count?: number
           start_time?: string
@@ -14800,12 +14863,10 @@ export type Database = {
           effective_until: string | null
           end_time_local: string
           id: string
-          location_id: string | null
           name: string | null
           notes: string | null
           organization_id: string
           service_code: string | null
-          service_code_id: string | null
           shift_type: string | null
           staff_id: string | null
           start_time_local: string
@@ -14825,12 +14886,10 @@ export type Database = {
           effective_until?: string | null
           end_time_local: string
           id?: string
-          location_id?: string | null
           name?: string | null
           notes?: string | null
           organization_id: string
           service_code?: string | null
-          service_code_id?: string | null
           shift_type?: string | null
           staff_id?: string | null
           start_time_local: string
@@ -14850,12 +14909,10 @@ export type Database = {
           effective_until?: string | null
           end_time_local?: string
           id?: string
-          location_id?: string | null
           name?: string | null
           notes?: string | null
           organization_id?: string
           service_code?: string | null
-          service_code_id?: string | null
           shift_type?: string | null
           staff_id?: string | null
           start_time_local?: string
@@ -15313,7 +15370,6 @@ export type Database = {
           ends_at: string
           id: string
           is_awake_overnight: boolean | null
-          is_recurring: boolean
           notes: string | null
           open_spots: number | null
           organization_id: string
@@ -15321,8 +15377,6 @@ export type Database = {
           parent_shift_id: string | null
           pattern_line_id: string | null
           published: boolean
-          recurrence_end_date: string | null
-          recurrence_rule: string | null
           service_code: string | null
           shift_type: string
           staff_id: string | null
@@ -15345,7 +15399,6 @@ export type Database = {
           ends_at: string
           id?: string
           is_awake_overnight?: boolean | null
-          is_recurring?: boolean
           notes?: string | null
           open_spots?: number | null
           organization_id: string
@@ -15353,8 +15406,6 @@ export type Database = {
           parent_shift_id?: string | null
           pattern_line_id?: string | null
           published?: boolean
-          recurrence_end_date?: string | null
-          recurrence_rule?: string | null
           service_code?: string | null
           shift_type?: string
           staff_id?: string | null
@@ -15377,7 +15428,6 @@ export type Database = {
           ends_at?: string
           id?: string
           is_awake_overnight?: boolean | null
-          is_recurring?: boolean
           notes?: string | null
           open_spots?: number | null
           organization_id?: string
@@ -15385,8 +15435,6 @@ export type Database = {
           parent_shift_id?: string | null
           pattern_line_id?: string | null
           published?: boolean
-          recurrence_end_date?: string | null
-          recurrence_rule?: string | null
           service_code?: string | null
           shift_type?: string
           staff_id?: string | null
