@@ -1,17 +1,19 @@
 // The Needs you row (B5): its kinds, tags, urgency and order. Pure. Rows are
 // built by needs-list.ts and drawn by components/scheduler/needs/. Most urgent
-// first: tier 0 (red: call-outs, late and missed clock-ins, 1:1 not covered,
-// expired cards, 1056 Act now), then tier 1 (open shifts, claims, swaps,
+// first: tier 0 (red: call-outs, late and missed clock-ins, coverage gaps at
+// homes, 1:1 not covered, expired cards, 1056 Act now), then tier 1 (open shifts, claims, swaps,
 // shifts left uncovered by time off, 1056 Watch), then tier 2 (time off,
 // punch fixes, cards expiring, overtime). Within a tier, the earliest first.
 import type { EscalationView } from "./escalation-view.ts";
 import type { Approval } from "./needs-approvers.ts";
+import type { Gap } from "./coverage.ts";
 import { addDaysKey, weekStartKey } from "./time.ts";
 
 export type NeedKind =
   | "callout"
   | "late"
   | "missed"
+  | "coverage_gap"
   | "one_to_one"
   | "open"
   | "claim"
@@ -28,6 +30,7 @@ export const NEED_TAG: Record<NeedKind, string> = {
   callout: "Call-out",
   late: "Late clock-in",
   missed: "Missed visit",
+  coverage_gap: "Coverage gap",
   one_to_one: "1:1 not covered",
   open: "Open shift",
   claim: "Claim",
@@ -74,6 +77,8 @@ export type NeedItem = {
   cardLabel?: string;
   /** 1056: the client. */
   clientId?: string;
+  /** Coverage gap: the short stretch (opens the gap dialog). */
+  gap?: Gap;
   /** Call-out / open / 1:1: the escalation ladder (escalation-needs.server.ts). */
   escalation?: EscalationView & { canStart: boolean };
 };
@@ -91,6 +96,7 @@ const PLURAL: Partial<Record<NeedKind, string>> = {
   callout: "Call-outs",
   late: "Late clock-ins",
   missed: "Missed visits",
+  coverage_gap: "Coverage gaps",
   open: "Open shifts",
   claim: "Claims",
   swap: "Swaps",

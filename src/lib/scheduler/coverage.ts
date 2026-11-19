@@ -282,7 +282,7 @@ export const hasStaffingNeeds = (needs: readonly CoverageNeed[], teamId?: string
   needs.some((n) => n.required_staff_count > 0 && (!teamId || n.team_id === teamId));
 
 /** The open (unfilled) shift at the home that overlaps a gap, if any. */
-export function openShiftFor(gap: Gap, shifts: readonly CoverageShift[]): CoverageShift | null {
+export function openShiftFor<S extends CoverageShift>(gap: Gap, shifts: readonly S[]): S | null {
   return (
     shifts.find((s) => {
       if (s.team_id !== gap.teamId || s.client_id || s.parent_shift_id) return false;

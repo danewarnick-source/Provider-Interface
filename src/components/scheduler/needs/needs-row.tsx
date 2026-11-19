@@ -1,7 +1,8 @@
 // One Needs you row (B5): its tag, where and when, why, and its fix buttons
 // (the plan's behavior table). Drawers (Find staff, the overtime list) are the
 // board's, opened through the board context the page provides; the other
-// buttons are useNeedsActions; the escalation line and Start / Stop
+// buttons are useNeedsActions; a coverage gap opens the board's gap dialog
+// (B7); the escalation line and Start / Stop
 // escalation are EscalationControls. A button the viewer can't use is
 // disabled and says why underneath.
 import { useState, type ReactNode } from "react";
@@ -9,6 +10,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { NEED_TAG, type NeedItem } from "@/lib/scheduler/needs-items";
 import { firstName, useBoard } from "@/components/scheduler/board/board-context";
+import { newDraft } from "@/components/scheduler/board/add-draft";
+import { onCalendar } from "@/lib/scheduler/coverage";
 import { EscalationControls } from "./escalation-controls";
 import type { NeedsActions } from "./use-needs-actions";
 
@@ -98,6 +101,7 @@ export function NeedsRow({ item: i, act }: { item: NeedItem; act: NeedsActions }
       },
     ],
     one_to_one: [],
+    coverage_gap: [],
     claim: [
       { label: "Approve", onClick: () => act.claim(i.key, i.shiftId!, true), off: decide },
       { label: "Not this time", onClick: () => act.claim(i.key, i.shiftId!, false), off: decide },
@@ -133,6 +137,28 @@ export function NeedsRow({ item: i, act }: { item: NeedItem; act: NeedsActions }
     overtime: [{ label: "See their shifts", onClick: () => b.open({ kind: "list", which: "ot" }) }],
   };
   acts.one_to_one = acts.open;
+  if (i.gap) {
+    const gap = i.gap;
+    const cal = onCalendar(gap.day, gap.from, gap.to);
+    const addGap: Act = {
+      label: "Add a shift for the gap",
+      onClick: () =>
+        b.open({
+          kind: "add",
+          draft: {
+            ...newDraft(b, { day: cal.day, placeKey: `team:${gap.teamId}` }),
+            start: cal.start,
+            end: cal.end,
+            shiftType: null,
+          },
+        }),
+      off: edit,
+    };
+    acts.coverage_gap = [
+      ...(i.shiftId ? acts.open : [addGap]),
+      { label: "No staff needed…", onClick: () => b.open({ kind: "gap", gap }), off: edit },
+    ];
+  }
   const card: Act[] = [
     ...(i.href ? [{ label: "Open in Evidence", onClick: () => void nav({ href: i.href! }) }] : []),
     {
@@ -146,7 +172,13 @@ export function NeedsRow({ item: i, act }: { item: NeedItem; act: NeedsActions }
 
   return (
     <Row
-      onOpen={loaded ? () => b.open({ kind: "shift", id: i.shiftId! }) : undefined}
+      onOpen={
+        loaded
+          ? () => b.open({ kind: "shift", id: i.shiftId! })
+          : i.gap
+            ? () => b.open({ kind: "gap", gap: i.gap! })
+            : undefined
+      }
       tag={
         <span
           className={`text-[10.5px] font-extrabold uppercase tracking-wider ${TAG_COLOR[i.level]}`}
