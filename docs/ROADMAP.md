@@ -2,7 +2,7 @@
 
 Read this before planning or building anything. Update it at the end of every session ("update the roadmap and decisions, then commit"). Owner decisions are in `docs/decisions.md`.
 
-**Next up:** Dane tests the escalation step (new PR). After merge: test the live site with one in-database call to `scheduler-tick` (secret stays in the vault), then, with Dane's OK, apply `20261118200000_scheduler_b_tick_job.sql` to turn on late alerts and timed escalation. Then B6 (Rotations).
+**Next up:** (1) Dane adds `NECTAR_CRON_SECRET` to AWS Lambda `hive-app-server` (us-east-1) › Configuration › Environment variables, with the same value as the Supabase Vault secret of that name. The Nov 19 in-database test call to `scheduler-tick` got 401: the route is live, the secret is missing. Then re-test, and with Dane's OK apply `20261118200000_scheduler_b_tick_job.sql`. (2) B6 (Rotations).
 
 ## The vision (Dane, Nov 13, 2026)
 - **One platform for Utah DSPD providers, built for the admin side first.** Staff screens exist to feed admins clean records.
