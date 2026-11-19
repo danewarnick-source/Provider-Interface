@@ -47,23 +47,36 @@ const overlaps = (
   b: { starts_at: string; ends_at: string },
 ) => ms(a.starts_at) < ms(b.ends_at) && ms(b.starts_at) < ms(a.ends_at);
 
+type Booked = Pick<CopySource, "staff_id" | "client_id" | "starts_at" | "ends_at" | "status">;
+
+/**
+ * "person" / "client" when a live shift already overlaps `row` for the same
+ * person or the same client, else null. Also used by the rotation builder.
+ */
+export function bookedClash(
+  row: Pick<CopySource, "staff_id" | "client_id" | "starts_at" | "ends_at">,
+  existing: readonly Booked[],
+): "person" | "client" | null {
+  for (const e of existing) {
+    if (!live(e) || !overlaps(e, row)) continue;
+    if (row.staff_id && e.staff_id === row.staff_id) return "person";
+    if (row.client_id && e.client_id === row.client_id) return "client";
+  }
+  return null;
+}
+
 /** Why `copy` would overwrite something already in the target week, or null. */
 function clash(copy: CopyRow, existing: readonly CopySource[]): SkipWhy | null {
-  for (const e of existing) {
-    if (!live(e)) continue;
-    if (
+  const same = existing.some(
+    (e) =>
+      live(e) &&
       e.team_id === copy.team_id &&
       e.client_id === copy.client_id &&
       (e.service_code ?? "").toUpperCase() === (copy.service_code ?? "").toUpperCase() &&
       ms(e.starts_at) === ms(copy.starts_at) &&
-      ms(e.ends_at) === ms(copy.ends_at)
-    )
-      return "duplicate";
-    if (!overlaps(e, copy)) continue;
-    if (copy.staff_id && e.staff_id === copy.staff_id) return "person";
-    if (copy.client_id && e.client_id === copy.client_id) return "client";
-  }
-  return null;
+      ms(e.ends_at) === ms(copy.ends_at),
+  );
+  return same ? "duplicate" : bookedClash(copy, existing);
 }
 
 export function planCopyWeek(input: {
