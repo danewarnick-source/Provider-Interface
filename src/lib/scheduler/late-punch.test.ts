@@ -4,6 +4,7 @@ import {
   hasPunch,
   lateAlerts,
   lateAlertText,
+  lateLeadRecipients,
   punchState,
   type PunchShift,
   type ShiftPunch,
@@ -88,4 +89,20 @@ test("alert texts carry code, day and time, never a client", () => {
   assert.match(t.body, /10 minutes past the start of your SLN shift \(Tue, Nov 17 · 2p–10p\)/);
   const l = lateAlertText(shift(), "lead", at("2026-11-17T21:30:00.000Z"), "Nora");
   assert.match(l.body, /^Nora isn't clocked in for SLN · Tue, Nov 17 · 2p–10p, 30 minutes/);
+});
+
+test("lead alert goes to the home's lead, else the schedulers (never a host)", () => {
+  const schedulers = ["rosa", "admin"];
+  assert.deepEqual(lateLeadRecipients({ team_type: "rhs_home", manager_id: "lead" }, schedulers), [
+    "lead",
+  ]);
+  assert.deepEqual(
+    lateLeadRecipients({ team_type: "rhs_home", manager_id: null }, schedulers),
+    schedulers,
+  );
+  assert.deepEqual(
+    lateLeadRecipients({ team_type: "host_home", manager_id: "host" }, schedulers),
+    schedulers,
+  );
+  assert.deepEqual(lateLeadRecipients(null, schedulers), schedulers);
 });

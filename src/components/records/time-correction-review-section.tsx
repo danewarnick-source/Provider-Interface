@@ -5,15 +5,18 @@
 // Documentation > Records > Needs attention so nothing goes stale on the
 // hidden page. All approve/deny semantics mirror the old compliance desk
 // exactly (see reviewApprove/reviewReject in dashboard.compliance-desk.tsx):
-//  • Approve → sets review_status='approved', stamps reviewed_by/at.
-//    downstream effectiveBillingTimes() then bills the corrected times.
-//  • Reject  → requires a note, sets review_status='rejected' + review_note,
+// Approve and deny run reviewPunchFix (lib/scheduler/punch-review.functions.ts),
+// the same decision Scheduler › Needs you makes:
+//  • Approve → review_status='approved'; effectiveBillingTimes() then bills the
+//    corrected times.
+//  • Reject  → requires a note (review_status='rejected' + review_note); the
 //    caregiver sees a "correction rejected — resubmit" state on punch pad.
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Check, X, Flag, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/use-auth";
+import { useServerFn } from "@tanstack/react-start";
+import { reviewPunchFix } from "@/lib/scheduler/punch-review.functions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -57,7 +60,6 @@ function varianceMinutes(r: Row): number | null {
 
 export function TimeCorrectionReviewSection({ organizationId }: { organizationId: string }) {
   const qc = useQueryClient();
-  const { user } = useAuth();
 
   const q = useQuery({
     enabled: !!organizationId,
@@ -88,46 +90,27 @@ export function TimeCorrectionReviewSection({ organizationId }: { organizationId
     },
   });
 
+  const review = useServerFn(reviewPunchFix);
+  const decide = (timesheet_id: string, approve: boolean, note?: string) =>
+    review({ data: { organization_id: organizationId, timesheet_id, approve, note } });
+
   const approve = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("evv_timesheets")
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .update({
-          review_status: "approved",
-          reviewed_by: user?.id ?? null,
-          reviewed_at: new Date().toISOString(),
-        } as any)
-        .eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: (id: string) => decide(id, true),
     onSuccess: () => {
       toast.success("Correction approved — corrected times now bill.");
       qc.invalidateQueries({ queryKey: ["records-needs-review"] });
       qc.invalidateQueries({ queryKey: ["records"] });
+      qc.invalidateQueries({ queryKey: ["needs-you"] });
     },
     onError: (e) => toast.error((e as Error).message),
   });
 
   const reject = useMutation({
-    mutationFn: async (payload: { id: string; note: string }) => {
-      const note = payload.note.trim();
-      if (!note) throw new Error("A reviewer note is required to deny.");
-      const { error } = await supabase
-        .from("evv_timesheets")
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .update({
-          review_status: "rejected",
-          reviewed_by: user?.id ?? null,
-          reviewed_at: new Date().toISOString(),
-          review_note: note,
-        } as any)
-        .eq("id", payload.id);
-      if (error) throw error;
-    },
+    mutationFn: (payload: { id: string; note: string }) => decide(payload.id, false, payload.note),
     onSuccess: () => {
       toast.success("Returned to caregiver — they will see a resubmit prompt.");
       qc.invalidateQueries({ queryKey: ["records-needs-review"] });
+      qc.invalidateQueries({ queryKey: ["needs-you"] });
     },
     onError: (e) => toast.error((e as Error).message),
   });

@@ -115,18 +115,37 @@ const ShiftRef = z.object({
   override_reason: z.string().max(1000).nullable().optional(),
 });
 
-/** Cancel a shift: it stays on record (status cancelled, cancelled_at) and can be restored. */
+const CancelRef = ShiftRef.extend({
+  /** Why (Needs you › Didn't happen); added to the shift's notes. */
+  cancel_reason: z.string().max(500).optional(),
+});
+
+/**
+ * Cancel a shift: it stays on record (status cancelled, cancelled_at) and can
+ * be restored. A reason is kept in the shift's notes ("Cancelled: …").
+ */
 export const cancelShift = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: z.input<typeof ShiftRef>) => ShiftRef.parse(d))
+  .inputValidator((d: z.input<typeof CancelRef>) => CancelRef.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false };
     await requireCategory(supabase, userId, data.organization_id, "scheduling", "edit");
     const before = await loadSnapshot(supabase, data.organization_id, data.id);
+    const reason = data.cancel_reason?.trim();
+    let notes: { notes?: string } = {};
+    if (reason) {
+      const { data: cur } = await supabase
+        .from("scheduled_shifts")
+        .select("notes")
+        .eq("id", data.id)
+        .eq("organization_id", data.organization_id)
+        .maybeSingle();
+      notes = { notes: `${cur?.notes ? `${cur.notes}\n` : ""}Cancelled: ${reason}` };
+    }
     const { data: rows, error } = await supabase
       .from("scheduled_shifts")
-      .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
+      .update({ status: "cancelled", cancelled_at: new Date().toISOString(), ...notes })
       .eq("id", data.id)
       .eq("organization_id", data.organization_id)
       .select(SNAPSHOT_COLUMNS);

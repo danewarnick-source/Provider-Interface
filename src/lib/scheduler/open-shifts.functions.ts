@@ -122,7 +122,7 @@ export const claimOpenShift = createServerFn({ method: "POST" })
       type: "shift_claim_request",
       title: "Open shift requested",
       body: `A team member requested ${shift.service_code ?? "an open shift"} on ${dayKey(shift.starts_at)}.`,
-      link_to: `/dashboard/scheduler`,
+      link_to: `/dashboard/scheduler/needs`,
       related_id: data.shiftId,
       related_type: "scheduled_shift",
     });

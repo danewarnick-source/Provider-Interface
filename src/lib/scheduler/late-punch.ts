@@ -145,3 +145,16 @@ export function punchFixAskText(s: PunchShift): { title: string; body: string } 
     body: `Your ${codeOf(s)} shift (${shiftWhen(s)}) has no clock-in. If you worked it, add the time in My time corrections.`,
   };
 }
+
+/**
+ * Who gets the +30 minute alert: the lead of the shift's home (not a host
+ * home's host), else the agency's schedulers (Owners and agency-wide Admins
+ * with Scheduling edit). A client shift with no home goes to the schedulers.
+ */
+export function lateLeadRecipients(
+  home: { team_type: string | null; manager_id: string | null } | null,
+  schedulers: readonly string[],
+): string[] {
+  if (home?.manager_id && home.team_type !== "host_home") return [home.manager_id];
+  return [...schedulers];
+}

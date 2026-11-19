@@ -23,7 +23,11 @@ export type CardFinding = {
 
 export function cardFindings(
   people: readonly StaffFacts[],
-  shifts: ReadonlyArray<{ staff_id: string | null; service_code: string | null; starts_at: string }>,
+  shifts: ReadonlyArray<{
+    staff_id: string | null;
+    service_code: string | null;
+    starts_at: string;
+  }>,
   evidence: Readonly<Record<string, QualEvidence>>,
   today: string,
 ): CardFinding[] {

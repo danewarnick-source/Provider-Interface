@@ -5,6 +5,7 @@
 // shifts left uncovered by time off, 1056 Watch), then tier 2 (time off,
 // punch fixes, cards expiring, overtime). Within a tier, the earliest first.
 import type { Approval } from "./needs-approvers.ts";
+import { addDaysKey, weekStartKey } from "./time.ts";
 
 export type NeedKind =
   | "callout"
@@ -106,3 +107,17 @@ export function needsSummary(items: readonly NeedItem[]): string {
 
 export const isNeedKind = (v: unknown): v is NeedKind =>
   typeof v === "string" && (NEED_KINDS as string[]).includes(v);
+
+/**
+ * The days Needs you looks at: missed visits from the last 7 days through open
+ * shifts to the end of next week. The page loads the board for the same days
+ * so Find staff and Make it open work on every row.
+ */
+export function needsWindow(today: string): { from: string; until: string; week: string[] } {
+  const weekStart = weekStartKey(today);
+  return {
+    from: addDaysKey(today, -7),
+    until: addDaysKey(weekStart, 14),
+    week: Array.from({ length: 7 }, (_, i) => addDaysKey(weekStart, i)),
+  };
+}

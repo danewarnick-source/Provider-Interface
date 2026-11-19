@@ -34,7 +34,7 @@ export const respondToSwapRequest = createServerFn({ method: "POST" })
           body: accepted
             ? "A coworker accepted a swap request. Review and approve it."
             : "A coworker declined a swap request.",
-          link_to: "/dashboard/scheduler",
+          link_to: "/dashboard/scheduler/needs",
           related_id: r.id,
           related_type: "shift_swap_request",
         },
