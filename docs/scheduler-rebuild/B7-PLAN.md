@@ -1,6 +1,6 @@
 # B7 plan: group home page (RHS)
 
-Status: **approved, building, scope A (full)** (Nov 19, 2026). Dane: A, and yes to questions 2–7. Residents' away times are in: new table `client_away_times` (owned by Clients), edited on the client's profile and from the home page's Residents card (same function), and when every resident of a home is away those hours need no staff. Spec: `docs/demos/scheduler.html` › click a home on the board (`vPlace`, `covDay`, `dlgGap`). Step text: PART-B.md › B7.
+Status: **built, scope A (full)** (Nov 19, 2026; branch claude/busy-cray-w323d6, not pushed; see PROGRESS.md). Dane: A, and yes to questions 2–7. Residents' away times are in: new table `client_away_times` (owned by Clients), edited on the client's profile and from the home page's Residents card (same function), and when every resident of a home is away those hours need no staff. Spec: `docs/demos/scheduler.html` › click a home on the board (`vPlace`, `covDay`, `dlgGap`). Step text: PART-B.md › B7.
 
 ## 1. Job
 A lead sees whether a group home is covered and staffed to its Worksheet, fixes gaps in place, and the board's coverage-gaps tile comes back.
