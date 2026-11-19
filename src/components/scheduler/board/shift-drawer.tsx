@@ -1,11 +1,8 @@
 // The shift drawer: details, the rule engine's checks for this shift, who's
-// been asked (open shifts), and Edit day, place or time / Give it to someone
-// else / Make it open / Cancel shift (or Restore). Nothing is deleted:
-// cancelled shifts stay on record.
-import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+// been asked (offers and escalation steps, who-asked.tsx), and Edit day,
+// place or time / Give it to someone else / Make it open / Cancel shift (or
+// Restore). Nothing is deleted: cancelled shifts stay on record.
 import { Button } from "@/components/ui/button";
-import { listShiftOffers } from "@/lib/scheduler/offer.functions";
 import { fmtDay } from "@/lib/scheduler/auth-outlook";
 import {
   fmtSpan,
@@ -14,53 +11,17 @@ import {
   shiftHours,
   type BoardShift,
 } from "@/lib/scheduler/board-model";
-import { shiftFlags, staffName, useBoard, type Board } from "./board-context";
+import { shiftFlags, staffName, useBoard } from "./board-context";
 import { editDraft } from "./add-draft";
 import { CodeTag, DrawerShell } from "./board-ui";
 import { placeLabel } from "./shift-chip";
+import { WhoAsked } from "./who-asked";
 
 const LEVEL_CLASS = {
   block: "text-[var(--hive-danger)]",
   reason: "text-[var(--hive-gold)]",
   warn: "text-[var(--hive-text)]",
 };
-
-function Asked({ b, s }: { b: Board; s: BoardShift }) {
-  const run = useServerFn(listShiftOffers);
-  const { data, isLoading } = useQuery({
-    queryKey: ["scheduler-board", "offers", s.id],
-    queryFn: () => run({ data: { organization_id: b.orgId, shift_id: s.id } }),
-  });
-  return (
-    <div className="rounded-md border border-[var(--hive-border)] p-3">
-      <h3 className="text-sm font-bold">Who's been asked</h3>
-      {isLoading && <p className="text-sm text-[var(--hive-text-muted)]">Loading…</p>}
-      {data && !data.length && (
-        <p className="text-sm text-[var(--hive-text-muted)]">
-          Not offered yet. Offer it to qualified people, or pick someone.
-        </p>
-      )}
-      {data && data.length > 0 && (
-        <ol className="mt-2 space-y-1 text-sm">
-          {data.map((a, i) => (
-            <li key={`${a.staffId}${i}`} className="flex justify-between gap-2">
-              <span>
-                {i + 1}. {staffName(b, a.staffId)}
-              </span>
-              <span className="text-[var(--hive-text-muted)]">
-                {s.claim_requested_by === a.staffId
-                  ? "Asked to take it"
-                  : a.seenAt
-                    ? "Seen"
-                    : "No answer yet"}
-              </span>
-            </li>
-          ))}
-        </ol>
-      )}
-    </div>
-  );
-}
 
 export function ShiftDrawer({ s }: { s: BoardShift }) {
   const b = useBoard();
@@ -162,7 +123,7 @@ export function ShiftDrawer({ s }: { s: BoardShift }) {
           </ul>
         </div>
       )}
-      {!s.staff_id && !cancelled && <Asked b={b} s={s} />}
+      {!cancelled && <WhoAsked b={b} s={s} />}
       {b.canEdit && (
         <div className="flex flex-wrap gap-2">
           {!cancelled && (
