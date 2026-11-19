@@ -1,6 +1,6 @@
 # B6 plan: Rotations
 
-Status: **approved, building** (Nov 19, 2026). Dane: yes to all 9 questions. Spec: `docs/demos/scheduler.html` › Rotations (tabs per place, the 4-week preview, `dlgRot`). Step text: PART-B.md › B6.
+Status: **built** (Nov 19, 2026; branch claude/busy-cray-w323d6, see PROGRESS.md). Dane: yes to all 9 questions. Spec: `docs/demos/scheduler.html` › Rotations (tabs per place, the 4-week preview, `dlgRot`). Step text: PART-B.md › B6.
 
 ## 1. Job
 The week builds itself from each home's and client's usual pattern, so the scheduler only handles what's different.
