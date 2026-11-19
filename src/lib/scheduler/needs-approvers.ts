@@ -64,7 +64,7 @@ export function canApprove(
 
 /** The distinct homes a set of shifts belongs to: the shift's home, else its client's. */
 export function homesOfShifts(
-  shifts: ReadonlyArray<{ team_id: string | null; client_id: string | null }>,
+  shifts: ReadonlyArray<{ team_id?: string | null; client_id: string | null }>,
   clientHome: ReadonlyMap<string, string | null>,
   homes: ReadonlyMap<string, ApprovalHome>,
 ): ApprovalHome[] {

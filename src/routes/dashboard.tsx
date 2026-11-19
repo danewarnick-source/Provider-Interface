@@ -82,6 +82,7 @@ import { OrgSwitcher, DemoBadge, DemoOrgBanner } from "@/components/org-switcher
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getInboxUnreadCount } from "@/lib/inbox-messages.functions";
+import { useNeeds } from "@/components/scheduler/needs/use-needs";
 import { useOrgFeatures } from "@/hooks/use-feature-enabled";
 import {
   DASHBOARD_BOOT_TIMEOUT_MS,
@@ -318,6 +319,8 @@ type SidebarBodyProps = {
   signOut: () => Promise<void>;
   onNavigate?: () => void;
   inboxUnread: number;
+  /** Scheduler › Needs you rows (B5), shown on the Scheduler menu item. */
+  needsCount: number;
 };
 
 function DashboardLayout() {
@@ -328,7 +331,7 @@ function DashboardLayout() {
     isError: orgError,
     error: orgQueryError,
   } = useCurrentOrg();
-  const { can } = useAccess();
+  const { can, canCategory } = useAccess();
   const {
     view,
     hasStoredView,
@@ -542,6 +545,10 @@ function DashboardLayout() {
     }
   }, [execLoading, viewHydrated, orgLoading, isHiveExecView, isStatePreview, pathname, navigate]);
 
+  const needsQ = useNeeds(
+    org?.organization_id,
+    effectiveView === "admin" && canCategory("scheduling", "view"),
+  );
   const unreadFn = useServerFn(getInboxUnreadCount);
   const unreadQ = useQuery({
     enabled: !!org?.organization_id && effectiveView === "admin" && isAdminCapable,
@@ -708,6 +715,7 @@ function DashboardLayout() {
     pathname,
     signOut,
     inboxUnread,
+    needsCount: needsQ.data?.length ?? 0,
   };
 
   return (
@@ -1041,6 +1049,7 @@ function SidebarBody({
   signOut,
   onNavigate,
   inboxUnread,
+  needsCount,
 }: SidebarBodyProps) {
   const [upgradeFeatureKey, setUpgradeFeatureKey] = useState<string | null>(null);
   // Domain sections in the Executive Command Center sidebar are collapsed by
@@ -1317,6 +1326,14 @@ function SidebarBody({
                     className="inline-flex min-w-[20px] items-center justify-center rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-semibold leading-none text-destructive-foreground"
                   >
                     {inboxUnread > 99 ? "99+" : inboxUnread}
+                  </span>
+                )}
+                {item.to === "/dashboard/scheduler" && needsCount > 0 && (
+                  <span
+                    aria-label={`${needsCount} need you`}
+                    className="inline-flex min-w-[20px] items-center justify-center rounded-full bg-[var(--hive-gold)] px-1.5 py-0.5 text-[10px] font-semibold leading-none text-[var(--hive-ink)]"
+                  >
+                    {needsCount > 99 ? "99+" : needsCount}
                   </span>
                 )}
               </Link>

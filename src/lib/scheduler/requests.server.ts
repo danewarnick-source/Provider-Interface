@@ -18,7 +18,7 @@ import { addDaysKey, parseLocalDate } from "./time.ts";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Db = any;
 
-type Placed = { team_id: string | null; client_id: string | null };
+type Placed = { team_id?: string | null; client_id: string | null };
 
 /** Refuses unless the caller approves this kind for every home the shifts belong to. */
 export async function requireApprover(

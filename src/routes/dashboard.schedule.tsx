@@ -660,7 +660,6 @@ function SchedulePage() {
           organizationId={org.organization_id}
           startIso={range.from.toISOString()}
           endIso={range.to.toISOString()}
-          mode="staff"
         />
       )}
 
