@@ -158,6 +158,7 @@ import { Route as DashboardHubDocumentationRouteImport } from './routes/dashboar
 import { Route as DashboardHubEmployeesRouteImport } from './routes/dashboard.hub.employees'
 import { Route as DashboardHubFinancesRouteImport } from './routes/dashboard.hub.finances'
 import { Route as DashboardHubKnowledgeRouteImport } from './routes/dashboard.hub.knowledge'
+import { Route as DashboardSchedulerNeedsRouteImport } from './routes/dashboard.scheduler_.needs'
 import { Route as DashboardSchedulerSettingsRouteImport } from './routes/dashboard.scheduler_.settings'
 import { Route as DashboardSettingsAutomationRulesRouteImport } from './routes/dashboard.settings.automation-rules'
 import { Route as DashboardSettingsBankMappingRouteImport } from './routes/dashboard.settings.bank-mapping'
@@ -182,6 +183,7 @@ import { Route as ApiPublicHooksBillingDailyCheckRouteImport } from './routes/ap
 import { Route as ApiPublicHooksGmailIngestRouteImport } from './routes/api/public/hooks/gmail-ingest'
 import { Route as ApiPublicHooksNectarDraftTickRouteImport } from './routes/api/public/hooks/nectar-draft-tick'
 import { Route as ApiPublicHooksNectarSchedulesRouteImport } from './routes/api/public/hooks/nectar-schedules'
+import { Route as ApiPublicHooksSchedulerLateAlertsRouteImport } from './routes/api/public/hooks/scheduler-late-alerts'
 import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
 import { Route as DashboardComplianceCertReviewCompletionIdRouteImport } from './routes/dashboard.compliance_.cert-review.$completionId'
 import { Route as DashboardCoursesPolicyDocumentIdRouteImport } from './routes/dashboard.courses.policy.$documentId'
@@ -989,6 +991,11 @@ const DashboardHubKnowledgeRoute = DashboardHubKnowledgeRouteImport.update({
   path: '/hub/knowledge',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardSchedulerNeedsRoute = DashboardSchedulerNeedsRouteImport.update({
+  id: '/scheduler_/needs',
+  path: '/scheduler/needs',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardSchedulerSettingsRoute =
   DashboardSchedulerSettingsRouteImport.update({
     id: '/scheduler_/settings',
@@ -1127,6 +1134,12 @@ const ApiPublicHooksNectarSchedulesRoute =
   ApiPublicHooksNectarSchedulesRouteImport.update({
     id: '/api/public/hooks/nectar-schedules',
     path: '/api/public/hooks/nectar-schedules',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksSchedulerLateAlertsRoute =
+  ApiPublicHooksSchedulerLateAlertsRouteImport.update({
+    id: '/api/public/hooks/scheduler-late-alerts',
+    path: '/api/public/hooks/scheduler-late-alerts',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicWebhooksStripeRoute = ApiPublicWebhooksStripeRouteImport.update({
@@ -1361,6 +1374,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/hub/employees': typeof DashboardHubEmployeesRoute
   '/dashboard/hub/finances': typeof DashboardHubFinancesRoute
   '/dashboard/hub/knowledge': typeof DashboardHubKnowledgeRoute
+  '/dashboard/scheduler/needs': typeof DashboardSchedulerNeedsRoute
   '/dashboard/scheduler/settings': typeof DashboardSchedulerSettingsRoute
   '/dashboard/settings/automation-rules': typeof DashboardSettingsAutomationRulesRoute
   '/dashboard/settings/bank-mapping': typeof DashboardSettingsBankMappingRoute
@@ -1393,6 +1407,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
   '/api/public/hooks/nectar-draft-tick': typeof ApiPublicHooksNectarDraftTickRoute
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
+  '/api/public/hooks/scheduler-late-alerts': typeof ApiPublicHooksSchedulerLateAlertsRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
   '/dashboard/compliance/cert-review/$completionId': typeof DashboardComplianceCertReviewCompletionIdRoute
   '/dashboard/courses/policy/$documentId': typeof DashboardCoursesPolicyDocumentIdRoute
@@ -1543,6 +1558,7 @@ export interface FileRoutesByTo {
   '/dashboard/hub/employees': typeof DashboardHubEmployeesRoute
   '/dashboard/hub/finances': typeof DashboardHubFinancesRoute
   '/dashboard/hub/knowledge': typeof DashboardHubKnowledgeRoute
+  '/dashboard/scheduler/needs': typeof DashboardSchedulerNeedsRoute
   '/dashboard/scheduler/settings': typeof DashboardSchedulerSettingsRoute
   '/dashboard/settings/automation-rules': typeof DashboardSettingsAutomationRulesRoute
   '/dashboard/settings/bank-mapping': typeof DashboardSettingsBankMappingRoute
@@ -1575,6 +1591,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
   '/api/public/hooks/nectar-draft-tick': typeof ApiPublicHooksNectarDraftTickRoute
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
+  '/api/public/hooks/scheduler-late-alerts': typeof ApiPublicHooksSchedulerLateAlertsRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
   '/dashboard/compliance/cert-review/$completionId': typeof DashboardComplianceCertReviewCompletionIdRoute
   '/dashboard/courses/policy/$documentId': typeof DashboardCoursesPolicyDocumentIdRoute
@@ -1734,6 +1751,7 @@ export interface FileRoutesById {
   '/dashboard/hub/employees': typeof DashboardHubEmployeesRoute
   '/dashboard/hub/finances': typeof DashboardHubFinancesRoute
   '/dashboard/hub/knowledge': typeof DashboardHubKnowledgeRoute
+  '/dashboard/scheduler_/needs': typeof DashboardSchedulerNeedsRoute
   '/dashboard/scheduler_/settings': typeof DashboardSchedulerSettingsRoute
   '/dashboard/settings/automation-rules': typeof DashboardSettingsAutomationRulesRoute
   '/dashboard/settings/bank-mapping': typeof DashboardSettingsBankMappingRoute
@@ -1766,6 +1784,7 @@ export interface FileRoutesById {
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
   '/api/public/hooks/nectar-draft-tick': typeof ApiPublicHooksNectarDraftTickRoute
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
+  '/api/public/hooks/scheduler-late-alerts': typeof ApiPublicHooksSchedulerLateAlertsRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
   '/dashboard/compliance_/cert-review/$completionId': typeof DashboardComplianceCertReviewCompletionIdRoute
   '/dashboard/courses/policy/$documentId': typeof DashboardCoursesPolicyDocumentIdRoute
@@ -1926,6 +1945,7 @@ export interface FileRouteTypes {
     | '/dashboard/hub/employees'
     | '/dashboard/hub/finances'
     | '/dashboard/hub/knowledge'
+    | '/dashboard/scheduler/needs'
     | '/dashboard/scheduler/settings'
     | '/dashboard/settings/automation-rules'
     | '/dashboard/settings/bank-mapping'
@@ -1958,6 +1978,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/gmail-ingest'
     | '/api/public/hooks/nectar-draft-tick'
     | '/api/public/hooks/nectar-schedules'
+    | '/api/public/hooks/scheduler-late-alerts'
     | '/api/public/webhooks/stripe'
     | '/dashboard/compliance/cert-review/$completionId'
     | '/dashboard/courses/policy/$documentId'
@@ -2108,6 +2129,7 @@ export interface FileRouteTypes {
     | '/dashboard/hub/employees'
     | '/dashboard/hub/finances'
     | '/dashboard/hub/knowledge'
+    | '/dashboard/scheduler/needs'
     | '/dashboard/scheduler/settings'
     | '/dashboard/settings/automation-rules'
     | '/dashboard/settings/bank-mapping'
@@ -2140,6 +2162,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/gmail-ingest'
     | '/api/public/hooks/nectar-draft-tick'
     | '/api/public/hooks/nectar-schedules'
+    | '/api/public/hooks/scheduler-late-alerts'
     | '/api/public/webhooks/stripe'
     | '/dashboard/compliance/cert-review/$completionId'
     | '/dashboard/courses/policy/$documentId'
@@ -2298,6 +2321,7 @@ export interface FileRouteTypes {
     | '/dashboard/hub/employees'
     | '/dashboard/hub/finances'
     | '/dashboard/hub/knowledge'
+    | '/dashboard/scheduler_/needs'
     | '/dashboard/scheduler_/settings'
     | '/dashboard/settings/automation-rules'
     | '/dashboard/settings/bank-mapping'
@@ -2330,6 +2354,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/gmail-ingest'
     | '/api/public/hooks/nectar-draft-tick'
     | '/api/public/hooks/nectar-schedules'
+    | '/api/public/hooks/scheduler-late-alerts'
     | '/api/public/webhooks/stripe'
     | '/dashboard/compliance_/cert-review/$completionId'
     | '/dashboard/courses/policy/$documentId'
@@ -2386,6 +2411,7 @@ export interface RootRouteChildren {
   ApiPublicHooksGmailIngestRoute: typeof ApiPublicHooksGmailIngestRoute
   ApiPublicHooksNectarDraftTickRoute: typeof ApiPublicHooksNectarDraftTickRoute
   ApiPublicHooksNectarSchedulesRoute: typeof ApiPublicHooksNectarSchedulesRoute
+  ApiPublicHooksSchedulerLateAlertsRoute: typeof ApiPublicHooksSchedulerLateAlertsRoute
   ApiPublicWebhooksStripeRoute: typeof ApiPublicWebhooksStripeRoute
   ApiPublicOauthGmailCallbackRoute: typeof ApiPublicOauthGmailCallbackRoute
 }
@@ -3435,6 +3461,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardHubKnowledgeRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/scheduler_/needs': {
+      id: '/dashboard/scheduler_/needs'
+      path: '/scheduler/needs'
+      fullPath: '/dashboard/scheduler/needs'
+      preLoaderRoute: typeof DashboardSchedulerNeedsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/scheduler_/settings': {
       id: '/dashboard/scheduler_/settings'
       path: '/scheduler/settings'
@@ -3601,6 +3634,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/nectar-schedules'
       fullPath: '/api/public/hooks/nectar-schedules'
       preLoaderRoute: typeof ApiPublicHooksNectarSchedulesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/scheduler-late-alerts': {
+      id: '/api/public/hooks/scheduler-late-alerts'
+      path: '/api/public/hooks/scheduler-late-alerts'
+      fullPath: '/api/public/hooks/scheduler-late-alerts'
+      preLoaderRoute: typeof ApiPublicHooksSchedulerLateAlertsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/webhooks/stripe': {
@@ -4030,6 +4070,7 @@ interface DashboardRouteChildren {
   DashboardHubEmployeesRoute: typeof DashboardHubEmployeesRoute
   DashboardHubFinancesRoute: typeof DashboardHubFinancesRoute
   DashboardHubKnowledgeRoute: typeof DashboardHubKnowledgeRoute
+  DashboardSchedulerNeedsRoute: typeof DashboardSchedulerNeedsRoute
   DashboardSchedulerSettingsRoute: typeof DashboardSchedulerSettingsRoute
   DashboardShiftShiftIdRoute: typeof DashboardShiftShiftIdRoute
   DashboardTeamMembersStaffIdRoute: typeof DashboardTeamMembersStaffIdRoute
@@ -4111,6 +4152,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardHubEmployeesRoute: DashboardHubEmployeesRoute,
   DashboardHubFinancesRoute: DashboardHubFinancesRoute,
   DashboardHubKnowledgeRoute: DashboardHubKnowledgeRoute,
+  DashboardSchedulerNeedsRoute: DashboardSchedulerNeedsRoute,
   DashboardSchedulerSettingsRoute: DashboardSchedulerSettingsRoute,
   DashboardShiftShiftIdRoute: DashboardShiftShiftIdRoute,
   DashboardTeamMembersStaffIdRoute: DashboardTeamMembersStaffIdRoute,
@@ -4185,6 +4227,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksGmailIngestRoute: ApiPublicHooksGmailIngestRoute,
   ApiPublicHooksNectarDraftTickRoute: ApiPublicHooksNectarDraftTickRoute,
   ApiPublicHooksNectarSchedulesRoute: ApiPublicHooksNectarSchedulesRoute,
+  ApiPublicHooksSchedulerLateAlertsRoute:
+    ApiPublicHooksSchedulerLateAlertsRoute,
   ApiPublicWebhooksStripeRoute: ApiPublicWebhooksStripeRoute,
   ApiPublicOauthGmailCallbackRoute: ApiPublicOauthGmailCallbackRoute,
 }

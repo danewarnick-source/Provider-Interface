@@ -1,19 +1,18 @@
 // The scheduler board (Office › Scheduler, /dashboard/scheduler): the week at
-// a glance and fixed in place. Header and stat tiles, the Requests and Open
-// shifts panels (until Needs you, B5), the toolbar, then the week grid (Homes &
-// programs / Team members / Clients, with the 1056 panel on Clients) or the
-// month. Chips open the shift drawer; Add shift and Find staff open drawers
-// too. View, filter, range and week live in the URL (the route passes them).
-import { useMemo, useState } from "react";
+// a glance and fixed in place. Header and stat tiles, the Needs you banner
+// (what the schedule can't settle on its own, B5), the toolbar, then the week
+// grid (Homes & programs / Team members / Clients, with the 1056 panel on
+// Clients) or the month. Chips open the shift drawer; Add shift and Find staff
+// open drawers too. View, filter, range and week live in the URL (the route
+// passes them).
+import { useMemo } from "react";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { useAccess } from "@/hooks/use-access";
 import { addDaysKey, dayKey, parseLocalDate, weekStartKey } from "@/lib/scheduler/time";
 import { weekDays, type FilterKey, type Range, type View } from "@/lib/scheduler/board-model";
 import { NectarFocusBanner } from "@/components/nectar/nectar-focus-banner";
-import { RequestsPanel } from "@/components/scheduler/shared/requests-panel";
-import { OpenShiftsPanel } from "@/components/scheduler/shared/open-shifts-panel";
+import { NeedsBanner } from "@/components/scheduler/needs/needs-banner";
 import { ReasonDialog } from "@/components/scheduler/settings/reason-dialog";
-import { BoardProvider, type Board, type Panel } from "./board-context";
+import { BoardProvider } from "./board-context";
 import { BoardDrawers } from "./board-drawers";
 import { BoardGrid } from "./board-grid";
 import { BoardHeader } from "./board-header";
@@ -21,8 +20,8 @@ import { buildRows } from "./board-rows";
 import { BoardToolbar, StatTiles } from "./board-toolbar";
 import { AuthPanel } from "./auth-panel";
 import { MonthView } from "./month-view";
-import { useBoardActions } from "./use-board-actions";
-import { useAuthOutlook, useBoardData, useUnsentChanges, useWeekChecks } from "./use-board-data";
+import { useAuthOutlook } from "./use-board-data";
+import { useBoardValue } from "./use-board-value";
 
 export type BoardSearch = { view: View; show: FilterKey; range: Range; week?: string };
 
@@ -47,7 +46,6 @@ export function SchedulerBoard({
   onSearch: (p: Partial<BoardSearch>) => void;
 }) {
   const orgId = useCurrentOrg().data?.organization_id;
-  const canEdit = useAccess().canCategory("scheduling", "edit");
   const anchor = search.week ?? dayKey(new Date());
   const week = weekStartKey(anchor);
   const month = search.range === "month";
@@ -62,46 +60,21 @@ export function SchedulerBoard({
       endIso: parseLocalDate(to).toISOString(),
     };
   }, [anchor, week, month]);
-  const data = useBoardData(orgId, range);
-  const checks = useWeekChecks(orgId, {
-    startIso: parseLocalDate(week).toISOString(),
-    endIso: parseLocalDate(addDaysKey(week, 7)).toISOString(),
-  });
+  const { board, panel, error, actions } = useBoardValue(
+    orgId,
+    range,
+    {
+      startIso: parseLocalDate(week).toISOString(),
+      endIso: parseLocalDate(addDaysKey(week, 7)).toISOString(),
+    },
+    weekDays(week),
+  );
   const outlook = useAuthOutlook(orgId, week, search.view === "clients" && !month);
-  const actions = useBoardActions(orgId ?? "");
-  const changes = useUnsentChanges(orgId);
-  const [panel, setPanel] = useState<Panel | null>(null);
 
-  const board: Board | null =
-    !orgId || !data.data
-      ? null
-      : {
-          orgId,
-          data: data.data,
-          checks: checks.data ?? {},
-          days: weekDays(week),
-          canEdit,
-          actions,
-          clients: new Map(data.data.clients.map((c) => [c.id, c])),
-          teams: new Map(data.data.teams.map((t) => [t.id, t])),
-          staff: new Map(data.data.staff.map((s) => [s.id, s])),
-          shifts: data.data.shifts,
-          changes: changes.data ?? [],
-          changed: new Set((changes.data ?? []).map((c) => c.shiftId)),
-          // A drawer opened from a dialog (Publish › Open shift) goes back to it on close.
-          open: (p) =>
-            setPanel((cur) =>
-              cur?.back && !p.back && p.kind !== "publish" && p.kind !== "copy"
-                ? ({ ...p, back: cur.back } as Panel)
-                : p,
-            ),
-          close: () => setPanel((cur) => (cur?.back ? { kind: cur.back } : null)),
-        };
-
-  if (data.error)
+  if (error)
     return (
       <p className="p-8 text-sm text-[var(--hive-danger)]">
-        The schedule didn't load: {data.error.message}. Reload the page to try again.
+        The schedule didn't load: {error.message}. Reload the page to try again.
       </p>
     );
   if (!board)
@@ -121,22 +94,7 @@ export function SchedulerBoard({
         <NectarFocusBanner />
         <BoardHeader week={month ? monthBounds(anchor).first : week} month={month} onStep={step} />
         <StatTiles />
-        <RequestsPanel weekStart={parseLocalDate(week)} staff={board.data.staff} />
-        <OpenShiftsPanel
-          organizationId={board.orgId}
-          startIso={range.startIso}
-          endIso={range.endIso}
-          mode="admin"
-          clientNames={
-            new Map(
-              board.data.clients.map((c) => [
-                c.id,
-                `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() || "Client",
-              ]),
-            )
-          }
-          onJumpToShift={(id) => setPanel({ kind: "shift", id })}
-        />
+        <NeedsBanner orgId={board.orgId} />
         <section className="rounded-xl border border-[var(--hive-border)] bg-[var(--hive-surface)]">
           <BoardToolbar
             range={search.range}

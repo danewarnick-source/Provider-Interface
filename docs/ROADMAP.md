@@ -2,7 +2,7 @@
 
 Read this before planning or building anything. Update it at the end of every session ("update the roadmap and decisions, then commit"). Owner decisions are in `docs/decisions.md`.
 
-**Next up:** B4 (Publish, Send changes, Copy week) is built on `claude/busy-cray-w323d6`, not pushed: Dane reviews, then B5 (Needs you). Settings › Homes is live (PR #509) and its cleanup was applied Nov 18.
+**Next up:** B5 (Needs you) is built on `claude/busy-cray-w323d6`, waiting for Dane's preview check; then the late-alerts job (draft migration, not applied) and B6. B4 is live (PR #511).
 
 ## The vision (Dane, Nov 13, 2026)
 - **One platform for Utah DSPD providers, built for the admin side first.** Staff screens exist to feed admins clean records.
@@ -28,7 +28,7 @@ Status: `audit` → `demo` → `demo approved` → `building` → `live` (✅ = 
 |---|---|---|
 | Team Members | ✅ live | Rebuilt Sept 28–30. Re-check against competitors later. |
 | Clients | ✅ live | Rebuilt Oct 6–22 (incl. Meds, progress summaries). |
-| **Scheduler** | **building (Part B) · demo approved Nov 13 · B1–B4 built** | Demo: `docs/demos/scheduler.html`, `docs/demos/daily-notes.html`. Plan: `docs/scheduler-rebuild/PART-B.md` (B1–B20). B1 #498 and B2 #499 open, both 13 commits behind `main`; their DB changes went live Oct 23. B3–B20 not started. |
+| **Scheduler** | **building (Part B) · demo approved Nov 13 · B1–B5 built** | Demo: `docs/demos/scheduler.html`, `docs/demos/daily-notes.html`. Plan: `docs/scheduler-rebuild/PART-B.md` (B1–B20). B1 #498 and B2 #499 open, both 13 commits behind `main`; their DB changes went live Oct 23. B3–B20 not started. |
 | Daily Logs | not started | Part B (B16–B19) rebuilds notes; decide whether this tab merges into it. The host home "can this day bill" grid and missing-note alerts belong here (moved out of the scheduler Nov 13). |
 | Evidence | not started | |
 | Summaries | not started | |

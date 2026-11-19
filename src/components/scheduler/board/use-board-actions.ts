@@ -35,6 +35,7 @@ export function useBoardActions(orgId: string) {
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: ["scheduler-board"] });
     void qc.invalidateQueries({ queryKey: ["open-shifts"] });
+    void qc.invalidateQueries({ queryKey: ["needs-you"] });
   };
 
   async function undoLast() {

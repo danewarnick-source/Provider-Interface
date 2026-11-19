@@ -120,11 +120,6 @@ describe("levels", () => {
     const decide = fn.slice(fn.indexOf("export const decideClaim"), fn.length);
     assert.match(decide, /requireOrgMembership\(supabase, userId, shift\.organization_id, "admin"\)/);
     assert.match(decide, /isAgencyAdmin\(access\.level, access\.scope\)/);
-    const panel = readFileSync(
-      new URL("../../components/scheduler/shared/open-shifts-panel.tsx", import.meta.url),
-      "utf8",
-    );
-    assert.match(panel, /mode === "admin" && pending && isAgencyAdmin/);
   });
 
   it("has explain copy for every setting a category offers", () => {

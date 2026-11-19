@@ -1,12 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Sparkles, Check, X } from "lucide-react";
-import { listOpenShifts, decideClaim, claimOpenShift } from "@/lib/scheduler/open-shifts.functions";
+import { Sparkles } from "lucide-react";
+import { listOpenShifts, claimOpenShift } from "@/lib/scheduler/open-shifts.functions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
-import { useAccess } from "@/hooks/use-access";
 import { toastRuleWarnings } from "@/components/scheduler/shared/rule-warnings";
 
 function fmtWhen(iso: string) {
@@ -15,25 +14,21 @@ function fmtWhen(iso: string) {
 }
 
 /**
- * Admin variant: open shifts in range. Approve/Deny only when the viewer is
- * an owner or an agency-wide admin. Team-member variant: Request shift, which
- * waits for that approval. It does not assign the shift.
+ * My Schedule's open shifts (dashboard.schedule.tsx): the ones this team
+ * member may take, with Request shift. Where the home's pickups are First to
+ * claim the shift is theirs at once; otherwise the request waits for an
+ * approver in Scheduler › Needs you.
  */
 export function OpenShiftsPanel({
-  organizationId, startIso, endIso, mode, clientNames, onJumpToShift,
+  organizationId, startIso, endIso,
 }: {
   organizationId: string;
   startIso: string;
   endIso: string;
-  mode: "admin" | "staff";
-  clientNames?: Map<string, string>;
-  onJumpToShift?: (id: string) => void;
 }) {
   const qc = useQueryClient();
   const { user } = useAuth();
-  const { isAgencyAdmin } = useAccess();
   const listFn = useServerFn(listOpenShifts);
-  const decideFn = useServerFn(decideClaim);
   const claimFn = useServerFn(claimOpenShift);
 
   const q = useQuery({
@@ -50,11 +45,6 @@ export function OpenShiftsPanel({
     qc.invalidateQueries({ queryKey: ["scheduler-data"] });
   };
 
-  const decide = useMutation({
-    mutationFn: (vars: { shiftId: string; approve: boolean }) => decideFn({ data: vars }),
-    onSuccess: (d, v) => { invalidate(); toast.success(v.approve ? "Claim approved" : "Claim denied"); toastRuleWarnings(d); },
-    onError: (e: any) => toast.error(e?.message ?? "Failed"),
-  });
   const claim = useMutation({
     mutationFn: (shiftId: string) => claimFn({ data: { shiftId } }),
     onSuccess: (d) => {
@@ -72,9 +62,7 @@ export function OpenShiftsPanel({
     <div className="rounded-xl border bg-card p-3">
       <div className="mb-2 flex items-center gap-2">
         <Sparkles className="h-4 w-4 text-amber-500" />
-        <h3 className="text-sm font-semibold">
-          {mode === "staff" ? "Open shifts you're qualified for" : "Open shifts"} ({rows.length})
-        </h3>
+        <h3 className="text-sm font-semibold">Open shifts you're qualified for ({rows.length})</h3>
       </div>
       <ul className="space-y-1.5">
         {rows.map((s) => {
@@ -88,43 +76,13 @@ export function OpenShiftsPanel({
                 pending && "border-amber-300 bg-amber-50/60",
               )}
             >
-              <button
-                type="button"
-                onClick={() => onJumpToShift?.(s.id)}
-                className="min-w-0 flex-1 text-left"
-              >
+              <div className="min-w-0 flex-1">
                 <div className="font-medium">
                   {s.service_code ?? "Shift"} · {fmtWhen(s.starts_at)}
                 </div>
-                <div className="text-[11px] text-muted-foreground">
-                  {(s.client_id && clientNames?.get(s.client_id)) || "Client"}
-                  {mode === "admin" && pending ? " · waiting for approval" : ""}
-                </div>
-              </button>
+              </div>
               <div className="flex shrink-0 items-center gap-2">
-                {mode === "admin" && pending && isAgencyAdmin && (
-                  <>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-9 min-h-[44px] md:min-h-0"
-                      onClick={() => decide.mutate({ shiftId: s.id, approve: true })}
-                      disabled={decide.isPending}
-                    >
-                      <Check className="mr-1 h-3.5 w-3.5" /> Approve
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-9 min-h-[44px] md:min-h-0"
-                      onClick={() => decide.mutate({ shiftId: s.id, approve: false })}
-                      disabled={decide.isPending}
-                    >
-                      <X className="mr-1 h-3.5 w-3.5" /> Deny
-                    </Button>
-                  </>
-                )}
-                {mode === "staff" && s.status === "open" && !pending && (
+                {s.status === "open" && !pending && (
                   <Button
                     size="sm"
                     className="h-10 min-h-[44px] md:min-h-0"
@@ -134,12 +92,12 @@ export function OpenShiftsPanel({
                     Request shift
                   </Button>
                 )}
-                {mode === "staff" && mine && (
+                {mine && (
                   <span className="text-[11px] font-medium text-amber-700">
                     Requested, waiting for approval
                   </span>
                 )}
-                {mode === "staff" && pending && !mine && (
+                {pending && !mine && (
                   <span className="text-[11px] font-medium text-muted-foreground">
                     Waiting for approval
                   </span>

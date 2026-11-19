@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -17,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useAccess } from "@/hooks/use-access";
 import { notify } from "@/lib/scheduler/notify";
+import { acknowledgeCallout } from "@/lib/scheduler/needs.functions";
 import { staffClockOutSearch } from "@/lib/staff-clock-out";
 import { monthlySupportHoursTarget } from "@/lib/scheduler/hhs-visit";
 import { Button } from "@/components/ui/button";
@@ -449,7 +451,7 @@ function CalloutPanel({ shift, userId }: { shift: Shift; userId?: string }) {
         urgency: urgency === "critical" ? "critical" : urgency === "high" ? "high" : "normal",
         title: `Call-out: ${shift.code?.code ?? shift.service_code ?? "shift"} · ${startLabel}`,
         body: reason.trim() || "A team member can't make their shift.",
-        link_to: "/dashboard/scheduler",
+        link_to: "/dashboard/scheduler/needs",
         related_id: shift.id,
         related_type: "scheduled_shift",
       });
@@ -470,27 +472,14 @@ function CalloutPanel({ shift, userId }: { shift: Shift; userId?: string }) {
     onError: (e: any) => toast.error(e.message ?? "Call-out failed"),
   });
 
+  const acknowledgeFn = useServerFn(acknowledgeCallout);
   const acknowledge = useMutation({
     mutationFn: async () => {
       if (!existing) return;
-      const { error } = await (supabase as any).from("shift_callouts").update({
-        status: "manager_acknowledged",
-        manager_acknowledged_at: new Date().toISOString(),
-        manager_acknowledged_by: userId,
-      }).eq("id", existing.id);
-      if (error) throw error;
-      await (supabase as any).from("callout_escalation_events").insert({
-        organization_id: shift.organization_id,
-        callout_id: existing.id,
-        step: (events?.length ?? 0) + 1,
-        channel: "in_app",
-        target_role: "manager",
-        target_user_id: userId,
-        outcome: "acknowledged",
-        detail: "Manager acknowledged call-out.",
-      });
+      await acknowledgeFn({ data: { organization_id: shift.organization_id, callout_id: existing.id } });
     },
     onSuccess: () => { toast.success("Acknowledged"); qc.invalidateQueries({ queryKey: ["callout", shift.id] }); qc.invalidateQueries({ queryKey: ["callout-events", existing?.id] }); },
+    onError: (e: any) => toast.error(e.message ?? "That didn't save. Try again."),
   });
 
   const lockCoverage = useMutation({
