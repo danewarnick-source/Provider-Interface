@@ -2,10 +2,12 @@
 // signed-in user (RLS applies). loadBoardData: clients, homes (teams), active
 // team members (organization_members, then profiles: two queries joined here,
 // never an embed), shifts in range, each client's 1056 codes, caseloads, time
-// off, shift types (B2 Settings) and the overtime threshold. The 1056 outlook
-// loads in auth-outlook-load.ts.
+// off, shift types (B2 Settings), the overtime threshold and what coverage at
+// the homes reads (coverage-load.ts, B7). The 1056 outlook loads in
+// auth-outlook-load.ts.
 import { supabase } from "@/integrations/supabase/client";
 import type { BoardClient, BoardShift, BoardTeam } from "@/lib/scheduler/board-model";
+import { loadCoverageData, type CoverageData } from "@/lib/scheduler/coverage-load";
 
 export type BoardStaff = { id: string; name: string };
 export type BoardCode = {
@@ -39,6 +41,7 @@ export type BoardData = {
   timeOff: BoardTimeOff[];
   shiftTypes: BoardShiftType[];
   otHours: number;
+  coverage: CoverageData;
 };
 
 const SHIFT_SELECT =
@@ -62,7 +65,7 @@ export type BoardRange = { startIso: string; endIso: string; from: string; to: s
 
 export async function loadBoardData(orgId: string, range: BoardRange): Promise<BoardData> {
   const org = orgId;
-  const [clients, teams, members, shifts, codes, assigns, timeOff, types, settings] =
+  const [clients, teams, members, shifts, codes, assigns, timeOff, types, settings, coverage] =
     await Promise.all([
       supabase
         .from("clients")
@@ -111,6 +114,7 @@ export async function loadBoardData(orgId: string, range: BoardRange): Promise<B
         .select("ot_threshold_hours")
         .eq("organization_id", org)
         .maybeSingle(),
+      loadCoverageData(supabase, org),
     ]);
   const ids = [
     ...new Set(
@@ -139,5 +143,6 @@ export async function loadBoardData(orgId: string, range: BoardRange): Promise<B
     timeOff: must(timeOff),
     shiftTypes: must(types),
     otHours: Number(settings.data?.ot_threshold_hours ?? 40),
+    coverage,
   };
 }

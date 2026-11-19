@@ -1,6 +1,7 @@
 // Profile section: "About <first name>" (lead, full width), then Identity |
 // Service address (with any extra service locations) side by side, and More
-// details (custom fields). The photo lives in the header; "Person prefers no photo"
+// details (custom fields), and for RHS clients their Away times (B7). The
+// photo lives in the header; "Person prefers no photo"
 // (setup) is listed under "Show hidden sections".
 
 import { HomePinCard } from "@/components/clients/profile/home-pin-card";
@@ -11,6 +12,8 @@ import { hiddenCards } from "@/lib/clients/support-scope";
 import { AboutCard } from "./about-card";
 import { IdentityCard } from "./identity-card";
 import { MoreDetailsCard } from "./more-details-card";
+import { AwayTimesCard } from "./away-times-card";
+import { showsAbsences } from "@/lib/clients/health/health";
 
 export function ProfileSection({
   orgId,
@@ -36,6 +39,7 @@ export function ProfileSection({
         <IdentityCard key={clientId} orgId={orgId} data={data} onChanged={onChanged} />
         <HomePinCard orgId={orgId} clientId={clientId} codes={data.codes} />
       </div>
+      {showsAbsences(data.codes) ? <AwayTimesCard orgId={orgId} clientId={clientId} /> : null}
       <MoreDetailsCard clientId={clientId} />
       <HiddenSections orgId={orgId} clientId={clientId} cards={hiddenCards("profile", scope)} />
     </div>

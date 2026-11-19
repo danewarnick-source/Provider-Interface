@@ -12,6 +12,7 @@
 // taken off for that time. All times are Denver wall clock, in minutes.
 import { wallClock, type BoardShift } from "./board-model.ts";
 import { denverWallToIso } from "../denver-date.ts";
+import { fmtDay } from "./auth-outlook.ts";
 import { addDaysKey, dayKey, daysBetween, weekdayOf } from "./time.ts";
 
 export const SLOT_MIN = 15;
@@ -103,6 +104,11 @@ export function minuteClock(m: number): string {
   return `${h % 12 || 12}${mm ? `:${String(mm).padStart(2, "0")}` : ""}${ap}`;
 }
 export const minuteSpan = (from: number, to: number) => `${minuteClock(from)}–${minuteClock(to)}`;
+
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+/** "Mon Nov 16". */
+export const dayText = (ymd: string) =>
+  `${WEEKDAYS[weekdayOf(ymd)]} ${fmtDay(ymd).replace(/, \d{4}$/, "")}`;
 
 /** "HH:MM" of a minute count (wraps past midnight). */
 export const minuteHhmm = (m: number) => {
@@ -287,3 +293,7 @@ export function openShiftFor(gap: Gap, shifts: readonly CoverageShift[]): Covera
     }) ?? null
   );
 }
+
+/** Every gap in a set of homes' coverage, home by home, day by day. */
+export const allGaps = (coverage: ReadonlyMap<string, readonly CoverageDay[]>): Gap[] =>
+  [...coverage.values()].flatMap((days) => days.flatMap((d) => d.gaps));

@@ -1,7 +1,7 @@
 // Shared state for one scheduler board: the loaded data and rule findings,
 // lookups by id, whether the viewer may edit, the change actions (with Undo),
-// the unsent changes to published shifts (B4) and which drawer or dialog is
-// open. Provided by scheduler-board.tsx; every board component reads it with
+// the unsent changes to published shifts (B4), coverage at each staffed home
+// for the days shown (B7) and which drawer or dialog is open. Provided by scheduler-board.tsx; every board component reads it with
 // useBoard() instead of threading props.
 import { createContext, useContext, type ReactNode } from "react";
 import type { Check } from "@/lib/scheduler/find-staff.functions";
@@ -9,6 +9,7 @@ import type { BoardClient, BoardShift, BoardTeam } from "@/lib/scheduler/board-m
 import type { BoardActions } from "./use-board-actions";
 import type { BoardData, BoardStaff } from "@/lib/scheduler/board-data";
 import type { NetChange } from "@/lib/scheduler/shift-change";
+import type { CoverageDay, Gap } from "@/lib/scheduler/coverage";
 
 /** What Add shift starts from. `lock` = the team member was picked from their row's +. */
 export type AddDraft = {
@@ -29,7 +30,8 @@ export type Panel =
   | { kind: "shift"; id: string; back?: Back }
   | { kind: "add"; draft: AddDraft; back?: Back }
   | { kind: "find"; id: string; back?: Back }
-  | { kind: "list"; which: "hours" | "open" | "ot"; back?: Back }
+  | { kind: "list"; which: "hours" | "open" | "ot" | "gaps"; back?: Back }
+  | { kind: "gap"; gap: Gap; back?: Back }
   | { kind: "publish"; back?: undefined }
   | { kind: "copy"; back?: undefined };
 
@@ -49,6 +51,8 @@ export type Board = {
   changes: NetChange[];
   /** Shift ids with an unsent change ("Changed · not sent"). */
   changed: ReadonlySet<string>;
+  /** Coverage per staffed home with staffing needs, for `days` (coverage.ts). */
+  coverage: ReadonlyMap<string, CoverageDay[]>;
   open: (p: Panel) => void;
   close: () => void;
 };

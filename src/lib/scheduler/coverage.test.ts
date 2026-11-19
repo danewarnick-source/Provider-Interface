@@ -4,6 +4,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   barInstant,
+  dayText,
   homeCoverage,
   minuteSpan,
   onCalendar,
@@ -191,4 +192,5 @@ test("the open shift overlapping a gap is found; calendar times and instants of 
     end: "02:00",
   });
   assert.equal(barInstant(MON, 900), "2026-11-16T22:00:00.000Z");
+  assert.equal(dayText(MON), "Mon Nov 16");
 });
