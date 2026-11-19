@@ -98,8 +98,8 @@ export function AuthorizationCard({
           <div>
             <div className="flex flex-wrap justify-between gap-2 text-xs tabular-nums">
               <span>
-                {num(pace.used)} used · <strong>{num(pace.left)} left</strong> of{" "}
-                {num(pace.annual)} {v.unitWord}
+                {num(pace.used)} used · <strong>{num(pace.left)} left</strong> of {num(pace.annual)}{" "}
+                {v.unitWord}
               </span>
               {v.money ? (
                 <span className="text-muted-foreground">
@@ -134,8 +134,8 @@ export function AuthorizationCard({
           <CodeTeamLine clientId={email.clientId} code={row.service_code} team={team} />
         ) : null}
         <p className="text-xs text-muted-foreground">
-          Rate: {rate > 0 ? `${money(rate)} per ${v.daily ? "day" : "unit"}` : "no rate on file"}{" "}
-          · {unitLabel}
+          Rate: {rate > 0 ? `${money(rate)} per ${v.daily ? "day" : "unit"}` : "no rate on file"} ·{" "}
+          {unitLabel}
           {noRate ? (
             <span className="ml-2 inline-flex items-center gap-1 font-medium text-[var(--hive-danger-fg)]">
               <AlertTriangle className="h-3 w-3" aria-hidden /> Enter this client's worksheet rate

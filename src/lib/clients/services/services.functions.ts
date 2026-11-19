@@ -10,11 +10,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireCategory } from "@/lib/access/require";
 import { assertCanManageClient } from "../guards.server";
 import { assertRowsChanged } from "../writes";
-import {
-  authorizationProblems,
-  authorizationValues,
-  endProblems,
-} from "./authorizations";
+import { authorizationProblems, authorizationValues, endProblems } from "./authorizations";
 import { authorizationSaveTarget } from "./authorization-renewal";
 import { RATIO_CHOICES } from "./ratio";
 import { todayYmd } from "../dates";

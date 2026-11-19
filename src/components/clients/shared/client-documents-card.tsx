@@ -1,5 +1,8 @@
 // All documents on file for a client (Client file section): upload, preview,
-// download and retire. A PCSP upload goes through the PCSP review.
+// download and retire. A PCSP upload goes through the PCSP review. A Form 930
+// (enhanced staffing, §21.3(4)) is saved straight to the client's documents
+// (client_documents, type form_930) and asks for its start and end dates; the
+// scheduler reads it (residential-facts.ts).
 
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -39,11 +42,7 @@ import {
 import { useCurrentOrg } from "@/hooks/use-org";
 import { formatDate } from "@/lib/clients/dates";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  ingestDocument,
-  queryDocuments,
-  getDocument,
-} from "@/lib/nectar-documents.functions";
+import { ingestDocument, queryDocuments, getDocument } from "@/lib/nectar-documents.functions";
 import { retireDocument } from "@/lib/document-effective-dating.functions";
 import { NectarDocumentActionsDialog } from "@/components/nectar/document-actions-dialog";
 import { DocumentPreviewDialog } from "../dialogs/document-preview-dialog";
@@ -51,6 +50,9 @@ import { DocumentEffectiveDatingDialog } from "@/components/documents/document-e
 import { OutdatedDocumentsSection } from "@/components/documents/outdated-documents-section";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
 import { usePcspUploadFlow } from "@/components/clients/profile/plans/pcsp-upload-button";
+import { attachClientDocument } from "@/lib/import-checklist.functions";
+import { CLIENT_DOCUMENTS_BUCKET, clientUploadFolder } from "@/lib/clients/create/document-review";
+import { FORM_930 } from "@/lib/scheduler/residential-facts";
 
 const CLIENT_DOC_TYPES = [
   { value: "pcsp", label: "PCSP" },
@@ -60,6 +62,7 @@ const CLIENT_DOC_TYPES = [
   { value: "assessment", label: "Assessment" },
   { value: "contract", label: "Guardian / legal papers" },
   { value: "hrc_approval", label: "HRR / HRC / Rights Restriction" },
+  { value: FORM_930, label: "Form 930 (enhanced staffing)" },
   { value: "certification", label: "Consent" },
   { value: "room_board_agreement", label: "Room and Board Agreement (HHS)" },
   { value: "lease_agreement", label: "Lease agreement (RHS)" },
@@ -441,16 +444,40 @@ function UploadDocDialog({
   onUploaded: (docId?: string, sourceKind?: "nectar" | "client", docType?: string) => void;
 }) {
   const ingest = useServerFn(ingestDocument);
+  const attach = useServerFn(attachClientDocument);
   const [title, setTitle] = useState("");
   const [docType, setDocType] = useState("pcsp");
   const [fiscalYear, setFiscalYear] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const isPcsp = docType === "pcsp";
+  const isForm930 = docType === FORM_930;
 
   const defaultTitle = useMemo(() => {
     const t = CLIENT_DOC_TYPES.find((x) => x.value === docType)?.label ?? "Document";
     return `${t} — ${clientName}`;
   }, [docType, clientName]);
+
+  // Form 930: storage + a client_documents row, then its dates (DocumentEffectiveDatingDialog).
+  const form930 = useMutation({
+    mutationFn: async () => {
+      if (!orgId || !file) throw new Error("Pick a file first");
+      const path = `${clientUploadFolder(orgId, clientId, FORM_930)}${Date.now()}_${file.name.replace(/[^\w.-]+/g, "_")}`;
+      const up = await supabase.storage
+        .from(CLIENT_DOCUMENTS_BUCKET)
+        .upload(path, file, { upsert: false, contentType: file.type });
+      if (up.error) throw new Error(`The file didn't upload: ${up.error.message}`);
+      return attach({
+        data: { clientId, documentType: FORM_930, fileName: file.name, storagePath: path },
+      });
+    },
+    onSuccess: (r) => {
+      toast.success(`Form 930 saved to ${clientName}'s record. Add its dates next.`);
+      setFile(null);
+      onOpenChange(false);
+      onUploaded(r.id ?? undefined, "client", FORM_930);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const mut = useMutation({
     mutationFn: async () => {
@@ -539,24 +566,31 @@ function UploadDocDialog({
                   onChange={(e) => setFile(e.target.files?.[0] ?? null)}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label>Title (optional)</Label>
-                  <Input
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder={defaultTitle}
-                  />
+              {isForm930 ? (
+                <p className="text-sm text-muted-foreground">
+                  Saved to {clientName}'s documents; next you enter the dates it covers. The
+                  scheduler checks 4+ hours a day of RHS 1:1 against it.
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label>Title (optional)</Label>
+                    <Input
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder={defaultTitle}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Fiscal year</Label>
+                    <Input
+                      value={fiscalYear}
+                      onChange={(e) => setFiscalYear(e.target.value)}
+                      placeholder="FY26"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <Label>Fiscal year</Label>
-                  <Input
-                    value={fiscalYear}
-                    onChange={(e) => setFiscalYear(e.target.value)}
-                    placeholder="FY26"
-                  />
-                </div>
-              </div>
+              )}
             </>
           )}
         </div>
@@ -568,6 +602,15 @@ function UploadDocDialog({
             <Button disabled={!orgId} onClick={onPcsp}>
               <FileUp className="mr-2 h-4 w-4" />
               {pcspLabel}
+            </Button>
+          ) : isForm930 ? (
+            <Button disabled={!file || form930.isPending} onClick={() => form930.mutate()}>
+              {form930.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Upload className="mr-2 h-4 w-4" />
+              )}
+              Upload Form 930
             </Button>
           ) : (
             <Button disabled={!file || mut.isPending} onClick={() => mut.mutate()}>

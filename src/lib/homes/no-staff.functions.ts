@@ -75,9 +75,7 @@ export const saveNoStaffBlock = createServerFn({ method: "POST" })
 export const removeNoStaffBlock = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z
-      .object({ organizationId: uuid, teamId: uuid, ids: z.array(uuid).min(1).max(14) })
-      .parse(d),
+    z.object({ organizationId: uuid, teamId: uuid, ids: z.array(uuid).min(1).max(14) }).parse(d),
   )
   .handler(async ({ data, context }) => {
     const { sb, userId } = ctx(context);
