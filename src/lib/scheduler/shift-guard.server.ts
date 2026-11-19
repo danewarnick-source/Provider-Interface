@@ -3,6 +3,7 @@
 // the agency's strengths, and turn the findings into refuse / ask for a reason
 // / go ahead with warnings. Called by scheduler.functions.ts (save, restore),
 // publish-plan.server.ts (Send changes), copy-week.server.ts (Copy week),
+// rotation.server.ts (rotation drafts),
 // open-shifts.functions.ts (claim), find-staff.functions.ts (checks) and
 // clock-in.functions.ts. No caller adds checks of its own.
 import { evaluateShifts, refusalLine, verdictOf, warningLines, type Verdict } from "./rules.ts";
