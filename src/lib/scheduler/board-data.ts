@@ -42,7 +42,7 @@ export type BoardData = {
 };
 
 const SHIFT_SELECT =
-  "id, staff_id, client_id, team_id, service_code, starts_at, ends_at, status, published, parent_shift_id, open_spots, override_reason, shift_type, notes, claim_requested_by";
+  "id, staff_id, client_id, team_id, service_code, starts_at, ends_at, status, published, parent_shift_id, open_spots, override_reason, shift_type, notes, claim_requested_by, pattern_line_id";
 
 function must<T>(r: { data: T | null; error: { message: string } | null }): T {
   if (r.error) throw new Error(r.error.message);

@@ -11,7 +11,8 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireCategory } from "@/lib/access/require";
 import { homeCode } from "@/lib/scheduler/board-model";
-import { crossesMidnight, type RotationLine } from "@/lib/scheduler/rotation";
+import { crossesMidnight } from "@/lib/scheduler/rotation";
+import { lineFromInput } from "@/lib/scheduler/rotation-form";
 import type { DayOutcome } from "@/lib/scheduler/rotation-preview";
 import { dayKey } from "@/lib/scheduler/time";
 import {
@@ -54,23 +55,6 @@ const LineInput = z
     message: "The last day is before the first.",
   });
 type LineIn = z.infer<typeof LineInput>;
-
-const toLine = (d: LineIn, id: string): RotationLine => ({
-  id,
-  staff_id: d.staff_id,
-  client_id: d.client_id,
-  team_id: d.team_id,
-  service_code: d.service_code.toUpperCase(),
-  shift_type: d.shift_type,
-  cycle: d.cycle,
-  cycle_start: d.cycle ? d.starts_on : null,
-  weekday_mask: d.cycle ? 0 : d.weekday_mask,
-  start_time_local: d.start_time.slice(0, 5),
-  end_time_local: d.end_time.slice(0, 5),
-  effective_from: d.starts_on,
-  effective_until: d.ends_on,
-  active: true,
-});
 
 async function loadLine(db: Db, orgId: string, id: string): Promise<StoredLine> {
   const { data, error } = await db
@@ -119,7 +103,7 @@ export const previewRotation = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<DayOutcome[]> => {
     const { db } = await signedIn(context, data.organization_id);
     const stored = data.id ? await loadLine(db, data.organization_id, data.id) : null;
-    const line = toLine(data, data.id ?? crypto.randomUUID());
+    const line = lineFromInput(data, data.id ?? crypto.randomUUID());
     const build = stored ? rebuildOf(stored, line) : { line, before: null, builtThrough: null };
     const plan = await planBuild(db, data.organization_id, [build], new Date());
     return plan.outcomes.map(({ day, as, message }) => ({ day, as, message }));
@@ -134,7 +118,7 @@ export const saveRotation = createServerFn({ method: "POST" })
     const org = data.organization_id;
     const stored = data.id ? await loadLine(db, org, data.id) : null;
     await checkCode(db, data, dayKey(now));
-    const line = toLine(data, stored?.id ?? crypto.randomUUID());
+    const line = lineFromInput(data, stored?.id ?? crypto.randomUUID());
     // Plan (and run the engine) before anything is written.
     const build = stored ? rebuildOf(stored, line) : { line, before: null, builtThrough: null };
     const plan = await planBuild(db, org, [build], now);

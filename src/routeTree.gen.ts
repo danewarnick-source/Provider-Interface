@@ -159,6 +159,7 @@ import { Route as DashboardHubEmployeesRouteImport } from './routes/dashboard.hu
 import { Route as DashboardHubFinancesRouteImport } from './routes/dashboard.hub.finances'
 import { Route as DashboardHubKnowledgeRouteImport } from './routes/dashboard.hub.knowledge'
 import { Route as DashboardSchedulerNeedsRouteImport } from './routes/dashboard.scheduler_.needs'
+import { Route as DashboardSchedulerRotationsRouteImport } from './routes/dashboard.scheduler_.rotations'
 import { Route as DashboardSchedulerSettingsRouteImport } from './routes/dashboard.scheduler_.settings'
 import { Route as DashboardSettingsAutomationRulesRouteImport } from './routes/dashboard.settings.automation-rules'
 import { Route as DashboardSettingsBankMappingRouteImport } from './routes/dashboard.settings.bank-mapping'
@@ -996,6 +997,12 @@ const DashboardSchedulerNeedsRoute = DashboardSchedulerNeedsRouteImport.update({
   path: '/scheduler/needs',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardSchedulerRotationsRoute =
+  DashboardSchedulerRotationsRouteImport.update({
+    id: '/scheduler_/rotations',
+    path: '/scheduler/rotations',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 const DashboardSchedulerSettingsRoute =
   DashboardSchedulerSettingsRouteImport.update({
     id: '/scheduler_/settings',
@@ -1375,6 +1382,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/hub/finances': typeof DashboardHubFinancesRoute
   '/dashboard/hub/knowledge': typeof DashboardHubKnowledgeRoute
   '/dashboard/scheduler/needs': typeof DashboardSchedulerNeedsRoute
+  '/dashboard/scheduler/rotations': typeof DashboardSchedulerRotationsRoute
   '/dashboard/scheduler/settings': typeof DashboardSchedulerSettingsRoute
   '/dashboard/settings/automation-rules': typeof DashboardSettingsAutomationRulesRoute
   '/dashboard/settings/bank-mapping': typeof DashboardSettingsBankMappingRoute
@@ -1559,6 +1567,7 @@ export interface FileRoutesByTo {
   '/dashboard/hub/finances': typeof DashboardHubFinancesRoute
   '/dashboard/hub/knowledge': typeof DashboardHubKnowledgeRoute
   '/dashboard/scheduler/needs': typeof DashboardSchedulerNeedsRoute
+  '/dashboard/scheduler/rotations': typeof DashboardSchedulerRotationsRoute
   '/dashboard/scheduler/settings': typeof DashboardSchedulerSettingsRoute
   '/dashboard/settings/automation-rules': typeof DashboardSettingsAutomationRulesRoute
   '/dashboard/settings/bank-mapping': typeof DashboardSettingsBankMappingRoute
@@ -1752,6 +1761,7 @@ export interface FileRoutesById {
   '/dashboard/hub/finances': typeof DashboardHubFinancesRoute
   '/dashboard/hub/knowledge': typeof DashboardHubKnowledgeRoute
   '/dashboard/scheduler_/needs': typeof DashboardSchedulerNeedsRoute
+  '/dashboard/scheduler_/rotations': typeof DashboardSchedulerRotationsRoute
   '/dashboard/scheduler_/settings': typeof DashboardSchedulerSettingsRoute
   '/dashboard/settings/automation-rules': typeof DashboardSettingsAutomationRulesRoute
   '/dashboard/settings/bank-mapping': typeof DashboardSettingsBankMappingRoute
@@ -1946,6 +1956,7 @@ export interface FileRouteTypes {
     | '/dashboard/hub/finances'
     | '/dashboard/hub/knowledge'
     | '/dashboard/scheduler/needs'
+    | '/dashboard/scheduler/rotations'
     | '/dashboard/scheduler/settings'
     | '/dashboard/settings/automation-rules'
     | '/dashboard/settings/bank-mapping'
@@ -2130,6 +2141,7 @@ export interface FileRouteTypes {
     | '/dashboard/hub/finances'
     | '/dashboard/hub/knowledge'
     | '/dashboard/scheduler/needs'
+    | '/dashboard/scheduler/rotations'
     | '/dashboard/scheduler/settings'
     | '/dashboard/settings/automation-rules'
     | '/dashboard/settings/bank-mapping'
@@ -2322,6 +2334,7 @@ export interface FileRouteTypes {
     | '/dashboard/hub/finances'
     | '/dashboard/hub/knowledge'
     | '/dashboard/scheduler_/needs'
+    | '/dashboard/scheduler_/rotations'
     | '/dashboard/scheduler_/settings'
     | '/dashboard/settings/automation-rules'
     | '/dashboard/settings/bank-mapping'
@@ -3468,6 +3481,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSchedulerNeedsRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/scheduler_/rotations': {
+      id: '/dashboard/scheduler_/rotations'
+      path: '/scheduler/rotations'
+      fullPath: '/dashboard/scheduler/rotations'
+      preLoaderRoute: typeof DashboardSchedulerRotationsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/scheduler_/settings': {
       id: '/dashboard/scheduler_/settings'
       path: '/scheduler/settings'
@@ -4071,6 +4091,7 @@ interface DashboardRouteChildren {
   DashboardHubFinancesRoute: typeof DashboardHubFinancesRoute
   DashboardHubKnowledgeRoute: typeof DashboardHubKnowledgeRoute
   DashboardSchedulerNeedsRoute: typeof DashboardSchedulerNeedsRoute
+  DashboardSchedulerRotationsRoute: typeof DashboardSchedulerRotationsRoute
   DashboardSchedulerSettingsRoute: typeof DashboardSchedulerSettingsRoute
   DashboardShiftShiftIdRoute: typeof DashboardShiftShiftIdRoute
   DashboardTeamMembersStaffIdRoute: typeof DashboardTeamMembersStaffIdRoute
@@ -4153,6 +4174,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardHubFinancesRoute: DashboardHubFinancesRoute,
   DashboardHubKnowledgeRoute: DashboardHubKnowledgeRoute,
   DashboardSchedulerNeedsRoute: DashboardSchedulerNeedsRoute,
+  DashboardSchedulerRotationsRoute: DashboardSchedulerRotationsRoute,
   DashboardSchedulerSettingsRoute: DashboardSchedulerSettingsRoute,
   DashboardShiftShiftIdRoute: DashboardShiftShiftIdRoute,
   DashboardTeamMembersStaffIdRoute: DashboardTeamMembersStaffIdRoute,

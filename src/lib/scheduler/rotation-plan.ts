@@ -69,14 +69,13 @@ function draftOf(line: RotationLine, day: string, id: string | null): RotationDr
   return {
     key: id ?? `rot-${line.id}-${day}`,
     lineId: line.id,
-    day,
     id,
     staff_id: line.staff_id,
     client_id: line.client_id,
     team_id: line.team_id,
     service_code: (line.service_code ?? "").toUpperCase(),
     shift_type: line.shift_type ?? "hourly",
-    ...slotOn(line, day),
+    ...slotOn(line, day), // day, starts_at, ends_at
   };
 }
 

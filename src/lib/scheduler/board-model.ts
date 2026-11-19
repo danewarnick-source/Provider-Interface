@@ -22,6 +22,8 @@ export type BoardShift = {
   shift_type: string;
   notes: string | null;
   claim_requested_by: string | null;
+  /** The rotation line that drafted it (B6); null once edited by hand. */
+  pattern_line_id?: string | null;
 };
 export type BoardTeam = { id: string; team_name: string; team_type: string | null };
 export type BoardClient = {
@@ -213,7 +215,7 @@ export type CodeRow = {
 };
 
 /** Codes nobody is scheduled under per client: host homes never clock, RHS is the home's shift. */
-const HOME_ONLY_CODES = new Set(["HHS", "PPS", "RHS"]);
+export const HOME_ONLY_CODES = new Set(["HHS", "PPS", "RHS"]);
 
 /** True when a 1056 row covers the day (its end date closes the code). */
 export const codeActiveOn = (c: CodeRow, day: string) =>

@@ -51,6 +51,7 @@ export function DrawerShell({
   children,
   footer,
   dirty = false,
+  unsaved = "this shift",
 }: {
   open: boolean;
   onClose: () => void;
@@ -59,6 +60,8 @@ export function DrawerShell({
   children: ReactNode;
   footer?: ReactNode;
   dirty?: boolean;
+  /** What "Close without saving …?" names. */
+  unsaved?: string;
 }) {
   const [confirming, setConfirming] = useState(false);
   const close = () => {
@@ -77,7 +80,7 @@ export function DrawerShell({
         <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">{children}</div>
         {confirming ? (
           <div className="flex flex-wrap items-center gap-2 border-t border-[var(--hive-border)] px-5 py-3">
-            <span className="flex-1 text-sm">Close without saving this shift?</span>
+            <span className="flex-1 text-sm">Close without saving {unsaved}?</span>
             <Button variant="outline" className="min-h-11" onClick={() => setConfirming(false)}>
               Keep editing
             </Button>

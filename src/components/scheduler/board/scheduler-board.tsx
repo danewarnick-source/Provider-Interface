@@ -4,8 +4,8 @@
 // grid (Homes & programs / Team members / Clients, with the 1056 panel on
 // Clients) or the month. Chips open the shift drawer; Add shift and Find staff
 // open drawers too. View, filter, range and week live in the URL (the route
-// passes them).
-import { useMemo } from "react";
+// passes them); ?copy=1 (Rotations › Copy this week instead) opens Copy week.
+import { useEffect, useMemo } from "react";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { addDaysKey, dayKey, parseLocalDate, weekStartKey } from "@/lib/scheduler/time";
 import { weekDays, type FilterKey, type Range, type View } from "@/lib/scheduler/board-model";
@@ -23,7 +23,13 @@ import { MonthView } from "./month-view";
 import { useAuthOutlook } from "./use-board-data";
 import { useBoardValue } from "./use-board-value";
 
-export type BoardSearch = { view: View; show: FilterKey; range: Range; week?: string };
+export type BoardSearch = {
+  view: View;
+  show: FilterKey;
+  range: Range;
+  week?: string;
+  copy?: boolean;
+};
 
 const EMPTY = {
   homes:
@@ -70,6 +76,12 @@ export function SchedulerBoard({
     weekDays(week),
   );
   const outlook = useAuthOutlook(orgId, week, search.view === "clients" && !month);
+  const openCopy = !!search.copy && !!board;
+  useEffect(() => {
+    if (!openCopy || !board) return;
+    if (board.canEdit && !month) board.open({ kind: "copy" });
+    onSearch({ copy: undefined });
+  }, [openCopy]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (error)
     return (
